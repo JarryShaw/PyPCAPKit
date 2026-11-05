@@ -276,7 +276,7 @@ class IPOverlapConflictTests(unittest.TestCase):
     def test_conflict_stays_scoped_to_its_own_bufid(self) -> None:
         """Coverage gap named in #482's review: ``Buffer.conflict`` is created
         fresh per BUFID, but "created fresh" is an argument, not a test -- this
-        exercises two BUFIDs actually in flight at once. Cases that all share a
+        exercises two BUFIDs in flight at once. Cases that all share a
         single ACK bucket, as #478's boundary cases do, cannot see a genuine
         cross-bucket data-loss regression.
 

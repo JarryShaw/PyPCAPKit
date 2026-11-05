@@ -1,90 +1,70 @@
 # -*- coding: utf-8 -*-
 """The suite's result does not depend on the order its files were collected in.
 
-Issue #660: three files, run in one order, gave ``12 failed, 5 passed``; the same
-three in the opposite order gave ``17 passed``. The cause was a test that bound a
-non-generic ``ProtocolBase`` stand-in into :data:`sys.modules` and finished
-without removing it, so the next test to import :mod:`pcapkit` died at the
-:class:`Frame` class statement in :mod:`pcapkit.protocols.misc.pcap.frame.protocol` with
-``TypeError: type 'ProtocolBase' is not subscriptable``.
+#660: three files gave ``12 failed, 5 passed`` in one order and ``17 passed`` in the
+other. A test bound a non-generic ``ProtocolBase`` stand-in into :data:`sys.modules`
+and never removed it, so the next test importing :mod:`pcapkit` died at the
+:class:`Frame` class statement in :mod:`pcapkit.protocols.misc.pcap.frame.protocol`
+with ``TypeError: type 'ProtocolBase' is not subscriptable``.
 
-The tests here run :program:`pytest` in a subprocess over the exact selections
-that failed. That is the only way to state this invariant: it is a property of
-one run of several files against each other, not of anything observable from
-inside a single test. Cross-file ordering is also precisely what a normal test
-cannot reach -- by the time it executes, the polluting file either has or has not
-already run, and the guard under test is the thing that makes the difference
-invisible.
+The tests run :program:`pytest` in a subprocess over the exact selections that failed,
+since order-independence is a property of one run of several files, which no single
+test can observe: by the time it runs, the polluter has or has not run already.
 
-Each case is a *pair*: the order that failed, and one file that is known to
-pollute paired with one that is known to import the package. Each leak is covered
-separately because they fail differently and have different fixes:
+Each case pairs a file known to pollute with one known to import the package, one
+leak per case, since each fails differently and has its own fix:
 
 * :meth:`OrderIndependenceTests.test_the_reported_three_file_order_passes` is the
-  reproduction from the issue verbatim -- ``tests/corekit/test_protochain.py``
-  leaking a fake ``ProtocolBase``.
-* :meth:`OrderIndependenceTests.test_the_integration_tier_polluter_order_passes`
-  is a second leak, in ``tests/integration/test_module_loading.py``, not
-  mentioned in the issue. It fails differently -- a stub ``pcapkit``
-  carrying only ``__path__``, so ``__all__`` entries resolve to nothing
-  rather than raising.
-* :meth:`OrderIndependenceTests.test_the_cli_polluter_order_passes` is the third
-  leak, in ``tests/cli/test_main.py``. That file calls
-  :func:`tests._support.isolate_modules` like its neighbours, so this case is a
-  control on the pairing rather than a witness that the guard,
-  :func:`tests.conftest.restore_module_table`, covers a file which has not opted
-  into anything. The witness role is left vacant on purpose; keeping a file
-  unfixed to fill it is the wrong trade. The guard heals such a leak on every run,
-  which is exactly why it took an audit rather than a red test to notice this one
-  -- issue #688 -- and a test whose job is to leave :data:`sys.modules` broken is a
-  defect the suite would have to maintain deliberately, while the next file
-  written without the helpers is covered by the guard whether or not such a test
-  exists.
+  issue's reproduction verbatim: ``tests/corekit/test_protochain.py`` leaking a fake
+  ``ProtocolBase``.
+* :meth:`OrderIndependenceTests.test_the_integration_tier_polluter_order_passes` is a
+  leak the issue did not mention, in ``tests/integration/test_module_loading.py``: a
+  stub ``pcapkit`` carrying only ``__path__``, so ``__all__`` entries resolve to
+  nothing rather than raising.
+* :meth:`OrderIndependenceTests.test_the_cli_polluter_order_passes` is the leak in
+  ``tests/cli/test_main.py`` (#688). That file calls
+  :func:`tests._support.isolate_modules`, so this case is a control on the pairing,
+  not a witness that the guard, :func:`tests.conftest.restore_module_table`, covers a
+  file that opted into nothing. The witness role is vacant on purpose: a test whose
+  job is to leave :data:`sys.modules` broken is a defect the suite would maintain,
+  and the guard covers the next unhelpered file anyway.
 
-The guard is also why the :program:`pytest` runs above cannot see a leak at all.
-What they assert is that the *guarded* suite is order-independent -- which it was
-throughout, while #660, #674 and #688 were each live. So :data:`UNMASKED_ORDERS`
-runs the same shape of pairing under the stdlib :mod:`unittest` runner, where no
-conftest is loaded and nothing heals anything between tests. Both defects the #674
-audit turned up are covered there:
+The guard is also why those :program:`pytest` runs cannot see a leak: they assert
+that the *guarded* suite is order-independent, which it stayed while #660, #674 and
+#688 were live. So :data:`UNMASKED_ORDERS` runs the same pairings under the stdlib
+:mod:`unittest` runner, where no conftest heals anything. It covers both defects
+the #674 audit found:
 
 * ``tests/utilities/test_compat.py`` faking :data:`sys.version_info` around a real
   ``import``, which memoises the fake in :mod:`aenum`'s import-time version cache
-  for the rest of the process -- issue #687. This one is not a
-  :data:`sys.modules` leak at all and :func:`tests.conftest.restore_module_table`
-  could not have healed it; what hid it was
-  :func:`tests.conftest.pytest_sessionstart` importing :mod:`pcapkit`, and so
-  :mod:`aenum`, before any test ran. **This is the only place a #687 regression is
-  caught**, and that is why it is here rather than left to the file's own
-  assertions: the same warm import makes those assertions vacuous under
-  :program:`pytest`, so they pass whether or not the fix is in place.
-* ``tests/cli/test_main.py`` leaving its stand-ins bound -- issue #688. That one
-  *is* caught in the file itself, by
-  :meth:`tests.cli.test_main.CLIMainTests.assert_module_table_restored`, which is
-  registered as a cleanup ahead of the isolation and so runs before the conftest
-  fixture gets to heal anything. This case is the cross-file half of the same
-  claim, and cheap enough to keep for the symmetry.
+  for the process (#687). Not a :data:`sys.modules` leak, so the guard could not heal
+  it; :func:`tests.conftest.pytest_sessionstart` importing :mod:`pcapkit`, and so
+  :mod:`aenum`, before any test hid it. **Only this module catches a #687
+  regression**: the same warm import makes the file's own assertions vacuous under
+  :program:`pytest`.
+* ``tests/cli/test_main.py`` leaving its stand-ins bound (#688). The file itself
+  catches it, by :meth:`tests.cli.test_main.CLIMainTests.assert_module_table_restored`,
+  a cleanup registered ahead of the isolation so it runs before the conftest fixture
+  heals anything; this case is the cheap cross-file half.
 
-One more is a sub-package isolation (#2646): ``isolate_modules(self, ('pcapkit.vendor',))``
-restored the table but left ``pcapkit.vendor`` bound on ``pcapkit`` to the generation
-imported inside it, so a later patch of ``pcapkit.vendor`` landed on a module that
-``pcapkit.vendor.__main__`` did not read.
+A sub-package isolation (#2646), ``isolate_modules(self, ('pcapkit.vendor',))``,
+restored the table but left ``pcapkit.vendor`` bound on ``pcapkit`` to the
+generation imported inside it, so a later patch of ``pcapkit.vendor`` landed on a
+module ``pcapkit.vendor.__main__`` did not read.
 
-``pytest --noconftest`` over the same files shows each of them and is the quicker
-thing to reach for by hand. :mod:`unittest` is what is automated here because it
-needs no flag to get there, and because a second runner is worth exercising for
-its own sake.
+``pytest --noconftest`` over the same files shows each leak and is quicker by hand;
+:mod:`unittest` is automated here because it needs no flag, and a second runner is
+worth exercising.
 
-Why not simply move ``test_protochain.py`` so it sorts after its victims: because
-sort order is what hid #660. The file sorted last inside ``tests/corekit/``, so no
-sibling healed it, and the full CI selection passed only because unrelated
-directories sort between it and ``tests/project/``. A fix that
-rearranges the collection order leaves the defect in place and re-hides it, and
-the next file added anywhere between the two re-exposes it.
+Moving ``test_protochain.py`` to sort after its victims is not a fix, because sort
+order hid #660: it sorted last in ``tests/corekit/``, so no sibling healed it, and
+the full selection passed only because unrelated directories sort between it and
+``tests/project/``. Reordering re-hides the defect until the next file added between
+the two re-exposes it.
 
-This module is unit-tier by location but is not a unit test of anything: it
-reads no sample capture, and every subprocess it starts is a narrow, named file
-selection -- never the whole suite, which needs tens of gigabytes of memory.
+This module is unit-tier by location but unit-tests nothing: it reads no sample
+capture, and every subprocess it starts is a narrow, named selection, never the whole
+suite, which needs tens of gigabytes of memory.
 
 """
 from __future__ import annotations
@@ -128,14 +108,10 @@ POLLUTING_ORDERS = [
 ]
 
 #: Pairings that :func:`tests.conftest.restore_module_table` and
-#: :func:`tests.conftest.pytest_sessionstart` between them hide, so they are run
-#: under the stdlib :mod:`unittest` runner instead -- which loads no conftest and
-#: heals nothing. Each is (label, dotted module names, the symptom to look for).
-#:
-#: The symptom is asserted as well as the exit status because the two say different
-#: things. A non-zero exit says *something* failed; the symptom says the failure
-#: was this one, and not some unrelated breakage in a file that happens to be in
-#: the selection.
+#: :func:`tests.conftest.pytest_sessionstart` hide, so they run under the stdlib
+#: :mod:`unittest` runner, which loads no conftest. Each is (label, dotted module
+#: names, the symptom to look for). The symptom is asserted beside the exit status
+#: so the failure is this one, not unrelated breakage in the selection.
 UNMASKED_ORDERS = [
     (
         'the aenum import-time version cache (#687)',
@@ -214,15 +190,10 @@ def nested_failures(stdout: str) -> 'list[str]':
 def run_unittest(modules: 'list[str]') -> 'subprocess.CompletedProcess[str]':
     """Run the stdlib :mod:`unittest` runner over ``modules`` in a subprocess.
 
-    The point of using this runner rather than :program:`pytest` is everything it
-    does *not* do: it loads no ``conftest.py``, so neither
-    :func:`tests.conftest.restore_module_table` nor
-    :func:`tests.conftest.pytest_sessionstart` runs, and a test that leaves the
-    process in a worse state than it found it gets no help. ``pytest
-    --noconftest`` reaches the same place; this needs no flag to get there.
-
-    Modules run in the order given, which is the whole point -- the polluting one
-    comes first.
+    It loads no ``conftest.py``, so neither :func:`tests.conftest.restore_module_table`
+    nor :func:`tests.conftest.pytest_sessionstart` heals a test that leaves the
+    process worse than it found it. Modules run in the order given, the polluting
+    one first.
 
     Args:
         modules: Dotted module names, e.g. ``'tests.cli.test_main'``. Not paths:

@@ -1,35 +1,36 @@
 # -*- coding: utf-8 -*-
 """#1732 and #1958: the ``LATEST`` test tier runs on ``latest`` alone.
 
-The owner's ruling on #1732, paraphrased: run a subset, and the round-trip sweeps
-need run only on the latest version. #1958 makes that subset a test tier rather
-than a name glob: :func:`tests._tiers.module_tier` puts each module in ``ALL`` or
-``LATEST``, by the module's own ``__tier__`` or by the rule, and the owner's
-rulings there, paraphrased, keep the hand-picked round trips on every leg and send
-only the real sweeps, with the modules whose answer no interpreter changes, to
-``latest``. So ``test``'s ``Run unit tests`` step passes each module
+The owner ruled on #1732 that a subset will do, and that the round-trip sweeps need
+run only on the latest version. #1958 makes that subset a test tier rather than a
+name glob: :func:`tests._tiers.module_tier` puts each module in ``ALL`` or
+``LATEST``, by its own ``__tier__`` or by the rule, and the owner's rulings there
+keep the hand-picked round trips on every leg and send only the real sweeps, with
+the modules whose answer no interpreter changes, to ``latest``.
+
+So ``test``'s ``Run unit tests`` step passes each module
 :func:`~tests._tiers.latest_tier_paths` prints as an ``--ignore`` on every leg,
-``latest``'s too, as ``experimental``'s does on each of its legs, and #2751:
-``test-latest-tier`` runs the tier by the same step on ``latest``, a half a cell, as
-:func:`~tests._tiers.latest_tier_half` prints it, which leaves out the project pins
-(#1954). The coverage legs together measure the whole unit tier less the pins.
-``integration`` does the same
-with the fixture tier: off ``latest``, its ``Run full test suite`` asks for
-:func:`~tests._tiers.fixture_tier_paths`'s ``ALL`` part, and ``pypcap-parity``, none
-of whose legs is ``latest``, asks for it on each, :class:`TestTheIntegrationSubset`.
+``latest``'s too, as ``experimental``'s does on each of its legs. ``test-latest-tier``
+runs the tier by the same step on ``latest``, each cell the half
+:func:`~tests._tiers.latest_tier_half` prints, less the project pins (#1954, #2751);
+the coverage legs together measure the whole unit tier less the pins.
+``integration`` does the same with the fixture tier: off ``latest``, its
+``Run full test suite`` asks for :func:`~tests._tiers.fixture_tier_paths`'s ``ALL``
+part, and ``pypcap-parity``, none of whose legs is ``latest``, asks for it on each
+(:class:`TestTheIntegrationSubset`).
 
 :class:`TestTheStepSelectsByLeg` runs the step's script on each leg the tier file
-gives each job, with a ``python`` on ``PATH`` that records its arguments, so what
-is checked is the selection bash builds, not what the text appears to say.
+gives each job, with a ``python`` on ``PATH`` that records its arguments, so what is
+checked is the selection bash builds, not what the text appears to say.
 :class:`TestTheIgnoresAreTheLatestTier` asks pytest itself what those ignores leave
 out. :class:`TestEveryXdistRunCountsLogicalCPUs` holds every xdist run in the
 workflows but GraalPy's to ``-n logical`` (#2573).
 
 The owner's second ruling on #1732, option 2: nothing waits on the experimental
 legs, which with the caps GraalPy needs run for up to two hours. A job of
-unit-tests.yml would still hold its run in progress, and with it every
-``workflow_run`` consumer of "Unit Tests", so they are a workflow of their own,
-experimental.yml: :class:`TestTheExperimentalLegsAreAWorkflowOfTheirOwn`.
+unit-tests.yml would hold its run in progress, and with it every ``workflow_run``
+consumer of "Unit Tests", so they are a workflow of their own, experimental.yml
+(:class:`TestTheExperimentalLegsAreAWorkflowOfTheirOwn`).
 
 """
 

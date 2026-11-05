@@ -7,7 +7,7 @@ Translates the demonstration scripts that only ever checked that
 ``plist`` reports), :file:`test_basic.py` (``verbose``),
 :file:`test_api.py` and :file:`test_ipv6.py` (``files=True``) and
 :file:`test_file.py` (an already-open binary stream) -- into assertions about
-the file that actually lands on disk.
+the file that lands on disk.
 
 Every report is written into the test's own temporary directory. The captures
 under :file:`examples/captures/` are inputs only.
@@ -117,9 +117,8 @@ class PlistRoundTripTests(EndToEndTestCase):
     def test_plist_report_round_trips_through_plistlib(self) -> None:
         """A ``plist`` report is readable by :func:`plistlib.load` (GitHub issue #1448).
 
-        ``dictdumper`` used to write a ``<date>`` with fractional seconds,
-        which :mod:`plistlib` rejects; fixed upstream in ``dictdumper`` 0.8.5
-        (DictDumper#124), which now writes whole seconds itself. The exact
+        ``dictdumper`` 0.8.5 writes a ``<date>`` in whole seconds, since
+        :mod:`plistlib` rejects fractional ones (DictDumper#124). The exact
         value stays in ``time_epoch`` regardless. The date is compared as
         naive UTC, since ``aware_datetime`` is new in Python 3.13.
 

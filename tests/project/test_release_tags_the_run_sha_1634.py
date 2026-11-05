@@ -1,58 +1,54 @@
 # -*- coding: utf-8 -*-
 """Create Release tags and builds exactly the commit its run was created for (#1634).
 
-Run 38008819343 was created for ``b6b95bc8e`` ("Bumped version to 1.5.0b9"),
-waited three days on the ``github-release`` approval, and then tagged ``main``'s
-tip ``2c0008c3c`` as both ``v1.5.0b9`` and ``conda-1.5.0b9+0``. Two moving refs
-did it: ``softprops/action-gh-release`` defaults ``target_commitish`` to the
-default branch, and the ``tag`` job ran ``git pull --rebase origin main`` --
-fast-forwarding ``b6b95bc8e..2c0008c3c`` in job 115087308551 -- before tagging.
-``pypi`` and ``conda`` then checked those tags out, so the build-0 packages
-carried ``2c0008c3c``'s pins, whose ``conda/build`` reads 3.
+Run 38008819343, created for ``b6b95bc8e``, tagged ``main``'s tip ``2c0008c3c``
+as ``v1.5.0b9`` and ``conda-1.5.0b9+0``: ``softprops/action-gh-release``
+defaults ``target_commitish`` to the default branch, and the ``tag`` job ran
+``git pull --rebase origin main`` before tagging. ``pypi`` and ``conda`` then
+built that later commit's pins.
 
-The owner's ruling: tag and build exactly the run's commit, with the
+The owner ruled to tag and build exactly the run's commit, with the
 ``conda/build`` reset as a commit of its own on top. ``github.sha`` is that
 commit on both triggers -- the pushed tag's commit, or ``main``'s tip when a
 ``workflow_run`` run was created -- whereas ``github.event.workflow_run.head_sha``
 is the commit Vendor Update *ran on*, before it pushed its bump.
 
-Asserted here, over :file:`.github/workflows/create-release.yml`:
+Asserted over :file:`.github/workflows/create-release.yml`:
 
-* every ``actions/checkout`` pins ``ref: ${{ github.sha }}``, and ``github``'s
+* every ``actions/checkout`` pins ``ref: ${{ github.sha }}``; ``github``'s
   ``action-gh-release`` names it as ``target_commitish`` only on
   ``workflow_run``, where it creates the tag;
-* ``pypi`` and ``conda`` attach their files with ``gh release upload`` rather
-  than ``action-gh-release``, which calls Update a release -- where GitHub
-  re-checks that target -- before every upload, and leave a file already on the
-  release alone (#1640) unless its asset is not ``uploaded``, which is deleted
-  and uploaded again; their shared script is run here against a stand-in
-  ``gh``;
-* :file:`cron-conda.yml`'s ``conda-dist`` updates the release only when one is
-  published, and names the default branch as its target, so it neither creates
-  the pending version's tag at ``main``'s tip nor has a stale target re-checked;
-* ``tag`` tags before anything looks at ``main``, never pulls, merges, rebases
-  or force-pushes, and its two scripts -- run here against a scratch repository
-  -- tag the run's commit, then reset ``conda/build`` on ``main``'s tip unless a
-  build number that would free is already tagged;
-* ``github``, ``pypi`` and ``conda`` refuse to publish under a tag that names any
-  other commit, which is likewise run, not just read;
-* once the version is tagged, ``version_check``'s PyPI and Anaconda counts are
-  of the tiers at the tag's commit, not this run's (#1660), run against a
-  scratch repository, so a tier added since cannot fail the check above; and
-  its Anaconda count is of the platforms the tag's commit published (#2060), so
-  a version released before win-64 is not read as lacking it;
-* every step handed ``PCAPKIT_RUN_SHA`` is handed ``github.sha``, and no
-  expression names ``workflow_run.head_sha`` -- the scratch-repository tests
-  inject their own values, so these are what tie them to the job;
-* ``github`` creates the release with a token of the release App, minted with
-  Contents and Workflows write from a ``github-release`` environment secret
-  only that job reads, and spends ``GITHUB_TOKEN`` while no App is set up;
-  ``version_check`` skips the tag-push run the App's tag starts, and
-  ``release_status`` reports that skip quietly -- the owner's choice on #1634.
+* ``pypi`` and ``conda`` attach files with ``gh release upload``, not
+  ``action-gh-release``, whose every upload calls Update a release, where
+  GitHub re-checks that target; a file already on the release is left alone
+  (#1640) unless its asset is not ``uploaded``, which is deleted and uploaded
+  again. Their shared script runs against a stand-in ``gh``;
+* :file:`cron-conda.yml`'s ``conda-dist`` updates the release only once it is
+  published, naming the default branch as target, so it neither creates the
+  pending version's tag at ``main``'s tip nor has a stale target re-checked;
+* ``tag`` tags before anything reads ``main`` and never pulls, merges, rebases
+  or force-pushes; its two scripts, run against a scratch repository, tag the
+  run's commit, then reset ``conda/build`` on ``main``'s tip unless a build
+  number that would free is already tagged;
+* ``github``, ``pypi`` and ``conda`` refuse to publish under a tag naming any
+  other commit, run as well as read;
+* once the version is tagged, ``version_check`` counts the PyPI and Anaconda
+  tiers at the tag's commit, not this run's (#1660), so a tier added since
+  cannot fail it, and the Anaconda platforms that commit published (#2060), so
+  a version released before win-64 is not read as lacking it; both run against
+  a scratch repository;
+* every step handed ``PCAPKIT_RUN_SHA`` gets ``github.sha``, and no expression
+  names ``workflow_run.head_sha``; the scratch-repository tests inject their own
+  values, so this is what ties them to the job;
+* ``github`` creates the release with a release-App token, minted with Contents
+  and Workflows write from a ``github-release`` environment secret only that job
+  reads, and uses ``GITHUB_TOKEN`` while no App is set up; ``version_check``
+  skips the tag-push run the App's tag starts, and ``release_status`` reports
+  that skip quietly, as the owner chose on #1634.
 
 The scanner is indentation-based so the module runs without the ``test`` extra;
 :class:`TestYAMLAgreesWithTheScanner` checks it against :func:`yaml.safe_load`
-where PyYAML is installed, the split ``test_release_gates.py`` uses.
+where PyYAML is installed, as ``test_release_gates.py`` does.
 
 """
 
@@ -1704,9 +1700,8 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
     (``checkForMissingReleaseError`` and ``updateDraftOrCreateRelease``), both
     with ``target_commitish: commit`` (``updateRelease``, and
     ``GithubReleases.create`` and ``GithubReleases.update`` in
-    ``src/Releases.ts``). With no release, a bump made while Create Release
-    waits on its approval -- 1.5.0b9 waited three days, and cron-conda bumped
-    three times meanwhile -- would put ``v<version>`` on ``main``'s tip, and
+    ``src/Releases.ts``). With no release, a cron-conda bump made while Create
+    Release waits on its approval would put ``v<version>`` on ``main``'s tip, and
     Create Release's tag check would then fail. A draft stays a draft
     (``omitDraftDuringUpdate``, through ``CoreInputs.updatedDraft`` in
     ``src/Inputs.ts``) but is retargeted at ``commit``; Create Release's

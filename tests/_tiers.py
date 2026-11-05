@@ -1429,7 +1429,7 @@ def sample_path_calls(module_path: 'str') -> 'tuple[SampleCall, ...]':
     second traversal written by hand is another thing that can disagree with
     :func:`ast.walk` about where calls live.
 
-    ``col_offset`` is the other half of the key, and which AST shapes actually need
+    ``col_offset`` is the other half of the key, and which AST shapes need
     it is the reusable fact. A tuple does not: :class:`ast.Tuple` holds its
     elements in one field list, so ``(sample_path('a.pcap'),
     sample_path('b.pcap'))`` already comes out of the walk left to right and
@@ -1607,7 +1607,7 @@ def sample_root_join_calls(module_path: 'str') -> 'tuple[SampleCall, ...]':
     module-level ``CAPTURES`` tuple read in a ``for`` loop, and this guard's own
     static pass missed it -- CI's unit-tests leg still failed on every affected
     interpreter, since the capture genuinely was not on disk there; the guard
-    simply never flagged the violation to catch it before review.
+    never flagged the violation to catch it before review.
 
     Reuses :data:`SampleCall` rather than a new type: the two are positioned the
     same way relative to a ``try``/``except FileNotFoundError`` -- see
@@ -1886,7 +1886,7 @@ def skip_idiom_test_ids() -> 'tuple[str, ...]':
     :file:`tests/protocols/misc/test_pcapng_unit.py`'s
     ``PCAPNGUnitTests`` alone runs to thousands of lines and dozens of
     unrelated methods -- and pulling in the whole module to reach the one that
-    actually needs the fixtures would reintroduce, for just these modules, the
+    needs the fixtures would reintroduce, for just these modules, the
     same duplication :func:`fixture_tier_paths` exists to remove everywhere
     else. Each :class:`unittest.TestCase` method here gets its own ``setUp``,
     with no ``setUpClass`` state shared across siblings in the classes this
@@ -1962,7 +1962,7 @@ def fixture_tier_paths(tier: 'Optional[str]' = None) -> 'tuple[str, ...]':
     :func:`skip_idiom_modules` directly, so that pulling in one skip-idiom test
     does not also pull in every unrelated method the same module happens to
     hold. Without that, the skip-idiom modules would add every one of their
-    tests back into this selection to reach the handful that actually need it.
+    tests back into this selection to reach the handful that need it.
 
     This is deliberately *not* "the complement of :func:`is_unit_tier`"
     expressed as a single predicate the way :func:`is_unit_tier` itself is: the

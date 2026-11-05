@@ -1,33 +1,28 @@
 # -*- coding: utf-8 -*-
 """L2TPv2 accepts only the version nibble :rfc:`2661` fixes.
 
-GitHub issue #548 reported that IANA protocol number 115 (``TransType.L2TP``)
-is registered nowhere, so an L2TP-over-IP capture falls through to
+GitHub issue #548 noted that IANA protocol number 115 (``TransType.L2TP``) is registered
+nowhere, so an L2TP-over-IP capture falls through to
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and proposed binding
-:class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` there. Measurement says that
-binding would be wrong, and these tests are what pin that down.
+:class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` there. That binding would be wrong.
 
-:rfc:`3931` §4.1.1 ("L2TPv3 over IP") is what protocol 115 designates:
-*"L2TPv3 over IP (both versions) utilizes the IANA-assigned IP protocol ID
-115."* The same section notes the v3 session header over IP is *"free of any
-restrictions imposed by coexistence with L2TPv2 and L2F"* -- meaning that over
-IP a v3 **data** message opens with the raw Session ID and carries no version
-nibble anywhere. So 115 is not a second door onto the :rfc:`2661` framing
-:class:`L2TPv2` implements; it is a different header that only an ``L2TPv3``
-class can read, and no such class exists in this tree.
+:rfc:`3931` §4.1.1 ("L2TPv3 over IP") assigns protocol 115: *"L2TPv3 over IP (both
+versions) utilizes the IANA-assigned IP protocol ID 115."* Its v3 session header over IP is
+*"free of any restrictions imposed by coexistence with L2TPv2 and L2F"*, so a v3 **data**
+message opens with the raw Session ID and carries no version nibble. 115 is thus not the
+:rfc:`2661` framing :class:`L2TPv2` implements but a different header only an ``L2TPv3``
+class could read, and none exists.
 
-What these tests pin is the guard that makes that reasoning enforceable.
-:attr:`L2TPv2.version <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.version>`
-is annotated ``Literal[2]``, returns a hard-coded ``2``, and its
-docstring promises that *"a datagram carrying any other value is a
-different protocol reached through a different class"* -- so a
-:meth:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.read` that stores the wire nibble
-unchecked has the class report ``version == 2`` while its own parsed data
-reports ``3`` for the same octets. These tests hold the two to the same
-answer.
+These tests pin the guard that enforces this.
+:attr:`L2TPv2.version <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.version>` is annotated
+``Literal[2]``, returns a hard-coded ``2``, and its docstring promises that *"a datagram
+carrying any other value is a different protocol reached through a different class"*, so a
+:meth:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.read` storing the wire nibble
+unchecked would report ``version == 2`` while its parsed data reports ``3``. These tests
+hold the two to the same answer.
 
-Every case builds its own octets in memory and reads no capture under
-:file:`examples/captures/`, so this belongs to the unit tier.
+Unit tier: every case builds its own octets and reads no capture.
+
 
 """
 from __future__ import annotations

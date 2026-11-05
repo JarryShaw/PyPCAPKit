@@ -533,7 +533,7 @@ class SeekableReaderTests(unittest.TestCase):
 
         The round trip at :meth:`test_buffered_readline_read_read1_and_peek_paths` cannot
         see this: it seeks to 1, where ``_buffer_cur - 1`` happens to equal the octets
-        actually available, so the two candidate caps agree. Seeking to 0 separates them
+        available, so the two candidate caps agree. Seeking to 0 separates them
         -- four octets are available and, without the fix, the cap allows three, making up
         the fourth from the stream *past* the octet it skipped.
 
@@ -844,7 +844,7 @@ class SeekableReaderTests(unittest.TestCase):
         point and reads ahead from it to fill a gap, so a pair that under-reports makes
         the next forward seek splice octets in from the wrong absolute offset without
         complaining. It is asserted directly here, against a stream that counts what has
-        actually been taken off it, after *every* operation rather than at the end -- an
+        been taken off it, after *every* operation rather than at the end -- an
         output assertion can pass while the bookkeeping behind it is already wrong.
 
         Deriving the buffer's cursor from ``_tell`` at each point of use is what preserves

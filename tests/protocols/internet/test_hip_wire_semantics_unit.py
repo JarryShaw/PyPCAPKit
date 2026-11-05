@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """HIP parameters carry the units, widths and registries their RFCs define.
 
-Seven defects in :mod:`pcapkit.protocols.internet.hip.protocol`, each a field read or
-written against the wrong definition:
+Defects in :mod:`pcapkit.protocols.internet.hip.protocol`, each a field read or written
+against the wrong definition:
+
 
 * #2271 -- ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``
   (:rfc:`6079#section-6.1`) size their rebuilt ``Length`` from

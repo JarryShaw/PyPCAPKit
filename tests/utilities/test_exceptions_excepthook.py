@@ -17,7 +17,7 @@ without the fix::
 output for a loud error through an exception hook instead --
 :func:`pcapkit.utilities.exceptions._excepthook`, installed lazily by
 :func:`pcapkit.utilities.exceptions._install_excepthook` the first time a loud
-error actually needs it. A hook only shortens the printing of the exception it
+error needs it. A hook only shortens the printing of the exception it
 recognises as its own; it does not reach into how :mod:`traceback`, or any other
 code, formats a *different* exception, which is what lets a
 :data:`sys.tracebacklimit` assignment leak.
@@ -65,7 +65,7 @@ def run_in_subprocess(code: 'str', devmode: 'bool' = False) -> 'subprocess.Compl
 
     Prepends an assertion that the ``pcapkit`` the child imports lives under
     :data:`REPO_ROOT` -- not some other copy on the path -- so a green test here
-    actually proves something about the tree under review rather than about
+    proves something about the tree under review rather than about
     whatever happens to be on ``sys.path`` by default.
 
     It also binds ``DEFAULT_THREADING_HOOK`` to the interpreter's own default
@@ -264,7 +264,7 @@ class ChainingTests(unittest.TestCase):
         self.assertIn('PREVIOUS_IS_PREVIOUS_HOOK: True', proc.stderr)
         self.assertIn('PREVIOUS_HOOK_RAN', proc.stderr)
         self.assertIn('ValueError: route through previous_hook', proc.stderr)
-        # The thing actually being delegated to is the previous hook, not just
+        # The thing being delegated to is the previous hook, not just
         # something that happens to print the same traceback regardless.
         self.assertNotIn('IntError', proc.stderr.split('PREVIOUS_HOOK_RAN')[-1])
 
@@ -465,7 +465,7 @@ class CrossInstanceReinstallTests(unittest.TestCase):
     exactly that: a marked hook with no live module behind it any more. The
     next instance's own :func:`~pcapkit.utilities.exceptions._install_excepthook`
     then sees the marker, concludes there is nothing to do, and leaves
-    ``_previous_excepthook`` at :data:`None` -- never actually installing
+    ``_previous_excepthook`` at :data:`None` -- never installing
     *its own* hook at all.
 
     This reproduces that directly: install a first instance's hook, drop that

@@ -1,100 +1,41 @@
 # -*- coding: utf-8 -*-
 """Every ``:rfc:`` role's ``#`` fragment must name a real RFC anchor shape.
 
-GitHub issue #942: ``FEATCode``'s class docstring cited :rfc:`5797#secion-3` --
-``secion``, missing the ``t`` -- in both :file:`pcapkit/vendor/ftp/command.py`
-(inside the ``LINE`` f-string template, the source of truth) and its generated
-copy :file:`pcapkit/const/ftp/command.py`. Under Sphinx the role is
-``sphinx.roles.RFC``, whose ``build_uri`` appends whatever follows ``#`` onto
-the RFC's base URL with no validation at all, and returns a plain
-``nodes.reference`` carrying that URL as ``refuri`` -- never a
-``pending_xref``. Docutils' own ``rfc_reference_role`` behaves identically for
-the same reason. So this rendered a live link to a **non-existent** anchor, and
-no build warned: not because nitpicky mode is scoped to ``py:`` targets -- this
-repository's ``docs/source/conf.py`` does not enable nitpicky at all -- but
-because there is no cross-reference node here for nitpicky to ever have
-inspected in the first place, on any Sphinx configuration.
+#942: ``FEATCode``'s class docstring cited :rfc:`5797#secion-3` in both
+:file:`pcapkit/vendor/ftp/command.py` (the ``LINE`` template) and its generated
+copy :file:`pcapkit/const/ftp/command.py`. Sphinx's ``sphinx.roles.RFC``, like
+docutils' ``rfc_reference_role``, appends the fragment to the RFC's URL unchecked
+and returns a plain ``nodes.reference``, never a ``pending_xref``, so no build
+warns on any configuration. The same sweep found ``:rfc:`5797#secion-2.2``` in
+``Command``'s ``feat`` attribute docstring, in the same two files, fixed with it.
 
-Pinning the exact string that was wrong only catches *this* typo coming back.
-:class:`RFCAnchorFragmentTests` instead walks every ``:rfc:`` role with a ``#``
-fragment across :mod:`pcapkit` and asserts each fragment has one of the three
-shapes Sphinx itself recognises (see :data:`ACCEPTED_FRAGMENT` below).
-Anything else is a misspelling of ``section``/``appendix``/``page`` and would
-silently link to a dead anchor exactly as ``secion-3`` did.
+:class:`RFCAnchorFragmentTests` checks every fragment under :mod:`pcapkit`
+against :data:`ACCEPTED_FRAGMENT`, the three prefixes
+``sphinx.roles._format_rfc_target`` titles (``appendix``, ``page``, ``section``)
+with their numbering, so the next misspelling fails rather than only this one.
+``page-N`` is accepted though nothing under :mod:`pcapkit` cites one, matching
+Sphinx and :file:`tests/project/test_changelog_md.py`'s ``793#page-5``, a real
+anchor in RFC 793's HTML. Rejected:
 
-The sweep this test is built on also turned up a **second** instance of the
-same defect: ``:rfc:`5797#secion-2.2``` in the ``feat`` attribute docstring of
-the ``Command`` class (not ``FEATCode``), in
-:file:`pcapkit/vendor/ftp/command.py` and its generated copy
-:file:`pcapkit/const/ftp/command.py`. Same missing ``t``, same two files,
-same one-character fix -- fixed alongside #942's rather than carried as a
-documented exception.
+* a bare ``N[.N...]``, as in ``:rfc:`8684#3.1```: RFC HTML uses
+  ``id="section-3.1"``, never ``id="3.1"``. The generators behind
+  :mod:`pcapkit.const.tcp.mp_tcp_option` and :mod:`pcapkit.const.reg.apptype.tcp`
+  (``MPTCPOption.process``, ``AppType.records``) parse IANA's
+  ``RFC8684, Section 3.1`` down to the number, so each emits ``#section-{sec}``;
+* ``#introduction`` and a numberless ``#section``, which Sphinx does not error
+  on. The first is one of an open-ended set of named anchors a shape check cannot
+  tell from a typo; the second cannot be told from a citation that dropped its
+  number. Neither appears under :mod:`pcapkit`.
 
-A bare ``N[.N...]`` fragment with no ``section-`` word is not accepted either,
-as in ``:rfc:`8684#3.1``` or ``:rfc:`8765#6.1```. Such anchors do not exist --
-RFC 8684's real HTML uses ``id="section-3.1"``, never ``id="3.1"`` -- so
-accepting that shape would bless exactly the defect class this test exists to
-catch. The generators behind :mod:`pcapkit.const.tcp.mp_tcp_option` and
-:mod:`pcapkit.const.reg.apptype.tcp`, ``MPTCPOption.process`` in
-:file:`pcapkit/vendor/tcp/mp_tcp_option.py` and ``AppType.records`` in
-:file:`pcapkit/vendor/reg/apptype/apptype.py`, both parse IANA's
-``RFC8684, Section 3.1`` with the same ``re.fullmatch(r'RFC(?P<rfc>\\d+)(, Section
-(?P<sec>.*?))?', ...)``, which discards the literal word ``Section`` and
-keeps only the number, so each emits ``#section-{sec}`` explicitly.
-
-:data:`ACCEPTED_FRAGMENT`'s set is not a survey of shapes this tree happens to
-use -- it is Sphinx's own. ``sphinx.roles._format_rfc_target`` titles exactly
-three anchor prefixes, ``{'appendix', 'page', 'section'}``, and
-:file:`tests/project/test_changelog_md.py` already exercises ``#page-N`` as a
-correctly-rendered citation (``793#page-5``); confirmed real against RFC 793's
-own HTML (``id="page-5"`` present). A shapes-in-use survey would have missed
-it, since nothing under :mod:`pcapkit` cites a page anchor -- ``page-\\d+`` is
-accepted here anyway, matching Sphinx and that sibling test.
-
-That sibling test also exercises ``#introduction`` and a bare ``#section``
-(no number) as citations Sphinx does not error on. Deliberately **not**
-accepted here, on both counts. ``introduction`` is not one of Sphinx's three
-known prefixes -- it renders untitled, one named anchor among an open-ended
-set (``abstract``, ``overview``, ``references``, ...) that a fixed-prefix
-shape check cannot tell from a typo without becoming a vocabulary list rather
-than a shape check. A bare ``section`` with no number is indistinguishable
-from a citation that dropped its number, the same incompleteness this test
-exists to catch -- Sphinx happening not to error on it is not the same claim
-as it being a well-formed citation. Neither shape appears under :mod:`pcapkit`,
-so rejecting them flags nothing here, and is the more conservative
-default should either turn up later.
-
-One thing the shape check above does not catch: whether the anchor actually
-exists on the RFC's own page, only whether it is *shaped* like one could --
-that is exactly the class GitHub issue #944 found, ``:rfc:`959#section-4.1```
-(RFC 959's own rendered HTML carries only ``section-1`` through ``section-8``;
-verified by reading both ``https://www.rfc-editor.org/rfc/rfc959.html`` and
-the datatracker mirror). The maintainer ruled on #944 for the enclosing
-top-level section, so those citations cite ``:rfc:`959#section-4``` --
-which :data:`ACCEPTED_FRAGMENT` above already accepts as well-formed.
-
-More sites carried it than #944 reported: that issue grepped
-:mod:`pcapkit` only, and #944's cross-review found further rendered
-roles in :file:`docs/source/contributing/conventions/registry-protocol.rst`
-and one in :file:`tests/const/test_const_enum_no_mint.py`. Others
-cited ``959#section-5.3``, equally dead, in
-:file:`tests/protocols/application/test_ftp_unit.py` and
-:file:`docs/source/changelog/1.5.0.rst`; #947 ruled ``#section-5`` for those.
-**Every** sub-numbered ``959`` fragment is dead, since that RFC renders
-anchors for its eight top-level sections and nothing finer -- which is the
-general statement, and the reason the denylist below carries both fragments
-rather than only the reported one.
-
-:data:`KNOWN_DEAD_ANCHORS` and :meth:`RFCAnchorFragmentTests.
-test_no_known_dead_anchor_citations` below add a second, narrower check for
-that same defect class: a **denylist** of RFC-number -> anchor pairs already
-confirmed, by reading that RFC's own rendered HTML, not to exist -- starting
-with the two ``959`` fragments already confirmed dead, so neither can come
-back unnoticed. This is deliberately a denylist, not an existence oracle: it
-proves nothing about any fragment not already listed here, and adding a new
-RFC/anchor pair always means someone read that RFC's actual HTML first --
-never a guess extrapolated from this test alone. It stays offline (no network
-call) so it keeps running under this repository's CI, which has none.
+A shape check cannot see whether the anchor exists. #944 found
+``:rfc:`959#section-4.1```, and RFC 959's HTML renders only ``section-1`` through
+``section-8``, so the maintainer ruled the enclosing ``#section-4``; #947 ruled
+``#section-5`` for the ``959#section-5.3`` citations in :file:`tests/` and
+:file:`docs/source/changelog/1.5.0.rst`. :data:`KNOWN_DEAD_ANCHORS` denylists
+both, over :data:`DEAD_ANCHOR_SCAN`, which reaches :file:`docs/source` and
+:file:`tests` as well. It is a denylist, not an existence oracle: it proves
+nothing about an unlisted fragment, each entry means someone read that RFC's
+HTML, and it makes no network call.
 
 """
 
@@ -112,28 +53,19 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: closing backtick.
 RFC_FRAGMENT = re.compile(r':rfc:`(\d+)#([^`]+)`')
 
-#: Sphinx's own three known anchor prefixes (``sphinx.roles._format_rfc_target``:
-#: ``{'appendix', 'page', 'section'}``), each followed by its numbering --
-#: ``section-N[.N...]``, ``appendix-X[.N...]``, ``page-N``. Deliberately
-#: excludes the untitled/numberless shapes (``introduction``, bare ``section``)
-#: that same function also does not error on -- see the module docstring
-#: above for why those stay rejected. No bare ``N[.N...]`` alternative either
-#: -- see the module docstring for why that shape is rejected.
+#: The three anchor prefixes ``sphinx.roles._format_rfc_target`` titles, each with
+#: its numbering: ``section-N[.N...]``, ``appendix-X[.N...]``, ``page-N``. The
+#: module docstring says why numberless and bare-number shapes are rejected.
 ACCEPTED_FRAGMENT = re.compile(
     r'\A(?:section-\d+(?:\.\d+)*|appendix-[A-Z](?:\.\d+)*|page-\d+)\Z')
 
-#: A **denylist** of RFC number -> the set of anchor fragments that RFC's own
-#: rendered HTML is *known* not to have, confirmed by reading
-#: ``https://www.rfc-editor.org/rfc/rfc<N>.html`` (or the datatracker mirror)
-#: rather than by any crawl or heuristic. This cannot catch an arbitrary dead
-#: anchor -- only ones already found and added here -- so its absence from
-#: this table is not evidence a fragment is live; see the module docstring's
-#: closing paragraphs for why that limitation is deliberate. Both ``959`` entries
-#: come from GitHub issue #944: RFC 959's HTML carries anchors only for its eight
-#: top-level sections, ``section-1`` through ``section-8``, so *every* sub-numbered
-#: ``959`` fragment is dead. ``section-4.1`` is the one #944 reported;
-#: ``section-5.3`` turned up in the same sweep, cited for the case-insensitivity
-#: rule it does correctly name in prose.
+#: A **denylist** of RFC number -> anchor fragments that RFC's rendered HTML is
+#: known not to have, confirmed by reading ``https://www.rfc-editor.org/rfc/rfc<N>.html``
+#: (or the datatracker mirror). A fragment missing here is not thereby live. Both
+#: ``959`` entries are from #944: RFC 959 renders anchors only for ``section-1``
+#: through ``section-8``, so every sub-numbered ``959`` fragment is dead.
+#: ``section-4.1`` is the one #944 reported; ``section-5.3`` turned up in the same
+#: sweep.
 KNOWN_DEAD_ANCHORS: 'dict[int, frozenset[str]]' = {
     959: frozenset({'section-4.1', 'section-5.3'}),
 }
@@ -148,19 +80,13 @@ KNOWN_DEAD_ANCHORS: 'dict[int, frozenset[str]]' = {
 #: one. That asymmetry is why the list holds prefix/suffix pairs rather than a single
 #: delimiter.
 #:
-#: **A list rather than a general masker, and the reason is the point.** Deciding "is
-#: this text inside any inline literal" over the whole tree was measured wrong by
-#: every approach tried -- a lookbehind heuristic, a ``re.DOTALL`` span that crosses
-#: paragraph breaks and hides a live ``:rfc:`4303#section-2.1``` role, a greedy close
-#: that swallows the next literal's opener, a role's own backtick fusing with an
-#: adjacent literal. The general problem is RST's inline-markup grammar, which a
-#: regex was never going to model.
-#:
-#: The bounded question is a different size. Rather than classifying every literal in the
-#: tree -- every one of which would have to be got right -- it asks only where a
-#: *denylisted fragment* appears, which is a handful of occurrences, and classifies each
-#: against this list. Adding a form means one reviewed entry, the same scrutiny
-#: :data:`KNOWN_DEAD_ANCHORS` entries already get.
+#: **A list rather than a general masker.** Deciding "is this text inside any inline
+#: literal" over the whole tree was wrong under every approach tried -- a lookbehind
+#: heuristic, a ``re.DOTALL`` span that crosses paragraph breaks and hides a live
+#: ``:rfc:`4303#section-2.1``` role, a greedy close that swallows the next literal's
+#: opener, a role's own backtick fusing with an adjacent literal -- because that is
+#: RST's inline-markup grammar, which a regex cannot model. Classifying only where a
+#: denylisted fragment appears is bounded, and adding a form is one reviewed entry.
 QUOTED_FORMS: 'tuple[tuple[str, str], ...]' = (
     ('``', '``'),
 )
@@ -299,22 +225,19 @@ def _dead_anchor_citations() -> 'list[DeadAnchorFinding]':
 class RFCAnchorFragmentTests(unittest.TestCase):
     """No ``:rfc:`` role may cite a malformed fragment, or a known-dead anchor.
 
-    The two checks have **different scopes**, deliberately.
     :meth:`test_no_malformed_fragments` sweeps :mod:`pcapkit` only;
     :meth:`test_no_known_dead_anchor_citations` sweeps :data:`DEAD_ANCHOR_SCAN`, which
     also covers :file:`docs/source` and :file:`tests`, because scanning one directory
-    is what let dead-anchor sites sit unnoticed outside :mod:`pcapkit`.
+    let dead-anchor sites sit unnoticed outside :mod:`pcapkit`.
 
     """
 
     def test_no_malformed_fragments(self) -> 'None':
         """No ``:rfc:`` fragment under :mod:`pcapkit` is shaped like a typo.
 
-        Catches the *next* ``secion``, not just #942's: any freshly introduced
-        typo of ``section-``/``appendix-``/``page-``, or any bare-number
-        fragment like those #942's sweep found and fixed, shows up as a
-        finding and fails this test -- there is no allowlist for one to
-        hide behind. Shape only, not anchor existence -- see #944.
+        Catches the next typo of ``section-``/``appendix-``/``page-``, or a
+        bare-number fragment like those #942's sweep fixed; there is no
+        allowlist. Shape only, not anchor existence (#944).
 
         """
         found = _malformed_fragments()
@@ -327,23 +250,17 @@ class RFCAnchorFragmentTests(unittest.TestCase):
     def test_the_documentation_exemption_holds_on_every_known_mechanism(self) -> 'None':
         """:func:`_is_documentation` on each input known to defeat a naive masker.
 
-        This is the regression suite for every mechanism review has found, and it exists
-        because fixing the mechanism a postmortem names has repeatedly missed the next
-        one. Pinning the *table* rather than the latest fix is the difference: a new
-        mechanism has to be added here to be considered handled, and a redesign has to
-        keep every row passing.
+        The regression table for every mechanism review has found, since fixing the
+        one a postmortem names repeatedly missed the next: a new mechanism is handled
+        once it has a row, and a redesign must keep every row passing.
 
-        The rows are the real inputs, not paraphrases of them. Most are false negatives
-        a masker produces -- a live role it hides -- which is the dangerous direction,
-        since a hidden role is a dead link nobody sees. One is the documentation idiom
-        that must stay exempt, or the defect becomes impossible to write about in the
-        very file that guards against it.
+        The rows are the real inputs. Most are live roles a masker hides, the dangerous
+        direction, since a hidden role is a dead link nobody sees. The documentation
+        idiom must stay exempt, or the defect cannot be written about in this file.
 
         """
-        # Built from parts so this file does not itself contain a live-looking
-        # citation of a denylisted fragment -- writing the test data literally trips
-        # the very guard under test, which is the same "documenting the defect is the
-        # hazard" problem QUOTED_FORMS exists for, one layer up.
+        # Built from parts: literal test data would itself be a live-looking citation
+        # of a denylisted fragment and trip the guard under test.
         needle = ':rfc:`%d#%s`' % (959, 'section-4.1')
         cases = (
             ('a plain live role', 'cites %s here', True),
@@ -358,10 +275,8 @@ class RFCAnchorFragmentTests(unittest.TestCase):
              'cite %s``next`` after', True),
             ('a live role flush against a spaced literal',
              'cite %s` ``next`` after', True),
-            # Mechanism 6: the characters ``([{"'`` a boundary check might allow before
-            # the opener are equally valid as a literal's last *content* character, in
-            # which case the delimiter is a closer and the role is live. One row each,
-            # because they were allowed as a set and had to be refuted as a set.
+            # ``([{"'`` before the opener may be a literal's last content character,
+            # making the delimiter a closer and the role live; one row per character.
             ("a live role after a literal whose content ends in a quote",
              "See ``x'``%s`` dead.", True),
             ('a live role after a literal whose content ends in a paren',
@@ -372,22 +287,16 @@ class RFCAnchorFragmentTests(unittest.TestCase):
              'See ``foo{``%s`` dead.', True),
             ('a live role after a literal whose content ends in a double quote',
              'See ``f"``%s`` dead.', True),
-            # The real one: ``'base'`` is an inline literal in
-            # pcapkit/const/ftp/command.py, and hundreds of literals across the scanned
-            # roots end in one of those characters, so this shape is one adjacency away.
+            # ``'base'`` is a real inline literal in pcapkit/const/ftp/command.py, and
+            # many scanned literals end in one of those characters.
             ("a live role after this repository's own quoted literal",
              "See ``'base'``%s`` dead.", True),
-            # Pins the suffix half of the (prefix, suffix) pair. Deleting the suffix
-            # condition passed every row above, so without this the reason
-            # QUOTED_FORMS holds pairs at all is unasserted.
+            # Pins the suffix half of QUOTED_FORMS' pairs; deleting the suffix
+            # condition passed every row above.
             ('a citation opened like the idiom but not closed like it',
              'names ``%s and more', True),
-            # Pins **any** whitespace rather than a literal space. Narrowing
-            # ``isspace()`` to ``== ' '`` passed every earlier row, because the
-            # only row reaching that branch used a plain space -- so the boundary
-            # condition the comment above relies on was asserted for one whitespace
-            # character out of the set it names. A reader writing the idiom after a
-            # line wrap, or first on an indented line, hits exactly these.
+            # Pins any whitespace, not just a space: narrowing ``isspace()`` to
+            # ``== ' '`` passed every earlier row. Covers the idiom after a line wrap.
             ('the idiom preceded by a tab', 'names\t``%s`` here', False),
             ('the idiom preceded by a newline', 'names\n``%s`` here', False),
         )
@@ -408,22 +317,11 @@ class RFCAnchorFragmentTests(unittest.TestCase):
     def test_no_known_dead_anchor_citations(self) -> 'None':
         """No ``:rfc:`` role anywhere in :data:`DEAD_ANCHOR_SCAN` cites a known-dead anchor.
 
-        A well-formed fragment (one :meth:`test_no_malformed_fragments` above
-        already accepts) can still name an anchor its RFC does not render --
-        that is #944's defect, ``:rfc:`959#section-4.1```, which the shape
-        check cannot see because ``section-4.1`` is a perfectly well-shaped
-        fragment. This test catches that *narrower* class by checking every
-        role in the scanned roots against :data:`KNOWN_DEAD_ANCHORS`, a
-        denylist of RFC number -> anchors already confirmed dead by reading
-        that RFC's own rendered HTML.
-
-        This is a denylist, not an oracle: passing this test is not proof
-        that every ``:rfc:`` citation in the tree resolves, only that none of
-        them cite one of the specific, already-known-dead anchors listed in
-        :data:`KNOWN_DEAD_ANCHORS`. An anchor dead in some RFC this table has
-        never heard of would sail through unnoticed -- deliberately, since
-        the alternative is a live network fetch this offline test (and this
-        repository's CI, which has none) cannot make.
+        A well-shaped fragment can still name an anchor its RFC does not render,
+        #944's ``:rfc:`959#section-4.1```. This checks every role in the scanned
+        roots against :data:`KNOWN_DEAD_ANCHORS`. Passing proves only that none
+        cites a listed anchor; an unlisted dead one passes, since the alternative
+        is a network fetch this offline test does not make.
 
         """
         found = _dead_anchor_citations()
@@ -433,10 +331,9 @@ class RFCAnchorFragmentTests(unittest.TestCase):
             f'known-dead RFC anchor cited as a live role: {found}',
         )
 
-    #: Matches the ``FEATCode`` class header regardless of its base classes,
-    #: so a future re-parenting (like #930/#932/#937 did to its siblings)
-    #: does not fail this pin for a reason unrelated to the RFC citation --
-    #: only the docstring wording and the citation itself stay exact.
+    #: Matches the ``FEATCode`` class header whatever its bases, so a re-parenting
+    #: (as #930/#932/#937 did to its siblings) does not fail this pin; only the
+    #: docstring wording and citation stay exact.
     _FEATCODE_CITATION = re.compile(
         r'class FEATCode\([^)]*\):\n'
         r'    """Keyword returned in FEAT response line for this command/extension,\n'

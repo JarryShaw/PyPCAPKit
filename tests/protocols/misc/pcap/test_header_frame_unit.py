@@ -431,28 +431,28 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         """#605: a big-endian record header, read on a little-endian host.
 
         :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>`
-        seeded the file's byte order under the key ``bytesorder``, where
+        seeded the file's byte order under the key ``bytesorder`` while
         ``byteorder_callback`` (:file:`pcapkit/corekit/schema/byteorder.py`)
-        reads ``byteorder``, so the lookup always missed and always fell back to
-        :data:`sys.byteorder`. On a little-endian host reading a little-endian
-        capture that is the right answer by coincidence, so little-endian
-        fixtures cannot catch it; on a big-endian capture all four record-header
-        fields came back byte-swapped.
+        reads ``byteorder``, so it always fell back to :data:`sys.byteorder`.
+        That is right by coincidence for a little-endian capture on a
+        little-endian host, so little-endian fixtures cannot catch it; a
+        big-endian capture came back with all four record-header fields swapped.
 
-        The capture is built here rather than read from
-        :file:`examples/captures/`, so this stays in the unit tier and runs in
-        the selection :file:`.github/workflows/unit-tests.yml` uses -- the
-        fixture-backed counterpart, which goes through
-        :func:`pcapkit.interface.extract` against
+        The capture is built here, not read from :file:`examples/captures/`, so
+        this stays unit tier and runs in the selection
+        :file:`.github/workflows/unit-tests.yml` uses. The fixture-backed
+        counterpart, through :func:`pcapkit.interface.extract` over
         :file:`examples/generators/endian.py`'s captures, is
-        :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py` and runs
-        only once the fixtures exist.
+        :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py`, which
+        needs the fixtures.
 
-        Two records, because the swap is a wrong answer *and* a crash: frame 1's
-        ``incl_len`` of 60 reads as 1006632960, which consumes the rest of the
-        file, and frame 2 is then asked to read a negative payload length --
+        Two records, because the swap
+ is a wrong answer *and* a crash: frame 1's
+        ``incl_len`` of 60 reads as 1006632960 and consumes the rest of the
+        file, so frame 2 is asked to read a negative payload length --
         ``ValueError: read length must be non-negative or -1`` out of
         :file:`pcapkit/protocols/schema.py`.
+
 
         """
         from pcapkit.const.reg.linktype import LinkType

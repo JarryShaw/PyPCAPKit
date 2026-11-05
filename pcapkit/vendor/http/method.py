@@ -179,17 +179,8 @@ class {NAME}(EnumRegistry, StrEnum):
         try:
             return super().get(key)
         except KeyError:
-            # NOTE: the value is ``default`` if the caller supplied one, or
-            # else ``key`` exactly as given -- never its upper-cased form --
-            # so an unregistered member's value is the caller's own casing,
-            # the same convention :meth:`_unregistered_member` documents and
-            # :class:`~pcapkit.const.ftp.command.FEATCode` follows.
-            # The name is always the canonical upper-case form, matching
-            # :meth:`_missing_` and every registered member's own name. Two
-            # calls naming the same method in different case, e.g.
-            # ``get('frob')`` and ``get('FROB')``, therefore build results
-            # that are *not* equal -- each is exactly what its own caller
-            # passed, since ``get`` does not mint (GitHub issue #860).
+            # NOTE: the value keeps the caller's casing (``default`` or ``key``); the name is the
+            # upper-case form :meth:`_missing_` uses. ``get`` does not mint (GitHub issue #860).
             return cls._unregistered_member(default if default is not None else key, key.upper())
 
     @classmethod

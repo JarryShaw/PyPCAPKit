@@ -4,7 +4,7 @@
 Each helper below made a temporary directory with :func:`tempfile.mkdtemp`, handed
 back the path of the capture in it, and never removed it, so every test that called
 one left a directory in the temporary directory. A helper takes the
-:class:`unittest.TestCase` it serves now, and registers the removal on it.
+:class:`unittest.TestCase` it serves and registers the removal on it.
 
 The helpers live in modules of their own and take different arguments, so each is
 named here with a minimal call.

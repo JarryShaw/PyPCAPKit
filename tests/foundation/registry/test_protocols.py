@@ -96,7 +96,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         :class:`pcapkit.protocols.application.http.protocol.HTTP` and a user class of the
         same name both land on ``'HTTP'``, and registering one replaces whichever
         was there. Guards against the replacement being silent (#675) -- no
-        exception, no warning -- so that a later bare-name lookup simply returns a
+        exception, no warning -- so that a later bare-name lookup returns a
         different class than it did before, with nothing connecting the symptom
         to the registration that caused it. No two shipped HTTP classes share a
         name since #2529, so the second class is built here.

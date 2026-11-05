@@ -6,7 +6,7 @@ GitHub issue #719 is where the owner settled this rule: a module's
 leaves its type (such as ``NullType``) out. The reason is the context a
 bare rule would not give: the types are not part of the public surface, so
 exposing only the final objects is what keeps the published API to the
-things a caller actually uses. GitHub issue #911 is the issue the
+things a caller uses. GitHub issue #911 is the issue the
 implementing work for that ruling belongs to.
 
 Every sentinel is *defined* in :data:`CANONICAL_MODULE`: the owner chose one
@@ -138,7 +138,7 @@ def _expected_type_name(instance_name: 'str') -> 'str':
 def _star_import(module: 'str') -> 'dict[str, object]':
     """The namespace ``from <module> import *`` binds.
 
-    The only operation that actually reads :attr:`__all__`, which is why the export
+    The only operation that reads :attr:`__all__`, which is why the export
     rule is asserted through it and not only against the list literal.
 
     """
@@ -318,7 +318,7 @@ class SentinelPopulationTests(_ReimportCase):
         mechanically from the object's name, but that alone does not pin what the
         object's own casing *is* -- a tree where every object were, say, CamelCase
         would satisfy it just as well, so long as the type followed suit. This test
-        is what actually pins SCREAMING_SNAKE, independent of the type-derivation
+        is what pins SCREAMING_SNAKE, independent of the type-derivation
         rule -- the rule GitHub issue #937's ruling adds, and the gap that lets
         object names disagree on casing.
 
@@ -373,7 +373,7 @@ class SentinelPopulationTests(_ReimportCase):
         rule having changed -- exactly the defect #949 exists to remove.
 
         So the substance is checked against the tree, which is where the ruling
-        actually takes effect, and the page is only required to name the export
+        takes effect, and the page is only required to name the export
         boundary (``__all__``, an identifier rather than prose) and the issue that
         settled it.
 

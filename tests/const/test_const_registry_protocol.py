@@ -545,7 +545,7 @@ class RegisterContractTests(unittest.TestCase):
         registers as a *composite* pseudo-member, so ``_member_names_`` does not
         grow even though the name and value both resolve. That is
         :mod:`aenum`'s own flag semantics rather than anything this base does,
-        so the assertion here is what actually holds for a flag registry."""
+        so the assertion here is what holds for a flag registry."""
         from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
 
         value = _unused_value(HandoverACKFlag)
@@ -586,7 +586,7 @@ class RegisterContractTests(unittest.TestCase):
         since that one is not gated the same way):
         ``TransportProtocol.register(6, 'TOTALLY_NEW_NAME')`` returned
         ``TransportProtocol.tcp`` unchanged and minted nothing. This pins the
-        fix on the base class every :data:`CONVERTED` registry actually uses.
+        fix on the base class every :data:`CONVERTED` registry uses.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
 
@@ -777,72 +777,49 @@ GENERATED_SAMPLE = (
     ('pcapkit.const.hip.parameter', 'Parameter', 'pcapkit/const/hip/parameter.py'),
 )
 
-#: Const modules tier 3 deliberately leaves alone. The bespoke ones override
-#: their crawler's own ``process()``/``context()`` with a bespoke ``get()``/
-#: ``_missing_`` pair that does not share :mod:`pcapkit.vendor.default`'s
-#: template at all -- mixing :class:`~pcapkit.corekit.enum.EnumRegistry` in
-#: without further care would silently change behaviour rather than just
-#: move it, since several are :class:`~aenum.StrEnum` registries whose
-#: own ``__new__`` attaches further attributes the base's generic
-#: ``_unregistered_member`` does not set. GitHub issue #860 fixes the base
-#: ``get()``'s own str-key-never-tries-the-value-path limitation -- measured
-#: on a synthetic registry in :class:`StrEnumValueFallbackTests` below -- and
-#: issue #860's step 2 converts them all (``FEATCode``, ``Command``,
-#: ``Method``, ``ReturnCode``/``ResponseKind``/``GroupingInformation``,
-#: ``StatusCode``, ``OptionType``, and ``AppType`` and its transport
-#: subclasses), each with its own ``_unregistered_member`` override where a
-#: custom ``__new__`` needs one. They stay excluded from *this* file's
-#: tier-3 sweep regardless, because the exclusion here is about their
-#: bespoke ``process()``/``get()`` shape not sharing the generated template,
-#: which conversion onto the base does not change -- unlike the
-#: default-template registries :data:`GENERATED_SAMPLE` samples above, each
-#: of these classes' own ``_missing_`` stays bespoke rather than sharing the
-#: generated template, and several also keep a bespoke
-#: ``_unregistered_member`` (``Command``, ``Method``, ``OptionType``,
-#: ``ReturnCode``, ``StatusCode``) or a bespoke ``get`` of their own
-#: (``Command``, ``Method``, ``OptionType``; ``AppType`` and its transport
-#: subclasses keep ``get``/``get_all``/``register``/``register_alias`` of
-#: their own) -- but not every one does:
-#: ``FEATCode``, ``ResponseKind`` and ``GroupingInformation`` resolve every
-#: protocol method to the base's generic implementation unchanged.
-#: ``TransportProtocol`` alone is excluded for
-#: a separate reason: it never mixes in
-#: :class:`~pcapkit.corekit.enum.EnumRegistry` at all, by the owner's own
-#: ruling against extending it (GitHub PR #836) -- there is no registry
-#: protocol here to inherit or shadow.
+#: Const modules tier 3 deliberately leaves alone, tagged below by reason. The
+#: name says what the set *does*: everything this file's ``IntEnum``-only census
+#: (:data:`GENERATED_SAMPLE` and the ``generated`` list below) leaves out, not a
+#: claim of one shared reason. A file can carry more than one -- ``apptype.py``
+#: is (a) via ``AppType`` and (c) via ``TransportProtocol``.
 #:
-#: The name below is deliberately about what the set *does*, not why: it is
-#: everything this file's ``IntEnum``-only census (:data:`GENERATED_SAMPLE`
-#: and the ``generated`` list below) leaves out -- not a claim that every
-#: entry shares one reason. At least three apply, and the
-#: grouping below tags each entry with its own: (a) is a
-#: :class:`~aenum.StrEnum` registry, so would miss this file's
-#: ``class \w+(EnumRegistry, IntEnum):`` regex regardless of anything else;
-#: (b) mixes in the base but overrides its generic protocol with a bespoke
-#: one, per the paragraph above; (c) ``TransportProtocol`` alone, which never
-#: mixes in the base at all. A file can carry more than one -- ``apptype.py``
-#: is (a) via ``AppType`` and (c) via ``TransportProtocol`` in the same
-#: module.
-#:
-#: ``pcapkit/const/pcapng/tls_key_label.py`` (GitHub issue #886) is reason
-#: (a) too, but on narrower grounds worth spelling out, since -- unlike the
-#: rest of that group -- it does not carry a bespoke ``get()``/``register()``
-#: at all; its own ``get``/``get_all``/``register``/``register_alias`` are
-#: exactly the base's generic implementation, same as every
-#: :data:`GENERATED_SAMPLE`-shaped registry below. What excludes it is
-#: simply that this whole census, and its
-#: ``class \w+(EnumRegistry, IntEnum):`` regex a few lines down, is scoped to
-#: the :class:`~aenum.IntEnum` batch tier 3 of #775 converted.
-#: ``TLSKeyLabel`` is :class:`~aenum.StrEnum`-valued -- RFC 9850's labels are
-#: strings, matched by value -- so it is outside that batch either way.
-#: Excluding it here
-#: is not a judgement about its own inherited-protocol cleanliness;
+#: Reason (a) is a :class:`~aenum.StrEnum` registry, which misses this file's
+#: ``class \w+(EnumRegistry, IntEnum):`` regex regardless of anything else.
+#: ``pcapkit/const/pcapng/tls_key_label.py`` (GitHub issue #886) is (a) on those
+#: grounds alone: its ``get``/``get_all``/``register``/``register_alias`` are the
+#: base's generic implementation, but RFC 9850's labels are strings, matched by
+#: value, so it is outside the :class:`~aenum.IntEnum` batch tier 3 of #775
+#: converted. That is no judgement on its inherited protocol:
 #: :mod:`tests.const.test_const_enum_get`,
 #: :mod:`tests.const.test_const_enum_lookup` and
-#: :mod:`tests.const.test_const_enum_builtin_parity`'s dynamic
-#: ``pkgutil.walk_packages`` sweeps already discover and cover it
-#: generically -- it is simply outside what this file's IntEnum-only census
-#: counts.
+#: :mod:`tests.const.test_const_enum_builtin_parity`'s
+#: ``pkgutil.walk_packages`` sweeps cover it generically.
+#:
+#: Reason (b) is a bespoke module, whose crawler overrides ``process()``/
+#: ``context()`` with a ``get()``/``_missing_`` pair outside
+#: :mod:`pcapkit.vendor.default`'s template; mixing
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` in without care would change
+#: behaviour, since a custom ``__new__`` attaches attributes the base's generic
+#: ``_unregistered_member`` does not set. GitHub issue #860 fixes the base
+#: ``get()``'s str-key-never-tries-the-value-path limitation (measured in
+#: :class:`StrEnumValueFallbackTests`), and its step 2 converts them all
+#: (``FEATCode``, ``Command``, ``Method``,
+#: ``ReturnCode``/``ResponseKind``/``GroupingInformation``, ``StatusCode``,
+#: ``OptionType``, and ``AppType`` and its transport subclasses), each with its
+#: own ``_unregistered_member`` override where a custom ``__new__`` needs one.
+#: They stay excluded because conversion does not change their bespoke shape:
+#: each keeps its own ``_missing_``, and several a bespoke
+#: ``_unregistered_member`` (``Command``, ``Method``, ``OptionType``,
+#: ``ReturnCode``, ``StatusCode``) or ``get`` (``Command``, ``Method``,
+#: ``OptionType``; ``AppType`` and its transport subclasses keep
+#: ``get``/``get_all``/``register``/``register_alias`` of their own), while
+#: ``FEATCode``, ``ResponseKind`` and ``GroupingInformation`` resolve every
+#: protocol method to the base's generic implementation.
+#:
+#: Reason (c) is ``TransportProtocol`` alone, which never mixes in
+#: :class:`~pcapkit.corekit.enum.EnumRegistry`, by the owner's ruling against
+#: extending it (GitHub PR #836), so there is no registry protocol to inherit or
+#: shadow.
 EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
     # (a) str-valued: not an IntEnum, so excluded from the regex census
     # regardless of override.
@@ -1100,7 +1077,7 @@ class GetDispatchMatrixTests(unittest.TestCase):
     """The dispatch order: a generated ``get()`` checking
     ``isinstance(key, int)`` first treats anything else as a name; the
     inherited base checks ``isinstance(key, str)`` first and treats
-    anything else as a value. For a key that actually is an ``int``
+    anything else as a value. For a key that is an ``int``
     or a ``str``, both orderings agree, so every probe below except the
     "neither" one is a parity pin rather than a change; the "neither" probe
     is the one documented, deliberate difference, shown on ``TransType``
@@ -1410,7 +1387,7 @@ class NoDefaultSentinelTests(unittest.TestCase):
         ``NO_DEFAULT``), and deliberately leaves its type (such as
         ``NoDefaultType``) out, because the type is not part of the public
         surface -- exposing only the final object is what keeps the published
-        API to what a caller actually uses. GitHub issue #911 implements that
+        API to what a caller uses. GitHub issue #911 implements that
         ruling. The type is out of :attr:`__all__` while staying importable by
         its dotted path.
 

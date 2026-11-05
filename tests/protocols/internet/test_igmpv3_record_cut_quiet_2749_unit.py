@@ -8,7 +8,7 @@ Its record list counts the records the Number of Group Records gives and runs to
 of the data (#2711), and each record is sized by the octets left to it, so
 :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` read the fields of the
 record the data ends inside as running past a length it had been given.
-:class:`~pcapkit.corekit.fields.collections.ListField` now reads a schema item it counts
+:class:`~pcapkit.corekit.fields.collections.ListField` reads a schema item it counts
 as ending with the data, and ``Schema.unpack`` reads such an item's fields past its length
 as the cut its short read records.
 

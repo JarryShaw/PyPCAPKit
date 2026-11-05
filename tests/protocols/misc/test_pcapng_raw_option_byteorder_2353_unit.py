@@ -1,27 +1,22 @@
 # -*- coding: utf-8 -*-
 """A raw option or record in a PCAP-NG block builds in the right byte order.
 
-This guards against GitHub issue #2353. An option handed to a block maker as raw
-:obj:`bytes` has its Option Code read back out of those octets, and a name
-resolution record handed over the same way has its Record Type read the same
-way. Both read it in the block's byte order. Without the fix, only the section
-header block's maker and the :manpage:`systemd(1)` journal block's maker settle
-that order, so every other block -- an Interface Description Block and a Name
-Resolution Block among them -- raises ``AttributeError: 'PCAPNG' object has no
-attribute '_byte'`` instead of building.
+GitHub issue #2353. A block maker reads the Option Code of an option handed over as raw
+:obj:`bytes`, and the Record Type of a name resolution record handed over likewise, out of
+those octets in the block's byte order. Without the fix only the section header block's and
+the :manpage:`systemd(1)` journal block's makers settle that order, so every other block,
+an Interface Description Block or a Name Resolution Block among them, raises
+``AttributeError: 'PCAPNG' object has no attribute '_byte'`` instead of building.
 
-The byte order resolved has to be the one the block is written in, not merely
-some byte order: read in the wrong one, a code is misread, which silently loses
-the "only one of this option" guard and attributes the option to a type that is
-not there. So the cases below pin the code actually resolved, in a big-endian
-section as well as a little-endian one, and parse each built block back from its
-octets rather than trusting the schema the maker returned.
+It must be the block's own byte order: in the wrong one a code is misread, silently losing
+the "only one of this option" guard and attributing the option to a type that is not there.
+So the cases pin the code resolved, in big- and little-endian sections, and parse each
+built block back from its octets rather than trust the schema the maker returned.
 
-The order is resolved through a chain: a bound section's own byte order wins,
-then the one the packet data declares -- at either nesting level -- and the host
-byte order is the fallback. The cases below pin each link of it, and pin that
-packet data handed over as :data:`None` resolves to the fallback rather than
-raising.
+The order resolves through a chain: a bound section's own byte order, then the one the
+packet data declares at either nesting level, then the host's. The cases pin each link, and
+that packet data given as :data:`None` resolves to the fallback rather than raising.
+
 
 Every case builds its own octets in memory and reads no capture. :mod:`pcapkit`
 is imported inside each test, after

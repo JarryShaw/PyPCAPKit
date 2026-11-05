@@ -447,17 +447,8 @@ class {NAME}(EnumRegistry, StrEnum):
             return super().get(key)  # type: ignore[unreachable]
         name = key.upper()
         if name not in cls._member_map_:  # pylint: disable=no-member
-            # NOTE: the value is ``default`` if the caller supplied one, or
-            # else ``key`` exactly as given -- never ``name`` -- so an
-            # unregistered member's value is the caller's own casing, the
-            # same convention :meth:`_unregistered_member` documents and
-            # :class:`~pcapkit.const.ftp.command.FEATCode` follows
-            # unchanged. Two calls naming the same command in different
-            # case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build
-            # results that are *not* equal -- each is exactly what its own
-            # caller passed. Minting instead would return, through the
-            # ``_member_map_`` cache, the *first* casing seen for every later
-            # call regardless of case (GitHub issue #860).
+            # NOTE: the value keeps the caller's casing (``default`` or ``key``), not ``name``;
+            # minting would cache the first casing seen for every later call (GitHub issue #860).
             return cls._unregistered_member(default if default is not None else key, name)
         return cls._member_map_[name]  # pylint: disable=no-member
 
@@ -541,10 +532,8 @@ class Command(Vendor):
             #    temp.append(f'[{rfc[:3]} {rfc[3:]}]')
             for rfc in map(str.strip, self.split_references(item[5])):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
-                    # NOTE: IANA has put a section inside the citation since
-                    # 2026-10-13 -- ``ALGS`` cites ``[RFC 6384, Section 11]``,
-                    # formerly ``[RFC6384] Section 11`` -- and the whole of
-                    # ``rfc[3:]`` would make that a role no RFC answers (#1664).
+                    # NOTE: ``ALGS`` cites ``[RFC 6384, Section 11]``, and the whole of ``rfc[3:]``
+                    # would make that a role no RFC answers (#1664).
                     num, _, sec = rfc[3:].partition(', Section ')
                     temp.append(f'[:rfc:`{num}#section-{sec}`]' if sec else f'[:rfc:`{num}`]')
                 else:
@@ -555,14 +544,8 @@ class Command(Vendor):
                 cmmd = cast('str', feat)
 
             if isinstance(feat, str):
-                # NOTE: GitHub issue #860. Every FEAT code the registry
-                # names -- lower-case group marker or upper-case per-command
-                # keyword alike -- is a declared member of FEATCode (see
-                # feat_codes below and FEATCode's own template), so both
-                # cases resolve by plain attribute access, and nothing calls
-                # FEATCode(...) at import time, which would mint the
-                # upper-case ones as a side effect of evaluating this very
-                # module.
+                # NOTE: GitHub issue #860. Every FEAT code, in either case, is a declared FEATCode
+                # member, so nothing mints one by calling FEATCode(...) at import time.
                 if feat.isupper() and feat not in feat_codes:
                     feat_codes[feat] = f'#: {cmmt}\n    {feat} = {feat!r}'
                 feat = f'FEATCode.{feat}'

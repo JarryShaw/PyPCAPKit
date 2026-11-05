@@ -1,47 +1,42 @@
 # -*- coding: utf-8 -*-
 """Every :mod:`pcapkit.const` registry must reject an invalid value the way the built-in does.
 
-GitHub issue #647 counted the generated range guards under :mod:`pcapkit.const`
-and found that 113 of the 117 modules raise a bare :exc:`ValueError`. The issue
-proposed replacing them with :class:`~pcapkit.utilities.exceptions.EnumError`;
-the decision went the other way. A bare :exc:`ValueError` is exactly what
-:class:`enum.IntEnum` raises for a value it does not define, mirroring the
-built-in is the intent, and
-:class:`~pcapkit.utilities.exceptions.EnumError` is ``(BaseError, TypeError)`` --
-not a :exc:`ValueError` at all -- so swapping it in would have diverged from the
-built-in *and* walked past the ``except ValueError`` in all 113 generated
-``get()`` bodies, silently undoing GitHub issue #584.
+GitHub issue #647 proposed replacing the generated range guards' bare
+:exc:`ValueError` with :class:`~pcapkit.utilities.exceptions.EnumError`; the
+decision went the other way. A bare :exc:`ValueError` is what
+:class:`enum.IntEnum` raises for a value it does not define, and
+:class:`~pcapkit.utilities.exceptions.EnumError` is ``(BaseError, TypeError)``,
+so swapping it in would diverge from the built-in *and* walk past the
+``except ValueError`` in the generated ``get()`` bodies, undoing GitHub issue
+#584.
 
-What was left was the inconsistency. Six registries across four modules did
-something other than raise:
+What was left was the registries that did something other than raise:
 
-* three :class:`~aenum.IntFlag` registries defined no ``_missing_`` at all, so
-  ``aenum``'s :class:`~aenum.Flag` machinery composed a pseudo-member for any
-  integer whatsoever. ``Flags(-1)`` returned ``65520`` -- the OR of every
-  declared TCP header flag -- so a value no 16-bit wire field can hold read back
-  as *every flag set at once*, and ``Flags(-65536)`` as *none set*.
-* three :class:`~aenum.StrEnum` registries reached ``value.upper()`` in their
+* :class:`~aenum.IntFlag` registries with no ``_missing_`` let ``aenum``'s
+  :class:`~aenum.Flag` machinery compose a pseudo-member for any integer.
+  ``Flags(-1)`` returned ``65520``, the OR of every declared TCP header flag, so
+  a value no 16-bit wire field can hold read back as *every flag set at once*,
+  and ``Flags(-65536)`` as *none set*.
+* :class:`~aenum.StrEnum` registries reached ``value.upper()`` in their
   ``_missing_`` before checking the type, so an integer raised
   :exc:`AttributeError` (``'int' object has no attribute 'upper'``) rather than
   :exc:`ValueError`.
 
-Each carries a guard raising a bare :exc:`ValueError`, emitted by their
-templates under :mod:`pcapkit.vendor` rather than hand-written -- the tree is
-generated, so a fix that is not in the template is reverted by the next crawl.
-
-The one divergence from the built-in the owner named was the *mutable*
-registries': look a value up, miss, and then **register** it with
-:func:`~aenum.extend_enum` instead of raising. Per GitHub issues #775 and #860,
-a miss resolves to an equal, unregistered member instead, and only
-:class:`~pcapkit.const.mh.cga_type.CGAType` extends on a miss.
-:class:`ConstEnumRegisterFallbackTests` pins that, and that no guard turns the
-lookup into an outright crash -- the failure mode GitHub issues #584 and #623
-are both about.
-
-The guard for the three flag registries delegates in-range composites to
+Each carries a guard raising a bare :exc:`ValueError`, emitted by its template
+under :mod:`pcapkit.vendor`, since a fix that is not in the template is
+reverted by the next crawl. The flag guard delegates in-range composites to
 ``super()._missing_`` rather than resolving them itself, because GitHub issue
 #623 established that an :class:`~aenum.IntFlag` whose ``_missing_`` re-enters
 its own constructor recurses without bound.
+
+The one divergence from the built-in is the *mutable* registries': a miss
+could **register** the value with :func:`~aenum.extend_enum` instead of
+raising. Per GitHub issues #775 and #860, a miss resolves to an equal,
+unregistered member instead, and only
+:class:`~pcapkit.const.mh.cga_type.CGAType` extends on a miss.
+:class:`ConstEnumRegisterFallbackTests` pins that, and that no guard turns the
+lookup into an outright crash -- the failure mode of GitHub issues #584 and
+#623.
 
 """
 from __future__ import annotations
@@ -122,7 +117,7 @@ EXPECTED_TO_REGISTER = frozenset({
 #: Keyed to each template's own guard text rather than one literal shared by
 #: all of them. They all use the same f-string form (GitHub issues #792 and
 #: #798), but the dict stays: a future bespoke guard is not guaranteed to match this
-#: one's shape, and what #647 actually needs pinned is that each template
+#: one's shape, and what #647 needs pinned is that each template
 #: still carries *a* guard rejecting an invalid value, not that every template
 #: shares one literal.
 BESPOKE_TEMPLATES = {
@@ -620,7 +615,7 @@ class ConstFlagCompositeTests(unittest.TestCase):
 
     @unittest.skipIf(sys.version_info < (3, 11), 'enum.STRICT is 3.11+')
     def test_a_bounded_flag_matches_the_built_in_under_its_strict_boundary(self) -> None:
-        """Where the built-in flag parity claim actually lands.
+        """Where the built-in flag parity claim lands.
 
         :class:`enum.IntFlag` defaults to ``boundary=KEEP`` and *composes* an
         out-of-range value rather than raising, so the parity being asserted for
@@ -717,7 +712,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
 
         The string path of a generated ``get`` never reaches ``_missing_`` at all,
         and the integer path reaches it inside a ``try``. Both are exercised here
-        for the four modules GitHub issue #647 touched, so a guard that had
+        for the modules GitHub issue #647 touched, so a guard that had
         broken either would fail rather than merely go unmeasured.
 
         The fallback is probed with a two-part check: a *registered* default
@@ -888,7 +883,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
 
     :mod:`pcapkit.const` is generated from :mod:`pcapkit.vendor`, so the
     committed tree passing the tests above is not evidence that the templates
-    agree with it -- the next crawl would simply revert them. The templates
+    agree with it -- the next crawl would revert them. The templates
     below each carry their own copy of the guard rather than inheriting the one
     in :mod:`pcapkit.vendor.default`, which is why each is checked --
     each against its own guard text in :data:`BESPOKE_TEMPLATES`, none of

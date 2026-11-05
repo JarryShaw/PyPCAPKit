@@ -138,7 +138,7 @@ class ModuleDescriptorTests(unittest.TestCase):
 exceptions.ProtocolError` rather than the bare stdlib :exc:`AttributeError`,
         so every one of the ``register_*`` call sites that build a
         descriptor from a bad class name fails as a :mod:`pcapkit` error a
-        caller can actually catch. GitHub issue #832.
+        caller can catch. GitHub issue #832.
 
         """
         target_module = types.ModuleType('demo.incomplete')

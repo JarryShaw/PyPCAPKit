@@ -2033,7 +2033,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         This is the issue's own reproduction: a null-TaggerID I-DPD option with a
         zero-octet identifier, followed by one octet of ``PadN``. It guards
-        against ``ipv6_opts.py``'s ``SMFIdentificationBasedDPDOption`` carrying a
+        against ``ipv6_opts/schema.py``'s ``SMFIdentificationBasedDPDOption`` carrying a
         stray ``test`` :class:`~pcapkit.corekit.fields.misc.ForwardMatchField`
         that its HOPOPT twin does not -- see
         :meth:`_assert_identification_based_dpd_options_parse_from_the_wire` above

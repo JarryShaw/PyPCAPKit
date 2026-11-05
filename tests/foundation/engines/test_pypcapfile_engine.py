@@ -42,7 +42,7 @@ PCAPNG_MAGIC = b'\x0a\x0d\x0d\x0a'
 
 #: Raw bytes of a not-yet-decoded frame.
 RAW_FRAME = b'payload'
-#: The hex-ASCII form :func:`pcapfile.savefile._read_a_packet` actually hands
+#: The hex-ASCII form :func:`pcapfile.savefile._read_a_packet` hands
 #: back as ``packet.packet`` for a savefile loaded with ``layers=0`` -- see
 #: :meth:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run`. Stand-in
 #: packets below carry this, not :data:`RAW_FRAME` itself, so that a decoder
@@ -588,7 +588,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
         self.assertIsInstance(frame.packet, FakeDecoded)
         # the decoder must see the un-hexlified raw bytes, not the hex-ASCII
-        # ``packet.packet`` a ``layers=0`` load actually hands back -- #746
+        # ``packet.packet`` a ``layers=0`` load hands back -- #746
         self.assertEqual(frame.packet.raw, RAW_FRAME)
         self.assertEqual(frame.packet.layers, engine.LAYERS - 1)
         self.assertEqual((frame.timestamp, frame.timestamp_us), (1, 500000))

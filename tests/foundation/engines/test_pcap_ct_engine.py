@@ -37,7 +37,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 
 def _importable(*modules: str) -> bool:
-    """Test if every named module can actually be imported."""
+    """Test if every named module can be imported."""
     for module in modules:
         try:
             importlib.import_module(module)
@@ -587,7 +587,7 @@ class PCAP_CTEngineTests(unittest.TestCase):
 
         # A missing engine module only warns and falls back to pcapkit's own
         # parser, so a successful extraction proves nothing on its own -- it is the
-        # absence of that warning, plus the engine actually on the extractor, that
+        # absence of that warning, plus the engine on the extractor, that
         # says this ran through ``pcap-ct``.
         engines = [call.args[0] for call in warn.call_args_list
                    if len(call.args) > 1 and call.args[1] is EngineWarning]

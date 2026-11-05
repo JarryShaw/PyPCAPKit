@@ -1,58 +1,46 @@
 # -*- coding: utf-8 -*-
 """``Frame.len`` is the on-wire length and ``Frame.cap_len`` the captured one.
 
-Both readers that build a
-:class:`~pcapkit.protocols.misc.pcap.frame.data.Frame` have to agree about which
-of the two wire fields lands in which attribute. GitHub issue #618 is the
-defect where they did not: the classic-PCAP reader in
-:mod:`pcapkit.protocols.misc.pcap.frame.protocol` wrote ``len=incl_len,
-cap_len=orig_len`` while :func:`pcapkit.toolkit.pcapng.block2frame` wrote
-``len=original_len, cap_len=captured_len``. Exactly inverted, so ``frame.len``
-meant the *captured* length out of a ``.pcap`` and the *on-wire* length out of a
-``.pcapng``.
+Both readers that build a :class:`~pcapkit.protocols.misc.pcap.frame.data.Frame` must agree
+on which wire field lands in which attribute. GitHub issue #618: the classic-PCAP reader in
+:mod:`pcapkit.protocols.misc.pcap.frame.protocol` wrote ``len=incl_len, cap_len=orig_len``
+while :func:`pcapkit.toolkit.pcapng.block2frame` wrote ``len=original_len,
+cap_len=captured_len``, so ``frame.len`` meant the *captured* length from a ``.pcap`` and
+the *on-wire* length from a ``.pcapng``.
 
-The PCAP reader was the wrong one. The names are Wireshark's, and its
-:file:`epan/dissectors/packet-frame.c` settles which way round they go:
-``frame.len`` is registered as "Frame length on the wire" and ``frame.cap_len``
-as "Frame length stored into the capture file", and the expert info
+The PCAP reader was wrong. The names are Wireshark's, and its
+:file:`epan/dissectors/packet-frame.c` registers ``frame.len`` as "Frame length on the wire"
+and ``frame.cap_len`` as "Frame length stored into the capture file"; its expert info
 ``frame.len_lt_caplen`` -- "Frame length is less than captured length",
-``PI_MALFORMED``/``PI_ERROR`` -- fires on ``frame_len < cap_len``, which it
-could not be if ``len`` were the smaller, captured one.
-:mod:`pcapkit.toolkit.pyshark` reads those very field names off a tshark frame,
-so the library already leant on that reading.
+``PI_MALFORMED``/``PI_ERROR`` -- fires on ``frame_len < cap_len``.
+:mod:`pcapkit.toolkit.pyshark` reads those field names off a tshark frame.
 
-The underlying wire fields mean the same thing in both containers.
-:manpage:`pcap-savefile(5)` gives ``incl_len`` as "the number of bytes of
-captured data that follow the per-packet header" and ``orig_len`` as "the number
-of bytes that would have been present had the packet not been truncated by the
-snapshot length"; ``draft-ietf-opsawg-pcapng`` gives Captured Packet Length as
-"the number of octets captured from the packet" against Original Packet Length's
-"number of octets of packet data that would have been provided had the packet not
-been truncated", which "SHOULD NOT be less than the Captured Packet Length". So
-neither format is the odd one out -- only the reader was.
+The wire fields mean the same in both containers. :manpage:`pcap-savefile(5)` gives
+``incl_len`` as "the number of bytes of captured data that follow the per-packet header" and
+``orig_len`` as "the number of bytes that would have been present had the packet not been
+truncated by the snapshot length"; ``draft-ietf-opsawg-pcapng`` gives Captured Packet Length
+as "the number of octets captured from the packet" and Original Packet Length as the "number
+of octets of packet data that would have been provided had the packet not been truncated",
+which "SHOULD NOT be less than the Captured Packet Length".
 
-Why fixtures can miss it: **the two lengths are equal unless the snapshot length
-cut the frame short**, so a fixture without a truncated frame compares a value
-against itself and cannot tell the two assignments apart. This module therefore
-leans on the truncated fixtures (#614), and asserts that they really are
-truncated before asserting anything about them -- a fixture regenerated into
-something untruncated fails
-:meth:`PcapFrameLengthRuntimeTests.test_the_fixture_really_holds_a_truncated_frame`
-loudly rather than making everything below vacuous:
+**The two lengths are equal unless the snapshot length cut the frame short**, so an
+untruncated fixture cannot tell the assignments apart. This module uses the truncated
+fixtures (#614) and first asserts they are truncated:
+:meth:`PcapFrameLengthRuntimeTests.test_the_fixture_really_holds_a_truncated_frame` fails
+on a regenerated, untruncated fixture rather than leaving the rest vacuous.
 
-======================= ==================== ==========================
-Fixture                 Truncated frame      ``orig_len`` / ``incl_len``
-======================= ==================== ==========================
-``big_endian.pcap``     frame 3              1200 / 96
-``little_endian.pcap``  frame 3              1200 / 96
-``big_endian_nanosecond.pcap`` frame 3       1200 / 96
-``test.pcapng``         the third packet      314 / 32
-                        block
-======================= ==================== ==========================
+=============================== ==================== ===========================
+Fixture                         Truncated frame      ``orig_len`` / ``incl_len``
+=============================== ==================== ===========================
+``big_endian.pcap``             frame 3              1200 / 96
+``little_endian.pcap``          frame 3              1200 / 96
+``big_endian_nanosecond.pcap``  frame 3              1200 / 96
+``test.pcapng``                 the third packet     314 / 32
+                                block
+=============================== ==================== ===========================
 
-Expectations are taken from the files themselves with :mod:`struct` as well as
-written down, deliberately without going through :mod:`pcapkit`, so that the
-thing under test is not also the thing supplying the answer.
+Expectations are written down and also read from the files with :mod:`struct`, never
+through :mod:`pcapkit`, so the code under test does not supply its own answer.
 
 """
 from __future__ import annotations

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 """``FEATCode.get`` must be case-insensitive, per RFC 5797 Section 2.
 
-GitHub issue #903, the registry-wide case-sensitivity audit. Of the
-registries under :mod:`pcapkit.const` and the non-registry enumerations
-elsewhere, :class:`~pcapkit.const.ftp.command.FEATCode` is the one the audit
-found on the wrong side of the owner's ruling: it did no case folding at all,
-so it ran the case-sensitive default, while the document defining the very
-registry it is generated from states the *opposite* comparison rule outright.
+GitHub issue #903, the registry-wide case-sensitivity audit, found
+:class:`~pcapkit.const.ftp.command.FEATCode` on the wrong side of the owner's
+ruling: it did no case folding, so it ran the case-sensitive default, while the
+document defining its registry states the *opposite* comparison rule.
 
 RFC 5797 Section 2, describing the ``FEAT Code`` column of the IANA "FTP
 Commands and Extensions" registry that
@@ -27,28 +25,25 @@ and the lenient limb holds too. RFC 2389 Section 3.2, which defines the
     letters when transmitting the feature response.
 
 so a caller holding a line off a ``FEAT`` response holds upper case *by the
-RFC's own recommendation*, while the registry spells 5 of its 15 codes in
-lower case -- because RFC 5797 uses case presentationally, to tell a
-registered keyword from a placeholder::
+RFC's own recommendation*, while the registry spells some codes in lower case,
+because RFC 5797 uses case presentationally, to tell a registered keyword from
+a placeholder::
 
     ... defined FEAT keywords codes are listed in all uppercase, whereas
     placeholder keywords (henceforth called "pseudo FEAT codes") are listed
     in lowercase.
 
-Measured on the live registry CSV while auditing: of 64 rows, 11 carry an
-all-upper-case code (10 distinct -- ``AUTH``, ``HOST``, ``MDTM``, ``MLST``,
-``PBSZ``, ``PROT``, ``REST``, ``SIZE``, ``TVFS``, ``UTF8``), 52 carry an
-all-lower-case one (5 distinct -- ``base``, ``feat``, ``hist``, ``nat6``,
-``secu``), 1 is blank, and **none** is mixed. So the two authorities
-disagree about the casing of the same field, which is exactly the shape the
-owner's ruling on this issue treats as case-insensitive. He chose the lenient
-reading of the criterion, with ``TransportProtocol`` as his example: when the
-RFC and IANA themselves use upper and lower case for the same field, that mix
-is itself an indication of case insensitivity.
+Measured on the live registry CSV while auditing: every code is all upper case
+(``AUTH``, ``HOST``, ``MDTM``, ``MLST``, ``PBSZ``, ``PROT``, ``REST``, ``SIZE``,
+``TVFS``, ``UTF8``) or all lower case (``base``, ``feat``, ``hist``, ``nat6``,
+``secu``), apart from one blank, and **none** is mixed. So the two authorities
+disagree about the casing of the same field, the shape the owner's ruling on
+this issue treats as case-insensitive: taking the lenient reading, with
+``TransportProtocol`` as the example, an RFC and IANA mixing upper and lower
+case for one field is itself an indication of case insensitivity.
 
-**Behaviour without the fix, as measured** (throwaway process, no
-probe that could mint; ``_member_map_`` and ``_value2member_map_`` both 15
-entries before and after)::
+**Behaviour without the fix, as measured** (throwaway process, no probe that
+could mint; ``_member_map_`` and ``_value2member_map_`` unchanged)::
 
     FEATCode.get('base'  ) -> <FEATCode [base]>   value='<base>'
     FEATCode.get('BASE'  ) -> KeyError: 'BASE'
@@ -78,8 +73,8 @@ so there is no second member for the fold to hide -- pinned below by
 **Contrast, pinned so the default is not quietly widened.** The audit's other
 ``str``-valued registries stay case-sensitive and each has a reason:
 :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, whose RFC 9850
-Section 4.2 registry and live IANA CSV agree on upper case in all 10 rows
-with no comparison rule stated anywhere, is measured below as the witness
+Section 4.2 registry and live IANA CSV agree on upper case in every row with
+no comparison rule stated anywhere, is measured below as the witness
 that the base ``get`` stays case-sensitive.
 """
 

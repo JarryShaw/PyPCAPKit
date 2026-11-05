@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """The value helpers ``Protocol`` shares with its subclasses (GitHub issue #2514).
 
-The TLS extension parser on PR #2595 brought module-level vector and integer-list
-helpers, and the owner asked there for them to live on the base ``Protocol``
-instead, so that any protocol can use them; PR #2607's 802.11 header brought the
-``_make_uint`` check, and the owner asked for the same there. Each helper is
-checked here on its own, apart from TLS:
+The owner ruled on PR #2595 (TLS extensions) and PR #2607 (the 802.11 header) that the
+vector, integer-list and ``_make_uint`` helpers live on the base ``Protocol``, so any
+protocol can use them. Each is checked here apart from TLS:
 
 * ``_read_vector`` and ``_read_whole_vector`` -- a length-prefixed vector, with
   prefix widths of one, two and three octets, refusing a truncated prefix, a
@@ -30,9 +28,9 @@ The rest of ``ProtocolBase``'s value helpers, from the audit on #2614:
   one of any length;
 * ``_read_text`` -- text decoded so that it encodes back to its octets.
 
-The errors the readers and makers raise name the instance's ``alias``, which is
-per instance -- a TLS record's is its tier, such as ``TLS 1.3`` -- so that is
-pinned with an alias that differs from the class name.
+Their errors name the instance's ``alias``, which is per instance (a TLS record's is its
+tier, such as ``TLS 1.3``), so that is pinned with an alias unlike the class name.
+
 
 """
 

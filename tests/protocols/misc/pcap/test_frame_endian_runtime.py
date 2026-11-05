@@ -1,42 +1,32 @@
 # -*- coding: utf-8 -*-
 """A big-endian classic PCAP, read on a little-endian host.
 
-Classic PCAP declares its byte order in the magic number of the global header,
-and the four fields of every record header -- ``ts_sec``, ``ts_usec``,
-``incl_len`` and ``orig_len`` -- are written in that order rather than in the
-reading host's. Little-endian fixtures alone cannot show whether that order is
-honoured: on a little-endian runner, a reader that ignores the file's declared
-order and uses :data:`sys.byteorder` produces exactly the right answer.
+Classic PCAP declares its byte order in the global header's magic number, and every record
+header's ``ts_sec``, ``ts_usec``, ``incl_len`` and ``orig_len`` are written in that order,
+not the reading host's. Little-endian fixtures cannot show it is honoured: on a
+little-endian runner, a reader using :data:`sys.byteorder` gets the right answer.
 
-This guards against GitHub issue #605, where
-:meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>` seeded the
-order under the key ``bytesorder``, while ``byteorder_callback``
-(:file:`pcapkit/corekit/schema/byteorder.py`) reads ``byteorder``, so the
-``.get()`` never found the key and always fell back to the host's order -- the
-sibling :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.pack>`
-spelled it correctly, which is what marks it as a slip rather than a second
-key. Measured without the fix against
-``big_endian.pcap``, whose first record really holds ``ts_sec=1500000000``,
-``ts_usec=123456`` and ``incl_len=74``: frame 1 came back with
-``ts_sec=3106905``, ``ts_usec=1088553216`` and ``incl_len=1241513984``, i.e.
-every field byte-swapped, dated 1970-02-05 rather than 2017-07-14. And because
-``incl_len`` is the payload length, that first record swallowed the rest of the
-file and the read that followed was handed a negative payload length, raising
-``ValueError: read length must be non-negative or -1`` from
-:file:`pcapkit/protocols/schema.py`. So the defect was a wrong answer
-first and a crash second.
+GitHub issue #605: :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>`
+seeded the order under the key ``bytesorder`` while ``byteorder_callback``
+(:file:`pcapkit/corekit/schema/byteorder.py`) reads ``byteorder``, so the ``.get()``
+always fell back to the host's order; the sibling
+:meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.pack>` spelled it
+correctly, marking it a slip rather than a second key. Measured without the fix against
+``big_endian.pcap``, whose first record holds ``ts_sec=1500000000``, ``ts_usec=123456`` and
+``incl_len=74``, frame 1 came back byte-swapped as ``ts_sec=3106905``,
+``ts_usec=1088553216`` and ``incl_len=1241513984``, dated 1970-02-05 rather than
+2017-07-14. That ``incl_len`` swallowed the rest of the file and handed the next read a
+negative payload length, raising ``ValueError: read length must be non-negative or -1`` from
+:file:`pcapkit/protocols/schema.py`: a wrong answer first and a crash second.
 
-The fixtures come from :file:`examples/generators/endian.py`, and the set is
-built around one property: ``big_endian.pcap`` and ``little_endian.pcap`` carry
-the *same three records* -- same timestamps, same lengths, byte-identical packet
-data -- in the two containers. A test against the big-endian file alone can only
-check it against numbers written down here; against its twin it can check that
-the byte order of the container makes no difference to what is read out of it,
-which is the property the byte-order branch exists to provide.
+The fixtures come from :file:`examples/generators/endian.py`. ``big_endian.pcap`` and
+``little_endian.pcap`` carry the *same three records* (timestamps, lengths and packet data)
+in the two containers, so beyond numbers written down here a test can check that the
+container's byte order makes no difference to what is read, the property the byte-order
+branch exists for.
 
-Expectations are taken from the files themselves with :mod:`struct` as well as
-written down, so a fixture regenerated into something else fails here rather
-than quietly moving the goalposts.
+Expectations are written down and also read from the files with :mod:`struct`, so a
+fixture regenerated into something else fails here.
 
 """
 from __future__ import annotations

@@ -1742,9 +1742,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             return data
 
         options = getattr(data, 'options', None)
-        # NOTE: The ``isinstance`` test comes first so that the type checker can
-        # narrow ``data`` for the assignment below; at runtime ``getattr`` has
-        # already covered the :obj:`bytes` case by returning :obj:`None`.
+        # NOTE: The ``isinstance`` test narrows ``data`` for the type checker; at runtime ``getattr``
+        # has already covered :obj:`bytes` by returning :obj:`None`.
         if isinstance(data, bytes) or options is None:
             warn(f'{self.alias}: message data of {len(data)} octets carries no '
                  f'mobility options to hold padding, so {pad_len} octet(s) were '
@@ -1766,9 +1765,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data.data = body + b'\x00' * pad_len
             return data
 
-        # NOTE: Rebinding the attribute rather than mutating the list in place is
-        # what marks the schema as updated, so that ``len()`` and ``pack()`` take
-        # the padding into account.
+        # NOTE: Rebinding the attribute, not mutating the list, marks the schema updated, so ``len()``
+        # and ``pack()`` count the padding.
         data.options = list(options) + pad_opts
         return data
 
@@ -3247,10 +3245,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if schema.length != 18:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
-        # NOTE: The prefix and its length stay apart, as captured: an IPv6Network
-        # holds neither bits set past the length nor a length past 128. RFC 3963
-        # section 6.2 reads both fields as given, and answers a prefix the home
-        # agent cannot use with a status rather than discarding the option (#2702).
+        # NOTE: Prefix and length stay apart, as captured: an IPv6Network holds neither bits past the
+        # length nor a length past 128; RFC 3963 section 6.2 answers a bad prefix with a status (#2702).
         data = Data_MobileNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
@@ -3863,9 +3859,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if schema.length != 18:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
-        # NOTE: A prefix length past 128 is kept, as for option 6: RFC 5213
-        # section 5.3.2 answers a prefix the local mobility anchor cannot
-        # authorise with a status rather than discarding the option (#2702).
+        # NOTE: A prefix length past 128 is kept, as for option 6: RFC 5213 section 5.3.2 answers an
+        # unauthorisable prefix with a status rather than discarding the option (#2702).
         data = Data_HomeNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
@@ -7587,9 +7582,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_addr = option.prefix
         else:
             try:
-                # NOTE: An interface, unlike a network, keeps the bits past its
-                # length, and takes an address, a network or text alike. A bool
-                # is refused first, as it would pass for the address ``::1``.
+                # NOTE: An interface keeps bits past its length, unlike a network, and takes an address,
+                # network or text alike; a bool is refused first, as it would pass for ``::1``.
                 prefix_val = None if isinstance(prefix, bool) else ipaddress.IPv6Interface(prefix)
             except ValueError:
                 prefix_val = None
@@ -9087,10 +9081,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         addr = parse_ip_address(
             address, f'{self.alias}: [OptNo {type}] invalid address')
 
-        # NOTE: RFC 5949 ties each code to one address family, so a code the
-        # caller did not choose is the family's own, and one they did choose has
-        # to agree with it (#2280). A data model passed as ``option`` skips the
-        # check, so that a captured mismatch still rebuilds byte for byte.
+        # NOTE: RFC 5949 ties each code to one address family, so an unset code is the family's and a
+        # set one must agree (#2280). A data model as ``option`` skips this, so a captured mismatch rebuilds.
         family_code = LMAAddressCode.IPv4_LMAA if addr.version == 4 else LMAAddressCode.IPv6_LMAA
         if code_val is None:
             code_val = int(family_code)
@@ -10493,9 +10485,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             else:
                 data = meth(schema, options=options)
 
-                # NOTE: Fields are read at their own widths, so a length they do not
-                # fill exactly reads octets not the option's, and rebuilds as another
-                # (#2684).
+                # NOTE: Fields are read at their own widths, so a length they do not fill exactly reads
+                # octets not the option's, and rebuilds as another (#2684).
                 if isinstance(name, str) and len(schema) != data.length:
                     raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid option length: {schema.length}')
 
@@ -11239,10 +11230,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             else:
                 address = kwargs.get('address', '::')
                 reserved = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
-            # NOTE: Through ``parse_ip_address`` because the sub-option length
-            # below is derived from the family here, ahead of the schema, so a
-            # bare ``ipaddress.ip_address`` would launder a ``bool`` past the
-            # schema's guard, packing ``address=True`` as ``0506000000000001``.
+            # NOTE: The sub-option length below is derived ahead of the schema, so a bare ``ip_address``
+            # would launder a ``bool`` past its guard: ``address=True`` packs as ``0506000000000001``.
             addr = parse_ip_address(
                 address, f'{self.alias}: [OptNo {code}] invalid target care-of address')
             return Schema_TargetCareofAddressSuboption(

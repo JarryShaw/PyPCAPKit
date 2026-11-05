@@ -264,7 +264,7 @@ class PySharkUnsupportedReasonTests(unittest.TestCase):
         ``shutil.which('tshark') is None``, i.e. that the *host* has no tshark
         anywhere on ``PATH`` at all, is true on a machine without it and false on
         every ``engine-tests`` CI leg once #755's own ``apt-get install … tshark``
-        step runs. The claim this test actually needs is narrower: that ``which``
+        step runs. The claim this test needs is narrower: that ``which``
         cannot resolve *the stand-in specifically*, because its directory was never
         put on ``PATH`` -- true regardless of whether some unrelated ``tshark``
         happens to sit on ``PATH`` elsewhere. Both worlds are constructed and

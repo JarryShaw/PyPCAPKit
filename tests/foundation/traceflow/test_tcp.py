@@ -254,7 +254,7 @@ class TCPTraceFlowTests(unittest.TestCase):
             self.assertEqual(second.index, (3,))
 
     def test_a_half_open_connection_is_still_reported_at_end_of_capture(self) -> None:
-        """A conversation with no teardown must not simply vanish.
+        """A conversation with no teardown must not vanish.
 
         Nothing supersedes it, so ``finish`` -- which
         :meth:`Extractor._cleanup <pcapkit.foundation.extraction.Extractor._cleanup>`

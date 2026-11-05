@@ -10,17 +10,16 @@ that handles it reads
    if self._flag_n:
        continue
 
-with nothing else to stop it, so an exhausted input is retried forever. The
-flag suppresses the error that *ends* the loop without supplying any other
-ending.
+with nothing else to stop it, so an exhausted input is retried forever: the
+flag suppresses the error that *ends* the loop without supplying another ending.
 
-The flag is not pointless, which is why it gets a termination condition rather
-than a deletion. ``pcapkit/__main__.py`` sets ``no_eof = args.fin == '-'``, so
-``pcapkit -`` reads a live capture off standard input, and reaching the end of
-what has arrived so far genuinely is not the end of that capture. What is
-needed is a way to tell a capture that has paused from one that is over.
+The flag gets a termination condition rather than a deletion because
+``pcapkit/__main__.py`` sets ``no_eof = args.fin == '-'``: ``pcapkit -`` reads a
+live capture off standard input, where the end of what has arrived is not the
+end of the capture. What is needed is a way to tell a paused capture from one
+that is over.
 
-Measured without the fix, which is what these tests reproduce:
+Measured without the fix, which these tests reproduce:
 
 * ``extract(in.pcap, nofile=True)`` returns with 6 frames; adding
   ``no_eof=True`` never returns, and ``faulthandler`` killed it at 10s with the
@@ -40,37 +39,32 @@ A **seekable** input does not block, so the two end-of-stream probes happen
 microseconds apart and a file still being appended to ends at whatever was
 present when the extraction got there. Measured with the append landing on a
 record boundary 0.6s in: unbounded retrying yields all six frames, and the
-stopping rule yields five. That is deliberate -- unbounded retrying is the defect
-#620 reports, so some stopping rule had to be chosen. A timed grace period would only
-make the cut-off intermittent instead of absent, so following a growing file is
-left to a policy of its own. :class:`NoEOFOverAGrowingFileStopsAtWhatIsThere`
-pins the decision so that it stays a decision rather than becoming folklore.
+stopping rule yields five. That is deliberate: unbounded retrying is the defect
+#620 reports, and a timed grace period would only make the cut-off intermittent
+instead of absent, so following a growing file is left to a policy of its own.
+:class:`NoEOFOverAGrowingFileStopsAtWhatIsThere` pins the decision.
 
-Worth knowing while reading that: an append landing *mid-record* raises nothing
-(#1265). If extraction stops there, a record cut inside its header ends it at the
-last whole record, and a record cut inside its data is yielded with only the
-octets present. So over a growing file, ``no_eof`` drops or truncates the record
-a writer was partway through when the stopping rule fired.
+An append landing *mid-record* raises nothing (#1265): if extraction stops
+there, a record cut inside its header ends it at the last whole record, and a
+record cut inside its data is yielded with only the octets present. So over a
+growing file, ``no_eof`` drops or truncates the record a writer was partway
+through when the stopping rule fired.
 
 Why the end-to-end cases run in a child process
 -----------------------------------------------
 
-A hang cannot fail an assertion -- the call simply never returns, and a test
-written without a deadline wedges the run instead of failing it. The suite's own
-:func:`tests._support.time_limit` is the usual answer, and it is used below for
-the cases driven by a stand-in engine.
+A hang cannot fail an assertion -- a test without a deadline wedges the run
+instead of failing it. :func:`tests._support.time_limit` is used below for the
+cases driven by a stand-in engine.
 
-For the cases that parse a real capture it is **not dependable**, which is worse
-than it being unusable. Measured on ``6c3d1b0d9``: a ``time_limit``-guarded
-version of ``test_call_form_...`` below usually did expire on time, and once did
-not -- it escaped the deadline entirely and ran for over ten minutes, reaching
-**13.2 GB RSS**, and was killed by hand. The escape has not been reproduced
-since. So the honest statement is that the in-process deadline is delivered
-*intermittently* here, and an intermittent guard against a hang is worse than
-none, because the run it fails to bound is a wedged suite rather than a red test.
+For the cases that parse a real capture it is **not dependable**: a
+``time_limit``-guarded version of ``test_call_form_...`` below usually expired
+on time, but once escaped the deadline, ran for over ten minutes reaching
+**13.2 GB RSS**, and was killed by hand. An intermittent guard against a hang is
+worse than none, because the run it fails to bound is a wedged suite rather than
+a red test.
 
-Two things this is *not*, both checked, so that the next reader does not repeat
-the guesses:
+Two things this is *not*, both checked:
 
 * It is not the parse path's ``except Exception`` handlers absorbing the
   ``SIGALRM``-raised :exc:`TimeoutError`. Those handlers exist -- in
@@ -85,23 +79,20 @@ the guesses:
   thousands of ``EOF reached`` warning and log records per second, which the test
   runner retains.
 
-So those cases are bounded from **outside** the interpreter: a child process with
-a wall-clock :mod:`subprocess` timeout, which cannot be absorbed or missed, plus
-an ``RLIMIT_AS`` cap so that a child which does hang cannot take the host down
-while it waits to be killed. The child also asserts which tree it imported, since
-this project is usually installed editable and an editable finder will happily
-serve a different checkout than the one under test.
+So those cases are bounded from **outside** the interpreter: a child process
+with a wall-clock :mod:`subprocess` timeout, which cannot be absorbed or missed,
+plus an ``RLIMIT_AS`` cap so a hung child cannot take the host down before it is
+killed. The child also asserts which tree it imported, since an editable install
+can serve a different checkout than the one under test.
 
 The timeout bounds the extraction, not the interpreter's warm-up (#2085). On
 GraalPy 25.4.4 a child spends 4-8s importing :mod:`pcapkit` and 7-13s on its
 first extraction, which imports more modules and is otherwise cold code:
 about 21 CPU-seconds before the case under test begins, after which every case
-here takes 0.02-0.06s. CPython takes 0.9s in all. A single 30s timeout over the
-whole child is therefore not enough: measured on ``main``, it failed four of
-eleven GraalPy runs, the other exhausted-input cases in each finishing at
-25-30s, and reported them as #620. So the
-child warms up with one plain extraction and prints :data:`READY`; that phase
-gets :data:`STARTUP`, and only what follows counts against :data:`DEADLINE`.
+here takes 0.02-0.06s. CPython takes 0.9s in all. So a single 30s timeout over
+the whole child failed GraalPy runs, misreported as #620. The child warms up
+with one plain extraction and prints :data:`READY`; that phase gets
+:data:`STARTUP`, and only what follows counts against :data:`DEADLINE`.
 
 """
 

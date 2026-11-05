@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """#1633: every Python matrix is two tiers, and only one of them can block.
 
-Python 3.10 reached end-of-life on 2026-10-01 and 3.15.0 was released on
-2026-10-09, so the owner's ruling on #1633 split the matrices:
+With 3.10 past end-of-life and 3.15.0 released, the owner's ruling on #1633 split
+the matrices:
 
 * **Supported** -- 3.11 to 3.15, in every matrix (unit tests, compatibility,
   conda, PyPI), blocking.
@@ -11,7 +11,7 @@ Python 3.10 reached end-of-life on 2026-10-01 and 3.15.0 was released on
   a release, not a required context.
 * ``requires-python`` is ``>=3.8`` (#2051).
 
-A KTLO leg can block in more ways than one, so each is pinned on its own: a job
+A KTLO leg can block in several ways, each pinned on its own: a job
 that ``required-checks`` or ``release_status`` aggregates through one
 ``needs.<job>.result`` must keep the leg's failure inside its steps (GitHub
 documents step-level ``continue-on-error``, not what that result reads under a
@@ -25,9 +25,9 @@ concludes ``success``, Compat's included, and reports a failed step as a warning
 
 No leg runs below 3.8, the ``requires-python`` floor pip enforces at install
 (#2051). A KTLO leg that cannot install or compile still fails fast and says
-why, at warning level, and :class:`TestAKTLOLegFailsFast` pins that -- the
-install and verify steps are executed with ``python``, or its ``pip``, stubbed, and each
-annotation is parsed as the runner parses it.
+why, at warning level: :class:`TestAKTLOLegFailsFast` executes the install and
+verify steps with ``python``, or its ``pip``, stubbed, and parses each annotation
+as the runner does.
 
 The tiers are declared once, in :file:`.github/python-versions.toml` (#1660),
 and every matrix is read from it, so the expectations below are read from it

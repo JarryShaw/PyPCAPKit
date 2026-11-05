@@ -282,7 +282,7 @@ class ScapyToolkitTests(unittest.TestCase):
         # (unscaled) offset of the final fragment
         self.assertEqual(len(datagram.payload), 48)
         self.assertEqual(bytes(datagram.payload), b'A' * 40 + b'B' * 8)
-        # #482's overlap detection is what actually witnesses the corruption:
+        # #482's overlap detection is what witnesses the corruption:
         # under the defect fragment 2 lands inside fragment 1's span and
         # differs from it, so the datagram comes back carrying
         # ``conflict == ((5, 12),)``. Asserting the record is *empty* pins the

@@ -239,7 +239,7 @@ class NegativeBitLengthTests(unittest.TestCase):
         self.assertIsInstance(ctx.exception, BaseError)
 
     def test_the_reported_value_is_the_bit_length_not_a_byte_length(self) -> None:
-        """The message must name what is actually wrong: ``bit_length``.
+        """The message must name what is wrong: ``bit_length``.
 
         A resolved byte ``length`` of ``4`` is perfectly legitimate here --
         it is the *bit* length that is negative -- so the message must not

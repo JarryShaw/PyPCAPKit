@@ -3,65 +3,54 @@
 
 GitHub issue #2293. :meth:`_MPTCP.post_process
 <pcapkit.protocols.transport.tcp.schema._MPTCP.post_process>` set ``ret.option =
-Enum_Option.Multipath_TCP`` on the subtype schema it returns. No ``_make_mptcp_*`` maker, and
-not :meth:`TCP._make_mode_mp <pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp>` either, made
-the matching assignment -- so the attribute existed on a schema unpacked from wire bytes and
-not on the same schema built in memory.
+Enum_Option.Multipath_TCP`` on the subtype schema it returned, and no ``_make_mptcp_*`` maker
+nor :meth:`TCP._make_mode_mp <pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp>`
+matched it, so the attribute existed on a parsed schema and not on a built one.
 
-Why the assignment had nothing to be symmetric about
-----------------------------------------------------
+Why the assignment is dropped rather than mirrored
+--------------------------------------------------
 
-``option`` was not a field. :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP` declares
-exactly ``kind`` and ``length`` (#541) and every concrete subtype adds its own on top; none of
-them declares ``option``, under :data:`~typing.TYPE_CHECKING` or otherwise. So the assignment
-created an attribute out of nothing at unpack time, and nothing in ``pcapkit`` read it back:
-``kind``, a real :class:`~pcapkit.corekit.fields.numbers.EnumField`, already carries
-:attr:`~pcapkit.const.tcp.option.Option.Multipath_TCP`, and it is ``kind`` that the schema
-packs.
+``option`` is not a field. :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP` declares
+exactly ``kind`` and ``length`` (#541), and no concrete subtype declares ``option``, under
+:data:`~typing.TYPE_CHECKING` or otherwise. Nothing in ``pcapkit`` read it back: ``kind``, an
+:class:`~pcapkit.corekit.fields.numbers.EnumField` the schema packs, already carries
+:attr:`~pcapkit.const.tcp.option.Option.Multipath_TCP`.
 
-That is the difference from ``subtype``, the other attribute ``post_process`` assigns, which
-*is* needed on both paths and stays. ``subtype`` cannot be a field -- every subtype schema
-already packs those 4 bits inside its own ``test``
-:class:`~pcapkit.corekit.fields.strings.BitField`, so a second field for them would either
-double-pack or need a derive-don't-pack field this library has no equivalent of -- and every
-``_read_mptcp_*`` reader reads it, which is why ``_make_mode_mp`` sets it for construction
-(#566, #579, pinned in
-:mod:`tests.protocols.transport.test_tcp_mptcp_subtype_unit`). ``option`` had neither
-property: no reader wanted it and no maker set it. Dropping it is therefore the symmetric
-fix, where adding a mirror assignment to ``_make_mode_mp`` would have propagated a value
-with no purpose to the construction path as well.
+``subtype``, which ``post_process`` also assigns, differs and stays. It cannot be a field,
+since every subtype schema packs those 4 bits inside its own ``test``
+:class:`~pcapkit.corekit.fields.strings.BitField` and a second field would double-pack or
+need a derive-don't-pack field the library lacks; and every ``_read_mptcp_*`` reader reads
+it, so ``_make_mode_mp`` sets it for construction (#566, #579, pinned in
+:mod:`tests.protocols.transport.test_tcp_mptcp_subtype_unit`). ``option`` had no reader and
+no maker, so a mirror assignment in ``_make_mode_mp`` would only spread a purposeless value.
 
 Why the defect is invisible to a round trip
 -------------------------------------------
 
-Both schemas pack to the same octets, because ``option`` is not among the fields ``pack``
-walks. Only the attribute *sets* differ, so a byte-level round trip stays closed over the
-defect -- the blind spot
-:mod:`tests.protocols.test_option_roundtrip_unit`'s docstring names. The assertion here is
-accordingly on ``set(schema.to_dict())``, the attributes each path leaves behind, rather than
-on packed bytes; the packed bytes are asserted equal as well, to pin that dropping the
+``option`` is not among the fields ``pack`` walks, so both schemas pack to the same octets
+and only their attribute *sets* differ: the blind spot
+:mod:`tests.protocols.test_option_roundtrip_unit`'s docstring names. The tests assert on
+``set(schema.to_dict())``, and also that the packed bytes are equal, so dropping the
 assignment moved nothing on the wire.
 
 Coverage
 --------
 
-Three subtypes, each reached by parsing hand-built spec-correct octets and then rebuilt from
-the resulting data model through ``_make_mode_mp``: MP_CAPABLE and MP_FASTCLOSE for the
-registered makers, and an unknown subtype for the ``MPTCPUnknown`` fallback, since
-``post_process`` runs once per option regardless of which subtype schema it dispatched to.
+Three subtypes, each parsed from hand-built spec-correct octets and rebuilt from the data
+model through ``_make_mode_mp``: MP_CAPABLE and MP_FASTCLOSE for the registered makers, and
+an unknown subtype for the ``MPTCPUnknown`` fallback, since ``post_process`` runs for every
+option whichever subtype schema it dispatched to.
 
-MP_JOIN is deliberately absent. ``_make_mptcp_join`` picks between the three layouts of
-:rfc:`8684` section 3.2 by reading ``self._flags``, which a bare ``TCP.__new__(TCP)`` has
-not got, so reaching it would mean constructing a whole protocol instance and would test the
-flag dispatch rather than the attribute symmetry this module is about -- that dispatch is
-covered in :mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`.
+MP_JOIN is deliberately absent. ``_make_mptcp_join`` picks one of the :rfc:`8684` section 3.2
+layouts from ``self._flags``, which a bare ``TCP.__new__(TCP)`` lacks, so reaching it would
+test the flag dispatch rather than attribute symmetry;
+:mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit` covers that.
 
-:meth:`~TCPMPTCPOptionAttributeUnitTests.test_option_is_not_a_declared_field` is the positive
-half: it derives from the schema classes themselves that ``option`` never was a field, so the
-case for deleting the assignment rather than mirroring it does not rest on this docstring.
+:meth:`~TCPMPTCPOptionAttributeUnitTests.test_option_is_not_a_declared_field` derives from
+the schema classes themselves that ``option`` is not a field, so deleting rather than
+mirroring the assignment does not rest on this docstring.
 
-Every case builds its own octets in memory and reads no capture under
-:file:`examples/captures/`, so this belongs to the unit tier.
+Unit tier: every case builds its own octets and reads no capture.
 
 """
 from __future__ import annotations

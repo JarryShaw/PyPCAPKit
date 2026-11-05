@@ -1,38 +1,36 @@
 # -*- coding: utf-8 -*-
 """#1672: a failed KTLO leg concludes ``success`` and reports a warning.
 
-The owner's ruling: a KTLO failure must not turn ``main`` or a pull request red.
-Job-level ``continue-on-error`` is not enough: it keeps the *run* from failing
-but still concludes the job's own check run ``failure`` -- check run
-115490362417, ``Compat Python 3.7 (KTLO)``, the one failing check of 4673cffa9 --
-and a KTLO step's ``::error`` annotations are errors all the same.
+The owner ruled that a KTLO failure must not turn ``main`` or a pull request red.
+Job-level ``continue-on-error`` is not enough: it keeps the *run* from failing but
+still concludes the job's own check run ``failure`` (check run 115490362417,
+``Compat Python 3.7 (KTLO)``, on 4673cffa9), and a KTLO step's ``::error``
+annotations are errors all the same.
 
-So every job holding a KTLO leg works one way: each step that can fail on the
-leg carries ``continue-on-error: ${{ matrix.ktlo == true }}`` and an ``id``; a
-step that needs an earlier one waits on that step's ``outcome``; the last step,
+So every job holding a KTLO leg works one way: each step that can fail on the leg
+carries ``continue-on-error: ${{ matrix.ktlo == true }}`` and an ``id``; a step
+needing an earlier one waits on that step's ``outcome``; the last step,
 ``KTLO summary``, reports each failed ``outcome`` as a warning and a job-summary
-line; and a step's own annotations take the job's ``ANNOTATION_LEVEL``. #2030:
-only the steps that name and upload the job's copy of its summary,
-:data:`JOB_SUMMARY_STEPS`, follow a summary, masked on every leg.
+line; and a step's own annotations take the job's ``ANNOTATION_LEVEL``. Only the
+steps that name and upload the job's copy of its summary, :data:`JOB_SUMMARY_STEPS`,
+follow a summary, masked on every leg (#2030).
 
-:func:`run_leg` steps through a job the way the runner does -- the implicit
+:func:`run_leg` steps through a job as the runner does -- the implicit
 ``success()`` GitHub prepends to an ``if:`` without a status function, and a
 ``continue-on-error`` step's failed ``outcome`` concluding ``success`` -- so each
 step's failure is tried on every leg instead of read off the text. Expressions go
 through :mod:`tests.project.test_release_gates`'s evaluator, and the scripts that
-write annotations are executed. Both summaries run :file:`util/leg_summary.py`
-(#1967), :file:`create-release.yml`'s ``pypi``'s too, and the script is run
-against :data:`REFERENCE_RELEASE_SUMMARY`, the step's inline shell form and the
-reference it must match, on the same steps.
+write annotations are executed. Both summaries, :file:`create-release.yml`'s
+``pypi``'s included, run :file:`util/leg_summary.py` (#1967), which is run against
+:data:`REFERENCE_RELEASE_SUMMARY`, the step's inline shell form it must match.
 
 The experimental tier, free-threaded CPython and GraalPy (#1660), is a job of its
-own, ``experimental``, which nothing gating needs (#1732). They are non-blocking
-by the same mechanics, every step that can fail guarded, and report through
-``Experimental summary``, that job's last step:
-:class:`TestAnExperimentalLegIsNonBlockingTheSameWay`. Their setup-python, install,
-watcher setup and test steps have caps of their own, so a slow or hung leg fails a step rather
-than being cancelled with its job:
-:class:`TestASlowExperimentalLegTimesOutAStepNotTheJob`.
+own, ``experimental``, which nothing gating needs (#1732). It is non-blocking by the
+same mechanics and reports through ``Experimental summary``, its last step
+(:class:`TestAnExperimentalLegIsNonBlockingTheSameWay`). Its setup-python, install,
+watcher setup and test steps have caps of their own, so a slow or hung leg fails a
+step rather than being cancelled with its job
+(:class:`TestASlowExperimentalLegTimesOutAStepNotTheJob`).
 
 """
 

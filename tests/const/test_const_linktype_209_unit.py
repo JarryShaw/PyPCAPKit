@@ -22,7 +22,7 @@ for a shared value regardless of the source table's own row order.
 
 GitHub issue #852 (from the cross-review of #848) adds that a predicate testing
 the notes column for the word "legacy" alone, with no check that the row's value
-is actually claimed by another row, would wrongly sink a future *current* row
+is claimed by another row, would wrongly sink a future *current* row
 whose notes happen to mention "legacy" about some unrelated code, and would sink
 all sixteen expanded members of a single ``USER0``-style range row at once
 instead of none.
@@ -78,7 +78,7 @@ __tier__ = 'ALL'
 #: the **existing** ``HAS_VENDOR_DEPS`` dependency gate rather than minting a new
 #: one, which :mod:`tests._dependency_gates` already maps.
 #:
-#: ``html5lib`` is the one that is actually missing on ``test``: ``requests`` and
+#: ``html5lib`` is the one that is missing on ``test``: ``requests`` and
 #: ``bs4`` are in the ``test`` extra (#507), but only
 #: ``beautifulsoup4[html5lib]`` -- the ``vendor`` and ``dev`` extras -- provides a
 #: parser (their entries in :file:`pyproject.toml`, and the ``test`` extra's comment
@@ -275,7 +275,7 @@ class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
 
     Guards against :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`'s
     sink rule (#848) testing a row's notes for the word "legacy" alone, with
-    no check that the row's value is actually claimed by another row, which
+    no check that the row's value is claimed by another row, which
     #852 points out can invert in the *other* direction: a future
     *current* row whose notes happen to mention "legacy" about some unrelated
     code gets sunk even though nothing else shares its value -- silently
@@ -305,7 +305,7 @@ class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
         return enum
 
     def test_non_duplicated_legacy_wording_does_not_reorder(self) -> None:
-        """A row cannot be sunk unless another row actually shares its value.
+        """A row cannot be sunk unless another row shares its value.
 
         Fails against a value-blind, word-only predicate, which sinks
         ``FOO_LEGACY_WORDED`` purely because its notes contain "legacy",

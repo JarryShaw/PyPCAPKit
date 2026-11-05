@@ -114,20 +114,17 @@ class FTPUnitTests(unittest.TestCase):
         # form raised too.
         self.assertIs(Command('retr'), Command.RETR)
 
-        # GitHub issue #860: a genuinely unknown command does not register
-        # at all -- the owner's ruling is that ``get``/``_missing_`` have no
-        # way to supply ``feat``/``desc``/``type``/``conf``, so minting one
-        # would register a permanently hollowed-out member; only
-        # ``register()`` can do that properly. The *value* keeps the
-        # caller's own casing (the same convention
-        # :class:`~pcapkit.const.ftp.command.FEATCode` uses) -- only the
-        # *name* is canonicalised -- so a repeated call with the same casing
-        # is *equal* but never *identical* (nothing is cached to be
-        # identical to), while a different-case call is a genuinely
-        # different value and is correctly *not* equal. A minting cache
-        # would return the first casing seen for every later call
-        # regardless of case, which is exactly the "registered enum out of
+        # GitHub issue #860: an unknown command does not register. The owner
+        # ruled that ``get``/``_missing_`` cannot supply
+        # ``feat``/``desc``/``type``/``conf``, so minting would register a
+        # hollow member; only ``register()`` can. The *value* keeps the
+        # caller's casing, as :class:`~pcapkit.const.ftp.command.FEATCode`
+        # does, and only the *name* is canonicalised: a repeat with the same
+        # casing is *equal* but not *identical* (nothing is cached), and a
+        # different casing is *not* equal. A minting cache would return the
+        # first casing seen for every later call, the "registered enum out of
         # an unrecognised value" #860 rules out.
+
         unknown = Command.get('xyzw')
         self.assertEqual(unknown._name_, 'XYZW')
         self.assertEqual(unknown, 'xyzw')
@@ -142,7 +139,7 @@ class FTPUnitTests(unittest.TestCase):
                           if name.upper() == 'RETR'], ['RETR'])
 
     def test_ftp_read_parses_a_lowercase_request(self) -> None:
-        """The case-insensitivity is reachable from wire data: ``ftp.py``
+        """The case-insensitivity is reachable from wire data: ``ftp/protocol.py``
         compiles ``FTP_REQUEST`` with :data:`re.I` and passes the match
         verbatim, so the lookup must accept a lowercase request rather than
         crash the parse -- #582.

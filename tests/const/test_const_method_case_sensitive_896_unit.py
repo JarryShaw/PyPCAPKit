@@ -161,7 +161,7 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
 
     def test_get_exact_case_resolves_the_standardised_member(self) -> None:
         """The unaffected half: the registered, all-uppercase casing every
-        member is actually declared under still resolves to it."""
+        member is declared under still resolves to it."""
         from pcapkit.const.http.method import Method
 
         self.assertIs(Method.get('GET'), Method.GET)
@@ -264,7 +264,7 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
 
         self.assertEqual(rendered, committed)
 
-        # And the fix itself is actually present in both -- a byte-identical
+        # And the fix itself is present in both -- a byte-identical
         # comparison above already implies this, but names the exact shape
         # so a failure here is legible without a diff. ``get`` delegates to
         # the base's own ``get`` (which also checks ``_value2member_map_``;

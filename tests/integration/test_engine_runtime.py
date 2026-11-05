@@ -51,7 +51,7 @@ class EngineRuntimeTests(unittest.TestCase):
     def test_scapy_engine_returns_scapy_packets(self) -> None:
         # #406: guards against the engine importing only ``scapy.sendrecv``, under
         # which scapy's layer registries are empty and every frame comes back
-        # undissected, as ``Raw``. ``Ether`` is what the capture actually holds: frame 1 of
+        # undissected, as ``Raw``. ``Ether`` is what the capture holds: frame 1 of
         # in.pcap is an Ethernet frame carrying an ICMPv6 neighbour solicitation over
         # IPv6, which is exactly what the two tests above independently report for the
         # same frame -- 'Ethernet:IPv6:ICMPv6' from the default engine and
@@ -104,7 +104,7 @@ class EngineRuntimeTests(unittest.TestCase):
             # And the fall back is a working extraction, not an empty one.
             self.assertEqual(extractor.length, 6)
         else:
-            # Prove pyshark actually ran, rather than the built-in parser wearing
+            # Prove pyshark ran, rather than the built-in parser wearing
             # its label -- see test_new_engine_parity_runtime.py's own `extract`
             # helper, which asserts the same thing for PyPCAP/PyPCAPFile. Without
             # this, a CI leg missing the ``tshark`` binary makes

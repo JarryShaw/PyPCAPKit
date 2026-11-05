@@ -123,7 +123,7 @@ def discover_address_typed_switches() -> 'set[tuple[str, str, str]]':
             seen.add(id(field))
 
             # an address-typed switch is one that can *return* an address field;
-            # read off the selector's own source, since the branch actually taken
+            # read off the selector's own source, since the branch taken
             # depends on a packet this function does not have
             try:
                 source = inspect.getsource(field._selector)

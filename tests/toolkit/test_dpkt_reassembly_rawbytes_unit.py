@@ -20,7 +20,7 @@ behind a stack of VLAN tags DPKT reads in two goes (#1646), the layer is
 re-serialised instead, so the extraction goes on.
 
 Every frame below is written to a PCAP file and read back through the engine, so
-the tests exercise the path a capture actually takes rather than a packet with a
+the tests exercise the path a capture takes rather than a packet with a
 buffer bolted on by hand. :class:`DPKTUnbufferedFallbackTests` is the exception,
 and says why.
 

@@ -198,7 +198,7 @@ class HttpV2FlagsHierarchyTests(unittest.TestCase):
                 # ``FrameType.Flags``, which is where ``EnumLookup`` sits.
                 self.assertEqual(cls.__bases__, (FrameType.Flags,))
                 self.assertIn(EnumLookup, cls.__mro__)
-                # And the contract actually works, not merely appears in the MRO.
+                # And the contract works, not merely appears in the MRO.
                 member = next(iter(cls))
                 self.assertIs(cls.get(member.name), member)
 

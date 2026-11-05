@@ -370,7 +370,7 @@ class DeferredPickleSlotSpellingTests(unittest.TestCase):
                 self.assertEqual(restored.reveal_secret(), 'secret-value')
 
     def test_slotnames_resolves_both_spellings_correctly(self) -> None:
-        """Pins what :func:`copyreg._slotnames` actually returns for each.
+        """Pins what :func:`copyreg._slotnames` returns for each.
 
         A bare string resolves to the name itself, not its characters; a
         mangled name resolves to its real, ``_<ClassName>``-prefixed

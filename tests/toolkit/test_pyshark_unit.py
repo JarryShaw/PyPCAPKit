@@ -310,7 +310,7 @@ class PySharkToolkitTests(unittest.TestCase):
         ``FILTER_NAME_TO_LINKTYPE`` still resolves from the encapsulation.
         Feeding a mismatched pair -- ``eth`` as the root name with
         ``frame.encap_type`` 174 (``editcap -T loop``) -- is the only way to
-        see which of the two the code actually read.
+        see which of the two the code read.
 
         """
         from pcapkit.const.reg.linktype import LinkType

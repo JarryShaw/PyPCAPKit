@@ -5,131 +5,92 @@ GitHub issue #872. The protection lives in
 :func:`pcapkit.vendor.__main__._snapshot_and_restore`, a
 :func:`contextlib.contextmanager` that :func:`~pcapkit.vendor.__main__.run`
 wraps every ``vendor()`` call in, rather than in an atomic write inside
-:meth:`~pcapkit.vendor.default.Vendor.__init__`. That follows the owner's
-ruling on GitHub pull request #873: keeping a copy of the file before running
-the sub-vendor and reverting if anything fails is the easier path, with
-:mod:`contextlib` managing the cleanup rather than a hand-written try-finally.
-:meth:`Vendor.__init__`'s last line is a plain::
+:meth:`~pcapkit.vendor.default.Vendor.__init__`, per the owner's ruling on
+GitHub pull request #873: copy the file before running the sub-vendor and
+revert if anything fails, with :mod:`contextlib` managing the cleanup rather
+than a hand-written try-finally. :meth:`Vendor.__init__`'s last line is a
+plain::
 
     with open(const_file, 'w') as file:
         print(context, file=file)
 
 ``_snapshot_and_restore`` copies the target's existing const file aside
-*before* the crawler is instantiated at all -- resolving the destination via
-:meth:`~pcapkit.vendor.default.Vendor._dest_path`, a classmethod for exactly
-this reason, called on the crawler *class* rather than an instance -- and
-restores that copy if the crawler raises for any reason. This is a **wider**
-guarantee than an atomic write at one call site: it covers any way a crawler's
-own code could end up touching its const file, not only the single
-``open``/``print`` pair the base class happens to use, and it puts the
-discarding exactly at the per-target boundary.
+*before* the crawler is instantiated -- resolving the destination via
+:meth:`~pcapkit.vendor.default.Vendor._dest_path`, a classmethod for this
+reason, called on the crawler *class* -- and restores that copy if the crawler
+raises for any reason. That is **wider** than an atomic write at one call site:
+it covers any way a crawler's code could touch its const file, not only the
+base class's ``open``/``print`` pair, and discards exactly at the per-target
+boundary.
 
-Because the protection lives in ``run()`` rather than inside
-:meth:`Vendor.__init__`, this suite calls :func:`pcapkit.vendor.__main__.run`
--- not the crawler class directly -- exactly as
-:file:`tests/vendor/test_vendor_exit_code_unit.py` does. Calling the crawler
-class directly would exercise :meth:`Vendor.__init__` in isolation, which is
-not where the guarantee lives.
+So this suite calls :func:`pcapkit.vendor.__main__.run`, as
+:file:`tests/vendor/test_vendor_exit_code_unit.py` does, rather than the
+crawler class, which would exercise :meth:`Vendor.__init__` in isolation.
 
-This suite makes no network call: :class:`~pcapkit.vendor.default.Vendor`'s
-``_request``, ``count``, ``context`` and ``_dest_path`` are all overridden by
-a stub subclass built per test, with the destination pointed at a temporary
-directory rather than the real :file:`pcapkit/const/`. ``_dest_path`` is
-overridden as a ``@classmethod``, matching the base class, so
-``_snapshot_and_restore`` can call it on the stub class itself before
-instantiating it -- overriding it as a plain instance method would raise
-``TypeError`` when called that way, which ``_snapshot_and_restore`` would
-(correctly, for a crawler it genuinely cannot resolve a path for) treat as
-"skip the snapshot", silently exercising the unprotected fallback instead of
-what these tests are actually about.
+No network call: ``_request``, ``count``, ``context`` and ``_dest_path`` are
+overridden by a stub subclass built per test, with the destination in a
+temporary directory rather than the real :file:`pcapkit/const/`.
+``_dest_path`` is overridden as a ``@classmethod``, matching the base class: as
+a plain instance method, calling it on the class would raise ``TypeError``,
+which ``_snapshot_and_restore`` treats as "skip the snapshot", silently
+exercising the unprotected fallback instead.
 
-Snapshot-and-restore has no per-mode branching to pin -- a restored file is
-simply the exact bytes and mode :func:`shutil.copy2` copied out, once, for every
-case alike -- so one mode assertion covers what separate permutations would.
+A restored file is the exact bytes and mode :func:`shutil.copy2` copied out,
+with no per-mode branching, so one mode assertion covers every case.
 
 :meth:`SnapshotRestoreTests.test_successful_run_replaces_the_previous_file_content`
-is the happy-path round trip. It also pins that ``run()`` returns :data:`True`
-on success, which a ``run()`` with no exit-code accounting fails.
+is the happy-path round trip, and pins that ``run()`` returns :data:`True` on
+success, which a ``run()`` with no exit-code accounting fails.
 
-The invariant pinned is that a failure during or around a target's
-regeneration leaves the previous const file byte-for-byte intact. That is
 :meth:`SnapshotRestoreTests.test_a_failure_leaves_the_previous_file_byte_for_byte_intact`
-below, simulated by making :func:`print` raise once the destination is open
-for writing -- :meth:`Vendor.__init__` opens ``const_file`` directly (there is
-no temp file to redirect the write onto), so this truncates the previous
-content before the injected failure fires;
-:func:`~pcapkit.vendor.__main__._snapshot_and_restore` is what restores it
-afterwards. It asserts on the *reported* error
+pins the invariant: a failure during or around a target's regeneration leaves
+the previous const file byte-for-byte intact. :func:`print` raises once the
+destination is open, so the previous content is truncated before the failure
+fires (there is no temp file to redirect onto) and only the restore brings it
+back. It asserts on the *reported* error
 (:meth:`~unittest.TestCase.assertWarnsRegex` against the crawler's own
-``RuntimeError`` text) as well as on ``run()`` returning falsy,
-deliberately: a mutant that deletes the ``raise`` from
-``_snapshot_and_restore``'s ``except BaseException:`` clause does not
-merely misreport the failure, it makes it disappear. Because
-:func:`contextlib.contextmanager`'s generated ``__exit__`` suppresses an
-exception its generator catches and does not re-raise,
-:meth:`Vendor.__init__`'s ``RuntimeError`` never reaches ``run()``'s own
-``except Exception as error:`` at all under that mutant -- no warning, no
-stderr line, and ``run()`` returns :data:`True`, which the ``assertFalse``
-on its result catches. The error-text assertion is what catches the variant
-that also collapses the ``else:`` clause into an unindented
-``os.remove(backup)``: ``run()`` stays falsy there, but reports that call's
-:exc:`FileNotFoundError` instead of the crawler's own error. It
-also asserts the destination's mode (``0o640`` in, ``0o640`` out) alongside
-its content, which is the measurement that justifies a single mode
-assertion: restore preserves mode as a side effect of :func:`shutil.copy2`
-plus a rename, for every case alike, rather than needing a case-by-case
-check. Without the protection this fails on the content assertion with
-``'' != 'GOOD CONTENT\\n'``: the previous content is destroyed before
-``run()`` ever gets a chance to report anything.
+``RuntimeError`` text) as well as on ``run()`` returning falsy. Deleting the
+``raise`` from ``_snapshot_and_restore``'s ``except BaseException:`` clause
+makes the failure disappear, since :func:`contextlib.contextmanager`'s
+``__exit__`` suppresses an exception its generator catches and does not
+re-raise: no warning, no stderr line, and ``run()`` returns :data:`True`, which
+the ``assertFalse`` catches. The error-text assertion catches collapsing the
+``else:`` clause into an unindented ``os.remove(backup)``: ``run()`` stays
+falsy but reports :exc:`FileNotFoundError` instead. It also asserts the mode
+(``0o640`` in and out), the measurement behind the single mode assertion.
+Without the protection it fails with ``'' != 'GOOD CONTENT\\n'``.
 
 :meth:`SnapshotRestoreTests.test_a_keyboard_interrupt_still_restores_and_propagates`
-pins ``except BaseException:`` itself, rather than the narrower
-``except Exception:`` a reasonable-looking edit might reach for.
-:exc:`KeyboardInterrupt` is a :exc:`BaseException` but not an
-:exc:`Exception`, so it is what actually exercises the difference: under an
-``except Exception:`` mutant it falls straight through
-``_snapshot_and_restore``'s generator uncaught, skipping both the restore
-and the backup's cleanup -- the previous content stays truncated and a
-``.const.py.*.bak`` is left behind in the directory, measured directly as
-``['.const.py.<random>.bak', 'const.py']``. The interrupt itself still
-propagates out of ``run()`` either way, since ``run()``'s own
-``except Exception:`` does not catch it either; what the mutant changes is
-only whether anything got restored on the way out. This is why the method
-asserts three things rather than two: the exception's propagation, the
-content, and the directory listing -- the first alone is silent about
-exactly the defect this pins.
+pins ``except BaseException:`` rather than ``except Exception:``.
+:exc:`KeyboardInterrupt` is not an :exc:`Exception`, so under that mutant it
+falls through the generator uncaught, skipping the restore and the backup's
+cleanup: the content stays truncated and a ``.const.py.*.bak`` is left behind,
+measured as ``['.const.py.<random>.bak', 'const.py']``. The interrupt
+propagates out of ``run()`` either way, so the method asserts the propagation,
+the content and the directory listing; the first alone is silent about the
+defect.
 
 :meth:`SnapshotRestoreTests.test_a_read_only_destination_is_left_exactly_as_it_was`
-measures the ``0o444`` case. A plain ``open(const_file, 'w')`` needs write
-permission on the file itself, so a ``0o444`` destination fails to
-regenerate -- a capability an :func:`os.replace`-based atomic write, which
-needs write permission on the *directory* instead, would have, and which
-this design deliberately trades away for simplicity, per the owner's
-ruling. What the design guarantees is that the failure leaves the file
-exactly as it was, mode included, which is what this method pins. It is a
-measurement, not a regression pin: ``open()`` raises :exc:`PermissionError`
-on a ``0o444`` destination *before* truncating anything (the permission
-check happens before the write, not after), so the file is left untouched
+measures ``0o444``. A plain ``open(const_file, 'w')`` needs write permission on
+the file, so such a destination fails to regenerate -- a capability an
+:func:`os.replace`-based write, which needs write permission on the
+*directory*, would have, and which the owner's ruling trades away for
+simplicity. The method pins that the file is left exactly as it was, mode
+included. It is a measurement, not a regression pin: ``open()`` raises
+:exc:`PermissionError` before truncating anything, so the file is untouched
 with or without the snapshot.
 
-The ``0o444`` file is one traded capability; there is a second, in the
-opposite direction, not covered by any method here. A writable file inside
-a *non-writable directory* regenerates under a plain ``open`` with no
-snapshot -- opening an *existing* file for writing needs write permission on
-the file, not on its parent directory -- but fails under this design,
-because :func:`~pcapkit.vendor.__main__._snapshot_and_restore`'s
-:func:`tempfile.mkstemp` call needs write permission on the directory to
-create the backup, and :meth:`Vendor.__init__`'s own ``open(const_file,
-'w')`` does not. Measured: ``run()`` returns :data:`False` with a
-:exc:`PermissionError`, and the previous content survives untouched because
-``vendor()`` is never even called. An :func:`os.replace`-based write needs
-directory write too, so #873 discloses two traded capabilities rather than
-one. See
-:func:`~pcapkit.vendor.__main__._snapshot_and_restore`'s own docstring for
-the asymmetry between this and the ``0o444`` case: a ``_dest_path``
-resolution failure *skips* the snapshot and lets the target proceed
-unprotected, while a ``mkstemp`` failure *fails* the target before
-``vendor()`` is ever attempted.
+A second traded capability, not covered here: a writable file in a
+*non-writable directory* regenerates under a plain ``open`` but fails under
+this design, because ``_snapshot_and_restore``'s :func:`tempfile.mkstemp`
+needs directory write to create the backup. Measured: ``run()`` returns
+:data:`False` with a :exc:`PermissionError`, and the previous content survives
+because ``vendor()`` is never called. An :func:`os.replace`-based write needs
+directory write too, so #873 discloses two traded capabilities. See
+:func:`~pcapkit.vendor.__main__._snapshot_and_restore`'s docstring for the
+asymmetry: a ``_dest_path`` resolution failure *skips* the snapshot and lets
+the target proceed unprotected, while a ``mkstemp`` failure *fails* the target
+before ``vendor()`` is attempted.
 
 """
 from __future__ import annotations
@@ -369,7 +330,7 @@ class SnapshotRestoreTests(unittest.TestCase):
 
         # What the design does guarantee: the failure leaves the file
         # exactly as it was, content and mode both, even though nothing was
-        # ever actually rewritten (open() raised before truncating anything).
+        # ever rewritten (open() raised before truncating anything).
         with open(const_file, encoding='utf-8') as file:
             self.assertEqual(file.read(), 'GOOD CONTENT\n',
                              'a 0o444 destination must survive a failed run with its '

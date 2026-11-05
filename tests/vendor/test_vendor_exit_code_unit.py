@@ -13,7 +13,7 @@ one warning is emitted (silently, since
 :data:`~pcapkit.utilities.logging.VERBOSE` defaults to :data:`False`), and the
 process would report success regardless. A no-op regeneration would then be
 indistinguishable from a real one at the only boundary a CI job or a script
-actually checks -- the exit code. This was hit for real during GitHub issue
+checks -- the exit code. This was hit for real during GitHub issue
 #870's work, where a docstring edit silently failed to propagate.
 
 :func:`~pcapkit.vendor.__main__.run` returns whether its target succeeded, and
@@ -24,7 +24,7 @@ is down should not stop the rest from regenerating.
 This suite exercises the real :func:`~pcapkit.vendor.__main__.main` entrypoint
 end to end, with the default (no ``--target``) argument path, rather than
 calling :func:`~pcapkit.vendor.__main__.run` directly -- the point is to pin
-both ``main()`` itself (what an operator or a workflow actually invokes) and
+both ``main()`` itself (what an operator or a workflow invokes) and
 its exit code, not just the helper function underneath it. It makes **no
 network call**:
 a stub :class:`~pcapkit.vendor.default.Vendor` subclass overrides
@@ -140,7 +140,7 @@ class ExitCodeTests(unittest.TestCase):
         failing = self._make_failing_crawler()
         # assertIs, not assertFalse: a run() returning None is merely falsy
         # and would pass an assertFalse, pinning nothing. The exact value
-        # False is what main() actually branches on
+        # False is what main() branches on
         # (`if not run(vendor): success = False`), so this has to check
         # for that literal, not for anything that happens to be falsy.
         self.assertIs(self.vendor_main.run(failing), False,
@@ -203,7 +203,7 @@ class ExitCodeTests(unittest.TestCase):
         # would pass this assertion whether or not the print() line exists --
         # pinning nothing. Only with warnings silenced does the print()
         # become the one thing keeping this assertion true, which is the
-        # scenario the comment above (and the issue) is actually about: a CI
+        # scenario the comment above (and the issue) is about: a CI
         # log that has warnings turned off or filtered.
         failing = self._make_failing_crawler()
         buffer = io.StringIO()

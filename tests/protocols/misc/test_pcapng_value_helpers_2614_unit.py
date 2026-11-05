@@ -1,51 +1,42 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2614: PCAP-NG's signed, sentinel and address fields on the base helpers.
 
-The signed and sentinel fields were reviewed one by one against the PCAP-NG
-specification (draft-ietf-opsawg-pcapng):
+Each signed and sentinel field, checked against the PCAP-NG specification
+(draft-ietf-opsawg-pcapng):
 
-* ``if_tsoffset`` is a signed 64-bit integer with no sentinel, so a value its
-  64 bits cannot hold raises through
-  :meth:`~pcapkit.protocols.protocol.Protocol._make_sint` rather than being
-  written truncated, which read back as another value;
-* ``if_tzone`` gets the same check over 32 bits, by pcapkit's choice so that
-  it round-trips (#2617): the specification fixes only its length, and the
-  value is signed because the schema's ``Int32Field`` reads it so (#1340);
-* the IDB's SnapLen is unsigned, and its sentinel -- 0, no limit -- is in range,
-  so it is checked by :meth:`~pcapkit.protocols.protocol.Protocol._make_uint`;
-* the obsolete Packet Block's Drops Count is a 16-bit counter the schema's
-  ``UInt16Field`` reads unsigned, and its "not available" sentinel, ``xFFFF`` in
-  hexadecimal (Appendix A, Drops Count), is in range -- like SnapLen's -- so it is
-  checked by :meth:`~pcapkit.protocols.protocol.Protocol._make_uint` over 16 bits.
-  The specification never spells it -1 and the reader returns 65535, so there is
-  no spelling for masking to keep, and a ``-1``, a value past ``0xFFFF`` or a
-  :obj:`bool` is refused rather than written as another count;
-* the SHB's Section Length is signed, and the specification spells its "not
-  specified" -1 as ``0xFFFFFFFFFFFFFFFF`` as well, the reader returning -1. So
+* ``if_tsoffset`` is a signed 64-bit integer with no sentinel, so a value its 64 bits
+  cannot hold raises through :meth:`~pcapkit.protocols.protocol.Protocol._make_sint`
+  rather than being written truncated as another value;
+* ``if_tzone`` gets the same check over 32 bits, by pcapkit's choice so that it
+  round-trips (#2617): the specification fixes only its length, and it is signed because
+  the schema's ``Int32Field`` reads it so (#1340);
+* the IDB's SnapLen is unsigned and its sentinel, 0 for no limit, is in range, so
+  :meth:`~pcapkit.protocols.protocol.Protocol._make_uint` checks it;
+* the obsolete Packet Block's Drops Count is a 16-bit counter the schema's ``UInt16Field``
+  reads unsigned, and its "not available" sentinel ``xFFFF`` (Appendix A, Drops Count) is
+  in range, so :meth:`~pcapkit.protocols.protocol.Protocol._make_uint` checks it over 16
+  bits. The specification never spells it -1 and the reader returns 65535, so a ``-1``, a
+  value past ``0xFFFF`` or a :obj:`bool` is refused rather than written as another count;
+* the SHB's Section Length is signed, and the specification also spells its "not
+  specified" -1 as ``0xFFFFFFFFFFFFFFFF``, the reader returning -1. So
   :meth:`~pcapkit.protocols.protocol.Protocol._make_sint` takes ``-2 ** 63`` to
-  ``2 ** 64 - 1``, both spellings of the sentinel write the same octets, and the
-  field's own packing maps the unsigned spelling onto the signed one -- the only
-  masking left. A value past either end, a :obj:`bool` or a non-integer is
-  refused (#2617). That is what sets it apart from Drops Count above, whose
-  sentinel has no signed spelling.
+  ``2 ** 64 - 1``, both spellings write the same octets, and the field's own packing maps
+  the unsigned spelling onto the signed one, the only masking left. A value past either
+  end, a :obj:`bool` or a non-integer is refused (#2617).
 
-``if_tsoffset`` and ``if_tzone`` are checked over the signed range alone, which
-already refuses a :obj:`bool` and a value past either end: neither has a
-sentinel, so no second spelling is needed, and one would read back as another
-value (#2617).
+``if_tsoffset`` and ``if_tzone`` have no sentinel, so the signed range alone refuses a
+:obj:`bool` and a value past either end; a second spelling would read back as another value
+(#2617).
 
-The EUI-64 address of ``if_EUIaddr`` goes through the base MAC address pair with
-``size=8``, so the module keeps no address pattern of its own.
+``if_EUIaddr``'s EUI-64 goes through the base MAC address pair with ``size=8``, so the
+module keeps no address pattern of its own.
 
-The padding sites on :func:`~pcapkit.corekit.schema.padding.pad_length` that no
-other test reaches are pinned too: a custom block's data before its options, its
-option area, and a Simple Packet Block whose data ends exactly at the padding of
-its original length.
+Also pinned are the :func:`~pcapkit.corekit.schema.padding.pad_length` sites no other test
+reaches: a custom block's data before its options, its option area, and a Simple Packet
+Block whose data ends exactly at the padding of its original length.
 
-Every case builds its own octets in memory and reads no capture.
-
-:mod:`pcapkit` is imported inside each test, after
-:func:`~tests._support.reimport_once_per_class`.
+Every case builds its own octets in memory and reads no capture. :mod:`pcapkit` is imported
+inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
 """
 

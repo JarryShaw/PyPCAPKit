@@ -11,9 +11,8 @@ where a parse wants ``<unassigned>``. These tests pin both halves, so that the
 peek's documented reason fails here the day it stops being true, and pin that a
 composite ``proto`` resolves a miss as ``get`` does.
 
-The naming is the *only* half left. ``get``'s member was also unpicklable until
-#2417, which is a difference these tests used to assert; that was a defect in
-its own right, fixed there, and is now asserted the other way round.
+The naming is the *only* half left: ``get``'s member was also unpicklable, a
+defect #2417 fixed, so these tests assert that it pickles.
 
 """
 import pickle
@@ -100,18 +99,17 @@ class PortEnumFieldPeekTests(unittest.TestCase):
         name. If this starts failing, ``get``'s member has become what a parse
         needs, and the peek can go -- see #1774.
 
-        ``get``'s member used to differ in a second way, which this test also
-        pinned: it carried no reducer, so pickling it raised
+        ``get``'s member also carried no reducer, so pickling it raised
         ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP`` on read-back.
         That was a defect rather than a distinction -- reassembly dispatches on
         these members, so an unresolved
         :class:`~pcapkit.foundation.reassembly.data.data.Deferred` could not be
-        pickled for 90.7% of the port space -- and :issue:`2417` fixed it by
+        pickled for most of the port space -- and :issue:`2417` fixed it by
         giving :meth:`AppType._unregistered_member
         <pcapkit.const.reg.apptype.apptype.AppType._unregistered_member>` the
-        same per-instance ``__reduce_ex__`` the field's own path already had.
-        Both members now round-trip, so the ``name`` is the only difference
-        left, and it is the one that still justifies the peek.
+        same per-instance ``__reduce_ex__`` the field's own path had. Both
+        members round-trip, so the ``name`` is the only difference left, and
+        the one that justifies the peek.
 
         """
         from pcapkit.const.reg.apptype import AppType

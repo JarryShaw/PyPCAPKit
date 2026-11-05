@@ -917,7 +917,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         arriving segment supplies genuinely new bytes *before* ``isn``
         (90..99) and genuinely new bytes *past* the old buffer's end
         (110..119) in the very same :meth:`~pcapkit.foundation.reassembly.tcp.TCP._merge_overlap`
-        call. What actually is mutually exclusive is only which one of the
+        call. What is mutually exclusive is only which one of the
         old buffer's own tail or a genuinely new one survives -- never both --
         and that is unaffected by the head also being new.
 

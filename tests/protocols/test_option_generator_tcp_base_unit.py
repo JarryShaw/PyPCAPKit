@@ -1,75 +1,60 @@
 # -*- coding: utf-8 -*-
 """``TCP_BASE`` builds the segment it describes.
 
-Every frame in :file:`examples/captures/options-tcp.pcap` is a TCP segment whose
-header comes from :data:`examples.generators.option_families.tcp.TCP_BASE` and
-whose only per-case difference is the one option it carries. So that mapping is the
-description of every one of those fixture frames, and a key it spells wrongly is a
-description that does not match the octets.
+Every frame in :file:`examples/captures/options-tcp.pcap` takes its TCP header from
+:data:`examples.generators.option_families.tcp.TCP_BASE` and differs only in the one
+option it carries, so a key that mapping misspells is a description that does not match
+the octets.
 
-Without a check upstream, nothing warns when the mapping spells a key wrongly.
-:meth:`TCP.make
-<pcapkit.protocols.transport.tcp.protocol.TCP.make>` ends its signature with
-``**kwargs: 'Any'`` and never reads anything out of it, so a keyword it does not
-declare is accepted, discarded, and the parameter it was meant to set keeps its
-default. GitHub issue #602 is three such keys:
+:meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` ends in
+``**kwargs: 'Any'`` and reads nothing out of it, so without an upstream check a keyword it
+does not declare is discarded and its parameter keeps the default. GitHub issue #602 is
+three such keys:
 
 * ``'seq': 1`` for ``seq_no``, so every generated frame carried sequence number
-  ``0`` while the table read as ``1``;
-* ``'urgent_pointer': 0`` for ``urgent``, whose requested value and unused
-  default happened to coincide;
-* ``'ack_flag': False`` for ``ack`` -- while ``'ack': 0`` bound to ``ack``,
-  which is the acknowledgement *flag*, not the acknowledgement number
-  ``ack_no``. The pair was the wrong way round, and neither half said so.
+  ``0`` while the table read ``1``;
+* ``'urgent_pointer': 0`` for ``urgent``, whose requested value happened to equal the
+  default;
+* ``'ack_flag': False`` for ``ack``, while ``'ack': 0`` bound to ``ack``, the
+  acknowledgement *flag*, not the number ``ack_no``: the pair was swapped, silently.
 
-Issue #617 has :meth:`ProtocolBase.__init__
-<pcapkit.protocols.protocol.ProtocolBase.__init__>` check a construction keyword
-against the protocol's signatures and raise
-:exc:`~pcapkit.utilities.exceptions.UnsupportedCall` for one that no signature
-declares. ``TCP.make`` ends in ``**kwargs`` and reads nothing out of it -- the
-check is upstream of it -- so the account above is the account of how the
-defect was possible, and
+Under #617, :meth:`ProtocolBase.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>`
+checks a construction keyword against the protocol's signatures and raises
+:exc:`~pcapkit.utilities.exceptions.UnsupportedCall` for one no signature declares;
 :meth:`TCPBaseKeywordTests.test_an_undeclared_keyword_is_refused_rather_than_absorbed`
-is where the refusal is pinned.
+pins the refusal.
 
 Why the expected header is written out here
 -------------------------------------------
 
-:data:`EXPECTED_HEADER` repeats ``TCP_BASE``, which looks like duplication and
-is the point. A test that reads its own expectations out of the mapping under
-test cannot fail on a misspelled key -- it fails with :exc:`KeyError`, or worse
-agrees with whatever the mapping happens to say. Spelling the intended header
-out independently is what makes the failure read ``0 != 1``, which is the defect,
-rather than ``KeyError: 'seq_no'``, which is a symptom of it.
+:data:`EXPECTED_HEADER` repeats ``TCP_BASE`` on purpose. A test reading its expectations
+out of the mapping under test cannot fail on a misspelled key: it raises
+:exc:`KeyError`, or agrees with the mapping. Spelled out independently, the failure reads
+``0 != 1``, the defect, rather than ``KeyError: 'seq_no'``, a symptom.
 
-It also gives those fixture frames a stated contract. Changing
-``TCP_BASE``'s values changes the bytes of ``options-tcp.pcap``, so it should
-take two edits and a moment's thought, not one.
+It also gives the fixture frames a stated contract: changing ``TCP_BASE``'s values changes
+the bytes of ``options-tcp.pcap``, so it should take two edits, not one.
 
 What each check is for
 ----------------------
 
 :meth:`TCPBaseKeywordTests.test_every_key_is_a_parameter_make_declares`
-    The check that generalises. It compares the keys against
-    :func:`inspect.signature`, so it fails for a *fourth* misspelling nobody
-    has made yet -- which a per-field assertion would not.
+    Compares the keys against :func:`inspect.signature`, so it also fails for a
+    misspelling nobody has made yet, which a per-field assertion would not.
 
 :meth:`TCPBaseHeaderTests.test_the_header_fields_are_the_ones_expected` and
 :meth:`TCPBaseHeaderTests.test_the_header_octets_are_the_ones_expected`
-    The data model and the wire, separately. The data model is what ``make``
-    packed and :meth:`ProtocolBase.__post_init__
-    <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` parsed straight
-    back, so a field wrong in both directions round-trips through it
-    unnoticed; the octets are what the capture actually holds.
+    The data model and the wire, separately. The data model is what ``make`` packed and
+    :meth:`ProtocolBase.__post_init__ <pcapkit.protocols.protocol.ProtocolBase.__post_init__>`
+    parsed straight back, so a field wrong both ways round-trips unnoticed; the octets
+    are what the capture holds.
 
 :meth:`TCPBaseHeaderTests.test_the_acknowledgement_flag_and_number_are_distinct`
-    ``ack`` and ``ack_no`` are one letter apart, adjacent in the signature, and
-    both falsy in ``TCP_BASE``, so swapping them back would change nothing
-    anything else here could see. This sets them to values that cannot be
-    confused.
+    ``ack`` and ``ack_no`` are one letter apart, adjacent in the signature, and both
+    falsy in ``TCP_BASE``, so swapping them back would be invisible elsewhere here. This
+    sets them to values that cannot be confused.
 
-This module is unit tier: it constructs its own octets and reads no capture, so
-it runs on a fresh checkout with nothing generated.
+Unit tier: it constructs its own octets and reads no capture.
 
 """
 

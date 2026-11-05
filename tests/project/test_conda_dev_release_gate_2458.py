@@ -1,30 +1,25 @@
 # -*- coding: utf-8 -*-
 """#2458: ``cron-conda.yml`` never tags or uploads a dev-release version.
 
-#2452 (not yet merged) proposes the equivalent gate for
-:file:`.github/workflows/create-release.yml`'s publishers (``github``, ``tag``,
-``pypi``, ``conda``), gated on ``PCAPKIT_DEV_RELEASE`` by that PR's owner
-ruling: ``__version__`` carrying a PEP 440 dev-release suffix (``X.Y.Z.devN``)
-is a work-in-progress signal, and that workflow's ``workflow_run`` trigger
-means a scheduled Vendor Update can reach it and publish that version with no
-human in the path.
+#2452 gates :file:`.github/workflows/create-release.yml`'s publishers (``github``,
+``tag``, ``pypi``, ``conda``) on ``PCAPKIT_DEV_RELEASE``, per the owner's ruling
+there: a ``__version__`` with a PEP 440 dev-release suffix (``X.Y.Z.devN``) is a
+work-in-progress signal, and that workflow's ``workflow_run`` trigger lets a
+scheduled Vendor Update publish it with no human in the path.
 
-:file:`cron-conda.yml` is a separate workflow with its own independent route to
-publishing: ``conda-tag`` pushes a ``conda-<version>+<build>`` tag and
-``conda-dist`` uploads to anaconda.org, both whenever ``mode``'s ``publishes``
-output is ``'true'`` and ``conda-update``'s ``CONDA_CHANGED`` is ``'true'`` --
-reachable the same way, from its own ``schedule`` and ``workflow_run`` triggers,
-and until now with no dev-release check of its own. This workflow has no
-``version_check`` job to share #2452's proposed output with, so
-``conda-update``'s own ``Get Version`` step computes ``PCAPKIT_DEV_RELEASE``
-independently, and ``conda-tag`` and ``conda-dist`` each read it.
+:file:`cron-conda.yml` publishes by its own route, reachable the same way from its
+``schedule`` and ``workflow_run`` triggers: ``conda-tag`` pushes a
+``conda-<version>+<build>`` tag and ``conda-dist`` uploads to anaconda.org, both
+when ``mode``'s ``publishes`` output and ``conda-update``'s ``CONDA_CHANGED`` are
+``'true'``. With no ``version_check`` job to share #2452's output, ``conda-update``'s
+own ``Get Version`` step computes ``PCAPKIT_DEV_RELEASE``, and ``conda-tag`` and
+``conda-dist`` each read it.
 
-Deliberately ``is_devrelease``, never ``is_prerelease``: the latter is also
-``true`` for a deliberately-tagged alpha/beta/rc this project has shipped for
-real (e.g. ``1.5.0b14``), and gating on it would silently block one.
+Deliberately ``is_devrelease``, never ``is_prerelease``: the latter is also ``true``
+for an alpha, beta or rc this project has shipped (e.g. ``1.5.0b14``), and gating
+on it would silently block one.
 :meth:`TestGetVersionComputesDevRelease.test_running_the_script_disagrees_with_is_prerelease_on_a_real_release`
-runs the real step script against both shapes of version string to show the
-two outputs actually disagree there.
+runs the real step script against both shapes to show the two outputs disagree.
 
 * :class:`TestGetVersionComputesDevRelease`: the ``Get Version`` step's script,
   and the job's declared ``outputs:``, by text and by running the script.

@@ -4,65 +4,48 @@
 GitHub issue #519 counted :meth:`TCP._read_mode_sack
 <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sack>` among its phantom
 ``Raises:`` clauses: the docstring promised ``ProtocolError: If length is
-**NOT** multiply of 8 plus 2`` and the body contained no such check. The
-tempting reading is that the clause was stale and should be deleted, which is
-what the other phantoms in that issue needed.
-
-It was the opposite. The clause is right and the check belongs in the body, and
-three pieces of evidence settle it:
+**NOT** multiply of 8 plus 2`` and the body had no such check. Unlike the other
+phantoms there, the clause is right and the check belongs in the body:
 
 * :rfc:`2018` gives the SACK option a 2-octet header followed by 8-octet
-  left/right edge pairs, so a well-formed option's length really is ``8n + 2``.
-* The sibling readers validate their own lengths rather than delegating it.
+  left/right edge pairs, so a well-formed length is ``8n + 2``.
+* The sibling readers validate their own lengths, with the same message:
   :meth:`TCP._read_mode_sackpmt
-  <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sackpmt>` -- the method
-  immediately above this one -- raises on ``schema.length != 2``, and
+  <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sackpmt>` raises on
+  ``schema.length != 2`` and
   :meth:`TCP._read_mode_echo <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_echo>`
-  on ``schema.length != 6``, both with the same message.
-* Nothing upstream enforces it either. The schema field is
+  on ``schema.length != 6``.
+* Nothing upstream enforces it. The schema field is
   ``ListField(length=lambda pkt: pkt['length'] - 2,
-  item_type=SchemaField(length=8, schema=SACKBlock))``, and a remainder is
-  simply not noticed, so without the check a segment carrying ``kind=5,
-  length=11`` parses clean. That is what :meth:`SACKLengthTests
-  .test_invalid_sack_length_is_rejected` pins.
+  item_type=SchemaField(length=8, schema=SACKBlock))``, which ignores a remainder,
+  so without the check ``kind=5, length=11`` parses clean, as
+  :meth:`SACKLengthTests.test_invalid_sack_length_is_rejected` pins.
 
-So this module is the behavioural half of the #519 work. The other half is
-:file:`tests/test_docstring_contract.py`, which stops a docstring from drifting
-away from the code again; this one stops the code from drifting away from
-*this* docstring, which is the direction that actually lets a malformed packet
-through.
+This is the behavioural half of #519. :file:`tests/test_docstring_contract.py` stops a
+docstring drifting from the code; this module stops the code drifting from *this*
+docstring, the direction that lets a malformed packet through.
 
-The exception is :exc:`~pcapkit.utilities.exceptions.ProtocolError` whatever
-ran earlier in the process (#525). That depends on :meth:`ListField.unpack
+The exception is :exc:`~pcapkit.utilities.exceptions.ProtocolError` whatever ran earlier
+in the process (#525). That relies on :meth:`ListField.unpack
 <pcapkit.corekit.fields.collections.ListField.unpack>` resolving
-:class:`~pcapkit.corekit.fields.misc.SchemaField` once at module load rather
-than through a *function-local* import on every call: ordinarily such an import
-is a cheap :data:`sys.modules` hit, but a class that has been popped from
-:data:`sys.modules` since this field was built (which is exactly what the
-``#439`` ABC-cache regression tests do, in every case's ``setUp``/``tearDown``,
-to get a clean cache between them) comes back as a second, distinct class on
-the next call. ``isinstance(self._item_type, SchemaField)`` then answers
-:data:`False` for an item that plainly is one, ``ListField.unpack`` bills it by
-its declared length instead of by what it actually consumed, and *that* lets
-the length check go negative and raise
+:class:`~pcapkit.corekit.fields.misc.SchemaField` at module load, not through a
+function-local import per call: the ``#439`` ABC-cache tests pop classes from
+:data:`sys.modules` in every ``setUp``/``tearDown``, so such an import would return a
+second, distinct class. ``isinstance(self._item_type, SchemaField)`` would then be
+:data:`False`, ``ListField.unpack`` would bill the item by its declared length rather
+than what it consumed, and the length check would go negative and raise
 :exc:`~pcapkit.utilities.exceptions.FieldValueError` from
-:mod:`pcapkit.corekit.fields.collections` before ``_read_mode_sack`` is ever
-reached.
+:mod:`pcapkit.corekit.fields.collections` before ``_read_mode_sack`` is reached.
 :meth:`SACKLengthTests.test_sack_exception_type_survives_a_sys_modules_purge`
-pins the mechanism directly, by reproducing that :data:`sys.modules`
-manipulation.
+reproduces that purge.
 
-One deliberate limit, so a later reader does not think it an oversight: the
-check implements exactly the rule the docstring states, ``(length - 2) % 8 ==
-0``. :rfc:`2018` also wants at least one block and at most four, so ``length=2``
-is degenerate and ``length=42`` is too long, and neither is rejected here.
-Tightening past the documented contract would change what the parser accepts on
-the strength of a test rather than of the specification it cites, so it is
-recorded in :meth:`SACKLengthTests.test_documented_rule_is_the_implemented_rule`
-instead of being quietly added.
+A deliberate limit: the check is exactly the documented rule, ``(length - 2) % 8 == 0``.
+:rfc:`2018` also wants one to four blocks; tightening past the documented contract would
+change what the parser accepts on a test's say rather than the specification's, so
+:meth:`SACKLengthTests.test_documented_rule_is_the_implemented_rule` records the gap
+instead.
 
-Every case builds its own octets in memory and reads no capture under
-:file:`examples/captures/`, so this belongs to the unit tier.
+Unit tier: every case builds its own octets and reads no capture.
 
 """
 from __future__ import annotations
@@ -161,42 +144,25 @@ class SACKLengthTests(unittest.TestCase):
     def test_sack_exception_type_survives_a_sys_modules_purge(self) -> 'None':
         """The exception type does not depend on :data:`sys.modules` state.
 
-        This pins the actual mechanism behind #525, rather than merely
-        recording the symptom. Guards against :meth:`ListField.unpack
-        <pcapkit.corekit.fields.collections.ListField.unpack>` resolving
-        :class:`~pcapkit.corekit.fields.misc.SchemaField` through a
-        function-local import, re-run on every call. That is an ordinary
-        :data:`sys.modules` cache hit almost always -- except when something
-        has popped :mod:`pcapkit.corekit.fields.misc` out of
-        :data:`sys.modules` since this ``ListField`` was built, which is
-        exactly what the ``#439`` ABC-cache regression tests do in every
-        case's ``setUp``/``tearDown`` (see
-        :mod:`tests.protocols.schema.test_schema_metaclass_abc_cache_unit`) to
-        get a clean cache between cases. The next call then re-executes
-        :mod:`pcapkit.corekit.fields.misc` from scratch and mints a *second*,
-        distinct ``SchemaField`` class, while the ``sack`` field's
-        ``item_type`` -- built long before, from the first one -- is still an
-        instance of the original. ``isinstance`` against the new class then
-        answers :data:`False` for an item that plainly is a ``SchemaField``,
-        and ``ListField.unpack`` takes its other branch, which bills each item
-        by its *declared* length unconditionally instead of by what it
-        actually consumed -- letting the length check go negative and raise
-        :exc:`~pcapkit.utilities.exceptions.FieldValueError` from
-        :mod:`pcapkit.corekit.fields.collections` before
-        ``_read_mode_sack`` is ever reached.
-
-        Reproducing that does not need the schema test suite at all -- the
-        :data:`sys.modules` manipulation alone is sufficient, and doing just
-        that is what makes this a targeted regression test rather than a
-        repeat of the same "run some other tests first" guess #525 opened
-        with. With a function-local import, this exact removal makes
+        Pins the mechanism behind #525, not just its symptom. A function-local
+        import of :class:`~pcapkit.corekit.fields.misc.SchemaField` in
         :meth:`ListField.unpack <pcapkit.corekit.fields.collections.ListField.unpack>`
-        re-import :mod:`pcapkit.corekit.fields.misc` on its next call and mint
-        the mismatched second ``SchemaField`` class described above; asserting
-        that :mod:`pcapkit.corekit.fields.misc` is *not* back in
-        :data:`sys.modules` immediately after ``parse()`` returns is what
-        confirms a module-level import, resolved once, rather than just a
-        passing assertion for the wrong reason.
+        would, once :mod:`pcapkit.corekit.fields.misc` is popped from
+        :data:`sys.modules` (as the ``#439`` ABC-cache tests in
+        :mod:`tests.protocols.schema.test_schema_metaclass_abc_cache_unit` do in
+        every ``setUp``/``tearDown``), re-execute it and mint a second, distinct
+        ``SchemaField``. The ``sack`` field's ``item_type``, built from the first,
+        then fails ``isinstance``, and ``ListField.unpack`` bills each item by its
+        *declared* length, so the length check goes negative and raises
+        :exc:`~pcapkit.utilities.exceptions.FieldValueError` from
+        :mod:`pcapkit.corekit.fields.collections` before ``_read_mode_sack`` is
+        reached.
+
+        The :data:`sys.modules` removal alone reproduces it, without the schema
+        suite or the "run some other tests first" guess #525 opened with.
+        Asserting the module is *not* back in :data:`sys.modules` after
+        ``parse()`` confirms the import is module-level, so the test does not
+        pass for the wrong reason.
 
         """
         self.assertIn(
@@ -222,25 +188,20 @@ class SACKLengthTests(unittest.TestCase):
     def test_documented_rule_is_the_implemented_rule(self) -> 'None':
         """The check is exactly ``(length - 2) % 8 == 0``, no more.
 
-        :rfc:`2018` also bounds the block count at one to four, and the
-        implementation deliberately does not reach past its own docstring to
-        enforce that. Only one such case is actually reachable, though, and
-        working out why is what makes the missing bound harmless:
+        :rfc:`2018` also bounds the block count at one to four, which the
+        implementation deliberately does not enforce past its own docstring. Only
+        one violation is reachable:
 
-        * ``length=2`` -- no blocks at all. Satisfies the modulo rule, is not
-          well formed under :rfc:`2018`, and parses. This is the one real gap,
-          recorded here as a decision rather than left silent.
-        * five blocks or more cannot be expressed at all, which is why
-          :rfc:`2018` stops at four. The TCP data offset is four bits, so a
-          header is at most ``15 * 4 == 60`` octets and the options area at
-          most 40. A five-block SACK needs ``2 + 40 == 42`` octets of option,
-          and 44 once padded, which no legal data offset can describe --
-          :func:`segment` cannot even build one. The upper bound is therefore
-          enforced by the header format rather than by a check, and adding one
-          would be unreachable code.
+        * ``length=2``, no blocks: satisfies the modulo rule, is malformed under
+          :rfc:`2018`, and parses. This gap is a recorded decision.
+        * five or more blocks cannot be expressed. The four-bit data offset caps
+          the header at ``15 * 4 == 60`` octets and the options area at 40; a
+          five-block SACK needs ``2 + 40 == 42`` octets, 44 padded, which
+          :func:`segment` cannot build. The header format enforces the upper
+          bound, so a check would be unreachable.
 
-        So if a lower bound is ever added, this test is what should fail and be
-        rewritten.
+        If a lower bound is ever added, this test should fail and be rewritten.
+
 
         """
         tcp = parse(sack_option(2, 0))

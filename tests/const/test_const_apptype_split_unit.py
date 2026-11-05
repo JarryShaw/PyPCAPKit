@@ -634,7 +634,7 @@ class AppTypeSplitTests(unittest.TestCase):
         Every registry therefore answered with the first: ``AppType.get(6010,
         proto='udp')`` returned a **UDP** member whose ``proto`` read ``tcp``.
 
-        6665-6669 is why the duplicate is not simply collapsed into one branch
+        6665-6669 is why the duplicate is not collapsed into one branch
         carrying ``tcp | udp``: its two rows are different services -- ``ircu`` on
         TCP, IANA's ``reserved`` marker on UDP -- so a merged branch would have to
         discard one of them, and #732's ``TransportProtocol`` retype would then
@@ -1220,16 +1220,16 @@ class AppTypeSplitTests(unittest.TestCase):
         # Pure ``bind()`` is purely positional: it cannot see what ``module`` *is*,
         # so a third positional argument lands in ``class_`` regardless -- the very
         # swallow a keyword-only shape would prevent. That the swallow does not
-        # actually happen is not a fact ``bind()`` can show, because the
+        # happen is not a fact ``bind()`` can show, because the
         # disambiguation runs in the function body, keyed on ``type(module)``, and
-        # only takes place once ``register_apptype`` actually executes.
+        # only takes place once ``register_apptype`` executes.
         from pcapkit.const.reg.apptype import TransportProtocol
 
         bound = inspect.signature(register_apptype).bind(80, object(), TransportProtocol.udp)
         self.assertEqual(bound.arguments['class_'], TransportProtocol.udp)
         self.assertNotIn('transport', bound.arguments)
 
-        # So the branch itself is checked by actually calling the live function,
+        # So the branch itself is checked by calling the live function,
         # not by binding its signature: a class ``module`` sends the same third
         # argument to the real ``TCP``/``UDP`` registry as ``transport``, and a
         # ``str`` module leaves it in ``class_`` and registers the class it names.
@@ -1541,7 +1541,7 @@ class AppTypeSplitTests(unittest.TestCase):
         ``TransportProtocol`` not a flag, ``|``-joined values are not parsed
         and accepted, and the value is treated as a whole rather than split --
         settles :meth:`TransportProtocol.get` onto that same answer: ``'|'`` is
-        not special, it is simply not the name of a declared member, and the
+        not special, it is not the name of a declared member, and the
         composite case gets no diagnostic message of its own.
         """
         from pcapkit.const.reg.apptype import TransportProtocol
@@ -1561,7 +1561,7 @@ class AppTypeSplitTests(unittest.TestCase):
         ``17`` is ``1 | 16`` -- ``tcp`` plus a bit no registry declares.
         ``_dispatch`` decodes no bare int's bits, per the owner's ruling on
         #836 (see ``test_a_bare_int_composite_is_refused_as_a_whole``), so a
-        stray bit is not a case of its own: ``17`` is simply an ``int`` that
+        stray bit is not a case of its own: ``17`` is an ``int`` that
         names no registry, and gets the identical plain ``ValueError`` any
         other unmatched value gets -- as does a composite matching no member,
         such as ``tcp | dccp`` (``5``; see

@@ -11,13 +11,11 @@ members are plain, not *annotated*, assignments. An annotated member --
 ``sphinx/ext/autodoc/_dynamic/_loader.py`` -- the wrapper
 around :func:`typing.get_type_hints` that catches the ``NameError`` a
 ``TYPE_CHECKING``-only forward ref would otherwise raise), each call
-re-resolving the *whole* class, which with annotated members makes documenting
-this one registry cost 378.8s on CI (measured) -- the single largest stall in the
-entire docs build. The
-annotation carries no information a lookup needs: member construction reads the
-positional tuple, not ``__annotations__``. Measured by #769, dropping it removes
-86,838 bytes (7/8 bytes per member, depending on whether its class name is 3 or
-4 letters long).
+re-resolving the *whole* class, so documenting this one registry cost 378.8s on
+CI (measured), the largest stall in the docs build. The annotation carries
+nothing a lookup needs: member construction reads the positional tuple, not
+``__annotations__``. Dropping it saves 7 or 8 bytes per member, by whether its
+class name is 3 or 4 letters long (#769).
 
 GitHub issue #768: the ``proto`` argument on every one of those members, and
 every ``cls.__transport__ is ...`` test in a range-row ``_missing_`` branch,
@@ -26,9 +24,8 @@ uses attribute access rather than
 ``isinstance`` check, two ``.lower()`` calls, a membership test and a
 ``__getitem__``) to reach a member plain attribute access returns in 24 ns,
 saving 7 bytes each (``TransportProtocol.get('tcp')`` is 28 characters,
-``TransportProtocol.tcp`` is 21), for 167,587 bytes (163.7 KiB) of generated
-source as measured by #769. The generator only ever emits the declared names
-(``TRANSPORTS + ('undefined',)``), so the attribute form cannot miss.
+``TransportProtocol.tcp`` is 21; #769). The generator only emits the declared
+names (``TRANSPORTS + ('undefined',)``), so the attribute form cannot miss.
 
 GitHub issue #770: a bare ``undefined = 0`` in the ``BASE`` template is an int
 literal, so mypy -- which has no :mod:`aenum` plugin and so treats this class
@@ -44,22 +41,20 @@ so mypy infers ``TransportProtocol`` there too, without changing what runs:
 undefined`` and ``bool(undefined)`` is ``False`` -- and a genuine
 ``TransportProtocol`` member: the ``proto`` sentinel default at each of those
 sites, and what the base registry's ``_missing_`` extends unassigned/reserved
-rows from. Two rejected alternatives, measured rather than argued: an explicit
-member annotation (``undefined: 'TransportProtocol' = 0``) does not fix this at
-all, it only *relocates* the error -- mypy still reports one ``[assignment]`` at
-the member's own declaration line, for 113 errors in 39 files rather than 116,
-so ``cast`` is preferred 0/38 against 1/39, not on parity. ``auto() & 0`` is
-run-time identical to the bare literal -- value ``0``, no burned counter slot,
-``tcp``/``udp``/``sctp``/``dccp`` unaffected -- and is rejected only because it
-leans on :mod:`aenum`'s undocumented internal order of operations for resolving
-a composed ``auto()``, not because it misbehaves.
+rows from. Two alternatives were measured and rejected: an explicit member
+annotation (``undefined: 'TransportProtocol' = 0``) only *relocates* the error,
+since mypy still reports an ``[assignment]`` at the member's own declaration
+line, where ``cast`` leaves none. ``auto() & 0`` is run-time identical to the
+bare literal -- value ``0``, no burned counter slot,
+``tcp``/``udp``/``sctp``/``dccp`` unaffected -- but leans on :mod:`aenum`'s
+undocumented internal order of operations for resolving a composed ``auto()``.
 
 ``undefined`` takes ``0`` directly and the other real transports use
 ``auto()``, so that no ``_start_`` has to be defined and the declaration of
 ``undefined`` is explicit (the owner's ruling on GitHub pull request #874);
 ``auto()`` picks up the next value after whatever came immediately before it,
-explicit literal or not. That makes ``undefined`` the one member among the five
-whose wrapper is load-bearing against a mypy error -- see
+explicit literal or not. That makes ``undefined`` the one member whose wrapper
+is load-bearing against a mypy error -- see
 :meth:`AppTypeGeneratorShapeTests.
 test_undefined_member_is_cast_rather_than_a_bare_literal`'s own docstring
 for the measurements.
@@ -67,15 +62,14 @@ for the measurements.
 #744 and #768 are pinned two ways: directly against the generator's own
 :meth:`~pcapkit.vendor.reg.apptype.apptype.AppType.flag`, which needs no
 network access since it is a ``@staticmethod``, and against the files it
-actually produced, committed under :mod:`pcapkit.const.reg.apptype`. #770 is
-pinned against that same base module -- a plain source-text assertion that the
-member stays wrapped in ``cast`` rather than being a bare literal, plus a
-direct run through mypy's own API when :mod:`mypy` is importable, since the
-source-text shape alone cannot tell a correct fix from a differently-worded
-one that stops mypy agreeing.
+produced, committed under :mod:`pcapkit.const.reg.apptype`. #770 is pinned
+against that same base module -- a source-text assertion that the member stays
+wrapped in ``cast``, plus a run through mypy's own API when :mod:`mypy` is
+importable, since the source text alone cannot tell a correct fix from a
+differently-worded one that stops mypy agreeing.
 
-That second pin is gated the way :mod:`tests._dependency_gates` can actually
-see: a module-level ``HAS_MYPY`` flag and an ``@unittest.skipUnless``
+That second pin is gated the way :mod:`tests._dependency_gates` can see: a
+module-level ``HAS_MYPY`` flag and an ``@unittest.skipUnless``
 decorator, with ``mypy`` mapped in
 :data:`~tests._dependency_gates.MODULE_PROVIDERS` and its gap recorded as a
 deliberate exclusion (#779). An inline ``try``/``except ImportError:
@@ -84,12 +78,10 @@ construction* -- :func:`~tests._dependency_gates._gates_of` walks a
 definition's decorator list and never its body -- which is the "dark test"
 hazard #745 exists to stop, and which #766 carries for the sibling isort check.
 
-What the gate is worth: mypy is a :file:`Pipfile` ``[dev-packages]`` entry and
-is in no :file:`pyproject.toml` extra, so no ``pytest`` job in
-:file:`.github/workflows/unit-tests.yml` -- every one installs
-``.[test,...]`` -- ever has it importable, and this test skips on all of them;
-it runs where mypy is installed, which is a developer checkout and ``make
-mypy``'s own environment. The skip is counted: it is a
+mypy is a :file:`Pipfile` ``[dev-packages]`` entry in no :file:`pyproject.toml`
+extra, so no ``pytest`` job in :file:`.github/workflows/unit-tests.yml` (each
+installs ``.[test,...]``) has it, and this test skips on all of them; it runs
+in a developer checkout and ``make mypy``'s environment. The skip is counted: it is a
 :class:`~tests._dependency_gates.Gap` on each job that reaches it, and
 :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`\\ ``['HAS_MYPY']``
 carries the reason for declining to close it -- a type checker belongs to the
@@ -228,7 +220,7 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
         # Not for the single-edit case above -- stripping the wrapper alone
         # (``undefined = 0``, nothing else touched) already fails the
         # containment check above, since the exact wrapped string is then
-        # simply absent; measured directly against that scenario. This is
+        # absent; measured directly against that scenario. This is
         # for the two-edit case the containment check cannot see: the
         # correct, wrapped line stays exactly as it should, and a second,
         # unwrapped ``undefined = 0`` sits somewhere else in the source --

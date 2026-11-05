@@ -6,7 +6,7 @@ GitHub issue #2761: a header cut short rebuilt to the octets captured, but
 ``make()`` built, which holds what it filled in past the cut: the zeros
 :meth:`Protocol._fill_short_read <pcapkit.protocols.protocol.Protocol._fill_short_read>`
 gives a reserved field, a ``PadN`` padding an option area out, a nested schema at its
-full width. The parse read the octets captured. The rebuild now parses those octets
+full width. The parse read the octets captured. The rebuild parses those octets
 back, at the width its parse read them at, so a round trip reproduces the parsed values
 as well as the octets, with no exception.
 

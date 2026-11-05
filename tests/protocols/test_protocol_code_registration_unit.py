@@ -2,28 +2,25 @@
 """``code=`` opt-in next-layer dispatch registration.
 
 GitHub issue #514 part (b): :class:`~pcapkit.protocols.protocol.Protocol`/
-:class:`~pcapkit.protocols.protocol.ProtocolBase` gain a ``code`` class
-keyword that registers a subclass into the next-layer dispatch registry (or
-registries) it names -- e.g. :attr:`Link.__proto__
-<pcapkit.protocols.link.link.Link.__proto__>`. Registration is opt-in,
-exactly like the ``engine=``/``protocol=``/``fmt=`` keywords part (a) (#547)
-gave :class:`~pcapkit.foundation.engines.engine.Engine`,
+:class:`~pcapkit.protocols.protocol.ProtocolBase` take a ``code`` class keyword that
+registers a subclass into the next-layer dispatch registry (or registries) it names, such
+as :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`. Registration is
+opt-in, like the ``engine=``/``protocol=``/``fmt=`` keywords part (a) (#547) gave
+:class:`~pcapkit.foundation.engines.engine.Engine`,
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`,
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` and
-:class:`~pcapkit.dumpkit.common.Dumper` (``Engine``'s is ``engine=`` rather
-than ``name=``, #557): omitting ``code`` leaves the
-subclass unregistered, which is exactly what every built-in protocol class
-does, since the built-in dispatch tables are populated by literal
-assignment in each layer module rather than by ``__init_subclass__``.
+:class:`~pcapkit.dumpkit.common.Dumper` (``Engine``'s is ``engine=`` rather than
+``name=``, #557): without ``code`` the subclass stays unregistered, as every built-in
+protocol class does, since the built-in dispatch tables are literal assignments in each
+layer module.
 
-Most tests here mock the destination classes' ``register`` classmethod (or
-:func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
-itself) rather than mutating the real, process-wide ``__proto__`` registries
--- those are shared, module-level singletons, and a leaked entry would
-corrupt :file:`test_dispatch_registry_unit.py`'s exact-count assertions for
-the rest of the test session. The handful of tests that do exercise a real
-table use :func:`unittest.mock.patch.dict` so the entry is guaranteed gone
-again once the ``with`` block exits, even on failure.
+Most tests mock the destination classes' ``register`` classmethod (or
+:func:`~pcapkit.foundation.registry.protocols.register_protocol_code` itself) rather than
+mutate the process-wide ``__proto__`` registries, where a leaked entry would break
+:file:`test_dispatch_registry_unit.py`'s exact-entry assertions for the rest of the
+session. Tests touching a real table use :func:`unittest.mock.patch.dict`, so the entry is
+gone once the ``with`` block exits, even on failure.
+
 
 """
 from __future__ import annotations
@@ -354,7 +351,7 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
 
     ``mock.patch.dict`` snapshots each registry before mutating it and
     restores it verbatim afterwards, so these cannot leak a stray entry into
-    ``test_dispatch_registry_unit.py``'s exact-count assertions even if an
+    ``test_dispatch_registry_unit.py``'s exact-entry assertions even if an
     assertion here fails first.
     """
 

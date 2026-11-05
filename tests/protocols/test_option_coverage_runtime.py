@@ -1,28 +1,22 @@
 # -*- coding: utf-8 -*-
 """The ``options-*.pcap`` fixtures decode, and the octets in them are pcapkit's own.
 
-:file:`examples/generators/options.py` constructs one item of every option-like
-code the library registers, and writes the ones that survive a construct ->
-parse -> construct cycle into a set of captures. This module reads them back through
-the public extraction interface.
+:file:`examples/generators/options.py` constructs one item of every option-like code the
+library registers and writes those surviving a construct -> parse -> construct cycle into
+captures, which this module reads back through the public extraction interface.
 
-The point is not to re-assert the round trip --
-:file:`tests/protocols/test_option_roundtrip_unit.py` does that, and does it
-without needing a fixture. The point is that these captures go through the
-*whole* stack: the pcap reader, the link and internet layer dispatch, the
-option-area walk, and the dumpers. A defect that only shows up once an option is
-inside a real frame -- an option area whose length disagrees with the header, a
-next-layer lookup that fires on the wrong protocol number -- is invisible to a
+:file:`tests/protocols/test_option_roundtrip_unit.py` already asserts the round trip
+without a fixture. These captures go through the *whole* stack instead: the pcap reader,
+link and internet layer dispatch, the option-area walk, and the dumpers. A defect that
+shows only inside a real frame, such as an option area whose length disagrees with the
+header or a next-layer lookup firing on the wrong protocol number, is invisible to a
 direct round trip and lands here.
 
-This module is fixture tier, so it may read generated captures; it is named
-``*_runtime.py`` for exactly that reason, and it handles the captures being
-absent so that a checkout which has not run ``make samples`` skips rather than
-fails. See :mod:`tests._tiers` for the rule.
+Fixture tier, hence ``*_runtime.py``: it reads generated captures and skips, rather than
+fails, on a checkout that has not run ``make samples``. See :mod:`tests._tiers`.
 
-Every extraction is wrapped in :func:`tests._support.time_limit`. That is not
-belt-and-braces: the generator deliberately leaves out the cases whose parse does
-not terminate -- ``HOPOPT``'s ``SMF_DPD`` is one -- and this deadline is what
+Every extraction is wrapped in :func:`tests._support.time_limit`: the generator leaves out
+cases whose parse does not terminate, ``HOPOPT``'s ``SMF_DPD`` among them, and the deadline
 turns a regression that puts one back into a failure rather than a wedged CI run.
 
 """

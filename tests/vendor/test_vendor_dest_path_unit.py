@@ -20,13 +20,10 @@ path into exactly two levels:
 
 That is correct only for a crawler exactly one level under ``vendor/``, e.g.
 :mod:`pcapkit.vendor.reg.ethertype` writing :file:`pcapkit/const/reg/ethertype.py`.
-Traced by hand for a module one level deeper --
-:file:`pcapkit/vendor/reg/apptype/tcp.py`, the shape #732 needs -- ``temp`` is
-:file:`.../vendor/reg/apptype`, so ``ROOT`` becomes :file:`.../vendor/reg` and
-``STEM`` becomes ``apptype``. The write then lands at
-:file:`.../vendor/reg/../const/apptype/tcp.py`, i.e.
-:file:`pcapkit/vendor/const/apptype/tcp.py` -- *inside* ``vendor/`` itself,
-never reaching :mod:`pcapkit.const` at all.
+For :file:`pcapkit/vendor/reg/apptype/tcp.py`, the shape #732 needs, ``ROOT``
+becomes :file:`.../vendor/reg` and ``STEM`` ``apptype``, so the write lands at
+:file:`pcapkit/vendor/const/apptype/tcp.py` -- *inside* ``vendor/``, never
+reaching :mod:`pcapkit.const`.
 
 :meth:`~pcapkit.vendor.default.Vendor._dest_path` anchors on the ``vendor``
 package's own ``__file__`` instead of counting a fixed number of path
@@ -36,7 +33,7 @@ components, and mirrors whatever path a module sits at *relative to*
 That relative-path mirroring has its own failure mode: ``const/`` and
 ``vendor/`` are siblings at equal depth, so for a module that is *not* under
 the resolved ``vendor_root`` -- a second checkout, or any module whose file
-simply is not under ``vendor/`` -- the leading ``..`` segments of
+is not under ``vendor/`` -- the leading ``..`` segments of
 ``os.path.relpath(module, vendor_root)`` cancel out exactly against
 ``const_root``, reproducing the module's own path. Unguarded,
 :meth:`Vendor.__init__` then opens that with ``'w'``, silently truncating the
@@ -44,58 +41,50 @@ crawler's own source. ``_dest_path`` rejects that case outright, raising
 :exc:`~pcapkit.utilities.exceptions.VendorPathNotFound` instead of returning
 a path that happens to equal its input.
 
-Three things are pinned:
+Pinned:
 
 * :class:`ExistingCrawlerDestPathTests` -- the regression guard. Every crawler
-  discovered under :mod:`pcapkit.vendor` must resolve to exactly the
-  :file:`const/` file it writes -- the depth-one ones by the two-level
+  on disk under :mod:`pcapkit.vendor`, not a sample, must resolve to exactly
+  the :file:`const/` file it writes -- the depth-one ones by the two-level
   formula, the ones #732 nests under :file:`vendor/reg/apptype/` by the
-  mirrored path; this is the "did not move" half of the contract, checked by
-  enumerating the real crawlers on disk rather than sampling a couple by name.
+  mirrored path.
 * :class:`NestedCrawlerDestPathTests`\\ 's
   :meth:`~NestedCrawlerDestPathTests.test_nested_module_resolves_under_const`
   -- the case that motivates ``_dest_path``. A stub crawler is built two levels
-  under a *synthetic* ``vendor/`` tree in a temporary directory (never inside
-  the checkout, since :meth:`Vendor.__init__` -- not exercised here -- would
-  otherwise write into it), and :meth:`_dest_path` is asserted to mirror it
-  under a sibling ``const/`` at the same relative depth. :func:`_old_algorithm`
-  below reproduces the two-level split directly against the same synthetic
-  paths and lands it at ``vendor/const/apptype/tcp.py``, confirming the trace
-  above without needing the checkout's real crawlers.
+  under a *synthetic* ``vendor/`` tree in a temporary directory, never inside
+  the checkout, and :meth:`_dest_path` is asserted to mirror it under a sibling
+  ``const/`` at the same relative depth. :func:`_old_algorithm` reproduces the
+  two-level split against the same paths and lands at
+  ``vendor/const/apptype/tcp.py``, confirming the trace above.
 * :class:`NestedCrawlerDestPathTests`\\ 's
   :meth:`~NestedCrawlerDestPathTests.test_module_outside_vendor_root_raises_instead_of_self_truncating`
-  -- the destructive escape case above, pinned directly: a stub crawler's
-  module file stays where it is, but ``vendor_root`` is patched to an
-  unrelated temporary tree that shares no ancestry with it beyond the
-  filesystem root, and :meth:`_dest_path` is asserted to raise rather than to
+  -- the destructive escape case above: ``vendor_root`` is patched to an
+  unrelated temporary tree sharing no ancestry with the stub crawler's module
+  beyond the filesystem root, and :meth:`_dest_path` must raise rather than
   return the module's own path.
 
 Neither class calls :meth:`Vendor.__init__`: it fetches from IANA/Wikipedia and
 writes the constant file as a side effect of construction, so every instance
-here is built with ``cls.__new__(cls)`` -- the same bypass
+here is built with ``cls.__new__(cls)``, the bypass
 :file:`tests/vendor/test_crawler_reachability_unit.py` and
-:file:`tests/vendor/test_user_agent_unit.py` already use for the same reason.
+:file:`tests/vendor/test_user_agent_unit.py` use for the same reason.
 
-The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture and makes
-no network call. Its classes are gated on :data:`HAS_VENDOR_DEPS`, the same
-gate :file:`tests/vendor/test_crawler_reachability_unit.py` uses, because they
-read the crawlers off the :mod:`pcapkit.vendor` package, whose
-:file:`__init__.py` imports them only when ``requests`` and ``bs4`` are
-installed (#1850) -- :mod:`pcapkit.vendor.default` imports ``requests`` at
-module scope, and several crawlers ``import bs4`` at module scope.
-``html5lib`` is deliberately *not* in the gate: it appears nowhere at
-module scope, only as the string parser name in the crawlers'
-``bs4.BeautifulSoup(text, 'html5lib')`` calls at actual crawl time, which
-nothing here reaches -- no test in this file calls :meth:`Vendor.__init__` or
-:meth:`~Vendor.context`. ``requests`` and ``beautifulsoup4`` both ship in the
-``test`` extra precisely so vendor tests can run (the comment on them in
-:file:`pyproject.toml`), so both classes below run on ``test`` and ``gate`` -- the
-only pytest jobs of :file:`.github/workflows/unit-tests.yml` that collect
-anything under :file:`tests/vendor/` at all, since ``integration`` and
-``pypcap-parity`` never reach it and ``engine-tests`` runs only each engine's
-own test files (#849) -- unlike :file:`tests/vendor/test_user_agent_unit.py`,
-whose own gate also lists ``html5lib`` and so skips on every ``test`` leg but
-``latest``, the one that installs ``vendor`` (#1958).
+The suite is unit-tier (see :mod:`tests._tiers`): no capture, no network call.
+Its classes are gated on :data:`HAS_VENDOR_DEPS`, as in
+:file:`tests/vendor/test_crawler_reachability_unit.py`, because the
+:mod:`pcapkit.vendor` package imports its crawlers only when ``requests`` and
+``bs4`` are installed (#1850): :mod:`pcapkit.vendor.default` and several
+crawlers import them at module scope. ``html5lib`` is deliberately *not* in the
+gate: it appears only as the parser name in the crawlers'
+``bs4.BeautifulSoup(text, 'html5lib')`` calls at crawl time, which nothing here
+reaches. ``requests`` and ``beautifulsoup4`` ship in the ``test`` extra so
+vendor tests can run, so both classes run on ``test`` and ``gate`` -- the only
+pytest jobs of :file:`.github/workflows/unit-tests.yml` that collect
+:file:`tests/vendor/` (``integration`` and ``pypcap-parity`` never reach it,
+and ``engine-tests`` runs only each engine's own test files, #849) -- unlike
+:file:`tests/vendor/test_user_agent_unit.py`, whose gate also lists
+``html5lib`` and so skips on every ``test`` leg but ``latest``, the one that
+installs ``vendor`` (#1958).
 
 """
 from __future__ import annotations
@@ -169,7 +158,7 @@ def _old_algorithm(module_file: 'str') -> 'str':
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class ExistingCrawlerDestPathTests(unittest.TestCase):
-    """Every crawler on disk resolves to the constant file it actually owns.
+    """Every crawler on disk resolves to the constant file it owns.
 
     The regression guard: :meth:`Vendor._dest_path` must not move a single
     existing crawler's output, enumerated from the filesystem rather than
@@ -199,7 +188,7 @@ class ExistingCrawlerDestPathTests(unittest.TestCase):
         from pcapkit.vendor.default import Vendor
 
         # Comparing this checkout's crawlers against this checkout's __file__
-        # only means something if pcapkit was actually imported from here --
+        # only means something if pcapkit was imported from here --
         # see test_crawler_reachability_unit.py's setUp for the same guard.
         resolved = pathlib.Path(pcapkit.__file__).resolve()
         if ROOT not in resolved.parents:

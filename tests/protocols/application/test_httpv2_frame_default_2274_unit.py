@@ -10,12 +10,12 @@ is longer than that, so ``HTTP(type=<T>, sid=...)`` could not build one at all:
 packet length < 0``. ``frame={}``, which dispatches to the frame type's own
 constructor, built them.
 
-``frame`` now defaults to :data:`None` and takes that dispatch, so the default
+``frame`` defaults to :data:`None` and takes that dispatch, so the default
 call and ``frame={}`` give the same octets for every frame type. An explicit
 :obj:`bytes` value, ``b''`` included, is still packed raw. ``SETTINGS`` needed
 the other half of the fix: ``_make_http_settings`` rejected its own
 ``settings=None`` default, so ``frame={}`` raised there instead, and
-:data:`None` now builds the parameterless ``SETTINGS`` frame
+:data:`None` builds the parameterless ``SETTINGS`` frame
 :rfc:`9113#section-6.5` permits.
 
 Every case builds its own octets in memory and reads no capture. Classes are

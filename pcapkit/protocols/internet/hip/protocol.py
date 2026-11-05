@@ -632,9 +632,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         schema = self.__header__
 
         # NOTE: The two fixed bits "MUST be ignored when receiving" (:rfc:`7401#section-5.1`),
-        # so they are kept as read rather than validated.
-        # Header Length below 4 cannot cover the two HITs, and would leave a
-        # negative parameter length below.
+        # so they are kept as read. A Header Length below 4 cannot cover the two HITs.
         if schema.len < 4:
             raise ProtocolError(f'HIP: invalid header length: {schema.len}')
 
@@ -667,9 +665,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return hip
 
-        # NOTE: ``_decode_next_layer`` builds the protocol chain from
-        # :attr:`self.alias <HIP.alias>`, which reads ``self._info``, and
-        # ``__post_init__`` assigns that only once this method returns.
+        # NOTE: ``_decode_next_layer`` builds the chain from :attr:`self.alias <HIP.alias>`, which
+        # reads ``self._info``, and ``__post_init__`` assigns that only after this method returns.
         self._info = hip
         return self._decode_next_layer(hip, schema.next, length - hip.length)
 
@@ -928,10 +925,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 meth = name[0]
             data = meth(schema, version=version, options=options)
 
-            # NOTE: The trailing padding (:rfc:`7401#section-5.2.1`) is kept on
-            # the data model only when it is not all zeros -- the form a fresh
-            # build writes -- so that a rebuild reproduces it (#1223).
-            # :meth:`_make_hip_param` writes it back.
+            # NOTE: Padding (:rfc:`7401#section-5.2.1`) is kept on the data model unless all zeros, a
+            # fresh build's form, so that :meth:`_make_hip_param` writes it back (#1223).
             padding = schema.__dict__.get('padding')
             if isinstance(padding, bytes) and any(padding):
                 data.__update__([('padding', padding)])

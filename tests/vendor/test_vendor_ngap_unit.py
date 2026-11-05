@@ -162,7 +162,7 @@ class NGAPVendorCrawlerTests(unittest.TestCase):
 class NGAPVendorCrawlerMissingDependencyTests(unittest.TestCase):
     """:meth:`_request` without |pycrate|_ installed -- simulated via
     ``sys.modules``, run unconditionally regardless of whether this
-    environment actually has it, since the failure path itself needs no
+    environment has it, since the failure path itself needs no
     |pycrate|_ to exercise."""
 
     def test_procedure_code_request_reports_the_missing_optional_dependency(self) -> None:

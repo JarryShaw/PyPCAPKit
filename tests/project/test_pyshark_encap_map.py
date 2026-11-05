@@ -1,58 +1,37 @@
 # -*- coding: utf-8 -*-
-"""Tests for :file:`util/pyshark_encap_map.py`, the pyshark table generator.
+"""Tests for :file:`util/pyshark_encap_map.py`, the pyshark table generator (#851).
 
-GitHub issue #851. ``ENCAP_TYPE_TO_LINKTYPE`` and ``FILTER_NAME_TO_LINKTYPE`` in
-:mod:`pcapkit.toolkit.pyshark` were measured, not transcribed, by sweeping every
-encapsulation :program:`editcap` accepts through :program:`editcap`/:program:`tshark`
-4.6.9. This generator is that sweep, made runnable; these tests pin the two traps
-that cost real time when the tables were first produced (a PDML ``showname``
-holding a ``/``, and the bogus token in ``editcap -T``'s own help banner), the
-formatting that has to be byte-stable for a re-run to change nothing, and the
-two exclusion rules (an unmapped DLT, an ambiguous filter name) generically --
-against the real :class:`~pcapkit.const.reg.linktype.LinkType` registry, whose
-``_missing_`` answers *any* unknown value with an unregistered placeholder rather than
-raising, which is itself worth pinning (#575).
+``ENCAP_TYPE_TO_LINKTYPE`` and ``FILTER_NAME_TO_LINKTYPE`` in :mod:`pcapkit.toolkit.pyshark`
+were measured by sweeping every encapsulation :program:`editcap` accepts through
+:program:`editcap`/:program:`tshark` 4.6.9; this generator is that sweep. These tests
+pin its two traps (a PDML ``showname`` holding a ``/``, and the bogus token in
+``editcap -T``'s help banner), the byte-stable formatting a re-run relies on, and the
+two exclusion rules (an unmapped DLT, an ambiguous filter name) against the real
+:class:`~pcapkit.const.reg.linktype.LinkType` registry, whose ``_missing_`` answers any
+unknown value with an unregistered placeholder rather than raising (#575).
 
-Most of this is unit-tier: it exercises the parsing and formatting helpers
-against fabricated PDML/help-text fragments and a fabricated measurement list,
-never shelling out to :program:`editcap`/:program:`tshark`. The classes that do
-shell out are gated on :data:`HAS_WIRESHARK` -- a real ``HAS_*`` flag, deliberately,
-rather than a same-effect :func:`shutil.which` check under an unprefixed name.
-The latter rests on the theory that a name ``tests/_dependency_gates.py``'s AST
-scan does not recognise cannot need an entry there -- true, but the wrong
-lesson: it also means the scan cannot see the gate at all, so a real skip on
-every CI leg (Wireshark is not installed on most of them) would go unreported as
-anything. ``HAS_WIRESHARK`` is declared in
-:data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS`, next to the existing
-``HAS_PROC_FD`` precedent for "a flag that asks about something pip cannot
-install at all" -- see that module for the declaration, and
-:func:`tests.test_tier_guard.DependencyGateCoverageTests
-.test_every_gated_flag_is_classified` for the check that would fail if it were
-missing.
+Most tests run the parsing and formatting helpers on fabricated PDML, help text and
+measurements. The classes that shell out are gated on :data:`HAS_WIRESHARK`, a real
+``HAS_*`` flag rather than a :func:`shutil.which` check under another name, so the AST
+scan in :file:`tests/_dependency_gates.py` sees the gate and its skips get reported. It
+is declared in :data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS` beside
+``HAS_PROC_FD``, and
+:func:`tests.test_tier_guard.DependencyGateCoverageTests.test_every_gated_flag_is_classified`
+fails without it.
 
-* :class:`RealSweepTests` asserts the exact 4.6.9 sweep arithmetic (226
-  accepted, 157 writable, 69 refused) and byte-identical reproduction of the
-  committed tables. It additionally requires :data:`MEASURED_WIRESHARK_VERSION`
-  itself, because those counts are properties of *that* Wireshark release, not
-  of the sweep method -- Wireshark 4.2.2 accepts 224 encapsulations, not 226,
-  and asserting 226 there is a test bug, not a generator bug (PR #853's first
-  CI run).
-* :class:`VersionIndependentInvariantTests` runs the same real sweep on
-  *whatever* Wireshark is on ``PATH`` and checks properties that hold
-  regardless of how many encapsulations that copy accepts: no
-  ``frame.encap_type`` key resolves to two different DLTs, no DLT resolves to
-  two different keys, and every key or filter name the local sweep *did*
-  measure agrees with the committed table rather than merely being present or
-  absent from it. This is what still exercises the real binaries on a host
-  whose Wireshark :class:`RealSweepTests` skips.
+* :class:`RealSweepTests` asserts the 4.6.9 sweep arithmetic (226 accepted, 157
+  writable, 69 refused) and byte-identical reproduction of the committed tables. It
+  requires :data:`MEASURED_WIRESHARK_VERSION`, since those counts belong to that
+  release: Wireshark 4.2.2 accepts 224 (PR #853's first CI run).
+* :class:`VersionIndependentInvariantTests` runs the real sweep on whatever Wireshark
+  is on ``PATH``: no ``frame.encap_type`` key resolves to two DLTs, no DLT to two keys,
+  and every key or filter name it measured agrees with the committed table.
+* :class:`StrictPdmlTests` checks the hardened lxml parser the PDML is read with
+  (#1894), against stand-ins for editcap and tshark.
 
-Both classes skip in CI: a runner's Wireshark is whatever its Ubuntu release
-packages, not :data:`MEASURED_WIRESHARK_VERSION`, and the jobs that install
-:program:`tshark` run their own test selections, which leave this module out.
-* :class:`StrictPdmlTests` checks the hardened lxml parser the PDML is read
-  with (#1894), against stand-ins for editcap and tshark. It and the classes
-  above are gated on :data:`HAS_LXML` too, since the generator has no laxer
-  parser to fall back to.
+The first two skip in CI: a runner's Wireshark is its Ubuntu release's, and the jobs
+that install :program:`tshark` run selections that leave this module out. All three are
+gated on :data:`HAS_LXML` too, since the generator has no laxer parser to fall back to.
 
 """
 
@@ -93,20 +72,18 @@ def _load_generator():
 
 encap_map = _load_generator()
 
-#: The real :program:`editcap`/:program:`tshark` binaries, resolved once and
-#: kept as the resolved paths -- what :func:`~pyshark_encap_map.list_encap_types`
-#: and :func:`~pyshark_encap_map.measure_encap` actually need to invoke them.
+#: The real :program:`editcap`/:program:`tshark` paths, resolved once, which
+#: :func:`~pyshark_encap_map.list_encap_types` and
+#: :func:`~pyshark_encap_map.measure_encap` invoke.
 _EDITCAP = shutil.which('editcap')
 _TSHARK = shutil.which('tshark')
 
-#: Whether Wireshark is on ``PATH`` at all. Named with the ``HAS_`` prefix
-#: deliberately: ``tests/_dependency_gates.py``'s AST scan keys on exactly that
-#: prefix inside a ``skipUnless(...)`` call, and it needs to *see* this gate
-#: darkening the real-sweep classes on every CI leg -- see the module docstring for why
-#: an unprefixed same-effect name was the wrong fix. Declared in
+#: Whether Wireshark is on ``PATH``. The ``HAS_`` prefix is what
+#: ``tests/_dependency_gates.py``'s AST scan keys on inside a ``skipUnless(...)``
+#: call, so it sees this gate skip the real-sweep classes. Declared in
 #: :data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS` rather than
-#: :data:`~tests._dependency_gates.MODULE_PROVIDERS`, since a Wireshark binary
-#: is not something any ``pyproject.toml`` extra could ever install.
+#: :data:`~tests._dependency_gates.MODULE_PROVIDERS`, since no ``pyproject.toml``
+#: extra can install a Wireshark binary.
 HAS_WIRESHARK = _EDITCAP is not None and _TSHARK is not None
 
 #: Whether lxml, which the generator parses PDML with (#1894), is installed. The
@@ -115,18 +92,14 @@ HAS_WIRESHARK = _EDITCAP is not None and _TSHARK is not None
 HAS_LXML = importlib.util.find_spec('lxml') is not None
 NO_LXML = 'lxml, from the test extra, is not installed'
 
-#: The one Wireshark release ``ENCAP_TYPE_TO_LINKTYPE`` and
-#: ``FILTER_NAME_TO_LINKTYPE`` were measured against, and the only one
-#: :class:`RealSweepTests` trusts to reproduce their exact counts. Named here,
-#: singly, so a future reader greps one constant rather than three magic
-#: numbers scattered across assertions.
+#: The Wireshark release ``ENCAP_TYPE_TO_LINKTYPE`` and ``FILTER_NAME_TO_LINKTYPE``
+#: were measured against, the only one :class:`RealSweepTests` trusts to reproduce
+#: their exact counts.
 MEASURED_WIRESHARK_VERSION = '4.6.9'
 
-#: ``tshark --version``'s first line reads
-#: ``"TShark (Wireshark) 4.6.9 (Git commit ...)."`` -- a distribution's packaged
-#: build, such as Ubuntu's 4.2.2, reads ``"TShark (Wireshark) 4.2.2 (Git ...)."``
-#: in exactly the same shape, just a different number -- so an ``X.Y.Z``
-#: anywhere in the output is enough.
+#: Any ``X.Y.Z`` in ``tshark --version``, whose first line reads
+#: ``"TShark (Wireshark) 4.6.9 (Git commit ...)."`` in upstream and distribution
+#: builds alike.
 _VERSION_PATTERN = re.compile(r'(\d+\.\d+\.\d+)')
 
 
@@ -150,60 +123,44 @@ def detect_tshark_version(tshark: 'str | None') -> 'str | None':
     return match.group(1) if match else None
 
 
-#: Resolved once, the same way :data:`_EDITCAP`/:data:`_TSHARK` are. Not itself
-#: a ``HAS_*`` flag: it is a version *string*, not a boolean gate, so it drives
-#: an equality check inside a :func:`unittest.skipUnless` rather than being the
-#: condition directly -- :data:`HAS_WIRESHARK` is what the dependency-gate scan
-#: needs to see, and it already is one.
+#: The local :program:`tshark`'s version, resolved once. A string, not a ``HAS_*``
+#: flag: it drives an equality check inside a :func:`unittest.skipUnless`, and
+#: :data:`HAS_WIRESHARK` is the gate the dependency-gate scan sees.
 _TSHARK_VERSION = detect_tshark_version(_TSHARK)
 
 
 class ParseParenthesisedNumberTests(unittest.TestCase):
     """:func:`~pyshark_encap_map.parse_parenthesised_number`'s own robustness.
 
-    **What this does not pin, stated plainly because it is easy to
-    overclaim:** #851/#850's real defect -- rows lost,
-    including ``null`` -- was in how the original ad hoc script extracted the
-    *name* portion of a PDML ``showname`` such as ``"Encapsulation type:
-    NULL/Loopback (15)"``. This generator never does that extraction at all;
-    a key comes from ``frame.encap_type``'s number directly, and a filter
-    name comes from the PDML ``<proto name=...>`` attribute, never parsed out
-    of prose. #850's original naive shape, ``r'(\\w+) \\((\\d+)\\)'`` used with
-    :func:`re.search` in place of :data:`~pyshark_encap_map._PAREN_NUMBER`,
-    passes every test below as well: ``.search`` is
-    unanchored, so ``\\w+`` matches ``Loopback`` and steps straight over the
-    ``/`` -- confirmed by trying it.
+    **Not pinned:** #851/#850's real defect, lost rows including ``null``, was in
+    how the original script extracted the *name* from a PDML ``showname`` such as
+    ``"Encapsulation type: NULL/Loopback (15)"``. This generator never extracts it:
+    a key is ``frame.encap_type``'s number and a filter name is the PDML
+    ``<proto name=...>`` attribute. #850's naive ``r'(\\w+) \\((\\d+)\\)'`` with
+    :func:`re.search`, in place of :data:`~pyshark_encap_map._PAREN_NUMBER`, passes
+    every test below too, since an unanchored ``\\w+`` matches ``Loopback`` past the
+    ``/``.
 
-    **What this does pin:** the number-extraction is anchored to the *end* of
-    the string rather than to a run of name-shaped characters immediately
-    before it, which is a genuinely different -- and stricter -- property.
-    :meth:`test_a_name_with_no_word_boundary_before_the_number_still_matches`
-    is the case that tells the two approaches apart: a naive
-    ``\\w+ \\(\\d+\\)`` search requires *some* word character to sit directly
-    against the space before the parenthesis, and a name ending in anything
-    else -- a trailing ``/`` with nothing after it, say -- leaves the naive
-    pattern with nothing in the whole string to match at all, so
-    ``re.search`` returns :obj:`None` and the naive code (whatever it did
-    with a failed match) drops the row. This function does not have that
-    hole, because it never looks at the name.
+    **Pinned:** the number is anchored to the *end* of the string, not to a word run
+    before it. :meth:`test_a_name_with_no_word_boundary_before_the_number_still_matches`
+    tells the two apart: a name ending in a bare ``/`` leaves the naive search nothing
+    to match, so it returns :obj:`None` and the row is dropped, while this function
+    never looks at the name.
 
     """
 
     def test_a_slash_in_the_name_does_not_stop_the_match(self) -> None:
-        # The real showname tshark 4.6.9 renders for ``editcap -T null``.
-        # Included for realism, not as proof of the fix -- see the class
-        # docstring: the naive regex also passes this particular case.
+        # The real showname tshark 4.6.9 renders for ``editcap -T null``; the
+        # naive regex passes it too (see the class docstring).
         self.assertEqual(
             encap_map.parse_parenthesised_number('Encapsulation type: NULL/Loopback (15)'),
             15,
         )
 
     def test_a_name_with_no_word_boundary_before_the_number_still_matches(self) -> None:
-        # The case that actually distinguishes this function from #850's
-        # ``r'(\w+) \((\d+)\)'``: nothing but ``/`` sits between the name and
-        # the number, so a search anchored on a word run immediately before
-        # the space finds nothing anywhere in the string and returns None,
-        # while the end-anchored pattern here does not care what precedes it.
+        # Distinguishes this function from #850's ``r'(\w+) \((\d+)\)'``: with only
+        # ``/`` before the number, the naive search returns None, while the
+        # end-anchored pattern ignores what precedes it.
         naive = re.compile(r'(\w+) \((\d+)\)')
         showname = 'Encapsulation type: NULL/ (15)'
         self.assertIsNone(naive.search(showname), 'test premise: the naive regex must fail here')
@@ -254,10 +211,8 @@ class ListEncapTypesTests(unittest.TestCase):
         self.assertEqual(found, ['alp', 'ap1394', 'fddi-swapped'])
 
     def test_list_encap_types_reads_a_fabricated_binary(self) -> None:
-        # A fake "editcap" -- a tiny script that prints the fixture listing to
-        # stderr and exits non-zero, exactly as the real ``-T ''`` invocation
-        # does -- so the subprocess plumbing is exercised without needing the
-        # real binary at all.
+        # A fake "editcap" printing the fixture listing to stderr and exiting
+        # non-zero, as the real ``-T ''`` does, exercises the subprocess plumbing.
         fake = make_tmp_dir(self) / 'fake-editcap'
         fake.write_text(
             '#!/bin/sh\n'

@@ -214,7 +214,7 @@ class VendorMissingBodyTests(unittest.TestCase):
         Named separately from :meth:`test_the_hard_coded_body_ends_in_a_return`
         because this line *does* return and so passes that check, yet re-enters
         ``_missing_`` for the same value. It was the second half of #866's
-        two-line body and is the line that actually recursed.
+        two-line body and is the line that recursed.
 
         """
         for crawler, lines in sorted(self.miss_lines.items()):  # type: ignore[attr-defined]

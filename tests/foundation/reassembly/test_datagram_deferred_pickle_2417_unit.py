@@ -20,8 +20,8 @@ sockets are ephemeral. :meth:`EnumRegistry._make_reducible
 over the whole port space. These synthesise the datagram directly, on both an
 unassigned and an assigned flow, rather than reading a capture --
 :mod:`tests.foundation.reassembly.test_datagram_deferred_pickle_2417_runtime`
-pins the same thing end to end over the sample captures, which is how the bug
-was originally found: a datagram is only worth pickling *while* its payload is
+pins the same thing end to end over the sample captures, where the bug was
+found: a datagram is only worth pickling *while* its payload is
 unresolved, so the failure sat exactly where nothing else would catch it.
 
 Pickled before :attr:`~...Datagram.packet` is read, deliberately: reading it

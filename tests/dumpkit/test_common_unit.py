@@ -52,7 +52,7 @@ class IdentityDumper:
     Unlike :class:`BaseDumper` -- used to prove the *fallback* is reached at all
     -- this is what :meth:`dictdumper.dumper.Dumper.object_hook` itself does, so
     it is what a non-PLIST format such as ``json``, ``tree`` or ``text``
-    actually sees.
+    sees.
 
     """
 
@@ -226,7 +226,7 @@ class DumpkitCommonTests(unittest.TestCase):
         self.assertEqual(file.getvalue(), "{'base': '123'}")
 
     def test_make_dumper_object_hook_leaves_strings_and_enum_renderings_unescaped(self) -> None:
-        """GitHub issue #772: escaping is now the writer's own job, not this hook's.
+        """GitHub issue #772: escaping is the writer's own job, not this hook's.
 
         ``dictdumper.plist.PLIST`` (which is also what ``'xml'`` maps to --
         see ``Extractor.__output__``) used to interpolate every
@@ -273,13 +273,12 @@ class DumpkitCommonTests(unittest.TestCase):
         neither a plain :class:`dict` nor the single-key mappings a
         :class:`~pcapkit.corekit.multidict.MultiDict` or
         :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes is rebuilt
-        here any more: the writer is handed the caller's own mapping, with the
+        here: the writer is handed the caller's own mapping, with the
         caller's own key objects in it, exactly as given -- for *any*
         ``output``, not only a non-PLIST one.
 
-        The :class:`bytes` key is :file:`examples/captures/test.pcapng`'s own
-        -- it used to be the reason that fixture's ``plist`` report did not
-        parse, since its repr carries ``&``, ``<`` and ``>``.
+        The :class:`bytes` key is :file:`examples/captures/test.pcapng`'s own,
+        whose repr carries ``&``, ``<`` and ``>``.
 
         """
         from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict

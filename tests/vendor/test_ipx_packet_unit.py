@@ -15,7 +15,7 @@ hand-maintained :data:`pcapkit.vendor.ipx.packet.DATA` instead.
 .. |requests| replace:: ``requests``
 .. _requests: https://requests.readthedocs.io
 
-What that leaves worth pinning is the failure mode the issue is actually about: a
+What that leaves worth pinning is the failure mode the issue is about: a
 regeneration that quietly drops packet types. :data:`EXPECTED_MEMBERS` spells the
 enumeration out in full, so losing one fails here rather than shipping.
 ``Broadcast_4`` is in it verbatim, footnote artefact and all -- ``[4]`` was
@@ -92,7 +92,7 @@ def _normalize(context: 'str') -> 'str':
     trailing whitespace from every non-blank line, drops whitespace-only lines
     outright, and ends the file with a newline courtesy of :func:`print`. Byte
     comparison against the committed file has to do the same, or it reports a
-    difference that regeneration would not actually produce.
+    difference that regeneration would not produce.
 
     Args:
         context: Return value of :meth:`~pcapkit.vendor.default.Vendor.context`.

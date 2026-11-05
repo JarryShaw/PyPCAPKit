@@ -210,7 +210,7 @@ class TierClassificationTests(unittest.TestCase):
 
 
 class WorkflowAgreementTests(unittest.TestCase):
-    """The tier rule here matches the one the workflow actually runs."""
+    """The tier rule here matches the one the workflow runs."""
 
     #: :data:`PYTHON_STUB`'s ``$SELECTOR_CACHE`` for this class's steps, so each
     #: selector runs once per class rather than once per step run (#2254).
@@ -964,7 +964,7 @@ class FixtureTierSelectionTests(unittest.TestCase):
         Checked by parsing the module independently with :mod:`ast` rather
         than by importing it -- unit-tier modules are not meant to be imported
         outside pytest collecting them, and a static check is enough to prove
-        the node ID is not simply wrong.
+        the node ID is not wrong.
 
         """
         skip_idiom = {module.relative_to(_tiers.ROOT).as_posix() for module in _tiers.skip_idiom_modules()}
@@ -1464,7 +1464,7 @@ class AuditTests(unittest.TestCase):
         self.assertEqual([(call.lineno, call.name) for call in calls], expected)
 
         # audit_module emits one finding per call and inherits this order, which is
-        # what the reader of a failed collection actually sees. Matched on the
+        # what the reader of a failed collection sees. Matched on the
         # capture name as well as the line, because the two calls on line 7 share a
         # line and the name is the only thing that distinguishes them -- so this is
         # the assertion that catches a lost col_offset in the diagnostic itself.
@@ -2655,7 +2655,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
 
     def test_no_provider_mapping_or_exclusion_is_vestigial(self) -> None:
         """Both tables are exactly as wide as the suite needs them to be --
-        for every drift this comparison can actually see.
+        for every drift this comparison can see.
 
         A required module resolves through the *exact* key when
         :data:`~tests._dependency_gates.MODULE_PROVIDERS` has one (``pcap._pcap``,
@@ -2708,7 +2708,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
         warns a skip list rots into. Comparing it against
         :func:`~tests._dependency_gates.contested_imports`, which counts how
         many of a :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry's
-        alternatives some declared extra actually resolves, is what would
+        alternatives some declared extra resolves, is what would
         catch that: an entry gaining a second *live* alternative without a
         matching addition here fails this assertion rather than silently
         reopening #762 under a name nobody scoped
@@ -3044,7 +3044,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """Falsifiability for the liveness comparison itself.
 
         A hand-written set passing a comparison against itself proves
-        nothing; this shows the comparison actually distinguishes a set that
+        nothing; this shows the comparison distinguishes a set that
         has drifted from one that has not. Doctoring in a module with two
         *live* alternatives -- ``requests`` and ``cryptography`` are both
         already installed everywhere, so both resolve for real, unlike
@@ -3074,7 +3074,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         which proves nothing about that line specifically. ``HAS_PYPCAP`` on
         the doctored ``pypcap-parity`` workflow does reach it -- there is a
         real finding to suppress -- so naming *that* flag here is what
-        actually exercises the skip.
+        exercises the skip.
 
         """
         doctored = doctored_workflow(
@@ -3153,7 +3153,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
         # More than one `case "$ENGINE" in ... esac` block is in this job -- the install step's
         # (`EXTRA=` arms) and the pytest step's (`TEST_PATHS=` arms) -- so finding the
-        # first match is not enough; pick the one that actually carries `TEST_PATHS=`.
+        # first match is not enough; pick the one that carries `TEST_PATHS=`.
         matches = [m for m in re.finditer(r'(?m)^( +)case "\$ENGINE" in\n(?:.*\n)*?\1esac\n', text)
                   if 'TEST_PATHS=' in m.group(0)]
         self.assertEqual(len(matches), 1, 'expected exactly one TEST_PATHS case block to doctor')
@@ -3374,7 +3374,7 @@ class DependencyGateDegradationTests(unittest.TestCase):
         the helper itself.
 
         The message has to name the *dotted* module as given as well as the
-        top-level key actually looked up, because those differ exactly when the
+        top-level key looked up, because those differ exactly when the
         truncation is what a reader would otherwise have to work out for
         themselves.
 

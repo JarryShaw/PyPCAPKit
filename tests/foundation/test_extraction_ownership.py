@@ -36,7 +36,7 @@ stopped exercising anything. They **count handles**, by two independent means:
   works on every platform.
 * :func:`fd_count` counts the process's own file descriptors that resolve to the
   capture, through :file:`/proc/self/fd`. That measures the *descriptor* rather
-  than the Python wrapper around it, which is the thing that actually runs out.
+  than the Python wrapper around it, which is the thing that runs out.
   It is Linux-only and skipped elsewhere.
 
 Both guard against the defects of #610: a path-given extraction leaking
@@ -272,7 +272,7 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
 
         ``closed`` alone would be a thin assertion, so the read is done as well:
         the failure this guards against is a caller losing access to a file it
-        still holds, and that is what actually demonstrates it. Without the fix
+        still holds, and that is what demonstrates it. Without the fix
         (#610), the handle comes back closed and the read raises
         ``ValueError: seek of closed file``.
 
@@ -314,7 +314,7 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
             payload = source.read()
 
         # A ``BufferedReader`` over a non-seekable raw stream, which is the shape
-        # ``sys.stdin.buffer`` has -- and stdin is the input that actually reaches
+        # ``sys.stdin.buffer`` has -- and stdin is the input that reaches
         # this path, since ``pcapkit/__main__.py`` hands it over for ``fin='-'``. A
         # bare non-seekable :class:`io.BytesIO` is *not* usable here: lacking
         # ``peek`` it takes a different branch of ``SeekableReader`` that mis-reads

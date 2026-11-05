@@ -18,7 +18,8 @@ rate the field cannot carry -- above zero but under the 80 kbps of ``N = 1``, or
 past ``N = 15`` -- raises ``ProtocolError`` rather than being written as zero,
 which is what #1119's fix had done.
 
-Every case builds its own octets in memory, so this belongs to the unit tier.
+Unit tier: every case builds its own octets.
+
 
 :mod:`pcapkit` is resolved at call time, after
 :func:`~tests._support.reimport_once_per_class`, not at module load: a

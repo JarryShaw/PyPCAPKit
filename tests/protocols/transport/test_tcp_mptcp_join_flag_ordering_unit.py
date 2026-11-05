@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """``TCP.make`` resolves the connection flags before it builds the options.
 
-GitHub issue #587. Distinct from #576/#585, which are about MPTCP option *length*
-arithmetic; this one is a statement-ordering defect in
-:meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>`.
+GitHub issue #587, a statement-ordering defect in
+:meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>`; #576/#585 cover
+MPTCP option *length* arithmetic.
 
 The ordering
 ------------
 
 :meth:`TCP._make_mptcp_join <pcapkit.protocols.transport.tcp.protocol.TCP._make_mptcp_join>`,
-reached from ``_make_tcp_options``, *branches on* ``self._flags`` to pick which of the
-three MP_JOIN layouts to emit, so :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP.make` has
-to assign the flags before it builds the options. Built the other way round:
+reached from ``_make_tcp_options``, branches on ``self._flags`` to pick one of the
+three MP_JOIN layouts, so :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP.make`
+must assign the flags first. Built the other way round:
 
 .. code-block:: python
 
@@ -19,21 +19,20 @@ to assign the flags before it builds the options. Built the other way round:
     ...
     self._flags = _flag
 
-a fresh instance has no such attribute yet, and construction dies outright::
+a fresh instance dies outright::
 
     AttributeError: 'TCP' object has no attribute '_flags'
 
-The parse path has the identical pair of branches in ``_read_mptcp_join``, and
-:meth:`~pcapkit.protocols.transport.tcp.protocol.TCP.read` assigns ``self._flags`` before it
-parses the options. In ``make`` the ``flags`` dict and the ``_flag`` accumulation sit
-above the ``_make_tcp_options`` call; the ``offset`` computation stays below it, being the
-one statement in that block that genuinely depends on the options' ``total_length``.
+:meth:`~pcapkit.protocols.transport.tcp.protocol.TCP.read` likewise assigns
+``self._flags`` before ``_read_mptcp_join`` branches on it. In ``make`` the ``flags``
+dict and the ``_flag`` accumulation sit above the ``_make_tcp_options`` call; only the
+``offset`` computation, which needs the options' ``total_length``, stays below it.
 
 Why the branch is not the thing to remove
 ------------------------------------------
 
-MP_JOIN really is flag-dependent. :rfc:`8684` section 3.2 gives it three distinct
-layouts, and they are three different lengths, so a single form cannot serve:
+:rfc:`8684` section 3.2 gives MP_JOIN three layouts of three different lengths, so a
+single form cannot serve:
 
 ============== ========= ======== ==================================================
 Segment        Figure     Length   Payload after the 2-octet ``Kind``/``Length``
@@ -45,73 +44,60 @@ SYN/ACK        figure 6      16   subtype/rsv/``B`` 1, ``Address ID`` 1, truncat
 ACK            figure 7      24   subtype and 12 reserved bits 2, full HMAC 20
 ============== ========= ======== ==================================================
 
-Those octet counts are the makers' own (#585), and they are re-asserted here from the
-same figures, because a layout chosen correctly and then sized wrongly is no better than
-the crash.
+These octet counts are the makers' own (#585), re-asserted here from the same figures,
+since a correctly chosen layout sized wrongly is no better than the crash.
 
 Why a zero initialisation is not enough
 ----------------------------------------
 
-The obvious alternative -- give ``_flags`` a class-level default of zero so the attribute
-always exists -- is worse than the crash, and
-:class:`TCPMPTCPJoinStaleFlagsUnitTests` is the case that shows why.
-
+A class-level ``_flags`` default of zero is worse than the crash, as
+:class:`TCPMPTCPJoinStaleFlagsUnitTests` shows.
 :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>` is public and calls
-``make``, so an instance that has already *parsed* a segment can be asked to build a
-different one. That instance's ``_flags`` is already set -- to the parsed segment's flags
--- so a zero default never comes into play for it, and with the options built first it
-silently builds the option for the wrong segment. Measured that way on a parsed
-MP_JOIN-SYN instance asked to pack an MP_JOIN-ACK segment::
+``make``, so an instance that has *parsed* a segment can be asked to build another. Its
+``_flags`` already holds the parsed flags, so with the options built first it silently
+builds the option for the wrong segment. A parsed MP_JOIN-SYN instance asked to pack an
+MP_JOIN-ACK segment gives::
 
     c3500050 00000001 00000000 8010 2000 0000 0000  1e0c 10 00 00000000 00000000
 
-The header's flag octet is ``0x10``, ACK, as requested; the option is ``1e0c…``, the
-**12-octet SYN form** of figure 5, and the caller's 20-octet HMAC -- the entire
-authentication payload of figure 7's form, and the only reason to send it -- is gone,
-replaced by an all-zero phantom token and nonce. Nothing raises. A receiver gets a
-self-inconsistent segment.
+The flag octet is ``0x10``, ACK, but the option ``1e0c…`` is figure 5's **12-octet SYN
+form**: the caller's 20-octet HMAC, figure 7's whole authentication payload, is replaced
+by an all-zero token and nonce, and nothing raises. In the right order the same call
+emits ``1e18 10 00`` and the 20 HMAC octets: figure 7, length 24.
 
-Built in the right order, the same call emits ``1e18 10 00`` followed by the 20 HMAC
-octets: figure 7, length 24.
-
-So the crash is the *benign* symptom and the ordering is the defect. Resolving the flags
-first prevents both outcomes; a zero default prevents only the fresh-instance crash, and
-converts the flagless case from a crash into a spurious error while leaving the silent
-corruption exactly as it is.
+So the crash is the benign symptom and the ordering is the defect. A zero default stops
+only the fresh-instance crash, turns the flagless crash into a spurious error, and leaves
+the silent corruption.
 
 The flagless seed
 ------------------
 
-An MP_JOIN asked for on a segment with neither SYN nor ACK set ends in
-``_make_mptcp_join``'s :exc:`~pcapkit.utilities.exceptions.ProtocolError`. Reaching it
-needs a real flagless seed for the accumulator: seeded with ``cast('Enum_Flags', 0)`` --
-and :func:`typing.cast` is a runtime no-op -- ``self._flags`` would stay the plain
-:class:`int` ``0`` with no flag set, and the first membership test would raise instead::
+An MP_JOIN on a segment with neither SYN nor ACK set ends in ``_make_mptcp_join``'s
+:exc:`~pcapkit.utilities.exceptions.ProtocolError`, which needs a real flagless seed.
+Seeded with ``cast('Enum_Flags', 0)`` (:func:`typing.cast` is a runtime no-op),
+``self._flags`` stays the plain :class:`int` ``0`` and the first membership test raises::
 
     TypeError: argument of type 'int' is not a container or iterable
 
-Seeding with ``Enum_Flags(0)`` -- a real, flagless :class:`aenum.IntFlag` member, which
-compares equal to ``0`` and ORs the same way -- lets the library's own documented error
-surface. :class:`TCPMPTCPJoinFlagOrderingUnitTests` pins that it is a ``ProtocolError``,
-since a bare :exc:`TypeError` escaping the library would break the in-library exception
-contract.
+``Enum_Flags(0)``, a flagless :class:`aenum.IntFlag` member that compares and ORs like
+``0``, lets the documented error surface. :class:`TCPMPTCPJoinFlagOrderingUnitTests`
+pins the ``ProtocolError``, since a bare :exc:`TypeError` would break the in-library
+exception contract.
 
 On the read path,
-:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_data_selector` guards the flagless
-case and raises :exc:`~pcapkit.utilities.exceptions.FieldError` before
-``_read_mptcp_join`` is reached at all, and ``read`` seeds ``Enum_Flags(0)`` as well
-(#616).
+:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_data_selector` raises
+:exc:`~pcapkit.utilities.exceptions.FieldError` for the flagless case before
+``_read_mptcp_join`` is reached, and ``read`` seeds ``Enum_Flags(0)`` too (#616).
 
 Relationship to the rest of the suite
 --------------------------------------
 
 Everything here goes through the **public** constructor, ``TCP(options=[(code, kwargs)],
-…)``, or through ``pack`` on an instance that has parsed. That matters: the MP_JOIN cases
-in :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit` call
+…)``, or ``pack`` on a parsed instance. The MP_JOIN cases in
+:mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit` call
 ``_make_join_syn``/``_make_join_synack``/``_make_join_ack`` directly on a
-``TCP.__new__(TCP)``, which is precisely how they sidestep ``_make_mptcp_join`` and its
-``self._flags`` read -- so none of them can catch an inverted order. The public path is
-the one #587 is about.
+``TCP.__new__(TCP)``, bypassing ``_make_mptcp_join`` and its ``self._flags`` read, so
+none can catch an inverted order; #587 is about the public path.
 
 """
 from __future__ import annotations

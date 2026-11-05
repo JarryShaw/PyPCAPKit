@@ -7,7 +7,7 @@ declares or, where no layer declares one, from the frame's original length (#265
 #2689). Nothing recorded the cut on the message's own header, though, so rebuilt on its
 own from its data model the message verified the octets captured and read ``INVALID``
 with a ``ChecksumWarning``. Ruled on the issue: the layer records the cut, so its parse
-and its rebuild agree. ``Schema``'s own short read now covers a payload the data ends
+and its rebuild agree. ``Schema``'s own short read covers a payload the data ends
 inside, and a layer running to the end of a frame the capture cut short records the cut
 on the last of its fields holding octets.
 

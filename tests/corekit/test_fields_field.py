@@ -20,7 +20,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
     schema selector from a value it just read off the wire -- and is thus
     attacker- or corruption-controlled. Without the #554 guard,
     ``buffer[:length].rjust(length, b'\\x00')`` zero-pads up to ``length``
-    octets regardless of how little data ``buffer`` actually holds, so a
+    octets regardless of how little data ``buffer`` holds, so a
     short, otherwise unremarkable capture can declare a multi-gigabyte
     field and force that allocation.
 
@@ -141,7 +141,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         self.assertEqual(self.ceiling, 262144)
 
     def test_field_past_the_ceiling_with_a_full_buffer_is_accepted(self) -> None:
-        """A field past the ceiling is rejected only when it would actually pad.
+        """A field past the ceiling is rejected only when it would pad.
 
         If the buffer genuinely holds that much data there is nothing to
         zero-fill and nothing to refuse -- the guard fires on the padding
@@ -171,14 +171,14 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         length is enough to force a multi-gigabyte ``rjust()`` without the
         fix. ``length`` here is set to 16 GiB -- large enough that,
         if the guard were absent, comparing against the wrong thing, or
-        otherwise not actually reached, this test would try to allocate that
+        otherwise not reached, this test would try to allocate that
         much and either hang or fail with :exc:`MemoryError` rather than
         raising the expected, bounded exception. It runs under a wall-clock
         deadline rather than trusting the assertion alone to fail promptly,
         in case a future regression reintroduces the allocation instead of
         just moving the threshold.
         """
-        # 16 GiB; must never actually be allocated. ``struct`` refuses a count
+        # 16 GiB; must never be allocated. ``struct`` refuses a count
         # past ``sys.maxsize``, which is 2 GiB less one on GraalPy (#1963).
         huge_declared_length = min(2 ** 34, sys.maxsize)
         field = self.BytesField(length=huge_declared_length)
@@ -265,7 +265,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
 
         Args:
             declared: Length each field declares.
-            supplied: Octets actually handed to each field.
+            supplied: Octets handed to each field.
             limit: How many fields to try before giving up.
 
         Returns:
@@ -308,7 +308,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
 
         The figures are written out rather than read back off the module so that
         quietly loosening either constant fails here: 262,144 octets of one-off
-        allowance plus 16 octets of padding per octet actually supplied.
+        allowance plus 16 octets of padding per octet supplied.
 
         Every attempt is counted towards the octets supplied, refused ones
         included -- a refused field really did read its two octets, and charging
@@ -323,12 +323,12 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         allowance = 262144 + 16 * len(supplied) * attempts
         self.assertLessEqual(padded, allowance)
 
-        # and the bound has to actually bite on this input, or asserting it
+        # and the bound has to bite on this input, or asserting it
         # proves nothing: 200 unbounded fields would have padded 52.4 MiB.
         self.assertLess(padded, attempts * declared // 10)
 
     def test_the_amplification_against_wire_octets_is_bounded(self) -> None:
-        """The ratio #573 is actually about: retained octets per wire octet.
+        """The ratio #573 is about: retained octets per wire octet.
 
         The issue measures 10,922x per block for this shape, from a minimal
         24-octet Decryption Secrets Block. Reproduced here at field level with
@@ -364,7 +364,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
             self.assertEqual(field.unpack(b'', {}), b'\x00')
 
     def test_reading_real_octets_earns_allowance_for_padding_them(self) -> None:
-        """A parse that actually reads data is allowed to pad in proportion to it.
+        """A parse that reads data is allowed to pad in proportion to it.
 
         The one-off allowance covers a single large shortfall from a cold start,
         which is what a capture truncated at EOF needs. Reading real data is what
@@ -658,7 +658,7 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
         """The first ``kept`` octets of ``value`` as it appears on the wire.
 
         Args:
-            value: The value the capture actually held.
+            value: The value the capture held.
             width: Field width, in octets.
             byteorder: ``'big'`` or ``'little'``.
             kept: How many octets of the field were captured.
@@ -772,7 +772,7 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
         *higher* position than it occupies on the wire, so the reported value
         exceeds the truth -- by ``2 ** 24`` in the reported case. Whatever the
         width or shortfall, a short read can only ever drop information, so it
-        must never report more than the value actually held.
+        must never report more than the value held.
         """
         for width, cls, value in ((2, self.UInt16Field, 0x0102),
                                   (4, self.UInt32Field, 0x01020304),
@@ -913,7 +913,7 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
     ``length`` argument is (see the class above): :meth:`Schema.unpack
     <pcapkit.protocols.schema.Schema.unpack>` decrements
     ``packet['__length__']`` by each field's nominal width regardless of how
-    many octets the buffer actually held, and a subsequent field's callback
+    many octets the buffer held, and a subsequent field's callback
     can resolve to that negative remainder. :class:`~pcapkit.corekit.fields.
     strings._TextField.__call__` then builds a template such as ``'-5s'``
     from it with no lower bound, and :func:`struct.calcsize` cannot size
@@ -993,7 +993,7 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
         self.assertNotIn('negative length', message)
 
         # must not be a bare struct.error, and must still chain to the real
-        # one struct.calcsize actually raised.
+        # one struct.calcsize raised.
         self.assertNotIsInstance(ctx.exception, struct.error)
         self.assertIsInstance(ctx.exception.__cause__, struct.error)
 

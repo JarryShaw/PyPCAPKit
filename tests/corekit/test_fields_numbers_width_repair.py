@@ -31,7 +31,7 @@ without the fix a mis-sized width that lands on 1, 2 or 4 octets comes back from
 :func:`struct.pack` as ``struct.error: 'B' format requires 0 <= number <= 255``
 while a mis-sized 3 octets comes back from :meth:`int.to_bytes` as
 ``OverflowError: int too big to convert``. What these tests pin instead is the
-width and the octets -- the thing that is actually wrong.
+width and the octets -- the thing that is wrong.
 """
 
 from __future__ import annotations

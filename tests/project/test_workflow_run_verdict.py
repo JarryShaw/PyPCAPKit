@@ -3,11 +3,10 @@
 for the commit they build (#1643).
 
 Each chains off ``Unit Tests`` completing and checks out ``github.sha``, which
-for a ``workflow_run`` is ``main``'s tip when the event is raised -- not the commit
-the completed run verified. Conda Update 38325136710 was raised 2 s after the run
-for 9083163f5 succeeded, ran on 2e941bbb7 (with later pull requests merged), and
-pushed f4f94bcad at 00:03:38Z; 2e941bbb7's own run 38323130015 finished at
-00:13:35Z.
+for a ``workflow_run`` is ``main``'s tip when the event is raised, not the commit
+the completed run verified. Conda Update 38325136710, raised as 9083163f5's run
+succeeded, ran on 2e941bbb7, which had later pull requests merged, and pushed
+f4f94bcad before 2e941bbb7's own run 38323130015 finished.
 
 Two layers, as in :mod:`tests.project.test_release_gates`:
 

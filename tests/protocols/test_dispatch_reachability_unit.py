@@ -1,31 +1,28 @@
 # -*- coding: utf-8 -*-
 """Every class that declares a dispatch code is reachable under it.
 
-GitHub issue #548 asks for this directly: a test asserting that every
-``TransType`` member with an implementing class is reachable through dispatch
-catches the next missing registration, not just one.
+GitHub issue #548 asks for this: asserting that every ``TransType`` member with an
+implementing class is reachable through dispatch catches the next missing registration,
+not just one.
 
-:file:`test_dispatch_registry_unit.py` walks the problem from the other end: it
-takes each ``__proto__`` entry that *exists* and checks the class it
-names can parse a packet. That cannot see a class nobody registered at all
--- #436's :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` case, a class
-reachable from no table. This module walks it from the class side instead -- every
-:class:`~pcapkit.protocols.protocol.ProtocolBase` descendant whose
-:meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns an enum member
-is *claiming* to be reachable under that code, so the claim is checked.
+:file:`test_dispatch_registry_unit.py` checks that the class each existing ``__proto__``
+entry names can parse a packet, which cannot see a class nobody registered, such as
+#436's :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`. This module starts from
+the class side: every :class:`~pcapkit.protocols.protocol.ProtocolBase` descendant whose
+:meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns an enum member *claims*
+to be reachable under that code, and the claim is checked.
 
-Which registry a code belongs in is not restated here. It is read off the enum
-type's own ``__proto_dest__``, the declaration that backs ``code=`` (#570,
-#2392), so the audit and the registration mechanism cannot drift apart: an enum
-type that declares one gets audited here the same day.
+The registry a code belongs in is read off the enum type's own ``__proto_dest__``, the
+declaration that backs ``code=`` (#570, #2392), so the audit and the registration
+mechanism cannot drift apart: an enum type that declares one is audited here too.
 
 An index is the class's own LinkType, EtherType or TransType value, or AppType
 port, bar Netlink's ARPHRD type (#2627), whether or not anything dispatches it
 there, so a claim nothing reaches is an entry in :data:`UNBOUND` giving the
 reason, checked in both directions.
 
-Nothing is parsed and no capture under :file:`examples/captures/` is read, so
-this belongs to the unit tier.
+Unit tier: nothing is parsed and no capture is read.
+
 
 """
 from __future__ import annotations

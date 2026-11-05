@@ -248,9 +248,8 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 raise ProtocolError(f'{self.alias}: {schema.type!r} is not an {self.alias} '
                                     f'message ({length} octets)')
 
-            # NOTE: The classify check above only accepts a Query of 12 or more
-            # octets, which is exactly when ``query_extension_present`` parses
-            # ``ext`` -- so it is never ``None`` here.
+            # NOTE: The classify check above accepts only a Query of 12 or more octets, exactly when
+            # ``query_extension_present`` parses ``ext``, so it is never ``None`` here.
             ext = cast('Schema_QueryExtension', body.ext)
             resv = ext.flags['resv']
             s_flag = bool(ext.flags['s_flag'])

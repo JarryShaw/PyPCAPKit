@@ -3,7 +3,7 @@
 
 :file:`tests/dumpkit/test_common_unit.py` pins what
 :meth:`~pcapkit.dumpkit.common.make_dumper.DictDumper.object_hook` returns. This
-module pins the only thing that actually matters about it -- that the file on
+module pins the only thing that matters about it -- that the file on
 disk parses -- against a fixture that, without the fix, proves it does not.
 
 :file:`examples/captures/test.pcapng` carries a decryption secrets block whose

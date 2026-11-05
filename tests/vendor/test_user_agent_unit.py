@@ -83,7 +83,7 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
 #: Tokens that only appear in a browser's ``User-Agent``. The point is an agent
-#: that says what the client actually is, so any of these appearing in it means
+#: that says what the client is, so any of these appearing in it means
 #: the descriptive agent has been replaced by a spoof. ``Gecko`` covers both the real
 #: token and the ``like Gecko`` every Chromium agent carries.
 BROWSER_TOKENS = ('Mozilla', 'AppleWebKit', 'Chrome', 'Chromium', 'Safari',
@@ -140,7 +140,7 @@ class _FakeMetadata:
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class VendorUserAgentTests(unittest.TestCase):
-    """The descriptive agent, and that both fetch paths actually send it."""
+    """The descriptive agent, and that both fetch paths send it."""
 
     if TYPE_CHECKING:
         default: 'Any'
@@ -329,7 +329,7 @@ class VendorUserAgentTests(unittest.TestCase):
         self.assertIn(self.default.PROJECT_URL, agent,
                       'no label matched, so the fallback URL should have been used')
 
-    # -- that it is actually sent -------------------------------------------
+    # -- that it is sent -------------------------------------------
 
     def test_direct_branch_sends_the_user_agent(self) -> None:
         crawler = self._crawler()

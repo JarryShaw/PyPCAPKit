@@ -230,7 +230,7 @@ class CallableLengthTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class SubclassCallableLengthTests(unittest.TestCase):
-    """The same field classes as they are actually used in the schemas."""
+    """The same field classes as they are used in the schemas."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)

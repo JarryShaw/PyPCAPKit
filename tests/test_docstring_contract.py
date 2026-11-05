@@ -24,7 +24,7 @@ and says so:
 :meth:`DocstringParameterTests.test_documented_parameters_exist`
     A documented name that is not a parameter *and* has no ``**kwargs`` to
     absorb it is a guaranteed :exc:`TypeError` at call time. No intent needs to
-    be guessed: ``Frame.register(code=..., module=...)`` simply fails. This is
+    be guessed: ``Frame.register(code=..., module=...)`` fails. This is
     the invariant with no false positives, so it is the one asserted hardest.
 
 :meth:`DocstringParameterTests.test_section_headers_are_not_swallowed`
@@ -137,7 +137,7 @@ OTHER_SECTIONS = frozenset({
 })
 
 #: Sentences this package quotes verbatim from :rfc:`8200`, each mapped to the
-#: section that actually contains it. Keys are lowercased and whitespace is
+#: section that contains it. Keys are lowercased and whitespace is
 #: normalised before matching, because every one of these quotes is line-wrapped
 #: across a docstring and the leading ``Length of`` is routinely lowercased to
 #: fit the sentence it is embedded in.
@@ -340,7 +340,7 @@ def _raised_names(node: 'ast.AST') -> 'set[str]':
       documented functions raise inside a nested ``def``.
 
     That second one reads like a bug and is the right answer for a nested
-    ``def`` that is a local helper the enclosing body actually calls, so the
+    ``def`` that is a local helper the enclosing body calls, so the
     exception really does propagate out of the enclosing function:
     :meth:`HIP._read_param_locator_set
     <pcapkit.protocols.internet.hip.protocol.HIP._read_param_locator_set>` documents
@@ -496,7 +496,7 @@ def misattributed_quotes() -> 'list[Finding]':
     """Quoted :rfc:`8200` sentences whose introducing citation names another section.
 
     "Introducing" is the nearest ``8200#section-`` citation *before* the quote in
-    the same docstring, which is how these paragraphs are actually written --
+    the same docstring, which is how these paragraphs are written --
     ``Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field ... counts
     *"the length of the Option Data field of this option, in octets"*``. Taking
     the nearest preceding one rather than asking whether the right section is

@@ -332,10 +332,8 @@ class OptionType(EnumRegistry, StrEnum):
             raise ValueError(f'{value!r} is not a registered {cls.__name__} in namespace '
                              f'{namespace!r} or opt; use {cls.__name__}.register() to mint one')
 
-        # NOTE: ``aenum.extend_enum`` builds a throwaway member through
-        # :meth:`__new__` to learn its value, and :meth:`__new__` files that
-        # throwaway in :attr:`__members_ns__` over ``member``. The alias
-        # resolves to ``member``, so ``member`` is put back.
+        # NOTE: ``aenum.extend_enum``'s throwaway member, built via :meth:`__new__`, overwrites
+        # ``member`` in :attr:`__members_ns__`; the alias resolves to ``member``, so restore it.
         member_ns = member.opt_name.split('_', maxsplit=1)[0]
         try:
             return extend_enum(cls, name, value, member.opt_name)
@@ -373,15 +371,8 @@ class OptionType(EnumRegistry, StrEnum):
             temp_ns.update(OptionType.__members_ns__.get(namespace, {}))
             if key in temp_ns:
                 return temp_ns[key]
-            # NOTE: GitHub issue #860. An extend_enum(...) here would mint a
-            # permanent member as a side effect of a mere lookup -- exactly
-            # the ``get``/``_missing_`` minting the owner's ruling forbids,
-            # here on the wire-facing path
-            # (:meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG._make_pcapng_options`
-            # calls this with raw option-code bytes off the wire).
-            # ``_unregistered_member`` never touches ``__members_ns__``
-            # either, so a genuinely unknown option code grows neither
-            # lookup table.
+            # NOTE: ``extend_enum`` would mint a member per unknown wire code ``PCAPNG._make_pcapng_options`` passes
+            # here (#860); ``_unregistered_member`` never touches ``__members_ns__``, so neither lookup table grows.
             return OptionType._unregistered_member(key, '%s_unknown' % namespace)
         if key in OptionType.__members__:
             return getattr(OptionType, key)
@@ -389,12 +380,8 @@ class OptionType(EnumRegistry, StrEnum):
         # string, so ``get(member.value)`` resolves it as ``cls(value)`` would.
         if key in OptionType._value2member_map_:  # type: ignore[misc]
             return OptionType._value2member_map_[key]  # type: ignore[misc,return-value]
-        # NOTE: same ruling, the str-keyed path: rather than mint ``key``
-        # itself as the member's name with ``default`` as its value -- neither
-        # ``get`` nor ``_missing_`` has enough information to register one
-        # properly, as there is no namespace, description or anything else
-        # IANA would attach to it -- this returns an unregistered
-        # pseudo-member with the same attributes such a mint would set.
+        # NOTE: same ruling: a mint here would lack the namespace and description IANA attaches, so
+        # this returns an unregistered pseudo-member with the attributes a mint would set.
         return OptionType._unregistered_member(default, key)
 
     @classmethod

@@ -82,7 +82,7 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
 
     A parser defect that degenerates into a loop making no progress -- GitHub
     issue #431 is one -- offers a test nothing to assert on: the call under test
-    simply never returns. A test written for it without a deadline does not fail,
+    never returns. A test written for it without a deadline does not fail,
     it *wedges*, taking the rest of the run with it, so the deadline is as much a
     part of the regression test as the assertion is.
 
@@ -379,7 +379,7 @@ def ensure_package(name: str, path: pathlib.Path) -> types.ModuleType:
     """
     module = sys.modules.get(name)
     if module is None:
-        # Checked only on the path that actually writes to ``sys.modules``: a
+        # Checked only on the path that writes to ``sys.modules``: a
         # caller handed a name that already resolves has nothing to put back, and
         # failing it would be a complaint about pollution that is not happening.
         _require_arranged_restore('ensure_package')
@@ -846,7 +846,7 @@ def restore_modules_after(test: 'unittest.TestCase',
 
     Exact in both directions, because :func:`restore_modules` is. Absence is the
     direction a ``dict.update`` of the snapshot would silently get wrong, and it
-    is the direction issue #674 actually was: ``pcapkit``, ``pcapkit.corekit``
+    is the direction issue #674 was: ``pcapkit``, ``pcapkit.corekit``
     and ``pcapkit.utilities`` did not exist before
     :func:`bootstrap_core_modules` ran, so they must not exist after it.
 

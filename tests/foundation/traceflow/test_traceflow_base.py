@@ -271,7 +271,7 @@ class TraceFlowBaseTests(unittest.TestCase):
         register.assert_not_called()
         self.assertIn('traceflow', str(caught.exception))
 
-        # ``name=`` is the mistake a user actually makes, by analogy with
+        # ``name=`` is the mistake a user makes, by analogy with
         # ``Engine``, and it is one of the four colliding names -- so which
         # exception surfaces is version-dependent. Pinned rather than skipped.
         expected = UnsupportedCall if sys.version_info >= (3, 11) else TypeError

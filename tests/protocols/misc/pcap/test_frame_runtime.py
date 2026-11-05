@@ -90,15 +90,12 @@ class PcapFrameRuntimeTests(unittest.TestCase):
             self.assertEqual(bytes(frame), expected)
             self.assertEqual(frame.packet.header, expected[:16])
             self.assertEqual(frame.packet.payload, expected[16:])
-            # the nested layer is parsed from the schema's payload rather than
-            # from the frame's raw data, so this pins the two to each other.
-            #
-            # Sliced by ``cap_len`` rather than by ``len``: the octets in the
-            # file are the *captured* ones, and ``len`` is the on-wire length
-            # (#618), which for a truncated frame runs past the end of the
-            # record. ``arp.pcap`` is not truncated, so the two are equal here
-            # and the choice changes no result -- which is exactly why it needs
-            # stating.
+            # The nested layer is parsed from the schema's payload, not the
+            # frame's raw data, so this pins the two to each other. It slices by
+            # ``cap_len``, the captured octets, not the on-wire ``len`` (#618),
+            # which runs past a truncated record; ``arp.pcap`` is untruncated, so
+            # the two agree here, which is why the choice needs stating.
+
             self.assertEqual(bytes(frame.payload), expected[16:16 + frame.info.cap_len])
 
 

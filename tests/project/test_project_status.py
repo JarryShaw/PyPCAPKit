@@ -2,8 +2,7 @@
 """Tests for :file:`util/project_status.py` and the workflow that runs it.
 
 :file:`.github/workflows/project-status.yml` sets each item's *Status* on the
-project board from its state labels. What is checkable about it from the tree
-has a class of its own:
+project board from its state labels. What the tree can check:
 
 * :class:`TestMapping` -- :func:`status_for` gives the documented status for every
   row of the table, precedence included.
@@ -17,14 +16,12 @@ has a class of its own:
   the item number. Asserted over the file, because nothing at run time would
   announce the mistake. :class:`TestScannerFailsClosed` holds the line scan those
   assertions read to refusing any YAML it cannot read with certainty.
-  :class:`TestConcurrency` evaluates the ``concurrency:``
-  expressions per event and pins that no run is cancelled, so the queueing policy
-  is checked rather than eyeballed.
+  :class:`TestConcurrency` evaluates the ``concurrency:`` expressions per event
+  and pins that no run is cancelled.
 
-:class:`TestBoardSync` drives the script against a fake GraphQL endpoint, which is
-as close to the live board as a unit test may get: the tier has no network and no
-token, and nothing here may mutate the real project. Whether the queries are
-accepted by GitHub's schema is therefore *not* tested -- only that the script
+:class:`TestBoardSync` drives the script against a fake GraphQL endpoint, since the
+tier has no network and no token and nothing here may mutate the real project. So
+whether GitHub's schema accepts the queries is *not* tested, only that the script
 issues the mutations the mapping calls for, and none when the board is already
 right.
 

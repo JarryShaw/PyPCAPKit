@@ -22,7 +22,7 @@ Python 3.11 and later nothing this file imports has pulled :mod:`aenum` in alrea
 -- the branch the *real* interpreter takes is ``from enum import StrEnum`` -- so the
 faked load performs the first ``import aenum`` of the process. Every
 :mod:`aenum` enumeration built afterwards -- including
-``TransportProtocol``, at the time in ``pcapkit/const/reg/apptype.py`` -- took the
+``TransportProtocol`` -- took the
 ``pyver < PY3_6`` path in ``aenum/_enum.py`` and died with ``AttributeError:
 'TransportProtocol' object has no attribute '__set_name__'``, so a later
 ``import pcapkit`` failed outright.
@@ -38,7 +38,7 @@ Hence the guards here, none of which is about the shims themselves:
    test in this file, so the invariant is re-checked after each one rather than
    only where it is broken.
 
-One honest limitation, because it decides where the regression is actually caught.
+One honest limitation, because it decides where the regression is caught.
 Both guards are **vacuous under a normal** :program:`pytest` **run**, and not by
 accident: :func:`tests.conftest.pytest_sessionstart` imports :mod:`pcapkit` before
 the first test, which imports :mod:`aenum` under the true version, so there is no
@@ -123,7 +123,7 @@ __tier__ = 'ALL'
 #: :mod:`threading` is on the list because :meth:`CompatTests.load_compat_as`
 #: reads :data:`threading.excepthook` for PyPy's stand-in ``_thread._excepthook``.
 #:
-#: Some of those never actually surface, and *why* is the point.
+#: Some of those never surface, and *why* is the point.
 #: :mod:`collections.abc`, :mod:`contextlib` and :mod:`pathlib` are imported at
 #: module scope by :mod:`tests._support`, and :mod:`enum` by this module itself. It
 #: is not the runtime that keeps them warm: under ``python -S`` none of them is

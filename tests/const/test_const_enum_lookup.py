@@ -2,7 +2,7 @@
 """Registry-wide regression tests for :mod:`pcapkit.const` enum lookups.
 
 GitHub issue #492 found three lookup defects hiding under :mod:`pcapkit.const`:
-a value that a registry actually defines being rejected by the generated
+a value that a registry defines being rejected by the generated
 :class:`~aenum.IntEnum` (:class:`~pcapkit.const.ipv4.router_alert.RouterAlert`
 and :class:`~pcapkit.const.ipx.socket.Socket`, both for value ``0``), and a
 ``_missing_`` lookup method missing its ``@classmethod`` decorator
@@ -77,7 +77,7 @@ __tier__ = 'ALL'
 
 #: Fully qualified names of the :class:`~aenum.IntEnum` classes under
 #: :mod:`pcapkit.const` for which rejecting ``0`` is *correct*, because their
-#: registries simply do not define ``0`` (registries reserving ``0`` and
+#: registries do not define ``0`` (registries reserving ``0`` and
 #: starting real assignments at 1). Confirmed against the IANA/RFC registries
 #: backing each one; see GitHub issue #492. FTP ``ReturnCode`` and HTTP
 #: ``StatusCode`` left the set with GitHub issue #1443: their wire fields are
@@ -136,7 +136,7 @@ def _iter_const_int_enums() -> 'list[type]':
 
     Walks every submodule of :mod:`pcapkit.const` and collects the
     :class:`~aenum.IntEnum` subclasses (excluding :class:`~aenum.IntFlag`,
-    which is a different value-lookup contract) that are actually *defined*
+    which is a different value-lookup contract) that are *defined*
     in the module being walked, rather than merely imported/re-exported by
     it -- so each registry enum is counted exactly once.
 
@@ -398,7 +398,7 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
 
         ``pcapkit/const/`` is generated from ``pcapkit/vendor/``, so the
         committed tree passing the tests above is not evidence that the
-        templates agree with it -- the next crawl would simply revert them.
+        templates agree with it -- the next crawl would revert them.
         Renders each of the four templates with the registry data taken back out
         of the module generated from it, and compares the whole file character
         for character. Needs no network: the crawl supplies only the enumeration

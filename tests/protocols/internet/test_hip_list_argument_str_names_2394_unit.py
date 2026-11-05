@@ -15,7 +15,7 @@ name, default, namespace and reversed group explicitly; resolved one item at a
 time, it builds the octets the member does.
 
 :meth:`HIPListArgumentStrNameTests.test_every_list_argument_maker_has_a_case`
-reads the list-item sites off ``hip.py`` itself rather than trusting the table
+reads the list-item sites off ``hip/protocol.py`` itself rather than trusting the table
 below, so a further parameter added with the same shape cannot land without a
 case here.
 
@@ -62,7 +62,7 @@ HIP_VERSION = {577: 1}
 #: carrying it is evidence the item reached the wire rather than that a default
 #: survived. Keyed by maker rather than by parameter because
 #: :meth:`HIPListArgumentStrNameTests.test_every_list_argument_maker_has_a_case`
-#: compares these keys against the makers it finds in ``hip.py``.
+#: compares these keys against the makers it finds in ``hip/protocol.py``.
 CASES = {
     '_make_param_dh_group_list': (
         'DH_GROUP_LIST', 'groups', 'pcapkit.const.hip.group.Group',
@@ -292,7 +292,7 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         self.assertEqual(expected[40:].hex(), '03a8000201010000')
 
     def test_every_list_argument_maker_has_a_case(self) -> None:
-        """Every list-item ``_make_index`` site in ``hip.py`` has a case.
+        """Every list-item ``_make_index`` site in ``hip/protocol.py`` has a case.
 
         The set is read off the makers rather than listed: a site is a call to
         :meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index` whose value

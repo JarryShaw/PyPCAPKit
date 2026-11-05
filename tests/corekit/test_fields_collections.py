@@ -381,7 +381,7 @@ class ListFieldSchemaItemTests(unittest.TestCase):
         The callback is evaluated regardless: ``field = self._item_type(packet)``
         runs it for its side effect even without the fix. So what this proves is
         not that the callback *fires*, but that the mutation it made on its copy
-        is what ``unpack`` actually used. It alternates ``field._schema`` between
+        is what ``unpack`` used. It alternates ``field._schema`` between
         two otherwise-identical schemas, one per item; unpacking from
         ``self._item_type`` instead would use the schema fixed at construction
         time for every item.

@@ -41,7 +41,7 @@ overshoot:
 
 * :meth:`ManualIntervenePromptTests.test_saving_the_page_still_completes_the_fetch`
   and :meth:`~ManualIntervenePromptTests.test_the_prompt_still_repeats_until_the_page_appears`
-  drive the path an operator actually uses, including the "not saved yet, press
+  drive the path an operator uses, including the "not saved yet, press
   ENTER again" round trip the loop exists for.
 * :meth:`~ManualIntervenePromptTests.test_keyboard_interrupt_still_aborts_as_itself`
   pins that :exc:`KeyboardInterrupt` is *not* swallowed into a fetch error.
@@ -592,7 +592,7 @@ class ManualIntervenePromptTests(unittest.TestCase):
 
         self.assertEqual(len(calls), 1)
 
-    # -- the path an operator actually uses ----------------------------------
+    # -- the path an operator uses ----------------------------------
 
     def test_saving_the_page_still_completes_the_fetch(self) -> None:
         # A fix for a runaway loop is easy to overshoot into one that never

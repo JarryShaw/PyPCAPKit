@@ -20,7 +20,7 @@ behaviour. This is a repository-hygiene violation, not a bug in the code under
 test -- the tests in question very likely pass on the machine that is running
 them -- so the useful outcome is one loud, explanatory message at the top of the
 output rather than a red test buried in a summary. Only modules the current
-invocation actually collected are checked, so a narrow run is never stopped by a
+invocation collected are checked, so a narrow run is never stopped by a
 file it was not going to run.
 
 The static pass here and the runtime pass in :func:`tests._support.sample_path`

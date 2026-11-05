@@ -36,7 +36,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 
 def _importable(*modules: str) -> bool:
-    """Test if every named module can actually be imported.
+    """Test if every named module can be imported.
 
     :func:`importlib.util.find_spec` is not enough for ``pypcapfile``: its released
     0.12.0 imports the :mod:`imp` module, removed in Python 3.12, so it can be

@@ -243,7 +243,7 @@ class IPAddressFieldTests(unittest.TestCase):
                     self.assertIsInstance(context.exception, BaseError)
                     self.assertIn('must not be a bool', str(context.exception))
                     self.assertIn(repr(value), str(context.exception))
-                    # the escape hatch the message points at must actually work
+                    # the escape hatch the message points at must work
                     self.assertIn(f'int({value!r})', str(context.exception))
 
         # the escape hatch: int(True)/int(False) still convert correctly,

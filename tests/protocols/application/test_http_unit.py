@@ -224,25 +224,22 @@ class HTTPUnitTests(unittest.TestCase):
     def test_http_construction_reaches_the_versioned_make_callee(self) -> None:
         """Regression test for GH-452, using the corrected reproduction.
 
-        The issue's original reproduction called ``HTTP.make(version=1,
-        ...)`` directly on the class -- but the *outer* ``HTTP.make`` is
-        itself an ordinary instance method, so that call fails at the outer
-        method and never demonstrates anything about the inner
-        ``protocol.make(**kwargs)`` dispatch this issue is actually about.
+        The issue's reproduction called ``HTTP.make(version=1, ...)`` on the
+        class, but the *outer* ``HTTP.make`` is an instance method, so that
+        call fails there and says nothing about the inner
+        ``protocol.make(**kwargs)`` dispatch the issue is about.
 
-        The real, supported entry point is construction:
-        :meth:`ProtocolBase.__init__` (the implementation behind its
-        ``**kwargs``-only overload) calls ``self.pack(**kwargs)``, through
-        :meth:`~ProtocolBase.__post_init__`, when built with no ``file``, and
-        :meth:`ProtocolBase.pack` calls
-        ``target.make(**kwargs)`` on :meth:`~ProtocolBase._packing_target`,
-        which while constructing is the instance itself -- a *bound* call on the
-        outer ``HTTP`` instance, which is what actually reaches the inner
-        ``protocol.make(**kwargs)`` dispatch. So the reachable reproduction is
-        ``HTTP(version=1, ...)``, not ``HTTP.make(...)``. Without the fix it
-        raises ``TypeError: HTTP.make() missing 1 required positional argument:
-        'self'`` -- the *same* exception text as the wrong reproduction, but
-        reached legitimately.
+        The supported entry point is construction: with no ``file``,
+        :meth:`ProtocolBase.__init__` (behind its ``**kwargs``-only overload)
+        calls ``self.pack(**kwargs)`` through
+        :meth:`~ProtocolBase.__post_init__`, and :meth:`ProtocolBase.pack`
+        calls ``target.make(**kwargs)`` on
+        :meth:`~ProtocolBase._packing_target`, the instance itself while
+        constructing. That *bound* call reaches the inner dispatch, so the
+        reproduction is ``HTTP(version=1, ...)``. Without the fix it raises
+        ``TypeError: HTTP.make() missing 1 required positional argument:
+        'self'``, the same text as the wrong reproduction, reached legitimately.
+
 
         The callee is proven reached by its output, which "no ``TypeError``"
         alone would not prove: ``make`` builds ``b'GET / HTTP/1.1\\r\\n\\r\\n'``,
@@ -615,22 +612,17 @@ class HTTPUnitTests(unittest.TestCase):
             HTTP(io.BytesIO(raw), len(raw))
         self.assertIn('9-octet frame header', str(ctx.exception))
 
-        # And a preface followed by a frame that trips the #805 residual -- a
-        # sixteen-octet GOAWAY, whose fixed ``stream`` and ``error`` fields alone
-        # want eight octets after the header -- must come back catchable.
-        # ``FieldBase.length`` raises ``ProtocolError`` itself on a negative
-        # resolved length (#811), instead of letting a bare :exc:`struct.error`
-        # escape from :func:`struct.calcsize`.
-        # So the ``debug`` field -- whose length is ``pkt['__length__']`` minus
-        # the fixed ``stream``/``error`` octets, negative once the declared frame
-        # length outruns this 16-octet buffer -- raises that ``ProtocolError``
-        # directly, and ``http.py``'s dispatcher (``except ProtocolError: raise``)
-        # passes it through unchanged rather than wrapping it as
-        # ``'HTTP/2: invalid format'``, exactly as it does for the
-        # '9-octet frame header' case above. As #814 requires, it is a catchable
-        # ``BaseError``, not a bare :exc:`struct.error`, and chained to the
-        # original one via ``__cause__``, with the specific message #811
-        # provides.
+        # A preface followed by a frame tripping the #805 residual -- a
+        # sixteen-octet GOAWAY, whose fixed ``stream`` and ``error`` fields want
+        # eight octets after the header -- must come back catchable.
+        # ``FieldBase.length`` raises ``ProtocolError`` on a negative resolved
+        # length (#811) rather than let :exc:`struct.error` escape
+        # :func:`struct.calcsize`. The ``debug`` field's length,
+        # ``pkt['__length__']`` minus the fixed octets, goes negative once the
+        # declared length outruns this buffer, and ``http/protocol.py``'s dispatcher
+        # (``except ProtocolError: raise``) passes the error through unwrapped,
+        # as for the '9-octet frame header' case above. Per #814 it is a
+        # catchable ``BaseError`` chained via ``__cause__``, with #811's message.
         import struct
 
         from pcapkit.utilities.exceptions import BaseError
@@ -724,8 +716,8 @@ class HTTPUnitTests(unittest.TestCase):
 
         The predicate classifies and the parser parses, and they are two
         statements of the same rule -- which is why the two share one copy of
-        ``_RE_METHOD``/``_RE_VERSION``/``_RE_STATUS``, defined in ``http.py``
-        beside the predicate and imported by ``httpv1.py`` (#1519). Drift either way is a defect: a predicate looser
+        ``_RE_METHOD``/``_RE_VERSION``/``_RE_STATUS``, defined in ``http/protocol.py``
+        beside the predicate and imported by ``httpv1/protocol.py`` (#1519). Drift either way is a defect: a predicate looser
         than the parser classifies payloads the parser then refuses, and a
         tighter one hands real HTTP/1 to a later arm, which is the mislabel #787
         and #800 are both about.
@@ -1632,19 +1624,17 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual([name for name in Method._member_map_
                           if name.upper() == 'GET'], ['GET'])
 
-        # GitHub issue #860: a genuinely unknown method does not register
-        # at all -- the owner's ruling is that ``get``/``_missing_`` have no
-        # way to supply ``safe``/``idempotent``, so minting one would
-        # register a permanently hollowed-out member; only ``register()``
-        # can do that properly. The *value* keeps the caller's own casing
-        # (the same convention :class:`~pcapkit.const.ftp.command.FEATCode`
-        # uses) -- only the *name* is canonicalised -- so a repeated call
-        # with the same casing is *equal* but never *identical* (nothing is
-        # cached to be identical to), while a different-case call is a
-        # genuinely different value and is correctly *not* equal. A minting
-        # cache would return the first casing seen for every later call
-        # regardless of case, which is exactly the "registered enum out of
-        # an unrecognised value" #860 rules out.
+        # GitHub issue #860: an unknown method does not register. The owner
+        # ruled that ``get``/``_missing_`` cannot supply ``safe``/``idempotent``,
+        # so minting would register a hollow member; only ``register()`` can.
+        # The *value* keeps the caller's casing, as
+        # :class:`~pcapkit.const.ftp.command.FEATCode` does, and only the *name*
+        # is canonicalised: a repeat with the same casing is *equal* but not
+        # *identical* (nothing is cached), and a different casing is *not*
+        # equal. A minting cache would return the first casing seen for every
+        # later call, the "registered enum out of an unrecognised value" #860
+        # rules out.
+
         unknown = Method.get('frob')
         self.assertEqual(unknown._name_, 'FROB')
         self.assertEqual(unknown, 'frob')
@@ -1679,7 +1669,7 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual(match.group('method') if match else None, expected)
 
     def test_httpv1_read_header_uses_the_captured_method(self) -> None:
-        """``httpv1.py`` must hand ``Method.get`` the captured group, not the whole
+        """``httpv1/protocol.py`` must hand ``Method.get`` the captured group, not the whole
         ``para1``, or a prefix match lets a bad token through -- #583.
 
         Both halves are asserted together because either alone still gives a
@@ -2448,29 +2438,23 @@ class HTTPUnitTests(unittest.TestCase):
 
         Guards against ``SettingsFrame.settings`` passing the bare
         ``SettingPair`` *class* as ``ListField``'s ``item_type``, where every
-        sibling
-        (``tcp.py``'s ``SACK.sack``, ``hip.py``, ``mh.py``'s
-        ``CGAParametersOption.parameters``, ``sctp.py``'s
-        ``gap_blocks``/``dup_tsn``) wraps its schema item in a
+        sibling (TCP's ``SACK.sack``, HIP's, MH's
+        ``CGAParametersOption.parameters``, SCTP's ``gap_blocks``/``dup_tsn``)
+        wraps its schema item in a
         :class:`~pcapkit.corekit.fields.misc.SchemaField`. A bare
-        ``SchemaMeta`` is not a field instance, so ``ListField.unpack``'s
-        schema branch -- ``field = self._item_type(packet)`` -- would construct
-        a ``SettingPair`` from the packet *dict* instead of configuring a
-        per-item field, and the ``isinstance(self._item_type, SchemaField)``
-        check that picks the schema branch is ``False`` for a bare class in the
-        first place, so it would fall through to the plain-field branch and
-        fail there instead: ``field.length`` does not exist on a
-        ``SettingPair`` instance.
+        ``SchemaMeta`` fails ``ListField.unpack``'s
+        ``isinstance(self._item_type, SchemaField)`` check, so it falls through
+        to the plain-field branch and fails there: ``field.length`` does not
+        exist on a ``SettingPair`` instance.
 
-        This is a unit-level check on the field wiring, not an end-to-end
-        ``HTTPv2`` round trip. The round trip itself passes -- there is
-        no ``EXPECTED_FAILURES`` entry for ``httpv2-frame/SETTINGS``, and
-        the generator's own round trip for it reports ``OK``. What a round
-        trip never exercises is a bare ``SettingsFrame(...).pack()`` called
-        with no enclosing packet: that raises ``KeyError: 'flags'``,
-        from ``FrameType.post_process``'s ``packet['flags'][name]`` lookup,
-        which has no ``flags`` to read without a real header above it. That
-        is an unsupported invocation, not a defect in the round trip.
+        This checks the field wiring, not an ``HTTPv2`` round trip, which
+        passes: ``httpv2-frame/SETTINGS`` has no ``EXPECTED_FAILURES`` entry
+        and the generator's round trip reports ``OK``. A bare
+        ``SettingsFrame(...).pack()`` with no enclosing packet raises
+        ``KeyError: 'flags'`` from ``FrameType.post_process``'s
+        ``packet['flags'][name]`` lookup; that is an unsupported invocation,
+        not a round-trip defect.
+
         """
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.protocols.application.httpv2.schema import SettingPair, SettingsFrame
@@ -2649,13 +2633,10 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(len(FrameType.Flags.__members__), 0)
 
         # What makes the guard *necessary* is version-dependent, so it is
-        # asserted as such rather than unconditionally. The 3.11 enum rewrite
-        # made a memberless ``enum.Flag`` subclass refuse ``Flags(0)``
-        # outright, where earlier interpreters handed back a pseudo-member --
-        # ``Enum.__new__`` gained ``if not cls._member_map_: raise TypeError``
-        # in 3.11, which runs *before* the ``_missing_`` hook
-        # that used to manufacture one. Measured either side of the boundary
-        # rather than taken from a changelog:
+        # asserted per version. From 3.11, ``Enum.__new__`` raises ``TypeError``
+        # for a memberless ``enum.Flag`` subclass (``if not cls._member_map_``)
+        # before the ``_missing_`` hook that earlier interpreters used to hand
+        # back a pseudo-member. Measured either side of the boundary:
         #
         #   3.8.20   Flags(0) -> OK <Flags.0: 0>
         #   3.9.25   Flags(0) -> OK <Flags.0: 0>
@@ -2664,9 +2645,8 @@ class HTTPUnitTests(unittest.TestCase):
         #   3.12.13  Flags(0) -> TypeError: ... has no members; specify `names=()` ...
         #   3.14.7   Flags(0) -> TypeError: ... has no members; specify `names=()` ...
         #
-        # 3.12 only reworded the message; the refusal itself starts at 3.11.
-        # The guard keys on the memberless-ness above rather than on this, so
-        # it is correct on every supported interpreter either way.
+        # 3.12 only reworded the message. The guard keys on memberless-ness,
+        # not the version, so it is correct on every supported interpreter.
         if sys.version_info >= (3, 11):
             with self.assertRaises(TypeError):
                 FrameType.Flags(0)

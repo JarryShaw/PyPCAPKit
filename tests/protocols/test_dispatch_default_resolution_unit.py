@@ -1,44 +1,38 @@
 """Regression tests for GitHub issue #574.
 
-A next layer code nobody registered resolves to the fallback
-:class:`~pcapkit.corekit.module.ModuleDescriptor` the registry's default factory
-produces -- normally :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. That resolution is
-deliberately **not** written back into the registry, because the registry is a
-class-level :class:`collections.defaultdict` and recording a miss in it is
-GitHub issue #421's defect, guarded at this layer by pull request #426, at the
-option, chunk and block registries by pull request #428, and at the schema layer
-by pull request #560. The cost of not writing it back is that
-every unrecognised frame resolves the same descriptor again. A registered
-descriptor is not written back either (GitHub issue #1559), so an extraction of
-:file:`many_interfaces.pcapng` performs 296 resolutions, 48 of them fallbacks.
+An unregistered next layer code resolves to the fallback
+:class:`~pcapkit.corekit.module.ModuleDescriptor` the registry's default factory produces,
+normally :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. That resolution is deliberately
+**not** written back: the registry is a class-level :class:`collections.defaultdict`, and
+recording a miss in it is GitHub issue #421's defect, guarded at this layer by pull request
+#426, at the option, chunk and block registries by #428, and at the schema layer by #560.
+A registered descriptor is not written back either (GitHub issue #1559), so every frame
+resolves its descriptor again: an extraction of :file:`many_interfaces.pcapng` performs 296 resolutions,
+48 of them fallbacks.
 
-GitHub pull request #563 proposed paying that cost with a class-level cache of
-resolved classes and no invalidation, under which an :func:`importlib.reload`
-leaves it serving the pre-reload class forever. These
-tests pin the shape taken instead: the repeats are cheap because
-:attr:`ModuleDescriptor.klass <pcapkit.corekit.module.ModuleDescriptor.klass>`
-reads :data:`sys.modules` rather than re-entering
-:func:`importlib.import_module`, and nothing anywhere retains the class.
+GitHub pull request #563 proposed a class-level cache of resolved classes with no
+invalidation, which serves the pre-reload class forever after :func:`importlib.reload`.
+These tests pin the shape taken instead: repeats are cheap because
+:attr:`ModuleDescriptor.klass <pcapkit.corekit.module.ModuleDescriptor.klass>` reads
+:data:`sys.modules` rather than re-entering :func:`importlib.import_module`, and nothing
+retains the class.
 
-The properties split deliberately -- the first pins the saving, the others say
-what it is not allowed to cost:
+The first test pins the saving; the others pin what it may not cost:
 
 :meth:`DefaultDescriptorResolutionTests.test_repeated_miss_does_not_re_enter_the_import_machinery`
-    The saving itself, as a call count rather than as a timing. Fails without
-    the fix with one :func:`~importlib.import_module` call per lookup.
+    The saving, as a call count rather than a timing. Without the fix it sees one
+    :func:`~importlib.import_module` call per lookup.
 
 :meth:`DefaultDescriptorResolutionTests.test_a_missed_code_can_still_be_registered_without_a_warning`
-    The half that any write-back-on-miss implementation breaks: a code that has
-    only ever *missed* is still unregistered, so a later genuine
-    :meth:`~pcapkit.protocols.protocol.ProtocolBase.register` for it must not
-    warn that it is already registered. That warning is the #426/#428 symptom.
+    Broken by any write-back on miss: a code that has only *missed* is still unregistered,
+    so a later :meth:`~pcapkit.protocols.protocol.ProtocolBase.register` for it must not
+    warn that it is already registered, the #426/#428 symptom.
 
 :meth:`DefaultDescriptorResolutionTests.test_no_stale_class_survives_a_module_reload`
-    The half that any class-caching implementation breaks, #563's included.
-    Both reload idioms are covered, because they differ:
-    :func:`importlib.reload` rebinds the class inside the *same* module object,
-    so validating a memo against the object's identity would not notice it,
-    while popping :data:`sys.modules` and importing again mints a new one.
+    Broken by any class cache, #563's included. Both reload idioms are covered because
+    they differ: :func:`importlib.reload` rebinds the class inside the *same* module
+    object, which a memo keyed on the object's identity would miss, while popping
+    :data:`sys.modules` and importing again mints a new one.
 """
 from __future__ import annotations
 

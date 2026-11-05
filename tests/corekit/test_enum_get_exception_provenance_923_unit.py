@@ -286,7 +286,7 @@ class BaseGetQuietnessTests(unittest.TestCase):
         self.assertFalse(hasattr(sys, 'tracebacklimit'))
 
     def test_the_unregistered_member_override_stays_silent_end_to_end(self) -> 'None':
-        """The call this is actually for: a ``Method.get`` that misses and builds
+        """The call this is for: a ``Method.get`` that misses and builds
         an unregistered member is a successful call and must emit nothing at all."""
         from pcapkit.const.http.method import Method
 
@@ -560,7 +560,7 @@ class VendorTemplateParityTests(unittest.TestCase):
 
     ``pcapkit/const/`` is generated from ``pcapkit/vendor/``, so the committed
     module passing everything above is not evidence that the template agrees
-    with it -- the next crawl would simply revert it, which is the trap
+    with it -- the next crawl would revert it, which is the trap
     ``TransportProtocol.get`` living inside an f-string template sets. The same
     proof shape as ``test_the_tcp_flags_template_renders_the_committed_module``
     and ``test_the_vendor_templates_render_the_committed_modules``: render the template and

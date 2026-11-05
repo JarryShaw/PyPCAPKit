@@ -1,34 +1,27 @@
 # -*- coding: utf-8 -*-
 """Tests for :file:`util/changelog_md.py`, the ``CHANGELOG.md`` generator.
 
-``CHANGELOG.md`` is a derived artefact: it is the newest
-:file:`docs/source/changelog/<version>.rst` entry converted to Markdown, so that
-the ``Create Release`` workflow's release body and the source distribution get
-Markdown without a second copy of the history to keep in step by hand.
+``CHANGELOG.md`` is the newest :file:`docs/source/changelog/<version>.rst` entry
+converted to Markdown, so the ``Create Release`` workflow's release body and the
+source distribution get Markdown without a second, hand-kept copy of the history.
 
-The conversion is a set of mechanical rules over a small reStructuredText subset,
-and each rule has tests of its own. Each asserts both halves -- that the Markdown form
-arrived *and* that the reStructuredText form is gone -- because a rule that fires
-in the wrong place and a rule that does not fire at all both leave markup in a
-published release body, and only checking for the new spelling would miss the
+Each conversion rule over the small reStructuredText subset has tests of its own,
+asserting both that the Markdown form arrived *and* that the reStructuredText form
+is gone: a rule firing in the wrong place and one not firing at all both leave
+markup in a published release body, and checking only the new spelling misses the
 second.
 
-Others cover two things that are easy to get wrong and invisible when they
-are: which entry counts as "newest" (the toctree's first line, not a sort of the
-version strings), and ``--check``, which is what a CI gate calls and is worthless
-if it cannot fail.
+Others cover which entry counts as newest (the toctree's first line, not a sort of
+the version strings) and ``--check``, the CI gate, which is worthless if it cannot
+fail.
 
-One class covers the guard's *message* rather than its verdict, because the guard
-is what blocks a merge and the message is all the author gets. Its assertions are
-deliberately about the entry file rather than about the wording: a cited line is
-read back out of the entry and has to hold the construct it was cited for, which
-is the one property a line number in a diagnostic exists to have.
+One class covers the guard's *message*, since that is all a blocked author gets. It
+asserts against the entry file rather than the wording: a cited line is read back
+out of the entry and must hold the construct it was cited for.
 
-Almost everything here builds its own two-file changelog tree in a temporary
-directory rather than reading the repository's. That keeps the rule tests honest
--- each entry is written to exercise one rule, instead of hoping the real
-changelog happens to contain the construct -- and it keeps them passing on a
-source tarball, where :file:`docs/` has been pruned away.
+Almost every test builds its own two-file changelog tree in a temporary directory,
+so each entry exercises one rule instead of relying on the real changelog, and the
+tests pass on a source tarball, where :file:`docs/` is pruned.
 
 """
 

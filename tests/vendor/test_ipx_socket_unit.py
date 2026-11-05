@@ -10,7 +10,7 @@ table was deleted from the article on 2026-08-25, so there is nothing at
 The crawler reads the hand-maintained :data:`pcapkit.vendor.ipx.socket.DATA`
 instead.
 
-What that leaves worth pinning is the failure mode the issue is actually about:
+What that leaves worth pinning is the failure mode the issue is about:
 a regeneration that quietly drops sockets. :data:`EXPECTED_MEMBERS` spells out
 the enumeration in full, so losing one fails here rather than shipping. The
 value ``0x0000`` in it is the member GitHub issue #492 called for -- IPX's own
@@ -150,7 +150,7 @@ def _normalize(context: 'str') -> 'str':
     trailing whitespace from every non-blank line, drops whitespace-only lines
     outright, and ends the file with a newline courtesy of :func:`print`. Byte
     comparison against the committed file has to do the same, or it reports a
-    difference that regeneration would not actually produce.
+    difference that regeneration would not produce.
 
     Args:
         context: Return value of :meth:`~pcapkit.vendor.default.Vendor.context`.

@@ -1,38 +1,35 @@
 # -*- coding: utf-8 -*-
 """What git is allowed to track under :file:`examples/captures/`.
 
-That directory holds two kinds of file, and only one of them belongs in the
-index. The *inputs* -- :file:`in.pcap` and :file:`dhcp.pcapng` -- are captures
-nothing in the repository can reconstruct, so they are committed. Everything else
-is output: the captures :file:`examples/generators/make_samples.py` writes, and
-the rendered reports :file:`examples/legacy_smoke/` produces out of those two
-inputs -- :file:`out.json`, :file:`out.plist`, :file:`out.txt` and
-:file:`pcapng.txt`, via ``make fixtures`` there.
+The *inputs*, :file:`in.pcap` and :file:`dhcp.pcapng`, are captures nothing in the
+repository can reconstruct, so they are committed. Everything else is output: the
+captures :file:`examples/generators/make_samples.py` writes, and the reports
+:file:`examples/legacy_smoke/` renders from those two inputs via ``make fixtures``
+there -- :file:`out.json`, :file:`out.plist`, :file:`out.txt` and
+:file:`pcapng.txt`.
 
-GitHub issue #685 is why those reports are not tracked. A tracked report has no
-reader: no test asserts on one, and the documentation only quotes them as prose.
-So a parser change that alters how a frame renders leaves a committed copy wrong
-with nothing anywhere to say so -- #685 found :file:`pcapng.txt` recording
-``packet -> NIL`` for blocks that carried their captured octets, by somebody
-reading the file rather than by anything failing.
+#685 is why those reports are not tracked: no test asserts on one and the
+documentation only quotes them, so a parser change that alters how a frame renders
+leaves a committed copy wrong with nothing to say so. #685 found :file:`pcapng.txt`
+recording ``packet -> NIL`` for blocks that carried their captured octets, by
+someone reading the file rather than by anything failing.
 
-This module keeps the reports out of the index, because the mistake is one
-commit away in either direction and neither direction looks interesting in a
-diff review:
+The mistake is one commit away in either direction, and neither looks interesting
+in review:
 
-* ``git add -f examples/captures/out.txt`` on a freshly rebuilt report puts the
-  staleness straight back, :file:`.gitignore` notwithstanding -- and so would a
-  new ``!examples/captures/...`` exception line;
-* an over-eager cleanup that dropped the real inputs as well would break the
-  whole unit tier, which is entitled to read them on a fresh clone.
+* ``git add -f examples/captures/out.txt`` on a rebuilt report puts the staleness
+  back despite :file:`.gitignore`, as would a new ``!examples/captures/...``
+  exception line;
+* a cleanup that dropped the real inputs too would break the unit tier, which may
+  read them on a fresh clone.
 
-The rule is stated by *suffix* rather than as a list of names, so adding
-a genuine input capture needs no edit here while committing a rendered report
-fails immediately. That is the same trade :mod:`tests._tiers` makes, and this
-module reuses its answer rather than shelling out to git a second time.
+The rule is stated by *suffix* rather than as a list of names, so a genuine input
+capture needs no edit here while a rendered report fails at once. That is the trade
+:mod:`tests._tiers` makes, and this module reuses its answer rather than shelling
+out to git again.
 
-This module is unit-tier and reads no capture: it asks what git tracks, and it
-parses test modules as text. Both work on a fresh clone.
+This module is unit-tier and reads no capture: it asks what git tracks and parses
+test modules as text, both of which work on a fresh clone.
 
 """
 from __future__ import annotations

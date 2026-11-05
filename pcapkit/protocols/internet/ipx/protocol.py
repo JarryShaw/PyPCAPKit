@@ -174,10 +174,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             src=self._read_ipx_address(schema.src),
         )
 
-        # NOTE: Octets captured past the Packet Length belong to this layer,
-        # since its own length field is what leaves them out of the payload: an
-        # Ethernet carrier hands the whole rest of its frame here, padding
-        # included, and the rebuild keeps them as captured (#1433).
+        # NOTE: Octets captured past the Packet Length, e.g. an Ethernet carrier's padding, belong to
+        # this layer, as its length field leaves them out of the payload; rebuilds keep them (#1433).
         if schema.trailer:
             ipx.__update__([
                 ('trailer', schema.trailer),

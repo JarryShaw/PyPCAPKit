@@ -995,7 +995,7 @@ class ExtractorTests(unittest.TestCase):
         # ``__iter__``'s sibling ``Raises:`` block, one method up, promises
         # ``IterableError`` for the identical condition. The two are siblings
         # (both ``BaseError, TypeError``) and neither subclasses the other, so
-        # this pins the *actually raised* class on a real ``Extractor(auto=True)``
+        # this pins the *raised* class on a real ``Extractor(auto=True)``
         # instance (not a hand-built stand-in) against both names, guarding
         # against either the raise or the docstring drifting again unnoticed.
         from pcapkit.foundation.extraction import Extractor
@@ -1281,7 +1281,7 @@ class DictFrameTraceEndToEndTests(unittest.TestCase):
     ``AttributeError: 'dict' object has no attribute 'packet'`` from
     :meth:`pcapkit.dumpkit.pcap.PCAPIO._append_value`.
 
-    What makes this reachable is that the tracer is actually fed: the dumper runs
+    What makes this reachable is that the tracer is fed: the dumper runs
     only once a flow has been recorded, so the capture has to hold real TCP frames
     and both ``trace=True`` and ``tcp=True`` have to be set. ``nofile=True`` is
     orthogonal -- it suppresses the *frame* output, not the trace output, so it

@@ -2,61 +2,41 @@
 """Tests that every workflow step invoking :program:`apt-get` declares a ``timeout-minutes``.
 
 #974: the ``engine-tests`` install step fetched its ``InRelease`` metadata from
-``archive.ubuntu.com`` and then went silent for 29m52s, until the job's own
+``archive.ubuntu.com`` and went silent for 29m52s, until the job's own
 ``timeout-minutes: 30`` killed it. A job killed that way reports ``cancelled``,
-and ``cancelled`` correctly fails the ``Required checks passed`` gate, so one
-unresponsive mirror turned a docs-only PR red after burning the entire job
-budget. It happened twice inside forty minutes.
+which fails the ``Required checks passed`` gate, so one unresponsive mirror turned a
+docs-only PR red, twice.
 
-What makes that worth a test rather than only a fix is that the same hazard
-sits in every step that runs apt, not only in the one that stalled:
-``pypcap-parity`` installs the union of the packages ``engine-tests`` installs,
-from the same mirrors. Bounding only the step that happened to bite is the
-recurrence this module exists to prevent:
-nothing about an unbounded ``apt-get`` warns, and the failure is invisible until
-a mirror misbehaves on whichever step was left out.
+Every step that runs apt carries the same hazard -- ``pypcap-parity`` installs the
+union of ``engine-tests``' packages from the same mirrors -- and nothing about an
+unbounded ``apt-get`` warns. So the rule asserted is general, not a copy of the
+file: **any step in any workflow whose script invokes** ``apt-get`` **declares a**
+``timeout-minutes`` **below its job's own budget**, which also catches a new
+unbounded step. A bound at or above the job's budget is decorative, since the job's
+timer fires first, so it fails here.
 
-The rule asserted here is not a copy of the current file: **any step in any
-workflow whose script invokes ``apt-get`` must declare a ``timeout-minutes``,
-and that value must be below its job's own budget.** Stated that way it also
-catches a *new* apt-installing step added later without a bound, in a workflow
-that has none.
+Deliberately **not** tested:
 
-The second half of the rule matters as much as the first. A step timeout at or
-above the job's budget is decorative -- the job's own timer fires first and the
-run is cancelled exactly as without it -- so a bound that does not actually
-bind is treated as a failure here rather than passing on the strength of the
-key being present.
+* **That the number is well chosen**, which depends on Ubuntu's mirrors on the day;
+  the reasoning and measurements live in the workflow's own comment.
+* **That the timeout fires.** The Actions runner enforces ``timeout-minutes``, so
+  this is an assertion over the file, as #641's gating test is.
 
-Two things this deliberately does **not** test:
-
-* **That the number is well chosen.** Whether a step's bound is the right one
-  depends on how long the step legitimately takes, which is a property of
-  Ubuntu's mirrors on the day and is not observable from the file. The reasoning
-  and the measurements behind the current value live in the workflow's own
-  comment; this module only asserts that *some* binding value is declared.
-* **That the step will not hang in a way the timeout misses.** ``timeout-minutes``
-  is enforced by the Actions runner, so nothing here can exercise it. The test is
-  an assertion over the file, as #641's gating test is.
-
-:mod:`yaml` comes only with the ``test`` extra of :file:`pyproject.toml`, so
-the scanner here is hand-rolled and dependency-free, and
-:class:`TestYAMLAgreesWithTheScanner` checks it against :func:`yaml.safe_load`,
-skipping on an install without that extra. That is the same split
-:file:`tests/project/test_release_gates.py` uses, and for the same reason: the
-assertion that must run everywhere does not need the dependency, and the one
-that needs it guards the substitute.
+:mod:`yaml` comes only with the ``test`` extra of :file:`pyproject.toml`, so the
+scanner here is hand-rolled, and :class:`TestYAMLAgreesWithTheScanner` checks it
+against :func:`yaml.safe_load`, skipping without that extra. That is the split
+:file:`tests/project/test_release_gates.py` uses, for the same reason: the assertion
+that must run everywhere needs no dependency, and the one that does guards the
+substitute.
 
 The steps run apt through :file:`util/apt_packages.py` (#1967), so a step running
-its ``plan`` or ``install`` counts as invoking apt, as one naming ``apt-get``
-does.
+its ``plan`` or ``install`` counts as invoking apt.
 
-Comments are stripped before the ``apt-get`` marker is looked for. Without that,
-prose *about* apt -- including the long #974 note above the very step this
-module guards -- would register as an invocation, so a step could be flagged for
-mentioning apt and, worse, a commented-out invocation could be credited as a
-live one. :func:`tests._dependency_gates._engine_matrix_variants` strips
-comments before its own scan for the same class of reason.
+Comments are stripped before the ``apt-get`` marker is looked for; otherwise prose
+about apt, such as the #974 note above the guarded step, would flag a step, and a
+commented-out invocation would count as live.
+:func:`tests._dependency_gates._engine_matrix_variants` strips comments before its
+own scan for the same reason.
 
 """
 

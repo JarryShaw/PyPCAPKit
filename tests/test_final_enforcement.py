@@ -4,10 +4,9 @@
 :func:`typing.final` records ``__final__ = True`` on the class it decorates and
 stops there -- the interpreter will still derive from it happily. Both
 :func:`~pcapkit.corekit.infoclass.info_final` and
-:func:`~pcapkit.protocols.schema.schema_final` end by applying it, so
-every finalised class in the library already carried the marker and nothing read
-it. Issue #778 is the ruling that it should be read, and this module is what
-pins the reading.
+:func:`~pcapkit.protocols.schema.schema_final` end by applying it, so every
+finalised class in the library carries the marker. Issue #778 rules that it is
+read, and this module pins the reading.
 
 **One answer per shape, and the differences are the ruling.** In the
 maintainer's terms: ``@info_final`` implies ``@final``, and ``@final`` must not
@@ -36,15 +35,12 @@ is a defect, not a style choice: the class comes back with no generated
 *silently returns bookkeeping attributes* on the
 :class:`~pcapkit.protocols.schema.Schema` side.
 
-What the rule costs is nothing up front and everything later, which is why it needs
-tests rather than a measurement. Measured at ``110381b63``: of :class:`Info`'s
-488 descendants 455 carry ``__final__`` in their own ``__dict__`` and **none is
-subclassed**; of :class:`~pcapkit.protocols.schema.Schema`'s 445, 408 do
-and none is subclassed. So the raise cannot fire on any declaration in the tree
-as it stands, and the only way to know it fires at all is to make it.
+The rule needs tests rather than a measurement: most :class:`Info` and
+:class:`~pcapkit.protocols.schema.Schema` descendants carry ``__final__`` in
+their own ``__dict__`` and **none is subclassed**, so the raise cannot fire on
+any declaration in the tree, and the only way to know it fires is to make it.
 
-These properties are easy to get subtly wrong, and each has a test here for the
-*wrong* answer as much as the right one:
+Each property below has a test for the *wrong* answer as much as the right one:
 
 :meth:`OwnDictRuleTests`
     ``__final__`` and ``__finalised__`` are both ordinary class attributes, so
@@ -58,7 +54,7 @@ These properties are easy to get subtly wrong, and each has a test here for the
     is why that test checks construction rather than the markers alone.
 
 :meth:`DecoratorCombinationTests`
-    The four rows above, both families, with ``@info_final @final`` and ``@final
+    The rows above, both families, with ``@info_final @final`` and ``@final
     @info_final`` asserted to agree rather than merely each asserted to work --
     order-independence is the property a ``__final__``-keyed re-entry check
     breaks, so it is the property stated.
@@ -288,7 +284,7 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
         writes ``cls`` into
         :attr:`~pcapkit.protocols.misc.pcapng.schema.Option.__enum__` -- before
         calling ``super().__init_subclass__()``, which is where the guard that
-        refuses to subclass a finalised schema actually lives. So without the
+        refuses to subclass a finalised schema lives. So without the
         fix a refused declaration displaces a built-in option schema first,
         exactly the failure the test above pins for the generic
         :class:`EnumSchema` hook, and this pins the same guarantee for the
@@ -398,7 +394,7 @@ class OwnDictRuleTests(unittest.TestCase):
         self.assertEqual(list(Child(1, 2).to_dict().items(multi=True)), [('x', 1), ('y', 2)])
 
     def test_a_subclass_that_predates_an_unfinalised_ancestors_bare_final_is_not_blamed_for_it(self) -> None:
-        """The one shape that actually tells ``__dict__`` and ``getattr`` apart
+        """The one shape that tells ``__dict__`` and ``getattr`` apart
         on :meth:`Info.__new__`'s own re-entry check -- distinct from the test
         above, where the ancestor is properly finalised.
 
@@ -406,7 +402,7 @@ class OwnDictRuleTests(unittest.TestCase):
         ever reached: it inherits ``__finalised__ == FINAL`` too, so
         :meth:`Info.__new__`'s outer ``if cls.__finalised__ ==
         FinalisedState.NONE`` is already false for it, regardless of which
-        lookup the inner check uses. The shape that actually reaches the inner
+        lookup the inner check uses. The shape that reaches the inner
         check is an ancestor marked with a *bare* ``@final`` -- never run through
         :func:`info_final` -- whose own ``__finalised__`` therefore stays
         ``NONE``. A subclass declared *before* that bare marking is legal (there
@@ -503,7 +499,7 @@ class AncestryWalkTests(unittest.TestCase):
             class Grandchild(Child):  # pylint: disable=unused-variable
                 z: int
 
-        # Named after the class that actually carries the marker, rather than
+        # Named after the class that carries the marker, rather than
         # after the direct base, so the message points at what to change.
         self.assertIn('Parent', str(caught.exception))
 
@@ -947,7 +943,7 @@ class DecoratorCombinationTests(unittest.TestCase):
         but only by redoing the ``dir()``-over-the-MRO scan and rebuilding
         ``cls.__builtin__`` on every single bare call, which makes bare
         construction 41x-49x slower rather than cheaper. ``cls.__builtin__ = set(temp)`` is a *reassignment*, so its
-        identity changes every time the base setup actually reruns, even when
+        identity changes every time the base setup reruns, even when
         the resulting set looks the same; a short-circuit that truly skips the
         work leaves that same object in place. Identity is what tells "skipped"
         apart from "did the work again and happened to get the same answer" --

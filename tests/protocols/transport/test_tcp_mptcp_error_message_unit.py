@@ -6,18 +6,16 @@ with an empty field between the protocol alias and the option number::
 
     TCP: : [OptNo 30] 1: invalid flags combination
 
-The defect is presentational -- the exception type, the option number and the
-subtype are right either way, and nothing downstream parses these strings -- but
-it is the string a user sees when an MP_JOIN or DSS option is rejected, and an
-empty field reads as a value that failed to interpolate.
+The defect is presentational -- the exception type, option number and subtype are
+right, and nothing parses these strings -- but it is what a user sees when an MP_JOIN
+or DSS option is rejected, and the empty field reads as a failed interpolation. Every
+other option message in the module spells the prefix ``f'{self.alias}: [OptNo …] …'``
+with a single separator.
 
-The correct form is not a matter of taste: every other option message in the same
-file spells the prefix ``f'{self.alias}: [OptNo …] …'`` with a single separator, so
-a doubled one is an outlier against a house form in its own module.
+Every message is asserted **in full**: a substring assertion on
+``'invalid flags combination'`` matches both forms, so the other tests of these
+messages cannot catch the doubling:
 
-Every message here is asserted **in full** rather than by substring. A substring
-assertion on ``'invalid flags combination'`` matches both forms, so the other
-places that exercise these messages cannot catch the doubling --
 
 * ``TCPMPTCPJoinFlagOrderingUnitTests.test_neither_syn_nor_ack_raises_protocol_error``
   in ``test_tcp_mptcp_join_flag_ordering_unit.py``, which asserts

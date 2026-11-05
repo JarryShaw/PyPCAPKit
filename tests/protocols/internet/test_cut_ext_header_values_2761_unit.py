@@ -9,7 +9,7 @@ parse read the octets captured. Each field the issue names is checked against th
 octets, in the parse and in its rebuild from the data model and from the :obj:`dict`.
 ``IPv6_Ext``'s ``length`` is the width the parse was given where the header overruns
 it, and the rebuild, read at the two octets ``make()`` packs, took that for its own;
-``__short_width__`` now records the width, and the rebuild is read at it.
+``__short_width__`` records the width, and the rebuild is read at it.
 
 The octets are built here; this module is unit-tier and reads no capture file.
 

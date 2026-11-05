@@ -103,17 +103,16 @@ class HTTPRuntimeTests(unittest.TestCase):
         self.assertEqual(type(tcp.payload).__name__, 'Raw')
         self.assertEqual(tcp.payload.name, 'Unknown')
 
-        # The registry key that selected the protocol whose parse then failed --
-        # TCP port 80 here. Guards against it reading :data:`None`, as it would if
-        # ``beholder`` did not forward ``alias`` on its path to :class:`Raw`; that
-        # would make a *registered* number less informative than an unregistered
-        # one, which reaches Raw through ``_import_next_layer`` and keeps its
-        # enumeration.
-        # ``Data_Raw.protocol`` is "the original enumeration of this protocol", and
-        # 80 is what this payload arrived as, so the value belongs here. The
-        # protochain reads ``Raw`` all the same: a plain :obj:`int` has no ``name`` to
-        # render, and only an enumeration key -- SCTP's payload protocol
-        # identifier, say -- shows through.
+        # The registry key that selected the protocol whose parse then failed,
+        # TCP port 80. It would read :data:`None` if ``beholder`` did not forward
+        # ``alias`` to :class:`Raw`, making a *registered* number less informative
+        # than an unregistered one, which reaches Raw through
+        # ``_import_next_layer`` and keeps its enumeration. ``Data_Raw.protocol``
+        # is "the original enumeration of this protocol", which 80 is. The
+        # protochain still reads ``Raw``: a plain :obj:`int` has no ``name`` to
+        # render; only an enumeration key, such as SCTP's payload protocol
+        # identifier, shows through.
+
         self.assertEqual(tcp.payload.info.protocol, 80)
         self.assertIsNotNone(tcp.payload.info.packet)
 

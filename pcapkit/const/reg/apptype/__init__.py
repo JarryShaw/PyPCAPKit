@@ -119,9 +119,8 @@ class _Registries(Info['Type[AppType]']):
             self.__dict__[name] = registry
 
     def __getitem__(self, key: 'Any') -> 'Type[AppType]':
-        # NOTE: ``__map__`` holds the transport protocols alone, so any other
-        # key, the names of the bookkeeping attributes included, raises
-        # :exc:`KeyError` as a missing :obj:`dict` key does.
+        # NOTE: ``__map__`` holds the transport protocols alone, so any other key, bookkeeping
+        # attribute names included, raises :exc:`KeyError` as a missing :obj:`dict` key does.
         name = self.__map__[key]
         registry = self.__dict__[name]
         if isinstance(registry, ModuleDescriptor):
@@ -155,10 +154,8 @@ class _Registries(Info['Type[AppType]']):
         list(self.values())
 
 
-# NOTE: this is what makes ``AppType.get(port, proto=...)`` work on the base
-# class, which is where every caller in the library addresses it. It cannot live
-# in ``apptype.py``: that module is imported *by* every per-transport registry,
-# so it cannot import them back. Here is where to import each of them from.
+# NOTE: this makes ``AppType.get(port, proto=...)`` work on the base class, where every library
+# caller addresses it; ``apptype.py`` cannot import the registries that import it.
 AppType.__registries__ = _Registries({  # type: ignore[assignment] # Info types its keys as str
     TransportProtocol.get(module): ModuleDescriptor(f'{__name__}.{module}', klass)
     for (module, klass) in _LAZY.values()

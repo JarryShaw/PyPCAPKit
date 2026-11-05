@@ -326,7 +326,7 @@ class MemberTypeTests(unittest.TestCase):
         self.assertIs(_PickleStr._member_type_, str)
 
     def test_members_still_behave_as_their_data_type(self) -> 'None':
-        """Not merely annotated as ``int``/``str`` -- actually usable as one."""
+        """Not merely annotated as ``int``/``str`` -- usable as one."""
         self.assertEqual(int(_Int.one), 1)
         self.assertEqual(str(_Str.plain), 'plain')
         self.assertEqual(int(_PickleFlag.solo), 4)

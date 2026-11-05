@@ -17,10 +17,10 @@ Two independent defects follow from that one misplacement:
    occurrences of the pattern keeps its ninth match onward unsubstituted,
    because ``count=8`` caps replacement rather than being ignored.
 2. **The flag never applies.** :data:`re.MULTILINE` changes the matching
-   behaviour of ``^``/``$`` only; every one of the affected patterns is
-   ``r'\\r*\\n'``, which carries no anchor, so the *intended* flag is inert
-   -- passing it as ``flags=`` does not change what it matches, only removes
-   the accidental ``count`` cap and the interpreter warning.
+   behaviour of ``^``/``$`` only, and every affected pattern is
+   ``r'\\r*\\n'``, with no anchor, so passing it as ``flags=`` changes
+   nothing it matches; it only removes the accidental ``count`` cap and the
+   interpreter warning.
 
 It is also a live :exc:`DeprecationWarning` on Python 3.13+ (`'count' is
 passed as positional argument`), scheduled to become a :exc:`TypeError`.
@@ -32,10 +32,9 @@ A single-line grep misses a flag argument put on a *continuation* line --
    re.sub(r'\\r*\\n', ' ', text,
           re.MULTILINE)
 
--- so :class:`PositionalFlagArgumentTests` below walks :mod:`ast` rather than
-grepping, exactly as the issue's own enumeration did, and is self-tested
-against an inline known-positive (plain and continuation-line shaped) and
-known-negative fixture before it is ever pointed at the real tree -- see
+-- so :class:`PositionalFlagArgumentTests` walks :mod:`ast`, as the issue's own
+enumeration did, and is self-tested against inline known-positive (plain and
+continuation-line) and known-negative fixtures -- see
 :meth:`PositionalFlagArgumentTests.test_self_check_detects_known_positive_and_negative_fixtures`.
 
 The sites #796 enumerated live in:
@@ -56,20 +55,17 @@ The sites #796 enumerated live in:
 
 and :meth:`PositionalFlagArgumentTests.test_no_positional_flag_argument_in_vendor_tree`
 fails on any positional form in the tree.
-:class:`RuntimeDeprecationWarningTests` additionally pins the runtime
-symptom directly by re-creating the exact ``r'\\r*\\n'`` call shape used at
-those sites and asserting no :exc:`DeprecationWarning` fires under ``error``
-filtering -- in the positional form, the same assertion raises
-:exc:`DeprecationWarning` (captured explicitly in
-:meth:`RuntimeDeprecationWarningTests.test_positional_flag_shape_warns_only_from_the_version_that_added_it`,
-which pins the positional shape's own defect -- gated on the CPython version
-that introduced it (3.13+; below that, the same shape must NOT warn) so a
-future refactor cannot silently drop the regression coverage for it, and no
-matrix leg below 3.13 goes dark).
+:class:`RuntimeDeprecationWarningTests` pins the runtime symptom by
+re-creating the ``r'\\r*\\n'`` call shape used at those sites and asserting no
+:exc:`DeprecationWarning` fires under ``error`` filtering.
+:meth:`RuntimeDeprecationWarningTests.test_positional_flag_shape_warns_only_from_the_version_that_added_it`
+pins the positional shape's own warning, gated on the CPython version that
+introduced it (3.13+; below that, the same shape must NOT warn), so no matrix
+leg below 3.13 goes dark.
 
-The suite is unit-tier (see :mod:`tests._tiers`): it reads no fixture capture
-and makes no network call, only :mod:`ast`-parsing source files already on
-disk and exercising bare :func:`re.sub` calls with synthetic strings.
+The suite is unit-tier (see :mod:`tests._tiers`): no fixture capture and no
+network call, only :mod:`ast`-parsing source on disk and bare :func:`re.sub`
+calls on synthetic strings.
 
 """
 from __future__ import annotations
@@ -285,7 +281,7 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
             self._assert_positional_flag_shape(wrong_boundary)
 
         # Mirror check: the CORRECT boundary must hold on this interpreter
-        # regardless, so the failure above is actually about the boundary
+        # regardless, so the failure above is about the boundary
         # being wrong, not about _assert_positional_flag_shape always
         # failing no matter what it is given.
         self._assert_positional_flag_shape(self.POSITIONAL_COUNT_DEPRECATED_SINCE)

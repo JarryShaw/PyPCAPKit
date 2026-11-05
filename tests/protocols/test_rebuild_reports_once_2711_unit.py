@@ -5,7 +5,7 @@ GitHub issue #2711: rebuilding an outer layer with ``from_data`` rebuilds its pa
 the same way, whose own parse went over the payload's octets and reported what they
 carry; the outer layer then parsed those octets again and reported it all once more.
 So Ethernet over IPv4 over a cut IGMPv3 Report logged every message of the Report
-twice, where IPv4 alone logged it once. The payload's parse is now quiet, warnings and
+twice, where IPv4 alone logged it once. The payload's parse is quiet, warnings and
 the errors a next-layer fallback absorbs alike, since the outer layer's own parse
 reports them.
 

@@ -16,36 +16,28 @@ traceflow         :class:`pcapkit.foundation.traceflow.traceflow.TraceFlowBase` 
 dumpers           :class:`pcapkit.dumpkit.common.DumperBase`      ``Dumper``
 ================= ============================================== =================
 
-Two different things are checked here, and the split between them is deliberate
-because only one of them is a behaviour claim.
-
 :class:`BaseClassAliasTests` is the part with teeth. It guards against an
 import such as ``from ... import ProtocolBase as Protocol`` -- binding the
-*base* to the *public* name -- after which a module says
-``class Application(Protocol)`` while in fact inheriting ``ProtocolBase``.
-Nothing is wrong at runtime; the classes are correct. What is wrong is that
-the source says the opposite of what it does, and that is not a cosmetic
-complaint: aliasing kept in check by *convention* rather than by a mechanism
-lets a sweep miss a site with nothing failing. A sweep missed one twice --
-issue #506 (a runtime import in ``schema.py`` unreachable for three
-years) and issue #513 (the ``extraction.py`` gates rejecting the library's own
-built-ins for three years). These tests replace the convention with
+*base* to the *public* name -- after which ``class Application(Protocol)`` in
+fact inherits ``ProtocolBase``. Nothing breaks at runtime, but the source says
+the opposite of what it does, and aliasing kept in check by *convention* lets a
+sweep miss a site with nothing failing, as issues #506 (a runtime import in
+``schema.py`` left unreachable) and #513 (the ``extraction.py`` gates rejecting
+the library's own built-ins) both did. These tests replace the convention with
 something that fails.
 
-Every site is renamed (#514 part (c), #726, #742). :data:`PENDING_ALIAS_PATHS`
-is therefore empty -- its intended end state -- and :func:`is_pending` is
-trivially ``False`` for every path; the dict stays as a mechanism rather than
-being deleted, in case a future ``*Base`` family needs the same transitional
-carve-out.
+Every site is renamed (#514 part (c), #726, #742), so
+:data:`PENDING_ALIAS_PATHS` is empty, its intended end state, and
+:func:`is_pending` is ``False`` for every path; the dict stays in case a future
+``*Base`` family needs the same transitional carve-out.
 
-:class:`RegistrationGateTests` is a regression pin: registration is opt-in on a keyword
-(#514 parts (a) and (b), pull requests #547 and #570). It is written down because the
-ruling promotes it from an accident of where the hook happens to live into the
-specification, and an unasserted specification is one refactor away from being untrue.
-The property worth noticing is the last one: a library-style subclass cannot opt in
-*even if it tries*, because the ``*Base`` hook does not accept the keyword at all. That
-is the ``final``-substitute the split was built to provide, and it is stronger than a
-convention.
+:class:`RegistrationGateTests` is a regression pin: registration is opt-in on a
+keyword (#514 parts (a) and (b), pull requests #547 and #570). The ruling makes
+that specification rather than an accident of where the hook lives, and an
+unasserted specification is one refactor away from being untrue. Its last
+property matters most: a library-style subclass cannot opt in *even if it
+tries*, because the ``*Base`` hook does not accept the keyword -- the
+``final``-substitute the split was built to provide.
 
 .. note::
 
@@ -56,9 +48,9 @@ convention.
    :file:`tests/protocols/schema/test_schema_unit.py` is one, and it exists on
    purpose) would make that count non-zero and the assertion order-dependent.
    The invariant is asserted over the *library's own* classes instead, which is
-   what it is actually about and is immune to collection order.
+   what it is about and is immune to collection order.
 
-   It fires, though, and GitHub issue #981 is the reproduction:
+   Order still matters, and GitHub issue #981 is the reproduction:
    ``tests.protocols.application.test_http_unit`` run before this module, one
    process, plain :mod:`unittest`, desyncs
    :class:`RegistrationGateTests.test_user_style_subclass_registers_when_it_opts_in`

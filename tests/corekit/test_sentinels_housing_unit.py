@@ -121,7 +121,7 @@ class NoImportCycleTests(unittest.TestCase):
     :command:`pylint` already reports hundreds of ``cyclic-import`` findings in
     this package, so one more would be invisible in the noise rather than caught.
     This does not run :command:`pylint` -- that check is done separately (#922)
-    -- it instead pins the one fact that actually rules a cycle out for this
+    -- it instead pins the one fact that rules a cycle out for this
     specific set of modules: that :mod:`pcapkit.corekit.sentinels` imports none
     of them.
 
@@ -187,7 +187,7 @@ class NoImportCycleTests(unittest.TestCase):
         """The other direction: importing a consumer first must not deadlock either.
 
         Each consumer is tried as the *first* thing imported after a purge,
-        one at a time -- the order a cycle would actually be sensitive to,
+        one at a time -- the order a cycle would be sensitive to,
         since a cycle through ``pcapkit.corekit.sentinels`` would surface as
         whichever of the two modules is entered second finding the other only
         partially initialised.

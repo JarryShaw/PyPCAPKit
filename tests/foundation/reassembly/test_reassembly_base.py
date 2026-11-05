@@ -224,7 +224,7 @@ class ReassemblyBaseTests(unittest.TestCase):
         register.assert_not_called()
         self.assertIn('reassembly', str(caught.exception))
 
-        # ``name=`` is the mistake a user actually makes, by analogy with
+        # ``name=`` is the mistake a user makes, by analogy with
         # ``Engine``, and it is one of the four colliding names -- so which
         # exception surfaces is version-dependent. Pinned rather than skipped, so
         # the behaviour below 3.11 is recorded rather than merely untested.

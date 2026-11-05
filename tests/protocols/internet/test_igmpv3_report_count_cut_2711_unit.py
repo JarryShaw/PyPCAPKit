@@ -6,7 +6,7 @@ of the header or of a group record, an IGMPv3 Report recorded no short read, sin
 record list was read with the rest of the message, which ended there too. So its
 checksum, covering records never captured, read ``INVALID`` with a ``ChecksumWarning``,
 where behind IPv4, whose length runs past the data, the same cut read ``TRUNCATED``. The
-record list now counts the records the Number of Group Records gives wherever the data
+record list counts the records the Number of Group Records gives wherever the data
 ends with the message (:rfc:`3376#section-4.2`), and one holding fewer records than it
 counts records the cut through ``Schema``'s own short read, the records absent never made
 up.

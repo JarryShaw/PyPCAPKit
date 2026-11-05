@@ -3,14 +3,14 @@
 
 :mod:`tests._tiers` answers "may this module read that capture". This module
 answers the neighbouring question: **when a test is gated on an optional
-dependency, does the job whose selection reaches that test actually install
+dependency, does the job whose selection reaches that test install
 it?**
 
 The reason it needs asking is that the failure mode is silence. A
 ``@unittest.skipUnless(HAS_CRYPTO, ...)`` whose dependency nobody installs does
 not fail -- it skips, and :program:`pytest` run as CI runs it (``-q``, no
 ``-r``) prints neither the count against the flag nor the reason. So the leg
-goes green, the required check passes, and the tests are simply not run. That
+goes green, the required check passes, and the tests are not run. That
 happened twice, with #729 (``dpkt``) and #738 (``cryptography``, ``emoji``,
 ``pycrate``), and both times it was found by hand months later. #745 is the
 ticket for stopping the third instance, and this module is its machinery.
@@ -62,15 +62,14 @@ resolves the positive half correctly, per flag -- ``HAS_PYPCAP`` needs
 so ``pcap._pcap`` lands on the very same ``'pcap'`` entry as plain ``pcap`` and
 :func:`dependency_gate_gaps` cannot tell PyPCAP's install from PCAP_CT's: a job
 installing either would read as satisfying *both* flags' gates. #751 put each
-extra on a *different* job's install line and neither job's selection reaches
-the *other* flag's gate -- confirmed with :func:`job_reaches` directly -- so
-that blind spot never actually bit; a first attempt at closing it (an
-allowlist naming the "correct" distribution per ``(job, flag)`` pair) turned
-out to be exactly the same shape of trust with an extra layer: it agreed with
-whatever the job installed rather than checking it, so flipping a job's
-install line and the allowlist entry together stayed silently green.
+extra on a *different* job's install line, and neither job's selection reaches
+the *other* flag's gate (confirmed with :func:`job_reaches`), so that blind spot
+never bit. An allowlist naming the "correct" distribution per ``(job, flag)``
+pair was tried and is the same trust with an extra layer: it agrees with
+whatever the job installs rather than checking it, so flipping a job's install
+line and the allowlist entry together stays green.
 
-:func:`ambiguous_satisfactions` closes it for real, using two pieces of
+:func:`ambiguous_satisfactions` closes it, using two pieces of
 information :func:`dependency_gate_gaps` never needed on its own.
 :func:`module_flag_exclusions` recovers the *negative* half
 :func:`flag_requirements` correctly drops -- ``HAS_PYPCAP``'s own ``not
@@ -79,7 +78,7 @@ excluded module *exactly*, not truncated: only ``pcap-ct`` really ships
 ``pcap._pcap``, so it alone is what the negation disqualifies from plain
 ``pcap``'s two-wide entry. Subtracting the two leaves exactly one legitimate
 distribution for each flag, derived from the source rather than hand-written,
-so a job installing the wrong half changes what actually resolves without
+so a job installing the wrong half changes what resolves without
 changing what is "legitimate" -- which is precisely what makes the mismatch
 visible. Scoped to :data:`MUTUALLY_EXCLUSIVE_IMPORTS` rather than to every name
 :data:`MODULE_PROVIDERS` happens to list more than one requirement string for:
@@ -240,7 +239,7 @@ MODULE_PROVIDERS = {
     # Only ``pcap-ct`` ships this exact submodule; ``pypcap``'s own ``pcap``
     # package has no ``_pcap`` member at all. This is what
     # ``HAS_PYPCAP = _importable('pcap') and not _importable('pcap._pcap')``
-    # actually distinguishes on, and what :func:`module_flag_exclusions` and
+    # distinguishes on, and what :func:`module_flag_exclusions` and
     # :func:`ambiguous_satisfactions` use to prune ``pcap-ct`` back out of
     # ``HAS_PYPCAP``'s candidates -- see :func:`ambiguous_satisfactions`'s own
     # docstring.
@@ -594,7 +593,7 @@ class AmbiguousProvider(NamedTuple):
     #: would credit with shipping ``module`` -- the *unnarrowed* set, keyed on
     #: ``module``'s top-level package the way that function always is.
     providers: 'frozenset[str]'
-    #: Of those, the ones the job's install line actually resolves. What
+    #: Of those, the ones the job's install line resolves. What
     #: :func:`dependency_gate_gaps` treats as proof the gate is satisfied.
     satisfied: 'frozenset[str]'
     #: The distribution(s) that would *genuinely* leave the flag true --
@@ -610,7 +609,7 @@ def requirement_key(text: 'str') -> 'Requirement':
     """Split one requirement string into a :class:`Requirement`.
 
     Deliberately not a PEP 508 parser: it handles what the extras in
-    :file:`pyproject.toml` actually use -- a name, optional bracketed extras, an
+    :file:`pyproject.toml` use -- a name, optional bracketed extras, an
     optional version specifier, and an optional ``;`` marker -- and normalises
     the name per PEP 503 so ``pcap-ct``, ``pcap_ct`` and ``PCAP.CT`` compare
     equal. Anything it cannot split yields a :class:`Requirement` whose name is
@@ -773,7 +772,7 @@ def contested_imports() -> 'frozenset[str]':
     """What :data:`MUTUALLY_EXCLUSIVE_IMPORTS` should be, derived rather than trusted.
 
     For each :data:`MODULE_PROVIDERS` entry, counts how many of its
-    alternative requirement strings some declared extra actually provides --
+    alternative requirement strings some declared extra provides --
     not how many alternatives the entry merely lists. ``html5lib``'s two
     alternatives (``beautifulsoup4[html5lib]``, plain ``html5lib``) resolve to
     one *live* distribution, because pyproject.toml never declares bare
@@ -1513,10 +1512,10 @@ def _disqualified_providers(excluded_modules: 'frozenset[str]') -> 'frozenset[st
     with no entry of its own would otherwise borrow its top-level package's
     whole provider set, and if that top-level name is itself contested (in
     :data:`MUTUALLY_EXCLUSIVE_IMPORTS`) the borrowed set disqualifies *every*
-    candidate rather than the one the negation actually names -- a finding
+    candidate rather than the one the negation names -- a finding
     with a wrong diagnosis rather than the right one, or none at all. Failing
     loudly and naming what is missing is the fix; a caller is only ever
-    exposed to this for a module that is actually reached by a real gate,
+    exposed to this for a module that is reached by a real gate,
     since :func:`ambiguous_satisfactions` only calls this once it has already
     confirmed the *required* module it is checking is contested -- an
     excluded module unrelated to any contested name never reaches here at
@@ -1564,7 +1563,7 @@ def ambiguous_satisfactions(
     moment some job gained the ``vendor`` extra.
 
     For a gated module in that set, the *true* set of distributions that would
-    actually leave the flag true is :func:`module_providers`'s exact-path
+    leave the flag true is :func:`module_providers`'s exact-path
     reading of the module (already narrower for ``pcap._pcap``, which only
     ``pcap-ct`` really ships) minus whatever :func:`module_flag_exclusions`
     says the same flag needs *absent* (which is how ``HAS_PYPCAP`` -- true

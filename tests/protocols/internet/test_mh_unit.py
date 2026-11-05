@@ -2359,9 +2359,9 @@ class MHUnitTests(unittest.TestCase):
         #509 extracted
         :meth:`~pcapkit.protocols.internet.mh.protocol.MH._mh_option_length` so that "a future
         fix to this arithmetic only has to happen once", and the equivalent branch of
-        ``hopopt.py`` and ``ipv6_opts.py`` routes through each module's own helper.
+        ``hopopt/protocol.py`` and ``ipv6_opts/protocol.py`` routes through each module's own helper.
         Guards against the
-        ``mh.py`` branch open-coding ``clen + 2``, which keeps the arithmetic twice in
+        ``mh/protocol.py`` branch open-coding ``clen + 2``, which keeps the arithmetic twice in
         the very file that holds the helper.
 
         A value assertion cannot catch that -- ``clen + 2`` and the helper return the

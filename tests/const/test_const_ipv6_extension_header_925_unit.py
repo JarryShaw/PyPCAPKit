@@ -79,7 +79,7 @@ class ExtensionHeaderHasNoBitEmuTests(unittest.TestCase):
         self.assertEqual(int(TransType.BIT_EMU), 147)
 
     def test_ipv6_walk_stops_cleanly_on_next_header_147(self) -> None:
-        # The behaviour actually worth protecting, restated for 147, which is
+        # The behaviour worth protecting, restated for 147, which is
         # not an ExtensionHeader member: IPv6._decode_next_layer
         # must not raise or lose the packet's own header just because a
         # next-header code does not resolve as an extension header at all.

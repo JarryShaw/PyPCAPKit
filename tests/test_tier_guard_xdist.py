@@ -369,7 +369,7 @@ class ProbeWorkerCrashTests(unittest.TestCase):
 
 
 class ProbeWriteLockTests(unittest.TestCase):
-    """:func:`tests.conftest._tier_guard_lock` actually excludes a concurrent reader.
+    """:func:`tests.conftest._tier_guard_lock` excludes a concurrent reader.
 
     Independent of :mod:`xdist` and of the two classes above: it exercises the
     mutex directly, with a background thread standing in for a concurrent
@@ -381,7 +381,7 @@ class ProbeWriteLockTests(unittest.TestCase):
 
     Runs unconditionally in the venv this suite normally runs under: unlike
     :class:`XdistSubprocessTests`, nothing here needs ``xdist`` importable, only
-    :mod:`fcntl`, so this is the case that actually exercises the mutex on the
+    :mod:`fcntl`, so this is the case that exercises the mutex on the
     interpreter without ``xdist`` installed.
 
     """
@@ -409,7 +409,7 @@ class ProbeWriteLockTests(unittest.TestCase):
             thread = threading.Thread(target=reader)
             thread.start()
             # Every chance for the reader to have raced ahead if the writer's
-            # hold did not actually exclude it.
+            # hold did not exclude it.
             got_it_early = reader_acquired.wait(timeout=0.5)
             self.assertFalse(
                 got_it_early,

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Tests for :file:`util/ci_timing.py`, the weekly CI timing review, and its inputs.
 
-GitHub issue #1538 added the review and the per-test timings it reads. These are
-checked, offline, since this tier has no network and no token:
+#1538 added the review and the per-test timings it reads. Checked offline, since
+this tier has no network and no token:
 
 * :class:`TestArithmetic` and :class:`TestWorkflowText` -- the quantiles, the
   projection to a cap, and the indentation reader the caps come from, on the real

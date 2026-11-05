@@ -21,7 +21,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: NOP, NOP, Timestamp (kind 8, length 10) -- 12 octets, the option block a
-#: modern established TCP segment actually carries.
+#: modern established TCP segment carries.
 TCP_TIMESTAMP_OPTS = b'\x01\x01\x08\x0a' + struct.pack('>II', 0x4C0A9AFB, 0xD6175129)
 #: NOP, NOP, NOP, End of Option List -- 4 octets of IPv4 options, enough to push
 #: the internet header length past the fixed 20-octet struct size.
@@ -486,7 +486,7 @@ class DPKTTCPHeaderSplitTests(unittest.TestCase):
         packet = _make_tcp_segment_with_options(body)
         tcp = packet.ip.data
 
-        # the fixture has to actually exercise the defect
+        # the fixture has to exercise the defect
         self.assertGreater(len(tcp.opts), 0)
         self.assertGreater(tcp.off * 4, tcp.__hdr_len__)
 
@@ -581,7 +581,7 @@ class DPKTIPv4ReassemblyFieldTests(unittest.TestCase):
         packet = _make_ipv4_with_options(body)
         ipv4 = packet.ip
 
-        # the fixture has to actually exercise the defect
+        # the fixture has to exercise the defect
         self.assertEqual(ipv4.hl * 4, ipv4.__hdr_len__ + len(IPV4_NOP_OPTS))
         self.assertGreater(ipv4.hl * 4, ipv4.__hdr_len__)
 

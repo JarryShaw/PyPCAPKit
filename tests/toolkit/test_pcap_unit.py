@@ -67,9 +67,8 @@ class PCAPToolkitTests(unittest.TestCase):
 
         # NOTE: ``offset`` mirrors ``Data_IPv6_Frag.offset``, in octets, so ``fo`` gets
         # it unscaled; ``id`` differs from the flow label so a wrong ``bufid`` shows.
-        #
-        # ``length`` is ``IPv6_Frag.length``, the 8 octets the toolkit subtracts from
-        # ``hdr_len`` to reach the boundary before the Fragment header.
+        # NOTE: ``length`` is ``IPv6_Frag.length``, the 8 octets the toolkit subtracts
+        # from ``hdr_len`` to reach the Fragment header.
         fragment = types.SimpleNamespace(
             length=8,
             info=types.SimpleNamespace(next=TransType.TCP, offset=8, mf=True, id=4321),

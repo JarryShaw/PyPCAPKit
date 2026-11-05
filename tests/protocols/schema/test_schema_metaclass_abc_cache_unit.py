@@ -26,40 +26,33 @@ NO_ABC_IMPL_REASON = "GraalPy's abc is _py_abc and PyPy's _abc keeps _py_abc's a
 class SchemaMetaAbcCacheTests(unittest.TestCase):
     """Regression tests for GitHub issue #439.
 
-    The issue: ``SchemaMeta.__new__`` (:mod:`pcapkit.protocols.schema`)
-    bypassed :meth:`abc.ABCMeta.__new__` on Python < 3.11, to dodge a ``namespace=``
-    class keyword collision described in that module. Bypassing it also skipped
-    :meth:`abc.ABCMeta.__new__`'s call to ``abc._abc_init(cls)``, so no
-    :class:`~pcapkit.protocols.schema.Schema` subclass ever got its own
-    ``_abc_impl``. Attribute lookup then fell through the MRO to
-    :class:`collections.abc.Mapping`'s ``_abc_impl`` -- the one ABC in the chain
-    still built through an untouched ``ABCMeta.__new__`` -- so *every* schema class
-    was reading and writing the same ``isinstance`` cache that
-    ``collections.abc.Mapping`` itself uses.
+    ``SchemaMeta.__new__`` (:mod:`pcapkit.protocols.schema`) bypassed
+    :meth:`abc.ABCMeta.__new__` on Python < 3.11 to dodge a ``namespace=`` class
+    keyword collision described in that module, and so skipped its
+    ``abc._abc_init(cls)`` call: no :class:`~pcapkit.protocols.schema.Schema`
+    subclass got its own ``_abc_impl``. Lookup fell through the MRO to
+    :class:`collections.abc.Mapping`'s, the one ABC in the chain still built by
+    ``ABCMeta.__new__``, so *every* schema class shared ``Mapping``'s ``isinstance``
+    cache.
 
-    :class:`dict` is a registered virtual subclass of ``Mapping``, so asking
-    ``isinstance(x, Mapping)`` for a plain :class:`dict` caches a positive answer
-    keyed on ``dict`` -- and with the cache shared, ``isinstance(x, Schema)`` for
-    that same ``dict`` then reads the *same* cache entry straight back, without
-    ever running :class:`Schema`'s real subclass check.
+    :class:`dict` is a registered virtual subclass of ``Mapping``, so
+    ``isinstance(x, Mapping)`` on a plain :class:`dict` caches a positive answer
+    keyed on ``dict``, which ``isinstance(x, Schema)`` then reads straight back
+    without running :class:`Schema`'s real subclass check.
 
-    The corruption runs **both ways**, which is why
+    The corruption runs **both ways**, so
     :meth:`test_a_plain_dict_is_not_a_schema_after_mapping_is_asked_first` and
     :meth:`test_asking_schema_first_does_not_break_mapping_for_a_plain_dict` ask
-    the two questions in opposite orders rather than one test asking them in the
-    "obvious" order. Asking ``Schema`` *first* computes a fresh (correct)
-    ``False`` for ``dict`` -- but caches it in the shared object's *negative*
-    cache, and since that object is ``Mapping``'s own, a plain ``dict`` then
-    stops answering ``isinstance(x, Mapping)`` at all, anywhere in the process,
-    until the cache token advances. Measured directly on a shared cache (not
-    merely inferred): asking ``isinstance({}, Schema)`` and then
-    ``isinstance({}, Mapping)`` returns ``False`` for the second question too.
-    This is the more dangerous direction, since it breaks code with no
-    connection to schemas at all -- ordinary library code such as
+    the questions in opposite orders. Asking ``Schema`` *first* caches a correct
+    ``False`` for ``dict`` in the shared, ``Mapping``-owned *negative* cache, so a
+    plain ``dict`` stops passing ``isinstance(x, Mapping)`` anywhere in the process
+    until the cache token advances; measured on a shared cache,
+    ``isinstance({}, Schema)`` then ``isinstance({}, Mapping)`` returns ``False``
+    twice. That direction breaks code unrelated to schemas: library code such as
     :meth:`Info.from_dict <pcapkit.corekit.infoclass.Info.from_dict>` asking
-    ``isinstance(dict_, (dict, collections.abc.Mapping))`` is enough to trigger
-    either direction, which is why the defect shows up in the full suite and
-    not in a single test file run alone.
+    ``isinstance(dict_, (dict, collections.abc.Mapping))`` triggers either
+    direction, which is why the defect shows in the full suite and not in one
+    file run alone.
 
     """
 
@@ -258,25 +251,18 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         <pcapkit.protocols.misc.pcapng.schema.NameResolutionBlock.post_process>`
         asks ``isinstance(record, (IPv4Record, IPv6Record))`` and then reads
         ``record.names``. Without the #439 fix, every schema class shares one
-        ``_abc_impl``, so that question answers ``True`` for the block's
-        *terminating* ``EndRecord`` -- which has no ``names`` -- provided
-        *anything at all* has already asked whether that same ``EndRecord``
-        instance was a :class:`~pcapkit.protocols.schema.Schema`.
+        ``_abc_impl``, so that answers ``True`` for the block's *terminating*
+        ``EndRecord``, which has no ``names``, once anything has asked whether
+        that ``EndRecord`` is a :class:`~pcapkit.protocols.schema.Schema`.
 
-        That is a lower bar than it sounds: ``isinstance(record, Schema)`` is
-        genuinely, unconditionally true for any real schema instance, via
-        ordinary inheritance rather than any cache -- and every schema class
-        asks it routinely (:meth:`Schema.pack`, elsewhere in this module, does
-        exactly that). Measured directly (not merely inferred): on the broken
-        code, asking ``isinstance(record, Schema)`` first -- correctly true,
-        cached against the object every schema class shared -- made the next,
-        unrelated question, ``isinstance(record, (IPv4Record, IPv6Record))``,
-        answer ``True`` too, for an ``EndRecord`` that is neither. This is a
-        *more* direct reproduction of the real call site than probing with a
-        plain ``dict`` first (as the other tests in this class do): it needs
-        no ``Mapping``/``dict`` involvement at all, only two ordinary
-        ``isinstance`` questions about the very code under test, in the order
-        real code already asks them.
+        That bar is low: ``isinstance(record, Schema)`` is true for any schema
+        instance by plain inheritance, and schema code asks it routinely
+        (:meth:`Schema.pack` does). Measured on the broken code, asking it first
+        cached ``True`` against the shared object, and the next question,
+        ``isinstance(record, (IPv4Record, IPv6Record))``, answered ``True`` too.
+        Unlike the other tests in this class, which probe with a plain ``dict``,
+        this needs no ``Mapping``/``dict`` at all: only two ``isinstance``
+        questions about the code under test, in the order real code asks them.
 
         """
         from pcapkit.protocols.misc.pcapng.schema import EndRecord, IPv4Record, IPv6Record
@@ -303,20 +289,18 @@ class SchemaMetaReservedClassKwargsTests(unittest.TestCase):
     """Regression tests for the reserved-class-keyword guard from #439.
 
     Renaming ``namespace=`` to ``ns=`` (see
-    :mod:`pcapkit.protocols.misc.pcapng.schema`) fixed the one collision that was actually in use, but the
-    collision class is not specific to ``namespace``: any class keyword
-    spelled ``mcls``, ``name``, ``bases`` or ``namespace`` collides with a
-    same-named parameter of :meth:`abc.ABCMeta.__new__` (on Python < 3.11 for
-    the first three, on every version for the fourth -- see
-    :attr:`~pcapkit.protocols.schema.SchemaMeta._RESERVED_CLASS_KWARGS`
-    for the precise reasoning), and ``cls`` collides with the implicit
-    ``__init_subclass__`` classmethod binding on every version. Without a
-    guard, the *next* accidental use of one of these names resurfaces as an
-    opaque ``TypeError: ...__new__() got multiple values for argument '...'``
-    several frames away, exactly the class of confusion that produced the
-    "for unknown reason" comment #439 started from. These tests pin that the
-    guard actually fires, names the offending keyword, and that ordinary class
-    keywords are unaffected.
+    :mod:`pcapkit.protocols.misc.pcapng.schema`) fixed the one collision in use,
+    but a class keyword spelled ``mcls``, ``name``, ``bases`` or ``namespace``
+    collides with a same-named parameter of :meth:`abc.ABCMeta.__new__` (on
+    Python < 3.11 for the first three, on every version for the fourth; see
+    :attr:`~pcapkit.protocols.schema.SchemaMeta._RESERVED_CLASS_KWARGS`), and
+    ``cls`` with the implicit ``__init_subclass__`` classmethod binding on every
+    version. Unguarded, such a name surfaces as an opaque ``TypeError:
+    ...__new__() got multiple values for argument '...'`` several frames away,
+    the confusion behind the "for unknown reason" comment #439 started from.
+    These tests pin that the guard fires and names the keyword, and that ordinary
+    class keywords are unaffected.
+
 
     """
 

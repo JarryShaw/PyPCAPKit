@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""What ``files=True`` actually writes to disk.
+"""What ``files=True`` writes to disk.
 
 #358: guards against every per-frame report landing with two dots before its
 extension -- ``Frame 1..json``, ``Global Header..txt``, ``Section Header

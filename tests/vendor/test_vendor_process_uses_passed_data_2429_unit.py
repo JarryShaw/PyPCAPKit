@@ -6,10 +6,9 @@ in :data:`TARGETS` is meant to render an enumeration from whatever registry
 mapping its caller hands it, mirroring :meth:`~pcapkit.vendor.default.Vendor.count`,
 which both takes and uses its own ``data``. Those crawlers instead read the
 module-level ``DATA`` literal straight out of the closure, silently discarding
-the argument. Harmless today, since every real call site passes
-``request()``'s own ``DATA``-returning value, so ``data is DATA`` always holds
-in practice -- but a caller that ever passes different data would get the
-module's table back regardless, with no error.
+the argument. Harmless while every real call site passes ``request()``'s own
+``DATA``-returning value, so ``data is DATA`` holds -- but a caller passing
+different data would get the module's table back, with no error.
 
 Each test below builds a crawler with :meth:`~pcapkit.vendor.default.Vendor.count`
 and :meth:`~pcapkit.vendor.default.Vendor.process` driven on a fabricated

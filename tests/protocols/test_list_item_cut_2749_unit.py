@@ -6,8 +6,9 @@ warned ``SchemaWarning: packet length < 0`` for each field of the record past th
 record list counts its records and runs to the end of the data, and each record is sized
 by the octets left to it, so the record the data ends inside read its fields past them as
 running past a length it had been given. A
-:class:`~pcapkit.corekit.fields.collections.ListField` now reads a schema item it counts
-as ending with the data, and :meth:`Schema.unpack
+:class:`~pcapkit.corekit.fields.collections.ListField` reads a schema item it counts
+as ending with the data,
+ and :meth:`Schema.unpack
 <pcapkit.protocols.schema.Schema.unpack>` reads its fields past that length as the cut
 its short read records.
 

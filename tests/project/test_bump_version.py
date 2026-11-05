@@ -1,44 +1,31 @@
 # -*- coding: utf-8 -*-
 """Tests for :file:`util/bump_version.py`, the version bump the vendor cron runs.
 
-The script moves ``__version__`` in :file:`pcapkit/__init__.py` on and, since the
-owner asked for it -- he pointed out that the version is also cited in
-:file:`CITATION.cff` and that the bump script might need to handle that as well
-(#625; no issue exists for it) -- the ``version`` and ``date-released`` fields
+The script moves ``__version__`` in :file:`pcapkit/__init__.py` on and, as the owner
+asked on #625 (no issue exists for it), the ``version`` and ``date-released`` fields
 of :file:`CITATION.cff` with it.
 
-Why the citation half is tested against a fixture
--------------------------------------------------
+Every test builds a minimal Citation File Format 1.2.0 document in a temporary
+directory and never touches the repository's :file:`CITATION.cff`: a test that
+rewrites a tracked file passes once and then fails, having left the version bumped
+in the working tree. The fixture also reaches shapes the real file lacks and should
+not be contorted into -- no ``date-released``, no ``version``, CRLF endings, a
+nested ``version`` in a ``references`` entry.
 
-Every test here builds a minimal Citation File Format 1.2.0 document in a
-temporary directory. None of them touches the repository's own
-:file:`CITATION.cff`, for the plain reason that a test which rewrites a tracked
-file passes once and then fails, having left the version bumped in the working
-tree. The fixture also lets the awkward shapes be tested at all -- a file with no
-``date-released``, a file with no ``version``, CRLF endings, a nested ``version``
-belonging to a ``references`` entry -- none of which the real file has and none of
-which it should be contorted into having.
-
-The exception is :class:`RepositoryCitationTests`, which reads the real file but
-only ever *reads* it. That one is a gate rather than a unit test: it fails when
-:file:`CITATION.cff` has drifted from ``pcapkit.__version__``, which is what the
-version changes made by hand would otherwise do, since they never run this script
-at all. It reads :file:`pcapkit/__init__.py` as text rather than importing
-:mod:`pcapkit`, because the question is what the file in the repository says, and
-an installed copy elsewhere on ``sys.path`` would answer a different one.
-
-Calling ``main``
-----------------
+:class:`RepositoryCitationTests` reads the real file but never writes it. It is a
+gate rather than a unit test, failing when :file:`CITATION.cff` drifts from
+``pcapkit.__version__``, as a hand-made version change, which never runs this
+script, would leave it. It reads :file:`pcapkit/__init__.py` as text rather than
+importing :mod:`pcapkit`, since an installed copy elsewhere on ``sys.path`` would
+answer for a different file.
 
 :func:`~bump_version.main` is called once, with the version reader and
 :func:`~bump_version.init_path` patched and the working directory moved into the
-scratch tree, because it ends by writing ``conda/build`` relative to the working
-directory and by resolving :file:`pcapkit/__init__.py` through
-``pcapkit.__path__``; unpatched, it would rewrite the checkout running the tests.
-That one call pins what a bump writes into ``date-released`` (#2163). Otherwise
-the pieces it wires together are each tested directly, and the ordering
-property that matters -- that the one fatal outcome is reached before any file is
-written -- is structural:
+scratch tree, because it writes ``conda/build`` relative to the working directory
+and resolves :file:`pcapkit/__init__.py` through ``pcapkit.__path__``; unpatched, it
+would rewrite the checkout running the tests. That call pins what a bump writes
+into ``date-released`` (#2163). The pieces it wires together are each tested
+directly, and that the one fatal outcome comes before any write is structural:
 :func:`~bump_version.plan_citation` takes text and returns text, so it has nothing
 to write with.
 

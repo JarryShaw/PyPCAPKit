@@ -15,9 +15,9 @@ this package, through :func:`~pcapkit.utilities.importlib.lazy_exports`
 """
 from typing import TYPE_CHECKING
 
+# Base Class for Protocols
 # NOTE: ahead of any protocol module: defining ``Protocol`` imports Raw and
 # NoPayload, which import it back, so either imported first is met half-built.
-# Base Class for Protocols
 from pcapkit.protocols.protocol import Protocol
 
 # Protocol Data

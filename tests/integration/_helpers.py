@@ -88,7 +88,7 @@ class EndToEndTestCase(unittest.TestCase):
         would: on a checkout without them an unguarded ``import`` here would
         raise :exc:`ModuleNotFoundError` out of ``setUpClass`` and error the
         whole class, where otherwise its individual tests would fail. Swallowed,
-        the table simply stays cold and those tests fail as they would anyway.
+        the table stays cold and those tests fail as they would anyway.
         :exc:`BaseException` is deliberately not caught, for the same reason as
         in :func:`tests._support._close_quietly`.
 

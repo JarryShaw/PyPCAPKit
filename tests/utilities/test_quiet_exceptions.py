@@ -195,7 +195,7 @@ class QuietExceptionTests(unittest.TestCase):
         """The control for the test above: ``quiet`` is what silences it.
 
         Without this, ``recorder.messages == []`` would also pass if
-        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` had simply stopped
+        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` had stopped
         logging altogether.
 
         """
@@ -216,7 +216,7 @@ class QuietExceptionTests(unittest.TestCase):
         printing of a
         :class:`~pcapkit.utilities.exceptions.BaseError` itself; see
         ``tests/utilities/test_exceptions_excepthook.py`` for what that hook
-        actually prints, end to end.
+        prints, end to end.
 
         """
         if hasattr(sys, 'tracebacklimit'):

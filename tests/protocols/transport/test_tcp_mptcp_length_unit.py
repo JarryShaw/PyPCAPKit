@@ -1,60 +1,46 @@
 # -*- coding: utf-8 -*-
 """Where the Multipath TCP option header keeps its length: bits 8-15, not seven bits early.
 
-GitHub issue #553. :class:`_MPTCP
-<pcapkit.protocols.transport.tcp.schema._MPTCP>` reads the option header through
-a :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` over a 3-octet
-:class:`~pcapkit.corekit.fields.strings.BitField`, and that field's namespace
-declares ``'length': (8, 8)``. Guards against ``(1, 8)`` -- eight bits starting
-one bit in -- and three independent pieces of evidence say ``(8, 8)`` is right:
+GitHub issue #553. :class:`_MPTCP <pcapkit.protocols.transport.tcp.schema._MPTCP>` reads
+the option header through a :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` over a
+3-octet :class:`~pcapkit.corekit.fields.strings.BitField` whose namespace declares
+``'length': (8, 8)``. This guards against ``(1, 8)``; three pieces of evidence say
+``(8, 8)`` is right:
 
-* :rfc:`8684` section 3 lays every Multipath TCP option out as ``Kind`` (8
-  bits), ``Length`` (8 bits), ``Subtype`` (4 bits), then subtype-specific
-  content. Numbering from the option's first octet, ``Length`` therefore
-  occupies bits 8-15 and the subtype bits 16-19.
-* The sibling entry in the very same namespace, ``'subtype': (16, 4)``, is
-  written against that numbering, and it decodes correctly. Two entries in one
-  namespace cannot be anchored differently -- :meth:`BitField.post_process
-  <pcapkit.corekit.fields.strings.BitField.post_process>` slices both out of one
-  big-endian bit string over the whole 3-octet window -- so ``subtype`` reading
-  from bit 16 fixes the window's origin at ``kind`` and leaves bit 8 as the only
-  place ``length`` can begin.
-* The window really is anchored at ``kind`` rather than after the option header.
-  ``_MPTCP`` is registered as the schema for the option itself
-  (``Option.register(Enum_Option.Multipath_TCP, _MPTCP)``) and, alone among the
-  option schemas, does not inherit :class:`Option
-  <pcapkit.protocols.transport.tcp.schema.Option>` -- so it is handed the
-  option's first octet and nothing has consumed ``kind``/``length`` before it.
+* :rfc:`8684` section 3 lays every Multipath TCP option out as ``Kind`` (8 bits),
+  ``Length`` (8 bits), ``Subtype`` (4 bits), then subtype content, so from the option's
+  first octet ``Length`` is bits 8-15 and the subtype bits 16-19.
+* The sibling ``'subtype': (16, 4)`` uses that numbering and decodes correctly.
+  :meth:`BitField.post_process <pcapkit.corekit.fields.strings.BitField.post_process>`
+  slices both from one big-endian bit string over the 3-octet window, so they share an
+  origin at ``kind`` and ``length`` can only begin at bit 8.
+* The window is anchored at ``kind``. ``_MPTCP`` is registered as the option's own schema
+  (``Option.register(Enum_Option.Multipath_TCP, _MPTCP)``) and, alone among the option
+  schemas, does not inherit :class:`Option <pcapkit.protocols.transport.tcp.schema.Option>`,
+  so nothing consumes ``kind``/``length`` before it.
 
-At ``(1, 8)`` the field would straddle the low seven bits of ``kind`` and the
-high bit of ``length``. For the 12-octet MP_CAPABLE of :rfc:`8684` figure 4,
-whose first three octets are ``1e 0c 01``, that reads ``00111100`` where the
-length is ``00001100``: 60 instead of 12.
+At ``(1, 8)`` the field straddles the low seven bits of ``kind`` and the high bit of
+``length``: for :rfc:`8684` figure 4's 12-octet MP_CAPABLE, opening ``1e 0c 01``, it reads
+``00111100``, 60, instead of ``00001100``, 12.
 
 Why a round trip cannot see it
 ------------------------------
 
-The decoded length is used for one thing, ``SchemaField(length=pkt['test']['length'])``
-in :func:`mptcp_data_selector
-<pcapkit.protocols.transport.tcp.schema.mptcp_data_selector>`, which sizes the
-nested subtype schema. Over-declaring that size does not fail loudly: the
-enclosing :class:`~pcapkit.corekit.fields.collections.OptionField` stops at the
-end-of-option-list marker or at the declared options length whichever comes
-first, so the over-read is absorbed rather than reported.
+The decoded length only sizes the nested subtype schema, through
+``SchemaField(length=pkt['test']['length'])`` in :func:`mptcp_data_selector
+<pcapkit.protocols.transport.tcp.schema.mptcp_data_selector>`. Over-declaring it fails
+quietly: the enclosing :class:`~pcapkit.corekit.fields.collections.OptionField` stops at the
+end-of-option-list marker or the declared options length, whichever comes first, absorbing
+the over-read.
 
-So the assertion here is deliberately on the *decoded namespace* rather than on a
-round trip: a full parse can fail, or pass, for reasons that have nothing to do
-with the bit offset -- the subtype schemas' own ``kind``/``length`` declarations
-on :class:`MPTCP <pcapkit.protocols.transport.tcp.schema.MPTCP>` (#541), for one
--- and the offset is pinned independently of them.
+So the tests assert on the *decoded namespace*, not a round trip, which can fail or pass for
+reasons unrelated to the offset, such as the subtype schemas' own ``kind``/``length``
+declarations on :class:`MPTCP <pcapkit.protocols.transport.tcp.schema.MPTCP>` (#541).
 
-The field is read off the schema class, ``_MPTCP.__fields__['test']``, rather
-than rebuilt here, so the declaration under test is the one the library ships.
-A copy of the namespace written into this module would keep passing after a
-regression.
+The field is read off the schema class, ``_MPTCP.__fields__['test']``, so the declaration
+under test is the shipped one; a copy here would keep passing after a regression.
 
-Every case builds its own octets in memory and reads no capture under
-:file:`examples/captures/`, so this belongs to the unit tier.
+Unit tier: every case builds its own octets and reads no capture.
 
 """
 from __future__ import annotations

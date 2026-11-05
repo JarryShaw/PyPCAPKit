@@ -1,54 +1,47 @@
 # -*- coding: utf-8 -*-
 """An unknown Multipath TCP subtype declares the length it actually packs, 3 octets at least.
 
-GitHub issue #2272. ``TCP._make_mptcp_unknown`` sized the option as ``2 + len(data)``,
-which is one octet short whenever ``data`` is empty, and only then.
+GitHub issue #2272. ``TCP._make_mptcp_unknown`` sized the option as ``2 + len(data)``, one
+octet short exactly when ``data`` is empty.
 
 Where the octet goes missing
 ----------------------------
 
-:class:`~pcapkit.protocols.transport.tcp.schema.MPTCPUnknown` packs three octets of header
-unconditionally -- ``kind`` and ``length``, both declared on
+:class:`~pcapkit.protocols.transport.tcp.schema.MPTCPUnknown` always packs three header
+octets -- ``kind`` and ``length``, declared on
 :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP` (#541), and its own ``test``
-:class:`~pcapkit.corekit.fields.strings.BitField`, whose high nibble is the subtype and whose
-low nibble takes ``data[0]`` -- and then ``data[1:]`` as the body. So the first octet of
-``data`` is folded into the header's low nibble rather than appended, and the option occupies
-``3 + len(data[1:])`` octets: never fewer than 3, which is the smallest Multipath TCP option
-:rfc:`8684` section 3 permits (``Kind``, ``Length``, ``Subtype``).
+:class:`~pcapkit.corekit.fields.strings.BitField`, whose high nibble is the subtype and low
+nibble takes ``data[0]`` -- then ``data[1:]`` as the body. The option is therefore
+``3 + len(data[1:])`` octets, never fewer than the 3 (``Kind``, ``Length``, ``Subtype``)
+:rfc:`8684` section 3 requires.
 
-``2 + len(data)`` agrees with that for every non-empty ``data`` -- at one octet both read 3,
-at two octets both read 4 -- and disagrees only at ``data=b''``, where it declares 2 while
-the schema still writes the three header octets. Hence a defect that a one-octet payload, the
-maker's own default, cannot see.
+``2 + len(data)`` agrees for every non-empty ``data`` and declares 2 only at ``data=b''``,
+where the schema still writes three octets, so the maker's own one-octet default cannot see
+the defect.
 
-The mismatch is not inert, because the parse side derives the body width from that same
-declared length: ``MPTCPUnknown.data`` is a
-:class:`~pcapkit.corekit.fields.strings.BytesField` sized ``pkt['length'] - 3``. At a declared
-2 that is ``-1``, and reading the segment back warns ``SchemaWarning: packet length < 0: -1``
-and then raises ``ProtocolError: Field data resolved to a negative length; template='-1s'``.
-The option is therefore unreadable rather than merely mislabelled, which is why
+The parse side sizes ``MPTCPUnknown.data``, a
+:class:`~pcapkit.corekit.fields.strings.BytesField`, as ``pkt['length'] - 3``. At a declared
+2 that is ``-1``: reading the segment back warns ``SchemaWarning: packet length < 0: -1`` and
+raises ``ProtocolError: Field data resolved to a negative length; template='-1s'``. The
+option is unreadable, not just mislabelled, so
 :meth:`TCPMPTCPUnknownLengthUnitTests.test_empty_data_round_trips_through_tcp` asserts a
-parse rather than only an octet count.
+parse rather than an octet count.
 
 Coverage
 --------
 
-:meth:`~TCPMPTCPUnknownLengthUnitTests.test_declared_length_matches_wire_length` is the
-invariant the defect broke, asserted across payload widths rather than at ``b''`` alone, so a
-fix that trades the empty case for a wide one is caught too. The remaining cases pin the
-parts that must *not* move: the exact minimum octets, the non-empty widths that were already
-correct, and the maker's own default.
+:meth:`~TCPMPTCPUnknownLengthUnitTests.test_declared_length_matches_wire_length` asserts the
+broken invariant across payload widths, so a fix that trades the empty case for a wide one
+is caught. The rest pin what must *not* move: the minimum octets, the non-empty widths, and
+the maker's default.
 
-``data=b''`` and ``data=b'\\x00'`` pack identically, to ``1e03f0``, and both read back as
-``data=b'\\x00'``: the low nibble of the header octet is always written and always read, so
-an absent first octet and a zero first octet are the same three octets on the wire. That is a
-property of :rfc:`8684`'s layout, not of this fix --
-:meth:`~TCPMPTCPUnknownLengthUnitTests.test_empty_and_zero_data_pack_alike` records it so a
-reader does not mistake the asymmetry for the defect, and so a later change that tried to
-distinguish them would have to argue with a test.
+``data=b''`` and ``data=b'\\x00'`` both pack to ``1e03f0`` and read back as
+``data=b'\\x00'``: the header's low nibble is always written and read, so an absent and a
+zero first octet are the same on the wire. That is :rfc:`8684`'s layout, not this fix;
+:meth:`~TCPMPTCPUnknownLengthUnitTests.test_empty_and_zero_data_pack_alike` records it so
+the asymmetry is not mistaken for the defect.
 
-Every case builds its own octets in memory and reads no capture under
-:file:`examples/captures/`, so this belongs to the unit tier.
+Unit tier: every case builds its own octets and reads no capture.
 
 """
 from __future__ import annotations

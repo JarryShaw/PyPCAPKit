@@ -5,7 +5,7 @@ GitHub issue #2173. Calling a field with a packet returns a fresh copy, which is
 what the schema then reads with. :meth:`ListField.__call__
 <pcapkit.corekit.fields.collections.ListField.__call__>` handed its ``callback``
 the template instead of that copy, so a callback adjusting its field mutated the
-template shared by every later packet and missed the copy actually in use.
+template shared by every later packet and missed the copy in use.
 :meth:`SchemaField.__call__ <pcapkit.corekit.fields.misc.SchemaField.__call__>`
 sized the copy's ``template`` from the template's ``-1`` length rather than the
 copy's resolved one, so it stayed ``'1024s'``. Both read the copy.

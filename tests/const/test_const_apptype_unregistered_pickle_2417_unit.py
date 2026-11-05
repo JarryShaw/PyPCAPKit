@@ -18,10 +18,10 @@ dispatching on ``AppType`` members rather than bare port numbers: the
 :class:`~pcapkit.foundation.reassembly.data.tcp.Datagram` it produces holds the
 pair in an unresolved
 :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, so pickling an
-unresolved datagram pickled the members. Measured before the fix, **59,413 of
-the 65,536** possible TCP ports failed to round-trip -- not merely the truly
-unregistered ``unknown`` ones but every IANA-span label too (``unassigned``,
-``reserved``, ``x11``, ``swx`` and the rest), which is 90.7% of the port space.
+unresolved datagram pickled the members. Measured before the fix, most of the
+TCP port space failed to round-trip -- not merely the truly unregistered
+``unknown`` ports but every IANA-span label too (``unassigned``, ``reserved``,
+``x11``, ``swx`` and the rest).
 
 :meth:`EnumRegistry._make_reducible
 <pcapkit.corekit.enum.EnumRegistry._make_reducible>` fixes it the way
@@ -94,9 +94,8 @@ class UnregisteredAppTypePickleTests(unittest.TestCase):
     def test_every_port_in_the_space_round_trips(self) -> None:
         """All 65,536 ports, the measurement the fix is stated against.
 
-        A sample would have passed before the fix too -- 6,123 of these ports
-        already round-tripped, being IANA assignments -- so the sweep is the
-        whole range rather than a selection from it.
+        A sample could pass without the fix, since the IANA assignments already
+        round-tripped, so the sweep is the whole range rather than a selection.
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol

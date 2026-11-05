@@ -168,7 +168,6 @@ class FoundationRegistryTests(unittest.TestCase):
         """
         # NOTE: the public ``register_*`` refuse a built-in under any name but its own
         # (#1016, #1363), so #513's real gate goes through ``_register_internal_*``.
-        #
         # NOTE: imported locally, as every sibling is, since ``setUp`` puts the class's
         # own ``pcapkit`` import in ``sys.modules``.
         from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine

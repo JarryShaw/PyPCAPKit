@@ -412,7 +412,7 @@ class TimeLimitTests(unittest.TestCase):
         self.assertIn(armed, (5, 6))
 
     def test_the_timeout_message_names_the_scaled_deadline(self) -> None:
-        """The seconds reported are the seconds that were actually allowed."""
+        """The seconds reported are the seconds that were allowed."""
         os.environ[TIMEOUT_SCALE_ENV] = '0.5'
         with self.assertRaisesRegex(TimeoutError, r'within 1s'):
             with time_limit(2):
@@ -694,7 +694,7 @@ class SnapshotRestoreTests(unittest.TestCase):
     over ``pcapkit.protocols.protocol`` is a rebind, and a restore that only
     removed additions would leave it in place.
 
-    Every name used here is under ``pcapkit.`` so the helpers actually match it,
+    Every name used here is under ``pcapkit.`` so the helpers match it,
     and every one is removed again on teardown whatever the assertions do.
 
     """
@@ -969,7 +969,7 @@ class LoadedModulesDoNotOutliveTheirTestTests(unittest.TestCase):
     hides the next one.
 
     The polluting cases are *borrowed* rather than written here, so what is pinned
-    is the behaviour of call sites the suite actually has. Every one of them
+    is the behaviour of call sites the suite has. Every one of them
     leaks without the fix, and none of them looks wrong.
 
     """
