@@ -187,10 +187,10 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
                    for name in made.__fields__ if name in parsed.__fields__)
     return False
 
-#: Construction keywords that name no field: :meth:`Protocol.__init__
-#: <pcapkit.protocols.protocol.Protocol.__init__>` or the schema layer consumes
-#: them, not :meth:`make <pcapkit.protocols.protocol.Protocol.make>`. No
-#: signature declares them, so :func:`_declared_keywords` takes them from here.
+#: Construction keywords that name no field.
+#: :meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>` or the
+#: schema layer consumes them, not :meth:`make <pcapkit.protocols.protocol.Protocol.make>`.
+#: No signature declares them, so :func:`_declared_keywords` takes them from here.
 #:
 #: ``packet`` is injected by the library: :meth:`Protocol.__init__
 #: <pcapkit.protocols.protocol.Protocol.__init__>` puts
@@ -213,10 +213,10 @@ OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
 #: rather than once per constructed packet.
 _DECLARED_KEYWORDS = {}  # type: dict[type, Optional[frozenset[str]]]
 
-#: Methods a construction keyword may be for. :meth:`Protocol.__post_init__
-#: <pcapkit.protocols.protocol.Protocol.__post_init__>` passes the same
-#: ``**kwargs`` to :meth:`pack <pcapkit.protocols.protocol.Protocol.pack>` (and
-#: so ``make``) *and* :meth:`unpack <pcapkit.protocols.protocol.Protocol.unpack>`
+#: Methods a construction keyword may be for.
+#: :meth:`Protocol.__post_init__ <pcapkit.protocols.protocol.Protocol.__post_init__>`
+#: passes the same ``**kwargs`` to :meth:`pack <pcapkit.protocols.protocol.Protocol.pack>`
+#: (and so ``make``) *and* :meth:`unpack <pcapkit.protocols.protocol.Protocol.unpack>`
 #: (and so ``read``).
 _KEYWORD_CONSUMERS = ('make', 'read', 'pack', 'unpack', '__post_init__', '__init__')
 
