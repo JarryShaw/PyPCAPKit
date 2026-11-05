@@ -206,6 +206,41 @@ number, so it registers through
 loopback is keyed by address family rather than by EtherType, and registers through
 :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`.
 
+A table belongs to the protocol that reads it, and is keyed by that protocol's own
+code for its payload:
+
+.. mermaid::
+
+   flowchart TD
+       FR["Frame.\_\_proto\_\_ for PCAP,<br/>PCAPNG.\_\_proto\_\_ for PCAP-NG<br/>keyed by LinkType<br/>register\_linktype for both,<br/>register\_pcap or register\_pcapng for one"]
+       LK["Link.\_\_proto\_\_<br/>keyed by EtherType<br/>register\_ethertype<br/>a VLAN tag reads on through it"]
+       LB["Loopback.\_\_proto\_\_<br/>keyed by BSD address family<br/>register\_loopback"]
+       IN["Internet.\_\_proto\_\_<br/>keyed by TransType<br/>register\_transtype"]
+       IPX["IPX.\_\_proto\_\_<br/>keyed by IPX Packet Type<br/>register\_ipx"]
+       subgraph TR ["Transport layer tables"]
+           direction TB
+           TU["TCP.\_\_proto\_\_ and UDP.\_\_proto\_\_<br/>keyed by port<br/>register\_tcp, register\_udp,<br/>register\_apptype for either or both"]
+           SC["SCTP.\_\_proto\_\_<br/>keyed by the DATA chunk's PPID<br/>register\_sctp"]
+           DC["DCCP.\_\_proto\_\_<br/>keyed by port<br/>register\_dccp"]
+           TU ~~~ SC ~~~ DC
+       end
+       APP["an application layer protocol"]
+
+       FR -->|"a link layer protocol, e.g. Ethernet"| LK
+       FR -->|"Loopback"| LB
+       FR -->|"IPv4 or IPv6, for a raw IP link type"| IN
+       LK -->|"an internet layer protocol, e.g. IPv4"| IN
+       LK -->|"IPX"| IPX
+       LK -->|"RARP"| APP
+       LB -->|"IPv4 or IPv6"| IN
+       IN -->|"TCP, UDP, SCTP or DCCP"| TR
+       IN -->|"OSPF"| APP
+       TR & IPX -->|"a registered protocol"| APP
+
+A miss in any table gives that table's fallback, normally
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as
+:ref:`protocol-next-layer-dispatch` shows.
+
 Samples
 ~~~~~~~
 
@@ -940,9 +975,9 @@ produced.
    - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback`
    - :func:`~pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback`
 
-A reassembly callback runs on every submission and takes one argument, the list
-of datagrams that submission produced. A flow tracing callback runs as each flow
-is finalised and takes that flow's
+A reassembly callback runs on every :ref:`submission <reassembly-submissions>` and
+takes one argument, the list of datagrams that submission produced. A flow tracing
+callback runs as each flow is finalised and takes that flow's
 :class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Each should return
 :obj:`None`; any return value is ignored.
 

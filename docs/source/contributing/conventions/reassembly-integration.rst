@@ -62,6 +62,27 @@ Parse Ownership
   made outside a ``TYPE_CHECKING`` block, the rest of
   :mod:`pcapkit.foundation.registry` included.
 
+.. mermaid::
+
+   flowchart TD
+       ENG["pcapkit.foundation.engines<br/>an already-parsed frame"]
+       TK["a pcapkit.toolkit.&lt;engine&gt; extraction function<br/>e.g. toolkit.pcap.dtls\_reassembly"]
+       RE["the reassembly instance the Extractor holds<br/>IPv4, IPv6, TCP, DTLS"]
+       DEF["Deferred: a datagram's packet,<br/>parsed on first read"]
+       AN["pcapkit.foundation.analysis<br/>ip\_datagram, tcp\_datagram, dtls\_handshake<br/>public wrappers, no parsing"]
+       subgraph protocols ["pcapkit.protocols"]
+           PM["the protocol class's parse method<br/>Protocol.analyze: IPv4, IPv6<br/>Transport.analyze: TCP<br/>DTLS.analyze\_handshake"]
+       end
+       REG["pcapkit.foundation.registry.protocols"]
+
+       ENG --> TK --> RE --> DEF
+       DEF -->|"on the reassembly's \_\_protocol\_type\_\_"| PM
+       AN --> PM
+       protocols -.->|"registers a class, nothing else"| REG
+
+No edge leaves :mod:`pcapkit.protocols` for the reassembly or the analysis layer;
+:file:`tests/project/test_protocols_import_boundary_2622_unit.py` fails on one.
+
 Compliance, Measured
 ~~~~~~~~~~~~~~~~~~~~~
 
