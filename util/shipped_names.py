@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """The names a release shipped under :mod:`pcapkit.protocols`, as the fixture a removal guard reads (#2534).
 
-``python3 util/shipped_names.py v1.5.1`` reads the tag's tree with ``git`` and
-writes :file:`tests/project/shipped_names_fixtures/v1.5.1.json`, which
+``python3 util/shipped_names.py v1.6.0`` reads the tag's tree with ``git`` and
+writes :file:`tests/project/shipped_names_fixtures/v1.6.0.json`, which
 :class:`~tests.project.test_no_moved_name_re_exports_1744_unit.TestShippedNames`
 reads. CI checks out no tags, so the file is checked in; the same command
 writes it again byte for byte, and the file names the tag, its commit and this
@@ -187,7 +187,7 @@ def render(fixture: 'dict[str, Any]') -> 'str':
 def main(argv: 'Optional[list[str]]' = None) -> 'int':
     """Write the fixture for the tag ``argv`` names; the exit status."""
     parser = argparse.ArgumentParser(description=__doc__.split('\n', 1)[0])
-    parser.add_argument('tag', help='the release tag to read, such as v1.5.1')
+    parser.add_argument('tag', help='the release tag to read, such as v1.6.0')
     args = parser.parse_args(argv)
     out = ROOT / 'tests' / 'project' / 'shipped_names_fixtures' / f'{args.tag}.json'
     out.parent.mkdir(parents=True, exist_ok=True)

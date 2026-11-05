@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import ast
 import importlib
+import inspect
 import json
 import pathlib
 import re
@@ -180,7 +181,7 @@ MOVED_MODULES = (
 
 #: The names the latest release shipped under :mod:`pcapkit.protocols`, which
 #: :file:`util/shipped_names.py` reads from its tag (CI checks out no tags).
-SHIPPED_NAMES = ROOT / 'tests' / 'project' / 'shipped_names_fixtures' / 'v1.5.1.json'
+SHIPPED_NAMES = ROOT / 'tests' / 'project' / 'shipped_names_fixtures' / 'v1.6.0.json'
 
 #: A ``versionremoved`` block, as its indentation and its body: the lines indented past it.
 REMOVAL_BLOCK = re.compile(r'(?m)^(?P<indent>[ \t]*)\.\. versionremoved::[^\n]*\n'
@@ -298,6 +299,17 @@ def _module(name: 'str') -> 'object':
         return importlib.import_module(name)
     except ImportError:
         return None
+
+
+def _source_names(module: 'object') -> 'set[str]':
+    """The names ``module``'s source binds, read as :func:`util.shipped_names.defined` reads the tag.
+
+    These include a TypedDict bound only for Sphinx, which the fixture lists and
+    the module lacks at run time.
+
+    """
+    tree = ast.parse(pathlib.Path(inspect.getfile(module)).read_text(encoding='utf-8'))
+    return set(shipped_names.defined(tree.body))
 
 
 class TestNotExported(unittest.TestCase):
@@ -473,15 +485,17 @@ class TestShippedNames(unittest.TestCase):
         """A name gone from its old path has a ``versionremoved`` naming that path (#2534).
 
         One naming the module stands for the name where the module went whole,
-        or where the module only re-exported the name.
+        or where the module only re-exported the name. A name bound only for
+        Sphinx resolves while the module's source still binds it.
 
         """
         notes = _removal_notes()
         missing = []  # type: list[str]
         for module_name, names in sorted(self.fixture['modules'].items()):
             module = _module(module_name)
+            source = set() if module is None else _source_names(module)  # type: set[str]
             for name in names['defined'] + names['exported'] + names['documented']:
-                if module is not None and hasattr(module, name):
+                if module is not None and (hasattr(module, name) or name in source):
                     continue
                 if f'``{module_name}.{name}``' in notes:
                     continue
