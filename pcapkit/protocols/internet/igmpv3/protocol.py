@@ -7,8 +7,7 @@
 :mod:`pcapkit.protocols.internet.igmpv3.protocol` contains
 :class:`~pcapkit.protocols.internet.igmpv3.protocol.IGMPv3`, which implements an
 extractor for Internet Group Management Protocol version 3 (IGMPv3)
-[:rfc:`3376`]. Unlike IGMPv1/v2, IGMPv3 defines two message shapes of its
-own, both handled by this one class:
+[:rfc:`3376`]. It handles both IGMPv3 message shapes:
 
 An IGMPv3 Membership Query (type ``0x11``, shared with v1/v2) reuses the
 8-octet layout IGMPv1/v2 share and, when at least 12 octets long overall,
@@ -29,8 +28,7 @@ Octets      Bits        Name                               Description
   12         96   ``igmpv3.sources``                 Source Address [1..N]
 ======= ========= ================================== ===================================
 
-An IGMPv3 Membership Report (type ``0x22``) has an unrelated, materially
-different shape of its own:
+An IGMPv3 Membership Report (type ``0x22``) has a layout of its own:
 
 ======= ========= ================================== ===================================
 Octets      Bits        Name                               Description

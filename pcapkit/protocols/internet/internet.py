@@ -152,13 +152,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Enum_TransType.IPv6_NoNxt:      ModuleDescriptor('pcapkit.protocols.misc.raw.protocol',            'Raw'),
             Enum_TransType.IPv6_Opts:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts.protocol',  'IPv6_Opts'),
 
-            # OSPF rides directly on IP, so IANA protocol number 89 is its only
-            # dispatch point. The dissector nonetheless lives under
-            # ``protocols.application`` and reports ``__layer__ = 'Application'``,
-            # because a routing protocol computes the forwarding table rather
-            # than forwarding packets -- the dispatch tier and the subpackage are
-            # deliberately decoupled, see
-            # :doc:`/contributing/conventions/protocol-layer-placement`.
+            # OSPF rides directly on IP (protocol 89) but lives under ``protocols.application``:
+            # a routing protocol computes the forwarding table rather than forwarding packets;
+            # see :doc:`/contributing/conventions/protocol-layer-placement`.
             Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
 
             Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol',        'IPX'),
@@ -169,15 +165,14 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     )
 
     #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
-    #: and whether a bare :class:`int` is a valid key there too. Declared by the
-    #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
-    #: ``code=`` key is checked exactly as
+    #: and whether a bare :class:`int` is a valid key too. Declared by the class
+    #: owning the registry and read by
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`,
+    #: so a ``code=`` key is checked as
     #: :func:`~pcapkit.foundation.registry.protocols.internet.register_transtype` checks
-    #: its own -- a subclass sharing this registry is therefore checked as
-    #: :class:`Internet` is (:issue:`2268`), while
-    #: :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`, which keeps one of its own,
-    #: declares its own pairing (:issue:`2511`).
+    #: its own (:issue:`2268`).
+    #: :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`, which keeps a registry
+    #: of its own, declares its own pairing (:issue:`2511`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_TransType, False)
 
     #: int: How many IPv6 extension headers in a row the next layer follows:

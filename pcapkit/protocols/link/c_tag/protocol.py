@@ -11,11 +11,9 @@ the 802.1Q Customer VLAN Tag Type (C-Tag, formerly the Q-Tag) [*]_, EtherType
 :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`; this class adds only the tag's own
 identity and its registry index.
 
-It lives in a package of its own rather than beside
+It has a package of its own, apart from
 :class:`~pcapkit.protocols.link.s_tag.protocol.S_Tag`, since a package holds one protocol
-class, named after it, with only the framework bases in
-:mod:`pcapkit.protocols.protocol` exempt (:issue:`2529`). The two tags are
-reached through different registry indices, ``0x8100`` against ``0x88A8``.
+class, named after it (:issue:`2529`).
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q
 
@@ -33,14 +31,9 @@ if TYPE_CHECKING:
 __all__ = ['C_Tag']
 
 
-# NOTE: ``schema`` and ``data`` are restated here even though :class:`VLAN`
-# already declares them. They are not inherited:
-# :meth:`ProtocolBase.__init_subclass__ <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>`
-# resolves an omitted schema by looking the *subclass name* up in
-# :mod:`pcapkit.protocols.schema`, and assigns unconditionally -- so leaving them
-# off would silently bind ``Schema_Raw``/``Data_Raw`` rather than falling back to
-# the base class's pair. See :class:`~pcapkit.protocols.application.rarp.protocol.RARP`, which
-# restates them for the same reason.
+# NOTE: ``schema`` and ``data`` are restated, not inherited: ProtocolBase.__init_subclass__
+# looks an omitted pair up by class name in the ``schema`` and ``data`` modules beside
+# this one, and this package has neither, so it would bind Raw's. RARP does the same.
 class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     """This class implements 802.1Q Customer VLAN Tag Type.
 

@@ -5,8 +5,7 @@
 
 .. module:: pcapkit.protocols.internet
 
-:mod:`pcapkit.protocols.internet` is the collection of all protocols
-in the internet layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.internet` collects the internet layer protocols.
 
 Each protocol class, and the base class
 :class:`~pcapkit.protocols.internet.internet.Internet`, is imported the first time

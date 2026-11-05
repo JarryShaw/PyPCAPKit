@@ -198,16 +198,10 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
 
     #: CmprI and CmprE -- two 4-bit counts sharing one octet.
     #:
-    #: NOTE: :rfc:`6554#section-3` gives ``CmprI`` and ``CmprE`` as *"4-bit
-    #: unsigned integer"*, i.e. the high and low nibble of a single octet, so
-    #: they cannot be two :class:`~pcapkit.corekit.fields.numbers.UInt8Field`
-    #: (one octet each). Together with :attr:`pad` below -- ``Pad``
-    #: (4 bits) plus ``Reserved`` (20 bits) -- this is the one 32-bit word the
-    #: diagram in :rfc:`6554#section-3` draws, and the same word
-    #: :meth:`IPv6_Route._read_data_type_rpl
-    #: <pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_rpl>`'s
-    #: own docstring draws. The split between the two fields falls on the octet
-    #: boundary between ``CmprE`` and ``Pad``, so neither straddles an octet.
+    #: NOTE: :rfc:`6554#section-3` gives each as a *"4-bit unsigned integer"*,
+    #: the high and low nibble of one octet. With :attr:`pad` -- ``Pad`` (4 bits)
+    #: and ``Reserved`` (20 bits) -- they form the 32-bit word that section
+    #: draws; the split falls on the octet boundary between ``CmprE`` and ``Pad``.
     cmpr: 'CmprInfo' = BitField(length=1, namespace={
         'cmpr_i': (0, 4),
         'cmpr_e': (4, 4),
@@ -232,13 +226,9 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             packet: packet data
 
         """
-        # NOTE: The declared span -- ``4 + Hdr Ext Len * 8`` octets inside
-        # IPv6-Route -- is kept for :meth:`post_process`, which splits
-        # ``Addresses[1..n]`` by it. By then ``__length__`` has been counted
-        # down to zero, and the octets actually read are fewer than declared
-        # whenever the capture ends inside the address list. :meth:`pack` calls
-        # this too, before it has set ``__length__``; the packing path does not
-        # need the span, so nothing is kept there.
+        # NOTE: Keep the declared span (``4 + Hdr Ext Len * 8``) for post_process, which
+        # splits ``Addresses[1..n]`` by it: by then ``__length__`` is counted down to zero.
+        # pack calls this before setting ``__length__``, and needs no span.
         if '__length__' in packet:
             packet['__rpl_length__'] = packet['__length__']
 
@@ -254,34 +244,14 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
         """
         buffer = self.addresses
         if not isinstance(buffer, bytes):
-            # NOTE: ``self.addresses`` is still a ``list[bytes]`` -- one
-            # already-compressed address per item -- when this schema was
-            # built via ``make`` (see
-            # :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data_type_rpl`)
-            # rather than parsed off the wire. There is nothing to decode in
-            # that case: the caller supplied each address already
-            # compressed, and :meth:`Schema.pack
-            # <pcapkit.protocols.schema.Schema.pack>`'s own
-            # :class:`~pcapkit.corekit.fields.collections.ListField` handling
-            # packs that list directly. The SRH prefix-decompression below
-            # only makes sense against the raw octets a real parse hands
-            # here.
+            # NOTE: Built via ``make`` (IPv6_Route._make_data_type_rpl), ``addresses`` is a
+            # ``list[bytes]`` of already-compressed addresses, which Schema.pack packs as is,
+            # so there is nothing to decompress.
             #
-            # NOTE: ``ip`` still has to be *set*, though, rather than merely
-            # left alone. :meth:`Protocol.__post_init__
-            # <pcapkit.protocols.protocol.Protocol.__post_init__>` packs and
-            # then unpacks, and :meth:`IPv6_Route.read
-            # <pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read>` hands
-            # :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_rpl`
-            # *this* schema on that path, not a re-parsed one -- so returning
-            # early without ``ip`` would raise a bare ``AttributeError`` from
-            # the reader. Each item is one whole element of
-            # ``Addresses[1..n]``, so a full-width (16-octet) item is decoded
-            # the way the parse path below decodes an uncompressed one, and a
-            # compressed suffix is left as :obj:`bytes` -- which is exactly what
-            # that path does too. The :func:`isinstance` test keeps anything
-            # that is not :obj:`bytes` passing through untouched, rather than
-            # failing here on a :func:`len` the item may not support.
+            # NOTE: ``ip`` must still be set: Protocol.__post_init__ packs then unpacks, and
+            # IPv6_Route.read hands *this* schema to _read_data_type_rpl, which would raise
+            # AttributeError without it. A full-width (16-octet) item is decoded as the parse
+            # path decodes an uncompressed one; anything else passes through untouched.
             self.ip = [
                 cast('IPv6Address', ipaddress.ip_address(item))
                 if isinstance(item, bytes) and len(item) == 16 else item
@@ -298,24 +268,17 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
         ilen = 16 - cmpr_i
         elen = 16 - cmpr_e
 
-        # NOTE: The address list is split by the span ``Hdr Ext Len`` declares,
-        # not by the octets actually read: once a capture ends inside the list
-        # the two differ, and splitting by the latter decodes the octets of
-        # ``Addresses[1]`` as ``Addresses[n]`` (or a short run as an IPv4
-        # address). The declared span is what :attr:`addresses`'s own
-        # ``length`` callback asked for -- ``pad_len`` already subtracted, the
-        # trailing padding octets being read by :attr:`padding` -- and a
-        # malformed one (no whole number of addresses) is rejected by
-        # :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_rpl`,
-        # so it is only clamped here.
+        # NOTE: Split by the span ``Hdr Ext Len`` declares, less ``pad_len``, not by the
+        # octets read: on a truncated capture the latter decodes ``Addresses[1]`` as
+        # ``Addresses[n]``. _read_data_type_rpl rejects a malformed span, so it is only
+        # clamped here.
         declared = packet.get('__rpl_length__', len(buffer) + 4 + self.pad['pad_len'])
         area = max(declared - 4 - self.pad['pad_len'], 0)
         widths = [ilen] * (max(area - elen, 0) // ilen) + [elen]
 
-        # NOTE: Only an item read at its full width is decoded. One the capture
-        # cut short stays the raw :obj:`bytes` that were read -- not prefixed
-        # with ``dst``, so a rebuild writes back exactly those octets -- and
-        # one cut off entirely is not listed at all.
+        # NOTE: Only an item read at full width is decoded. A truncated one stays the raw
+        # octets read, without the ``dst`` prefix, so a rebuild writes them back; one cut
+        # off entirely is not listed.
         addr = []  # type: list[IPv6Address | bytes]
         counter = 0
         for index, width in enumerate(widths):

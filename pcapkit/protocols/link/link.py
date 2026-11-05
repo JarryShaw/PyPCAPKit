@@ -86,13 +86,8 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             Enum_EtherType.Reverse_Address_Resolution_Protocol:
                 ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
 
-            # The 802.1Q customer tag and the 802.1ad service tag. Q-in-Q stacks
-            # them -- the service tag's own next-EtherType is what selects the
-            # customer tag -- so the two coexist in one frame rather than
-            # competing. They are separate classes only to keep their
-            # ``info_name`` apart in the parsed output; the tag layout itself is
-            # identical, and both share the code in
-            # :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
+            # 802.1Q customer and 802.1ad service tags: Q-in-Q stacks them, so they are
+            # separate classes to keep their ``info_name`` apart; both share VLAN's code.
             Enum_EtherType.Customer_VLAN_Tag_Type:
                 ModuleDescriptor('pcapkit.protocols.link.c_tag.protocol', 'C_Tag'),
 
@@ -106,15 +101,14 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
-    #: and whether a bare :class:`int` is a valid key there too. Declared by the
-    #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
-    #: ``code=`` key is checked exactly as
+    #: and whether a bare :class:`int` is a valid key too. Declared by the class
+    #: owning the registry and read by
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`,
+    #: so a ``code=`` key is checked as
     #: :func:`~pcapkit.foundation.registry.protocols.link.register_ethertype` checks
-    #: its own -- :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`, which shares
-    #: this registry, is therefore checked as :class:`Link` is, while
-    #: :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`, which keeps one of its
-    #: own, declares its own pairing or none at all (:issue:`2268`).
+    #: its own. A class keeping its own registry, such as
+    #: :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`, declares its own
+    #: pairing or none (:issue:`2268`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_EtherType, False)
 
     ##########################################################################

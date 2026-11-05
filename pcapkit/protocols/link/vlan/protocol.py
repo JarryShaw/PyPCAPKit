@@ -22,27 +22,21 @@ Octets      Bits        Name                    Description
   2          16   ``c_tag.type``            Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
-The two tags carry an **identical** tag control information layout -- the same
-3-bit PCP, 1-bit DEI and 12-bit VID -- and are told apart solely by the tag
-protocol identifier (TPID) that selected them, ``0x8100`` for the customer tag
-against ``0x88A8`` for the service tag. That TPID is not part of either tag: it
-is the EtherType field of whatever encapsulates the tag, so both classes read the
-same four octets and share every byte of parsing and construction code.
+Both tags have the same tag control information layout -- 3-bit PCP, 1-bit
+DEI, 12-bit VID -- and differ only in the tag protocol identifier (TPID) that
+selected them. The TPID is the EtherType field of the encapsulating header, not
+part of the tag, so both classes share all parsing and construction code.
 
-They are nonetheless distinct classes rather than one class bound at two
-EtherTypes, because 802.1ad *stacks* them: a Q-in-Q frame carries a service tag
-whose next EtherType is ``0x8100``, selecting a customer tag in turn. Both tags
-therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.Protocol.info_name`
--- ``s_tag`` against ``c_tag`` -- is what keeps them apart in the parsed
-:class:`~pcapkit.corekit.infoclass.Info`. A single class bound at both EtherTypes
-would nest one ``c_tag`` inside another, leaving nothing in the output to say
-which of the two was the service tag.
+They are still distinct classes because 802.1ad *stacks* them: a Q-in-Q frame
+carries a service tag whose next EtherType, ``0x8100``, selects a customer tag.
+:attr:`~pcapkit.protocols.protocol.Protocol.info_name` -- ``s_tag`` against
+``c_tag`` -- keeps the two apart in the parsed
+:class:`~pcapkit.corekit.infoclass.Info`; one class bound at both EtherTypes
+would nest one ``c_tag`` inside another.
 
-Each tag has a package of its own because a package holds one protocol class,
-named after it, with only the framework bases in :mod:`pcapkit.protocols.protocol`
-exempt (:issue:`2529`). This base declares no
-:meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own -- it is
-abstract and nothing dispatches to it -- so its ``__index__`` raises.
+Each tag has a package of its own, since a package holds one protocol class,
+named after it (:issue:`2529`). This base is abstract and nothing dispatches to
+it, so its :meth:`~pcapkit.protocols.protocol.Protocol.__index__` raises.
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q
 

@@ -19,15 +19,12 @@ of their own:
      - :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`
      - :rfc:`2661`
 
-Only L2TPv2 is implemented. What the family is expected to grow is set out below,
-so that the base's shape is not guessed at later.
+Only L2TPv2 is implemented; the missing members are set out below.
 
-The base deliberately carries **no header parsing at all**, in the way
-:class:`~pcapkit.protocols.internet.ip.protocol.IP` carries none for its family. That is
-not tidiness: the versions genuinely do not share a header. All that is common
-across them is the *first 16-bit word carrying a version nibble at bits 12-15*;
-everything after it differs, so a base that parsed further would be assuming one
-version's layout for all of them.
+The base carries **no header parsing**, as
+:class:`~pcapkit.protocols.internet.ip.protocol.IP` carries none for its family: the
+versions share only a version nibble at bits 12-15 of the first 16-bit word, so a
+base that parsed further would impose one version's layout on all of them.
 
 Unimplemented Members
 ---------------------
@@ -35,15 +32,13 @@ Unimplemented Members
 **L2TPv3** [:rfc:`3931`] has a different session header and a different control
 message header from v2, and is reachable two ways -- over UDP port 1701 like v2
 (§4.1.2), and directly over IP as **protocol number 115** (§4.1.1: *"L2TPv3 over
-IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). That second
-route is why
+IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). So
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
-leaves 115 unbound: the binding waits on an ``L2TPv3`` class, not on a
-different framing decision. It also means 115 names v3 alone: v2's
+leaves 115 unbound until an ``L2TPv3`` class exists; v2's
 :meth:`~pcapkit.protocols.protocol.Protocol.__index__` is its UDP port.
 
-Binding :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` at 115 instead does not
-work (:issue:`548`), and is recorded so it is not proposed again. Over IP the v3
+Binding :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` at 115 does not
+work (:issue:`548`). Over IP the v3
 session header is, in :rfc:`3931` §4.1.1.1's own words, *"free of any restrictions
 imposed by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw
 32-bit Session ID and carries **no version nibble at all**, so there is nothing a
@@ -53,9 +48,7 @@ that binding reports ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``
 for a v3-over-IP datagram: a complete header assembled out of a Session ID and
 the first two octets of the PPP frame behind it. The check refuses that datagram
 only because its Session ID does not put ``2`` in the nibble; one that does
-parses as v2. 115 is a missing
-*class*, not a missing registration, and until that class exists an undissected
-payload is the honest answer.
+parses as v2.
 
 **L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*
 an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves
@@ -79,19 +72,17 @@ other version, for that field, for the nibble and for the data
 :meth:`L2TP.from_data <pcapkit.protocols.link.l2tp.protocol.L2TP.from_data>` is handed.
 :meth:`L2TPv2.read <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.read>` **checks** the
 nibble as well and refuses anything other than ``2``. That keeps v3 traffic on
-port 1701 (:rfc:`3931` §4.7.2 shares the port, so this is ordinary capture
-traffic rather than a corner case) from being reported as v2 with a tunnel and
-session ID read out of v3's Control Connection ID.
+port 1701, which :rfc:`3931` §4.7.2 shares, from being reported as v2 with a
+tunnel and session ID read out of v3's Control Connection ID.
 
 UDP port 1701 binds L2TPv2 itself, the only member.
 :meth:`~pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version` is where a further
 member goes, and binding the port to this base through a hook making the same
 switch, as :meth:`IGMP._dispatch <pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch>`
-does for IP protocol 2, needs no new registry. L2TP is the easier case beside
+does for IP protocol 2, needs no new registry: unlike
 :class:`~pcapkit.protocols.application.http.protocol.HTTP`, whose
 :meth:`~pcapkit.protocols.application.http.protocol.HTTP._guess_version` has to *infer*
-the version because HTTP's wire format carries no version field, whereas L2TP
-states its version explicitly in those four bits. The switch belongs on the
+the version, L2TP states it in those four bits. The switch belongs on the
 **UDP** path only: over IP protocol 115 there is no nibble to switch on, per the
 §4.1.1.1 note above.
 

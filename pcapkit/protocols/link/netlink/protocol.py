@@ -34,9 +34,7 @@ Scope
 -----
 
 Only the fixed 16-octet ``nlmsghdr`` framing is dissected -- ``nlmsg_len``,
-``nlmsg_type``, ``nlmsg_flags``, ``nlmsg_seq`` and ``nlmsg_pid``. Two things a
-complete Netlink dissector would eventually need are deliberately left out of
-this first cut:
+``nlmsg_type``, ``nlmsg_flags``, ``nlmsg_seq`` and ``nlmsg_pid``. Left out:
 
 * **Per-family message payloads.** What a given ``nlmsg_type`` means, and how
   its payload is laid out, is defined independently by each Netlink family
@@ -44,17 +42,13 @@ this first cut:
   own -- routing table entries, link attributes (``rtattr``/``nlattr`` TLV
   chains), and so on. The payload is kept as
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless its ``nlmsg_type`` is registered.
-* **Multiple messages packed into one read.** The kernel's own netlink(7)
-  page documents that a single read from a netlink socket, and so a single
-  captured frame, commonly carries more than one ``nlmsghdr`` message back to
-  back (:rfc:`3549#section-2.3.2` numbers the header fields; it does not
-  itself restate the "one read, several messages" framing convention, which
-  is :manpage:`netlink(7)`'s). This class dissects only the *first* message's
-  header; everything after it -- that message's own payload, and any sibling
-  messages the frame may carry -- is kept together as the undissected
-  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload, exactly as if it were one
-  larger opaque blob. Splitting the frame on every ``nlmsg_len`` boundary is
-  future work, tracked on :issue:`2460`.
+* **Multiple messages packed into one read.** Per :manpage:`netlink(7)`, a
+  single read from a netlink socket, and so a single captured frame, commonly
+  carries several ``nlmsghdr`` messages back to back. This class dissects only
+  the *first* message's header; that message's payload and any sibling
+  messages are kept together as the
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload. Splitting the frame on
+  every ``nlmsg_len`` boundary is not implemented.
 
 Byte Order
 ----------

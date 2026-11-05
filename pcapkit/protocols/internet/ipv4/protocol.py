@@ -446,19 +446,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             'dst': ipv4.dst,
         })
 
-        # NOTE: A capture that ends at or inside the header has no payload
-        # octets, and parsing the next layer from none would default-fill a
-        # header that was never captured, which ``from_data`` then rebuilds
-        # (#1167). A zero length makes it a ``NoPayload`` instead.
+        # NOTE: A capture ending at or inside the header has no payload; a zero length
+        # makes it a ``NoPayload`` rather than a default-filled header (#1167).
         #
-        # A Total Length of 0 is what TCP segmentation offload leaves in a
-        # capture taken on the sending host: the payload is then the rest of
-        # the captured frame, with no trailer, as Wireshark ("presumed TSO") and
-        # dpkt read it. Any other Total Length shorter than the header is
-        # Wireshark's "Bogus IP length", which it dissects no further: no
-        # payload, and the octets after the header are the trailer, as they are
-        # for a Total Length equal to the header's. Either way the rebuild
-        # writes the Total Length back as it was (#1547).
+        # A Total Length of 0 is what TCP segmentation offload leaves on the sending
+        # host: the payload is the rest of the frame, with no trailer, as Wireshark
+        # ("presumed TSO") and dpkt read it. Any other Total Length shorter than the
+        # header is Wireshark's "Bogus IP length": no payload, and the rest is trailer.
+        # Either way the rebuild writes the Total Length back as it was (#1547).
         if len(self) > ipv4.hdr_len:
             if ipv4.len == 0:
                 _plen = len(self) - ipv4.hdr_len
@@ -467,15 +462,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             _plen = 0
 
-        # NOTE: A later fragment, one with a non-zero Fragment Offset, carries a
-        # slice of the datagram's data from that offset on, and that slice
-        # starts with no upper-layer header (:rfc:`791#section-3.2`), though
-        # ``protocol`` above still names the one the first fragment carries. No
-        # code is dispatched on, so the registry's fallback leaves the octets as
-        # :class:`~pcapkit.protocols.misc.raw.protocol.Raw` with no protocol to alias it
-        # as, and ``'UDP' in frame`` does not hold of a slice of UDP payload
-        # (#1553). Reassembly takes ``packet.payload``, the octets as
-        # captured, which this leaves as they were.
+        # NOTE: A later fragment (non-zero Fragment Offset) starts with no upper-layer
+        # header (:rfc:`791#section-3.2`), though ``protocol`` names the first fragment's.
+        # Nothing is dispatched on, so the octets stay Raw and ``'UDP' in frame`` does not
+        # hold (#1553); reassembly takes ``packet.payload`` as captured.
         proto = None if ipv4.offset else ipv4.protocol
         # NOTE: A Total Length of 0 declares none, so the frame's lengths are the
         # only record of a cut and the payload keeps them (#2689).

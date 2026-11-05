@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=fixme
-"""Mobility Header
+"""MH - Mobility Header
+==========================
+
+.. module:: pcapkit.protocols.internet.mh.protocol
 
 :mod:`pcapkit.protocols.internet.mh.protocol` contains
 :class:`~pcapkit.protocols.internet.mh.protocol.MH`,

@@ -12,15 +12,10 @@ through IP protocol number 47 behind any layer sharing
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`,
 IPv4 and IPv6 among them, and on a
 ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type``
-is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- ``ARPHRD_IPGRE`` and
-``ARPHRD_IP6GRE`` both land on this one class:
-:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` dispatches here instead
-of falling back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` for either case;
-see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`. The
-"IP"/"IP6" distinction in the two ``arphrd_type`` names is about which IP
-version the tunnel carries on its *outer* layer -- i.e. which ``arphrd_type``
-fired -- not a different GRE header shape; the GRE framing itself is
-identical either way.
+is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE``; see
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`.
+The two names differ only in the tunnel's outer IP version; the GRE framing is
+the same.
 
 Structure, the base header plus every optional field (:rfc:`2784` section
 2.1, :rfc:`2890` section 2):
@@ -40,32 +35,26 @@ Structure, the base header plus every optional field (:rfc:`2784` section
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 ``C`` gates the Checksum/Reserved1 pair, ``K`` gates the Key field and ``S``
-gates the Sequence Number field, each independently -- so the header is
-4, 8, 12 or 16 octets depending on which of the three are set. ``Ver`` is
-:rfc:`2784`'s 3-bit Version Number, which MUST be ``0``; a nonzero version is
-a different protocol entirely (RFC 2637's "Enhanced GRE", the PPTP variant,
-is version ``1``) and is not implemented here. The Protocol Type field is an
-EtherType selecting the encapsulated payload -- resolved through
-:attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, the same
-family registry Ethernet, VLAN and LinuxSLL already share, exactly as
-:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` resolves its own ``type`` field.
-This class therefore keeps no registry of its own.
+gates the Sequence Number field, each independently, so the header is 4, 8,
+12 or 16 octets. ``Ver`` is :rfc:`2784`'s 3-bit Version Number, which MUST be
+``0``. The Protocol Type field is an EtherType selecting the payload, resolved
+through :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>` as
+:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` resolves its ``type`` field,
+so this class keeps no registry of its own.
 
 Scope
 -----
 
 Only the framing above is dissected. The Key and Sequence Number fields are
-recorded but not interpreted further -- their meaning (which traffic flow, and
-where in its sequence) is a matter for the tunnel endpoints, not something a
-passive dissector can resolve from the header alone. The Checksum, when ``C``
-is set, covers the header and the payload with no pseudo-header
-(:rfc:`2784#section-2.5`); :meth:`~pcapkit.protocols.link.gre.protocol.GRE.read`
-verifies it and :meth:`~pcapkit.protocols.link.gre.protocol.GRE.make` computes it
-(:issue:`2618`). RFC 2637's Enhanced GRE
-(version 1, used by PPTP) has a different, incompatible layout from this point
-on -- a Key field split into Payload Length and Call ID, and an optional
-Acknowledgment Number -- and is out of scope; :meth:`read` refuses it rather
-than misreading it as RFC 2784/2890 GRE.
+recorded but not interpreted: their meaning is a matter for the tunnel
+endpoints. The Checksum, when ``C`` is set, covers the header and the payload
+with no pseudo-header (:rfc:`2784#section-2.5`);
+:meth:`~pcapkit.protocols.link.gre.protocol.GRE.read` verifies it and
+:meth:`~pcapkit.protocols.link.gre.protocol.GRE.make` computes it
+(:issue:`2618`). RFC 2637's Enhanced GRE (version 1, used by PPTP) has an
+incompatible layout -- a Key field split into Payload Length and Call ID, and
+an optional Acknowledgment Number -- so :meth:`read` refuses any nonzero
+version rather than misreading it as RFC 2784/2890 GRE.
 
 .. versionadded:: 1.6.0
 

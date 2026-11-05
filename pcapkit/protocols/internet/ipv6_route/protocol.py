@@ -434,7 +434,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             stub above, which types them as optional keyword parameters. The
             runtime accepts them through ``**kwargs`` without defaulting them.
             The discrepancy with the implementation signature is deliberate
-            (GitHub issue :issue:`505`).
+            (:issue:`505`).
 
         See Also:
             For construction arguments, please refer to :meth:`self.make <IPv6_Route.make>`.

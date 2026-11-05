@@ -11,11 +11,9 @@ structure, and all of its parsing and construction, come from
 :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`; this class adds only the tag's own
 identity and its registry index.
 
-It lives in a package of its own rather than beside
+It has a package of its own, apart from
 :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag`, since a package holds one protocol
-class, named after it, with only the framework bases in
-:mod:`pcapkit.protocols.protocol` exempt (:issue:`2529`). The two tags are
-reached through different registry indices, ``0x88A8`` against ``0x8100``.
+class, named after it (:issue:`2529`).
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1ad
 
@@ -33,9 +31,8 @@ if TYPE_CHECKING:
 __all__ = ['S_Tag']
 
 
-# NOTE: ``schema`` and ``data`` are restated here for the reason given in
-# :mod:`pcapkit.protocols.link.c_tag.protocol` -- they are resolved by subclass *name*,
-# not inherited, so omitting them would silently bind the Raw pair.
+# NOTE: ``schema`` and ``data`` are restated for the reason given in
+# pcapkit.protocols.link.c_tag.protocol: omitted, they would bind Raw's.
 class S_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     """This class implements 802.1ad Service VLAN Tag Type.
 

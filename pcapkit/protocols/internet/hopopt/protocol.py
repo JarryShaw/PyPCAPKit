@@ -298,7 +298,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         class-name default, because
         :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` sits between
         this class and that default in the MRO and carries its own
-        ``'IPv6-Ext'`` (GitHub issue :issue:`917`). Inheriting it would rename
+        ``'IPv6-Ext'`` (:issue:`917`). Inheriting it would rename
         this header in every :class:`~pcapkit.corekit.protochain.ProtoChain`
         string and in :meth:`IPv6._decode_next_layer
         <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`'s packet

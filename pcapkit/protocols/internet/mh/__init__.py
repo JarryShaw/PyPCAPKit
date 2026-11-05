@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-"""mh
-========
+"""MH - Mobility Header
+==========================
 
 .. module:: pcapkit.protocols.internet.mh
 

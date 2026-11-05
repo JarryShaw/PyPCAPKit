@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.icmpv4.protocol` contains
 :class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` only,
-which implements extractor for Internet Control
+which implements the extractor for Internet Control
 Message Protocol (ICMP) [*]_, whose structure is
 described as below:
 

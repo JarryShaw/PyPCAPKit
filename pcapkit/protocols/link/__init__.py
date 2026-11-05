@@ -5,8 +5,7 @@
 
 .. module:: pcapkit.protocols.link
 
-:mod:`pcapkit.protocols.link` is a collection of all protocols in
-the link layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.link` collects the link layer protocols.
 
 Each protocol class, and the base class :class:`~pcapkit.protocols.link.link.Link`,
 is imported the first time it is reached rather than with this package, through
