@@ -17,6 +17,8 @@ model it is handed (:issue:`2574`).
 
 .. [*] https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol
 
+.. versionadded:: 1.6.0
+
 """
 from typing import TYPE_CHECKING, Generic, cast
 

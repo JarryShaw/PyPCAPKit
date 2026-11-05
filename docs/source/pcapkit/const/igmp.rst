@@ -15,6 +15,8 @@ enumerations include:
    * - :class:`IGMP_RecordType <pcapkit.const.igmp.record_type.RecordType>`
      - IGMP Group Record Types [*]_
 
+.. versionadded:: 1.6.0
+
 IGMP Type Numbers
 =================
 

@@ -25,7 +25,8 @@ A rough outline:
 - Create a topic branch, usually from `main`.
 - Make commits of logical units, and add a test case if the change fixes a bug or adds functionality.
 - Run the tests and make sure they pass (see below).
-- Add a changelog entry if the change is user-visible (see below).
+- If the change is user-visible, describe it in the pull request and leave its changelog entry to
+  the maintainer (see below).
 - Make sure your commit messages are in the proper format (see below).
 - Push your changes to a topic branch in your fork of the repository.
 - Submit a pull request to the repo.
@@ -58,10 +59,15 @@ shapes of it at collection time and say what to do; `tests/_tiers.py` has the re
 Entries live in `docs/source/changelog/<version>.rst`, one file per version, listed newest-first in
 the toctree of `docs/source/changelog.rst`. That tree is the single source of the project's history.
 
+**Pull requests for user-visible changes do not add their own bullet.** While a version is
+unreleased, its entry is written centrally by the maintainer once a change is ready to merge or has
+merged. Pull requests that each edit the same file conflict on every merge, so leave
+`docs/source/changelog/<version>.rst` and `CHANGELOG.md` out of the diff.
+
 **`CHANGELOG.md` is generated — never edit it by hand.** `util/changelog_md.py` derives it from the
 newest entry alone, because its consumers (the `Create Release` workflow's release body and the
-source distribution) read Markdown rather than reStructuredText. Add your bullet to the `.rst`
-entry, then regenerate:
+source distribution) read Markdown rather than reStructuredText. The maintainer adds the bullet to
+the `.rst` entry, then regenerates:
 
 ```shell
 python util/changelog_md.py            # rewrite CHANGELOG.md from the newest entry

@@ -2,14 +2,13 @@
 
 ## Supported Versions
 
-Security fixes land on the current stable line and on the development line. Older
-lines are not patched -- upgrading is the fix.
+Security fixes land on the current stable line, and on a development line while
+one is in pre-release. Older lines are not patched -- upgrading is the fix.
 
 | Version         | Supported          | Notes                                   |
 | --------------- | ------------------ | --------------------------------------- |
-| 1.5.x           | :white_check_mark: | development line, pre-release           |
-| 1.4.x           | :white_check_mark: | current stable                          |
-| 1.3.x and older | :x:                | no longer patched                       |
+| 1.6.x           | :white_check_mark: | current stable                          |
+| 1.5.x and older | :x:                | no longer patched                       |
 | 0.x             | :x:                | no longer patched                       |
 
 Supported interpreters are the test matrix's blocking tier: CPython 3.11

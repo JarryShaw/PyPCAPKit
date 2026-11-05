@@ -28,6 +28,8 @@ capture encapsulation [*]_ of ``LINKTYPE_LINUX_SLL``, the header of every
 
 .. [*] https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html
 
+.. versionadded:: 1.6.0
+
 """
 from typing import TYPE_CHECKING
 

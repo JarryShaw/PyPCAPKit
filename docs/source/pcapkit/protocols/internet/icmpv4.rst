@@ -19,6 +19,8 @@ Octets      Bits        Name                    Description
   4          32   ``icmpv4.data``           Message Body
 ======= ========= ======================= ===================================
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.internet.icmpv4.protocol.ICMPv4
    :no-members:
    :show-inheritance:

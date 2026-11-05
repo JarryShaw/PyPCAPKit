@@ -31,6 +31,8 @@ signals that another follows -- and then the optional-field region those
 bitmasks select, each field aligned and sized per its own type. ``it_len``
 bounds the whole of it; the 802.11 MAC frame starts at that offset.
 
+.. versionadded:: 1.6.0
+
 Scope
 -----
 

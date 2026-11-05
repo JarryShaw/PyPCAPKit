@@ -31,6 +31,8 @@ capture encapsulation v2 [*]_ of ``LINKTYPE_LINUX_SLL2``. Its structure:
 
 .. [*] https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL2.html
 
+.. versionadded:: 1.6.0
+
 """
 from typing import TYPE_CHECKING
 

@@ -443,8 +443,8 @@ thresholds are on :doc:`../workflows`.
 The PEP Discussion, Kept Current
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:file:`docs/source/contributing/pep.rst` is the source of truth for what each wave of
-the roadmap covers and where it stands. Ruled in review of :pr:`2483` (:issue:`2449`):
+:file:`docs/source/contributing/pep.rst` is the source of truth for the roadmap: what
+is done and what remains. Ruled in review of :pr:`2483` (:issue:`2449`):
 upon each release, amend that page inline, and also post the update -- or edit it
 inline, either is fine -- to the roadmap's own GitHub Discussion,
 `PyPCAPKit Enhancement Proposals <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__.

@@ -56,6 +56,8 @@ IP header nearest the TCP segment as for any tunnel (:issue:`1581`), and IPv4
 reassembly of an outer datagram fragmented in transit yields a parsed GRE
 layer.
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.link.gre.protocol.GRE
    :no-members:
    :show-inheritance:

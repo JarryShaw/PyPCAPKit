@@ -10,4 +10,6 @@ payload of an IPv4 or IPv6 datagram that
 :class:`~pcapkit.foundation.reassembly.ipv4.IPv4` or
 :class:`~pcapkit.foundation.reassembly.ipv6.IPv6` reassembled.
 
+.. versionadded:: 1.6.0
+
 .. autofunction:: pcapkit.foundation.analysis.ip.ip_datagram

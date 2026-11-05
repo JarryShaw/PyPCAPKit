@@ -21,6 +21,8 @@ Octets      Bits        Name                    Description
 
 .. [*] https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol
 
+.. versionadded:: 1.6.0
+
 """
 import collections
 from typing import TYPE_CHECKING, cast

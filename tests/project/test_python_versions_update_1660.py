@@ -876,7 +876,9 @@ class TestThePullRequestBody(unittest.TestCase):
         body = module.fill_template((ROOT / module.TEMPLATE).read_text(encoding='utf-8'), description, 'failure')
         self.assertIn('- [x] `ci` — workflows or build tooling', body)
         self.assertEqual(body.count('- [x]'), 1)
-        self.assertIn('regenerated `CHANGELOG.md`, if the change is user-visible — N/A — centralised in #657', body)
+        self.assertIn('- [ ] Described the user-visible change below and left its [changelog entry]', body)
+        self.assertIn('keeping `docs/source/changelog/` and `CHANGELOG.md` out of the diff, '
+                      'if the change is user-visible — N/A — centralised in #657', body)
         self.assertIn('### Description of your *pull request* and other information', body)
         self.assertNotIn('&emsp; Explanation of your', body)
         self.assertIn(f'| `3.11` | supported | KTLO | {plan["changes"][0]["reason"]} |', body)

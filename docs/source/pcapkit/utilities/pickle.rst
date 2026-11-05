@@ -13,6 +13,8 @@ item pairs; and :func:`reduce_to` makes one instance reduce to a call of a given
 function. A pickle a class wrote before it took one of these still loads, and one
 it writes with it loads where the class still reduces by its own.
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.utilities.pickle.ReduceAsProtocol2
    :members: __reduce_ex__
 

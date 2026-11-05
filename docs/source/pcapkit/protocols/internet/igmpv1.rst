@@ -11,6 +11,8 @@ extractor for Internet Group Management Protocol version 1 (IGMPv1)
 :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.protocol.IGMPv2>` -- see
 :mod:`~pcapkit.protocols.internet.igmp.protocol` for both.
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.internet.igmpv1.protocol.IGMPv1
    :no-members:
    :show-inheritance:

@@ -15,6 +15,8 @@ without it, since an ICMP message carries no version of its own. Its
 :meth:`~pcapkit.protocols.internet.icmp.protocol.ICMP.from_data` gives the one whose data
 model it is handed (:issue:`2574`).
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.internet.icmp.protocol.ICMP
    :no-members:
    :show-inheritance:

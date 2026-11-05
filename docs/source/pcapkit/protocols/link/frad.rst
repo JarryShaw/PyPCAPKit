@@ -26,6 +26,8 @@ When ``nlpid`` is the ``0x00`` pad, the NLPID follows it as ``frad.ext_nlpid``.
 An NLPID of ``0x80``, with or without the pad, is followed by a SNAP header, a
 3-octet OUI and a 2-octet PID, kept as ``frad.oui`` and ``frad.pid``.
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.link.frad.protocol.FRAD
    :no-members:
    :show-inheritance:

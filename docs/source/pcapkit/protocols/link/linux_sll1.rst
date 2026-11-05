@@ -35,6 +35,8 @@ Next-layer dispatch is shared with
 :attr:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1.alias` is ``'LINUX_SLL1'``;
 see :ref:`linux-sll-labels`.
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1
    :no-members:
    :show-inheritance:
