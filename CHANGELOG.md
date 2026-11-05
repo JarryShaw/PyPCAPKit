@@ -1,4 +1,4 @@
-## 1.6.0 -- unreleased
+## 1.6.0 -- 2026-11-05
 
 Wave 2 of the roadmap, per the contributing docs' enhancement-proposal page: the protocol pairs that wanted a shared abstract base, and the two that simply had no dissector at all. Alongside it come the Linux cooked-capture headers and a dissector for each `arphrd_type` they do not read as an EtherType, the IP pseudo-header, verified and computed one's-complement checksums, stricter handling of a malformed IPv6 extension header, and HTTP dispatched to its HTTP/1 and HTTP/2 classes under the RFC names.
 

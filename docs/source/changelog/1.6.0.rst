@@ -1,4 +1,4 @@
-1.6.0 -- unreleased
+1.6.0 -- 2026-11-05
 ===================
 
 Wave 2 of the roadmap, per the contributing docs' enhancement-proposal page: the

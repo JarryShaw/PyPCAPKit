@@ -137,7 +137,7 @@ __all__ = [
 ]
 
 #: version number
-__version__ = '1.5.1'
+__version__ = '1.6.0'
 
 # Protocols are imported the first time they are reached (#2730).
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=('protocols',))
