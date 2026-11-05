@@ -436,17 +436,9 @@ class PacketReception(EnumLookup, enum.IntEnum):
         return _unassigned_member(cls, value)
 
 
-# NOTE: RFC 9850 :rfc:`9850#section-4.2` makes the TLS key labels an IANA
-# registry ("TLS SSLKEYLOGFILE Labels", Specification Required) rather than a
-# closed, hand-picked set, so the TLS key label enumeration is the generated
-# :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as
-# ``Enum_TLSKeyLabel`` like its :mod:`pcapkit.const.pcapng` siblings. This
-# module does not re-export it under the unaliased name (#1744).
-# :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set
-# (draft-ietf-opsawg-pcapng-06 section 4.7, Decryption Secrets Block, says
-# the label "is one of" four names), not a registry, so filing it under
-# :mod:`pcapkit.const` would misrepresent it as one. The ``Enum_*`` alias convention covers imports of const enums, so it does
-# not apply to a local definition.
+# NOTE: RFC 9850 section 4.2 makes the TLS key labels an IANA registry, generated
+# as ``Enum_TLSKeyLabel`` and not re-exported here (#1744). ``WireGuardKeyLabel``
+# stays hand-written: draft-ietf-opsawg-pcapng-06 section 4.7 closes it to four names.
 
 
 class WireGuardKeyLabel(EnumLookup, StrEnum):
@@ -817,15 +809,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
-    #: and whether a bare :class:`int` is a valid key there too. Declared by the
-    #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
-    #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng` checks its own --
-    #: :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` keeps a registry of its own,
-    #: keyed by the same enum, and so declares the same pairing rather than
-    #: sharing this one (:issue:`2268`).
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key too. Declared by the class
+    #: *owning* the registry, so
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
+    #: checks a ``code=`` key as
+    #: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng` does;
+    #: :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose registry
+    #: is keyed by the same enum, declares its own (:issue:`2268`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_LinkType, False)
 
     #: Block type to method mapping. A :obj:`str` value names the
@@ -957,21 +948,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         return self._info.length
 
-    # NOTE: A plain property, where the inherited one is a
-    # :func:`~pcapkit.utilities.compat.cached_property`. That is deliberate: the
-    # inherited one caches because it *reads the stream*, and a second read would
-    # consume octets that are no longer there, whereas this one only walks buffers
-    # the schema layer has already filled, at the cost of a handful of dict
-    # lookups.
-    #
-    # Caching it would make a second ``unpack`` on the same instance return the
-    # *first* call's octets, because :meth:`self.unpack <unpack>` reports the
-    # payload through this property and ``get_payload`` would never be reached.
-    # Nothing in the tree calls ``unpack`` twice on one instance
-    # (``__post_init__`` is its only caller), so this keeps an invariant rather
-    # than fixing a bug. A data descriptor also wins over ``__dict__``, so a
-    # stale entry left by the inherited ``cached_property`` cannot shadow this
-    # one either.
+    # NOTE: Not cached, unlike the inherited one, which reads the stream: this only
+    # walks filled buffers, and a cache would hand a second ``unpack`` stale octets.
     @property
     def packet(self) -> 'Data_Packet':
         """Header and payload octets of the current block.
@@ -1004,13 +982,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if payload_name is None:
             return Data_Packet(header=self._data, payload=b'')
 
-        # The octets ahead of the payload field, in wire order: the outer
-        # schema's fields up to the one holding the block -- its 4-octet Block
-        # Type -- and then the block's own fields up to the payload. The block is
-        # found by identity rather than by name so that renaming the field
-        # cannot silently fold the whole block body into the header; if it is not
-        # found at all, the header loses the Block Type and nothing else, and the
-        # payload stays exact either way.
+        # The octets ahead of the payload field, in wire order: the outer schema's fields
+        # up to the block (its Block Type), then the block's up to the payload. The block
+        # is found by identity, so a renamed field cannot fold the body into the header.
         names = list(self.__header__.__fields__)
         stop = next((idx for idx, name in enumerate(names)
                      if getattr(self.__header__, name, None) is block), 0)
@@ -1292,9 +1266,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Constructed packet data.
 
         Notes:
-            We used a special keyword argument ``__packet__`` to pass the
-            global packet data to underlying methods. This is useful when
-            the packet data is not available in the current instance.
+            The special keyword argument ``__packet__`` passes the global
+            packet data to underlying methods, for when the current instance
+            does not have it.
 
             As in :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>`,
             the header is made on a copy outside construction, so the instance
@@ -1331,9 +1305,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Parsed packet data.
 
         Notes:
-            We used a special keyword argument ``__packet__`` to pass the
-            global packet data to underlying methods. This is useful when
-            the packet data is not available in the current instance.
+            The special keyword argument ``__packet__`` passes the global
+            packet data to underlying methods, for when the current instance
+            does not have it.
 
             A block handed to :meth:`make` as raw :obj:`bytes` is written back
             verbatim past the Block Type, so the schema :meth:`make` returns
@@ -1468,19 +1442,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             bound = min(schema.block.length, sys.maxsize)
             self._data = self._read_fileng(bound)
 
-            # NOTE: Block Total Length is cross-checked against its own trailing
-            # copy and never against the file, so on a capture cut short it runs
-            # past the real end -- and seeking past the end is legal and silent.
-            # The *next* block read would then measure a negative remainder,
-            # since ``pcapkit.corekit.decorators.prepare`` derives it as the
-            # end of the stream less the current position, and a negative
-            # ``__length__`` is what ``pcapng_block_selector`` hands to
-            # :class:`~pcapkit.corekit.fields.misc.SchemaField`, which fails with
-            # a bare ``ValueError: read length must be non-negative or -1``. That
-            # would cost the whole extraction rather than the one truncated
-            # block, the opposite of the #431 accommodation for damaged input.
-            # ``_read_fileng`` stops at the end of the file, so the octets it
-            # returned are the authority on where the block really finishes.
+            # NOTE: Block Total Length is checked only against its trailing copy, so on a cut
+            # capture it runs past the end, and the next block would read a negative length,
+            # failing the whole extraction against #431; the octets read mark the block's end.
             read = len(self._data)
             if read < schema.block.length:
                 warn(f'PCAP-NG: [Block {schema.type}] block length '
@@ -1538,22 +1502,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         type_val = self._make_index(type, Enum_BlockType, bits=32, name='block type', alias='PCAP-NG')
         self._type = type_val
 
-        # NOTE: An option or record handed over as raw octets has its type code
-        # read back out of them -- by ``_make_pcapng_options`` and
-        # ``_make_nrb_records`` -- in the byte order the block is written in. So
-        # the byte order has to be settled before the block maker runs, not only
-        # after it as ``pack`` settles it, and settled the way ``pack`` settles
-        # it, so that the code read matches the octets emitted. Settling it here
-        # covers every block maker: ``_make_block_shb`` and
-        # ``_make_block_systemd`` settle their own, and without this the rest
-        # read an attribute that is not there (#2353). A section header block
-        # overrides this from its own Byte-Order Magic, it being the block that
-        # starts the section read here.
-        #
-        # ``or {}`` rather than a ``get`` default because ``__packet__`` may be
-        # handed over explicitly as :data:`None`, which is what
-        # :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>`
-        # takes for "no packet data" as well.
+        # NOTE: Settle the byte order before the block maker, which reads the type code of
+        # a raw option or record back in it (#2353); an SHB overrides it from its own magic.
+        # ``or {}``, as ``__packet__`` may be given as ``None``, which ``Schema.pack`` takes too.
         if self._ctx is not None:
             self._byte = self._ctx.section.byteorder
         else:
@@ -4388,13 +4339,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             data = block.data
             options = cast('Option', getattr(block, 'options', None))
 
-        # NOTE: Unlike every other block that carries options, a custom block
-        # has no ``OptionField`` to name an option registry:
-        # :class:`~pcapkit.protocols.misc.pcapng.schema.CustomBlock`
-        # spans the custom data, its padding and the options as one opaque blob,
-        # since only the owner of the private enterprise number knows where the
-        # custom data ends. Its options are therefore resolved in the generic
-        # ``opt_*`` space, which is the only one valid in every block.
+        # NOTE: A custom block spans its data, padding and options as one blob, with no
+        # ``OptionField``, so its options resolve in the generic ``opt_*`` space.
         if options is not None:
             options_value, _ = self._make_pcapng_options(options, namespace='opt')
         else:
@@ -6409,15 +6355,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Timezone of the current block.
 
         """
-        # NOTE: UTC, not the host's timezone, is the default in both branches
-        # below. A capture carries no timezone of its own unless it says so, and
-        # draft-ietf-opsawg-pcapng-02 section 4.3, Enhanced Packet Block,
-        # defines the block timestamp as an offset from 1970-01-01 00:00:00 UTC
-        # with no timezone term at all, so substituting the *reading* machine's
-        # zone would make the same file parse to different instants on different
-        # hosts. ``_get_resolution``
-        # and ``_get_offset`` fall back to the format's own defaults in this
-        # situation; this is the matching one.
+        # NOTE: UTC, not the host's zone, by default in both branches: the EPB timestamp is
+        # an offset from the UTC epoch (draft-ietf-opsawg-pcapng-02 section 4.3).
         if self._ctx is None:
             warn(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'",
                  AttributeWarning, stacklevel=stacklevel())
@@ -6469,17 +6408,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         timestamp_raw = (timestamp_high << 32) | timestamp_low
         with localcontext(prec=64):
-            # NOTE: This is the UTC epoch the docstring above promises, with no
-            # ``tzone.utcoffset(None)`` added. The block
-            # timestamp is an offset from the UNIX epoch, so it is
-            # timezone-independent by definition (draft-ietf-opsawg-pcapng-02
-            # section 4.3, Enhanced Packet Block, spells out the arithmetic and
-            # has no timezone term), and the same draft's section 4.2, Interface
-            # Description Block, says of ``if_tzone`` that it "SHOULD NOT be used"
-            # and of ``if_tsoffset`` that it is "not intended to be used as an
-            # offset between local time and UTC". A shifted epoch would also
-            # contradict ``ts_datetime`` below, which is built from the
-            # unshifted value.
+            # NOTE: The UTC epoch, with no ``tzone.utcoffset`` added: the timestamp is
+            # zone-free (draft section 4.3), and section 4.2 says ``if_tzone`` SHOULD NOT be used.
             timestamp_epoch = decimal.Decimal(timestamp_raw) / self._get_resolution(interface_id) + \
                 self._get_offset(interface_id)
 

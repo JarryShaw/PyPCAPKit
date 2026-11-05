@@ -991,17 +991,10 @@ class OptionEnumField(EnumField):
         namespace = self._opt_ns
         members_ns = self._namespace.__members_ns__
         if value not in members_ns.get('opt', {}) and value not in members_ns.get(namespace, {}):
-            # NOTE: an unregistered member of self._namespace itself, per the
-            # ruling in EnumField._unregistered_member. ``.opt_name`` and
-            # ``.opt_value`` are what a real OptionType member carries --
-            # read unconditionally by e.g. pcapng's own ``_option_key`` --
-            # and ``<namespace>_unknown`` names an undeclared code. They are
-            # passed in the order
-            # OptionType.__new__ sets them, because DictDumper.object_hook
-            # renders a member's addon keys straight out of its ``__dict__``
-            # in insertion order, so any other order here would dump an
-            # undeclared option code's keys the other way round from every
-            # declared one's.
+            # NOTE: An unregistered member of ``self._namespace``, per
+            # ``EnumField._unregistered_member``, carrying the attributes of a real
+            # OptionType member in the order ``OptionType.__new__`` sets them, so
+            # ``DictDumper.object_hook`` dumps its keys in the same order.
             opt_name = f'{namespace}_unknown'
             return self._unregistered_member(
                 self._namespace, f'{opt_name} [{value:d}]',
@@ -1209,14 +1202,8 @@ class Option(EnumSchema[Enum_OptionType]):
            (:issue:`439`).
 
         """
-        # NOTE: the base hook goes first, before any of the registration work
-        # below -- see :meth:`EnumSchema.__init_subclass__`, which makes the same
-        # move for the same reason. :meth:`Schema.__init_subclass__` is what
-        # refuses to derive from a finalised schema, and a refusal has to land
-        # before :meth:`Option.register` writes ``cls`` into ``__enum__``: calling
-        # this last would let a raise discard the class object while leaving the
-        # registry pointing at it, so a rejected declaration would still
-        # displace a built-in option schema for the rest of the process.
+        # NOTE: First, as in ``EnumSchema.__init_subclass__``, so a refused subclass of a
+        # finalised schema never reaches the registry.
         super().__init_subclass__()
 
         if ns is not None:

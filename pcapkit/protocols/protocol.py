@@ -187,27 +187,22 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
                    for name in made.__fields__ if name in parsed.__fields__)
     return False
 
-#: Keywords that configure the construction rather than naming a field, and are
-#: therefore consumed by :meth:`Protocol.__init__
-#: <pcapkit.protocols.protocol.Protocol.__init__>` or by the schema layer
-#: instead of by a :meth:`make <pcapkit.protocols.protocol.Protocol.make>`. No
-#: signature declares them, so :func:`_declared_keywords` cannot find them and
-#: they are listed here.
+#: Construction keywords that name no field: :meth:`Protocol.__init__
+#: <pcapkit.protocols.protocol.Protocol.__init__>` or the schema layer consumes
+#: them, not :meth:`make <pcapkit.protocols.protocol.Protocol.make>`. No
+#: signature declares them, so :func:`_declared_keywords` takes them from here.
 #:
-#: ``packet`` is here because the library puts it there itself:
-#: :meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>`
-#: injects ``packet=self.packet.payload`` into every parsed ``_info``, so the
-#: default :meth:`Protocol._make_data
-#: <pcapkit.protocols.protocol.Protocol._make_data>` (``data.to_dict()``)
-#: carries it into the keywords that :meth:`Protocol.from_data
-#: <pcapkit.protocols.protocol.Protocol.from_data>` reconstructs from.
-#: Refusing it would make ``from_data`` fail on any protocol whose ``make`` does
-#: not declare a ``packet``, starting with
-#: :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, the innermost layer of every
-#: packet. It is also a real field name for some protocols --
-#: :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>` takes the HIP
-#: packet *type* under it -- and listing it here does not change how it binds,
-#: only that it is never refused.
+#: ``packet`` is injected by the library: :meth:`Protocol.__init__
+#: <pcapkit.protocols.protocol.Protocol.__init__>` puts
+#: ``packet=self.packet.payload`` into every parsed ``_info``, which the default
+#: :meth:`Protocol._make_data <pcapkit.protocols.protocol.Protocol._make_data>`
+#: (``data.to_dict()``) carries into the keywords :meth:`Protocol.from_data
+#: <pcapkit.protocols.protocol.Protocol.from_data>` rebuilds from. Refusing it
+#: would break ``from_data`` for every protocol whose ``make`` lacks it, starting
+#: with :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`. Where it
+#: is a real field, as the packet *type* of :meth:`HIP.make
+#: <pcapkit.protocols.internet.hip.protocol.HIP.make>`, listing it here only
+#: stops it being refused.
 OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
                                   '__packet__', 'packet'})
 
@@ -218,12 +213,11 @@ OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
 #: rather than once per constructed packet.
 _DECLARED_KEYWORDS = {}  # type: dict[type, Optional[frozenset[str]]]
 
-#: Methods a construction keyword may be destined for. The keywords handed to
-#: :class:`Protocol` reach all of them: :meth:`Protocol.__post_init__
+#: Methods a construction keyword may be for. :meth:`Protocol.__post_init__
 #: <pcapkit.protocols.protocol.Protocol.__post_init__>` passes the same
 #: ``**kwargs`` to :meth:`pack <pcapkit.protocols.protocol.Protocol.pack>` (and
-#: through it to ``make``) *and* to :meth:`unpack
-#: <pcapkit.protocols.protocol.Protocol.unpack>` (and through it to ``read``).
+#: so ``make``) *and* :meth:`unpack <pcapkit.protocols.protocol.Protocol.unpack>`
+#: (and so ``read``).
 _KEYWORD_CONSUMERS = ('make', 'read', 'pack', 'unpack', '__post_init__', '__init__')
 
 
@@ -244,25 +238,18 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
         :attr:`Protocol.__keywords__
         <pcapkit.protocols.protocol.Protocol.__keywords__>` explains.
 
-    The union is deliberately wider than the signature of ``cls.make``, because
-    a keyword reaching ``make`` is not necessarily *for* ``make``:
+    The union is wider than the signature of ``cls.make``:
     :meth:`Protocol.__post_init__
-    <pcapkit.protocols.protocol.Protocol.__post_init__>` hands one
-    ``**kwargs`` to both the construction and the parse of the packet it has just
-    constructed, so a keyword declared by ``read`` travels through ``make`` too.
-    :class:`~pcapkit.protocols.internet.hip.protocol.HIP` is the live example:
-    :meth:`HIP.read <pcapkit.protocols.internet.hip.protocol.HIP.read>` declares
-    ``extension``, :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>`
-    does not, and :meth:`HIP.__post_init__
-    <pcapkit.protocols.internet.hip.protocol.HIP.__post_init__>` forwards it to both.
+    <pcapkit.protocols.protocol.Protocol.__post_init__>` hands one ``**kwargs``
+    to both the construction and the parse, so a keyword ``read`` declares
+    travels through ``make`` too, as ``extension`` of :meth:`HIP.read
+    <pcapkit.protocols.internet.hip.protocol.HIP.read>` does.
 
-    The walk covers the whole MRO rather than the most derived override of each
-    method, so that a subclass declaring its own keyword and forwarding the rest
-    to its parent does not make the parent's keywords unreachable. The one
+    The walk covers the whole MRO, not the most derived override of each method,
+    so a subclass forwarding to its parent keeps the parent's keywords. The
     exception is a class that sets :attr:`Protocol.__own_make_keywords__
-    <pcapkit.protocols.protocol.Protocol.__own_make_keywords__>`: its
-    ``make`` counts only while it is the ``make`` of ``cls``, not once a
-    subclass overrides it (:issue:`2286`).
+    <pcapkit.protocols.protocol.Protocol.__own_make_keywords__>`: its ``make``
+    counts only while no subclass overrides it (:issue:`2286`).
 
     """
     try:
@@ -276,40 +263,26 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
     # ``make`` in the MRO has been overridden.
     make_owner = next((klass for klass in cls.__mro__ if 'make' in klass.__dict__), None)
     for klass in cls.__mro__:
-        # NOTE: A keyword read out of ``**kwargs`` by name is invisible to
-        # :func:`inspect.signature`, so the class lists it in ``__keywords__``.
-        # Read per class in the MRO, like the methods, so a subclass need not
-        # repeat its parents' entries.
+        # NOTE: ``inspect.signature`` misses a keyword read out of ``**kwargs``,
+        # so each class lists its own in ``__keywords__``, unioned down the MRO.
         keywords = klass.__dict__.get('__keywords__', ABSENT)
         if keywords is None:
-            # NOTE: The :obj:`None` opt-out is *not* inherited, unlike a set,
-            # which is unioned down the MRO. It describes how the class that
-            # declares it dispatches, not a property its subclasses share:
-            # :class:`~pcapkit.protocols.application.http.protocol.HTTP` cannot enumerate
-            # its keywords because it forwards them to whichever of
-            # :class:`HTTPv1 <pcapkit.protocols.application.httpv1.protocol.HTTPv1>` and
-            # :class:`HTTPv2 <pcapkit.protocols.application.httpv2.protocol.HTTPv2>` the
-            # ``version`` names, but each of those declares its own in full, and
-            # inheriting the opt-out would exempt the very classes that can be
-            # checked. A subclass that dispatches in turn says so itself.
+            # NOTE: Not inherited: HTTP forwards to HTTPv1 or HTTPv2, which each
+            # declare their keywords in full and so stay checked.
             if klass is cls:
                 unchecked = True
         elif keywords is not ABSENT:
             names.update(keywords)
 
         for method in _KEYWORD_CONSUMERS:
-            # NOTE: Read from ``__dict__`` rather than with :func:`getattr`, so
-            # that each class in the MRO contributes its *own* definition instead
-            # of the most derived one every time. An ``@overload`` stub is
-            # overwritten by the implementation that follows it, which is what
-            # lands here.
+            # NOTE: From ``__dict__``, not ``getattr``, so each class in the MRO
+            # contributes its own definition, not the most derived one.
             func = klass.__dict__.get(method)
             if func is None:
                 continue
 
-            # NOTE: A ``make`` whose keywords its class keeps to itself is read
-            # only while it is the one ``cls`` uses. Read from ``__dict__`` so
-            # the marker, like the :obj:`None` opt-out above, is not inherited.
+            # NOTE: Read only while it is the ``make`` that ``cls`` uses; from
+            # ``__dict__`` so the marker is not inherited.
             if (method == 'make' and klass is not make_owner
                     and klass.__dict__.get('__own_make_keywords__', False)):
                 continue
@@ -317,9 +290,7 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
             try:
                 signature = inspect.signature(func)
             except (TypeError, ValueError):  # pragma: no cover
-                # NOTE: An unintrospectable callable is skipped rather than fatal:
-                # failing to widen the accepted set is a false rejection, so keep
-                # walking.
+                # NOTE: Skipped, not fatal; the worst case is a false rejection.
                 continue
 
             for name, param in signature.parameters.items():
@@ -371,10 +342,8 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     if not unexpected:
         return
 
-    # NOTE: The check exists to catch misspellings, so name the neighbour that
-    # was probably meant (``seq`` for ``seq_no``, ``ack_flag`` for ``ack``, both
-    # a :func:`difflib.get_close_matches` hit); the message is the only place the
-    # caller looks before reading the signature.
+    # NOTE: The check catches misspellings, so suggest the closest declared
+    # name, e.g. ``seq_no`` for ``seq``.
     report = []  # type: list[str]
     for key in unexpected:
         suggestions = difflib.get_close_matches(key, declared, n=1)
@@ -384,19 +353,9 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     if strict:
         raise UnsupportedCall(f'{cls.__name__}: unexpected keyword(s): {listed}')
 
-    # NOTE: A warning rather than an error, because nobody typed these: they are
-    # whatever ``_make_data`` returned, so the defect is a key of that mapping
-    # disagreeing with the signature it is spread into, and the person who meets
-    # it cannot fix it. Raising would turn every such mismatch into a broken
-    # ``from_data``, where the field is merely dropped; the warning makes that
-    # audible instead.
-    #
-    # No explicit ``stacklevel``: the default blames the innermost frame outside
-    # :mod:`pcapkit`, which is the ``from_data`` call the reader wants to be
-    # pointed at, and it stays right if the frames between change, where a
-    # hardcoded count would not. It is also what :meth:`Schema.__update__
-    # <pcapkit.protocols.schema.Schema.__update__>` passes for the
-    # warning this one is the counterpart of.
+    # NOTE: A warning, not an error: ``_make_data`` generated these keys, so the
+    # caller cannot fix them, and raising would break ``from_data`` outright.
+    # The default ``stacklevel`` blames the ``from_data`` call, outside pcapkit.
     warn(f'{cls.__name__}._make_data returned keyword(s) that no signature of '
          f'{cls.__name__} declares, so they are discarded: {listed}',
          UnknownFieldWarning)
@@ -483,10 +442,9 @@ class ProtocolMeta(abc.ABCMeta):
         :meth:`ProtocolBase.get_protocol`, which resolves a descriptor.
 
         Note:
-            It is one map, not a per-class one, so every protocol class reads
-            the same entries, and the view shows each later registration. It
-            is defined on this metaclass, so it is a class attribute and
-            **not** an instance one.
+            Every protocol class reads the same map, later registrations
+            included. Defined on the metaclass, it is a class attribute, **not**
+            an instance one.
 
         .. versionadded:: 1.6.0
 
@@ -650,80 +608,60 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     _shipped_registry: 'types.MappingProxyType[str, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = \
         types.MappingProxyType(dict(__registry__))
 
-    #: Construction keywords this protocol consumes out of ``**kwargs`` instead
-    #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
-    #: :meth:`read` -- as :meth:`ESP.read <pcapkit.protocols.internet.esp.protocol.ESP.read>`
-    #: does with ``packet``.
-    #: :func:`_declared_keywords` finds keywords by
-    #: reading signatures, which cannot see such a name, so a protocol that
-    #: consumes one names it here and the construction check of :meth:`__init__`
-    #: accepts it. The union over the MRO is used, so a subclass need not repeat
-    #: its parents' entries.
+    #: Construction keywords this protocol takes out of ``**kwargs`` by name
+    #: rather than declaring as a parameter, as :meth:`IPv6_Ext.read
+    #: <pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read>` does with
+    #: ``alias``. :func:`_declared_keywords` reads signatures, which miss such a
+    #: name, so the construction check of :meth:`__init__` accepts only those
+    #: listed here, unioned over the MRO. Prefer a declared parameter, which also
+    #: documents the keyword (:issue:`617`).
     #:
-    #: Declaring the parameter is preferable where possible, since that also
-    #: documents the keyword to the caller and to :mod:`inspect`. This is for the
-    #: cases where it is not -- a keyword handled uniformly for a whole family of
-    #: names, say. It is opt-in per class, so it can only exempt a name whose
-    #: author wrote it down (:issue:`617`).
-    #:
-    #: :obj:`None` means the keywords cannot be enumerated and the check is
-    #: skipped for this protocol. That is for a *dispatcher*, whose real signature
-    #: belongs to a class chosen at call time:
-    #: :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>` declares
-    #: only ``version`` and forwards everything else to
-    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.protocol.HTTPv1.make>` or
-    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.protocol.HTTPv2.make>`
-    #: depending on that value, so no set of names is right for it. Use it only
-    #: for that shape, since a protocol that skips the check silently discards an
-    #: unknown keyword. Unlike a set, the :obj:`None` is **not** inherited: a
-    #: subclass of a dispatcher is checked normally unless it dispatches too and
-    #: says so, because ``HTTPv1`` and ``HTTPv2`` declare their keywords in full
-    #: and exempting them along with their base would forgo the check on the very
-    #: classes that can have it.
+    #: :obj:`None` skips the check, for a *dispatcher* whose real signature is
+    #: chosen at call time: :meth:`HTTP.make
+    #: <pcapkit.protocols.application.http.protocol.HTTP.make>` declares only
+    #: ``version`` and forwards the rest to :meth:`HTTPv1.make
+    #: <pcapkit.protocols.application.httpv1.protocol.HTTPv1.make>` or
+    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.protocol.HTTPv2.make>`.
+    #: A protocol that skips the check discards an unknown keyword silently.
+    #: Unlike a set, :obj:`None` is **not** inherited, so ``HTTPv1`` and
+    #: ``HTTPv2``, which declare their keywords in full, stay checked.
     __keywords__: 'Optional[frozenset[str]]' = frozenset()
 
     #: Whether the parameters of this class's own :meth:`make` are accepted only
     #: while that ``make`` is the one in use. By default
-    #: :func:`_declared_keywords` takes every ``make`` in the MRO, so a subclass
-    #: that overrides ``make`` and forwards the rest to its parent keeps the
-    #: parent's keywords. A base whose subclasses override ``make`` *without*
-    #: forwarding sets this, so that its keywords are refused for them rather than
-    #: accepted and dropped -- :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`
-    #: does, for ``len`` and ``data`` (:issue:`2286`). Read from the defining
-    #: class alone, so it is not inherited, and it leaves :attr:`__keywords__`
-    #: and the other construction methods unaffected.
+    #: :func:`_declared_keywords` takes every ``make`` in the MRO. A base whose
+    #: subclasses override ``make`` *without* forwarding sets this, so its
+    #: keywords are refused for them rather than accepted and dropped, as
+    #: :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` does for
+    #: ``len`` and ``data`` (:issue:`2286`). Not inherited, and
+    #: :attr:`__keywords__` and the other construction methods are unaffected.
     __own_make_keywords__: 'bool' = False
 
-    #: Whether this instance is being rebuilt by :meth:`from_data` from a parsed
-    #: data model, as against constructed from keywords somebody wrote. It governs
-    #: only whether the construction keyword check of :meth:`__init__` raises or
-    #: warns, and is set for the duration of that call alone; the class-level
-    #: :data:`False` is what every other code path sees, including an instance
-    #: built without ``__init__``.
+    #: Whether :meth:`from_data` is rebuilding this instance from a parsed data
+    #: model, rather than from keywords somebody wrote. It decides only whether
+    #: the construction keyword check of :meth:`__init__` raises or warns, and
+    #: is set for that call alone; every other code path sees :data:`False`.
     __reconstructing__: 'bool' = False
 
-    #: The ``__short_read__`` record of the data model :meth:`from_data` rebuilds
-    #: this instance from. :meth:`pack` cuts the header it makes back to the
-    #: octets captured, and :meth:`__post_init__` has :meth:`unpack` parse them
-    #: back at the width ``__short_width__`` records beside it, the one their
-    #: parse read them at, so the rebuild is parsed and verified as its capture
-    #: was (:issue:`2703`, :issue:`2761`). Set for the duration of that call
-    #: alone, like :attr:`__reconstructing__`; the class-level :data:`None` is
-    #: what every other code path sees.
+    #: The ``__short_read__`` record of the data model :meth:`from_data`
+    #: rebuilds this instance from. :meth:`pack` cuts the header it makes back
+    #: to the octets captured, and :meth:`__post_init__` has :meth:`unpack`
+    #: parse them at the width ``__short_width__`` records, so the rebuild is
+    #: parsed as its capture was (:issue:`2703`, :issue:`2761`). Set for that
+    #: call alone, like :attr:`__reconstructing__`; otherwise :data:`None`.
     __short_read__: 'Optional[tuple[str, int]]' = None
 
     #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
-    #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
-    #: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level
-    #: :data:`None` is what an instance built without ``__init__`` (e.g.
-    #: ``object.__new__(SomeProtocol)``) sees, so reading it is always safe.
+    #: :meth:`self.__init__ <Protocol.__init__>` sets a
+    #: :class:`~pcapkit.corekit.context.ContextRegistry`; an instance built
+    #: without ``__init__`` reads the class-level :data:`None`.
     _exctx: 'Optional[ContextRegistry]' = None
 
-    #: Whether this layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, and so was kept as
-    #: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` by :meth:`_parse_next_layer`
-    #: without being parsed. Such a layer carries an ``error`` as one that
-    #: failed to parse does, so this is what tells the two apart: what follows
-    #: the limit is not to be read on (:issue:`1610`).
+    #: Whether :meth:`_parse_next_layer` kept this layer as
+    #: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unparsed, being past
+    #: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`. Such a layer carries
+    #: an ``error`` as a failed parse does; this tells the two apart, for what
+    #: follows the limit is not to be read on (:issue:`1610`).
     _past_layer_limit: 'bool' = False
 
     ##########################################################################
@@ -800,18 +738,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Packet data of the protocol.
 
         Note:
-            The split relies on :attr:`self.length <length>` being the length of
-            the octets *preceding* the payload, and on the payload running from
-            there to the end of the buffer. Both hold for a protocol laid out as
-            a header followed by its payload, which is nearly all of them.
+            The split takes :attr:`self.length <length>` as the length of the
+            octets *preceding* the payload, and the payload as running to the
+            end of the buffer: a header followed by its payload.
 
-            A protocol laid out otherwise has to override this: one whose
-            :attr:`~length` counts something else, or one carrying a *trailer*
-            after the payload, gets a header that eats the payload and a payload
-            of ``b''``. :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` is the
-            example -- its :attr:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length`
-            is the wire's Block Total Length and the captured octets sit ahead of
-            the option list and the trailing length field. The payload matters
+            A protocol laid out otherwise overrides this, or its header eats the
+            payload and the payload is ``b''``.
+            :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` does: its
+            :attr:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length` is the
+            wire's Block Total Length, and the captured octets sit ahead of the
+            option list and the trailing length field. The payload matters
             because :meth:`Protocol.__init__` injects it into every parsed
             ``_info``, which the dumpers write out.
 
@@ -886,31 +822,25 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Curated protocol schema data.
 
         Note:
-            The ``**kwargs`` here absorbs the keywords that
-            :meth:`Protocol.__post_init__
+            The ``**kwargs`` absorbs the keywords :meth:`Protocol.__post_init__
             <pcapkit.protocols.protocol.Protocol.__post_init__>` hands to the
-            parse as well as to the construction, so an implementation is not
-            expected to declare every keyword it is called with. It is *not* a
-            place for a caller to put a keyword no signature declares: building a
-            protocol *through its constructor* with such a keyword raises
+            parse as well as the construction, so an implementation need not
+            declare every keyword it is called with. A caller's keyword that no
+            signature declares still raises
             :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` from
             :meth:`Protocol.__init__
             <pcapkit.protocols.protocol.Protocol.__init__>` (:issue:`617`).
 
         Warning:
-            **Calling this method directly is not checked**, and still discards an
-            undeclared keyword in silence. The check lives in
+            **Calling this method directly is not checked**, and discards an
+            undeclared keyword silently. The check lives in
             :meth:`Protocol.__init__
-            <pcapkit.protocols.protocol.Protocol.__init__>`, so it covers
-            ``SomeProtocol(...)`` and the :meth:`pack` it leads to, but not
-            ``SomeProtocol.make(...)`` on an instance obtained some other way --
-            ``object.__new__(cls).make(**kwargs)`` is the idiom, used by this
-            package's own tests and by :meth:`HTTP.make
-            <pcapkit.protocols.application.http.protocol.HTTP.make>` to reach its versioned
-            implementation. Covering it would mean interposing on every ``make``
-            in the tree rather than on the one place their keywords converge, so
-            it is deliberately not done. Construct through the constructor to get
-            the check.
+            <pcapkit.protocols.protocol.Protocol.__init__>`, the one place the
+            keywords converge, so it covers ``SomeProtocol(...)`` and its
+            :meth:`pack`, but not ``object.__new__(cls).make(**kwargs)``, as
+            :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>`
+            calls its versioned implementation. Construct through the
+            constructor to get the check.
 
         """
 
@@ -925,31 +855,31 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Notes:
             The special keyword argument ``__packet__`` passes the global
-            packet data to underlying methods. This is useful when the packet
-            data is not available in the current instance.
+            packet data to underlying methods, for when the current instance
+            does not have it.
 
             The octets are built from ``kwargs`` alone, through :meth:`make`;
-            the instance's own parsed or constructed state is not read. A bare
-            ``SomeProtocol(...).pack()`` therefore returns the octets of a
-            default header, not the instance's: :attr:`data` holds those.
+            the instance's state is not read, so a bare
+            ``SomeProtocol(...).pack()`` returns a default header, not the
+            instance's octets, which :attr:`data` holds.
 
-            Nor is that state written. Once the instance has been parsed or
-            constructed, the header is made on a shallow copy of it (see
+            Nor is that state written. Once the instance is parsed or
+            constructed, the header is made on a shallow copy (see
             :meth:`_packing_target`), so :attr:`schema`, :attr:`info` and
-            anything :meth:`make` sets along the way, such as
+            anything :meth:`make` sets, such as
             :attr:`TCP.connection <pcapkit.protocols.transport.tcp.protocol.TCP.connection>`,
-            still describe that packet. Only the call that
-            :meth:`__post_init__` makes to construct the instance keeps the
-            header made here, as the one :meth:`unpack` reads back.
+            still describe that packet. Only the call :meth:`__post_init__`
+            makes to construct the instance keeps the header, for
+            :meth:`unpack` to read back.
 
-            That call, when :meth:`from_data` rebuilds a header the capture cut
-            short, cuts the header back to the octets captured, through its own
+            When :meth:`from_data` rebuilds a header the capture cut short,
+            that call cuts it back to the octets captured, through
             ``__short_read__`` and :meth:`Schema._cut_short_read
-            <pcapkit.protocols.schema.Schema._cut_short_read>`, and
-            returns only those (:issue:`2703`). :meth:`__post_init__` then
-            drops that header, so that :meth:`unpack` parses the octets back
-            and the rebuild holds the values its parse read, not those
-            :meth:`make` filled in past the cut (:issue:`2761`).
+            <pcapkit.protocols.schema.Schema._cut_short_read>`
+            (:issue:`2703`). :meth:`__post_init__` then drops that header, so
+            :meth:`unpack` parses the octets back and the rebuild holds the
+            values its parse read, not those :meth:`make` filled in past the
+            cut (:issue:`2761`).
 
         .. versionchanged:: 1.5.0
 
@@ -986,23 +916,21 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Notes:
             The special keyword argument ``__packet__`` passes the global
-            packet data to underlying methods. This is useful when the packet
-            data is not available in the current instance.
+            packet data to underlying methods, for when the current instance
+            does not have it.
 
-            When :attr:`self.__header__ <Protocol.__header__>` is already set,
-            by :meth:`from_schema` or by the :meth:`pack` call that
-            :meth:`__post_init__` makes to construct the instance, that schema
-            is kept, unless it still holds raw :obj:`bytes` where parsing its
-            packed octets yields a schema -- e.g. a raw option given to
-            ``make()``, directly or inside a data model -- which :meth:`read`
-            cannot consume. The header is then replaced by the parsed one
+            A :attr:`self.__header__ <Protocol.__header__>` already set, by
+            :meth:`from_schema` or by the :meth:`pack` call of
+            :meth:`__post_init__`, is kept, unless it holds raw :obj:`bytes`
+            where parsing its packed octets yields a schema -- e.g. a raw
+            option given to ``make()``, directly or inside a data model -- which
+            :meth:`read` cannot consume; it is then replaced by the parsed one
             (:issue:`1312`).
 
             A header :meth:`from_data` rebuilds from a short read is parsed
-            from the octets captured instead, as quietly as the header made
-            was read, and given the ``__short_read__`` of its data model before
-            :meth:`read` reads it, as the record of a cut those octets may not
-            show (:issue:`2761`).
+            from the octets captured, its warnings discarded, and given its
+            data model's ``__short_read__`` before :meth:`read` runs, as the
+            record of a cut those octets may not show (:issue:`2761`).
 
         Raises:
             ProtocolError: If the made header holds raw items and its packed
@@ -1235,26 +1163,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
-            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already
-                registered, naming the displaced entry and its replacement so a
-                caller can tell *what* was lost rather than only that something
-                was. Fires only when the incumbent differs from the
-                replacement; an unresolved
-                :class:`~pcapkit.corekit.module.ModuleDescriptor` incumbent
-                counts as different from the class it names.
+            pcapkit.utilities.warnings.RegistryWarning: If ``code`` holds a
+                different entry, naming the displaced one and its replacement.
+                An unresolved :class:`~pcapkit.corekit.module.ModuleDescriptor`
+                incumbent counts as different from the class it names.
 
         Note:
-            The guard matches :func:`register_protocol
-            <pcapkit.foundation.registry.protocols.protocol.register_protocol>`'s: it
-            fires only when the incumbent differs from the replacement, so
-            handing back the entry already stored under ``code`` -- the same
-            class object, or a :class:`~pcapkit.corekit.module.ModuleDescriptor`
-            equal to the stored one -- is a silent no-op rather than a warning
-            about nothing displaced, and the stored entry is kept as it is
-            (:issue:`1364`). The comparison runs before ``protocol`` is
-            resolved and resolves nothing, so a stored descriptor stays
-            deferred, and an incumbent left as an unresolved descriptor still
-            reports as different from the class it names.
+            As for :func:`register_protocol
+            <pcapkit.foundation.registry.protocols.protocol.register_protocol>`,
+            handing back the entry stored under ``code`` -- the same class
+            object, or an equal
+            :class:`~pcapkit.corekit.module.ModuleDescriptor` -- is a silent
+            no-op that keeps the stored entry (:issue:`1364`). The comparison
+            resolves nothing, so a stored descriptor stays deferred.
 
             A descriptor equal to the one ``code`` shipped with restores that
             shipped object, unresolved, so undoing an override leaves the entry
@@ -1396,21 +1317,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,
         which the payload is dispatched on, ``__short_read__`` and
         ``__short_width__``, and, for
-        :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the extension header
-        chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them
-        too, or no payload (nor IPv6 extension header) is rebuilt and no short
-        read is cut back, see :meth:`_make_payload`; nothing is guessed from
-        its other keys (:issue:`2003`).
+        :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the extension
+        header chain under ``__exthdr__``. A hand-written :obj:`dict` without
+        them rebuilds no payload (nor IPv6 extension header) and cuts no short
+        read back; nothing is guessed from its other keys (see
+        :meth:`_make_payload`, :issue:`2003`).
 
         A header the capture cut short, as ``__short_read__`` records, is cut
-        back before it is read, and read at the width ``__short_width__``
-        records, the one its parse read it at, so the rebuild parses and
-        verifies the octets captured as the capture did (:issue:`2703`),
-        holding the values its parse read from them, not those :meth:`make`
-        fills in past the cut (:issue:`2761`), and the ``Raw`` next layer a
-        parse reading the header short of its width leaves it (:issue:`2717`).
-        Inside a payload :meth:`_make_payload` rebuilds, which gives only its
-        octets, the header made is read instead.
+        back and read at the width ``__short_width__`` records, so the rebuild
+        parses the octets captured as the capture did (:issue:`2703`): it holds
+        the values its parse read, not those :meth:`make` fills in past the cut
+        (:issue:`2761`), and the ``Raw`` next layer that parse left
+        (:issue:`2717`). Inside a payload :meth:`_make_payload` rebuilds, which
+        gives only its octets, the header made is read instead.
 
         Args:
             data: Protocol data.
@@ -1432,9 +1351,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if not isinstance(data, Data):
             data = cast('_PT', cls.__data__.from_dict(data))
 
-        # NOTE: The caller typed these, so they are checked strictly here, as a
-        # direct construction would check them. The out-of-band keywords
-        # ``__init__`` consumes are left out of it.
+        # NOTE: The caller's own keywords are checked strictly, as for a direct
+        # construction, less the out-of-band ones ``__init__`` consumes.
         _check_construction_keywords(cls, {
             key: val for key, val in kwargs.items()
             if key not in ('_layer', '_protocol', '__context__')
@@ -1443,13 +1361,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         self = cls.__new__(cls)
         kwargs = {**self._make_data(data), **kwargs}
 
-        # NOTE: The rest came out of ``_make_data``, not out of a caller, so the
-        # construction keyword check of ``__init__`` warns here instead of
-        # raising: a key of that mapping which disagrees with the signature it is
-        # spread into is a defect in this protocol, and the caller of
-        # ``from_data`` can do nothing about it. Set for the duration of the call
-        # and removed afterwards, so the instance is indistinguishable from one
-        # built directly. So is ``__short_read__``, which ``pack`` cuts back by (#2703).
+        # NOTE: The rest came from ``_make_data``, so ``__init__`` warns, not raises.
+        # Both flags last the call alone; ``pack`` cuts back by ``__short_read__`` (#2703).
         self.__reconstructing__ = True
         self.__short_read__ = cast('Optional[tuple[str, int]]', data.get('__short_read__'))
         # NOTE: A cut header is read at the width its parse read it at, as recorded, so
@@ -1537,15 +1450,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Note:
             The ``_layer``, ``_protocol`` and ``__context__`` keywords are
-            *out-of-band*: they configure the parse rather than describing the
-            packet, and every one of them is consumed here, at the one point
-            each of a protocol's producers passes through. That is deliberate,
-            and the normalisation below relies on it: fixing a spelling here
-            fixes it for the engines, for every
-            :meth:`_import_next_layer
-            <pcapkit.protocols.protocol.Protocol._import_next_layer>`
-            implementation, and for any third party protocol that copied their
-            shape, rather than one call site at a time.
+            *out-of-band*: they configure the parse rather than describe the
+            packet, and are consumed here, the one point every producer passes
+            through, so a spelling normalised here is normalised for the
+            engines, every :meth:`_import_next_layer
+            <pcapkit.protocols.protocol.Protocol._import_next_layer>` and any
+            third-party protocol alike.
 
             ``packet`` is read but not consumed: it stays in the keywords
             forwarded to :meth:`__post_init__`, and while parsing a copy is
@@ -1554,12 +1464,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """
         #logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
 
-        # Whether this instantiation parses an existing packet rather than
-        # constructing a new one; ``__post_init__`` turns on the same ``file``.
-        # ``layer``, ``protocol`` and ``packet`` are out-of-band only while
-        # parsing -- on the construction path they are ordinary ``make()``
-        # arguments, and consuming them there would silently drop the value
-        # being constructed.
+        # Parsing rather than constructing, as in ``__post_init__``. ``layer``,
+        # ``protocol`` and ``packet`` are out-of-band only then; else ``make()`` fields.
         parsing = file is not None
 
         #: int: File pointer.
@@ -1569,17 +1475,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         #: Parse packet until such protocol.
         self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | ProtocolBase | Type[ProtocolBase]]
 
-        # NOTE: The parse limits are documented as ``_layer`` and ``_protocol``,
-        # but no producer in the tree spells them that way. The engines build the
-        # outermost protocol with ``layer=``/``protocol=``
-        # (``pcapkit.foundation.engines.pcap.PCAP.read_frame`` and
-        # ``pcapkit.foundation.engines.pcapng.PCAPNG.read_frame``), every
-        # ``_import_next_layer`` recurses into the next one the same way, and the
-        # un-prefixed pair is the public spelling of
-        # ``pcapkit.extract(layer=..., protocol=...)`` and the CLI's ``-L``/``-P``.
-        # Left in ``**kwargs`` they would be ignored, so both spellings are
-        # accepted (GH-356); the prefixed one wins, so a caller following this
-        # docstring is not overridden by a limit its parent happened to forward.
+        # NOTE: The engines, every ``_import_next_layer`` and ``pcapkit.extract`` spell the
+        # limits ``layer``/``protocol``, so both are accepted; the prefixed one wins (GH-356).
         if parsing:
             layer = kwargs.pop('layer', None)
             protocol = kwargs.pop('protocol', None)
@@ -1588,69 +1485,32 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             if self._exproto is None:
                 self._exproto = protocol
 
-        # NOTE: ``Extractor.__init__`` substitutes the strings ``'none'`` and
-        # ``'null'`` for an omitted ``layer``/``protocol``
-        # (``pcapkit.foundation.extraction.Extractor.__init__``), and
-        # ``pcapkit.interface.core.extract`` does the same for ``layer``. They are
-        # sentinels meaning "no limit", so recognise them as such instead of
-        # carrying them into ``_check_term_threshold`` on every protocol of every
-        # packet, where they would be compared against real protocol names.
+        # NOTE: ``Extractor.__init__`` passes ``'none'``/``'null'`` for an omitted
+        # ``layer``/``protocol`` (``extract`` too, for ``layer``), meaning no limit.
         if isinstance(self._exlayer, str) and self._exlayer.lower() == 'none':
             self._exlayer = None
         if isinstance(self._exproto, str) and self._exproto.lower() == 'null':
             self._exproto = None
 
         #: pcapkit.corekit.context.ContextRegistry: Caller supplied parsing context.
-        # NOTE: Every nested layer normalises the context it was handed, so an
-        # already-normalised registry is adopted as-is: ``make()`` copies, and
-        # paying for a dict copy per protocol in a capture buys nothing when the
-        # contexts are shared regardless.
+        # NOTE: A registry is adopted as-is rather than copied by ``make()``: the
+        # contexts are shared across layers regardless.
         __context__ = kwargs.pop('__context__', None)
         self._exctx = (__context__ if isinstance(__context__, ContextRegistry)
                        else ContextRegistry.make(__context__))  # type: ContextRegistry
         #: bool: Whether to stop parsing the next layer of protocol.
         self._sigterm = self._check_term_threshold()
 
-        # NOTE: The enclosing layer's packet context arrives as ``packet=`` -- the
-        # spelling ``_import_next_layer`` uses -- but the schema layer reads it
-        # from ``__packet__`` (``self.unpack`` below, and the ``pack``/``unpack``
-        # overrides of ``Frame`` and ``PCAPNG``). Republishing it here, for the
-        # same reason the limits above are normalised here, is what lets a
-        # schema's ``unpack``/``post_process`` see what the outer layer put in it:
-        # the ``IPv6`` source address that the HOPOPT MPL option elides from the
-        # wire (RFC 7731), and the destination address that the RPL source route
-        # header needs to decompress (RFC 6554). See GH-382.
-        #
-        # A copy rather than the dict itself: ``Schema.unpack`` writes every field
-        # it reads into the context it is given, plus its own ``__length__`` and
-        # ``__option_padding__`` bookkeeping, and the IPv6 extension header walk
-        # hands one dict to each header in turn. Sharing it would leave one
-        # header's fields visible to the next, where a ``ConditionalField`` test
-        # or a length callback could read a sibling's stale value instead of
-        # failing. ``Schema.unpack`` isolates its own per-field contexts the same
-        # way.
+        # NOTE: ``_import_next_layer`` passes the outer context as ``packet=``; the schema
+        # reads ``__packet__``, e.g. the IPv6 addresses HOPOPT MPL and RPL need (GH-382).
+        # A copy, since ``Schema.unpack`` writes into it and the IPv6 extension header
+        # walk hands one dict to each header in turn, which would leak stale fields.
         if parsing and '__packet__' not in kwargs and isinstance(kwargs.get('packet'), dict):
             kwargs['__packet__'] = dict(kwargs['packet'])
 
-        # NOTE: Construction only. A keyword that names no parameter of this
-        # protocol is a mistake rather than a value. Every ``make`` in the tree
-        # ends its signature with ``**kwargs``, and none but the dispatching
-        # ``HTTP.make`` reads it, so an unknown
-        # keyword would reach the schema as nothing at all and the field would
-        # keep its default -- ``TCP_BASE`` asking for ``seq=1``, which
-        # ``TCP.make`` spells ``seq_no``, would yield ``seq = 0`` with no warning
-        # (#617). The schema layer is not that permissive: :meth:`Schema.__update__
-        # <pcapkit.protocols.schema.Schema.__update__>` warns
-        # :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it
-        # does not know, and this closes the asymmetry from the other end.
-        #
-        # Parsing is left alone. There, the keywords are not field values but
-        # whatever the engines and the ``_import_next_layer``
-        # implementations forward -- ``alias``, ``packet``, and the limits
-        # normalised above -- and a protocol has no way to know which of its
-        # ancestors' keywords its parent chose to pass on. Nothing is lost that
-        # way either: a dropped parse keyword changes how a packet is read, not
-        # what the octets say.
+        # NOTE: Construction only: every ``make`` ends in ``**kwargs``, so a misspelt field
+        # (``seq`` for ``seq_no``) would keep its default silently (#617). Parse keywords,
+        # whatever the engines forward, go unchecked: dropping one changes no octet.
         if not parsing:
             _check_construction_keywords(
                 type(self), kwargs, strict=not self.__reconstructing__)
@@ -1680,10 +1540,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>`.
 
         Note:
-            Inside a payload :meth:`_make_payload` rebuilds, the warnings of the
-            parse are dropped, as the layer the payload is rebuilt for parses
-            the same octets again and reports them there (:issue:`2711`). Those
-            of a parse that raises are reported as the error leaves, unless
+            Inside a payload :meth:`_make_payload` rebuilds, the parse's
+            warnings are dropped, since the enclosing layer parses the same
+            octets again and reports them (:issue:`2711`). A parse that raises
+            reports its warnings, unless
             :func:`~pcapkit.corekit.decorators.beholder` replaces the layer.
 
         """
@@ -1733,36 +1593,33 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Raises:
             UnsupportedCall: If any unrecognised class keyword is given.
 
-        This method is called when a subclass of :class:`ProtocolBase` is defined.
-        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
+        Sets :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
         and :attr:`self.__data__ <pcapkit.protocols.protocol.Protocol.__data__>`
-        attributes of the subclass, and, if ``code`` is given, to register the
-        subclass into the next-layer dispatch :term:`registry` (or registries) that
-        ``code`` names -- e.g. :attr:`Link.__proto__
-        <pcapkit.protocols.link.link.Link.__proto__>`.
+        on the subclass and, if ``code`` is given, registers it into the
+        next-layer dispatch :term:`registry` (or registries) ``code`` names,
+        e.g. :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`.
 
         Notes:
-            When ``schema`` and/or ``data`` is not specified, the method looks
-            for the class of the subclass's own name in the ``schema`` and
-            ``data`` modules beside the ``protocol`` module that defines it, as
+            An omitted ``schema`` or ``data`` is the class of the subclass's
+            own name in the ``schema`` or ``data`` module beside the
+            ``protocol`` module defining it, as
             :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` finds
             :class:`~pcapkit.protocols.link.l2tp.schema.L2TP`
-            (:issue:`2534`). If there is none, the default
-            :class:`~pcapkit.protocols.misc.raw.schema.Raw` and
-            :class:`~pcapkit.protocols.misc.raw.data.Raw` classes will be used.
-            An explicit ``schema`` or ``data`` keyword is used as given.
+            (:issue:`2534`), else
+            :class:`~pcapkit.protocols.misc.raw.schema.Raw` or
+            :class:`~pcapkit.protocols.misc.raw.data.Raw`.
 
         Dispatch registration is **opt-in**, like the ``engine=``/``protocol=``/
         ``fmt=`` keywords of :class:`~pcapkit.foundation.engines.engine.Engine`,
         :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`,
         :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` and
-        :class:`~pcapkit.dumpkit.common.Dumper`. Omitting ``code`` is a
-        deliberate way to decline registration, and what every built-in
-        protocol class does: the built-in dispatch tables (e.g.
-        :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`) are populated by
-        literal assignment in each layer module, not by this hook. A subclass that declines can
-        still be registered later via the owning class's :meth:`register` classmethod or the
-        matching ``register_*`` helper in :mod:`pcapkit.foundation.registry.protocols`.
+        :class:`~pcapkit.dumpkit.common.Dumper`. Every built-in protocol omits
+        ``code``: the built-in dispatch tables (e.g. :attr:`Link.__proto__
+        <pcapkit.protocols.link.link.Link.__proto__>`) are literal assignments
+        in each layer module. A class defined without ``code`` can be
+        registered later through the owning class's :meth:`register` or the
+        matching ``register_*`` helper in
+        :mod:`pcapkit.foundation.registry.protocols`.
 
         ``code`` accepts:
 
@@ -1784,13 +1641,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
           :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` subclass reachable both
           by its IP protocol number and by a UDP port.
 
-        The explicit mapping form is accepted even for a key whose type could
-        be inferred: being more explicit than required is never an error.
-
-        Inference refuses rather than guesses: an enum member whose type
-        names no known destination raises
-        :exc:`~pcapkit.utilities.exceptions.RegistryError` rather than doing
-        nothing or picking an arbitrary registry.
+        The mapping form is accepted even where the key's type could be
+        inferred. An enum member whose type names no known destination raises
+        :exc:`~pcapkit.utilities.exceptions.RegistryError` rather than guessing.
 
         See Also:
             :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
@@ -1811,11 +1664,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         cls.__schema__ = schema
         cls.__data__ = data
 
-        # NOTE: a class defining its own ``__proto__`` ships what its body put
-        # there; copy it now, before anything can register into it, so that
-        # ``_next_layer_entry`` can restore a shipped descriptor without
-        # resolving it (#1504). A class that inherits ``__proto__``
-        # inherits this copy with it.
+        # NOTE: Copy a class's own ``__proto__`` before anything registers into it, so
+        # ``_next_layer_entry`` restores a shipped descriptor unresolved (#1504).
         if '__proto__' in cls.__dict__:
             table = cls.__dict__['__proto__']
             cls._shipped_proto = types.MappingProxyType(
@@ -2819,13 +2669,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     def _make_payload(cls, data: 'Data') -> 'ProtocolBase':
         """Create payload from ``data`` for protocol construction.
 
-        This method uses ``__next_type__`` and ``__next_name__`` to
-        determine the payload type and name. If either of them is missing or
-        :data:`None`, or ``data`` holds nothing under ``__next_name__``, a
-        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` instance will be
-        returned, exactly as for a protocol with no next layer. Otherwise, the
-        payload will be constructed by :meth:`Protocol.from_data
-        <pcapkit.protocols.protocol.Protocol.from_data>`.
+        The payload's type and name are ``__next_type__`` and
+        ``__next_name__``. If either is missing or :data:`None`, or ``data``
+        holds nothing under ``__next_name__``, the payload is a
+        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as for
+        a protocol with no next layer; otherwise :meth:`Protocol.from_data
+        <pcapkit.protocols.protocol.Protocol.from_data>` builds it.
 
         :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries
         both keys, so ``data`` rebuilt from such a :obj:`dict` dispatches as
@@ -2833,15 +2682,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         must ``__short_read__`` and, for IPv6, ``__exthdr__``: the payload is
         never guessed from the other keys of ``data`` (:issue:`2003`).
 
-        The payload is built one layer further into the frame than this
-        protocol, as :meth:`_parse_next_layer` counts it, since each layer built
-        parses its own octets again. So rebuilding a frame stops at
-        :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` where parsing it did, rather than that many
-        layers below each layer of it (:issue:`1610`). Nor does the payload's
-        parse report anything, the limit included: this protocol's own parse
-        goes over the same octets, so the rebuilt frame reports each warning,
-        and each error a next-layer fallback absorbs, once, as the parsed one
-        did (:issue:`2711`).
+        The payload is built one layer further into the frame, as
+        :meth:`_parse_next_layer` counts it, so a rebuild stops at
+        :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` where the parse did
+        (:issue:`1610`). The payload's parse reports nothing, the limit
+        included: this protocol's own parse goes over the same octets, so the
+        rebuilt frame reports each warning, and each error a next-layer fallback
+        absorbs, once, as the parsed one did (:issue:`2711`).
 
         Args:
             data: protocol data
@@ -2883,18 +2730,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             declares when ``code`` is not registered.
 
         Important:
-            Every one of these registries is a :class:`collections.defaultdict`
-            held on a *class* attribute, shared by every instance of the class in
-            the process. So ``registry[code]`` inserts each code it misses, and
-            parsing one packet carrying an unrecognised code grows the registry
-            permanently.
-
-            The inserted value is what the default factory would have produced
-            anyway, so the entry buys nothing. It costs a spurious "already
-            registered" warning from the next genuine ``register`` call for that
-            code, and makes "is this code registered?" depend on what has been
-            parsed. The fallback is therefore read from the default factory
-            directly rather than through a lookup that records it.
+            Each of these registries is a :class:`collections.defaultdict` on a
+            *class* attribute, shared process-wide, so ``registry[code]`` would
+            insert every code it misses: one packet with an unrecognised code
+            would grow the registry permanently. The entry buys nothing, costs a
+            spurious "already registered" warning on the next genuine
+            ``register`` of that code, and makes "is this code registered?"
+            depend on what has been parsed, so the fallback is read from the
+            default factory directly.
 
         """
         if code in registry:
@@ -2919,28 +2762,22 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             ``proto`` is not registered.
 
         Important:
-            The lookup itself is :meth:`self._lookup_registry
+            The lookup is :meth:`self._lookup_registry
             <pcapkit.protocols.protocol.Protocol._lookup_registry>`, so a miss
-            does not grow the shared registry. What this adds is the
-            next-layer-specific resolution step: the entry found --
-            registered, or the fallback -- may be a
-            :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than a
-            class, and it is resolved to the class it names.
+            does not grow the shared registry. The entry found, registered or
+            the fallback, may be a
+            :class:`~pcapkit.corekit.module.ModuleDescriptor`, resolved to the
+            class it names.
 
-            Nothing is written back, on a hit or a miss. A miss has no key to
-            write under, and recording one would be exactly the insertion
-            :meth:`self._lookup_registry
-            <pcapkit.protocols.protocol.Protocol._lookup_registry>` exists
-            to avoid. A hit memoised under ``proto`` would retain a class that
-            :func:`importlib.reload` then makes stale, and would make parsing
-            mutate a registry shared by the whole process (:issue:`1559`). The
-            same holds for a memo in ``registry``'s default factory or in a cache
-            beside the registry (:issue:`421`, :issue:`425`, :issue:`555`).
-
-            So every lookup resolves its descriptor again, and what keeps that
-            affordable is :attr:`ModuleDescriptor.klass
+            Nothing is written back. A hit memoised under ``proto`` would keep
+            a class :func:`importlib.reload` makes stale, and make parsing
+            mutate a registry the whole process shares (:issue:`1559`); so
+            would a memo in the default factory or in a cache beside the
+            registry (:issue:`421`, :issue:`425`, :issue:`555`). Each lookup
+            resolves its descriptor again, kept cheap by
+            :attr:`ModuleDescriptor.klass
             <pcapkit.corekit.module.ModuleDescriptor.klass>` reading
-            :data:`sys.modules` instead of re-entering
+            :data:`sys.modules` rather than re-entering
             :func:`importlib.import_module` (:issue:`574`).
 
         """
@@ -3093,23 +2930,26 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             form rather than the shortest. A next layer that reports no hint is
             kept as parsed.
 
-            The warnings of a parse that may be replaced are held until it is
-            known whether it is. They are dropped when it is, since they describe
-            a header the result does not have -- ``packet length < 0`` twice for
-            an Ethernet frame of 10 octets (:issue:`1580`) -- and reported as the
-            parse ends when it is kept, still inside the guard that catches them
-            under an ``error`` filter. A layer kept with its header cut short
-            still warns. The held warnings of a parse that raises are dropped
-            too when :func:`~pcapkit.corekit.decorators.beholder`, which wraps
-            :meth:`_import_next_layer`, replaces the layer, since the
-            replacement's ``error`` reports the failure (:issue:`2308`); outside
-            ``beholder``, they are reported as the error leaves. Under
-            ``beholder``, a layer is held however much was captured, since one
-            that raises is replaced at any length (:issue:`2516`), so a kept
-            layer's warnings follow those of the layers it carries. Outside
-            ``beholder``, a layer captured at least as long as its hint cannot
-            be replaced, and is parsed holding nothing, even inside one that
-            holds.
+            The warnings of a parse that may be replaced are held until that is
+            known, then:
+
+            * **replaced as short** -- dropped, since they describe a header the
+              result does not have: ``packet length < 0`` twice for an Ethernet
+              frame of 10 octets (:issue:`1580`);
+            * **kept** -- reported as the parse ends, inside the guard that
+              catches them under an ``error`` filter; a layer kept with its
+              header cut short still warns;
+            * **raised** -- dropped when
+              :func:`~pcapkit.corekit.decorators.beholder`, which wraps
+              :meth:`_import_next_layer`, replaces the layer, whose ``error``
+              reports the failure (:issue:`2308`); otherwise reported as the
+              error leaves.
+
+            Under ``beholder`` a layer is held however much was captured, since
+            one that raises is replaced at any length (:issue:`2516`), so a kept
+            layer's warnings follow those of the layers it carries. Outside it,
+            a layer captured at least as long as its hint cannot be replaced,
+            and is parsed holding nothing, even inside one that holds.
 
             A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:
             it and the rest of the frame are kept as
@@ -3148,9 +2988,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 try:
                     next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
                 except Exception:
-                    # NOTE: Under ``beholder`` the layer that raised is replaced,
-                    # so its warnings go with it; outside it, the error reaches
-                    # the caller and they are reported as it leaves (#2308).
+                    # NOTE: Under ``beholder`` the layer is replaced and its warnings
+                    # go with it; outside it, they leave with the error (#2308).
                     held.discard = beholding.get()
                     raise
 
@@ -3266,37 +3105,24 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
-        This method is called when a subclass of :class:`Protocol` is defined.
-        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
+        Sets :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
         and :attr:`self.__data__ <pcapkit.protocols.protocol.Protocol.__data__>`
-        attributes of the subclass.
+        on the subclass through :meth:`ProtocolBase.__init_subclass__`, which
+        also finds an omitted one.
 
-        Notes:
-            When ``schema`` and/or ``data`` is not specified, the method looks
-            for the class of the subclass's own name in the ``schema`` and
-            ``data`` modules beside the ``protocol`` module that defines it, as
-            :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` finds
-            :class:`~pcapkit.protocols.link.l2tp.schema.L2TP`
-            (:issue:`2534`). If there is none, the default
-            :class:`~pcapkit.protocols.misc.raw.schema.Raw` and
-            :class:`~pcapkit.protocols.misc.raw.data.Raw` classes will be used.
-            An explicit ``schema`` or ``data`` keyword is used as given.
-
-        This method also names a concrete subclass in the by-name registry,
-        :attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`,
-        under its upper-cased class name, once
-        :meth:`ProtocolBase.__init_subclass__` has accepted its ``code``,
-        whereas ``code``'s next-layer dispatch registration is opt-in. An
-        abstract subclass, as :func:`~pcapkit.utilities.inspect.isabstract`
-        reports it, is not named, and nor is a class deriving
-        :class:`ProtocolBase` without this class, as every built-in protocol
-        does. A name already holding another entry keeps it, and the clash is
-        reported as a :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only
+        Once that has accepted ``code``, a concrete subclass is also named in
+        the by-name registry, :attr:`ProtocolBase.__registry__
+        <pcapkit.protocols.protocol.ProtocolBase.__registry__>`, under its
+        upper-cased class name; unlike ``code``'s dispatch registration, this
+        is not opt-in. An abstract subclass, as
+        :func:`~pcapkit.utilities.inspect.isabstract` reports it, is not named,
+        nor is a class deriving :class:`ProtocolBase` alone, as every built-in
+        protocol does. A name holding another entry keeps it, with a
+        :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only
         :meth:`ProtocolBase.register_protocol
-        <pcapkit.protocols.protocol.ProtocolBase.register_protocol>` replaces an
-        entry. A class meeting the :class:`~pcapkit.corekit.module.ModuleDescriptor`
-        that names its own module and name is no clash, and the descriptor
-        stays.
+        <pcapkit.protocols.protocol.ProtocolBase.register_protocol>` replaces
+        one. The :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
+        class's own module and name is no clash, and stays.
 
         See Also:
             For more information on the registry, please refer to
@@ -3311,10 +3137,8 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
         """
         super().__init_subclass__(schema, data, code, *args, **kwargs)
 
-        # NOTE: #2763: a concrete class names itself in the by-name registry
-        # once its ``code`` is accepted, so a refused one names nothing, and
-        # keeps off a name already held. A class meeting the descriptor naming
-        # its own module and name leaves it, to be resolved on lookup.
+        # NOTE: #2763: named once ``code`` is accepted, never over a held name; the
+        # descriptor naming the class itself stays, to be resolved on lookup.
         # #2784: not inspect.isabstract, which reads __flags__: GraalPy freezes them
         # at that read, so the abstract flag ABCMeta sets next would never show.
         if not isabstract(cls):

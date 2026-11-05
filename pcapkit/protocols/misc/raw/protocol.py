@@ -140,10 +140,8 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
 
-        # NOTE: The buffer above is all there is to parse, so its size is
-        # declared rather than left for :func:`~pcapkit.corekit.decorators.prepare`
-        # to derive: a derived zero is read as the end of the stream, whereas
-        # an empty raw payload is a payload all the same (#1285).
+        # NOTE: Declared, not left to ``prepare``, which reads a derived zero as the end
+        # of the stream; an empty raw payload is a payload all the same (#1285).
         if length is None:
             length = len(self._data)
 

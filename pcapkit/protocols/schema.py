@@ -48,29 +48,22 @@ _ST = TypeVar('_ST', bound='Type[Schema]')
 def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     """Finalise schema class.
 
-    This decorator function is used to generate necessary
-    attributes and methods for the decorated :class:`Schema`
-    class. It can be useful to reduce runtime generation
-    time as well as caching already generated attributes.
+    This decorator generates the attributes and methods of the decorated
+    :class:`Schema` class once, rather than at runtime.
 
     Notes:
-        The decorator should only be used on the *final* class. Applying it
-        with ``_finalised=True`` seals the class against *subclassing*, which
-        :meth:`Schema.__init_subclass__` enforces, and marks it with
-        :func:`~pcapkit.utilities.compat.final` -- so ``@schema_final`` implies
-        ``@final`` and there is never a reason to write both. Writing both is
-        harmless in either order, though; what is not is ``@final`` *without*
-        this decorator, which :meth:`Schema.__new__` refuses -- provided
-        ``@final`` is :func:`~pcapkit.utilities.compat.final` (or, on Python
-        3.11 and up, :func:`typing.final` directly). Below 3.11, plain
-        :func:`typing.final` does not set ``__final__`` at all (gh-90500), so a
-        class marked with a user's own ``from typing import final`` on 3.10 is
-        not refused: there is nothing on the class for :meth:`Schema.__new__` to
-        read.
+        Use it on the *final* class only. With ``_finalised=True`` it seals the
+        class against *subclassing*, which :meth:`Schema.__init_subclass__`
+        enforces, and marks it with :func:`~pcapkit.utilities.compat.final`, so
+        ``@schema_final`` implies ``@final``; writing both is harmless.
+        :meth:`Schema.__new__` refuses ``@final`` *without* this decorator,
+        where ``@final`` is :func:`~pcapkit.utilities.compat.final`, or
+        :func:`typing.final` on Python 3.11 and up. Below 3.11,
+        :func:`typing.final` sets no ``__final__`` (gh-90500), so a class
+        marked with it is not refused.
 
-        Applying this decorator to the same class a second time only warns: the
-        first application already did the work, so the duplicate is redundant
-        rather than wrong, and the class comes back finalised and usable.
+        Applying it to the same class a second time only warns, and the class
+        comes back finalised and usable.
 
     Args:
         cls: Schema class.
@@ -93,25 +86,15 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
 
     :meta decorator:
     """
-    # NOTE: keyed on ``__finalised__`` rather than on ``final``'s ``__final__``,
-    # and read out of ``cls.__dict__`` rather than through ``getattr``, for the
-    # reasons given in :func:`pcapkit.corekit.infoclass.info_final`, which
-    # makes both choices: only ``__finalised__`` records *this function* having
-    # run, so a ``__final__`` test would make ``@schema_final`` over ``@final``
-    # skip the generation while the opposite order did the work; and
-    # ``__finalised__`` is inherited, so ``getattr`` would skip a subclass
-    # declared before its parent was finalised.
+    # NOTE: Keyed on ``__finalised__``, which only this function sets, and read from
+    # ``cls.__dict__``, since it is inherited; as in ``info_final``.
     if cls.__dict__.get('__finalised__') == FinalisedState.FINAL:
         warn(f'{cls.__name__}: schema has been finalised; now skipping',
              SchemaWarning, stacklevel=stacklevel())
         return cls
 
-    # NOTE: short-circuit for ``Schema`` itself, as in
-    # :func:`pcapkit.corekit.infoclass.info_final`: ``Schema`` never reaches
-    # ``FinalisedState.BASE``, so a bare ``Schema()`` would otherwise re-enter
-    # this function, and redo the ``dir()``-over-the-MRO scan below, on *every*
-    # call. ``__base_ready__`` is
-    # its own marker, own-``__dict__`` only, so it never touches ``__finalised__``.
+    # NOTE: ``Schema`` never reaches ``FinalisedState.BASE``, so without its own
+    # ``__base_ready__`` marker every bare ``Schema()`` would redo the scan below.
     if cls is Schema and cls.__dict__.get('__base_ready__'):
         return cls
 
@@ -128,34 +111,14 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     args_ = [f'{key}=NO_VALUE' for key in cls.__fields__]
     dict_ = [f'{key}={key}' for key in cls.__fields__]
 
-    # NOTE: We shall only generate ``__init__`` if the class does not define one,
-    # which is a test on ``cls.__dict__``, not on ``hasattr``: every class
-    # inherits ``__init__`` from :obj:`object`, so ``hasattr(cls, '__init__')``
-    # is always true. Without the generated method, ``Schema(...)`` would run
-    # :meth:`Schema.__update__` alone and never reach
-    # :meth:`Schema.__post_init__`, leaving a schema built from a subset of its
-    # fields holding :class:`~pcapkit.corekit.fields.field.FieldBase` objects in
-    # place of the omitted values, so that it could not be packed at all and
-    # failed with an error naming a field class rather than a field.
-    #
-    # :class:`~pcapkit.protocols.misc.no_payload.schema.NoPayload` is what the test
-    # protects: it declares an argument-less ``__init__`` of its own so that no
-    # generated one displaces it.
+    # NOTE: Only where the class defines none (``hasattr`` is always true). Without it,
+    # ``Schema(...)`` skips ``__post_init__``, leaving omitted fields as field objects.
+    # ``NoPayload`` declares an argument-less ``__init__`` so that none is generated.
     if '__init__' not in cls.__dict__:
-        # NOTE: We only generate typed ``__init__`` method if only the class
-        # has field definition from any of itself and its base classes.
+        # NOTE: A typed ``__init__`` only for a class with fields, own or inherited.
         if args_:
-            # NOTE: The following code is to make the ``__init__`` method work.
-            # It is inspired from the :func:`dataclasses._create_fn` function.
-            #
-            # ``**kwargs`` is forwarded rather than rejected, so that a keyword
-            # naming something other than a field reaches
-            # :meth:`Schema.__update__` and draws its
-            # :class:`~pcapkit.utilities.warnings.UnknownFieldWarning`. Several
-            # schemas are constructed that way on purpose -- the Multipath TCP
-            # options take a ``kind`` and a ``length`` that the enclosing option
-            # owns and that ``MPTCP`` declares only for the type checker -- so a
-            # strict signature would turn a warning into a :exc:`TypeError`.
+            # NOTE: After ``dataclasses._create_fn``. ``**kwargs`` reaches ``__update__``, which
+            # warns of a non-field; the MPTCP options take ``kind``/``length`` that way on purpose.
             init_ = (
                 f'def __create_fn__():\n'
                 f'    def __init__(self, {", ".join(args_)}, *, __packet__=None, **kwargs):\n'
@@ -179,18 +142,8 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
         cls.__init__.__qualname__ = f'{cls.__name__}.__init__'  # type: ignore[misc]
 
     if not _finalised:
-        # NOTE: ``Schema`` itself must never receive this promotion, for the same
-        # reason ``Info`` must not -- see :func:`pcapkit.corekit.infoclass.info_final`.
-        # This branch binds ``cls`` to ``Schema``
-        # only when something bare-constructs ``Schema()`` directly, and writing
-        # ``BASE`` onto ``Schema.__dict__`` there would make every subclass declared
-        # afterwards inherit ``BASE`` and skip :meth:`Schema.__new__`'s own
-        # ``FinalisedState.NONE`` branch -- silently defeating the bare-``@final``
-        # guard nested inside it for the rest of the process.
-        #
-        # ``__base_ready__`` is set instead, for the short-circuit at the top of
-        # this function -- own-``__dict__`` only, so it is not inherited and
-        # does not touch ``__finalised__``.
+        # NOTE: Never ``BASE`` on ``Schema`` itself, as for ``Info`` (see ``info_final``):
+        # subclasses would inherit it and skip the bare-``@final`` guard of ``Schema.__new__``.
         if cls is not Schema:
             cls.__finalised__ = FinalisedState.BASE
         else:
@@ -204,43 +157,30 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
 class SchemaMeta(abc.ABCMeta):
     """Meta class to add dynamic support to :class:`Schema`.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`Schema` class. It can be useful to reduce runtime generation
-    cost as well as caching already generated attributes.
+    It generates the attributes of the :class:`Schema` class:
 
-    * :attr:`Schema.__fields__` is a dictionary of field names and their
-      corresponding :class:`~pcapkit.corekit.fields.field.Field` objects,
-      which are used to define and parse the protocol headers. The field
-      dictionary will automatically be populated from the class attributes
-      of the :class:`Schema` class, and the field names will be the same
-      as the attribute names.
+    * :attr:`Schema.__fields__` maps each field name, the attribute name, to
+      its :class:`~pcapkit.corekit.fields.field.Field` object, which defines
+      and parses the header. It is populated from the class attributes.
 
       .. seealso::
 
-         This is implemented through setting up the initial field dictionary
-         in the |prepare|_ method, and then inherit the field
-         dictionaries from the base classes.
-
-         Later, during the class creation, the
+         The |prepare|_ method sets up the initial field dictionary from
+         those of the base classes; during class creation,
          :meth:`Field.__set_name__ <pcapkit.corekit.fields.field.FieldBase.__set_name__>`
-         method will be called to set the field name for each field object,
-         as well as to add the field object to the field dictionary.
+         names each field object and adds it to the dictionary.
 
          .. |prepare| replace:: :meth:`__prepare__`
          .. _prepare: https://docs.python.org/3/reference/datamodel.html#preparing-the-class-namespace
 
-    * :attr:`Schema.__additional__` and :attr:`Schema.__excluded__` are
-      lists of additional and excluded field names, which are used to
-      determine certain names to be included or excluded from the field
-      dictionary. They will be automatically populated from the class
-      attributes of the :class:`Schema` class and its base classes.
+    * :attr:`Schema.__additional__` and :attr:`Schema.__excluded__` list
+      names to include in or exclude from the field dictionary, populated
+      from the class attributes of the class and its bases.
 
       .. note::
 
-         This is implemented through the :meth:`~object.__new__` method, which
-         will inherit the additional and excluded field names from the base
-         classes, as well as populating the additional and excluded field
-         from the subclass attributes.
+         This metaclass's ``__new__`` inherits both lists from the base
+         classes and extends them with the subclass's own.
 
          .. code-block:: python
 
@@ -279,50 +219,19 @@ class SchemaMeta(abc.ABCMeta):
         return collections.OrderedDict(__fields__=fields)
 
     #: Class keywords that collide with a parameter this class does not
-    #: control, so a schema class declared with one fails with an opaque
-    #: ``TypeError`` from several frames away instead of a clear message here.
-    #: Collisions of different kinds, all reserved:
+    #: control, which would fail with an opaque ``TypeError`` frames away:
     #:
-    #: ``mcls``, ``name``, ``bases``, ``namespace`` collide with
-    #: ``abc.ABCMeta.__new__`` -- a *different* function from this one, one
-    #: level up the ``super().__new__(...)`` call below. Before Python 3.11
-    #: those are positional-or-keyword there (from 3.11 they are
-    #: positional-only, ``def __new__(mcls, name, bases, namespace, /,
-    #: **kwargs)``), so a class keyword spelled the same as any of them binds
-    #: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple
-    #: values for argument '...'``. ``namespace`` collides this way, which is why
-    #: :mod:`pcapkit.protocols.misc.pcapng.schema`'s :class:`~pcapkit.protocols.misc.pcapng.schema.Option` subclasses
-    #: spell it ``ns=`` instead.
+    #: * ``mcls``, ``name``, ``bases`` and ``namespace`` are
+    #:   positional-or-keyword parameters of ``abc.ABCMeta.__new__`` before
+    #:   Python 3.11, so a class keyword of the same name binds one twice;
+    #:   hence ``ns=`` on the
+    #:   :class:`~pcapkit.protocols.misc.pcapng.schema.Option` subclasses.
+    #: * ``cls`` is bound first by every ``__init_subclass__``, in any class.
     #:
-    #: ``cls`` collides one level *later*: every ``__init_subclass__`` is an
-    #: implicit classmethod, so ``cls`` is always bound as its first argument,
-    #: and a class keyword also spelled ``cls`` binds it twice there --
-    #: ``TypeError: Generic.__init_subclass__() got multiple values for
-    #: argument 'cls'`` for a :class:`Schema` subclass (:class:`Schema`
-    #: inherits :class:`typing.Generic`), or the equivalent from whichever
-    #: class in the MRO defines ``__init_subclass__`` first. This one is not
-    #: specific to ``abc.ABCMeta`` or to this metaclass at all -- it holds for
-    #: *any* Python class with any ``__init_subclass__`` in its MRO -- but it
-    #: is reserved here anyway since it is exactly the class of mistake this
-    #: guard exists to catch early and legibly.
-    #:
-    #: Listed explicitly rather than derived from
-    #: :func:`inspect.signature(abc.ABCMeta.__new__) <inspect.signature>` at
-    #: import time: the signature's positional-only marker differs across
-    #: Python versions, introspecting a CPython internal's exact shape to
-    #: guard against a CPython internal's exact shape is circular, and
-    #: names that will not change are cheaper to read than the machinery to
-    #: recompute them.
-    #:
-    #: ``name``, ``bases`` and ``attrs`` -- *this* method's own parameters --
-    #: collide the same way one level earlier than ``ABCMeta.__new__``, on
-    #: every Python version, and are not in this set for that reason alone:
-    #: they are made positional-only below instead (the same fix CPython gave
-    #: ``ABCMeta.__new__`` in 3.11), which removes the collision rather than
-    #: merely naming it. ``name`` and ``bases`` stay in this set regardless,
-    #: because they still collide with ``ABCMeta.__new__``'s parameters of the
-    #: same name one level up; ``attrs`` does not appear anywhere downstream
-    #: and so needs no entry once it is positional-only here.
+    #: Listed rather than derived from :func:`inspect.signature`, whose shape
+    #: for ``ABCMeta.__new__`` varies across Python versions. ``attrs`` needs
+    #: no entry, being positional-only below, as are ``name`` and ``bases``,
+    #: which still collide one level up.
     _RESERVED_CLASS_KWARGS = frozenset({'mcls', 'name', 'bases', 'namespace', 'cls'})
 
     def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', /, **kwargs: 'Any') -> 'Type[Schema]':
@@ -365,13 +274,8 @@ class SchemaMeta(abc.ABCMeta):
             if hasattr(base, '__excluded__'):
                 attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
 
-        # NOTE: ``ABCMeta.__new__`` is called unconditionally, on every supported
-        # version. Dodging the ``namespace`` collision described above by calling
-        # ``type.__new__`` directly would skip ``ABCMeta.__new__``'s call to
-        # ``abc._abc_init(cls)``, so no :class:`Schema` subclass would get its
-        # own ``_abc_impl`` and every one of them would fall through the MRO to
-        # :class:`collections.abc.Mapping`'s -- corrupting ``isinstance`` against
-        # *any* of them for as long as the process ran.
+        # NOTE: Never ``type.__new__``: skipping ``abc._abc_init`` would leave every Schema
+        # subclass on the ``_abc_impl`` of ``Mapping``, corrupting ``isinstance`` against them.
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 
@@ -385,8 +289,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         two-octet field packs as ``0x1170``. The range checks live in each
         protocol's :meth:`~pcapkit.protocols.protocol.Protocol.make`, and in a
         field whose values have a range of their own, such as
-        :class:`~pcapkit.corekit.fields.numbers.PortEnumField`. See GitHub issue
-        :issue:`2314`.
+        :class:`~pcapkit.corekit.fields.numbers.PortEnumField` (:issue:`2314`).
 
     """
 
@@ -531,13 +434,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             packet = {}
 
         packet.update(self.__dict__)
-        # NOTE: ``pre_unpack`` is called here as well as from the unpacking path
-        # since a schema may seed ``packet`` keys that both paths need, as
-        # ``pcapkit.protocols.internet.hip.schema.EncryptedParameter`` does.
-        # ``pre_pack`` is what carries the packing-only preparation, such as the
-        # PCAP-NG section header block's byte order magic, which no field of the
-        # schema holds and which therefore cannot be recovered from
-        # ``self.__dict__`` above.
+        # NOTE: ``pre_unpack`` seeds keys both paths need, as HIP's ``EncryptedParameter``
+        # does; ``pre_pack`` adds packing-only ones no field holds, e.g. the PCAP-NG SHB magic.
         self.pre_unpack(packet)
         self.pre_pack(packet)
 
@@ -547,29 +445,13 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         for field in self.__fields__.values():
             field = field(packet)
 
-            # NOTE: Read from the instance rather than with :func:`getattr`, which
-            # finds the *class* attribute when the instance has none -- and a
-            # schema's class attribute for a field is the
-            # :class:`~pcapkit.corekit.fields.field.FieldBase` object itself. A
-            # field the caller never set would arrive below as the field rather
-            # than as a value: ``getattr(self, name, None)`` could not return its
-            # ``None``, so the absent-value branches would not fire, and packing
-            # would fail from inside a field object -- naming a field *class*, and
-            # so saying nothing about which field had been left out.
+            # NOTE: From ``__dict__``, not ``getattr``, which returns the class's field
+            # object for a field never set, so the absent-value branches would not fire.
             data = self.__dict__.get(self.__map__.get(field.name, field.name))
 
             if isinstance(field, PayloadField):
-                # NOTE: ``ProtocolBase``, not ``Protocol``: ``Protocol`` is a thin
-                # subclass that only adds auto-registration for externally defined
-                # protocols, and no protocol in the library subclasses it. Testing
-                # against it would send any protocol instance -- which is exactly
-                # what :meth:`ProtocolBase._make_payload
-                # <pcapkit.protocols.protocol.ProtocolBase._make_payload>` returns,
-                # and what ``make``'s own ``bytes | Protocol | Schema`` signature
-                # advertises -- to the ``ProtocolUnbound`` below instead of packing
-                # it, and ``from_data`` could not reconstruct a parsed packet. An
-                # external ``Protocol`` subclass is still a ``ProtocolBase``. The
-                # import is inside the method rather than at module level.
+                # NOTE: ``ProtocolBase``, not ``Protocol``, which no built-in protocol
+                # derives, so the payloads ``_make_payload`` returns pack.
                 from pcapkit.protocols.protocol import \
                     ProtocolBase  # pylint: disable=import-outside-toplevel
 
@@ -591,28 +473,15 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 elif isinstance(data, bytes):
                     self.__buffer__[field.name] = data
                 elif isinstance(data, (list, tuple)):
-                    # NOTE: a data model may declare a field ``tuple[...]``
-                    # rather than ``list[...]`` -- e.g. HIP's ``group_id:
-                    # 'tuple[Group, ...]'`` in
-                    # pcapkit/protocols/internet/hip/data.py -- and ``_read_*`` then hands one straight back
-                    # here on reconstruction. ``ListField.pack`` only ever
-                    # iterates its argument, so it accepts either, and
-                    # rejecting the tuple would break parse-then-reconstruct for
-                    # such a field. ``list(data)`` is a no-op for an actual list
-                    # and keeps ``ListField.pack``'s own ``Optional[list[_TL]]``
-                    # signature honest rather than widening it too.
+                    # NOTE: A data model may hold a tuple, as HIP's ``group_id``; ``list()``
+                    # keeps the signature of ``ListField.pack``, which only iterates it.
                     self.__buffer__[field.name] = field.pack(list(data), packet)
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
 
                 if isinstance(field, OptionField):
-                    # NOTE: The packing mirror of the ``__option_padding__`` that
-                    # :meth:`unpack` records: whatever of the declared option area
-                    # the packed options do not fill. Without it every padding
-                    # field sized from that key packs nothing, and the header
-                    # comes out shorter than its own length field says
-                    # (#1289). An undeclared area (a negative length)
-                    # leaves no remainder.
+                    # NOTE: Mirrors the ``__option_padding__`` of ``unpack``, so padding fills
+                    # the declared option area (#1289); an undeclared one leaves none.
                     packet['__option_padding__'] = max(field.length - len(self.__buffer__[field.name]), 0)
                 continue
 
@@ -630,10 +499,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 field = field.field(packet)
 
             if isinstance(field, ForwardMatchField):
-                # NOTE: a forward match consumes nothing, so it contributes no
-                # octets to ``bytes(self)``/``len(self)`` either. :meth:`unpack`
-                # mirrors this for the same reason -- see the ``ForwardMatchField``
-                # branch there.
+                # NOTE: A forward match consumes nothing, here as in ``unpack``.
                 self.__buffer__[field.name] = b''
                 continue
 
@@ -643,24 +509,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 temp = bytes(field.length)
 
             if isinstance(field, SchemaField) and len(temp) < field.length:
-                # NOTE: :meth:`unpack` hands a nested schema its whole declared
-                # span, and the schema may read less of it than that. The octets
-                # it left unread travel with the nested value as its
-                # ``__remainder__`` -- on the schema itself, or as a key of the
-                # mapping :meth:`to_dict` made of it -- so they are re-emitted
-                # from there, as long as the nested schema still packs to the
-                # ``__remainder_offset__`` octets it was parsed at. Re-emitting
-                # them after a nested schema that has shrunk or grown would put
-                # stale octets at a shifted offset, so then, or for a schema that
-                # never had any, the rest of the span is zero-filled.
-                # Either way the field keeps the width its length field declares
-                # (#1292), and a schema rebuilt through :meth:`from_dict`
-                # packs what the parsed one did (#1380).
-                #
-                # A field reached through a
-                # :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled
-                # here: the PCAP-NG block selector declares the rest of the
-                # *stream* as its span, which is no part of the field.
+                # NOTE: Re-emit the ``__remainder__`` a nested schema left unread while it still
+                # packs to its ``__remainder_offset__``; else zero-fill, keeping the declared
+                # width (#1292, #1380). Not for a SwitchField: PCAP-NG's spans the whole stream.
                 if isinstance(data, Schema):
                     record = data.__dict__  # type: Mapping[str, Any]
                 elif isinstance(data, collections.abc.Mapping):
@@ -706,75 +557,52 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             Unpacked data as :class:`Schema`.
 
         Notes:
-            A ``__length__`` key in ``packet`` records the length of the
-            remaining data, which is used to determine the length of the
-            payload field.
+            ``packet`` carries the bookkeeping keys below. For a nested schema,
+            unpacked through a :class:`~pcapkit.corekit.fields.misc.SchemaField`,
+            it is the context
+            :func:`~pcapkit.corekit.fields.misc.nested_packet_context` builds: a
+            name this schema does not declare falls through to the enclosing
+            schema, which ``__packet__`` also holds.
 
-            When this schema is nested -- unpacked through a
-            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
-            directly -- ``packet`` is not the enclosing schema's own data, but
-            a context built by
-            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`: a name
-            this schema does not itself
-            declare falls through to the enclosing schema, and the enclosing
-            schema is also reachable unconditionally under a ``__packet__``
-            key. See that function for the exact lookup, write and iteration
-            semantics.
+            * ``__length__`` -- the length of the remaining data, which sizes
+              the payload field.
+            * ``__option_padding__`` -- how much of an
+              :class:`~pcapkit.corekit.fields.collections.OptionField`'s
+              declared area it left after its end-of-option-list marker.
+              ``data`` is rewound by as much of that unparsed remainder as was
+              read, so the fields sized from this key read the remainder itself
+              and record a cut inside it (:issue:`2685`). What follows decides
+              what it is: usually padding, but the PCAP-NG name resolution block
+              reads further options from it.
+            * ``__short_read__`` -- for the fields after the one the data ends
+              inside, the ``(name, octets read)`` pair recorded, or that of a
+              :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` the data
+              ends inside first, which the record leaves out as it consumes
+              nothing. A field callback can so tell a value the end of the data
+              left as zero from one read, and leave it to the short read.
+            * ``__data_end__`` -- that ``length`` ends where the data does, as a
+              :class:`~pcapkit.corekit.fields.collections.ListField` says of an
+              item it counts. Fields running past ``length`` are then the cut
+              the short read records, and do not warn that ``__length__`` fell
+              below zero (:issue:`2749`).
+            * ``__data_present__`` -- that ``data`` holds the data that many
+              octets in, and past them the zeros a
+              :class:`~pcapkit.corekit.fields.collections.ListField` of schema
+              items filled it out with. The field a read crosses them in is given
+              how many of its octets the data holds, under the same key, so a
+              list there ends with the data (:issue:`2760`).
 
-            We also use an ``__option_padding__`` key in ``packet`` to record how
-            much of an
-            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared
-            area it did not consume. What follows that area decides what the
-            remainder means: usually padding, to be skipped, but a schema may
-            equally read it as further options, as the PCAP-NG name resolution
-            block does with its records and options.
+            The last three are cleared as unpacking starts, so a nested schema
+            finds only its own.
 
-            An :class:`~pcapkit.corekit.fields.collections.OptionField`
-            declares the size of the whole area it may read, but stops at the
-            end-of-option-list marker and reports the unconsumed remainder
-            through ``__option_padding__``. Since that remainder has not been
-            parsed, we rewind ``data`` by as much of it as was read, so that the
-            fields which size themselves from ``__option_padding__`` read the
-            remainder itself rather than the same number of octets from beyond
-            it, and record a cut inside it (:issue:`2685`).
-
-            A payload field of a declared length the data ends inside is a cut
-            like any other field's, so a layer whose octets fall short of the
-            length it declares records it, and its rebuild reads as cut
-            (:issue:`2711`). One declaring no length takes what the message
-            leaves, as a trailer or the next record does, which is no part of
-            the layer, and records nothing. A
+            A payload field of a declared length the data ends inside records a
+            cut like any other field, so its layer's rebuild reads as cut
+            (:issue:`2711`); one declaring no length takes what the message
+            leaves, as a trailer does, and records nothing. A
             :class:`~pcapkit.corekit.fields.collections.ListField` whose octets
-            hold fewer items than it counts records the cut too, the items
-            absent being its
+            hold fewer items than it counts records the cut too, the missing
+            items being its
             :attr:`~pcapkit.corekit.fields.collections.ListField.shortfall`.
-
-            The fields after the one the data ends inside find it in ``packet``
-            as ``__short_read__``: the ``(name, octets read)`` pair recorded as
-            the short read, or that of a
-            :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` the data
-            ends inside first, which the record leaves out as it consumes
-            nothing. So a field callback can tell a value the end of the data
-            left as zero from one read, and leave such a value to the short
-            read rather than refuse it. The key is cleared as unpacking starts,
-            so a nested schema finds only its own.
-
-            Fields running past ``length`` warn that ``__length__`` fell below
-            zero, unless a ``__data_end__`` key in ``packet`` says that
-            ``length`` ends where the data does, as a
-            :class:`~pcapkit.corekit.fields.collections.ListField` says of an
-            item it counts. The fields past it are then the cut the short read
-            records, and warn nothing (:issue:`2749`). The key is cleared as
-            unpacking starts too.
-
-            A ``__data_present__`` key in ``packet`` says that ``data`` holds
-            the data that many octets in, and past them the zeros a
-            :class:`~pcapkit.corekit.fields.collections.ListField` of schema
-            items filled it out with, as the list says of the item the data
-            ends inside. The field a read crosses them in is given how many of
-            its octets the data holds, under the same key, so that a list there
-            ends with the data, as it does where the data itself ends
-            (:issue:`2760`). The key is cleared as unpacking starts too.
 
         .. versionchanged:: 1.6.0
 
@@ -810,19 +638,14 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             # NOTE: ``Field.length`` recomputes struct.calcsize() on every read,
             # so it is read once per field here rather than at each use.
             if isinstance(field, PayloadField):
-                # NOTE: A negative length is the unset default and takes what
-                # the declared length leaves, never less than nothing; a
-                # computed zero is an empty payload, not an unset one, or it
-                # would swallow the fields after it (#1275).
+                # NOTE: A negative length is the unset default and takes what is left, at
+                # least nothing; a computed zero is an empty payload, not an unset one (#1275).
                 length = declared = field.length
                 if length < 0:
                     length = max(cast('int', packet['__length__']), 0)
 
-                # NOTE: A declared length is asked for no further than one read
-                # can go, :data:`sys.maxsize`; past it the read raises
-                # :exc:`OverflowError` rather than coming back short, which is
-                # how every other overrun is reported. No stream holds more than
-                # that, so the bounded read is the same short read (#1975).
+                # NOTE: Bounded at ``sys.maxsize``, past which the read raises OverflowError
+                # rather than coming back short, as every other overrun does (#1975).
                 payload = data.read(min(length, sys.maxsize))
                 self.__buffer__[field.name] = payload
                 # NOTE: A payload of a declared length the data ends inside is recorded as
@@ -874,11 +697,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 # octet, so it declares that many past those read (#2711).
                 self._note_short_read(field.name, len(byte) + field.shortfall, byte, packet)
             if isinstance(field, SchemaField) and isinstance(value, Schema):
-                # NOTE: Kept on the nested schema rather than only in
-                # ``__buffer__``, so that the octets it left unread go wherever
-                # the value goes, :meth:`to_dict` included; see :meth:`pack`.
-                # The width read is summed from the nested buffers rather than
-                # taken with :func:`len`, which may pack the schema again.
+                # NOTE: On the nested schema, so the unread octets go wherever the value goes
+                # (see ``pack``); summed from its buffers, as ``len`` may pack it again.
                 consumed = sum(map(len, value.__buffer__.values()))
                 if len(byte) > consumed:
                     value.__dict__['__remainder__'] = byte[consumed:]
@@ -891,25 +711,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 packet['__option_padding__'] = field.option_padding
 
             if isinstance(field, ForwardMatchField):
-                # NOTE: a forward match reads ``length`` octets so a later field
-                # can size itself from them, but consumes neither the stream
-                # (the rewind below) nor ``__length__`` (no decrement in this
-                # branch). ``self.__buffer__[field.name]`` above still holds the
-                # octets just read, so it is zeroed here, as :meth:`pack` does for
-                # the same field type: ``__bytes__``/``__len__`` concatenate every
-                # slot in ``__buffer__``, and the octets are read again, for real,
-                # by whichever field actually needs them, so keeping them would
-                # over-report the schema's length by the forward match's width.
-                # Zeroing is also what lets a declared area checked against
-                # ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`
-                # and :class:`~pcapkit.corekit.fields.collections.ListField` both
-                # do this -- see the octets actually consumed.
-                #
-                # The rewind is by the octets actually read, not by ``length``:
-                # near the end of the stream the read comes back short, and
-                # rewinding the full width would move the stream *before* the
-                # forward match, so the fields after it would re-read the
-                # preceding octet as their first.
+                # NOTE: A forward match consumes neither the stream nor ``__length__``, and its
+                # buffer is zeroed, as in ``pack``, so ``len(self)`` counts consumed octets only.
+                # The rewind is by the octets read, which come back short near the stream's end.
                 data.seek(-len(byte), io.SEEK_CUR)
                 self.__buffer__[field.name] = b''
 
@@ -919,10 +723,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 if len(byte) < length:
                     packet.setdefault('__short_read__', (field.name, len(byte)))
             elif isinstance(field, OptionField) and field.option_padding > 0:
-                # NOTE: The option list ended before the declared area did, and
-                # ``option_padding`` is the rest of that area; give back as much
-                # of it as was read, so that the following fields read it and
-                # record a cut inside it themselves (#2685).
+                # NOTE: The option list ended before its declared area: give back what was read
+                # of the rest, for the following fields to read and record a cut in (#2685).
                 consumed = length - field.option_padding
                 kept = min(consumed, len(byte))
                 if kept < len(byte):
@@ -972,13 +774,11 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
     def __init_subclass__(cls, /, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Refuse to derive from a finalised schema.
 
-        :func:`~pcapkit.utilities.compat.final` is a promise to the type
-        checker and nothing more: it records ``__final__`` on the class and
-        leaves the interpreter free to subclass it anyway. Every schema
-        :func:`schema_final` finalises carries a generated ``__init__`` built
-        from the :attr:`__fields__` that were declared at that moment, so a
-        subclass adding a field afterwards inherits a constructor that cannot
-        set it. This turns that promise into a rule the interpreter keeps.
+        :func:`~pcapkit.utilities.compat.final` only informs the type checker:
+        it records ``__final__`` and leaves the class subclassable. A schema
+        :func:`schema_final` finalises carries an ``__init__`` generated from
+        its :attr:`__fields__` at that moment, which cannot set a field a
+        subclass adds, so the subclass is refused.
 
         Args:
             *args: Arbitrary positional arguments.
@@ -989,21 +789,14 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 ``__final__`` marker in its own ``__dict__``.
 
         """
-        # NOTE: the whole ancestry rather than ``cls.__bases__``, and
-        # ``base.__dict__`` rather than ``getattr`` -- see
-        # :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__`, which makes
-        # the same choices for the same reasons.
+        # NOTE: The whole MRO, each read from its ``__dict__``, as ``Info.__init_subclass__`` does.
         for base in cls.__mro__[1:]:
             if base.__dict__.get('__final__'):
                 raise SchemaError(f'{cls.__name__}: cannot subclass {base.__name__}, '
                                   'which is final')
 
-        # NOTE: forwarded rather than swallowed, so that a class keyword nobody
-        # accepts still reaches ``object`` and fails there.
-        # :meth:`EnumSchema.__init_subclass__` is the one caller that reaches here
-        # with nothing: it consumes its own ``code`` keyword and discards the
-        # rest, which is why a stray class keyword is tolerated on an
-        # :class:`EnumSchema` subclass and rejected on a plain one.
+        # NOTE: Forwarded, so an unaccepted class keyword fails in ``object``. ``EnumSchema``
+        # consumes ``code`` and discards the rest, so tolerates a stray one.
         super().__init_subclass__(*args, **kwargs)
 
     def __new__(cls, *args: '_VT', **kwargs: '_VT') -> 'Self':  # pylint: disable=unused-argument
@@ -1035,25 +828,10 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.
 
         """
-        # NOTE: first instantiation is the earliest point a bare ``@final`` can
-        # be caught -- ``final`` runs after the class object exists, so
-        # :meth:`__init_subclass__` has already returned. Nested inside the NONE
-        # branch, which is already one-shot per class, so a finalised schema pays
-        # nothing for it. See :meth:`pcapkit.corekit.infoclass.Info.__new__`,
-        # which carries the full reasoning; on this side the missing generated
-        # ``__init__`` is the one built from :attr:`__fields__`.
-        #
-        # Both lookups read ``cls.__dict__`` rather than ``getattr``, because
-        # both markers are ordinary, inherited class attributes. The outer one:
-        # :func:`schema_final` writes ``BASE`` onto the class it finalises, and a
-        # subclass reading that state through inheritance was never finalised
-        # itself -- it would keep the ``__excluded__`` it copied at declaration,
-        # without the names :func:`schema_final` adds, and leak ``__map__``,
-        # ``__map_reverse__``, ``__buffer__`` and ``__updated__`` from
-        # :meth:`to_dict` (GitHub issue #1498). The inner one: an ancestor
-        # hand-marked bare ``@final`` passes its marker to every subclass
-        # declared before it landed, and ``getattr`` would blame such a subclass
-        # for a mismarking that is its ancestor's.
+        # NOTE: The earliest a bare ``@final`` can be caught, once per class, as in
+        # ``Info.__new__``. Both markers are inherited, so read from ``cls.__dict__``:
+        # an inherited ``BASE`` would skip finalising and leak bookkeeping from
+        # ``to_dict`` (#1498), and an inherited ``__final__`` would blame a subclass.
         if cls.__dict__.get('__finalised__', FinalisedState.NONE) == FinalisedState.NONE:
             if cls.__dict__.get('__final__'):
                 raise SchemaError(f'{cls.__name__}: marked final but never finalised, so it has no generated '
@@ -1061,14 +839,11 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             cls = schema_final(cls, _finalised=False)
         self = super().__new__(cls)
 
-        # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
-        # here under ``self`` to avoid them being considered as class variables
-        # and thus being shared by all instances.
+        # NOTE: Set on ``self``, so they are not class variables shared by all instances.
         super().__setattr__(self, '__map__', {})
         super().__setattr__(self, '__map_reverse__', {})
 
-        # NOTE: We only create the attributes for the instance itself,
-        # to avoid creating shared attributes for the class.
+        # NOTE: Per instance too, not shared through the class.
         super().__setattr__(self, '__buffer__', {name: b'' for name in self.__fields__.keys()})
         super().__setattr__(self, '__updated__', True)
 
@@ -1084,23 +859,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
         """
         for name, field in self.__fields__.items():
-            # NOTE: Read with a fallback rather than by subscript, since the
-            # generated ``__init__`` is not the only caller: :meth:`from_dict`
-            # seeds only the keys its argument carries, so a field the caller left
-            # out is missing from ``__dict__`` entirely rather than holding
-            # ``NO_VALUE``.
-            #
-            # What is tested is ``NO_VALUE`` alone, not ``NO_VALUE`` or ``None``.
-            # This method fills in what the caller did not say, and a ``None`` the
-            # caller passed *is* something said: on an optional field it is the
-            # chosen value, meaning this packet does not carry the field. It is
-            # also what :meth:`unpack` stores for a
-            # :class:`~pcapkit.corekit.fields.misc.ConditionalField` whose test
-            # fails -- including one that declares a default of its own -- so
-            # substituting the default here would leave a constructed schema
-            # disagreeing with a parsed one about the same packet, and
-            # ``from_dict(parsed.to_dict())`` no longer reproducing what it was
-            # given. Telling the two apart is what ``NO_VALUE`` is for.
+            # NOTE: With a fallback, as ``from_dict`` seeds only the keys it is given. Only
+            # ``NO_VALUE`` is unset: a ``None`` is a chosen absence, as ``unpack`` stores
+            # for a failed ConditionalField, so a default here would break the round trip.
             value = self.__dict__.get(name, NO_VALUE)
             if value is not NO_VALUE:
                 continue
@@ -1109,26 +870,12 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             if default is not NO_VALUE:
                 self.__dict__[name] = default
             else:
-                # NOTE: Nothing to fill an unset field with, so the ``NO_VALUE``
-                # the generated ``__init__`` seeded it with is dropped rather than
-                # kept: it is a *field* sentinel, not a value a schema may hold.
-                # Dropping it rather than storing ``None`` also keeps the name out
-                # of the context :meth:`pack` builds from ``__dict__``, which a
-                # schema may be relying on to seed for itself -- the PCAP-NG
-                # section header block reads its Byte-Order Magic from a ``match``
-                # its own :meth:`pre_pack` supplies, and only when the context
-                # does not name one already. :meth:`pack` reads an absent field as
-                # ``None`` regardless.
+                # NOTE: Dropped, not stored as ``None``, so ``pack``'s context leaves the name
+                # for the schema to seed, as the PCAP-NG SHB's ``pre_pack`` seeds its magic.
                 self.__dict__.pop(name, None)
 
-        # NOTE: Packed here only when a packet context was actually handed over.
-        # A schema is not in general packable from its own fields alone: a field
-        # callback may read a key that the *enclosing* layer owns, as the
-        # Multipath TCP options do with the ``length`` of the TCP option that
-        # carries them, and packing without it raises rather than producing
-        # octets. ``__updated__`` is still set, so a schema left unpacked here is
-        # packed by :meth:`__bytes__` on first use -- by which time the enclosing
-        # layer has supplied the context.
+        # NOTE: Only with a context: a field callback may read the enclosing layer's keys,
+        # as the MPTCP options do; otherwise ``__bytes__`` packs it on first use.
         if packet is not None:
             self.pack(packet)
 
@@ -1149,10 +896,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             data_iter = itertools.chain(dict_, kwargs.items())
 
         for (key, value) in data_iter:
-            # NOTE: Not a field, but what :meth:`to_dict` emits for the octets an
-            # enclosing ``SchemaField`` span held beyond this schema, and where,
-            # so that a rebuilt schema still re-emits them (#1380).
-            # NOTE: Nor is the short read :meth:`unpack` records (#1458).
+            # NOTE: Not fields: the unread octets of an enclosing ``SchemaField`` span,
+            # which a rebuild re-emits (#1380), and the short read ``unpack`` records (#1458).
             if key in ('__remainder__', '__remainder_offset__', '__short_read__'):
                 self.__dict__[key] = value
                 continue
@@ -1230,12 +975,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             yield self.__map_reverse__.get(key, key)
 
     def __getitem__(self, name: 'str') -> '_VT':
-        # NOTE: Serves every key :meth:`__iter__` yields, not only the declared
-        # fields: a ``post_process`` may store derived values on the instance,
-        # as :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption` does, and
-        # iteration reports them, so ``dict(schema)`` must be able to read them
-        # back (#1291). A mangled key is reachable only under the name
-        # it was mangled from, as in iteration.
+        # NOTE: Every key ``__iter__`` yields, so ``dict(schema)`` reads the values a
+        # ``post_process`` stores, as IPv4's ``TSOption`` does (#1291); mangled keys by origin.
         if name in self.__fields__ or (name not in self.__builtin__ and name not in self.__map_reverse__):
             key = self.__map__.get(name, name)
             return self.__dict__[key]
@@ -1245,11 +986,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         if name in self.__fields__:
             key = self.__map__.get(name, name)
             self.__dict__[key] = value
-            # NOTE: ``self.__updated__ = True`` would re-enter this method once
-            # per field assigned, only to miss the ``__fields__`` test and fall
-            # through to ``object.__setattr__``. ``__updated__`` is an instance
-            # attribute established in ``__new__``, so the direct store is the same
-            # write with none of the round trip.
+            # NOTE: Stored directly, rather than re-entering this method, as ``__new__`` set it.
             self.__dict__['__updated__'] = True
             return
         return super().__setattr__(name, value)
@@ -1354,23 +1091,19 @@ class _EnumRegistry(collections.defaultdict):
     :attr:`EnumSchema.registry` (and its class-level twin,
     :attr:`EnumMeta.registry
     <pcapkit.protocols.schema.EnumMeta.registry>`) is read with a bare
-    ``registry[code]`` at many call sites across the schema layer, e.g.
-    ``Option.registry[type]``. A
-    plain :class:`collections.defaultdict` inserts whatever
-    :attr:`~collections.defaultdict.default_factory` returns the *first time*
-    an unregistered ``code`` is looked up -- and since the registry lives on
-    the *class*, that insertion is permanent and shared by every instance of
-    every subclass in the process. Parsing one packet carrying an unrecognised
-    code would therefore grow the registry for the remainder of the process,
-    and make a later, entirely legitimate :meth:`EnumSchema.register` call
-    report an overwrite that never happened.
+    ``registry[code]`` across the schema layer, e.g.
+    ``Option.registry[type]``. A plain :class:`collections.defaultdict` would
+    insert what :attr:`~collections.defaultdict.default_factory` returns on
+    the first miss, and the registry lives on the *class*, so one packet with
+    an unrecognised code would grow it for the rest of the process, and make a
+    later, legitimate :meth:`EnumSchema.register` report an overwrite that
+    never happened.
 
-    The fallback itself is deliberate -- it is how an unknown option, chunk or
-    block falls back to its ``Unknown*``/``Unassigned*`` schema -- so this
-    subclass keeps returning it and just stops recording it.
-    :meth:`Protocol._lookup_registry
-    <pcapkit.protocols.protocol.Protocol._lookup_registry>`
-    does the same for the protocol-layer ``__proto__`` family.
+    The fallback is how an unknown option, chunk or block gets its
+    ``Unknown*``/``Unassigned*`` schema, so this subclass still returns it,
+    without recording it, as :meth:`Protocol._lookup_registry
+    <pcapkit.protocols.protocol.Protocol._lookup_registry>` does for the
+    ``__proto__`` family.
 
     """
 
@@ -1397,13 +1130,8 @@ class _EnumRegistry(collections.defaultdict):
 class EnumMeta(SchemaMeta, Generic[_ET]):
     """Meta class to add dynamic support for :class:`EnumSchema`.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`EnumSchema` class. It can be useful to reduce runtime generation
-    cost as well as caching already generated attributes.
-
-    * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*
-      proxy (similar to :class:`property`, but on class variables) to the
-      :attr:`EnumSchema.__enum__` mapping.
+    It adds :attr:`~EnumSchema.registry` to subclasses: a read-only class
+    property returning the :attr:`EnumSchema.__enum__` mapping.
 
     """
 
@@ -1511,31 +1239,18 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
                 registered, naming the displaced schema and its replacement.
 
         Note:
-            Every public registrar in
-            :mod:`pcapkit.foundation.registry.protocols` that accepts a
-            ``schema`` registers two halves of one binding -- a parser class
+            Each registrar in :mod:`pcapkit.foundation.registry.protocols` that
+            takes a ``schema`` registers both halves of one binding, a parser
             through e.g. :meth:`IPv4.register_option
-            <pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option>`, and a
-            schema class through this method. Both warn on an overwrite, so one
-            ``register_ipv4_option`` call replacing a built-in reports the
-            schema it displaced as well as the parser.
+            <pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option>` and
+            a schema through this method, and both warn on an overwrite.
 
-            The warning fires only when the incumbent differs from the
-            replacement: a repeat call that names the exact same schema object
-            is a caller replaying a registration, not a mistake, so it is a
-            silent no-op.
-
-            Presence is a faithful "was this really registered" test only because
-            :class:`_EnumRegistry` returns a miss without recording it. A plain
-            :class:`collections.defaultdict` would insert :attr:`__default__` the
-            first time any unregistered ``code`` was looked up, so parsing a
-            single packet carrying an unknown code would make the next legitimate
-            registration for that code warn about an entry no caller ever asked
-            for.
+            Registering the same schema object again is a silent no-op.
+            Presence is a faithful test only because :class:`_EnumRegistry`
+            does not record a miss.
 
             :class:`pcapkit.protocols.misc.pcapng.schema.Option` overrides this
-            method with a namespaced registry of its own and does not delegate
-            here, so it is guarded separately.
+            method with a namespaced registry of its own, guarded separately.
 
         """
         incumbent = cls.__enum__.get(code)  # type: ignore[arg-type]
@@ -1554,71 +1269,45 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
-        If ``code`` is provided, the subclass will be registered to the
-        :attr:`registry` mapping with the given ``code``. If ``code`` is
-        not given, the subclass will not be registered.
+        A subclass given ``code`` is registered under it in :attr:`registry`;
+        one without is not.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If any of ``code`` is
                 already registered, naming the displaced schema and its
-                replacement. This is the guard :meth:`register` applies, repeated
-                here because a class declaration is the *other* way into
-                :attr:`__enum__`: ``class MyOption(Option, code=...)`` writes the
-                registry without calling :meth:`register`.
+                replacement, as :meth:`register` does: a class declaration such
+                as ``class MyOption(Option, code=...)`` writes the registry
+                without calling it.
 
         Notes:
-            If :attr:`__enum__` is not yet defined at function call,
-            it will automatically be defined as a :class:`_EnumRegistry`
-            object, with the default value set to :attr:`__default__`.
+            An undefined :attr:`__enum__` becomes an :class:`_EnumRegistry`
+            defaulting to :attr:`__default__`.
 
-            If intended to customise the :attr:`__enum__` mapping,
-            it is possible to override the :meth:`__init_subclass__` method and
-            define :attr:`__enum__` manually. Such a manual definition may use
-            a plain :class:`collections.defaultdict` -- e.g. to seed a
-            namespaced or nested mapping such as
-            :class:`pcapkit.protocols.misc.pcapng.schema.Option`'s -- so it is
-            swapped for the retention-safe :class:`_EnumRegistry` below, before
-            anything else can hold a reference to the original object.
+            To customise the mapping, override this method and define
+            :attr:`__enum__` manually. A plain :class:`collections.defaultdict`
+            defined so, as for the namespaced mapping of
+            :class:`pcapkit.protocols.misc.pcapng.schema.Option`, is swapped
+            for an :class:`_EnumRegistry` before anything else can hold it.
 
         """
-        # NOTE: the base hook goes first, before any of the registry work below.
-        # :meth:`Schema.__init_subclass__` is what refuses to derive from a
-        # finalised schema, and a refusal has to land before this method writes
-        # ``cls`` into ``__enum__``: raising afterwards would discard the class
-        # object while leaving the registry pointing at it, so a rejected
-        # declaration would still have displaced a built-in schema. It takes no
-        # arguments: ``code`` is this method's own and the rest are deliberately
-        # dropped.
+        # NOTE: First, so a refused subclass of a finalised schema never reaches the
+        # registry; ``code`` is consumed here and the rest are dropped.
         super().__init_subclass__()
 
         if not hasattr(cls, '__enum__'):
             cls.__enum__ = _EnumRegistry(cls.__default__)
         elif '__enum__' in cls.__dict__ and not isinstance(cls.__dict__['__enum__'], _EnumRegistry):
-            # ``cls`` set its own ``__enum__`` in the class body, as a plain
-            # ``collections.defaultdict`` -- swap it for the retention-safe
-            # variant now, while ``cls`` is still being constructed and no
-            # external code has had a chance to capture a reference to the
-            # original dict. Every later access, through :attr:`registry` or
-            # otherwise, then sees the same safe object, and identity across
-            # repeated ``.registry`` reads is preserved.
+            # A plain ``defaultdict`` from the class body, swapped while nothing else
+            # can hold it, so every later read sees the same safe object.
             manual = cls.__dict__['__enum__']
             cls.__enum__ = _EnumRegistry(getattr(manual, 'default_factory', None), manual)
 
         if code is not None:
-            # One loop over both shapes, so the overwrite guard below is written
-            # once rather than once per branch. ``register`` cannot be delegated
-            # to here: :class:`pcapkit.protocols.misc.pcapng.schema.Option`
-            # overrides it with an incompatible signature, so ``cls.register``
-            # does not mean the same thing for every subclass.
+            # Not ``cls.register``, which the PCAP-NG ``Option`` overrides incompatibly.
             codes = code if isinstance(code, collections.abc.Iterable) else (code,)
             for _code in codes:
-                # A repeated member of an iterable ``code`` -- or two members that
-                # are the same object, as an :class:`enum.Enum` alias makes
-                # possible -- reaches this twice for the same key with ``cls`` on
-                # both sides: incumbent on the first pass, replacement on the
-                # second. So ordinary subclassing syntax reaches this guard, e.g.
-                # ``class X(Base, code=[A, A])`` or ``code=[A, B]`` with
-                # ``A is B``.
+                # A repeated member, as ``code=[A, A]`` or an enum alias makes, meets
+                # ``cls`` as its own incumbent, which is no overwrite.
                 incumbent = cls.__enum__.get(_code)  # type: ignore[arg-type]
                 if incumbent is not None and incumbent is not cls:
                     warn(f'schema {_code} already registered, overwriting '

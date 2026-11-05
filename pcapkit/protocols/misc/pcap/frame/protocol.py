@@ -132,15 +132,14 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
-    #: and whether a bare :class:`int` is a valid key there too. Declared by the
-    #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
-    #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap` checks its own --
-    #: :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` keeps a registry of its own,
-    #: keyed by the same enum, and so declares the same pairing rather than
-    #: sharing this one (:issue:`2268`).
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key too. Declared by the class
+    #: *owning* the registry, so
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
+    #: checks a ``code=`` key as
+    #: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap` does;
+    #: :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`, whose registry
+    #: is keyed by the same enum, declares its own (:issue:`2268`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_LinkType, False)
 
     ##########################################################################
@@ -184,14 +183,11 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
                 class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
-            pcapkit.utilities.warnings.RegistryWarning: If this link type is
-                already registered against PCAP frames, naming the displaced
-                entry and its replacement so a caller can tell *what* was lost.
-                Fires only when the incumbent differs from the replacement --
-                see :meth:`Protocol.register
-                <pcapkit.protocols.protocol.Protocol.register>` for the
-                guard this shares with ``register_protocol``, and for the
-                shipped descriptor a restore puts back (:issue:`1504`).
+            pcapkit.utilities.warnings.RegistryWarning: If this link type holds
+                a different entry for PCAP frames, naming the displaced one and
+                its replacement; see :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the guard and
+                for the shipped descriptor a restore puts back (:issue:`1504`).
 
         """
         incumbent = cls.__proto__.get(code)
@@ -228,9 +224,9 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             Constructed packet data.
 
         Notes:
-            We used a special keyword argument ``__packet__`` to pass the
-            global packet data to underlying methods. This is useful when
-            the packet data is not available in the current instance.
+            The special keyword argument ``__packet__`` passes the global
+            packet data to underlying methods, for when the current instance
+            does not have it.
 
             As in :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>`,
             the header is made on a copy outside construction, so the instance
@@ -257,9 +253,9 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             Parsed packet data.
 
         Notes:
-            We used a special keyword argument ``__packet__`` to pass the
-            global packet data to underlying methods. This is useful when
-            the packet data is not available in the current instance.
+            The special keyword argument ``__packet__`` passes the global
+            packet data to underlying methods, for when the current instance
+            does not have it.
 
         """
         if cast('Optional[Schema_Frame]', self.__header__) is None:
@@ -308,16 +304,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         _irat = _epch.as_integer_ratio()
 
         try:
-            # NOTE: Aware and anchored to UTC, not naive. ``ts_sec`` is an offset
-            # from the UNIX epoch, so the instant it names must not depend on
-            # where the file is read; a bare ``fromtimestamp`` renders it in the
-            # reading host's zone, drops the offset, and cannot be compared
-            # against an aware datetime. The ``except`` branch below returns an
-            # aware UTC datetime too, and so does the PCAP-NG reader, which fills
-            # the same
-            # :attr:`Data_Frame.time <pcapkit.protocols.misc.pcap.frame.data.Frame.time>`
-            # field through :func:`pcapkit.toolkit.pcapng.block2frame`. Converted
-            # without the C library, as the PCAP-NG reader does (#2099).
+            # NOTE: Aware UTC, not the reading host's zone, as in the ``except`` below and the
+            # PCAP-NG reader; converted without the C library, as it is there (#2099).
             _time = fromtimestamp(_irat[0] / _irat[1], datetime.timezone.utc)
         except ValueError:
             warn(f'PCAP: invalid timestamp: {_epch}', ProtocolWarning, stacklevel=stacklevel())
@@ -333,16 +321,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             time=_time,
             number=self._fnum,
             time_epoch=_epch,
-            # NOTE: ``len`` is the on-wire length (``orig_len``) and ``cap_len``
-            # the captured one (``incl_len``). The two differ only for a frame
-            # the snapshot length cut short.
-            #
-            # The names are Wireshark's: its ``packet-frame.c`` registers
-            # ``frame.len`` as "Frame length on the wire" and ``frame.cap_len``
-            # as "Frame length stored into the capture file", and raises
-            # ``frame.len_lt_caplen`` (``PI_MALFORMED``) on ``frame_len <
-            # cap_len``, which could not be malformed if ``len`` were the smaller,
-            # captured one. The PCAP-NG reader uses the same convention.
+            # NOTE: On-wire ``len`` (``orig_len``) and captured ``cap_len`` (``incl_len``), as
+            # Wireshark's ``frame.len``/``frame.cap_len`` and the PCAP-NG reader name them.
             len=_olen,
             cap_len=_ilen,
         )
@@ -351,19 +331,9 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # move backward to the beginning of the packet
             self._file.seek(0, io.SEEK_SET)
         else:
-            # NOTE: We create a copy of the frame data here for parsing
-            # scenarios to keep the original frame data intact.
-            #
-            # NOTE: The record spans ``self.length + incl_len`` octets, and
-            # :meth:`self.unpack <unpack>` has consumed *all* of them by now --
-            # the schema's payload field carries the ``incl_len`` octets of
-            # packet data, not just the 16-octet record header. Seeking back
-            # over ``self.length`` alone would land ``incl_len`` octets too late,
-            # on the tail of this record followed by the head of the next one.
-            # So the start is recorded before the unpack, in
-            # :meth:`self.__post_init__ <__post_init__>`, and seeked to
-            # absolutely, as the PCAP-NG reader does; see
-            # :meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.read`.
+            # NOTE: Copied, to keep the original frame data intact. ``unpack`` has consumed
+            # the whole record, packet data included, so seek to the start ``__post_init__``
+            # recorded, as ``PCAPNG.read`` does, not back over ``self.length``.
             seek_cur = _seek_set + self.length + _ilen
 
             # move backward to the beginning of the frame
@@ -371,32 +341,21 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
 
             #: bytes: Raw frame data.
             #
-            # NOTE: Asked for no further than one read can go, :data:`sys.maxsize`.
-            # Past it the read raises :exc:`OverflowError` instead of coming back
-            # short, so a record claiming more than that would never reach the
-            # overrun handling below (#1975).
+            # NOTE: Bounded at ``sys.maxsize``, past which the read raises OverflowError
+            # rather than reaching the overrun handling below (#1975).
             bound = min(self.length + _ilen, sys.maxsize)
             self._data = self._read_fileng(bound)
 
-            # NOTE: A record whose ``incl_len`` runs past the end of the data is
-            # kept as captured, as the PCAP-NG reader keeps a captured length
-            # running past its block (#1405): ``incl_len`` and ``cap_len``
-            # stay as declared, so the record rebuilds byte-exactly, and the
-            # packet is the octets present. A writer must not copy the declared
-            # length; see :meth:`PCAPIO._append_value
-            # <pcapkit.dumpkit.pcap.PCAPIO._append_value>` (#1541).
+            # NOTE: An ``incl_len`` past the data is kept as declared, as in PCAP-NG (#1405), so
+            # the record rebuilds byte-exactly; a writer must not copy it (see ``PCAPIO``, #1541).
             held = len(self._data) - self.length
             if held < _ilen:
                 warn(f'PCAP: [Frame {self._fnum}] captured length {_ilen} runs past the data, '
                      f'which holds {held} octet(s); kept as captured',
                      ProtocolWarning, stacklevel=stacklevel())
 
-            # NOTE: A read that came back whole at the bound stopped there, not
-            # at the end of the data: the record runs on past it, and the next
-            # one starts where this one declares it ends, so the stream is
-            # moved over the rest (#1975). A shorter read met the end of the
-            # data, where a seek past :data:`sys.maxsize` could not go either,
-            # so the next frame then starts where the octets read end.
+            # NOTE: A whole read at the bound skips the rest of the record (#1975); a shorter
+            # one met the end of the data, where the next frame then starts.
             if len(self._data) == bound < self.length + _ilen:
                 advance(self._file, self.length + _ilen - bound)
             else:
@@ -409,17 +368,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             #: io.BytesIO: Source data stream.
             self._file = io.BytesIO(self._data)
 
-        # NOTE: The dissector is handed the octets actually *present*, i.e.
-        # ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame the
-        # snapshot length cut short the latter exceeds what the file holds, and
-        # handing it over is the declared-length-exceeds-available-octets fault.
-        #
-        # A frame cut inside its IPv4 header keeps IPv4 as ``Raw``, whose
-        # ``error`` names the cut, for either length: the trial parse of IPv4
-        # raises, and its ``packet length < 0`` warnings go with the layer
-        # (#2308). As the dissection does not tell the two apart,
-        # ``test_truncated_ipv4_header_is_raw_with_its_error`` pins the argument
-        # where it is passed (#2236).
+        # NOTE: The octets *present*, ``cap_len``, never the on-wire ``len`` a snapshot cut
+        # exceeds; ``test_truncated_ipv4_header_is_raw_with_its_error`` pins it (#2236).
         #
         # NOTE: A layer that states no length cannot see the cut, so the layers
         # below are told both lengths (#2653).
@@ -457,11 +407,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         ts_sec, ts_usec = self._make_timestamp(timestamp, ts_sec, ts_usec, nanosecond)
 
         if incl_len is None:
-            # NOTE: A snaplen of 0 is no limit, not a limit of zero octets. The
-            # PCAP draft says the field "MUST NOT be zero" (draft-ietf-opsawg-pcap,
-            # section 4), and libpcap reads such a bogus value as the maximum for
-            # the link type (``pcapint_adjust_snapshot`` in ``savefile.c``); the
-            # PCAP-NG reader treats a zero ``SnapLen`` the same way.
+            # NOTE: A snaplen of 0 is no limit: draft-ietf-opsawg-pcap section 4 forbids it, and
+            # libpcap (``pcapint_adjust_snapshot``) and the PCAP-NG reader read it as none.
             snaplen = self._ghdr.snaplen
             incl_len = min(len(packet), snaplen) if snaplen else len(packet)
         if orig_len is None:
