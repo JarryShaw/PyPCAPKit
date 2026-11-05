@@ -249,6 +249,14 @@ class TestPublishing(unittest.TestCase):
         self.assertNotIn('Explanation of your *pull request*', text)
         self.assertIn('[Searched]', text)
 
+    def test_the_body_marks_the_templates_changelog_box_not_applicable(self) -> None:
+        boxes = [line for line in issue_pr_kinds.TEMPLATE.read_text(encoding='utf-8').splitlines()
+                 if line.startswith('- [ ] ') and 'changelog' in line]
+        self.assertEqual(len(boxes), 1, boxes)
+        text = issue_pr_kinds.body(TEXT, 'https://run')
+        self.assertIn(f'{boxes[0]} — N/A — centralised in #657\n', text)
+        self.assertEqual(text.count('N/A — centralised in #657'), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -120,7 +120,8 @@ def body(kinds_text: 'str', run_url: 'str') -> 'str':
     text = re.sub(r'(?m)^- \[ \] `test`', '- [x] `test`', text)
     text = re.sub(r'(?m)^(- \[ \] `make test` passes.*)$', r"\1 -- not run here; this pull request's checks run it",
                   text)
-    text = re.sub(r'(?m)^(- \[ \] Added a \[changelog entry\].*)$', r'\1 — N/A — centralised in #657', text)
+    # The changelog box, found by its link rather than by the wording around it.
+    text = re.sub(r'(?m)^(- \[ \] .*\[changelog entry\].*)$', r'\1 — N/A — centralised in #657', text)
     description = (f'Regenerated `{PATH}` from the tracker with `python util/issue_pr_kinds.py`, up to #{newest}, '
                    'so `tests/project/test_docs_issue_pr_roles_1103_unit.py` checks every role citing a number '
                    f'up to it. Opened by the Issue and PR Kinds workflow ({run_url}); a later run force-pushes '
