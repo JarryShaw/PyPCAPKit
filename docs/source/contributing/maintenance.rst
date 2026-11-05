@@ -297,7 +297,7 @@ The Pull Request Lifecycle
        D --> W["Worker: one commit in its own worktree,<br/>new tests, a report"]
        W --> V{"Coordinator verifies the diff and the tests;<br/>do the new tests fail with pcapkit/ reverted?"}
        V -->|no| W
-       V -->|yes| K{"Pure tests or docs,<br/>no call for the owner's eyes?"}
+       V -->|yes| K{"Only docs or tests,<br/>no change to code or behaviour?"}
        K -->|yes| MAIN["Push straight to main,<br/>close the issue"]
        K -->|no| Q{"Actions queue under 20?"}
        Q -->|no| H["Hold, and say so on the issue"] --> Q
@@ -333,6 +333,11 @@ The steps that the graph compresses:
    appendix. A verdict superseded by a new head is said to be, so a stale one never
    reads as current. A reviewer's correction of an earlier number is itself a claim,
    re-derived before it is relayed.
+*  **The verdict and its label go up** once the review is in and Project tests, Lint
+   and deploy-pages are green, never held for a slow non-blocking leg. Once that leg
+   finishes its failing test ids are re-read, since an experimental or KTLO leg ends
+   green whatever its tests did. A merge wave supersedes every GraalPy run on
+   ``main``, so a pull request's GraalPy leg may be the only full run there is.
 *  **A green, conflict-free pull request can still break** ``main``: after a merge
    wave, merge it into the current ``main`` in a scratch tree and run the affected
    tests before calling it ready.
@@ -444,11 +449,19 @@ job already failed. A non-blocking leg's red check is a defect as well: such a l
 only warn and end green, so a step that can lose its runner is contained -- capped,
 bounded, timed out -- rather than excused.
 
-**What may go straight to** ``main``. A fix for a red ``main``, whatever it touches. A
-change that is purely tests or docs, unless it needs the owner's eyes -- a
-conventions-page rule, the changelog, or a page that codifies process, like this one,
-goes through a pull request. Code always gets a pull request. Before a direct push,
-check that no open pull request edits the same hunk.
+**What may go straight to** ``main``. A change that only touches docs -- pages,
+docstrings and comments, under :file:`pcapkit/` as anywhere else, conventions and
+process pages included -- or only tests needs no issue and no pull request, and is
+pushed straight to ``main``. A pull request is for a change to code or behaviour. A fix
+for a red ``main`` goes direct, whatever it touches. Every direct push waits out the
+release freeze below, and first checks that no open pull request edits the same hunk.
+
+**The release freeze.** Once the push that moves ``__version__`` lands, nothing else
+does until Create Release's ``github`` job is waiting on approval (:doc:`releasing`),
+and that commit's own Unit Tests run is never cancelled. A push mid-chain makes
+``vendor-update`` skip, since its verdict no longer covers the checkout, and the
+release silently never starts. A squash merge whose body was cleared can be amended
+only before the chain reaches Vendor Update: after the tag, an amend orphans the tag.
 
 Throttles and Guards
 --------------------
@@ -542,6 +555,12 @@ instruction to falsify rather than bless; the pull request's own diff as the thi
 under review, not ``main``; the time budget; and a report that opens and closes with
 ``GOOD TO GO`` or ``NEEDS CHANGES`` at the sha, with each claim marked confirmed,
 refuted or ``UNVERIFIED``.
+
+**Everything the automation writes is as short as it can be while staying accurate**
+-- docs, docstrings, comments, pull request and issue bodies, verdicts and Discussion
+posts alike, under the rules on :ref:`documentation`. A flow in the docs is drawn as a
+vertical diagram in preference to prose, as that page's *Mermaid for Flows* section
+sets out, and :doc:`pep` lists the work that remains without grouping it into waves.
 
 **Treat an agent's report of an action as a finding.** Workers have posted, filed
 issues and spawned agents despite their briefs; what such a worker did is verified and
@@ -675,6 +694,8 @@ Failure Modes and Their Guards
      - re-read completed checks (`Board Sweep`_)
    * - A KTLO leg read green over new failures
      - failing-id diff (`Board Sweep`_)
+   * - A slow GraalPy leg hid a ``main`` defect
+     - failing ids re-read once it finishes (`The Pull Request Lifecycle`_)
    * - A bare label ``DELETE`` removed every label
      - removal by name (`Board Sweep`_)
    * - ``Closes #a, #b`` closed one issue
@@ -683,6 +704,11 @@ Failure Modes and Their Guards
      - scratch merge (`The Pull Request Lifecycle`_)
    * - Cancelled board-sync runs left the board stale
      - never-cancelled list (`The Post-Merge Routine and the Main-CI Watch`_)
+   * - A push during the release chain stops the release
+     - release freeze (`The Post-Merge Routine and the Main-CI Watch`_)
+   * - A squash merge landed with its body cleared
+     - amended before Vendor Update, never after the tag (`The Post-Merge Routine and
+       the Main-CI Watch`_)
    * - A test filled the disk
      - file-size cap (`Throttles and Guards`_)
    * - Bulk issue filing flooded the Actions queue
