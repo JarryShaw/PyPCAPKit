@@ -96,10 +96,12 @@ singular heading plural cost :ref:`registry-protocol` the antecedent of a follow
 Mermaid for Flows
 ~~~~~~~~~~~~~~~~~
 
-Where the subject is a flow, prefer a Mermaid graph to the paragraph or the ASCII
-diagram that would otherwise carry it -- a graph is read faster than its own
-description. The owner ruled this on :issue:`719`, asking for it where it is necessary and
-helpful, which bounds it:
+**Draw the structure, and keep the prose beside it short.** A pipeline, a hierarchy, a
+dispatch chain, a lifecycle or a decision procedure gets a Mermaid graph rather than an
+ASCII diagram, even where the paragraph describing it reads well, since a graph is read
+faster than its own description. :issue:`719` asked for graphs where they are necessary
+and helpful; the owner widened that in session, recorded on :issue:`2787`, which keeps
+:issue:`719`'s bounds and adds the last of these:
 
 *  **A short sequence does not earn a graph.** Two steps read perfectly well as a
    sentence, and a diagram of them costs a reader a context switch for nothing.
@@ -109,10 +111,32 @@ helpful, which bounds it:
 *  **Do not redraw a graph another page already has.** The owner's condition when
    approving the navigation work on :issue:`719` was that nothing duplicate information
    already shown, and a second copy of a flow is exactly that.
+*  **Every node and edge traces to the code or to the page.** A graph makes claims as a
+   sentence does, so `Accuracy`_ applies to each of them.
 
-The style model is the set already in the tree, every one of which builds. The sweep
-excludes this page, which names the directive in its own prose and would otherwise
-count itself:
+**Every diagram is vertical**, because a horizontal one renders too small to read. Ruled
+by the owner in session and recorded on :issue:`2787`:
+
+*  A flowchart is ``flowchart TD`` or ``flowchart TB``, and a subgraph inside one
+   stacks too, so it sets no horizontal ``direction`` of its own.
+*  A state diagram is ``stateDiagram-v2`` with ``direction TB``.
+*  A sequence diagram is allowed only while its participants are few, since they always
+   lay out side by side; ``wrap: true``, ``width`` and ``actorMargin`` in its front
+   matter wrap its messages between narrow participants.
+
+Vertical is judged on the render, which has to come out taller than wide. So a diagram
+is written ``TD`` or ``TB`` unless an ``LR`` layout measures both taller than wide and
+larger than every ``TD`` attempt, as the workflow trigger map and the field and protocol
+hierarchies do.
+
+Where a vertical layout runs wide or piles its labels on top of each other, stack
+siblings with an invisible link (``A ~~~ B``), group nodes in subgraphs, break a long
+label with ``<br/>``, pull the graph in with a smaller ``nodeSpacing`` in its front
+matter, or split it -- rather than turning it on its side.
+
+For the mechanics, the style model is the set in the tree, every one of which builds
+and is a bare ``.. mermaid::`` carrying no directive options. The sweep excludes this
+page, which names the directive in its own prose and would otherwise count itself:
 
 .. code-block:: shell
 
@@ -121,40 +145,36 @@ count itself:
    grep -rl 'mermaid::' docs/source --include='*.rst' \
         --exclude='documentation.rst' | wc -l   # pages carrying one
 
-Every one is a bare ``.. mermaid::`` carrying no directive options, and every one is
-**laid out vertically**: a graph wider than the page is shrunk to fit it, and its text
-with it. A ``flowchart`` is ``TD``, a ``stateDiagram-v2`` sets ``direction TB``, and a
-``sequenceDiagram`` sets ``wrap``, ``width`` and ``actorMargin`` in its front matter so
-that its messages wrap between narrow participants. Where ``TD`` would set many nodes
-side by side -- the outcomes of a decision, a list of siblings -- an invisible link
-(``A ~~~ B``) stacks them instead, and a smaller ``nodeSpacing`` in the front matter pulls
-in a graph still a little wider than the page. ``LR`` is kept only where its layout is
-already taller than wide and a ``TD`` one measured wider: the largest type hierarchies and
-the workflow trigger map. **Quote a
-node label whose text Mermaid would otherwise try to parse**, and leave a bare identifier
-bare. That is what the exemplars do with *node* labels, and it follows the subject rather
-than the direction: every node label in the sequence, decision and trigger graphs is
-quoted, since every one of them is prose; the type hierarchies quote only where the text
-forces it, which is ``h1["HTTP/1.*"]`` and ``h2["HTTP/2"]`` in
-:file:`docs/source/pcapkit/protocols/index.rst` and nowhere else. Everything else there
-uses the bare ``A{{Meta}}``, ``B(Base)``, ``D([user customisation ...])`` and
-``subgraph name [Title]`` forms, and spends its quotes on ``click`` targets instead.
-**Write a** ``click`` **target relative to the page it is on** -- ``protocol.html#...``,
-``../../ext.html#...`` -- never from the site root: the published site is served under
-``/PyPCAPKit/``, so a target starting with ``/`` resolves outside it and 404s.
-**Edge labels follow no rule at all.** The exemplars quote some and leave others bare,
-including ``|workflow_run: completed|`` and ``|02:00|``, which the reason above would
-have quoted and which Mermaid accepts anyway -- so match the graph being edited rather
-than this paragraph. Inside a quoted label, ``<br/>`` breaks the text across lines and a
-literal ``<`` or ``>`` is written ``&lt;`` or ``&gt;``. Mermaid also reads label text as
-Markdown, so an underscore that opens or closes a name is written ``\_`` --
-``\_missing\_``, ``pcapkit.\_\_version\_\_`` -- or the name renders as emphasis. Its
-own ``#95;`` escape is no substitute: in a label that carries a ``<br/>`` it is decoded
-before the Markdown pass, and the emphasis comes back. Where a steep edge runs under
-a neighbouring edge label, ``curve: monotoneX`` in the graph's front matter keeps it
-clear, as the mint criterion's decision graph does.
-:doc:`The release pipeline </contributing/releasing>` is the ``TD`` example and
-:doc:`the field hierarchy </pcapkit/corekit/fields/index>` the ``LR`` one.
+*  **Quote a node label whose text Mermaid would otherwise try to parse**, and leave a
+   bare identifier bare. A graph whose node labels are prose quotes every one of them.
+   A type hierarchy keeps the bare ``A{{Meta}}``, ``B(Base)``,
+   ``D([user customisation ...])`` and ``subgraph name [Title]`` forms, quotes only
+   where the text forces it -- ``h1["HTTP/1.*"]`` in
+   :file:`docs/source/pcapkit/protocols/index.rst` -- and spends its quotes on
+   ``click`` targets instead.
+*  **Write a** ``click`` **target relative to the page it is on** -- ``protocol.html#...``,
+   ``../../ext.html#...`` -- never from the site root: the published site is served
+   under ``/PyPCAPKit/``, so a target starting with ``/`` resolves outside it and 404s.
+*  **Edge labels follow no rule at all.** The exemplars quote some and leave others
+   bare, including ``|workflow_run: completed|`` and ``|02:00|``, which the reason above
+   would have quoted and which Mermaid accepts anyway -- so match the graph being edited
+   rather than this list.
+*  **Inside a quoted label**, ``<br/>`` breaks the text across lines and a literal ``<``
+   or ``>`` is written ``&lt;`` or ``&gt;``. Mermaid also reads label text as Markdown,
+   so an underscore that opens or closes a name is written ``\_`` -- ``\_missing\_``,
+   ``pcapkit.\_\_version\_\_`` -- or the name renders as emphasis. Its own ``#95;``
+   escape is no substitute: in a label that carries a ``<br/>`` it is decoded before the
+   Markdown pass, and the emphasis comes back.
+*  **Where a steep edge runs under a neighbouring edge label**, ``curve: monotoneX`` in
+   the graph's front matter keeps it clear, as the mint criterion's decision graph does.
+*  **Leave the sizing to** :file:`docs/source/conf.py`. Its ``mermaid_init_config``
+   turns ``useMaxWidth`` off for flowchart, state and sequence diagrams alike, since
+   each type reads its own copy, so a diagram renders at its own size; a type the pages
+   have not used needs its own entry there.
+
+:doc:`The release pipeline </contributing/releasing>` is the example of a vertical
+pipeline, :doc:`the engine hierarchy </pcapkit/foundation/engines/index>` of a vertical
+type hierarchy, and :doc:`/contributing/maintenance` of the state and sequence diagrams.
 
 Toctree Captions
 ~~~~~~~~~~~~~~~~
