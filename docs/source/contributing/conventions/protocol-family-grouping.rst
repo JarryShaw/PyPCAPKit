@@ -114,6 +114,29 @@ class states in its ``version``, which a subclass of the other bases does not ha
 While parsing, the keyword is handed on unread, since an IP layer passes its own
 version under that name to the layer it carries.
 
+The member a call through a versioned base gives, as a decision:
+
+.. mermaid::
+
+   flowchart TD
+       IN["octets, fields or from\_data<br/>through a versioned family's base"] --> SUB
+       SUB{"called on a subclass of the base?"}
+       SUB -->|yes| SELF["constructed as itself"]
+       SUB -->|"no: octets or fields"| VER{"version= given?"}
+       SUB -->|"no: from\_data"| FD{"which base?"}
+       VER -->|"yes: unchecked against the octets"| HAS
+       VER -->|"no: fields"| ERR["ProtocolError"]
+       VER -->|"no: octets"| OCT{"does the format carry a version?"}
+       OCT -->|"no: ICMP, LinuxSLL"| ERR
+       OCT -->|"yes: HTTP, IGMP, IP, L2TP"| HAS
+       FD -->|"IGMP, IP, L2TP:<br/>the data's version"| HAS
+       FD -->|"HTTP, ICMP, LinuxSLL"| DM{"a member's data model?"}
+       DM -->|"no, e.g. a dict"| ERR
+       DM -->|yes| MEM
+       HAS{"a member for that version?"}
+       HAS -->|"no, e.g. L2TP's 1 or 3"| ERR
+       HAS -->|yes| MEM["that member"]
+
 .. list-table::
    :header-rows: 1
    :widths: 13 15 42 30
