@@ -4,9 +4,7 @@
 
 .. module:: pcapkit.const.arp
 
-This module contains all constant enumerations of :class:`~pcapkit.protocols.link.arp.protocol.ARP`
-and :class:`~pcapkit.protocols.application.rarp.protocol.RARP` implementations. Available
-enumerations include:
+Shared with :class:`~pcapkit.protocols.application.rarp.protocol.RARP`.
 
 .. list-table::
 
@@ -20,8 +18,7 @@ Hardware Types
 
 .. module:: pcapkit.const.arp.hardware
 
-This module contains the constant enumeration for **Hardware Types**,
-which is automatically generated from :class:`pcapkit.vendor.arp.hardware.Hardware`.
+Generated from :class:`pcapkit.vendor.arp.hardware.Hardware`.
 
 .. autoclass:: pcapkit.const.arp.hardware.Hardware
    :members:
@@ -33,8 +30,7 @@ Operation Codes
 
 .. module:: pcapkit.const.arp.operation
 
-This module contains the constant enumeration for **Operation Codes**,
-which is automatically generated from :class:`pcapkit.vendor.arp.operation.Operation`.
+Generated from :class:`pcapkit.vendor.arp.operation.Operation`.
 
 .. autoclass:: pcapkit.const.arp.operation.Operation
    :members:

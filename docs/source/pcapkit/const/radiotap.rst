@@ -4,9 +4,7 @@
 
 .. module:: pcapkit.const.radiotap
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` implementations, each scraped
-from radiotap.org [*]_. Available enumerations include:
+Scraped from radiotap.org [*]_.
 
 .. list-table::
 
@@ -58,8 +56,7 @@ Field Types
 
 .. module:: pcapkit.const.radiotap.field_type
 
-This module contains the constant enumeration for **Radiotap Field Types**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.field_type.FieldType`.
+Generated from :class:`pcapkit.vendor.radiotap.field_type.FieldType`.
 
 .. autoclass:: pcapkit.const.radiotap.field_type.FieldType
    :members:
@@ -71,8 +68,7 @@ Flags
 
 .. module:: pcapkit.const.radiotap.flags
 
-This module contains the constant enumeration for **Radiotap Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.flags.Flags`.
+Generated from :class:`pcapkit.vendor.radiotap.flags.Flags`.
 
 .. autoclass:: pcapkit.const.radiotap.flags.Flags
    :members:
@@ -84,8 +80,7 @@ Channel Flags
 
 .. module:: pcapkit.const.radiotap.channel_flags
 
-This module contains the constant enumeration for **Radiotap Channel Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.channel_flags.ChannelFlags`.
+Generated from :class:`pcapkit.vendor.radiotap.channel_flags.ChannelFlags`.
 
 .. autoclass:: pcapkit.const.radiotap.channel_flags.ChannelFlags
    :members:
@@ -97,8 +92,7 @@ RX Flags
 
 .. module:: pcapkit.const.radiotap.rx_flags
 
-This module contains the constant enumeration for **Radiotap RX Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.rx_flags.RXFlags`.
+Generated from :class:`pcapkit.vendor.radiotap.rx_flags.RXFlags`.
 
 .. autoclass:: pcapkit.const.radiotap.rx_flags.RXFlags
    :members:
@@ -110,8 +104,7 @@ TX Flags
 
 .. module:: pcapkit.const.radiotap.tx_flags
 
-This module contains the constant enumeration for **Radiotap TX Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.tx_flags.TXFlags`.
+Generated from :class:`pcapkit.vendor.radiotap.tx_flags.TXFlags`.
 
 .. autoclass:: pcapkit.const.radiotap.tx_flags.TXFlags
    :members:
@@ -123,8 +116,7 @@ MCS Known Flags
 
 .. module:: pcapkit.const.radiotap.mcs_known
 
-This module contains the constant enumeration for **Radiotap MCS Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.mcs_known.MCSKnown`.
+Generated from :class:`pcapkit.vendor.radiotap.mcs_known.MCSKnown`.
 
 .. autoclass:: pcapkit.const.radiotap.mcs_known.MCSKnown
    :members:
@@ -136,8 +128,7 @@ A-MPDU Status Flags
 
 .. module:: pcapkit.const.radiotap.ampdu_flags
 
-This module contains the constant enumeration for **Radiotap A-MPDU Status Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.ampdu_flags.AMPDUFlags`.
+Generated from :class:`pcapkit.vendor.radiotap.ampdu_flags.AMPDUFlags`.
 
 .. autoclass:: pcapkit.const.radiotap.ampdu_flags.AMPDUFlags
    :members:
@@ -149,8 +140,7 @@ VHT Known Flags
 
 .. module:: pcapkit.const.radiotap.vht_known
 
-This module contains the constant enumeration for **Radiotap VHT Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.vht_known.VHTKnown`.
+Generated from :class:`pcapkit.vendor.radiotap.vht_known.VHTKnown`.
 
 .. autoclass:: pcapkit.const.radiotap.vht_known.VHTKnown
    :members:
@@ -162,8 +152,7 @@ VHT Flags
 
 .. module:: pcapkit.const.radiotap.vht_flags
 
-This module contains the constant enumeration for **Radiotap VHT Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.vht_flags.VHTFlags`.
+Generated from :class:`pcapkit.vendor.radiotap.vht_flags.VHTFlags`.
 
 .. autoclass:: pcapkit.const.radiotap.vht_flags.VHTFlags
    :members:
@@ -175,8 +164,7 @@ VHT Coding Flags
 
 .. module:: pcapkit.const.radiotap.vht_coding
 
-This module contains the constant enumeration for **Radiotap VHT Coding Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.vht_coding.VHTCoding`.
+Generated from :class:`pcapkit.vendor.radiotap.vht_coding.VHTCoding`.
 
 .. autoclass:: pcapkit.const.radiotap.vht_coding.VHTCoding
    :members:
@@ -188,8 +176,7 @@ Timestamp Flags
 
 .. module:: pcapkit.const.radiotap.timestamp_flags
 
-This module contains the constant enumeration for **Radiotap Timestamp Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags`.
+Generated from :class:`pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags`.
 
 .. autoclass:: pcapkit.const.radiotap.timestamp_flags.TimestampFlags
    :members:
@@ -201,8 +188,7 @@ HE Data1 Known Flags
 
 .. module:: pcapkit.const.radiotap.he_data1_known
 
-This module contains the constant enumeration for **Radiotap HE Data1 Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.he_data1_known.HEData1Known`.
+Generated from :class:`pcapkit.vendor.radiotap.he_data1_known.HEData1Known`.
 
 .. autoclass:: pcapkit.const.radiotap.he_data1_known.HEData1Known
    :members:
@@ -214,8 +200,7 @@ HE Data2 Known Flags
 
 .. module:: pcapkit.const.radiotap.he_data2_known
 
-This module contains the constant enumeration for **Radiotap HE Data2 Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.he_data2_known.HEData2Known`.
+Generated from :class:`pcapkit.vendor.radiotap.he_data2_known.HEData2Known`.
 
 .. autoclass:: pcapkit.const.radiotap.he_data2_known.HEData2Known
    :members:
@@ -227,8 +212,7 @@ HE-MU Flags1 Known Flags
 
 .. module:: pcapkit.const.radiotap.he_mu_flags1_known
 
-This module contains the constant enumeration for **Radiotap HE-MU Flags1 Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known`.
+Generated from :class:`pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known`.
 
 .. autoclass:: pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known
    :members:
@@ -240,8 +224,7 @@ HE-MU Flags2 Known Flags
 
 .. module:: pcapkit.const.radiotap.he_mu_flags2_known
 
-This module contains the constant enumeration for **Radiotap HE-MU Flags2 Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known`.
+Generated from :class:`pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known`.
 
 .. autoclass:: pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known
    :members:
@@ -253,8 +236,7 @@ HE-MU-other-user Known Flags
 
 .. module:: pcapkit.const.radiotap.he_mu_other_user_known
 
-This module contains the constant enumeration for **Radiotap HE-MU-other-user Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown`.
+Generated from :class:`pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown`.
 
 .. autoclass:: pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown
    :members:
@@ -266,8 +248,7 @@ L-SIG Data1 Flags
 
 .. module:: pcapkit.const.radiotap.lsig_data1
 
-This module contains the constant enumeration for **Radiotap L-SIG Data1 Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.lsig_data1.LSIGData1`.
+Generated from :class:`pcapkit.vendor.radiotap.lsig_data1.LSIGData1`.
 
 .. autoclass:: pcapkit.const.radiotap.lsig_data1.LSIGData1
    :members:
@@ -279,8 +260,7 @@ S1G Known Flags
 
 .. module:: pcapkit.const.radiotap.s1g_known
 
-This module contains the constant enumeration for **Radiotap S1G Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.s1g_known.S1GKnown`.
+Generated from :class:`pcapkit.vendor.radiotap.s1g_known.S1GKnown`.
 
 .. autoclass:: pcapkit.const.radiotap.s1g_known.S1GKnown
    :members:
@@ -292,8 +272,7 @@ U-SIG Common Known Flags
 
 .. module:: pcapkit.const.radiotap.usig_common_known
 
-This module contains the constant enumeration for **Radiotap U-SIG Common Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown`.
+Generated from :class:`pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown`.
 
 .. autoclass:: pcapkit.const.radiotap.usig_common_known.USIGCommonKnown
    :members:
@@ -305,8 +284,7 @@ EHT Known Flags
 
 .. module:: pcapkit.const.radiotap.eht_known
 
-This module contains the constant enumeration for **Radiotap EHT Known Flags**,
-which is automatically generated from :class:`pcapkit.vendor.radiotap.eht_known.EHTKnown`.
+Generated from :class:`pcapkit.vendor.radiotap.eht_known.EHTKnown`.
 
 .. autoclass:: pcapkit.const.radiotap.eht_known.EHTKnown
    :members:

@@ -4,9 +4,7 @@
 
 .. module:: pcapkit.vendor.arp
 
-This module contains all vendor crawlers of :class:`~pcapkit.protocols.link.arp.protocol.ARP`
-and :class:`~pcapkit.protocols.application.rarp.protocol.RARP` implementations. Available
-vendor crawlers include:
+Shared with :class:`~pcapkit.protocols.application.rarp.protocol.RARP`.
 
 .. list-table::
 
@@ -20,8 +18,7 @@ Hardware Types
 
 .. module:: pcapkit.vendor.arp.hardware
 
-This module contains the vendor crawler for **Hardware Types**,
-which is automatically generating :class:`pcapkit.const.arp.hardware.Hardware`.
+Generates :class:`pcapkit.const.arp.hardware.Hardware`.
 
 .. autoclass:: pcapkit.vendor.arp.hardware.Hardware
    :members: FLAG, LINK
@@ -32,8 +29,7 @@ Operation Codes
 
 .. module:: pcapkit.vendor.arp.operation
 
-This module contains the vendor crawler for **Operation Codes**,
-which is automatically generating :class:`pcapkit.const.arp.operation.Operation`.
+Generates :class:`pcapkit.const.arp.operation.Operation`.
 
 .. autoclass:: pcapkit.vendor.arp.operation.Operation
    :members: FLAG, LINK

@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.http
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.http.protocol.HTTP` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`HTTP_ErrorCode <pcapkit.const.http.error_code.ErrorCode>`
@@ -26,8 +22,7 @@ HTTP/2 Error Code
 
 .. module:: pcapkit.const.http.error_code
 
-This module contains the constant enumeration for **HTTP/2 Error Code**,
-which is automatically generated from :class:`pcapkit.vendor.http.error_code.ErrorCode`.
+Generated from :class:`pcapkit.vendor.http.error_code.ErrorCode`.
 
 .. autoclass:: pcapkit.const.http.error_code.ErrorCode
    :members:
@@ -39,8 +34,7 @@ HTTP/2 Frame Type
 
 .. module:: pcapkit.const.http.frame
 
-This module contains the constant enumeration for **HTTP/2 Frame Type**,
-which is automatically generated from :class:`pcapkit.vendor.http.frame.Frame`.
+Generated from :class:`pcapkit.vendor.http.frame.Frame`.
 
 .. autoclass:: pcapkit.const.http.frame.Frame
    :members:
@@ -52,16 +46,14 @@ HTTP Method
 
 .. module:: pcapkit.const.http.method
 
-This module contains the constant enumeration for **HTTP Method**,
-which is automatically generated from :class:`pcapkit.vendor.http.method.Method`.
+Generated from :class:`pcapkit.vendor.http.method.Method`.
 
 .. versionchanged:: 1.5.0
 
    Neither :meth:`Method._missing_ <pcapkit.const.http.method.Method._missing_>` nor
    :meth:`Method.get() <pcapkit.const.http.method.Method.get>` mints a member
-   (:issue:`860`): only IANA-registered values are members, and a new one is created
-   through :meth:`~pcapkit.corekit.enum.EnumRegistry.register`, which can supply the
-   ``safe`` and ``idempotent`` a bare wire method verb carries neither of. A member's
+   (:issue:`860`): only IANA-registered values are members, and
+   :meth:`~pcapkit.corekit.enum.EnumRegistry.register` adds a new one. A member's
    :class:`str` payload is its value, so ``Method.GET == 'GET'`` (:issue:`870`).
 
    :meth:`Method.get() <pcapkit.const.http.method.Method.get>` matches ``key``
@@ -87,8 +79,7 @@ HTTP/2 Settings
 
 .. module:: pcapkit.const.http.setting
 
-This module contains the constant enumeration for **HTTP/2 Settings**,
-which is automatically generated from :class:`pcapkit.vendor.http.setting.Setting`.
+Generated from :class:`pcapkit.vendor.http.setting.Setting`.
 
 .. autoclass:: pcapkit.const.http.setting.Setting
    :members:
@@ -100,8 +91,7 @@ HTTP Status Code
 
 .. module:: pcapkit.const.http.status_code
 
-This module contains the constant enumeration for **HTTP Status Code**,
-which is automatically generated from :class:`pcapkit.vendor.http.status_code.StatusCode`.
+Generated from :class:`pcapkit.vendor.http.status_code.StatusCode`.
 
 .. autoclass:: pcapkit.const.http.status_code.StatusCode
    :members:

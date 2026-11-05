@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.sctp
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`SCTP_Chunk <pcapkit.const.sctp.chunk.Chunk>`
@@ -24,8 +20,7 @@ SCTP Chunk Types
 
 .. module:: pcapkit.const.sctp.chunk
 
-This module contains the constant enumeration for **SCTP Chunk Types**,
-which is automatically generated from :class:`pcapkit.vendor.sctp.chunk.Chunk`.
+Generated from :class:`pcapkit.vendor.sctp.chunk.Chunk`.
 
 .. autoclass:: pcapkit.const.sctp.chunk.Chunk
    :members:
@@ -37,8 +32,7 @@ SCTP Chunk Parameter Types
 
 .. module:: pcapkit.const.sctp.parameter
 
-This module contains the constant enumeration for **SCTP Chunk Parameter Types**,
-which is automatically generated from :class:`pcapkit.vendor.sctp.parameter.Parameter`.
+Generated from :class:`pcapkit.vendor.sctp.parameter.Parameter`.
 
 .. autoclass:: pcapkit.const.sctp.parameter.Parameter
    :members:
@@ -50,8 +44,7 @@ SCTP Error Cause Codes
 
 .. module:: pcapkit.const.sctp.cause_code
 
-This module contains the constant enumeration for **SCTP Error Cause Codes**,
-which is automatically generated from :class:`pcapkit.vendor.sctp.cause_code.CauseCode`.
+Generated from :class:`pcapkit.vendor.sctp.cause_code.CauseCode`.
 
 .. autoclass:: pcapkit.const.sctp.cause_code.CauseCode
    :members:
@@ -63,8 +56,7 @@ SCTP Payload Protocol Identifiers
 
 .. module:: pcapkit.const.sctp.payload_protocol_identifier
 
-This module contains the constant enumeration for **SCTP Payload Protocol Identifiers**,
-which is automatically generated from :class:`pcapkit.vendor.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`.
+Generated from :class:`pcapkit.vendor.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`.
 
 .. autoclass:: pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier
    :members:

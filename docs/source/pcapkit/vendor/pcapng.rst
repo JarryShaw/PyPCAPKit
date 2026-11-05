@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.pcapng
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`PCAPNG_BlockType <pcapkit.vendor.pcapng.block_type.BlockType>`
@@ -32,20 +28,18 @@ vendor crawlers include:
    The crawlers that scrape a registry table --
    :class:`BlockType <pcapkit.vendor.pcapng.block_type.BlockType>`,
    :class:`OptionType <pcapkit.vendor.pcapng.option_type.OptionType>` and
-   :class:`RecordType <pcapkit.vendor.pcapng.record_type.RecordType>` -- all read
+   :class:`RecordType <pcapkit.vendor.pcapng.record_type.RecordType>` -- read
    revision ``-03`` of the draft, as each one's ``LINK`` below shows. Revision
-   ``-02`` renders its registries as ASCII art inside ``<pre>`` and carries no
-   registry ``<table>`` at all, so the ``table-1`` through ``table-10`` ids
-   these crawlers select on exist only in ``-03``, where the registries are real
-   tables. The footnotes below point at ``-03`` for the same reason.
+   ``-02`` renders its registries as ASCII art inside ``<pre>``, so the
+   ``table-1`` through ``table-10`` ids these crawlers select exist only in
+   ``-03``. The footnotes below point at ``-03`` for the same reason.
 
 Block Types
 ===========
 
 .. module:: pcapkit.vendor.pcapng.block_type
 
-This module contains the vendor crawler for **Block Types**,
-which is automatically generating :class:`pcapkit.const.pcapng.block_type.BlockType`.
+Generates :class:`pcapkit.const.pcapng.block_type.BlockType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.block_type.BlockType
    :members: FLAG, LINK
@@ -56,8 +50,7 @@ Hash Algorithms
 
 .. module:: pcapkit.vendor.pcapng.hash_algorithm
 
-This module contains the vendor crawler for **Hash Algorithms**,
-which is automatically generating :class:`pcapkit.const.pcapng.hash_algorithm.HashAlgorithm`.
+Generates :class:`pcapkit.const.pcapng.hash_algorithm.HashAlgorithm`.
 
 .. autoclass:: pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm
    :members: FLAG
@@ -68,8 +61,7 @@ Option Types
 
 .. module:: pcapkit.vendor.pcapng.option_type
 
-This module contains the vendor crawler for **Option Types**,
-which is automatically generating :class:`pcapkit.const.pcapng.option_type.OptionType`.
+Generates :class:`pcapkit.const.pcapng.option_type.OptionType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.option_type.OptionType
    :members: FLAG, LINK
@@ -80,8 +72,7 @@ Record Types
 
 .. module:: pcapkit.vendor.pcapng.record_type
 
-This module contains the vendor crawler for **Record Types**,
-which is automatically generating :class:`pcapkit.const.pcapng.record_type.RecordType`.
+Generates :class:`pcapkit.const.pcapng.record_type.RecordType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.record_type.RecordType
    :members: FLAG, LINK
@@ -92,8 +83,7 @@ Secrets Types
 
 .. module:: pcapkit.vendor.pcapng.secrets_type
 
-This module contains the vendor crawler for **Secrets Types**,
-which is automatically generating :class:`pcapkit.const.pcapng.secrets_type.SecretsType`.
+Generates :class:`pcapkit.const.pcapng.secrets_type.SecretsType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.secrets_type.SecretsType
    :members: FLAG
@@ -104,8 +94,7 @@ Verdict Types
 
 .. module:: pcapkit.vendor.pcapng.verdict_type
 
-This module contains the vendor crawler for **Verdict Types**,
-which is automatically generating :class:`pcapkit.const.pcapng.verdict_type.VerdictType`.
+Generates :class:`pcapkit.const.pcapng.verdict_type.VerdictType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.verdict_type.VerdictType
    :members: FLAG
@@ -116,8 +105,7 @@ Filter Types
 
 .. module:: pcapkit.vendor.pcapng.filter_type
 
-This module contains the vendor crawler for **Filter Types**,
-which is automatically generating :class:`pcapkit.const.pcapng.filter_type.FilterType`.
+Generates :class:`pcapkit.const.pcapng.filter_type.FilterType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.filter_type.FilterType
    :members: FLAG
@@ -128,8 +116,7 @@ TLS Key Log Labels
 
 .. module:: pcapkit.vendor.pcapng.tls_key_label
 
-This module contains the vendor crawler for **TLS Key Log Labels**,
-which is automatically generating :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`.
+Generates :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`.
 
 .. autoclass:: pcapkit.vendor.pcapng.tls_key_label.TLSKeyLabel
    :members: LINK
@@ -144,4 +131,4 @@ which is automatically generating :class:`pcapkit.const.pcapng.tls_key_label.TLS
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block
-.. [*] https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv, c.f., :rfc:`9850#section-4.2`
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv, cf. :rfc:`9850#section-4.2`

@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.dccp
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`DCCP_PacketType <pcapkit.const.dccp.packet_type.PacketType>`
@@ -30,8 +26,7 @@ DCCP Packet Types
 
 .. module:: pcapkit.const.dccp.packet_type
 
-This module contains the constant enumeration for **DCCP Packet Types**,
-which is automatically generated from :class:`pcapkit.vendor.dccp.packet_type.PacketType`.
+Generated from :class:`pcapkit.vendor.dccp.packet_type.PacketType`.
 
 .. autoclass:: pcapkit.const.dccp.packet_type.PacketType
    :members:
@@ -43,8 +38,7 @@ DCCP Reset Codes
 
 .. module:: pcapkit.const.dccp.reset_code
 
-This module contains the constant enumeration for **DCCP Reset Codes**,
-which is automatically generated from :class:`pcapkit.vendor.dccp.reset_code.ResetCode`.
+Generated from :class:`pcapkit.vendor.dccp.reset_code.ResetCode`.
 
 .. autoclass:: pcapkit.const.dccp.reset_code.ResetCode
    :members:
@@ -56,8 +50,7 @@ DCCP Option Types
 
 .. module:: pcapkit.const.dccp.option
 
-This module contains the constant enumeration for **DCCP Option Types**,
-which is automatically generated from :class:`pcapkit.vendor.dccp.option.Option`.
+Generated from :class:`pcapkit.vendor.dccp.option.Option`.
 
 .. autoclass:: pcapkit.const.dccp.option.Option
    :members:
@@ -69,8 +62,7 @@ DCCP Feature Numbers
 
 .. module:: pcapkit.const.dccp.feature
 
-This module contains the constant enumeration for **DCCP Feature Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.dccp.feature.Feature`.
+Generated from :class:`pcapkit.vendor.dccp.feature.Feature`.
 
 .. autoclass:: pcapkit.const.dccp.feature.Feature
    :members:
@@ -82,8 +74,7 @@ DCCP Ack Vector States
 
 .. module:: pcapkit.const.dccp.ack_vector_state
 
-This module contains the constant enumeration for **DCCP Ack Vector States**,
-which is automatically generated from :class:`pcapkit.vendor.dccp.ack_vector_state.AckVectorState`.
+Generated from :class:`pcapkit.vendor.dccp.ack_vector_state.AckVectorState`.
 
 .. autoclass:: pcapkit.const.dccp.ack_vector_state.AckVectorState
    :members:
@@ -95,8 +86,7 @@ DCCP Drop Codes
 
 .. module:: pcapkit.const.dccp.drop_code
 
-This module contains the constant enumeration for **DCCP Drop Codes**,
-which is automatically generated from :class:`pcapkit.vendor.dccp.drop_code.DropCode`.
+Generated from :class:`pcapkit.vendor.dccp.drop_code.DropCode`.
 
 .. autoclass:: pcapkit.const.dccp.drop_code.DropCode
    :members:

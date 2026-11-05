@@ -5,10 +5,6 @@
 .. module:: pcapkit.vendor.http
 
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.http.protocol.HTTP` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`HTTP_ErrorCode <pcapkit.vendor.http.error_code.ErrorCode>`
@@ -27,8 +23,7 @@ HTTP/2 Error Code
 
 .. module:: pcapkit.vendor.http.error_code
 
-This module contains the vendor crawler for **HTTP/2 Error Code**,
-which is automatically generating :class:`pcapkit.const.http.error_code.ErrorCode`.
+Generates :class:`pcapkit.const.http.error_code.ErrorCode`.
 
 .. autoclass:: pcapkit.vendor.http.error_code.ErrorCode
    :members: FLAG, LINK
@@ -39,8 +34,7 @@ HTTP/2 Frame Type
 
 .. module:: pcapkit.vendor.http.frame
 
-This module contains the vendor crawler for **HTTP/2 Frame Type**,
-which is automatically generating :class:`pcapkit.const.http.frame.Frame`.
+Generates :class:`pcapkit.const.http.frame.Frame`.
 
 .. autoclass:: pcapkit.vendor.http.frame.Frame
    :members: FLAG, LINK
@@ -51,8 +45,7 @@ HTTP Method
 
 .. module:: pcapkit.vendor.http.method
 
-This module contains the vendor crawler for **HTTP Method**,
-which is automatically generating :class:`pcapkit.const.http.method.Method`.
+Generates :class:`pcapkit.const.http.method.Method`.
 
 .. autoclass:: pcapkit.vendor.http.method.Method
    :members: LINK
@@ -63,8 +56,7 @@ HTTP/2 Settings
 
 .. module:: pcapkit.vendor.http.setting
 
-This module contains the vendor crawler for **HTTP/2 Settings**,
-which is automatically generating :class:`pcapkit.const.http.setting.Setting`.
+Generates :class:`pcapkit.const.http.setting.Setting`.
 
 .. autoclass:: pcapkit.vendor.http.setting.Setting
    :members: FLAG, LINK
@@ -75,8 +67,7 @@ HTTP Status Code
 
 .. module:: pcapkit.vendor.http.status_code
 
-This module contains the vendor crawler for **HTTP Status Code**,
-which is automatically generating :class:`pcapkit.const.http.status_code.StatusCode`.
+Generates :class:`pcapkit.const.http.status_code.StatusCode`.
 
 .. autoclass:: pcapkit.vendor.http.status_code.StatusCode
    :members: FLAG, LINK

@@ -4,9 +4,6 @@ Protocol Type Registry Constant Enumerations
 
 .. module:: pcapkit.const.reg
 
-This module contains all constant enumerations of protocol type registry
-implementations. Available enumerations include:
-
 .. list-table::
 
    * - :class:`LINKTYPE <pcapkit.const.reg.linktype.LinkType>`
@@ -23,8 +20,7 @@ Link-Layer Header Type Values
 
 .. module:: pcapkit.const.reg.linktype
 
-This module contains the constant enumeration for **Link-Layer Header Type Values**,
-which is automatically generated from :class:`pcapkit.vendor.reg.linktype.LinkType`.
+Generated from :class:`pcapkit.vendor.reg.linktype.LinkType`.
 
 .. autoclass:: pcapkit.const.reg.linktype.LinkType
    :members:
@@ -37,8 +33,7 @@ Ethertype IEEE 802 Numbers
 
 .. module:: pcapkit.const.reg.ethertype
 
-This module contains the constant enumeration for **Ethertype IEEE 802 Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.reg.ethertype.EtherType`.
+Generated from :class:`pcapkit.vendor.reg.ethertype.EtherType`.
 
 .. autoclass:: pcapkit.const.reg.ethertype.EtherType
    :members:
@@ -51,8 +46,7 @@ Transport Layer Protocol Numbers
 
 .. module:: pcapkit.const.reg.transtype
 
-This module contains the constant enumeration for **Transport Layer Protocol Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.reg.transtype.TransType`.
+Generated from :class:`pcapkit.vendor.reg.transtype.TransType`.
 
 .. autoclass:: pcapkit.const.reg.transtype.TransType
    :members:
@@ -65,10 +59,9 @@ Application Layer Protocol Numbers
 
 .. module:: pcapkit.const.reg.apptype
 
-This package contains the constant enumerations for **Application Layer Protocol
-Numbers**, which are automatically generated from :mod:`pcapkit.vendor.reg.apptype`.
-IANA keys every assignment on a ``(service, port, transport)`` triple, so the
-registry is one enumeration per transport protocol sharing a memberless base.
+Generated from :mod:`pcapkit.vendor.reg.apptype`. IANA keys every assignment on a
+``(service, port, transport)`` triple, so the registry is one enumeration per
+transport protocol sharing a memberless base.
 
 .. versionchanged:: 1.5.0
 

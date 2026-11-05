@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.ospf
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.ospf.protocol.OSPF` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`OSPF_Authentication <pcapkit.vendor.ospf.authentication.Authentication>`
@@ -20,8 +16,7 @@ Authentication Types
 
 .. module:: pcapkit.vendor.ospf.authentication
 
-This module contains the vendor crawler for **Authentication Types**,
-which is automatically generating :class:`pcapkit.const.ospf.authentication.Authentication`.
+Generates :class:`pcapkit.const.ospf.authentication.Authentication`.
 
 .. autoclass:: pcapkit.vendor.ospf.authentication.Authentication
    :members: FLAG, LINK
@@ -32,8 +27,7 @@ OSPF Packet Types
 
 .. module:: pcapkit.vendor.ospf.packet
 
-This module contains the vendor crawler for **OSPF Packet Types**,
-which is automatically generating :class:`pcapkit.const.ospf.packet.Packet`.
+Generates :class:`pcapkit.const.ospf.packet.Packet`.
 
 .. autoclass:: pcapkit.vendor.ospf.packet.Packet
    :members: FLAG, LINK

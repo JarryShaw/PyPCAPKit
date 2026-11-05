@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.tcp
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`TCP_Checksum <pcapkit.const.tcp.checksum.Checksum>`
@@ -24,8 +20,7 @@ TCP Checksum
 
 .. module:: pcapkit.const.tcp.checksum
 
-This module contains the constant enumeration for **TCP Checksum**,
-which is automatically generated from :class:`pcapkit.vendor.tcp.checksum.Checksum`.
+Generated from :class:`pcapkit.vendor.tcp.checksum.Checksum`.
 
 .. autoclass:: pcapkit.const.tcp.checksum.Checksum
    :members:
@@ -37,8 +32,7 @@ Multipath TCP Options
 
 .. module:: pcapkit.const.tcp.mp_tcp_option
 
-This module contains the constant enumeration for **Multipath TCP options**,
-which is automatically generated from :class:`pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption`.
+Generated from :class:`pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption`.
 
 .. autoclass:: pcapkit.const.tcp.mp_tcp_option.MPTCPOption
    :members:
@@ -50,8 +44,7 @@ TCP Option Kind Numbers
 
 .. module:: pcapkit.const.tcp.option
 
-This module contains the constant enumeration for **TCP Option Kind Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.tcp.option.Option`.
+Generated from :class:`pcapkit.vendor.tcp.option.Option`.
 
 .. autoclass:: pcapkit.const.tcp.option.Option
    :members:
@@ -63,12 +56,12 @@ TCP Header Flags
 
 .. module:: pcapkit.const.tcp.flags
 
-This module contains the constant enumeration for **TCP Header Flags**,
-which is automatically generated from :class:`pcapkit.vendor.tcp.flags.Flags`.
+Generated from :class:`pcapkit.vendor.tcp.flags.Flags`.
 
 .. versionchanged:: 1.5.0
 
-   A value outside the 16-bit field raises :exc:`ValueError`, where
+   A value outside ``0``-``0xFFF``, the flag bits of their 16-bit header word,
+   raises :exc:`ValueError`, where
    |aenum|_ composed a pseudo-member for any integer.
 
 .. autoclass:: pcapkit.const.tcp.flags.Flags

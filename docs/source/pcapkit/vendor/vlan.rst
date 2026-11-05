@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.vlan
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :const:`VLAN_PriorityLevel <pcapkit.vendor.vlan.priority_level.PriorityLevel>`
@@ -18,8 +14,7 @@ Priority Levels Defined in IEEE 802.1p
 
 .. module:: pcapkit.vendor.vlan.priority_level
 
-This module contains the vendor crawler for **Priority levels defined in IEEE 802.1p**,
-which is automatically generating :class:`pcapkit.const.vlan.priority_level.PriorityLevel`.
+Generates :class:`pcapkit.const.vlan.priority_level.PriorityLevel`.
 
 .. autoclass:: pcapkit.vendor.vlan.priority_level.PriorityLevel
    :members: FLAG, LINK

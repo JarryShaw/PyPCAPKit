@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.ipx
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.ipx.protocol.IPX` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`IPX_Packet <pcapkit.vendor.ipx.packet.Packet>`
@@ -20,8 +16,7 @@ IPX Packet Types
 
 .. module:: pcapkit.vendor.ipx.packet
 
-This module contains the vendor crawler for **IPX Packet Types**,
-which is automatically generating :class:`pcapkit.const.ipx.packet.Packet`.
+Generates :class:`pcapkit.const.ipx.packet.Packet`.
 
 .. note::
 
@@ -38,8 +33,7 @@ Socket Types
 
 .. module:: pcapkit.vendor.ipx.socket
 
-This module contains the vendor crawler for **Socket Types**,
-which is automatically generating :class:`pcapkit.const.ipx.socket.Socket`.
+Generates :class:`pcapkit.const.ipx.socket.Socket`.
 
 .. note::
 

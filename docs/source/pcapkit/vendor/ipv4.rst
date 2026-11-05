@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.ipv4
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`IPv4_ClassificationLevel <pcapkit.vendor.ipv4.classification_level.ClassificationLevel>`
@@ -40,8 +36,7 @@ Classification Level Encodings
 
 .. module:: pcapkit.vendor.ipv4.classification_level
 
-This module contains the vendor crawler for **Classification Level Encodings**,
-which is automatically generating :class:`pcapkit.const.ipv4.classification_level.ClassificationLevel`.
+Generates :class:`pcapkit.const.ipv4.classification_level.ClassificationLevel`.
 
 .. autoclass:: pcapkit.vendor.ipv4.classification_level.ClassificationLevel
    :members: FLAG
@@ -52,8 +47,7 @@ Option Classes
 
 .. module:: pcapkit.vendor.ipv4.option_class
 
-This module contains the vendor crawler for **Option Classes**,
-which is automatically generating :class:`pcapkit.const.ipv4.option_class.OptionClass`.
+Generates :class:`pcapkit.const.ipv4.option_class.OptionClass`.
 
 .. autoclass:: pcapkit.vendor.ipv4.option_class.OptionClass
    :members: FLAG
@@ -64,8 +58,7 @@ IP Option Numbers
 
 .. module:: pcapkit.vendor.ipv4.option_number
 
-This module contains the vendor crawler for **IP Option Numbers**,
-which is automatically generating :class:`pcapkit.const.ipv4.option_number.OptionNumber`.
+Generates :class:`pcapkit.const.ipv4.option_number.OptionNumber`.
 
 .. autoclass:: pcapkit.vendor.ipv4.option_number.OptionNumber
    :members: FLAG, LINK
@@ -76,8 +69,7 @@ Protection Authority Bit Assignments
 
 .. module:: pcapkit.vendor.ipv4.protection_authority
 
-This module contains the vendor crawler for **Protection Authority Bit Assignments**,
-which is automatically generating :class:`pcapkit.const.ipv4.protection_authority.ProtectionAuthority`.
+Generates :class:`pcapkit.const.ipv4.protection_authority.ProtectionAuthority`.
 
 .. autoclass:: pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority
    :members: FLAG
@@ -88,8 +80,7 @@ QS Functions
 
 .. module:: pcapkit.vendor.ipv4.qs_function
 
-This module contains the vendor crawler for **QS Functions**,
-which is automatically generating :class:`pcapkit.const.ipv4.qs_function.QSFunction`.
+Generates :class:`pcapkit.const.ipv4.qs_function.QSFunction`.
 
 .. autoclass:: pcapkit.vendor.ipv4.qs_function.QSFunction
    :members: FLAG
@@ -100,8 +91,7 @@ IPv4 Router Alert Option Values
 
 .. module:: pcapkit.vendor.ipv4.router_alert
 
-This module contains the vendor crawler for **IPv4 Router Alert Option Values**,
-which is automatically generating :class:`pcapkit.const.ipv4.router_alert.RouterAlert`.
+Generates :class:`pcapkit.const.ipv4.router_alert.RouterAlert`.
 
 .. autoclass:: pcapkit.vendor.ipv4.router_alert.RouterAlert
    :members: FLAG, LINK
@@ -112,8 +102,7 @@ ToS (DS Field) Delay
 
 .. module:: pcapkit.vendor.ipv4.tos_del
 
-This module contains the vendor crawler for **ToS (DS Field) Delay**,
-which is automatically generating :class:`pcapkit.const.ipv4.tos_del.ToSDelay`.
+Generates :class:`pcapkit.const.ipv4.tos_del.ToSDelay`.
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_del.ToSDelay
    :members: FLAG
@@ -124,8 +113,7 @@ ToS ECN Field
 
 .. module:: pcapkit.vendor.ipv4.tos_ecn
 
-This module contains the vendor crawler for **ToS ECN Field**,
-which is automatically generating :class:`pcapkit.const.ipv4.tos_ecn.ToSECN`.
+Generates :class:`pcapkit.const.ipv4.tos_ecn.ToSECN`.
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_ecn.ToSECN
    :members: FLAG
@@ -136,8 +124,7 @@ ToS (DS Field) Precedence
 
 .. module:: pcapkit.vendor.ipv4.tos_pre
 
-This module contains the vendor crawler for **ToS (DS Field) Precedence**,
-which is automatically generating :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence`.
+Generates :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence`.
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_pre.ToSPrecedence
    :members: FLAG
@@ -148,8 +135,7 @@ ToS (DS Field) Reliability
 
 .. module:: pcapkit.vendor.ipv4.tos_rel
 
-This module contains the vendor crawler for **ToS (DS Field) Reliability**,
-which is automatically generating :class:`pcapkit.const.ipv4.tos_rel.ToSReliability`.
+Generates :class:`pcapkit.const.ipv4.tos_rel.ToSReliability`.
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_rel.ToSReliability
    :members: FLAG
@@ -160,8 +146,7 @@ ToS (DS Field) Throughput
 
 .. module:: pcapkit.vendor.ipv4.tos_thr
 
-This module contains the vendor crawler for **ToS (DS Field) Throughput**,
-which is automatically generating :class:`pcapkit.const.ipv4.tos_thr.ToSThroughput`.
+Generates :class:`pcapkit.const.ipv4.tos_thr.ToSThroughput`.
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_thr.ToSThroughput
    :members: FLAG
@@ -172,8 +157,7 @@ TS Flag
 
 .. module:: pcapkit.vendor.ipv4.ts_flag
 
-This module contains the vendor crawler for **TS Flag**,
-which is automatically generating :class:`pcapkit.const.ipv4.ts_flag.TSFlag`.
+Generates :class:`pcapkit.const.ipv4.ts_flag.TSFlag`.
 
 .. autoclass:: pcapkit.vendor.ipv4.ts_flag.TSFlag
    :members: FLAG

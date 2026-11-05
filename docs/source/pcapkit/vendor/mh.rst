@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.mh
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.mh.protocol.MH` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`MH_Packet <pcapkit.vendor.mh.packet.Packet>`
@@ -100,8 +96,7 @@ Access Technology Type Option Type Values
 
 .. module:: pcapkit.vendor.mh.access_type
 
-This module contains the vendor crawler for **Access Technology Type Option Type Values**,
-which is automatically generating :class:`pcapkit.const.mh.access_type.AccessType`.
+Generates :class:`pcapkit.const.mh.access_type.AccessType`.
 
 .. autoclass:: pcapkit.vendor.mh.access_type.AccessType
    :members: FLAG, LINK
@@ -112,8 +107,7 @@ Pseudo Home Address Acknowledgement Status Codes
 
 .. module:: pcapkit.vendor.mh.ack_status_code
 
-This module contains the vendor crawler for **Pseudo Home Address Acknowledgement Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.ack_status_code.ACKStatusCode`.
+Generates :class:`pcapkit.const.mh.ack_status_code.ACKStatusCode`.
 
 .. autoclass:: pcapkit.vendor.mh.ack_status_code.ACKStatusCode
    :members: FLAG, LINK
@@ -124,8 +118,7 @@ Access Network Information (ANI) Sub-Option Type Values
 
 .. module:: pcapkit.vendor.mh.ani_suboption
 
-This module contains the vendor crawler for **Access Network Information (ANI) Sub-Option Type Values**,
-which is automatically generating :class:`pcapkit.const.mh.ani_suboption.ANISuboption`.
+Generates :class:`pcapkit.const.mh.ani_suboption.ANISuboption`.
 
 .. autoclass:: pcapkit.vendor.mh.ani_suboption.ANISuboption
    :members: FLAG, LINK
@@ -136,8 +129,7 @@ Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options
 
 .. module:: pcapkit.vendor.mh.auth_subtype
 
-This module contains the vendor crawler for **Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options**,
-which is automatically generating :class:`pcapkit.const.mh.auth_subtype.AuthSubtype`.
+Generates :class:`pcapkit.const.mh.auth_subtype.AuthSubtype`.
 
 .. autoclass:: pcapkit.vendor.mh.auth_subtype.AuthSubtype
    :members: FLAG, LINK
@@ -148,8 +140,7 @@ Binding Acknowledgment Flags
 
 .. module:: pcapkit.vendor.mh.binding_ack_flag
 
-This module contains the vendor crawler for **Binding Acknowledgment Flags**,
-which is automatically generating :class:`pcapkit.const.mh.binding_ack_flag.BindingACKFlag`.
+Generates :class:`pcapkit.const.mh.binding_ack_flag.BindingACKFlag`.
 
 .. autoclass:: pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag
    :members: FLAG, LINK
@@ -160,8 +151,7 @@ Binding Revocation Type
 
 .. module:: pcapkit.vendor.mh.binding_revocation
 
-This module contains the vendor crawler for **Binding Revocation Type**,
-which is automatically generating :class:`pcapkit.const.mh.binding_revocation.BindingRevocation`.
+Generates :class:`pcapkit.const.mh.binding_revocation.BindingRevocation`.
 
 .. autoclass:: pcapkit.vendor.mh.binding_revocation.BindingRevocation
    :members: FLAG, LINK
@@ -172,8 +162,7 @@ Binding Update Flags
 
 .. module:: pcapkit.vendor.mh.binding_update_flag
 
-This module contains the vendor crawler for **Binding Update Flags**,
-which is automatically generating :class:`pcapkit.const.mh.binding_update_flag.BindingUpdateFlag`.
+Generates :class:`pcapkit.const.mh.binding_update_flag.BindingUpdateFlag`.
 
 .. autoclass:: pcapkit.vendor.mh.binding_update_flag.BindingUpdateFlag
    :members: FLAG, LINK
@@ -184,8 +173,7 @@ IPv4 DHCP Support Mode Flags
 
 .. module:: pcapkit.vendor.mh.dhcp_support_mode
 
-This module contains the vendor crawler for **IPv4 DHCP Support Mode Flags**,
-which is automatically generating :class:`pcapkit.const.mh.dhcp_support_mode.DHCPSupportMode`.
+Generates :class:`pcapkit.const.mh.dhcp_support_mode.DHCPSupportMode`.
 
 .. autoclass:: pcapkit.vendor.mh.dhcp_support_mode.DHCPSupportMode
    :members: FLAG, LINK
@@ -196,8 +184,7 @@ Status Codes (DNS Update Mobility Option)
 
 .. module:: pcapkit.vendor.mh.dns_status_code
 
-This module contains the vendor crawler for **Status Codes (DNS Update Mobility Option)**,
-which is automatically generating :class:`pcapkit.const.mh.dns_status_code.DNSStatusCode`.
+Generates :class:`pcapkit.const.mh.dns_status_code.DNSStatusCode`.
 
 .. autoclass:: pcapkit.vendor.mh.dns_status_code.DNSStatusCode
    :members: FLAG, LINK
@@ -208,8 +195,7 @@ DSMIP6-TLS Packet Types Registry
 
 .. module:: pcapkit.vendor.mh.dsmip6_tls_packet
 
-This module contains the vendor crawler for **DSMIP6-TLS Packet Types Registry**,
-which is automatically generating :class:`pcapkit.const.mh.dsmip6_tls_packet.DSMIP6TLSPacket`.
+Generates :class:`pcapkit.const.mh.dsmip6_tls_packet.DSMIP6TLSPacket`.
 
 .. autoclass:: pcapkit.vendor.mh.dsmip6_tls_packet.DSMIP6TLSPacket
    :members: FLAG, LINK
@@ -220,8 +206,7 @@ Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes
 
 .. module:: pcapkit.vendor.mh.dsmipv6_home_address
 
-This module contains the vendor crawler for **Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
+Generates :class:`pcapkit.const.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
 
 .. autoclass:: pcapkit.vendor.mh.dsmipv6_home_address.DSMIPv6HomeAddress
    :members: FLAG, LINK
@@ -232,8 +217,7 @@ Enumerating Algorithms
 
 .. module:: pcapkit.vendor.mh.enumerating_algorithm
 
-This module contains the vendor crawler for **Enumerating Algorithms**,
-which is automatically generating :class:`pcapkit.const.mh.enumerating_algorithm.EnumeratingAlgorithm`.
+Generates :class:`pcapkit.const.mh.enumerating_algorithm.EnumeratingAlgorithm`.
 
 .. autoclass:: pcapkit.vendor.mh.enumerating_algorithm.EnumeratingAlgorithm
    :members: FLAG, LINK
@@ -244,8 +228,7 @@ Flow Binding Acknowledgement Status Codes
 
 .. module:: pcapkit.vendor.mh.fb_ack_status
 
-This module contains the vendor crawler for **Flow Binding Acknowledgement Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.fb_ack_status.FlowBindingACKStatus`.
+Generates :class:`pcapkit.const.mh.fb_ack_status.FlowBindingACKStatus`.
 
 .. autoclass:: pcapkit.vendor.mh.fb_ack_status.FlowBindingACKStatus
    :members: FLAG, LINK
@@ -256,8 +239,7 @@ Flow Binding Action Values
 
 .. module:: pcapkit.vendor.mh.fb_action
 
-This module contains the vendor crawler for **Flow Binding Action Values**,
-which is automatically generating :class:`pcapkit.const.mh.fb_action.FlowBindingAction`.
+Generates :class:`pcapkit.const.mh.fb_action.FlowBindingAction`.
 
 .. autoclass:: pcapkit.vendor.mh.fb_action.FlowBindingAction
    :members: FLAG, LINK
@@ -268,8 +250,7 @@ Flow Binding Indication Triggers
 
 .. module:: pcapkit.vendor.mh.fb_indication_trigger
 
-This module contains the vendor crawler for **Flow Binding Indication Triggers**,
-which is automatically generating :class:`pcapkit.const.mh.fb_indication_trigger.FlowBindingIndicationTrigger`.
+Generates :class:`pcapkit.const.mh.fb_indication_trigger.FlowBindingIndicationTrigger`.
 
 .. autoclass:: pcapkit.vendor.mh.fb_indication_trigger.FlowBindingIndicationTrigger
    :members: FLAG, LINK
@@ -280,8 +261,7 @@ Flow Binding Type
 
 .. module:: pcapkit.vendor.mh.fb_type
 
-This module contains the vendor crawler for **Flow Binding Type**,
-which is automatically generating :class:`pcapkit.const.mh.fb_type.FlowBindingType`.
+Generates :class:`pcapkit.const.mh.fb_type.FlowBindingType`.
 
 .. autoclass:: pcapkit.vendor.mh.fb_type.FlowBindingType
    :members: FLAG, LINK
@@ -292,8 +272,7 @@ Flow Identification Mobility Option Status Codes
 
 .. module:: pcapkit.vendor.mh.flow_id_status
 
-This module contains the vendor crawler for **Flow Identification Mobility Option Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.flow_id_status.FlowIDStatus`.
+Generates :class:`pcapkit.const.mh.flow_id_status.FlowIDStatus`.
 
 .. autoclass:: pcapkit.vendor.mh.flow_id_status.FlowIDStatus
    :members: FLAG, LINK
@@ -304,8 +283,7 @@ Flow Identification Sub-Options
 
 .. module:: pcapkit.vendor.mh.flow_id_suboption
 
-This module contains the vendor crawler for **Flow Identification Sub-Options**,
-which is automatically generating :class:`pcapkit.const.mh.flow_id_suboption.FlowIDSuboption`.
+Generates :class:`pcapkit.const.mh.flow_id_suboption.FlowIDSuboption`.
 
 .. autoclass:: pcapkit.vendor.mh.flow_id_suboption.FlowIDSuboption
    :members: FLAG, LINK
@@ -316,8 +294,7 @@ Handoff Indicator Option Type Values
 
 .. module:: pcapkit.vendor.mh.handoff_type
 
-This module contains the vendor crawler for **Handoff Indicator Option Type Values**,
-which is automatically generating :class:`pcapkit.const.mh.handoff_type.HandoffType`.
+Generates :class:`pcapkit.const.mh.handoff_type.HandoffType`.
 
 .. autoclass:: pcapkit.vendor.mh.handoff_type.HandoffType
    :members: FLAG, LINK
@@ -328,8 +305,7 @@ Handover Acknowledge Flags
 
 .. module:: pcapkit.vendor.mh.handover_ack_flag
 
-This module contains the vendor crawler for **Handover Acknowledge Flags**,
-which is automatically generating :class:`pcapkit.const.mh.handover_ack_flag.HandoverACKFlag`.
+Generates :class:`pcapkit.const.mh.handover_ack_flag.HandoverACKFlag`.
 
 .. autoclass:: pcapkit.vendor.mh.handover_ack_flag.HandoverACKFlag
    :members: FLAG, LINK
@@ -340,8 +316,7 @@ Handover Acknowledge Status Codes
 
 .. module:: pcapkit.vendor.mh.handover_ack_status
 
-This module contains the vendor crawler for **Handover Acknowledge Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.handover_ack_status.HandoverACKStatus`.
+Generates :class:`pcapkit.const.mh.handover_ack_status.HandoverACKStatus`.
 
 .. autoclass:: pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus
    :members: FLAG, LINK
@@ -352,8 +327,7 @@ Handover Initiate Flags
 
 .. module:: pcapkit.vendor.mh.handover_initiate_flag
 
-This module contains the vendor crawler for **Handover Initiate Flags**,
-which is automatically generating :class:`pcapkit.const.mh.handover_initiate_flag.HandoverInitiateFlag`.
+Generates :class:`pcapkit.const.mh.handover_initiate_flag.HandoverInitiateFlag`.
 
 .. autoclass:: pcapkit.vendor.mh.handover_initiate_flag.HandoverInitiateFlag
    :members: FLAG, LINK
@@ -364,8 +338,7 @@ Handover Initiate Status Codes
 
 .. module:: pcapkit.vendor.mh.handover_initiate_status
 
-This module contains the vendor crawler for **Handover Initiate Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.handover_initiate_status.HandoverInitiateStatus`.
+Generates :class:`pcapkit.const.mh.handover_initiate_status.HandoverInitiateStatus`.
 
 .. autoclass:: pcapkit.vendor.mh.handover_initiate_status.HandoverInitiateStatus
    :members: FLAG, LINK
@@ -376,8 +349,7 @@ IPv4 Home Address Reply Status Codes
 
 .. module:: pcapkit.vendor.mh.home_address_reply
 
-This module contains the vendor crawler for **IPv4 Home Address Reply Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.home_address_reply.HomeAddressReply`.
+Generates :class:`pcapkit.const.mh.home_address_reply.HomeAddressReply`.
 
 .. autoclass:: pcapkit.vendor.mh.home_address_reply.HomeAddressReply
    :members: FLAG, LINK
@@ -388,8 +360,7 @@ LMA-Controlled MAG Parameters Sub-Option Type Values
 
 .. module:: pcapkit.vendor.mh.lma_mag_suboption
 
-This module contains the vendor crawler for **LMA-Controlled MAG Parameters Sub-Option Type Values**,
-which is automatically generating :class:`pcapkit.const.mh.lma_mag_suboption.LMAControlledMAGSuboption`.
+Generates :class:`pcapkit.const.mh.lma_mag_suboption.LMAControlledMAGSuboption`.
 
 .. autoclass:: pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption
    :members: FLAG, LINK
@@ -400,8 +371,7 @@ Mobile Node Group Identifier Type Registry
 
 .. module:: pcapkit.vendor.mh.mn_group_id
 
-This module contains the vendor crawler for **Mobile Node Group Identifier Type Registry**,
-which is automatically generating :class:`pcapkit.const.mh.mn_group_id.MNGroupID`.
+Generates :class:`pcapkit.const.mh.mn_group_id.MNGroupID`.
 
 .. autoclass:: pcapkit.vendor.mh.mn_group_id.MNGroupID
    :members: FLAG, LINK
@@ -412,8 +382,7 @@ Mobile Node Identifier Option Subtypes
 
 .. module:: pcapkit.vendor.mh.mn_id_subtype
 
-This module contains the vendor crawler for **Mobile Node Identifier Option Subtypes**,
-which is automatically generating :class:`pcapkit.const.mh.mn_id_subtype.MNIDSubtype`.
+Generates :class:`pcapkit.const.mh.mn_id_subtype.MNIDSubtype`.
 
 .. autoclass:: pcapkit.vendor.mh.mn_id_subtype.MNIDSubtype
    :members: FLAG, LINK
@@ -424,8 +393,7 @@ Operator-Identifier Type Registry
 
 .. module:: pcapkit.vendor.mh.operator_id
 
-This module contains the vendor crawler for **Operator-Identifier Type Registry**,
-which is automatically generating :class:`pcapkit.const.mh.operator_id.OperatorID`.
+Generates :class:`pcapkit.const.mh.operator_id.OperatorID`.
 
 .. autoclass:: pcapkit.vendor.mh.operator_id.OperatorID
    :members: FLAG, LINK
@@ -436,8 +404,7 @@ Mobility Options
 
 .. module:: pcapkit.vendor.mh.option
 
-This module contains the vendor crawler for **Mobility Options**,
-which is automatically generating :class:`pcapkit.const.mh.option.Option`.
+Generates :class:`pcapkit.const.mh.option.Option`.
 
 .. autoclass:: pcapkit.vendor.mh.option.Option
    :members: FLAG, LINK
@@ -448,8 +415,7 @@ Mobility Header Types - for the MH Type Field in the Mobility Header
 
 .. module:: pcapkit.vendor.mh.packet
 
-This module contains the vendor crawler for **Mobility Header Types - for the MH Type field in the Mobility Header**,
-which is automatically generating :class:`pcapkit.const.mh.packet.Packet`.
+Generates :class:`pcapkit.const.mh.packet.Packet`.
 
 .. autoclass:: pcapkit.vendor.mh.packet.Packet
    :members: FLAG, LINK
@@ -460,8 +426,7 @@ Quality-of-Service Attribute Registry
 
 .. module:: pcapkit.vendor.mh.qos_attribute
 
-This module contains the vendor crawler for **Quality-of-Service Attribute Registry**,
-which is automatically generating :class:`pcapkit.const.mh.qos_attribute.QoSAttribute`.
+Generates :class:`pcapkit.const.mh.qos_attribute.QoSAttribute`.
 
 .. autoclass:: pcapkit.vendor.mh.qos_attribute.QoSAttribute
    :members: FLAG, LINK
@@ -472,8 +437,7 @@ Binding Revocation Acknowledgement Status Codes
 
 .. module:: pcapkit.vendor.mh.revocation_status_code
 
-This module contains the vendor crawler for **Binding Revocation Acknowledgement Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.revocation_status_code.RevocationStatusCode`.
+Generates :class:`pcapkit.const.mh.revocation_status_code.RevocationStatusCode`.
 
 .. autoclass:: pcapkit.vendor.mh.revocation_status_code.RevocationStatusCode
    :members: FLAG, LINK
@@ -484,8 +448,7 @@ Revocation Trigger Values
 
 .. module:: pcapkit.vendor.mh.revocation_trigger
 
-This module contains the vendor crawler for **Revocation Trigger Values**,
-which is automatically generating :class:`pcapkit.const.mh.revocation_trigger.RevocationTrigger`.
+Generates :class:`pcapkit.const.mh.revocation_trigger.RevocationTrigger`.
 
 .. autoclass:: pcapkit.vendor.mh.revocation_trigger.RevocationTrigger
    :members: FLAG, LINK
@@ -496,8 +459,7 @@ Status Codes
 
 .. module:: pcapkit.vendor.mh.status_code
 
-This module contains the vendor crawler for **Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.status_code.StatusCode`.
+Generates :class:`pcapkit.const.mh.status_code.StatusCode`.
 
 .. autoclass:: pcapkit.vendor.mh.status_code.StatusCode
    :members: FLAG, LINK
@@ -508,8 +470,7 @@ Traffic Selector Format
 
 .. module:: pcapkit.vendor.mh.traffic_selector
 
-This module contains the vendor crawler for **Traffic Selector Format**,
-which is automatically generating :class:`pcapkit.const.mh.traffic_selector.TrafficSelector`.
+Generates :class:`pcapkit.const.mh.traffic_selector.TrafficSelector`.
 
 .. autoclass:: pcapkit.vendor.mh.traffic_selector.TrafficSelector
    :members: FLAG, LINK
@@ -520,8 +481,7 @@ Update Notification Acknowledgement Status Registry
 
 .. module:: pcapkit.vendor.mh.upa_status
 
-This module contains the vendor crawler for **Update Notification Acknowledgement Status Registry**,
-which is automatically generating :class:`pcapkit.const.mh.upa_status.UpdateNotificationACKStatus`.
+Generates :class:`pcapkit.const.mh.upa_status.UpdateNotificationACKStatus`.
 
 .. autoclass:: pcapkit.vendor.mh.upa_status.UpdateNotificationACKStatus
    :members: FLAG, LINK
@@ -532,8 +492,7 @@ Update Notification Reasons Registry
 
 .. module:: pcapkit.vendor.mh.upn_reason
 
-This module contains the vendor crawler for **Update Notification Reasons Registry**,
-which is automatically generating :class:`pcapkit.const.mh.upn_reason.UpdateNotificationReason`.
+Generates :class:`pcapkit.const.mh.upn_reason.UpdateNotificationReason`.
 
 .. autoclass:: pcapkit.vendor.mh.upn_reason.UpdateNotificationReason
    :members: FLAG, LINK
@@ -544,8 +503,7 @@ Link-Layer Address (LLA) Option Code
 
 .. module:: pcapkit.vendor.mh.lla_code
 
-This module contains the vendor crawler for **Link-Layer Address (LLA) Option Code**,
-which is automatically generating :class:`pcapkit.const.mh.lla_code.LLACode`.
+Generates :class:`pcapkit.const.mh.lla_code.LLACode`.
 
 .. autoclass:: pcapkit.vendor.mh.lla_code.LLACode
    :members: FLAG
@@ -556,8 +514,7 @@ CGA Extension Type Tags
 
 .. module:: pcapkit.vendor.mh.cga_type
 
-This module contains the vendor crawler for **CGA Extension Type Tags**,
-which is automatically generating :class:`pcapkit.const.mh.cga_type.CGAType`.
+Generates :class:`pcapkit.const.mh.cga_type.CGAType`.
 
 .. autoclass:: pcapkit.vendor.mh.cga_type.CGAType
    :members: FLAG, LINK
@@ -568,8 +525,7 @@ CGA Extension Type Values
 
 .. module:: pcapkit.vendor.mh.cga_extension
 
-This module contains the vendor crawler for **CGA Extension Type Values**,
-which is automatically generating :class:`pcapkit.const.mh.cga_extension.CGAExtension`.
+Generates :class:`pcapkit.const.mh.cga_extension.CGAExtension`.
 
 .. autoclass:: pcapkit.vendor.mh.cga_extension.CGAExtension
    :members: FLAG, LINK
@@ -580,8 +536,7 @@ CGA SEC
 
 .. module:: pcapkit.vendor.mh.cga_sec
 
-This module contains the vendor crawler for **CGA SEC**,
-which is automatically generating :class:`pcapkit.const.mh.cga_sec.CGASec`.
+Generates :class:`pcapkit.const.mh.cga_sec.CGASec`.
 
 .. autoclass:: pcapkit.vendor.mh.cga_sec.CGASec
    :members: FLAG, LINK
@@ -592,8 +547,7 @@ Binding Error Status Code
 
 .. module:: pcapkit.vendor.mh.binding_error
 
-This module contains the vendor crawler for **Binding Error Status Code**,
-which is automatically generating :class:`pcapkit.const.mh.binding_error.BindingError`.
+Generates :class:`pcapkit.const.mh.binding_error.BindingError`.
 
 .. autoclass:: pcapkit.vendor.mh.binding_error.BindingError
    :members: FLAG

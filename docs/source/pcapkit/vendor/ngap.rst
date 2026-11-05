@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.ngap
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.ngap.protocol.NGAP` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`NGAP_ProcedureCode <pcapkit.vendor.ngap.procedure_code.ProcedureCode>`
@@ -15,18 +11,16 @@ vendor crawlers include:
    * - :class:`NGAP_ProtocolIE <pcapkit.vendor.ngap.protocol_ie.ProtocolIE>`
      - NGAP Protocol IE Identifiers [*]_
 
-Each sources the assignment from |pycrate|_'s already-installed, compiled NGAP
-specification rather than fetching a network registry: 3GPP publishes TS 38.413
-as a PDF, with no registry kept in step with it that a crawler could fetch
-(:issue:`880`).
+Each reads the assignment from |pycrate|_'s installed, compiled NGAP specification
+rather than fetching a registry: 3GPP publishes TS 38.413 as a PDF, with no
+registry kept in step with it (:issue:`880`).
 
 NGAP Elementary Procedure Codes
 ===============================
 
 .. module:: pcapkit.vendor.ngap.procedure_code
 
-This module contains the vendor crawler for **NGAP Elementary Procedure Codes**,
-which is automatically generating :class:`pcapkit.const.ngap.procedure_code.ProcedureCode`.
+Generates :class:`pcapkit.const.ngap.procedure_code.ProcedureCode`.
 
 .. autoclass:: pcapkit.vendor.ngap.procedure_code.ProcedureCode
    :members: FLAG, _request
@@ -37,8 +31,7 @@ NGAP Protocol IE Identifiers
 
 .. module:: pcapkit.vendor.ngap.protocol_ie
 
-This module contains the vendor crawler for **NGAP Protocol IE Identifiers**,
-which is automatically generating :class:`pcapkit.const.ngap.protocol_ie.ProtocolIE`.
+Generates :class:`pcapkit.const.ngap.protocol_ie.ProtocolIE`.
 
 .. autoclass:: pcapkit.vendor.ngap.protocol_ie.ProtocolIE
    :members: FLAG
