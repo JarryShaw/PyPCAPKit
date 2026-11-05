@@ -97,14 +97,17 @@ and :file:`pcapkit/vendor/ipx/socket.py`'s ``UNASSIGNED_RANGE_NAMES``.
    config:
      flowchart:
        curve: monotoneX
+       nodeSpacing: 30
+       wrappingWidth: 150
    ---
-   flowchart LR
+   flowchart TD
        LOOKUP["cls(value) finds no member"] --> MISSING["\_missing\_"]
        MISSING -->|"out of range, or no block covers it"| RAISE["ValueError"]
        MISSING -->|"CGAType only"| MINT["extend_enum<br/>permanent member, registry grows"]
        MISSING -->|"flag registries"| FLAG["super().\_missing\_<br/>pseudo-member cached in the value table only"]
        MISSING -->|"block label names a party"| SUFFIXED["\_unregistered\_member<br/>label + \_0x&lt;code&gt;"]
        MISSING -->|"block label names a procedure"| BARE["\_unregistered\_member<br/>bare block label"]
+       RAISE ~~~ MINT ~~~ FLAG ~~~ SUFFIXED ~~~ BARE
 
 The Criterion
 ~~~~~~~~~~~~~

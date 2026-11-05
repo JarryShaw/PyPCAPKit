@@ -121,10 +121,16 @@ count itself:
    grep -rl 'mermaid::' docs/source --include='*.rst' \
         --exclude='documentation.rst' | wc -l   # pages carrying one
 
-Every one is a bare ``.. mermaid::`` carrying no directive options, and every one is a
-``flowchart``: ``LR`` for a type hierarchy, and for a graph whose ``TD`` layout would run
-wider than the page or pile its edge labels on top of each other -- a decision with many
-outcomes, a trigger map -- and ``TD`` for the other sequences and decisions. **Quote a
+Every one is a bare ``.. mermaid::`` carrying no directive options, and every one is
+**laid out vertically**: a graph wider than the page is shrunk to fit it, and its text
+with it. A ``flowchart`` is ``TD``, a ``stateDiagram-v2`` sets ``direction TB``, and a
+``sequenceDiagram`` sets ``wrap``, ``width`` and ``actorMargin`` in its front matter so
+that its messages wrap between narrow participants. Where ``TD`` would set many nodes
+side by side -- the outcomes of a decision, a list of siblings -- an invisible link
+(``A ~~~ B``) stacks them instead, and a smaller ``nodeSpacing`` in the front matter pulls
+in a graph still a little wider than the page. ``LR`` is kept only where its layout is
+already taller than wide and a ``TD`` one measured wider: the largest type hierarchies and
+the workflow trigger map. **Quote a
 node label whose text Mermaid would otherwise try to parse**, and leave a bare identifier
 bare. That is what the exemplars do with *node* labels, and it follows the subject rather
 than the direction: every node label in the sequence, decision and trigger graphs is

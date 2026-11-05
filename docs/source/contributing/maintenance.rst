@@ -18,7 +18,14 @@ Actors and Roles
 
 .. mermaid::
 
-   flowchart LR
+   ---
+   config:
+     flowchart:
+       curve: monotoneX
+       nodeSpacing: 10
+       wrappingWidth: 150
+   ---
+   flowchart TD
        OWNER["Owner<br/>rules and merges"]
        GH["GitHub<br/>issues, pull requests, labels"]
        COORD["Coordinator<br/>main thread"]
@@ -37,6 +44,8 @@ Actors and Roles
        GH -->|"push and pull request events"| CI
        CI -->|"check runs, reports"| GH
        COORD -->|"checkpoint"| NOTES
+       CI ~~~ COORD
+       WORKER ~~~ NOTES
 
 .. list-table::
    :header-rows: 1
@@ -115,6 +124,13 @@ is scheduled and re-creates a missing one from its file.
 
 .. mermaid::
 
+   ---
+   config:
+     sequence:
+       wrap: true
+       width: 110
+       actorMargin: 15
+   ---
    sequenceDiagram
        participant S as Scheduler
        participant C as Coordinator
@@ -228,7 +244,7 @@ are the moves the loops make.
 .. mermaid::
 
    stateDiagram-v2
-       direction LR
+       direction TB
        state "pending" as P
        state "wip" as W
        state "blocked" as B
@@ -256,7 +272,7 @@ reporting the pull request as ready.
 .. mermaid::
 
    stateDiagram-v2
-       direction LR
+       direction TB
        state "review: pending" as RP
        state "review: running" as RR
        state "review: good-to-go" as RG
@@ -333,6 +349,13 @@ on it carries on.
 
 .. mermaid::
 
+   ---
+   config:
+     sequence:
+       wrap: true
+       width: 110
+       actorMargin: 15
+   ---
    sequenceDiagram
        participant C as Coordinator
        participant G as Issue or pull request

@@ -27,19 +27,20 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
 
 .. mermaid::
 
-   flowchart LR
+   flowchart TD
        A{{EngineMeta}} -.->|metaclass| B(EngineBase)
 
        subgraph built-in [Built-in Engines]
-           direction LR
+           direction TB
 
            PCAP
            PCAPNG
+           PCAP ~~~ PCAPNG
        end
        B --> built-in
 
        subgraph third-party [3rd Party Engines]
-           direction LR
+           direction TB
 
            Scapy
            DPKT
@@ -47,6 +48,7 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
            PyPCAP
            PCAP_CT
            PyPCAPFile
+           Scapy ~~~ DPKT ~~~ PyShark ~~~ PyPCAP ~~~ PCAP_CT ~~~ PyPCAPFile
        end
        B --> third-party
 

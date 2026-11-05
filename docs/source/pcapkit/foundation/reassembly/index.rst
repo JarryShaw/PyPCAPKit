@@ -28,7 +28,7 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
 
 .. mermaid::
 
-   flowchart LR
+   flowchart TD
        A{{ReassemblyMeta}} -.->|metaclass| B(ReassemblyBase)
 
        B --> IP & TCP & DTLS
@@ -36,6 +36,7 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
 
        B --> C(Reassembly)
        C --> D([user customisation ...])
+       IPv4 ~~~ C
 
        click A "reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"
        click B "reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase"

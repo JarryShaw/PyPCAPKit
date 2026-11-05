@@ -381,12 +381,20 @@ ogp_site_url = "https://pypcapkit.jarryshaw.me/"
 # box, so a tall class hierarchy shrank until its text could not be read and its
 # edges ran together. ``useMaxWidth`` has to be off as well, or Mermaid writes
 # ``width="100%"`` on the SVG in place of its own size and ``fit-content`` has
-# nothing to size the box from. ``startOnLoad`` repeats the plugin's default, which
-# this setting replaces wholesale. ``_static/mermaid.css`` centres a diagram
-# narrower than the page, as the full-width box did.
+# nothing to size the box from. Each diagram type reads its own copy, so it is off
+# for every type the pages use: left on, the state and sequence diagrams on the
+# maintenance page rendered 300px wide, at under a quarter of their natural size.
+# ``startOnLoad`` repeats the plugin's default, which this setting replaces
+# wholesale. ``_static/mermaid.css`` centres a diagram narrower than the page, as
+# the full-width box did.
 mermaid_width = 'fit-content'
 mermaid_height = 'auto'
-mermaid_init_config = {'startOnLoad': False, 'flowchart': {'useMaxWidth': False}}
+mermaid_init_config = {
+    'startOnLoad': False,
+    'flowchart': {'useMaxWidth': False},
+    'state': {'useMaxWidth': False},
+    'sequence': {'useMaxWidth': False},
+}
 html_css_files = ['mermaid.css']
 
 

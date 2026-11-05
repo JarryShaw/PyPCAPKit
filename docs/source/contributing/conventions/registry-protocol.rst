@@ -167,6 +167,7 @@ Which branch a key takes, and what each miss ends in:
        NAME -->|"hit,<br/>or miss, key is a registered value,<br/>or miss, default is a registered value"| OK["canonical member"]
        VALUE -->|"resolves, or \_missing\_ answers,<br/>or ValueError, default is a registered value"| OK
        VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>quiet, derives ValueError"]
+       KEYERR ~~~ VALUE
 
 Do not "improve" on the shape by making both misses report identically. Converting
 one into the other is exactly what :issue:`923` retired, and it was retired in several

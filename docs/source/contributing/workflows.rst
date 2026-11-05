@@ -257,7 +257,13 @@ than starting a new one.
 
 .. mermaid::
 
-   flowchart LR
+   ---
+   config:
+     flowchart:
+       curve: monotoneX
+       nodeSpacing: 20
+   ---
+   flowchart TD
        UT["Unit Tests<br/>unit-tests.yml"]
        VU["Vendor Update<br/>cron-vendor.yml"]
        CU["Conda Update<br/>cron-conda.yml"]
@@ -282,6 +288,9 @@ than starting a new one.
        GP -.-> CH
        CH -.-> UT
        CR -.-> UT
+
+       CC ~~~ VU ~~~ CU ~~~ GP
+       CH ~~~ EX & PC
 
 The double relationship between **Unit Tests** and the dependants that also
 call it is the part that reading a single file cannot show, and it is
