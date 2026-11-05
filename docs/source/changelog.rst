@@ -35,6 +35,9 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
+* **1.6.1** (2026-11-05) -- A documentation release: vertical diagrams, new ones
+  for the dispatch, extraction and reassembly paths, and a concision and accuracy
+  sweep. :doc:`Full changelog <changelog/1.6.1>`.
 * **1.6.0** (2026-11-05) -- Protocol pairs on a shared abstract base, dissectors
   for IGMP and DCCP, one package per protocol, and verified checksums.
   :doc:`Full changelog <changelog/1.6.0>`.
@@ -171,6 +174,7 @@ carries only the version being released.
    :hidden:
    :maxdepth: 1
 
+   changelog/1.6.1
    changelog/1.6.0
    changelog/1.5.1
    changelog/1.5.0
