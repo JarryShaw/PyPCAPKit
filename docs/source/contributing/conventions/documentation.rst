@@ -15,6 +15,22 @@ thread was the only place most of it lived. As on :ref:`process`, every ruling h
 **paraphrased rather than quoted**, on the owner's standing instruction there; the
 issue named beside a rule is where the original wording is.
 
+Concision
+~~~~~~~~~
+
+**Every page, docstring and comment is as short as it can be while staying
+accurate.** Cut restatement, hedging, narration, and any sentence that would survive
+deletion unnoticed; keep the specific fact, name and reference. Where the content is
+structure or a run of parallel items, a diagram (`Mermaid for Flows`_) or a table says
+it in less. This reaches the Markdown documents and every code comment, not only what
+Sphinx renders. Ruled on :issue:`719` and reaffirmed by the owner in session, recorded
+on :issue:`2787`.
+
+**Cut timed context** -- when a thing changed and what it used to do -- everywhere but
+version-bounded prose: changelog entries, breaking-change and deprecation notes, and the
+version directives. **Keep a design decision**: where a reader would otherwise undo a
+deliberate choice, its reason is tightened rather than removed. Ruled on :issue:`719`.
+
 Heading Case and Shape
 ~~~~~~~~~~~~~~~~~~~~~~
 
