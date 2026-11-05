@@ -41,6 +41,16 @@ An extraction runs in this order; a third-party engine implements its own
        FAIL["\_cleanup(failed=True), then re-raised<br/>input and engine released,<br/>tracing not finished"]
        NEXT["the frame: read on under auto,<br/>else returned to the caller"]
 
+       subgraph TRY ["inside the constructor's try"]
+           direction TB
+           MAGIC
+           RUN
+           HDR
+           OPEN
+           A
+           LOOP
+       end
+
        subgraph frame ["Per frame, in the built-in engines"]
            direction TB
            F1["parse the next frame, under layer= and protocol="]
@@ -72,7 +82,8 @@ An extraction runs in this order; a third-party engine implements its own
        RF -->|"EOFError or StopIteration<br/>ExtractionWarning: EOF reached"| EOF
        EOF -->|yes| RF
        EOF -->|no| CLEAN
-       RUN -.->|"raises"| FAIL
+       TRY -.->|"raises"| FAIL
+       RF -.->|"raises, under auto"| FAIL
 
        click SEL "engines/index.html#engine-selection"
        click NAME "extraction.html#pcapkit.foundation.extraction.Extractor.make_name"

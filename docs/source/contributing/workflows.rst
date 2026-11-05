@@ -1036,8 +1036,6 @@ required context:
        TL --> COV
        COV ~~~ IEP
        PT --> RC["required-checks<br/>Required checks passed"]
-       T --> RC
-       TL --> RC
        COV --> RC
        IEP --> RC
        T --> UO["unittest-ordering<br/>not on a pull request"]

@@ -67,27 +67,8 @@ before importing the engine. An engine that cannot run here therefore gives one
 warning naming the cause (a Python version, a missing :program:`tshark`, a
 missing :manpage:`libpcap(3)`, the wrong |pcap|_ distribution) and falls back
 to the :term:`default engine`, rather than raising from inside the third-party
-package:
-
-.. mermaid::
-
-   flowchart TD
-       REQ["engine=..."] --> KNOWN{"registered in<br/>Extractor.\_\_engine\_\_?"}
-       KNOWN -->|no| OWN{"'default' or 'pcapkit'?"}
-       OWN -->|no| W1["EngineWarning:<br/>unsupported extraction engine"]
-       OWN -->|yes| DEFAULT["default engine"]
-       W1 --> DEFAULT
-       KNOWN -->|yes| REASON{"unsupported_reason()<br/>gives a reason?"}
-       REASON -->|yes| W2["EngineWarning:<br/>not supported on this interpreter"]
-       W2 --> DEFAULT
-       REASON -->|no| IMPORT{"engine package imports?"}
-       IMPORT -->|no| W3["EngineWarning:<br/>not installed"]
-       W3 --> DEFAULT
-       IMPORT -->|yes| THIRD["third-party engine"]
-       DEFAULT --> MAGIC{"input's magic number"}
-       MAGIC -->|PCAP| PCAP["PCAP"]
-       MAGIC -->|PCAP-NG| PCAPNG["PCAPNG"]
-       MAGIC -->|other| ERR["FormatError"]
+package. The :ref:`engine selection graph <engine-selection>` draws each
+fallback in order.
 
 .. note::
 

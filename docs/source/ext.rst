@@ -234,6 +234,7 @@ code for its payload:
        LK -->|"RARP"| APP
        LB -->|"IPv4 or IPv6"| IN
        IN -->|"TCP, UDP, SCTP or DCCP"| TR
+       IN -->|"IPX_in_IP"| IPX
        IN -->|"OSPF"| APP
        TR & IPX -->|"a registered protocol"| APP
 
