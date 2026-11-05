@@ -51,7 +51,7 @@ Several protocols came in pairs that wanted a shared abstract base rather than t
 independent implementations, in the way
 :class:`~pcapkit.protocols.internet.ip.protocol.IP` and
 :class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec` cover their families.
-**Done** in 1.6.0, as wave 2 (see `Delivery Sequence`_ below):
+**Done** in 1.6.0:
 :class:`~pcapkit.protocols.internet.icmp.protocol.ICMP` is the base of ICMPv4 and
 ICMPv6, :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` that of the two
 Linux cooked-capture headers, and
@@ -323,6 +323,14 @@ complaint and yields nothing useful.
   registry, binds no port, so every DCCP payload is
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` until something calls
   :func:`~pcapkit.foundation.registry.protocols.transport.register_dccp`.
+* :class:`~pcapkit.const.linux.arphrd.ARPHRD` -- the values in :attr:`LinuxSLL.__proto__
+  <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>` (:issue:`2510`), each an
+  ``arphrd_type`` neither Linux cooked-capture header reads as an EtherType
+  (:issue:`2460`): ``NETLINK``, ``IPGRE``, ``IP6GRE``, ``FRAD`` and
+  ``IEEE80211_RADIOTAP``. Behind radiotap,
+  :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` dissects the MAC header
+  and keeps the frame body :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
+  (:issue:`2575`).
 * :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   -- the values in :attr:`SCTP.__proto__
   <pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__>`: PPIDs 60 and 66, each to
@@ -371,7 +379,10 @@ Some wanted only a table entry, because the dissector was already there:
   :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`, which reads the four-octet
   address family word and hands 2 to IPv4 and 24, 28 or 30 to IPv6
   (:issue:`1574`). ``RAW`` has no binding of its own: its bare IPv4 or IPv6 is
-  dispatched by the version nibble of the first octet (:issue:`1502`).
+  dispatched by the version nibble of the first octet (:issue:`1502`). Neither
+  ``NULL`` nor ``RAW`` stands in for an unknown link type: the toolkit raises for
+  a link-layer name it cannot resolve rather than defaulting to :attr:`LinkType.NULL
+  <pcapkit.const.reg.linktype.LinkType.NULL>`.
 
 Follow-ups to the bindings above:
 
@@ -846,8 +857,8 @@ reassembly, and the ``dpkt`` and ``scapy`` engines disable DTLS reassembly.
 Checksum and Integrity Verification
 -----------------------------------
 
-**Partly done.** The one's-complement half shipped in 1.6.0, and of the
-cryptographic half ESP's is done and HIP's is queued for wave 3.
+**Partly done.** The one's-complement half shipped in 1.6.0; of the cryptographic
+half, ESP's is done and HIP's is open.
 
 These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.link.gre.protocol.GRE`,
@@ -1000,8 +1011,7 @@ offload heuristic on :issue:`2470`.
   DCCP has no checksum to leave out, and Linux computed it in software rather
   than offloading it. Settled at implementation (:issue:`2489`).
 
-The cryptographic half is queued for **wave 3**, the next wave, and ESP has
-already laid the groundwork.
+HIP's cryptographic half is open, on the groundwork ESP has already laid.
 
 Deterministic Construction Arguments
 ------------------------------------
@@ -1063,38 +1073,38 @@ way.
 Release Plan
 ------------
 
-:data:`pcapkit.__version__` is the current version, and each release closes a
-wave of the `Delivery Sequence`_ below.
+:data:`pcapkit.__version__` is the current version, and editing it is what starts
+a release.
 
-1.6.0 — Wave 2, in One Step
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1.6.0, in One Step
+~~~~~~~~~~~~~~~~~~
 
-``1.6.0`` closes wave 2 in one step, with no beta. Its version edit rides in
+``1.6.0`` is released in one step, with no beta. Its version edit rides in
 :pr:`2483` with the 1.6.0 changelog, so merging that pull request is the single
 push that starts the release, as ruled in review of :pr:`2483` (:issue:`2449`).
 As a final version it takes the ``main`` Anaconda label and a full GitHub
-release, as step 2 of `1.5.0 — Wave 1, in Two Steps`_ did.
+release, as step 2 of `1.5.0, in Two Steps`_ did.
 
-1.5.0 — Wave 1, in Two Steps
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1.5.0, in Two Steps
+~~~~~~~~~~~~~~~~~~~
 
-The 1.5.0 release was sequenced against wave 1 in two deliberate steps:
+The 1.5.0 release came in two deliberate steps:
 
-#. **A beta —** ``1.5.0b1`` **— when wave 1's remaining issues are closed.**
-   *Done.* Wave 1's feature work had landed already; what remained was the
+#. **A beta —** ``1.5.0b1`` **— when the remaining defects are closed.**
+   *Done.* The feature work had landed already; what remained was the
    defect tail in `the issue tracker
    <https://github.com/JarryShaw/PyPCAPKit/issues>`__, and closing it earned a
-   beta rather than a final release, because the consistency sweep below had not
-   run yet and was expected to find things.
-#. **The official** ``1.5.0`` **when the post-wave-1 consistency sweep is done.**
-   *Done.* The sweep is described under `Delivery Sequence`_ below — prose
-   against code, missing tests, unaligned changes, packet formats against the
-   specifications, and duplicated logic. Its whole point was to find what
+   beta rather than a final release, because the consistency sweep of step 2 had
+   not run yet and was expected to find things.
+#. **The official** ``1.5.0`` **when a library-wide consistency sweep is done.**
+   *Done.* The sweep checked prose against code, missing tests, unaligned
+   changes, packet formats against the specifications, and duplicated logic,
+   each finding reproduced before it was filed. Its whole point was to find what
    one-at-a-time defect work does not, and its verified findings are closed:
    :issue:`490`, :issue:`491`, :issue:`492`, :issue:`493`, :issue:`494`,
    :issue:`495` and :issue:`496`, alongside the prose strand's own
-   :issue:`719`. A later defect wave made the prose strand's ground move again,
-   so it ran a second time as :issue:`1103`; that is closed too. ``1.5.0``
+   :issue:`719`. A later round of defect fixes moved the prose strand's ground
+   again, so it ran a second time as :issue:`1103`; that is closed too. ``1.5.0``
    shipped once this work was in.
 
 **The version string is the release button, so it is worth knowing exactly what
@@ -1164,182 +1174,22 @@ the workflow itself; editing the version string is the whole of it, which is
 precisely why it should be its own commit rather than a line folded into
 something else.
 
-Delivery Sequence
------------------
+Remaining Work
+--------------
 
-The items above are ordered by subject rather than by when anyone intends to do
-them. This section records the intended **order**, so that a contributor can see
-what is being worked on, what is queued behind it, and — more usefully — which
-items are queued because they *depend* on something rather than merely because
-nobody has started them.
+The items above are ordered by subject, and each says what it leaves open. This
+section adds the open work that spans several of them, and says which items
+*depend* on something rather than merely waiting for someone to start them. Nothing here is claimed: if you want an item,
+say so in the `discussion thread
+<https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__.
 
-It is a sequencing note, not a commitment: nothing here is claimed, and an item
-being in a later wave is not a reason to leave it alone if you want it now. Say
-so in the `discussion thread
-<https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ and it moves.
+**The remaining protocols** from the list under `More Protocols, More!!!`_ above,
+taken three or four at a time. QUIC, DSL, FDDI and ISDN come last: QUIC because it
+is really HTTP/3 over a new transport and wants that settled first, the rest
+because a capture in the wild is rare enough that the work buys little until the
+commoner protocols are in.
 
-**Wave 1 — done.** The Mobility Header registry completion, the protocol
-bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
-:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` C-Tag/S-Tag split, the option
-round-trip coverage harness, and reassembly's :rfc:`8200` timeout with
-bidirectional flow tracing. Its defect tail closed out through the
-post-wave-1 consistency sweep described under
-`1.5.0 — Wave 1, in Two Steps`_ above.
-
-**Between wave 1 and wave 2 — a library-wide consistency sweep, done**, its
-findings listed under `1.5.0 — Wave 1, in Two Steps`_ above. Clearing
-defects one at a time, each found because something else was being worked on
-nearby, is a poor way to find the rest of them. So the sweep is deliberate, and
-divided into strands:
-
-* **Prose against code.** Docstrings, the README, and inline comments checked
-  against what the code does. A docstring outliving the thing it described is a
-  demonstrated failure mode here rather than a hypothetical one. Includes the
-  rule that a docstring names the real defining module rather than the
-  re-export.
-* **Missing tests.** Not coverage percentage, which says nothing useful here, but
-  named gaps: registry entries with no round-trip case, error paths that no test
-  reaches, and behaviour asserted only in prose. The option round-trip harness
-  already enumerates its own coverage and fails when a registered code has no
-  case; the sweep asks which *other* registries deserve the same treatment.
-* **Unaligned changes.** Drift where one half of a pair moved and the other did
-  not — a schema whose data model disagrees with it, a maker whose annotation
-  admits what its schema cannot hold, an ``EXPECTED_FAILURES`` entry naming a
-  case that no longer fails. Several wave 1 defects were exactly this shape.
-* **Packet formats against the specifications.** The most valuable strand, and
-  the one with the clearest evidence behind it: reading the RFC field-by-field
-  against the schema is what produced
-  :issue:`472` — HIP
-  parameters sizing their list entries at one octet where :rfc:`5770` §5.4 and
-  :rfc:`7402` §5.1.2 specify sixteen bits — and the same method then *cleared*
-  the further
-  ``EnumField(length=1)`` sites in the same file against :rfc:`7401`,
-  :rfc:`8002`, :rfc:`8003`, :rfc:`5770` and :rfc:`6078`. It both finds real
-  defects and retires suspicion, which is why it is worth doing exhaustively
-  rather than opportunistically.
-* **Duplicated logic that wants a shared module.** The same method or the same
-  arithmetic written out in several protocols, where one definition would do.
-  This strand has the sharpest evidence of them all, because duplication here has
-  already *caused* defects rather than merely offended tidiness:
-
-  - :issue:`487` existed because
-    :meth:`IPv6_Route.make() <pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.make>`
-    computed ``Hdr Ext Len`` in **separate** branches with different wrong units, and the
-    read side computed the inverse elsewhere with yet another. The fix was not new
-    arithmetic but one helper per direction, each documenting the :rfc:`8200#section-4.4`
-    unit and saying what its counterpart is.
-  - :issue:`483` was the scapy
-    toolkit adapter passing a fragment offset unscaled where every sibling
-    adapter scaled it. Every adapter restates the same field mapping, so a
-    convention that holds in all but one is invisible until a capture is
-    wrong.
-
-  So the strand is not a style pass. Look for arithmetic that encodes a wire
-  unit, field-mapping tables restated per engine, and guards of the same shape
-  repeated per registered type — and where extraction is not worth it, say so
-  with the reason rather than leaving the duplication unexplained. Note also that
-  two candidates may look alike and differ deliberately: TCP and IPv4 reassembly
-  resolve overlaps in *opposite* directions because :rfc:`791` and :rfc:`9293`
-  §3.10 specify opposite resolutions, so "these two functions are nearly
-  identical" is a question to answer against the specification, not a defect on
-  its face.
-
-The sweep's output is **verified issues, not a list of suspicions** — each entry
-reproduced before it is filed, with the reproduction in the issue. An audit that
-files what it merely suspects transfers the work rather than doing it, and this
-project has already had to correct a finding whose count and whose diagnosis were
-both wrong when re-derived.
-
-**Done ahead of wave 2, in 1.5.0 — handlers for the** ``DLT_NULL`` **and**
-``DLT_RAW`` **link types.** Both are genuine DLTs that a capture can legitimately
-be rooted in — ``DLT_NULL`` (0) is BSD's loopback encapsulation, ``DLT_RAW`` (101)
-an IP packet with no link header at all.
-:class:`~pcapkit.protocols.link.loopback.protocol.Loopback` dissects ``DLT_NULL`` and
-``DLT_LOOP`` (:issue:`1574`), and the frame dispatcher reads ``DLT_RAW`` as IPv4
-or IPv6 by its version nibble (:issue:`1502`).
-Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown
-link type", which is why the toolkit raises for an unresolvable link-layer
-name instead of defaulting to :attr:`LinkType.NULL
-<pcapkit.const.reg.linktype.LinkType.NULL>`.
-
-**Wave 2 — done, released in 1.6.0** (closed as ruled on :issue:`2564`): the
-protocol pairs that wanted a shared abstract base, per `More Protocols, More!!!`_
-above -- **ICMP with ICMPv6**, **TLS/SSL with DTLS** and ``LINUX_SLL`` with
-``LINUX_SLL2`` -- plus **IGMP** and **DCCP** on their own. These were grouped
-because the shared-base question is the design work and doing either half of a
-pair alone would answer it twice.
-
-**Done within wave 2 — ICMP/ICMPv6 shared base.** :class:`~pcapkit.protocols.internet.icmp.protocol.ICMP`
-is the abstract base :class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` and
-:class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` share for selector composition
-(:issue:`2436`); each implements its own message-type parsing independently rather than
-through a shared method body. The two are distinguished by whether they carry pseudo-header
-checksums (ICMPv6 does; ICMPv4 does not), both verified and computed (:issue:`2470`).
-
-**Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
-what is decoded: the shared :class:`~pcapkit.protocols.application.ssl.protocol.SSL`
-base, SSLv2 (:issue:`2457`, :issue:`2567`), TLS, DTLS, handshake message
-framing, the hello and
-``EncryptedExtensions`` extension lists with their registered extension bodies
-(:issue:`2514`), and handshake-fragment reassembly (:issue:`2440`).
-
-**Done within wave 2 — the** ``LINUX_SLL`` **and** ``LINUX_SLL2`` **pair.**
-``DLT_LINUX_SLL`` (113) with ``DLT_LINUX_SLL2`` (276) is the Linux "cooked" capture
-header every ``tcpdump -i any`` capture uses.
-:class:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1` and
-:class:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2` dissect the two
-variants on the :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` base
-(:issue:`2438`). The ``arphrd_type`` values
-neither header treats as carrying an EtherType each have a dissector of their own
-(:issue:`2460`), dispatched through :attr:`LinuxSLL.__proto__
-<pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>` (:issue:`2510`):
-``NETLINK`` to :class:`~pcapkit.protocols.link.netlink.protocol.Netlink`, ``IPGRE`` and
-``IP6GRE`` to :class:`~pcapkit.protocols.link.gre.protocol.GRE`, ``FRAD`` to
-:class:`~pcapkit.protocols.link.frad.protocol.FRAD`, and ``IEEE80211_RADIOTAP`` to
-:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` (:issue:`2502`), which decodes its
-optional fields (:issue:`2576`) and hands the 802.11 frame to
-:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`, which dissects the MAC
-header and keeps the frame body :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
-(:issue:`2575`).
-
-**IGMP — done within wave 2** (:issue:`2439`, :issue:`2448`).
-The three concrete classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.protocol.IGMPv1>`,
-:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.protocol.IGMPv2>` and
-:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.protocol.IGMPv3>` share one read path on
-the abstract :class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` base, which
-:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP._classify` dispatches to the right
-one. IGMPv1/v2 share one 8-octet message shape; IGMPv3 (:rfc:`3376`) adds the
-Membership Query's source-list extension and the Membership Report's
-group-record list, each a shape of its own.
-
-**DCCP — done within wave 2** (:issue:`2489`).
-:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` dissects every :rfc:`4340` packet
-type and DCCP-Listen (:rfc:`5596`), with short and long sequence numbers, and the
-options :rfc:`4340` defines; its checksum is verified and computed over
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`, as `Checksum and
-Integrity Verification`_ above describes. The Data Checksum option's CRC-32c is
-recorded and not checked.
-
-**IP pseudo-header — done in 1.6.0** (:issue:`2471`).
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo` is the
-**pseudo-protocol class** for the IP family the owner settled on, serving both
-the parsing and the constructing path, rather than a back-reference from a
-parsed protocol to its parent.
-
-**Deterministic construction arguments — done in 1.6.0** (:issue:`2594`). See
-`Deterministic Construction Arguments`_ above: every ``make()`` takes an enum
-field as the member or an ``int``, with no string-to-enum inference and no
-``X_default``, ``X_namespace`` and ``X_reversed`` keywords behind it, and
-:meth:`Protocol.resolve_index <pcapkit.protocols.protocol.Protocol.resolve_index>`
-resolves a bare string first.
-
-**Wave 3 — next: the remaining protocols** from the same list, taken three or four at a
-time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
-new transport and wants that settled first, the rest because a capture in
-the wild is rare enough that the work buys little until the commoner protocols
-are in.
-
-**Wave 3 — per-entry coverage of the option and parameter registries.** The
+**Per-entry coverage of the option and parameter registries.** The
 option, parameter, block and frame registries are *enumerated* but not
 *implemented* throughout: a code can be registered, and named, and still have no
 working per-entry read/make pair behind it. The goal of this item is to close
@@ -1376,42 +1226,37 @@ generic handlers and parse as opaque.
 
 This is deliberately **not** the same request as the ``__proto__`` dispatch
 registries. Those name whole protocols, so closing a gap there means
-implementing a dissector — bounded by protocol work that already has its own
-waves above. The option and parameter registries are per-entry formats inside
-protocols that already exist, so the work is self-contained and does not wait on
-anything. Their enumerating harness already exists and already fails when a
+implementing a dissector, which is the protocol work above. The option and
+parameter registries are per-entry formats inside protocols that already exist,
+so the work is self-contained and does not wait on anything. Their enumerating harness already exists and already fails when a
 registered code has no case, which is how the shortfall is known at all; what is
 missing is the implementations behind the codes, not the accounting of them.
 :file:`tests/protocols/test_dispatch_registry_unit.py` gives the ``__proto__``
 family the same accounting for the separate question of whether a registered
 protocol's dispatch reaches it.
 
-**Queued for wave 3 — cryptographic integrity verification.** See `Checksum
-and Integrity Verification`_ above. HIP's ``HIP_MAC``/``RVS_HMAC``/``RELAY_HMAC``
-and its signature parameters could start whenever, since
+**Cryptographic integrity verification.** See `Checksum and Integrity
+Verification`_ above. HIP's ``HIP_MAC``/``RVS_HMAC``/``RELAY_HMAC`` and its
+signature parameters can be taken up at any point, since
 :class:`~pcapkit.protocols.internet.esp.protocol.ESP` has already established both the
-keying-context channel and the report-rather-than-raise policy. The
-one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is **done** in
-1.6.0 (:issue:`2470`, :issue:`2472` to :issue:`2475`), and DCCP's with it (:issue:`2489`),
-as are IGMP's and GRE's (:issue:`2618`).
+keying-context channel and the report-rather-than-raise policy.
 
-**Sequenced after wave 2 — the Mobility Header sub-layer registry.** Several
+**The Mobility Header sub-layer registry.** Several
 mobility options carry a payload belonging to another protocol, and those
 payloads want carrying as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` through a
 per-payload registry rather than as bare :obj:`bytes` — see `Mobility Header`_
 above, which describes the payloads in question and why a registry of their own
 is wanted instead of
-:meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. It was
-sequenced *after* wave 2 rather than by preference: the multicast options embed
-:rfc:`9777` MLD (which obsoletes :rfc:`3810`; :rfc:`2710` for MLDv1), which
-rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group records. ICMPv6 and
-IGMP, IGMPv3 included (:issue:`2448`), both shipped in 1.6.0;
-MLD itself is a follow-up to ICMPv6 (see `More Protocols, More!!!`_
-above). Landing the registry first would give a dispatch table with
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw` to register. The
-counter-argument is real though, and worth weighing rather than dismissing: changing the
+:meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. Its
+prerequisites are the protocols the multicast options embed: :rfc:`9777` MLD
+(which obsoletes :rfc:`3810`; :rfc:`2710` for MLDv1), which rides in **ICMPv6**,
+and :rfc:`3376` **IGMPv3** group records. ICMPv6 and IGMPv3 are implemented
+(:issue:`2448`); MLD is not (see `More Protocols, More!!!`_ above), so a registry
+landed first would have only :class:`~pcapkit.protocols.misc.raw.protocol.Raw` to
+register for it. The
+counter-argument to waiting is real though, and worth weighing rather than dismissing: changing the
 parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the
 disruptive half, since it changes what existing captures dump to, so there is a case for
 taking that churn early and registering dissectors later. The remaining format, the
-:rfc:`6088` traffic selectors of :rfc:`6089` and :rfc:`7222`, has no wave at all — it is a
-registry of its own and nobody has claimed it.
+:rfc:`6088` traffic selectors of :rfc:`6089` and :rfc:`7222`, is a registry of
+its own, and nobody has claimed it.

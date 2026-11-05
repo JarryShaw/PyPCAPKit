@@ -1,10 +1,10 @@
 1.6.0 -- 2026-11-05
 ===================
 
-Wave 2 of the roadmap, per the contributing docs' enhancement-proposal page: the
-protocol pairs that wanted a shared abstract base, the Linux cooked-capture headers
-among them, and the two that simply had no dissector at all. Alongside it come a
-dissector for each ``arphrd_type`` those headers do not read as an EtherType, the IP
+1.6.0 puts the protocol pairs that wanted a shared abstract base on one: ICMPv4
+and ICMPv6, the two Linux cooked-capture headers, and SSLv2, TLS and DTLS. It adds
+dissectors for IGMP and DCCP, which had none, and for each ``arphrd_type`` the
+cooked-capture headers do not read as an EtherType, along with the IP
 pseudo-header, verified and computed one's-complement checksums, stricter
 handling of a malformed IPv6 extension header, and HTTP dispatched to its
 HTTP/1 and HTTP/2 classes under the RFC names.
