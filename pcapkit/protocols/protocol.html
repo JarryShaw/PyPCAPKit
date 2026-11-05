@@ -343,6 +343,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/inspect.html">Abstract Classes</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -2440,11 +2441,11 @@ An explicit <code class="docutils literal notranslate"><span class="pre">schema<
 under its upper-cased class name, once
 <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__()</span></code></a> has accepted its <code class="docutils literal notranslate"><span class="pre">code</span></code>,
 whereas <code class="docutils literal notranslate"><span class="pre">code</span></code>’s next-layer dispatch registration is opt-in. An
-abstract subclass, as <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.isabstract" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.isabstract()</span></code></a> reports it, is not
-named, and nor is a class deriving <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> without this
-class, as every built-in protocol does. A name already holding another
-entry keeps it, and the clash is reported as a
-<a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>; only
+abstract subclass, as <a class="reference internal" href="../utilities/inspect.html#pcapkit.utilities.inspect.isabstract" title="pcapkit.utilities.inspect.isabstract"><code class="xref py py-func docutils literal notranslate"><span class="pre">isabstract()</span></code></a>
+reports it, is not named, and nor is a class deriving
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> without this class, as every built-in protocol
+does. A name already holding another entry keeps it, and the clash is
+reported as a <a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>; only
 <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a> replaces an
 entry. A class meeting the <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
 that names its own module and name is no clash, and the descriptor

@@ -336,6 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -613,6 +614,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">ProtocolNotFound</span><span class="p">,</span>
                                           <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span>
                                           <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">isabstract</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span>
                                         <span class="n">hold_warnings</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
@@ -4017,11 +4019,11 @@
 <span class="sd">        under its upper-cased class name, once</span>
 <span class="sd">        :meth:`ProtocolBase.__init_subclass__` has accepted its ``code``,</span>
 <span class="sd">        whereas ``code``'s next-layer dispatch registration is opt-in. An</span>
-<span class="sd">        abstract subclass, as :func:`inspect.isabstract` reports it, is not</span>
-<span class="sd">        named, and nor is a class deriving :class:`ProtocolBase` without this</span>
-<span class="sd">        class, as every built-in protocol does. A name already holding another</span>
-<span class="sd">        entry keeps it, and the clash is reported as a</span>
-<span class="sd">        :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only</span>
+<span class="sd">        abstract subclass, as :func:`~pcapkit.utilities.inspect.isabstract`</span>
+<span class="sd">        reports it, is not named, and nor is a class deriving</span>
+<span class="sd">        :class:`ProtocolBase` without this class, as every built-in protocol</span>
+<span class="sd">        does. A name already holding another entry keeps it, and the clash is</span>
+<span class="sd">        reported as a :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only</span>
 <span class="sd">        :meth:`ProtocolBase.register_protocol</span>
 <span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase.register_protocol&gt;` replaces an</span>
 <span class="sd">        entry. A class meeting the :class:`~pcapkit.corekit.module.ModuleDescriptor`</span>
@@ -4045,7 +4047,9 @@
         <span class="c1"># once its ``code`` is accepted, so a refused one names nothing, and</span>
         <span class="c1"># keeps off a name already held. A class meeting the descriptor naming</span>
         <span class="c1"># its own module and name leaves it, to be resolved on lookup.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isabstract</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="c1"># #2784: not inspect.isabstract, which reads __flags__: GraalPy freezes them</span>
+        <span class="c1"># at that read, so the abstract flag ABCMeta sets next would never show.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isabstract</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="n">incumbent</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">__registry__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">incumbent</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span>
