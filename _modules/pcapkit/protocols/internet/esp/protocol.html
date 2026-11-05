@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -1379,15 +1380,8 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid SPI: </span><span class="si">{</span><span class="n">spi</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="c1"># NOTE: checked before the ``ipaddress.ip_address`` call below, for</span>
-            <span class="c1"># the same reason as ``_reject_bool`` in</span>
-            <span class="c1"># ``pcapkit.corekit.schema.ipaddress`` (this module calls</span>
-            <span class="c1"># ``ipaddress.ip_address`` directly rather than through a Field, so</span>
-            <span class="c1"># it needs its own copy of the guard): ``bool`` is an ``int``</span>
-            <span class="c1"># subclass, and ``ipaddress.ip_address()`` treats any ``int`` below</span>
-            <span class="c1"># ``2**32`` as IPv4 -- so without this check, ``destination=True``</span>
-            <span class="c1"># would silently become ``IPv4Address('0.0.0.1')``, with no</span>
-            <span class="c1"># exception and no warning.</span>
+            <span class="c1"># NOTE: ``ip_address`` is called directly, not through a field, so the field's ``bool``</span>
+            <span class="c1"># guard is repeated; ``True`` would otherwise become ``IPv4Address('0.0.0.1')``.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'ESP: invalid destination: must not be a bool, not </span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1"> -- '</span>
                 <span class="sa">f</span><span class="s1">'pass int(</span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
@@ -1421,9 +1415,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Integrity</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="n">expected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrity_suite</span><span class="o">.</span><span class="n">key_size</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__integrity_key__</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected</span><span class="p">:</span>
-                <span class="c1"># NOTE: #2411 -- the ``ESP:`` prefix matters more here than on</span>
-                <span class="c1"># the exceptions above: ``warn`` reports the caller's frame, so</span>
-                <span class="c1"># the message text is the only thing that names the protocol.</span>
+                <span class="c1"># NOTE: #2411 -- ``warn`` reports the caller's frame, so here, more than on the</span>
+                <span class="c1"># exceptions above, the ``ESP:`` prefix is all that names the protocol.</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid integrity key: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">integrity</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> expects a '</span>
                      <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s1">-octet key, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__integrity_key__</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets; '</span>
                      <span class="sa">f</span><span class="s1">'the ICV will very likely fail to verify'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
@@ -1767,13 +1760,8 @@
                 <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">warning</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="c1"># NOTE: The ICV length comes from the security association, not from</span>
-        <span class="c1"># |cryptography|_, so the split and the truncation check are both</span>
-        <span class="c1"># possible whether or not the algorithms are available. Doing them</span>
-        <span class="c1"># first means a truncated packet is reported as TRUNCATED rather than</span>
-        <span class="c1"># masked as UNSUPPORTED, and that an UNSUPPORTED packet still reports</span>
-        <span class="c1"># the ``icv`` it carries -- which for a combined-mode algorithm is the</span>
-        <span class="c1"># authentication tag a caller may well want to see.</span>
+        <span class="c1"># NOTE: The ICV length comes from the association, so splitting first reports a truncated</span>
+        <span class="c1"># packet as TRUNCATED, not UNSUPPORTED, and an UNSUPPORTED one still carries its ``icv``.</span>
         <span class="n">icv_length</span> <span class="o">=</span> <span class="n">association</span><span class="o">.</span><span class="n">icv_length</span>
         <span class="k">if</span> <span class="n">icv_length</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opaque</span><span class="p">(</span>
@@ -2196,7 +2184,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

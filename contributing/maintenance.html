@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -572,13 +573,11 @@
 <span id="id1"></span><h1>Maintenance Workflow<a class="headerlink" href="#maintenance-workflow" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Between releases the repository is maintained by a <strong>coordinator</strong> session: it
-watches the board on a schedule, dispatches agents to do the work, verifies what
-they return, and is the only thing that writes to GitHub. This page is that loop
-written down – as a brief another agent can take over, and as a record of what
-the owner has established. What the labels mean is on <a class="reference internal" href="conventions/process.html#process"><span class="std std-ref">Running the Repository</span></a>, how CI is
-wired on <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>, and the release itself on <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>; this page
-links to them rather than restating them.</p>
+<p>Between releases a <strong>coordinator</strong> session maintains the repository: it watches
+the board on a schedule, dispatches agents to do the work, verifies what they
+return, and alone writes to GitHub. This page is that loop, as a brief another
+agent can take over and a record of what the owner has established. The labels are
+on <a class="reference internal" href="conventions/process.html#process"><span class="std std-ref">Running the Repository</span></a>, CI on <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a> and the release on <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>.</p>
 </div>
 <section id="actors-and-roles">
 <h2>Actors and Roles<a class="headerlink" href="#actors-and-roles" title="Link to this heading">¶</a></h2>
@@ -656,18 +655,17 @@ inside a time budget, returning a verdict.</p></td>
 </table>
 </div>
 <p><strong>One GitHub account posts everything.</strong> The coordinator posts under the owner’s
-login, so a comment from that account may be the coordinator’s rather than the
-owner’s, and an agent reading a thread cannot tell them apart. Every brief says so,
-and says that the coordinator sets the labels by hand, so that no agent reads them as
-automation. The coordinator itself tells the two apart by the ids of its own posts,
-which the post gate records (<a class="reference internal" href="#helper-scripts">Helper Scripts</a>).</p>
+login, so an agent reading a thread cannot tell their comments apart. Every brief says
+so, and that the coordinator sets the labels by hand, so no agent reads them as
+automation. The coordinator tells the two apart by the ids of its own posts, which the
+post gate records (<a class="reference internal" href="#helper-scripts">Helper Scripts</a>).</p>
 </section>
 <section id="the-recurring-loops">
 <h2>The Recurring Loops<a class="headerlink" href="#the-recurring-loops" title="Link to this heading">¶</a></h2>
 <p>Each loop is a scheduled prompt that only points at a policy file, so the file is what
-gets edited. The scheduler expires a recurring job after seven days without notice,
-which once left the owner’s answers unread; the sweep therefore checks that every loop
-is scheduled and re-creates a missing one from its file.</p>
+gets edited. The scheduler silently expires a recurring job after seven days, which
+once left the owner’s answers unread, so the sweep checks every loop is scheduled and
+re-creates a missing one from its file.</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -814,20 +812,20 @@ possible defect, root-caused and filed like a red check.</p></li>
 </section>
 <section id="notes-checkpoint">
 <h3>Notes Checkpoint<a class="headerlink" href="#notes-checkpoint" title="Link to this heading">¶</a></h3>
-<p>The coordinator is the store’s only writer; no agent touches it. A checkpoint records
-what is expensive to rediscover – pull requests with their head shas, rulings
-paraphrased, every refuted claim including the coordinator’s own, and the open threads
-with what each live agent is doing – not a transcript. It makes at most one append per
-tick. A failed append goes to a local backlog and bumps a failure streak; after ten
-failures in a row the coordinator opens a continuation note and repoints the loop at
-it. A write that errors may still have committed, so the note is searched for the
-heading just written before anything is retried.</p>
+<p>The coordinator is the store’s only writer. A checkpoint records what is expensive to
+rediscover – pull requests with their head shas, rulings paraphrased, every refuted
+claim including the coordinator’s own, and the open threads with what each live agent
+is doing – not a transcript, in at most one append per tick. A failed append goes to a
+local backlog and bumps a failure streak; after ten failures in a row the coordinator
+opens a continuation note and repoints the loop at it. A write that errors may still
+have committed, so the note is searched for the heading just written before any
+retry.</p>
 </section>
 </section>
 <section id="label-state-machines">
 <h2>Label State Machines<a class="headerlink" href="#label-state-machines" title="Link to this heading">¶</a></h2>
 <p>The meanings, and the one legal pair of state labels, are on <a class="reference internal" href="conventions/process.html#process"><span class="std std-ref">Running the Repository</span></a>; these
-are the moves the loops make.</p>
+are the loops’ moves.</p>
 <pre  class="mermaid">
         stateDiagram-v2
     direction TB
@@ -1027,7 +1025,10 @@ docstrings and comments, under <code class="file docutils literal notranslate"><
 process pages included – or only tests needs no issue and no pull request, and is
 pushed straight to <code class="docutils literal notranslate"><span class="pre">main</span></code>. A pull request is for a change to code or behaviour. A fix
 for a red <code class="docutils literal notranslate"><span class="pre">main</span></code> goes direct, whatever it touches. Every direct push waits out the
-release freeze below, and first checks that no open pull request edits the same hunk.</p>
+release freeze below, and first checks that no open pull request edits the same hunk.
+It lands as one commit per logical change, never a stack of worker or fix commits, its
+squashed tree checked against the verified tree. All of <code class="docutils literal notranslate"><span class="pre">tests/project/</span></code> runs first,
+not only the docs tests.</p>
 <p><strong>The release freeze.</strong> Once the push that moves <code class="docutils literal notranslate"><span class="pre">__version__</span></code> lands, nothing else
 does until Create Release’s <code class="docutils literal notranslate"><span class="pre">github</span></code> job is waiting on approval (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>),
 and that commit’s own Unit Tests run is never cancelled. A push mid-chain makes
@@ -1438,7 +1439,7 @@ the Main-CI Watch</a>)</p></td>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../_static/documentation_options.js?v=662e1299"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

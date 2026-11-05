@@ -51,10 +51,9 @@ standalone form is an IPsec one.
 The Shared-Registry Trap
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-**This is the part most often got wrong**, so it comes before the criterion. The
-obvious way to decide whether a header is "usable as a standalone protocol"
-is to ask what the library's own dispatch already allows. That answer is useless, and
-measurably so:
+**This is the part most often got wrong.** The obvious way to decide whether a header
+is "usable as a standalone protocol" is to ask what the library's own dispatch already
+allows. That answer is useless, and measurably so:
 
 .. code-block:: pycon
 
@@ -78,13 +77,9 @@ whether the same header is also a protocol in its own right.
 The IPv4-Payload Test
 ~~~~~~~~~~~~~~~~~~~~~
 
-So the census is read out of the specifications, on the owner's instruction: work
-through the RFCs to establish, for each defined IPv6 extension header, whether it is
-extension-header-only or a standalone protocol as well, and decide from that whether it
-inherits :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` alone or names additional bases.
-
-And the limb that decides is **whether a primary source shows the header carried
-directly as an IPv4 payload**:
+So each header is classified from its RFCs, on the owner's instruction, and the test
+that decides is **whether a primary source shows the header carried directly as an
+IPv4 payload**:
 
 *  :class:`~pcapkit.protocols.internet.ah.protocol.AH` -- :rfc:`4302#section-3.1.1`, *"In the
    context of IPv4, this calls for placing AH after the IP header"*, with a
@@ -140,8 +135,9 @@ held to the convention whether or not anyone remembers this page.
 ESP's Two Facts
 ~~~~~~~~~~~~~~~
 
-Two facts about :class:`~pcapkit.protocols.internet.esp.protocol.ESP` coexist, and each is
-routinely mistaken for a refutation of the other.
+Two facts about :class:`~pcapkit.protocols.internet.esp.protocol.ESP` coexist, and
+mistaking one for a refutation of the other either drops ESP from the
+extension-header contract or walks the chain past it.
 
 **It is an extension header.** IANA's *IPv6 Extension Header Types* registry lists
 protocol number **50**, and this package's
@@ -165,11 +161,3 @@ The full reasoning, including how ESP's terminal case differs from 253/254's, li
 with the code: see
 :meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer>`
 and the module docstring of :mod:`pcapkit.protocols.internet.ipv6_ext.protocol`.
-
-.. caution::
-
-   The two facts have to be kept apart when reading any of this. "ESP is not an
-   extension header" (wrong, and :rfc:`8200#section-4.5` quoted out of scope) is a
-   different claim from "ESP cannot be walked past" (right, and about
-   :rfc:`4303`'s wire format). Collapsing them is how ESP ends up either dropped
-   from the extension-header contract or wrongly walked past.

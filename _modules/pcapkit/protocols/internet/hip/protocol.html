@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -1192,9 +1193,8 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="c1"># NOTE: The two fixed bits are reserved for SHIM6 compatibility and</span>
-        <span class="c1"># "MUST be ignored when receiving" (:rfc:`7401#section-5.1`), so they</span>
-        <span class="c1"># are kept as read rather than validated.</span>
+        <span class="c1"># NOTE: The two fixed bits "MUST be ignored when receiving" (:rfc:`7401#section-5.1`),</span>
+        <span class="c1"># so they are kept as read rather than validated.</span>
         <span class="c1"># Header Length below 4 cannot cover the two HITs, and would leave a</span>
         <span class="c1"># negative parameter length below.</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
@@ -2262,11 +2262,8 @@
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no</span>
-        <span class="c1"># more than six (6) Cipher IDs in one HIP_CIPHER parameter. Conversely, a</span>
-        <span class="c1"># recipient MUST be prepared to handle received transport parameters that</span>
-        <span class="c1"># contain more than six Cipher IDs by accepting the first six Cipher IDs and</span>
-        <span class="c1"># dropping the rest. [:rfc:`7401#section-5.2.8`]</span>
+        <span class="c1"># NOTE: A recipient accepts the first six Cipher IDs and drops the rest</span>
+        <span class="c1"># [:rfc:`7401#section-5.2.8`].</span>
         <span class="n">ciphers</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">ciphers</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ciphers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
@@ -4136,15 +4133,8 @@
                 <span class="n">reserved</span> <span class="o">=</span> <span class="n">locator</span><span class="o">.</span><span class="n">reserved</span>
                 <span class="n">lifetime</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">locator</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># NOTE: Through ``parse_ip_address`` because the locator is packed</span>
-                <span class="c1"># to octets *here*, ahead of the schema, so a bare</span>
-                <span class="c1"># ``ipaddress.IPv6Address`` would launder a ``bool`` into ``::1``</span>
-                <span class="c1"># and hand the schema's ``SwitchField`` plain bytes that its guard</span>
-                <span class="c1"># cannot question. The ``version=6`` argument is the *IP* version</span>
-                <span class="c1"># rather than the HIP one the message names, and it keeps the</span>
-                <span class="c1"># ``int`` widening this signature documents: ``0x102`` is</span>
-                <span class="c1"># ``::102``, not the ``0.0.1.2`` that ``ipaddress.ip_address``</span>
-                <span class="c1"># would give.</span>
+                <span class="c1"># NOTE: Packed here, ahead of the schema's guard, so ``parse_ip_address`` refuses a</span>
+                <span class="c1"># ``bool``; ``version=6`` is the IP version, reading ``0x102`` as ``::102``.</span>
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                     <span class="n">ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid locator'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 
@@ -4200,18 +4190,8 @@
 
         <span class="k">return</span> <span class="n">Schema_LocatorSetParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="c1"># NOTE: ``Locator.len`` is ``Locator Length``, which</span>
-            <span class="c1"># :rfc:`8046#section-4` gives "in 4-octet units" and which counts</span>
-            <span class="c1"># only the ``Locator`` field, so a locator record is the eight</span>
-            <span class="c1"># fixed octets (traffic type, locator type, locator length,</span>
-            <span class="c1"># reserved-and-flags, lifetime) plus ``Locator Length`` * 4. This</span>
-            <span class="c1"># parameter's ``len`` is :rfc:`7401` Section 5.2.1's ``Length``,</span>
-            <span class="c1"># "length of the Contents, in bytes", so it is the sum of those</span>
-            <span class="c1"># record sizes. Summing ``locator['len']`` instead gives ``4n``</span>
-            <span class="c1"># where the contents are ``24n`` octets for plain IPv6 locators,</span>
-            <span class="c1"># mis-declaring the record and starving the reader's ``ListField``</span>
-            <span class="c1"># -- see ``LocatorSetParameter.locators`` in</span>
-            <span class="c1"># :mod:`pcapkit.protocols.internet.hip.schema`.</span>
+            <span class="c1"># NOTE: Each record is eight fixed octets plus ``Locator Length`` 4-octet units</span>
+            <span class="c1"># (RFC 8046 Section 4), and the parameter's ``Length`` is their sum in octets.</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="mi">8</span> <span class="o">+</span> <span class="n">locator</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">for</span> <span class="n">locator</span> <span class="ow">in</span> <span class="n">locators</span><span class="p">),</span>
             <span class="n">locators</span><span class="o">=</span><span class="n">locators</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -4748,16 +4728,8 @@
             <span class="n">iv</span><span class="o">=</span><span class="n">iv</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: ``cipher`` is not a schema field: ``ENCRYPTED``'s own wire</span>
-        <span class="c1"># format carries no cipher ID, only the preceding ``HIP_CIPHER``</span>
-        <span class="c1"># parameter does. Passed as a constructor keyword it draws an</span>
-        <span class="c1"># ``UnknownFieldWarning`` and is dropped, leaving ``pre_unpack`` to fall</span>
-        <span class="c1"># back to its sibling lookup, which a standalone ``make`` call gives no</span>
-        <span class="c1"># ``HIP_CIPHER`` parameter to search; the parameter would then be treated as</span>
-        <span class="c1"># cipher-less and silently packed without its IV. Setting the</span>
-        <span class="c1"># already-resolved ``cipher_id`` as a plain attribute instead reaches</span>
-        <span class="c1"># ``pack()``'s packet context via ``packet.update(self.__dict__)``,</span>
-        <span class="c1"># where ``pre_unpack`` honours it ahead of that lookup.</span>
+        <span class="c1"># NOTE: Not a schema field, as only ``HIP_CIPHER`` carries the cipher ID; set as an</span>
+        <span class="c1"># attribute it reaches ``pre_unpack`` via the packet context, so the IV is packed.</span>
         <span class="n">schema</span><span class="o">.</span><span class="n">cipher</span> <span class="o">=</span> <span class="n">cipher_id</span>
         <span class="k">return</span> <span class="n">schema</span></div>
 
@@ -6645,7 +6617,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

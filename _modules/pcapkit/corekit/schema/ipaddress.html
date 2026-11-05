@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -614,13 +615,8 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">yield</span>
     <span class="k">except</span> <span class="n">FieldValueError</span><span class="p">:</span>
-        <span class="c1"># NOTE: ``FieldValueError`` is itself a ``ValueError``, so without this</span>
-        <span class="c1"># clause first, a ``FieldValueError`` raised inside the ``with`` block</span>
-        <span class="c1"># (e.g. a version-mismatch check) would be caught below and re-wrapped,</span>
-        <span class="c1"># losing its original message. Callers are expected to keep such</span>
-        <span class="c1"># raises outside the ``with`` block, but this is the same ordering</span>
-        <span class="c1"># trap ``ProtocolError`` carries at ``exceptions.py``, so it is guarded</span>
-        <span class="c1"># here too rather than relied upon by convention alone.</span>
+        <span class="c1"># NOTE: ``FieldValueError`` is a ``ValueError``, so it is re-raised here first rather</span>
+        <span class="c1"># than re-wrapped below, guarding the same ordering trap as ``ProtocolError``.</span>
         <span class="k">raise</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
@@ -767,10 +763,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: Checked outside the ``with`` block above, and after it, because an</span>
-    <span class="c1"># :mod:`ipaddress` object taken from the branch that skips the conversion</span>
-    <span class="c1"># has not been version-checked at all -- ``IPv6Address(IPv4Address(...))``</span>
-    <span class="c1"># would have raised, but returning the object unchanged cannot.</span>
+    <span class="c1"># NOTE: Checked after the ``with`` block, as an :mod:`ipaddress` object returned unchanged</span>
+    <span class="c1"># by the branch that skips the conversion has not been version-checked.</span>
     <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="n">version</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: IP version mismatch: </span><span class="si">{</span><span class="n">ip</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ip</span></div>
@@ -807,7 +801,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

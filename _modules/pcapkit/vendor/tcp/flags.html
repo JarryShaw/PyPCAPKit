@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -704,9 +705,8 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="n">dscp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ('</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'Reserved for future use'</span><span class="p">,</span> <span class="s1">'Reserved'</span><span class="p">)</span>
             <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">'Unassigned'</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="n">dscp</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: IANA numbers the bits from the most significant end of the</span>
-            <span class="c1"># 16-bit Data Offset/flags word, so the wire mask of offset ``n`` is</span>
-            <span class="c1"># ``1 &lt;&lt; (15 - n)`` -- FIN, at offset 15, is the low bit (#2310).</span>
+            <span class="c1"># NOTE: IANA numbers the 16-bit Data Offset/flags word from its top bit,</span>
+            <span class="c1"># so offset ``n`` masks ``1 &lt;&lt; (15 - n)`` (#2310).</span>
             <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = 1 &lt;&lt; </span><span class="si">{</span><span class="mi">15</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span>
 
@@ -768,7 +768,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -778,17 +779,13 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="c1"># NOTE: This class reads IPv6 only, as :meth:`IPv4.read</span>
-        <span class="c1"># &lt;pcapkit.protocols.internet.ipv4.protocol.IPv4.read&gt;` reads IPv4 only; telling</span>
-        <span class="c1"># the two apart by the Version is left to the dispatchers (#1680).</span>
+        <span class="c1"># NOTE: This class reads IPv6 only, as ``IPv4.read`` reads IPv4 only; telling the two</span>
+        <span class="c1"># apart by the Version is left to the dispatchers (#1680).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">hextet</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[IPv6] invalid version: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">hextet</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: A receiver treats each of these as an error (#1687), so</span>
-        <span class="c1"># the frame stops here, see :meth:`IPv4.read</span>
-        <span class="c1"># &lt;pcapkit.protocols.internet.ipv4.protocol.IPv4.read&gt;`. A Fragment header beside</span>
-        <span class="c1"># the Jumbo Payload option is caught on the walk, see</span>
-        <span class="c1"># :meth:`_decode_next_layer`.</span>
+        <span class="c1"># NOTE: A receiver treats each as an error (#1687), so the frame stops here, as in</span>
+        <span class="c1"># ``IPv4.read``; a Fragment header beside a Jumbo Payload is caught on the walk.</span>
         <span class="n">rest</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span>
         <span class="n">error</span> <span class="o">=</span> <span class="n">jumbogram_error</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -806,17 +803,14 @@
         <span class="p">})</span>  <span class="c1"># type: Data_IPv6</span>
 
         <span class="c1"># NOTE: Octets captured past the Payload Length are kept as captured,</span>
-        <span class="c1"># see :meth:`IPv4.read &lt;pcapkit.protocols.internet.ipv4.protocol.IPv4.read&gt;`</span>
-        <span class="c1"># (#1209).</span>
+        <span class="c1"># see :meth:`IPv4.read &lt;pcapkit.protocols.internet.ipv4.protocol.IPv4.read&gt;` (#1209).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
                 <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">,</span>
             <span class="p">})</span>
 
-        <span class="c1"># NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero</span>
-        <span class="c1"># Payload Length, see :meth:`Schema_IPv6.post_process</span>
-        <span class="c1"># &lt;pcapkit.protocols.internet.ipv6.schema.IPv6.post_process&gt;`</span>
-        <span class="c1"># (#1434); the check above leaves a zero one beside it.</span>
+        <span class="c1"># NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero Payload Length, see</span>
+        <span class="c1"># ``Schema_IPv6.post_process`` (#1434); the check above leaves a zero one beside it.</span>
         <span class="n">jumbo</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
         <span class="n">extent</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">jumbo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">jumbo</span>
 
@@ -877,15 +871,8 @@
 <span class="sd">        """</span>
         <span class="n">next_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'next header'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: An explicit ``payload_length`` is written as given, so that a</span>
-        <span class="c1"># ``from_data`` rebuild of a capture truncated by snaplen keeps the</span>
-        <span class="c1"># length the sender declared instead of the one that was recorded</span>
-        <span class="c1"># (#1155). Computed from the octets at hand otherwise, which is</span>
-        <span class="c1"># what a plain ``IPv6(payload=...)`` wants -- or zero for a payload too</span>
-        <span class="c1"># long for the field, or one whose Hop-by-Hop Options header carries a</span>
-        <span class="c1"># Jumbo Payload option, i.e. a jumbogram, whose length the caller gives</span>
-        <span class="c1"># there (:rfc:`2675#section-2`); its Payload Length must be zero</span>
-        <span class="c1"># (#1687).</span>
+        <span class="c1"># NOTE: Written as given, so a truncated capture keeps its declared length (#1155);</span>
+        <span class="c1"># otherwise computed, or zero for an oversize payload or a jumbogram (#1687).</span>
         <span class="k">if</span> <span class="n">payload_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">payload_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">payload_length</span> <span class="o">&gt;</span> <span class="n">IP_MAX_LENGTH</span> <span class="ow">or</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">next_val</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1024,12 +1011,8 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: The chain is rebuilt from ``__exthdr__`` alone, which</span>
-        <span class="c1"># :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
-        <span class="c1"># carries; without it, no extension header is rebuilt, and none is</span>
-        <span class="c1"># guessed from the keys of ``data``, whose order is not part of the</span>
-        <span class="c1"># contract of an :class:`~pcapkit.corekit.infoclass.Info` and differs</span>
-        <span class="c1"># on PyPy (#2003).</span>
+        <span class="c1"># NOTE: Rebuilt from ``__exthdr__`` alone, never guessed from the keys of ``data``,</span>
+        <span class="c1"># whose order an ``Info`` does not promise and which differs on PyPy (#2003).</span>
         <span class="n">exthdr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__exthdr__'</span><span class="p">)</span>  <span class="c1"># type: Optional[tuple[tuple[Type[ProtocolBase], Any], ...]] # pylint: disable=line-too-long</span>
         <span class="n">chain</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">exthdr</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exthdr</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="k">else</span> <span class="p">()</span>
         <span class="n">upper</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1047,10 +1030,8 @@
             <span class="s1">'hop_limit'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span>
             <span class="s1">'src'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
-            <span class="c1"># NOTE: ``data.payload`` is the parsed payload length, passed through</span>
-            <span class="c1"># rather than left to ``make`` to recompute, so that a truncated</span>
-            <span class="c1"># capture rebuilds with the length that was on the wire</span>
-            <span class="c1"># (#1155).</span>
+            <span class="c1"># NOTE: The parsed payload length, passed through rather than recomputed by ``make``,</span>
+            <span class="c1"># so a truncated capture rebuilds with the length that was on the wire (#1155).</span>
             <span class="s1">'payload_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="n">payload</span><span class="p">,</span>
             <span class="c1"># NOTE: And the octets captured past the Payload Length (#1209).</span>
@@ -1098,18 +1079,13 @@
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">break</span>
 
-            <span class="c1"># NOTE: At most :data:`EXTENSION_HEADER_LIMIT</span>
-            <span class="c1"># &lt;pcapkit.utilities.config.EXTENSION_HEADER_LIMIT&gt;`</span>
-            <span class="c1"># headers are walked, as at most that many are dissected after any</span>
-            <span class="c1"># other layer. This header and the rest are then the upper layer,</span>
-            <span class="c1"># which :meth:`_import_next_layer` keeps raw, with one warning</span>
-            <span class="c1"># (#1604).</span>
+            <span class="c1"># NOTE: Past ``EXTENSION_HEADER_LIMIT`` headers, the rest is the upper layer, which</span>
+            <span class="c1"># ``_import_next_layer`` keeps raw with one warning (#1604).</span>
             <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">EXTENSION_HEADER_LIMIT</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_protos</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">config</span><span class="o">.</span><span class="n">EXTENSION_HEADER_LIMIT</span><span class="p">:</span>
                 <span class="k">break</span>
 
-            <span class="c1"># NOTE: Likewise past :data:`FRAME_LAYER_LIMIT</span>
-            <span class="c1"># &lt;pcapkit.utilities.config.FRAME_LAYER_LIMIT&gt;` layers of the</span>
-            <span class="c1"># frame (#1610), since each header walked is one of them.</span>
+            <span class="c1"># NOTE: Likewise past ``config.FRAME_LAYER_LIMIT`` layers of the frame (#1610), since</span>
+            <span class="c1"># each header walked is one of them.</span>
             <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">FRAME_LAYER_LIMIT</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">_protos</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">config</span><span class="o">.</span><span class="n">FRAME_LAYER_LIMIT</span><span class="p">:</span>
                 <span class="k">break</span>
 
@@ -1118,15 +1094,13 @@
             <span class="c1">#     proto = None</span>
             <span class="c1">#     break</span>
 
-            <span class="c1"># NOTE: The Payload Length left bounds this header. With every octet of</span>
-            <span class="c1"># it present, a header longer than that runs past it, malformed and</span>
-            <span class="c1"># not cut by the capture, which its option area is told (#2694).</span>
+            <span class="c1"># NOTE: The Payload Length left bounds this header, so with all of it present a longer</span>
+            <span class="c1"># header is malformed, not capture-cut, which its option area is told (#2694).</span>
             <span class="n">context</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">packet</span> <span class="ow">or</span> <span class="p">{},</span> <span class="n">__capture_cut__</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">raw_len</span><span class="p">)</span>
 
             <span class="c1"># make protocol name</span>
-            <span class="c1"># NOTE: Counted after every header walked, as it would be were each</span>
-            <span class="c1"># dissected by the one before it. ESP dissects its decrypted</span>
-            <span class="c1"># payload even when walked, and those layers count on from here.</span>
+            <span class="c1"># NOTE: Counted after every header walked, as if each were dissected by the one before;</span>
+            <span class="c1"># ESP dissects its decrypted payload even when walked, and those layers count on.</span>
             <span class="n">token</span> <span class="o">=</span> <span class="n">frame_depth</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">depth</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">_protos</span><span class="p">))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">next_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1146,10 +1120,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_walk_upper</span> <span class="o">=</span> <span class="n">next_</span>
                 <span class="k">break</span>
 
-            <span class="c1"># NOTE: Added through a :class:`MultiDict`, so a repeated header</span>
-            <span class="c1"># keeps its predecessor's info rather than overwriting it, and</span>
-            <span class="c1"># :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
-            <span class="c1"># writes every one of them (#1453).</span>
+            <span class="c1"># NOTE: Added through a ``MultiDict``, so a repeated header keeps its predecessor's</span>
+            <span class="c1"># info rather than overwriting it, and ``Info.to_dict`` writes every one (#1453).</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr_key</span><span class="p">(</span><span class="n">next_</span><span class="o">.</span><span class="n">alias</span><span class="p">)</span>
             <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">([(</span><span class="n">name</span><span class="p">,</span> <span class="n">info</span><span class="p">)]))</span>
 
@@ -1175,13 +1147,11 @@
 
             <span class="c1"># keep original data after fragment header</span>
             <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
-                <span class="c1"># NOTE: The first Fragment header splits the packet for</span>
-                <span class="c1"># reassembly, so ``fragment``, ``hdr_len`` and ``raw_len`` keep</span>
-                <span class="c1"># that split however far the walk goes on.</span>
+                <span class="c1"># NOTE: The first Fragment header splits the packet for reassembly, so</span>
+                <span class="c1"># ``fragment``, ``hdr_len`` and ``raw_len`` keep that split as the walk goes on.</span>
                 <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># NOTE: Nor may a jumbogram carry one (#1687), so the</span>
-                    <span class="c1"># frame stops here as for the errors :meth:`read` checks;</span>
-                    <span class="c1"># past those, its Jumbo Payload option is in the payload.</span>
+                    <span class="c1"># NOTE: Nor may a jumbogram carry one (#1687): the frame stops as for the errors</span>
+                    <span class="c1"># :meth:`read` checks; past those, its Jumbo Payload option is in the payload.</span>
                     <span class="n">error</span> <span class="o">=</span> <span class="n">jumbogram_error</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">(),</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -1190,12 +1160,8 @@
                         <span class="s1">'fragment'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">raw_len</span><span class="p">),</span>
                     <span class="p">})</span>
 
-                <span class="c1"># NOTE: Only a first fragment goes on. :rfc:`8200#section-4.5`</span>
-                <span class="c1"># puts every header through the upper-layer one in the fragment</span>
-                <span class="c1"># at offset zero, so what follows its Fragment header is walked</span>
-                <span class="c1"># exactly as it would be without one (#1539). A later</span>
-                <span class="c1"># fragment carries a slice of the Fragmentable Part from its</span>
-                <span class="c1"># offset on, and that slice starts with no header at all.</span>
+                <span class="c1"># NOTE: Only the first fragment goes on, as it carries every header through the</span>
+                <span class="c1"># upper layer (RFC 8200 Section 4.5) and is walked as if unfragmented (#1539).</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_first_fragment</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
                     <span class="n">opaque</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">break</span>
@@ -1213,13 +1179,8 @@
             <span class="s1">'__exthdr__'</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_exthdr</span><span class="p">),</span>
         <span class="p">})</span>
 
-        <span class="c1"># NOTE: Nor does a later fragment's slice start with the upper-layer</span>
-        <span class="c1"># header, though ``protocol`` above still names the one the first</span>
-        <span class="c1"># fragment carries. No code is dispatched on, so the registry's</span>
-        <span class="c1"># fallback leaves the octets as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`</span>
-        <span class="c1"># with no protocol to alias it as, and ``'UDP' in frame`` does not hold</span>
-        <span class="c1"># of a slice of UDP payload (#1545). Reassembly takes</span>
-        <span class="c1"># ``fragment`` above, which this leaves as it was.</span>
+        <span class="c1"># NOTE: A later fragment's slice is left ``Raw`` though ``protocol`` names the upper</span>
+        <span class="c1"># layer, so ``'UDP' in frame`` does not hold of it; reassembly uses ``fragment`` (#1545).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr_depth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_protos</span><span class="p">)</span>  <span class="c1"># the headers the upper layer follows</span>
         <span class="n">scope</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">nullcontext</span><span class="p">()</span>  <span class="c1"># type: ContextManager[None]</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">CHECKSUM_VERIFY</span><span class="p">:</span>
@@ -1388,7 +1349,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

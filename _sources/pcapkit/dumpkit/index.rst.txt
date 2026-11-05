@@ -4,8 +4,8 @@ Dump Utilities
 
 .. module:: pcapkit.dumpkit
 
-:mod:`pcapkit.dumpkit` is the collection of :mod:`pcapkit`'s own dumpers,
-like those in :mod:`dictdumper`.
+:mod:`pcapkit.dumpkit` holds :mod:`pcapkit`'s own dumpers, beside those of
+:mod:`dictdumper`.
 
 .. toctree::
    :maxdepth: 2
@@ -14,9 +14,8 @@ like those in :mod:`dictdumper`.
    pcap
    null
 
-Every dumper class is a :class:`dictdumper.dumper.Dumper` subclass, responsible
-for writing parsed packet data into a formatted output file. The class
-hierarchy:
+Every dumper class subclasses :class:`dictdumper.dumper.Dumper`, writing parsed
+packet data to a formatted output file:
 
 .. mermaid::
 
@@ -58,9 +57,8 @@ hierarchy:
 
 .. note::
 
-   The ``tree`` output (also selected as ``text`` and ``txt``) is a lossy,
-   human-readable view, and nothing reads it back. It renders ``''``, ``b''``,
-   :data:`None` and ``{}`` all as ``NIL``, writes a newline inside a short
-   string as is, breaking the layout, and rewraps a longer one, turning its
-   newlines into spaces. Use ``json`` or ``plist`` (also selected as
-   ``xml``) where the report has to round-trip.
+   The ``tree`` output (also ``text`` and ``txt``) is a lossy, human-readable
+   view that nothing reads back. It renders ``''``, ``b''``, :data:`None` and
+   ``{}`` all as ``NIL``, writes a newline inside a short string as is, breaking
+   the layout, and rewraps a longer one, turning its newlines into spaces. Use
+   ``json`` or ``plist`` (also ``xml``) where the report has to round-trip.

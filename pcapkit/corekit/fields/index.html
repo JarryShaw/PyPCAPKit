@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.fields is the collection of protocol fields that describe the structure of protocol headers. Base Fields- Internal Definitions, Type Variables., Numerical Fields- Sized Fields, Enum..." />
-<meta name="description" content="pcapkit.corekit.fields is the collection of protocol fields that describe the structure of protocol headers. Base Fields- Internal Definitions, Type Variables., Numerical Fields- Sized Fields, Enum..." />
+<meta property="og:description" content="pcapkit.corekit.fields holds the fields that describe a protocol header’s structure. Base Fields- Internal Definitions, Type Variables., Numerical Fields- Sized Fields, Enumeration Fields, Bitmap F..." />
+<meta name="description" content="pcapkit.corekit.fields holds the fields that describe a protocol header’s structure. Base Fields- Internal Definitions, Type Variables., Numerical Fields- Sized Fields, Enumeration Fields, Bitmap F..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Base Fields" href="field.html"><link rel="prev" title="Core Utilities" href="../index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -570,8 +571,8 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.fields">
 <span id="protocol-fields"></span><h1>Protocol Fields<a class="headerlink" href="#module-pcapkit.corekit.fields" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> is the collection of protocol fields that
-describe the structure of protocol headers.</p>
+<p><a class="reference internal" href="#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> holds the fields that describe a protocol
+header’s structure.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="field.html">Base Fields</a><ul>
@@ -615,9 +616,8 @@ describe the structure of protocol headers.</p>
 </li>
 </ul>
 </div>
-<p>Every field class is a <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>
-subclass, responsible for parsing and/or formatting the field value. The class
-hierarchy:</p>
+<p>Every field class subclasses <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>,
+parsing or formatting a field value:</p>
 <pre  class="mermaid">
         flowchart LR
     A{{FieldMeta}} -.-&gt;|metaclass| B(FieldBase)
@@ -763,7 +763,7 @@ hierarchy:</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -909,14 +910,11 @@
 <span class="sd">       rather than by its attributes (:issue:`2733`).</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: ``dictdumper`` 0.8.5 escapes keys and values itself (DictDumper#123,</span>
-    <span class="c1"># #772). The ``plist`` writer, which ``'xml'`` maps to as well, still needs a</span>
-    <span class="c1"># string XML 1.0 cannot spell written as bytes (#1262), and an aware datetime</span>
-    <span class="c1"># converted to UTC before ``&lt;date&gt;`` (#1448).</span>
+    <span class="c1"># NOTE: ``plist`` (and ``'xml'``) still needs XML-1.0-unspellable strings written</span>
+    <span class="c1"># as bytes (#1262) and aware datetimes in UTC (#1448); ``dictdumper`` escapes the rest.</span>
     <span class="n">is_plist_output</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
-    <span class="c1"># NOTE: ``dictdumper.json`` escapes a character above ``U+FFFF`` as one five-</span>
-    <span class="c1"># or six-digit ``\uXXXX``, misread as a four-digit escape and text (#1261);</span>
-    <span class="c1"># ``_append_string`` and ``_append_object`` below write a surrogate pair.</span>
+    <span class="c1"># NOTE: ``dictdumper.json`` escapes a character above ``U+FFFF`` as one long</span>
+    <span class="c1"># ``\uXXXX``; the overrides below write a surrogate pair instead (#1261).</span>
     <span class="n">is_json_output</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
     <span class="c1"># NOTE: ``dictdumper.plist`` skips every ``None`` value and item, so a</span>
     <span class="c1"># ``plist`` report would lack keys the ``json`` one has (#1257).</span>
@@ -980,9 +978,8 @@
             <span class="k">if</span> <span class="n">counts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># NOTE: read by indexing, so that a model overriding it is</span>
-                <span class="c1"># honoured -- the traceflow and reassembly models resolve a</span>
-                <span class="c1"># deferred ``packet`` there.</span>
+                <span class="c1"># NOTE: indexed, so the traceflow and reassembly models can</span>
+                <span class="c1"># resolve a deferred ``packet`` there.</span>
                 <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">result</span>
 
@@ -1079,9 +1076,8 @@
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="s1">'&lt;NO_VALUE&gt;'</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
-                <span class="c1"># NOTE: one single-key mapping per entry, in wire order, since a</span>
-                <span class="c1"># mapping keyed by name would group repeats under the first (#1263);</span>
-                <span class="c1"># keys an ``Info`` export excludes are left out, as in ``fields`` (#2003).</span>
+                <span class="c1"># NOTE: one single-key mapping per entry, in wire order, so repeats</span>
+                <span class="c1"># stay apart (#1263); excluded keys are left out, as in ``fields`` (#2003).</span>
                 <span class="n">skip</span> <span class="o">=</span> <span class="n">excluded</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="p">{</span><span class="n">render_enum</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">))</span> <span class="k">else</span> <span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">}</span>
@@ -1382,7 +1378,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

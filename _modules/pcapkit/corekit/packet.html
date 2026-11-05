@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -631,12 +632,8 @@
         <span class="c1">#: an instance of any other class, :data:`None` included, is not.</span>
         <span class="n">__deferred__</span><span class="p">:</span> <span class="s1">'ClassVar[Type[Callable[[], Any]]]'</span>
 
-    <span class="c1"># NOTE: the ``super()`` calls below are suppressed for both checkers. They are</span>
-    <span class="c1"># undefined *on this mixin*, which is what a mixin is -- the base arrives at</span>
-    <span class="c1"># the point of use, where every subclass is declared</span>
-    <span class="c1"># ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`</span>
-    <span class="c1"># supplies each of them. Neither mypy nor pylint can see that from here, and</span>
-    <span class="c1"># pylint calls it an *error* rather than a warning.</span>
+    <span class="c1"># NOTE: The ``super()`` calls below are suppressed for both checkers, as the base arrives</span>
+    <span class="c1"># with each ``class X(DeferredPacket, Info)``, which neither mypy nor pylint sees from here.</span>
 
 <div class="viewcode-block" id="DeferredPacket.__init_subclass__">
 <a class="viewcode-back" href="../../../pcapkit/corekit/packet.html#pcapkit.corekit.packet.DeferredPacket.__init_subclass__">[docs]</a>
@@ -708,10 +705,8 @@
 <span class="sd">            AttributeError: If ``name`` is not ``packet``.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: reached only for names absent from ``__dict__``, which ``packet``</span>
-        <span class="c1"># always is -- see ``__additional__`` in the module docstring. Everything</span>
-        <span class="c1"># else has to raise, or a typo would silently answer with the resolved</span>
-        <span class="c1"># ``packet``.</span>
+        <span class="c1"># NOTE: Reached only for names absent from ``__dict__``, as ``packet`` always is; anything</span>
+        <span class="c1"># else raises, or a typo would silently answer with the resolved ``packet``.</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'packet'</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span></div>
@@ -723,9 +718,8 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-        <span class="c1"># NOTE: ``Mapping.__contains__`` answers by fetching the value, which</span>
-        <span class="c1"># would resolve the placeholder merely to decide that the field exists.</span>
-        <span class="c1"># ``packet`` is a declared field, so it is always there.</span>
+        <span class="c1"># NOTE: ``Mapping.__contains__`` would fetch, and so resolve, the</span>
+        <span class="c1"># placeholder; ``packet`` is a declared field, so it is always there.</span>
         <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span> <span class="ow">or</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -785,7 +779,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

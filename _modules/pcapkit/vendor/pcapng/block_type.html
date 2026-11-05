@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -579,45 +580,11 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">bs4.element</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tag</span>
 
 <span class="c1">###############################################################################</span>
-<span class="c1"># NOTE: on the registry URL, which this module and its siblings</span>
-<span class="c1"># (:mod:`~pcapkit.vendor.pcapng.option_type`,</span>
-<span class="c1"># :mod:`~pcapkit.vendor.pcapng.record_type`) share. Why they all read ``-03`` is</span>
-<span class="c1"># stated for readers in the note in ``docs/source/pcapkit/vendor/pcapng.rst``,</span>
-<span class="c1"># which renders; what follows is the measurement detail behind it. See #518.</span>
-<span class="c1">#</span>
-<span class="c1"># The dead ``-02`` URL,</span>
-<span class="c1"># https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html, serves a</span>
-<span class="c1"># 77968-byte HTML error page rather than a clean refusal, so ``Vendor._request``</span>
-<span class="c1"># rejects it on ``page.ok`` and retries MAX_RETRY times against a page that will</span>
-<span class="c1"># never come back. On ``-02`` the registries are ASCII art inside ``&lt;pre&gt;`` and</span>
-<span class="c1"># the only HTML ``&lt;table&gt;`` is the running-header one, so</span>
-<span class="c1"># ``soup.select('table#table-9')`` below finds nothing and raises ``IndexError``.</span>
-<span class="c1"># Measured across every published revision, ``-03`` is the only one that</span>
-<span class="c1"># reproduces every committed constant file byte for byte.</span>
-<span class="c1">#</span>
-<span class="c1"># Two renderings of ``-03`` were compared, and both reproduce the constant</span>
-<span class="c1"># files byte-identically, so the choice is about exposure rather than data:</span>
-<span class="c1">#</span>
-<span class="c1">#   * https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html</span>
-<span class="c1">#     -- 254640 bytes, 11 ``&lt;table&gt;`` (the header one plus ``table-1``..``-10``),</span>
-<span class="c1">#     ``Last-Modified: Thu, 24 Jun 2021 01:24:12 GMT``. This is the immutable</span>
-<span class="c1">#     I-D archive: a static file, frozen at publication.</span>
-<span class="c1">#   * https://datatracker.ietf.org/doc/html/draft-tuexen-opsawg-pcapng-03</span>
-<span class="c1">#     -- 272271 bytes, 13 ``&lt;table&gt;``, no ``Last-Modified``. Rendered per</span>
-<span class="c1">#     request, and the extra ~17 KB is datatracker chrome: a version selector, a</span>
-<span class="c1">#     "Compare versions" control and a metadata table, plus ten more ``&lt;link&gt;``</span>
-<span class="c1">#     and two more ``&lt;nav&gt;``.</span>
-<span class="c1">#</span>
-<span class="c1"># The archive wins. Selecting tables by id out of a document that gains three</span>
-<span class="c1"># unrelated ``&lt;table&gt;`` elements from a navigation template, which can change</span>
-<span class="c1"># whenever the service is redeployed, is gratuitous risk for no gain.</span>
-<span class="c1">#</span>
-<span class="c1"># NOTE: the draft moved to the OPSAWG working group as</span>
-<span class="c1"># ``draft-ietf-opsawg-pcapng``. Tracking it is a separate</span>
-<span class="c1"># change, not a URL swap: the newer revisions alter the registries, and from</span>
-<span class="c1"># ``draft-ietf-opsawg-pcapng-03`` onwards ``process()`` below dies with</span>
-<span class="c1"># ``ValueError: invalid literal for int() with base 16: '0x0A0D0AXX'`` on a</span>
-<span class="c1"># wildcard row it has no handling for.</span>
+<span class="c1"># NOTE: the registry URL, shared with ``option_type`` and ``record_type``, is the ``-03``</span>
+<span class="c1"># I-D archive: a static file, and the only revision reproducing every constant file (#518).</span>
+
+<span class="c1"># NOTE: ``draft-ietf-opsawg-pcapng`` is no URL swap: its registries differ, and from</span>
+<span class="c1"># ``-03`` on ``process()`` dies on a wildcard row such as ``0x0A0D0AXX``.</span>
 <span class="c1">###############################################################################</span>
 
 
@@ -723,7 +690,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

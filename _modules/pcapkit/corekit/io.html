@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -711,9 +712,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_discard</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">buffer_save</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">buffer_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># NOTE: the buffer is read back by name, which Windows refuses for</span>
-                <span class="c1"># a ``NamedTemporaryFile`` while it is open (#2098). A ``mkstemp``</span>
-                <span class="c1"># file it allows; this removes it on close, or at collection.</span>
+                <span class="c1"># NOTE: Read back by name, which Windows refuses for an open ``NamedTemporaryFile``</span>
+                <span class="c1"># (#2098); this removes the ``mkstemp`` file on close, or at collection.</span>
                 <span class="n">fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">()</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -743,9 +743,8 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">buf_len</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
-                <span class="c1"># NOTE: the last ``_buffer_size`` octets, counted from the front rather</span>
-                <span class="c1"># than as ``buf[-self._buffer_size:]``, which for a buffer of no size at</span>
-                <span class="c1"># all is ``buf[-0:]`` -- the whole of ``buf``, not none of it.</span>
+                <span class="c1"># NOTE: Counted from the front, as ``buf[-self._buffer_size:]`` for a buffer</span>
+                <span class="c1"># of no size is ``buf[-0:]``, the whole of ``buf``.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="n">buf_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:</span><span class="o">-</span><span class="n">buf_len</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="n">old_ptr</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">-</span> <span class="n">buf_len</span><span class="p">):</span><span class="n">old_ptr</span><span class="p">]</span>
@@ -792,9 +791,8 @@
         <span class="n">minimum</span> <span class="o">=</span> <span class="n">size</span> <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">minimum</span>
         <span class="n">read</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">'read1'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: ``-1`` sets no limit of its own, but one read still goes no further</span>
-        <span class="c1"># than :data:`sys.maxsize`, whatever the setting, past which it raises</span>
-        <span class="c1"># :exc:`OverflowError` rather than coming back short (#1975).</span>
+        <span class="c1"># NOTE: ``-1`` sets no limit of its own, but one read stops at :data:`sys.maxsize`, past</span>
+        <span class="c1"># which it raises :exc:`OverflowError` rather than coming back short (#1975).</span>
         <span class="n">limit</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
         <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -995,26 +993,15 @@
                     <span class="n">temp_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
                     <span class="n">buf</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">size</span><span class="p">:</span>
-                <span class="c1"># NOTE: a request for no octets is answered without consulting the window,</span>
-                <span class="c1"># which has nothing to say about it. Asking anyway refuses a zero-length</span>
-                <span class="c1"># read from a position :meth:`_truncate_buffer` has left behind the window -- a</span>
-                <span class="c1"># refusal over data that was never wanted.</span>
-                <span class="c1">#</span>
-                <span class="c1"># Truthiness rather than ``size == 0`` on purpose. It is the same test for</span>
-                <span class="c1"># every value this method can be reached with -- ``size`` is an ``int`` by</span>
-                <span class="c1"># the time control arrives, and ``False`` is ``0`` -- but :meth:`peek` does</span>
-                <span class="c1"># not normalise a ``None`` its signature does not permit, and there the two</span>
-                <span class="c1"># spellings diverge: ``size == 0`` would send ``None`` on to the window and</span>
-                <span class="c1"># report a type error as a position error. Keeping it falsy keeps that call</span>
-                <span class="c1"># failing as a :exc:`TypeError`.</span>
+                <span class="c1"># NOTE: No octets wanted, so no window check. Falsy rather than ``size == 0``, so</span>
+                <span class="c1"># a ``None`` from :meth:`peek` still fails as a :exc:`TypeError`.</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seek_buffer</span><span class="p">()</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_take_buffer</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">),</span> <span class="n">line</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: an unbounded ``readline`` has to keep going until the line ends, and</span>
-            <span class="c1"># capping it at the buffer's content -- which the line need not end inside --</span>
-            <span class="c1"># is what makes the continuation necessary rather than optional here.</span>
+            <span class="c1"># NOTE: An unbounded ``readline`` runs to the line's end, which need not lie inside</span>
+            <span class="c1"># the buffer's content, so the continuation is necessary here.</span>
             <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
@@ -1117,9 +1104,8 @@
 
         <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SeekError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'negative seek value </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="c1"># NOTE: both refusals read the target rather than ``_tell``, which is what lets them</span>
-        <span class="c1"># run before the position is committed. This one is the window's, so a saved buffer</span>
-        <span class="c1"># -- which can still supply the octets from file -- is exempt from it.</span>
+        <span class="c1"># NOTE: Both refusals read the target, not ``_tell``, to run before the position is</span>
+        <span class="c1"># committed; this one is the window's, so a saved buffer, which can serve it, is exempt.</span>
         <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SeekError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cannot seek before the beginning of the buffer: </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1"> &lt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -1127,34 +1113,23 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
             <span class="n">ended</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">tmp_end</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">):</span>
-                <span class="c1"># NOTE: if we do need to seek beyond the existing contents,</span>
-                <span class="c1"># then we'll do a quick read to make up the contents; the</span>
-                <span class="c1"># size of the read is set to be 1/4 size of the buffer or</span>
-                <span class="c1"># the size of the content to be read, whichever is larger.</span>
-                <span class="c1"># However, the length to fill must not be larger than the</span>
-                <span class="c1"># buffer size itself.</span>
-                <span class="c1">#</span>
-                <span class="c1"># The gap is waited for and the rest is not, and the position is</span>
-                <span class="c1"># the target, or the end of the stream if that comes first -- not</span>
-                <span class="c1"># wherever an over-asking read happened to stop (#1586).</span>
+                <span class="c1"># NOTE: Seeking past the contents reads to fill the gap, capped at the buffer</span>
+                <span class="c1"># size; the position is the target, or the stream's end if sooner (#1586).</span>
                 <span class="n">tmp_gap</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="n">tmp_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">)</span>
                 <span class="n">tmp_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">tmp_gap</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">//</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">)</span>
 
                 <span class="n">tmp_buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill</span><span class="p">(</span><span class="n">tmp_len</span><span class="p">,</span> <span class="n">tmp_gap</span><span class="p">)</span>
                 <span class="n">ended</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tmp_gap</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">tmp_end</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">))</span>
-            <span class="c1"># NOTE: past a stream that ended inside the buffer, this is the silent seek past</span>
-            <span class="c1"># the end of a file, which a frame reader makes over a record the capture cut</span>
-            <span class="c1"># short. A seek that went past the buffer's edge, or stopped short of a target</span>
-            <span class="c1"># beyond it, is still warned of.</span>
+            <span class="c1"># NOTE: Past a stream that ended inside the buffer, this is a silent seek past the</span>
+            <span class="c1"># end, as over a record the capture cut short; any other overshoot is warned of.</span>
             <span class="k">if</span> <span class="n">target</span> <span class="o">&gt;</span> <span class="n">buf_end</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ended</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;=</span> <span class="n">buf_end</span><span class="p">):</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'seek beyond the end of the buffer: </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1"> &gt; </span><span class="si">{</span><span class="n">buf_end</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
                      <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: only a saved buffer reaches here -- the refusal above has already</span>
-            <span class="c1"># turned away a position before the window when there is no file to serve it</span>
-            <span class="c1"># from.</span>
+            <span class="c1"># NOTE: Only a saved buffer reaches here, as the refusal above turned away a</span>
+            <span class="c1"># position before the window with no file to serve it from.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span></div>
 
@@ -1235,17 +1210,14 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># NOTE: an unspecified size means the current position, following the</span>
-            <span class="c1"># :meth:`io.IOBase.truncate` convention. The buffer</span>
-            <span class="c1"># is indexed relative to ``_buffer_set``, and the position may sit before it</span>
-            <span class="c1"># once a saved buffer has been rewound, in which case nothing is kept.</span>
+            <span class="c1"># NOTE: No size means the current position, as in :meth:`io.IOBase.truncate`,</span>
+            <span class="c1"># relative to ``_buffer_set``; a rewound saved buffer may sit before it, keeping none.</span>
             <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TruncateError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'negative size value </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: the position isn't changed by a truncation, but rebuilding the buffer</span>
-        <span class="c1"># resets it, so it is read here and put back below -- moved down by whatever</span>
-        <span class="c1"># the window's base moved up, so that it still denotes the same octet.</span>
+        <span class="c1"># NOTE: Rebuilding the buffer resets its position, so it is put back below, moved down</span>
+        <span class="c1"># by whatever the window's base moved up, to denote the same octet.</span>
         <span class="n">buffer_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
@@ -1259,9 +1231,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">buffer_pos</span> <span class="o">-</span> <span class="n">dropped</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">=</span> <span class="n">size</span>
-        <span class="c1"># NOTE: ``_buffer_set + _buffer_cur`` is unchanged by construction -- the base</span>
-        <span class="c1"># gains exactly what the content pointer loses -- so the stream's consumption</span>
-        <span class="c1"># point still reads correctly out of the pair.</span>
+        <span class="c1"># NOTE: ``_buffer_set + _buffer_cur`` is unchanged, as the base gains what the content</span>
+        <span class="c1"># pointer loses, so the stream's consumption point still reads correctly.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+=</span> <span class="n">dropped</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">-</span> <span class="n">dropped</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span></div>
@@ -1304,9 +1275,8 @@
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
-        <span class="c1"># NOTE: both reads from the stream go through :meth:`_fill`, which keeps reading</span>
-        <span class="c1"># past a short answer, as :meth:`io.BufferedIOBase.read` is specified to: a short</span>
-        <span class="c1"># result here means the end of the stream, and the frame readers take it so.</span>
+        <span class="c1"># NOTE: Both stream reads go through :meth:`_fill`, which reads past a short answer, so</span>
+        <span class="c1"># a short result here means the end of the stream, and the frame readers take it so.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">:</span>
             <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1455,17 +1425,12 @@
                     <span class="n">temp_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
                     <span class="n">buf</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">size</span><span class="p">:</span>
-                <span class="c1"># NOTE: as in :meth:`readline` -- no octets wanted, so no window check. Only</span>
-                <span class="c1"># the buffered branch is short-circuited: the branch above hands a bare</span>
-                <span class="c1"># ``peek()`` to the raw stream, whose own ``peek(0)`` may legitimately</span>
-                <span class="c1"># return a whole buffer's worth, and that is left as it was.</span>
+                <span class="c1"># NOTE: As in :meth:`readline`, no octets wanted, so no window check; the bare</span>
+                <span class="c1"># ``peek()`` the branch above hands to the raw stream is left as it was.</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># NOTE: read through the view rather than through ``self._buffer``, whose</span>
-                <span class="c1"># cursor an ordinary read would advance. A preview must leave the position</span>
-                <span class="c1"># alone, and the buffer's cursor is part of the position: advancing it here</span>
-                <span class="c1"># while leaving ``_tell`` untouched would make the *next* buffered read</span>
-                <span class="c1"># start from the wrong octet, with ``tell()`` reporting the right one.</span>
+                <span class="c1"># NOTE: Through the view, not ``self._buffer``, whose cursor is part of the</span>
+                <span class="c1"># position; advancing it would start the next buffered read at the wrong octet.</span>
                 <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seek_buffer</span><span class="p">()</span>
                 <span class="n">buf_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span>
@@ -1600,13 +1565,8 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
-        <span class="c1"># NOTE: reached only for a name the proxy lacks, and some names are refused</span>
-        <span class="c1"># rather than forwarded. ``_stream`` is the proxy's own: :mod:`copy` and</span>
-        <span class="c1"># :mod:`pickle` build an instance without :meth:`__init__`, so it is not set</span>
-        <span class="c1"># yet, and forwarding would look it up through here again until the</span>
-        <span class="c1"># recursion limit (#1524). A dunder names a protocol of the proxy's, not of</span>
-        <span class="c1"># the stream's: forwarded, the stream's ``__setstate__`` or ``__deepcopy__``</span>
-        <span class="c1"># would be applied to the proxy.</span>
+        <span class="c1"># NOTE: ``_stream`` is refused, as :mod:`copy` and :mod:`pickle` skip :meth:`__init__` and</span>
+        <span class="c1"># forwarding would recurse (#1524); a dunder is the proxy's protocol, not the stream's.</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'_stream'</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
@@ -1681,7 +1641,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

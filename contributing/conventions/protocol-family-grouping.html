@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/protocol-family-grouping.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="A protocol family is a base class named after the family plus its member classes. What each class returns from id() is what the selectors on Protocol match against. Each ruling below names the thre..." />
-<meta name="description" content="A protocol family is a base class named after the family plus its member classes. What each class returns from id() is what the selectors on Protocol match against. Each ruling below names the thre..." />
+<meta property="og:description" content="A protocol family is a base class named after the family plus its member classes. The selectors on Protocol match against what each class returns from id(). Each ruling names the thread it was set ..." />
+<meta name="description" content="A protocol family is a base class named after the family plus its member classes. The selectors on Protocol match against what each class returns from id(). Each ruling names the thread it was set ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Member Order" href="protocol-member-order.html"><link rel="prev" title="Extension-Header Base Classes" href="extension-header-subclassing.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -571,15 +572,14 @@
           <section id="protocol-family-grouping">
 <span id="id1"></span><h1>Protocol Family Grouping<a class="headerlink" href="#protocol-family-grouping" title="Link to this heading">¶</a></h1>
 <p>A protocol family is a base class named after the family plus its member classes.
-What each class returns from <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a> is what
-the selectors on <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> match against. Each
-ruling below names the thread it was set on.</p>
+The selectors on <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> match against what each
+class returns from <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a>. Each ruling names
+the thread it was set on.</p>
 <section id="the-id-criterion">
 <h2>The <code class="docutils literal notranslate"><span class="pre">id()</span></code> Criterion<a class="headerlink" href="#the-id-criterion" title="Link to this heading">¶</a></h2>
-<p><strong>A family base lists its direct concrete subclasses.</strong> An abstract intermediate is
-left out, and so is everything beneath it. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2441">#2441</a>; no issue
-holds the ruling.</p>
-<p>The member list takes either of these forms:</p>
+<p><strong>A family base lists its direct concrete subclasses</strong>, leaving out an abstract
+intermediate and everything beneath it. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2441">#2441</a>; no issue holds
+the ruling. The list takes either form:</p>
 <ul class="simple">
 <li><p><strong>Members only.</strong> <a class="reference internal" href="../../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP.id" title="pcapkit.protocols.internet.ip.protocol.IP.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.id()</span></code></a> is
 <code class="docutils literal notranslate"><span class="pre">('IPv4',</span> <span class="pre">'IPv6')</span></code>; <a class="reference internal" href="../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.protocol.AH" title="pcapkit.protocols.internet.ah.protocol.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> and
@@ -598,9 +598,9 @@ the separate abstract <a class="reference internal" href="../../pcapkit/protocol
 </section>
 <section id="abstract-family-names">
 <h2>Abstract Family Names<a class="headerlink" href="#abstract-family-names" title="Link to this heading">¶</a></h2>
-<p><strong>An abstract family name composes its members.</strong> The ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2462">#2462</a> is that
+<p><strong>An abstract family name composes its members.</strong> Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2462">#2462</a>:
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> lists its direct concrete
-members in its <code class="docutils literal notranslate"><span class="pre">id()</span></code>, and that each member narrows its own <code class="docutils literal notranslate"><span class="pre">id()</span></code> to itself.</p>
+members in its <code class="docutils literal notranslate"><span class="pre">id()</span></code>, and each member narrows its own <code class="docutils literal notranslate"><span class="pre">id()</span></code> to itself.</p>
 </section>
 <section id="grouping-by-name">
 <h2>Grouping by Name<a class="headerlink" href="#grouping-by-name" title="Link to this heading">¶</a></h2>
@@ -645,9 +645,9 @@ choose. Every registry that reaches IPv4, IPv6, AH, ESP, TLS or DTLS has a code 
 that member alone, so no registry binds <a class="reference internal" href="../../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>,
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.protocol.IPsec" title="pcapkit.protocols.internet.ipsec.protocol.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a> or
 <a class="reference internal" href="../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a>, and none of the three defines
-<code class="docutils literal notranslate"><span class="pre">read()</span></code>: none needs a dispatcher there. Ruled for IGMP on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2444">#2444</a> and for SSL on
-<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2441">#2441</a>; no issue holds either ruling. The asymmetry is deliberate, and it concerns
-the registry only; parsing or building through a base directly is the rule below.</p>
+<code class="docutils literal notranslate"><span class="pre">read()</span></code>. Ruled for IGMP on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2444">#2444</a> and for SSL on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2441">#2441</a>; no issue holds
+either ruling. The asymmetry is deliberate and concerns the registry only; parsing or
+building through a base directly is the rule below.</p>
 <p><strong>A versioned family’s base dispatches on both paths</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2524">#2524</a>). Parsing
 octets through it, constructing it from fields and its <code class="docutils literal notranslate"><span class="pre">from_data</span></code> give a member,
 never an instance of the base, and a subclass of the base is constructed as itself.</p>
@@ -660,11 +660,11 @@ data model’s class or its <code class="docutils literal notranslate"><span cla
 member, not even a field only one member takes, and no member is a default: fields
 without <code class="docutils literal notranslate"><span class="pre">version</span></code> raise <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, and a
 field the member does not take fails that member’s own keyword check. Ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>. A class built directly takes <code class="docutils literal notranslate"><span class="pre">version</span></code> as well, which must then be
-its own version: a member’s, or, for a subclass outside the members, the one an IGMP
-class states in its <code class="docutils literal notranslate"><span class="pre">version</span></code>, which a subclass of the other bases does not have.
-While parsing, the keyword is handed on unread, since an IP layer passes its own
-version under that name to the layer it carries.</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>. A class built directly takes <code class="docutils literal notranslate"><span class="pre">version</span></code> too, which must be its own: a
+member’s, or, for a subclass outside the members, the one an IGMP class states in its
+<code class="docutils literal notranslate"><span class="pre">version</span></code> (a subclass of the other bases has none). While parsing, the keyword is
+handed on unread, since an IP layer passes its own version under that name to the
+layer it carries.</p>
 <p>The member a call through a versioned base gives, as a decision:</p>
 <pre  class="mermaid">
         flowchart TD
@@ -761,9 +761,9 @@ then refuses, such as a preface and three octets, are
 </section>
 <section id="handled-refusals">
 <span id="protocol-family-refusals"></span><h2>Handled Refusals<a class="headerlink" href="#handled-refusals" title="Link to this heading">¶</a></h2>
-<p><strong>A refusal a next-layer fallback handles is quiet</strong>, for every protocol and not only
-a family’s members (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2588">#2588</a>). The fallback is
-<a class="reference internal" href="../../pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>. It decorates
+<p><strong>A refusal a next-layer fallback handles is quiet</strong>, for every protocol, not only a
+family’s members (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2588">#2588</a>). The fallback,
+<a class="reference internal" href="../../pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, decorates
 <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code></a>
 and the overrides that parse a next layer themselves.
 <a class="reference internal" href="../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application._import_next_layer" title="pcapkit.protocols.application.application.Application._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Application._import_next_layer</span></code></a> and
@@ -907,8 +907,8 @@ parser’s <code class="docutils literal notranslate"><span class="pre">error</s
 </section>
 <section id="canonical-names">
 <span id="protocol-family-canonical-names"></span><h2>Canonical Names<a class="headerlink" href="#canonical-names" title="Link to this heading">¶</a></h2>
-<p><strong>A versioned protocol’s display name includes its version.</strong> This is the preference
-stated in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2444">#2444</a>, not a settled rule; no issue holds it.
+<p><strong>A versioned protocol’s display name includes its version</strong> – a preference stated
+in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2444">#2444</a>, not a settled rule; no issue holds it.
 <a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">name</span></code> is
 <code class="docutils literal notranslate"><span class="pre">Layer</span> <span class="pre">2</span> <span class="pre">Tunnelling</span> <span class="pre">Protocol</span> <span class="pre">version</span> <span class="pre">2</span></code>. The HTTP/1.1 and HTTP/2 classes define no
 <code class="docutils literal notranslate"><span class="pre">name</span></code> of their own, so they report <code class="docutils literal notranslate"><span class="pre">Hypertext</span> <span class="pre">Transfer</span> <span class="pre">Protocol</span></code>, which carries
@@ -918,8 +918,8 @@ of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/P
 but its <code class="docutils literal notranslate"><span class="pre">id()</span></code> drops the version for the RFC canonical name (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc792.html"><strong>RFC 792</strong></a> names it
 plain <code class="docutils literal notranslate"><span class="pre">ICMP</span></code>), and its <code class="docutils literal notranslate"><span class="pre">name</span></code> carries no “version 4”. <code class="docutils literal notranslate"><span class="pre">ICMPv6</span></code> keeps its own
 version, since <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4443.html"><strong>RFC 4443</strong></a> names it with one.</p>
-<p><strong>IGMPv1 follows the same shape, by the same reasoning</strong>, ruled in review of
-<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2506">#2506</a>; no issue holds the ruling.
+<p><strong>IGMPv1 follows the same shape</strong>, ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2506">#2506</a>; no issue holds the
+ruling.
 <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html"><strong>RFC 1112</strong></a> names IGMPv1’s protocol plain <code class="docutils literal notranslate"><span class="pre">IGMP</span></code>, so
 <a class="reference internal" href="../../pcapkit/protocols/internet/igmpv1.html#pcapkit.protocols.internet.igmpv1.protocol.IGMPv1.id" title="pcapkit.protocols.internet.igmpv1.protocol.IGMPv1.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMPv1.id()</span></code></a> is <code class="docutils literal notranslate"><span class="pre">('IGMP',)</span></code> and
 its <code class="docutils literal notranslate"><span class="pre">alias</span></code> is <code class="docutils literal notranslate"><span class="pre">'IGMP'</span></code>, while
@@ -1136,7 +1136,7 @@ package’s name, and sub-structure classes such as
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

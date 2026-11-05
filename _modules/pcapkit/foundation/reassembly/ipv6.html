@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -598,15 +599,12 @@
     <span class="n">position</span> <span class="o">=</span> <span class="n">IPV6_HEADER_LEN</span>
     <span class="n">proto</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span>
 
-    <span class="c1"># NOTE: ``header[position]`` is the Next Header field of the extension</span>
-    <span class="c1"># header starting at ``position`` and ``header[position + 1]`` its length,</span>
-    <span class="c1"># but which of the two length encodings applies is decided by the *previous*</span>
-    <span class="c1"># header's Next Header value -- hence ``proto`` trailing one step behind.</span>
+    <span class="c1"># NOTE: the length encoding of the header at ``position`` is decided by the previous</span>
+    <span class="c1"># header's Next Header value, hence ``proto`` trailing one step behind.</span>
     <span class="k">while</span> <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="n">position</span>
-        <span class="c1"># NOTE: AH is the one extension header that does not measure its</span>
-        <span class="c1"># length in 8-octet units (:rfc:`4302#section-2.2`), which is why it</span>
-        <span class="c1"># is singled out rather than falling to the common case below.</span>
+        <span class="c1"># NOTE: AH is the one extension header whose length is not in 8-octet</span>
+        <span class="c1"># units (:rfc:`4302#section-2.2`), so it is singled out.</span>
         <span class="k">if</span> <span class="n">proto</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>
             <span class="n">position</span> <span class="o">+=</span> <span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
         <span class="k">else</span><span class="p">:</span>
@@ -796,7 +794,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

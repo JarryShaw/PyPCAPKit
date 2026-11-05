@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/traceflow/tcp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.traceflow.tcp is the interface to trace TCP flows from a series of packets and connections. Terminology: trace.tcp.packet, Data structure for TCP flow tracing( TraceFlow.dump) is..." />
-<meta name="description" content="pcapkit.foundation.traceflow.tcp is the interface to trace TCP flows from a series of packets and connections. Terminology: trace.tcp.packet, Data structure for TCP flow tracing( TraceFlow.dump) is..." />
+<meta property="og:description" content="pcapkit.foundation.traceflow.tcp traces TCP flows from a series of packets. Terminology: trace.tcp.packet, Data structure for TCP flow tracing( TraceFlow.dump) is as follows:,, trace.tcp.buffer, Da..." />
+<meta name="description" content="pcapkit.foundation.traceflow.tcp traces TCP flows from a series of packets. Terminology: trace.tcp.packet, Data structure for TCP flow tracing( TraceFlow.dump) is as follows:,, trace.tcp.buffer, Da..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Registry Management" href="../registry.html"><link rel="prev" title="Flow Tracing Base Class" href="traceflow.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -570,8 +571,8 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.foundation.traceflow.tcp">
 <span id="follow-tcp-stream"></span><h1>Follow TCP Stream<a class="headerlink" href="#module-pcapkit.foundation.traceflow.tcp" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.foundation.traceflow.tcp" title="pcapkit.foundation.traceflow.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp</span></code></a> is the interface to trace
-TCP flows from a series of packets and connections.</p>
+<p><a class="reference internal" href="#module-pcapkit.foundation.traceflow.tcp" title="pcapkit.foundation.traceflow.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp</span></code></a> traces TCP flows from a series of
+packets.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.tcp.</span></span><span class="sig-name descname"><span class="pre">TCP</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_DT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_BT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_IT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.byteorder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP" title="Link to this definition">¶</a></dt>
@@ -655,9 +656,7 @@ and each datagram’s payload is a single message that
 <a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a> can parse alone.
 Where a sender <strong>pipelines</strong> – several requests in flight before any reply
 – they all carry the same acknowledgement number, so they share a bucket
-and are concatenated after all. Measured: two requests sent back to back
-on one acknowledgement number come back as a single datagram carrying
-<code class="docutils literal notranslate"><span class="pre">b'req1req2'</span></code>, which
+and are concatenated after all, as
 <code class="docutils literal notranslate"><span class="pre">test_pipelined_sends_share_a_datagram_because_the_ack_never_moved</span></code> in
 <code class="file docutils literal notranslate"><span class="pre">tests/foundation/traceflow/test_tcp.py</span></code> pins. So this narrows the
 concatenation to within one exchange rather than eliminating it, and an
@@ -974,23 +973,20 @@ is as follows:</p>
  |--&gt; (tuple) BUFID ...
 </pre></div>
 </div>
-<p>When tracing bidirectionally – the default – <code class="docutils literal notranslate"><span class="pre">BUFID</span></code> orders the two
-endpoints canonically rather than as (source, destination), so both halves
-of a conversation reduce to the same key. It stays a plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>
-either way, because it is a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> key and an
-<a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> cannot be one –
-<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></a> sets its <code class="docutils literal notranslate"><span class="pre">__hash__</span></code> to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<p>When tracing bidirectionally, the default, <code class="docutils literal notranslate"><span class="pre">BUFID</span></code> orders the endpoints
+canonically, so both halves of a conversation share one key;
+<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.BufferID" title="pcapkit.foundation.traceflow.data.tcp.BufferID"><code class="xref py py-data docutils literal notranslate"><span class="pre">BufferID</span></code></a> says why it stays a
+plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>.</p>
 <p>A teardown – a FIN from each endpoint, or a RST from either – is recorded
-in <code class="docutils literal notranslate"><span class="pre">fin</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code> but does <strong>not</strong> finalise the flow. The four-way
-close of <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the
-acknowledgement that completes it arrives after the second FIN; finalising
-on that FIN would drop the ACK from the flow and let it open a fresh buffer
-under the same <code class="docutils literal notranslate"><span class="pre">BUFID</span></code>, which a later connection reusing those endpoints
-would then merge into. The flow is finalised instead by proof that nothing
-more can arrive – a new connection’s SYN on the same endpoints, or
+in <code class="docutils literal notranslate"><span class="pre">fin</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code> but does <strong>not</strong> finalise the flow. The ACK that
+completes <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a>’s four-way close (FIN, ACK, FIN, ACK)
+arrives after the second FIN, so finalising on that FIN would let the ACK
+open a fresh buffer under the same <code class="docutils literal notranslate"><span class="pre">BUFID</span></code>, for a later connection reusing
+those endpoints to merge into. Only proof that nothing more can arrive
+finalises it – a new connection’s SYN on the same endpoints, or
 <a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.finish</span></code></a> at the end
-of the capture. Telling that SYN from the peer’s SYN-ACK is what the
-recorded teardown is for.</p>
+of the capture – and the recorded teardown is what tells that SYN from the
+peer’s SYN-ACK.</p>
 <pre  class="mermaid">
         stateDiagram-v2
     direction TB
@@ -1035,15 +1031,11 @@ recorded teardown is for.</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">forward</span></code> and <code class="docutils literal notranslate"><span class="pre">reverse</span></code> partition <code class="docutils literal notranslate"><span class="pre">index</span></code>, so
 <code class="docutils literal notranslate"><span class="pre">frame_number</span> <span class="pre">in</span> <span class="pre">flow.forward</span></code> answers which way a packet went without
-taking the label apart. <code class="docutils literal notranslate"><span class="pre">forward</span></code> is the direction of the packet that
-opened the flow, whose endpoints the label names first.</p>
-<p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is the conversation’s application layer: its reassembled
-datagrams, one per direction and acknowledgement number, present only when
-the tracer was constructed with <code class="docutils literal notranslate"><span class="pre">analyse=True</span></code>. It is reassembled on the
-<em>first read</em>, and each datagram’s
-own <a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a> is
-parsed later still, so a caller that wanted only frame numbers pays for
-none of it. The tracer does not reassemble the stream itself – it feeds
+taking the label apart.</p>
+<p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is reassembled on its <em>first read</em>, and each datagram’s own
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a> parsed later
+still, so a caller that wanted only frame numbers pays for none of it. The
+tracer does not reassemble the stream itself: it feeds
 <a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>, whose <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> algorithm
 handles the reordering and retransmission that concatenating payloads in
 capture order would corrupt.</p>
@@ -1431,7 +1423,7 @@ wanted frame numbers pays for none of it.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

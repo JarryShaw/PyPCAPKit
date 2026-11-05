@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -575,14 +576,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HandshakeType'</span><span class="p">]</span>
 
 <span class="c1">###############################################################################</span>
-<span class="c1"># NOTE: this crawler does not crawl. Its source is the expired Netscape SSLv2</span>
-<span class="c1"># draft, draft-hickman-netscape-ssl-00, which is not an IANA (or any other)</span>
-<span class="c1"># live registry a crawler could re-fetch -- there is nothing upstream of this</span>
-<span class="c1"># module to go stale against. Per the const-vendor-pairing convention, a</span>
-<span class="c1"># hand-maintained registry still gets a crawler, reading</span>
-<span class="c1"># :data:`~pcapkit.vendor.sslv2.handshake_type.DATA` instead of fetching a URL</span>
-<span class="c1"># -- the same shape as :mod:`pcapkit.vendor.linux.arphrd`,</span>
-<span class="c1"># :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.</span>
+<span class="c1"># NOTE: this crawler does not crawl: draft-hickman-netscape-ssl-00 is no live registry,</span>
+<span class="c1"># so it reads the hand-maintained :data:`~pcapkit.vendor.sslv2.handshake_type.DATA`.</span>
 <span class="c1">###############################################################################</span>
 
 <span class="c1">#: SSLv2 handshake message type registry, transcribed from</span>
@@ -693,7 +688,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -4,14 +4,13 @@ Protocol Layer Placement
 ------------------------
 
 Which subpackage of :mod:`pcapkit.protocols` a new dissector belongs in, and which
-base classes it names. Settled by the owner on
-:issue:`719`.
+base classes it names. Settled by the owner on :issue:`719`.
 
 The Rule
 ~~~~~~~~
 
-#. **Layer is decided by designed function, not by encapsulation.** What carries a
-   protocol on the wire is a separate question from what the protocol is *for*.
+#. **Layer is decided by designed function, not by encapsulation**: what a protocol
+   is *for*, not what carries it on the wire.
 #. **The IETF is the single source of truth** -- :rfc:`1122#section-1.1.3` and
    :rfc:`1812#section-7`. Where they place a protocol, so does this package.
 #. **The operative question for a new protocol** is: *is this protocol a user of the
@@ -80,9 +79,9 @@ name mapping, booting, and management"*, while **ARP** sits in the Link Layer ch
 at :rfc:`1122#section-2.3.2`. Sibling protocols sharing one frame format, each under
 its own EtherType, in different layers -- decided on function alone.
 
-OSI says the same by construction. ITU-T X.200 §9.2.4.4 has a protocol declare its own
-layer in terms of *"functions which pertain to a particular layer"*, and clause 7
-defines every layer by its purpose rather than by what encapsulates it.
+OSI agrees by construction: ITU-T X.200 §9.2.4.4 has a protocol declare its layer in
+terms of *"functions which pertain to a particular layer"*, and clause 7 defines every
+layer by its purpose, not its encapsulation.
 
 IANA Assignments: Encapsulation, Not Layer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,13 +94,11 @@ nothing else.
 
 .. caution::
 
-   This **retires the registration grid on** :doc:`/ext` (the
-   Protocol Type → Registry Function table) **as a placement rule.** It is a guide to
-   which registrar to call when extending the library, and it was never a layer
-   taxonomy. Read literally as one it makes ARP, RARP and both VLAN tags
-   internet-layer and every IPv6 extension header transport-layer. A
-   contributor looking for a placement rule will find that grid first, which is why
-   this page says so explicitly.
+   **The registration grid on** :doc:`/ext` (the Protocol Type → Registry Function
+   table) **is not a placement rule.** It says which registrar to call when extending
+   the library; read as a layer taxonomy it makes ARP, RARP and both VLAN tags
+   internet-layer and every IPv6 extension header transport-layer. It is named here
+   because a contributor looking for a placement rule finds it first.
 
 Routing Protocols: Control Plane, Not Data Plane
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,16 +111,16 @@ not one of the Internet Layer protocols §4.1 names.
 
 **X.200 does not contradict this, and must not be cited as though it did.** X.200
 §7.5.2.1 says the Network Layer provides transport *"independence of routing and relay
-considerations"* -- that is the network layer **performing forwarding** so transport
-need not care, which is the data plane. X.200 treats routing as a *generic* function
+considerations"* -- the network layer **performing forwarding** so transport need not
+care: the data plane. X.200 treats routing as a *generic* function
 parameterised by layer: §5.4.1.4 defines it as *"a function within a layer"*, and §5.9
 as *"a routing function within the (N)-layer enables communication to be relayed by a
 chain of (N)-entities."* An (N)-layer function is not a layer assignment, and **X.200
 assigns none**.
 
-The distinction that dissolves the apparent conflict: computing a forwarding table is
-the **control plane** and makes the protocol a user of the stack; forwarding packets is
-the **data plane** and is internet-layer. OSPF does the former.
+Computing a forwarding table is the **control plane** and makes a protocol a user of
+the stack; forwarding packets is the **data plane** and is internet-layer. OSPF does
+the former.
 
 Tunnelling Protocols: Payload, Not Carrier
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,8 +137,8 @@ point-to-point link -- i.e., an OSIRM Layer 2 connection"*, and a tunnelling pro
 encapsulating protocol."* :rfc:`2473#section-3` and :rfc:`4213#section-3.4` (*"the
 tunnel is a link"*) agree.
 
-The carrier was never single-valued for L2TP anyway: :rfc:`3931#section-4.1` makes
-L2TP-over-IP (protocol 115) a **MUST** and UDP/1701 only a **SHOULD**.
+L2TP's carrier is not single-valued anyway: :rfc:`3931#section-4.1` makes L2TP-over-IP
+(protocol 115) a **MUST** and UDP/1701 only a **SHOULD**.
 
 The Inheritance Convention
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -149,8 +146,8 @@ The Inheritance Convention
 **Layer base first, protocol family second.** Where a protocol's layer and its parsing
 family disagree, it names both, in that order.
 
-The order is load-bearing, and the mechanism is checkable. ``__layer__`` is resolved by
-the MRO, so whichever base owns it *earliest* wins:
+The order is load-bearing: ``__layer__`` resolves through the MRO, so the *earliest*
+base that owns it wins:
 
 .. code-block:: pycon
 
@@ -169,29 +166,27 @@ So :class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`, declared
 :class:`~pcapkit.protocols.link.link.Link`, which **does** own it, so
 ``class RARP(ARP, Application)`` would report ``'Link'`` and be wrong.
 
-Ordering layer-first is correct in both cases, which is the point: a contributor does
-not have to work out which case they are in.
+Layer-first is correct in both cases, so a contributor need not work out which applies.
 
 Apparent Mistakes
 ~~~~~~~~~~~~~~~~~
 
-Each is deliberate. Do not "fix" any of them.
+Each is deliberate; do not "fix" it.
 
 **A parsing base may live in another subpackage.**
 :mod:`pcapkit.protocols.application.rarp.protocol` imports
 :class:`~pcapkit.protocols.link.arp.protocol.ARP` from :mod:`pcapkit.protocols.link.arp.protocol`. That
-``application/ → link/`` dependency is the honest consequence of letting layer and
-parser disagree.
+``application/ → link/`` dependency follows from letting layer and parser disagree.
 
 **A pseudo-header protocol is in** :mod:`~pcapkit.protocols.misc`, **not beside the
 layer it is built from.** :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`
 is built from an IPv4 or IPv6 layer but is no layer on the wire, and its ``__layer__``
 is :obj:`None`. Pseudo-header protocols share :mod:`pcapkit.protocols.misc.checksum`,
-ruled in review of the IP pseudo-header, :pr:`2479` (:issue:`2471`); the issue's
-thread does not hold it.
+ruled in review of the IP pseudo-header, :pr:`2479` (:issue:`2471`), whose issue does
+not hold it.
 
-**The dispatch tier is decoupled from the subpackage.** A protocol's subpackage says
-nothing about which registry reaches it, and no dispatch key depends on it:
+**The dispatch tier is decoupled from the subpackage**: no dispatch key depends on
+the subpackage:
 
 .. list-table::
    :header-rows: 1
@@ -240,13 +235,13 @@ issue holds the ruling), and neither of the others does, so it does **not** reso
 :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`. Nothing turns on that:
 :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` reads the pairing
 out of the registry owner's own namespace rather than off the class, and reads its
-absence as *declares no pairing* rather than as an error. What changes is which
-registry it resolves *to*: ``OSPF.__proto__`` is
+absence as *declares no pairing*, not an error. What changes is the registry it
+resolves *to*: ``OSPF.__proto__`` is
 :attr:`ProtocolBase.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__proto__>` rather
 than :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, so OSPF does not
-see Link's EtherType entries. That is inert -- nothing reaches OSPF by EtherType, and a
-``-1`` lookup misses in both registries alike and resolves to
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, inserting nothing on the miss.
+see Link's EtherType entries. That is inert: nothing reaches OSPF by EtherType, and a
+``-1`` lookup misses in both registries and resolves to
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, inserting nothing.
 :class:`~pcapkit.protocols.application.rarp.protocol.RARP` keeps
 :class:`~pcapkit.protocols.link.link.Link`'s through
 :class:`~pcapkit.protocols.link.arp.protocol.ARP`.
@@ -263,11 +258,11 @@ For a genuinely ambiguous protocol, in this order:
 Why Not OSI's Seven Layers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Asked and declined on :issue:`719`. The
-four-layer Internet model is what the public API already declares --
+Asked and declined on :issue:`719`. The public API already declares the four-layer
+Internet model --
 ``Layers = Literal['link', 'internet', 'transport', 'application', 'none']`` in
 :mod:`pcapkit.foundation.extraction` -- and the session and presentation layers have
 no header on the wire and no IANA registry to dispatch on, so as subpackages they
-would be structurally empty rather than merely sparse. OSI also resolves neither of
-the cases that prompted this page: routing's control/data-plane split and L2TP's
-carrier/payload split exist identically in both models.
+would be empty. OSI also resolves neither case that prompted this
+page: routing's control/data-plane split and L2TP's carrier/payload split exist
+identically in both models.

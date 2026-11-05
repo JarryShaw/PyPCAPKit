@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -772,10 +773,8 @@
 <span class="sd">       (:issue:`2727`).</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: With ``Opt Data Len`` 0 the option has no data octet, so the mode</span>
-    <span class="c1"># bit forward-matched above belongs to whatever follows the option. Unless</span>
-    <span class="c1"># the data ends inside the forward match before ``Opt Data Len``, the</span>
-    <span class="c1"># option's second octet, which then reads as zero (#2727).</span>
+    <span class="c1"># NOTE: With ``Opt Data Len`` 0 the forward-matched mode bit belongs to what follows the</span>
+    <span class="c1"># option, unless the data ends before ``Opt Data Len``, which then reads as zero (#2727).</span>
     <span class="n">record</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
     <span class="n">cut</span> <span class="o">=</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'test'</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span>
     <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut</span><span class="p">:</span>
@@ -869,9 +868,8 @@
         <span class="c1"># as raw data, sized by its own ``Opt Data Len``.</span>
         <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">unassigned</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: The suboption schemas carry the option's own ``type`` and ``len``</span>
-    <span class="c1"># octets, so this is the width of the whole option: the two header octets</span>
-    <span class="c1"># plus the six data octets :rfc:`4782#section-3.2` gives both functions.</span>
+    <span class="c1"># NOTE: The suboption schemas carry the option's ``type`` and ``len`` octets, so this is the</span>
+    <span class="c1"># whole option: two header octets plus the six data octets of :rfc:`4782#section-3.2`.</span>
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
@@ -1014,7 +1012,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

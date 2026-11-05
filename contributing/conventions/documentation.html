@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/documentation.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The pages before this one rule on library code and on running the repository. This one rules on the documentation itself – how a page is titled, when a diagram beats a paragraph, and what a sentenc..." />
-<meta name="description" content="The pages before this one rule on library code and on running the repository. This one rules on the documentation itself – how a page is titled, when a diagram beats a paragraph, and what a sentenc..." />
+<meta property="og:description" content="Rules for the documentation itself: the reStructuredText under docs/source/ and the pcapkit docstrings the API reference renders from. Most were settled on#719, the prose sweep. As on Running the R..." />
+<meta name="description" content="Rules for the documentation itself: the reStructuredText under docs/source/ and the pcapkit docstrings the API reference renders from. Most were settled on#719, the prose sweep. As on Running the R..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Testing a Change" href="test-coverage.html"><link rel="prev" title="Running the Repository" href="process.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -570,25 +571,18 @@
         <article role="main" id="furo-main-content">
           <section id="writing-the-documentation">
 <span id="documentation"></span><h1>Writing the Documentation<a class="headerlink" href="#writing-the-documentation" title="Link to this heading">¶</a></h1>
-<p>The pages before this one rule on library code and on running the repository. This
-one rules on the documentation itself – how a page is titled, when a diagram beats a
-paragraph, and what a sentence on it is allowed to claim. It governs the
-reStructuredText under <code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code> and the <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> docstrings the API
-reference renders from, since the owner named both when settling the first of these.</p>
-<p>Nearly all of it was settled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, the prose sweep, whose
-thread was the only place most of it lived. As on <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a>, every ruling here is
-<strong>paraphrased rather than quoted</strong>, on the owner’s standing instruction there; the
-issue named beside a rule is where the original wording is.</p>
+<p>Rules for the documentation itself: the reStructuredText under <code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code>
+and the <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> docstrings the API reference renders from. Most were settled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, the prose sweep. As on <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a>, every ruling is <strong>paraphrased
+rather than quoted</strong>; the issue named beside a rule holds the original wording.</p>
 <section id="concision">
 <h2>Concision<a class="headerlink" href="#concision" title="Link to this heading">¶</a></h2>
 <p><strong>Every page, docstring and comment is as short as it can be while staying
 accurate.</strong> Cut restatement, hedging, narration, and any sentence that would survive
 deletion unnoticed; keep the specific fact, name and reference. Where the content is
 structure or a run of parallel items, a diagram (<a class="reference internal" href="#mermaid-for-flows">Mermaid for Flows</a>) or a table says
-it in less. This reaches the Markdown documents and every code comment, not only what
-Sphinx renders. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> and reaffirmed by the owner in session, recorded
-on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>.</p>
+it in less. This reaches the Markdown documents and every code comment too. Ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> and reaffirmed by the owner in session, recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>.</p>
 <p><strong>Cut timed context</strong> – when a thing changed and what it used to do – everywhere but
 version-bounded prose: changelog entries, breaking-change and deprecation notes, and the
 version directives. <strong>Keep a design decision</strong>: where a reader would otherwise undo a
@@ -596,31 +590,27 @@ deliberate choice, its reason is tightened rather than removed. Ruled on <a clas
 </section>
 <section id="heading-case-and-shape">
 <h2>Heading Case and Shape<a class="headerlink" href="#heading-case-and-shape" title="Link to this heading">¶</a></h2>
-<p><strong>Title Case, and short.</strong> Sentence case belongs only to a heading that genuinely is a
-sentence – a how-to question is the example the owner gave – and that was ruled rare:
-a sentence should generally not be used as a title at all. Settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
-<p>Title Case here is the conventional kind rather than every-word capitalisation. The
-short function words <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">an</span></code>, <code class="docutils literal notranslate"><span class="pre">the</span></code>, <code class="docutils literal notranslate"><span class="pre">and</span></code>, <code class="docutils literal notranslate"><span class="pre">or</span></code>, <code class="docutils literal notranslate"><span class="pre">of</span></code>, <code class="docutils literal notranslate"><span class="pre">in</span></code>, <code class="docutils literal notranslate"><span class="pre">for</span></code>
-and <code class="docutils literal notranslate"><span class="pre">to</span></code> stay lowercase unless they lead, which was the reading put to the owner on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> and left standing. It is also what the tree does: <em>The</em> <code class="docutils literal notranslate"><span class="pre">all</span></code> <em>Extra</em> and
-<em>Issue and Pull Request Labels</em> on <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a> are both in it.</p>
-<p><strong>The casing is the easy half.</strong> A heading can be in Title Case already and still
-break the rule by being a clause rather than a title: <em>What a Failed Lookup Raises</em> was
-correctly cased and was renamed <em>Failed-Lookup Exceptions</em>.</p>
-<p>The line to draw: a <strong>finite verb</strong> makes a heading a sentence and earns a rewrite,
-while a gerund or infinitive phrase is a noun phrase and needs only re-casing – so
-<em>Running the tests</em> becomes <em>Running the Tests</em> rather than being reworded.</p>
+<p><strong>Title Case, and short.</strong> Sentence case is only for a heading that genuinely is a
+sentence, such as a how-to question, and that was ruled rare: a sentence should
+generally not be a title at all. Settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
+<p>Title Case is the conventional kind, not every-word capitalisation: <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">an</span></code>,
+<code class="docutils literal notranslate"><span class="pre">the</span></code>, <code class="docutils literal notranslate"><span class="pre">and</span></code>, <code class="docutils literal notranslate"><span class="pre">or</span></code>, <code class="docutils literal notranslate"><span class="pre">of</span></code>, <code class="docutils literal notranslate"><span class="pre">in</span></code>, <code class="docutils literal notranslate"><span class="pre">for</span></code> and <code class="docutils literal notranslate"><span class="pre">to</span></code> stay lowercase unless they
+lead. That reading was put to the owner on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> and left standing; <em>The</em>
+<code class="docutils literal notranslate"><span class="pre">all</span></code> <em>Extra</em> and <em>Issue and Pull Request Labels</em> on <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a> follow it.</p>
+<p><strong>Casing is the easy half.</strong> A correctly cased heading still breaks the rule if it is a
+clause: <em>What a Failed Lookup Raises</em> became <em>Failed-Lookup Exceptions</em>. A <strong>finite
+verb</strong> makes a heading a sentence and earns a rewrite; a gerund or infinitive phrase is
+a noun phrase and needs only re-casing, so <em>Running the tests</em> becomes <em>Running the
+Tests</em>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>A heading also has to describe the section beneath it, and a rewrite is the moment
-to check that. <em>One Approval, Whole Release</em> was renamed <em>The Release Pipeline</em>
-because the section opens on a Mermaid flowchart while the approval prose it had
-been named for sat well below, leaving the page’s most navigable artefact
-unfindable from the table of contents.</p>
+<p>A heading must also describe its section; check that on any rewrite. <em>One Approval,
+Whole Release</em> became <em>The Release Pipeline</em> because the section opens on a Mermaid
+flowchart, and the approval prose it was named for sat well below it.</p>
 </div>
-<p><strong>A module docstring’s</strong> <code class="docutils literal notranslate"><span class="pre">=</span></code> <strong>title underline runs six past the title</strong>, so the
-heading reads balanced. The title is measured as written, inline markup included,
-which is how the crawler templates under <a class="reference internal" href="../../pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> compute it. Ruled on
+<p><strong>A module docstring’s</strong> <code class="docutils literal notranslate"><span class="pre">=</span></code> <strong>title underline runs six past the title.</strong> The title
+is measured as written, inline markup included, as the crawler templates under
+<a class="reference internal" href="../../pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> compute it. Ruled on
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2718">#2718</a>; <code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_module_title_underline_2718_unit.py</span></code>
 fails on an underline of any other length.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">"""Some Module</span>
@@ -632,54 +622,47 @@ fails on an underline of any other length.</p>
 </section>
 <section id="renaming-a-heading">
 <h2>Renaming a Heading<a class="headerlink" href="#renaming-a-heading" title="Link to this heading">¶</a></h2>
-<p>Mechanical traps, each of which has bitten rather than being hypothetical.</p>
+<p>Each of these traps has been hit.</p>
 <p><strong>Re-measure the underline against the new text.</strong> A case flip usually keeps the
-length; a rewrite almost never does, and docutils reports an underline shorter than
-its heading in a build that does not fail on warnings. Re-check every heading.</p>
-<p><strong>A heading is a link target, so a rename is a repository-wide sweep</strong> rather than a
-<code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code> one. In scope: <code class="docutils literal notranslate"><span class="pre">.rst</span></code> prose, <code class="docutils literal notranslate"><span class="pre">:ref:</span></code> and <code class="docutils literal notranslate"><span class="pre">:doc:</span></code> link text,
-toctree entries, implicit <code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">`Text`_</span> <span class="pre">`</span></code> references, <strong>and</strong> <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> docstrings
-and the files under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>. A heading rename once left stale
-references spread across <code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code>,
+length; a rewrite rarely does, and docutils only warns on a short underline, which the
+build does not fail on.</p>
+<p><strong>A heading is a link target, so a rename is a repository-wide sweep</strong>, not a
+<code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code> one: <code class="docutils literal notranslate"><span class="pre">.rst</span></code> prose, <code class="docutils literal notranslate"><span class="pre">:ref:</span></code> and <code class="docutils literal notranslate"><span class="pre">:doc:</span></code> link text, toctree
+entries, implicit <code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">`Text`_</span> <span class="pre">`</span></code> references, <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> docstrings and
+<code class="file docutils literal notranslate"><span class="pre">tests/</span></code>. One rename left stale references in
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code> (a shipped docstring the API reference renders),
 <code class="file docutils literal notranslate"><span class="pre">tests/corekit/test_sentinel_exports_unit.py</span></code> and
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conventions_doc_claims.py</span></code>. The first of those is a shipped
-module docstring that renders into the API reference, so a reader following it searches
-the page for a string no longer on it.</p>
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conventions_doc_claims.py</span></code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>Derive the list of old headings from the pre-change file, not from the diff.</strong> A
-diff-derived list silently drops any heading whose underline is not adjacent in the
-hunk. A whitespace-flattened search for every pre-change heading string across
-every tracked file is what works.</p>
+<p><strong>Derive the old headings from the pre-change file, not from the diff</strong>, which drops
+any heading whose underline is outside the hunk. Search every tracked file,
+whitespace-flattened, for each pre-change heading string.</p>
 </div>
-<p>Nothing in CI catches a reference a rename left behind. <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>
+<p>Nothing in CI catches a reference a rename left behind: <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>
 sets no <code class="docutils literal notranslate"><span class="pre">nitpicky</span></code> and <code class="file docutils literal notranslate"><span class="pre">docs/Makefile</span></code> leaves <code class="docutils literal notranslate"><span class="pre">SPHINXOPTS</span></code> empty, so the
-build runs with neither <code class="docutils literal notranslate"><span class="pre">-n</span></code> nor <code class="docutils literal notranslate"><span class="pre">-W</span></code>: a dead reference renders as the plain text
-it used to be, and the build still succeeds. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/934">#934</a> found a batch of them at once
-that way.</p>
-<p>One thing a rename breaks that no tool checks at all is the prose around it. Turning a
-singular heading plural cost <a class="reference internal" href="registry-protocol.html#registry-protocol"><span class="std std-ref">The Registry Protocol</span></a> the antecedent of a following
-<em>“it”</em>, caught in the same review.</p>
+build runs without <code class="docutils literal notranslate"><span class="pre">-n</span></code> or <code class="docutils literal notranslate"><span class="pre">-W</span></code> and a dead reference renders as plain text.
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/934">#934</a> found a batch that way.</p>
+<p>No tool checks the prose around a renamed heading either: making one plural left a
+following <em>“it”</em> on <a class="reference internal" href="registry-protocol.html#registry-protocol"><span class="std std-ref">The Registry Protocol</span></a> without its antecedent.</p>
 </section>
 <section id="mermaid-for-flows">
 <h2>Mermaid for Flows<a class="headerlink" href="#mermaid-for-flows" title="Link to this heading">¶</a></h2>
 <p><strong>Draw the structure, and keep the prose beside it short.</strong> A pipeline, a hierarchy, a
 dispatch chain, a lifecycle or a decision procedure gets a Mermaid graph rather than an
-ASCII diagram, even where the paragraph describing it reads well, since a graph is read
-faster than its own description. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> asked for graphs where they are necessary
-and helpful; the owner widened that in session, recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>, which keeps
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s bounds and adds the last of these:</p>
+ASCII diagram, even where its paragraph reads well, since a graph reads faster.
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> asked for graphs where necessary and helpful; the owner widened that in
+session, recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>, keeping <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s bounds and adding the last
+of these:</p>
 <ul class="simple">
-<li><p><strong>A short sequence does not earn a graph.</strong> Two steps read perfectly well as a
-sentence, and a diagram of them costs a reader a context switch for nothing.</p></li>
-<li><p><strong>A rationale stays prose.</strong> A diagram carries structure and sequence; it cannot
-carry <em>why</em> a choice was made, and that reasoning is what <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> protects rather
-than compresses.</p></li>
-<li><p><strong>Do not redraw a graph another page already has.</strong> The owner’s condition when
-approving the navigation work on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> was that nothing duplicate information
-already shown, and a second copy of a flow is exactly that.</p></li>
-<li><p><strong>Every node and edge traces to the code or to the page.</strong> A graph makes claims as a
-sentence does, so <a class="reference internal" href="#accuracy">Accuracy</a> applies to each of them.</p></li>
+<li><p><strong>A short sequence does not earn a graph.</strong> Two steps read well as a sentence.</p></li>
+<li><p><strong>A rationale stays prose.</strong> A diagram carries structure and sequence, not <em>why</em> a
+choice was made, which <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> protects rather than compresses.</p></li>
+<li><p><strong>Do not redraw a graph another page already has.</strong> Approving the navigation work
+on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, the owner required that nothing duplicate information already
+shown.</p></li>
+<li><p><strong>Every node and edge traces to the code or to the page</strong>, so <a class="reference internal" href="#accuracy">Accuracy</a> applies
+to each.</p></li>
 </ul>
 <p><strong>Every diagram is vertical</strong>, because a horizontal one renders too small to read. Ruled
 by the owner in session and recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>:</p>
@@ -687,21 +670,21 @@ by the owner in session and recorded on <a class="extlink-issue reference extern
 <li><p>A flowchart is <code class="docutils literal notranslate"><span class="pre">flowchart</span> <span class="pre">TD</span></code> or <code class="docutils literal notranslate"><span class="pre">flowchart</span> <span class="pre">TB</span></code>, and a subgraph inside one
 stacks too, so it sets no horizontal <code class="docutils literal notranslate"><span class="pre">direction</span></code> of its own.</p></li>
 <li><p>A state diagram is <code class="docutils literal notranslate"><span class="pre">stateDiagram-v2</span></code> with <code class="docutils literal notranslate"><span class="pre">direction</span> <span class="pre">TB</span></code>.</p></li>
-<li><p>A sequence diagram is allowed only while its participants are few, since they always
-lay out side by side; <code class="docutils literal notranslate"><span class="pre">wrap:</span> <span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">width</span></code> and <code class="docutils literal notranslate"><span class="pre">actorMargin</span></code> in its front
-matter wrap its messages between narrow participants.</p></li>
+<li><p>A sequence diagram is allowed only while its participants are few, since they lay
+out side by side; <code class="docutils literal notranslate"><span class="pre">wrap:</span> <span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">width</span></code> and <code class="docutils literal notranslate"><span class="pre">actorMargin</span></code> in its front matter
+wrap its messages between narrow participants.</p></li>
 </ul>
-<p>Vertical is judged on the render, which has to come out taller than wide. So a diagram
-is written <code class="docutils literal notranslate"><span class="pre">TD</span></code> or <code class="docutils literal notranslate"><span class="pre">TB</span></code> unless an <code class="docutils literal notranslate"><span class="pre">LR</span></code> layout measures both taller than wide and
-larger than every <code class="docutils literal notranslate"><span class="pre">TD</span></code> attempt, as the workflow trigger map and the field and protocol
+<p>Vertical is judged on the render, which must come out taller than wide. A diagram is
+<code class="docutils literal notranslate"><span class="pre">TD</span></code> or <code class="docutils literal notranslate"><span class="pre">TB</span></code> unless an <code class="docutils literal notranslate"><span class="pre">LR</span></code> layout measures both taller than wide and larger than
+every <code class="docutils literal notranslate"><span class="pre">TD</span></code> attempt, as the workflow trigger map and the field and protocol
 hierarchies do.</p>
-<p>Where a vertical layout runs wide or piles its labels on top of each other, stack
-siblings with an invisible link (<code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">~~~</span> <span class="pre">B</span></code>), group nodes in subgraphs, break a long
-label with <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code>, pull the graph in with a smaller <code class="docutils literal notranslate"><span class="pre">nodeSpacing</span></code> in its front
-matter, or split it – rather than turning it on its side.</p>
-<p>For the mechanics, the style model is the set in the tree, every one of which builds
-and is a bare <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code> carrying no directive options. The sweep excludes this
-page, which names the directive in its own prose and would otherwise count itself:</p>
+<p>Where a vertical layout runs wide or piles up its labels, stack siblings with an
+invisible link (<code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">~~~</span> <span class="pre">B</span></code>), group nodes in subgraphs, break a long label with
+<code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code>, lower <code class="docutils literal notranslate"><span class="pre">nodeSpacing</span></code> in the front matter, or split it – never turn it on
+its side.</p>
+<p>For the mechanics, follow the diagrams in the tree: each builds and is a bare
+<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code> with no directive options. This page names the directive in its prose,
+so the listing excludes it:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>grep<span class="w"> </span>-rn<span class="w"> </span><span class="s1">'mermaid::'</span><span class="w"> </span>docs/source<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.rst'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># directives</span>
 grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">'mermaid::'</span><span class="w"> </span>docs/source<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.rst'</span><span class="w"> </span><span class="se">\</span>
@@ -709,32 +692,29 @@ grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">'mermaid
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><strong>Quote a node label whose text Mermaid would otherwise try to parse</strong>, and leave a
-bare identifier bare. A graph whose node labels are prose quotes every one of them.
-A type hierarchy keeps the bare <code class="docutils literal notranslate"><span class="pre">A{{Meta}}</span></code>, <code class="docutils literal notranslate"><span class="pre">B(Base)</span></code>,
-<code class="docutils literal notranslate"><span class="pre">D([user</span> <span class="pre">customisation</span> <span class="pre">...])</span></code> and <code class="docutils literal notranslate"><span class="pre">subgraph</span> <span class="pre">name</span> <span class="pre">[Title]</span></code> forms, quotes only
-where the text forces it – <code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> in
-<code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/protocols/index.rst</span></code> – and spends its quotes on
-<code class="docutils literal notranslate"><span class="pre">click</span></code> targets instead.</p></li>
-<li><p><strong>Write a</strong> <code class="docutils literal notranslate"><span class="pre">click</span></code> <strong>target relative to the page it is on</strong> – <code class="docutils literal notranslate"><span class="pre">protocol.html#...</span></code>,
-<code class="docutils literal notranslate"><span class="pre">../../ext.html#...</span></code> – never from the site root: the published site is served
-under <code class="docutils literal notranslate"><span class="pre">/PyPCAPKit/</span></code>, so a target starting with <code class="docutils literal notranslate"><span class="pre">/</span></code> resolves outside it and 404s.</p></li>
-<li><p><strong>Edge labels follow no rule at all.</strong> The exemplars quote some and leave others
-bare, including <code class="docutils literal notranslate"><span class="pre">|workflow_run:</span> <span class="pre">completed|</span></code> and <code class="docutils literal notranslate"><span class="pre">|02:00|</span></code>, which the reason above
-would have quoted and which Mermaid accepts anyway – so match the graph being edited
-rather than this list.</p></li>
-<li><p><strong>Inside a quoted label</strong>, <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> breaks the text across lines and a literal <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>
-or <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> is written <code class="docutils literal notranslate"><span class="pre">&amp;lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&amp;gt;</span></code>. Mermaid also reads label text as Markdown,
-so an underscore that opens or closes a name is written <code class="docutils literal notranslate"><span class="pre">\_</span></code> – <code class="docutils literal notranslate"><span class="pre">\_missing\_</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pcapkit.\_\_version\_\_</span></code> – or the name renders as emphasis. Its own <code class="docutils literal notranslate"><span class="pre">#95;</span></code>
-escape is no substitute: in a label that carries a <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> it is decoded before the
-Markdown pass, and the emphasis comes back.</p></li>
+<li><p><strong>Quote a node label whose text Mermaid would otherwise parse</strong>, and leave a bare
+identifier bare. A graph whose labels are prose quotes all of them. A type hierarchy
+keeps the bare <code class="docutils literal notranslate"><span class="pre">A{{Meta}}</span></code>, <code class="docutils literal notranslate"><span class="pre">B(Base)</span></code>, <code class="docutils literal notranslate"><span class="pre">D([user</span> <span class="pre">customisation</span> <span class="pre">...])</span></code> and
+<code class="docutils literal notranslate"><span class="pre">subgraph</span> <span class="pre">name</span> <span class="pre">[Title]</span></code> forms, and quotes only where the text forces it –
+<code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> in <code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/protocols/index.rst</span></code> – and on
+<code class="docutils literal notranslate"><span class="pre">click</span></code> targets.</p></li>
+<li><p><strong>Write a</strong> <code class="docutils literal notranslate"><span class="pre">click</span></code> <strong>target relative to its page</strong> – <code class="docutils literal notranslate"><span class="pre">protocol.html#...</span></code>,
+<code class="docutils literal notranslate"><span class="pre">../../ext.html#...</span></code>. The site is served under <code class="docutils literal notranslate"><span class="pre">/PyPCAPKit/</span></code>, so a target
+starting with <code class="docutils literal notranslate"><span class="pre">/</span></code> resolves outside it and 404s.</p></li>
+<li><p><strong>Edge labels follow no rule.</strong> The exemplars quote some and leave others bare, such
+as <code class="docutils literal notranslate"><span class="pre">|workflow_run:</span> <span class="pre">completed|</span></code> and <code class="docutils literal notranslate"><span class="pre">|02:00|</span></code>, which Mermaid accepts; match the
+graph being edited.</p></li>
+<li><p><strong>Inside a quoted label</strong>, <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> breaks the line and a literal <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> is
+<code class="docutils literal notranslate"><span class="pre">&amp;lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&amp;gt;</span></code>. Mermaid reads label text as Markdown, so an underscore that
+opens or closes a name is <code class="docutils literal notranslate"><span class="pre">\_</span></code> – <code class="docutils literal notranslate"><span class="pre">\_missing\_</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.\_\_version\_\_</span></code>
+– or the name renders as emphasis. Mermaid’s <code class="docutils literal notranslate"><span class="pre">#95;</span></code> escape is no substitute: in a
+label with a <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> it is decoded before the Markdown pass.</p></li>
 <li><p><strong>Where a steep edge runs under a neighbouring edge label</strong>, <code class="docutils literal notranslate"><span class="pre">curve:</span> <span class="pre">monotoneX</span></code> in
-the graph’s front matter keeps it clear, as the mint criterion’s decision graph does.</p></li>
+the front matter keeps it clear, as the mint criterion’s decision graph does.</p></li>
 <li><p><strong>Leave the sizing to</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>. Its <code class="docutils literal notranslate"><span class="pre">mermaid_init_config</span></code>
-turns <code class="docutils literal notranslate"><span class="pre">useMaxWidth</span></code> off for flowchart, state and sequence diagrams alike, since
-each type reads its own copy, so a diagram renders at its own size; a type the pages
-have not used needs its own entry there.</p></li>
+turns <code class="docutils literal notranslate"><span class="pre">useMaxWidth</span></code> off for flowchart, state and sequence diagrams, each of which
+reads its own copy, so a diagram renders at its own size; a new diagram type needs
+its own entry there.</p></li>
 </ul>
 <p><a class="reference internal" href="../releasing.html"><span class="doc">The release pipeline</span></a> is the example of a vertical
 pipeline, <a class="reference internal" href="../../pcapkit/foundation/engines/index.html"><span class="doc">the engine hierarchy</span></a> of a vertical
@@ -742,8 +722,8 @@ type hierarchy, and <a class="reference internal" href="../maintenance.html"><sp
 </section>
 <section id="toctree-captions">
 <h2>Toctree Captions<a class="headerlink" href="#toctree-captions" title="Link to this heading">¶</a></h2>
-<p><strong>A caption renders wherever its own toctree renders, which is not the same place for
-every toctree.</strong> Measured against a built tree rather than assumed:</p>
+<p><strong>A caption renders wherever its own toctree renders</strong>, and that differs by toctree.
+Measured on a built tree:</p>
 <ul class="simple">
 <li><p>A toctree in the <strong>root</strong> document renders into the global sidebar, so its caption
 is visible from every page in the build.</p></li>
@@ -753,116 +733,98 @@ on that page alone.</p></li>
 survives and the caption is still everywhere; on a nested one nothing is left, and
 the caption renders nowhere.</p></li>
 </ul>
-<p>That is why most of the per-package toctrees are deliberately bare – a caption on a
-package index would be invisible on every page but one. The root ones in
-<code class="file docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code> carry captions, and <code class="docutils literal notranslate"><span class="pre">Subpackages</span></code> in
-<code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/index.rst</span></code> is the only nested one. A built tree says so –
-excluding this page, which names these captions in its own prose and would otherwise
-count itself:</p>
+<p>So the per-package toctrees are deliberately bare: a caption on a package index would
+show on that page alone. The root ones in <code class="file docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code> carry captions,
+and <code class="docutils literal notranslate"><span class="pre">Subpackages</span></code> in <code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/index.rst</span></code> is the only nested one. A
+built tree confirms it (this page names the captions, so it is excluded):</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">'API Reference'</span><span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.html'</span><span class="w"> </span>--exclude<span class="o">=</span><span class="s1">'documentation.html'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>docs/build/html<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># every other page</span>
 grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">'Subpackages'</span><span class="w">   </span>--include<span class="o">=</span><span class="s1">'*.html'</span><span class="w"> </span>--exclude<span class="o">=</span><span class="s1">'documentation.html'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>docs/build/html<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># the pcapkit index page alone</span>
 </pre></div>
 </div>
-<p>Those root toctrees are <code class="docutils literal notranslate"><span class="pre">:hidden:</span></code> because, without it, each of their captions
-rendered twice on the root page – once inline in the body, once in the sidebar – which
-is the duplication the owner ruled out on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
+<p>The root toctrees are <code class="docutils literal notranslate"><span class="pre">:hidden:</span></code> because otherwise each caption renders twice on the
+root page, in the body and in the sidebar: the duplication the owner ruled out on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For the same reason, do not add an inline <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">contents::</span></code> to a page. The <code class="docutils literal notranslate"><span class="pre">furo</span></code>
-theme already renders a sticky page-local table of contents on every page, so an
-inline directive is a second copy of it; the one in <code class="file docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code>
-is commented out and should stay that way.</p>
-<p>One setting there was decided by measurement rather than by preference:
-<code class="docutils literal notranslate"><span class="pre">toc_object_entries</span></code> carries, in a comment beside it, the figures that settled it,
-so that nobody reopens the question blind. That is worth copying the next time a
-setting is chosen that way, but it is a single precedent and not a rule the owner
-has ruled on.</p>
+<p>For the same reason, add no inline <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">contents::</span></code>: <code class="docutils literal notranslate"><span class="pre">furo</span></code> already renders a
+sticky page-local table of contents on every page. The one in
+<code class="file docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code> is commented out and stays so.</p>
+<p><code class="docutils literal notranslate"><span class="pre">toc_object_entries</span></code> in <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> was set by measurement, and
+the comment beside it records the figures so nobody reopens it blind. That is worth
+copying for the next measured setting; it is a precedent, not a ruling.</p>
 </div>
 </section>
 <section id="paraphrasing-a-ruling">
 <h2>Paraphrasing a Ruling<a class="headerlink" href="#paraphrasing-a-ruling" title="Link to this heading">¶</a></h2>
-<p>Write a ruling down in your own words. <strong>Do not quote the owner verbatim</strong> – a
-standing instruction on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, and the one every page in this directory follows.
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/949">#949</a> went back over the pages that then existed and replaced their quoted
-rulings with paraphrase.</p>
-<p>What a quotation costs is not style. A quoted sentence is pinned to the moment it was
-said, so it cannot be corrected when the thing it describes moves; and a test that
-asserts on the quotation fails when the wording is tidied rather than when the claim
-stops being true. That change rewrote those tests alongside the prose, so that each
-derives its claim from the tree instead. <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a> and <a class="reference internal" href="mint-criterion.html#mint-criterion"><span class="std std-ref">Minting an Unrecognised Value</span></a> show
-the form: say what was ruled, name where it was ruled, and leave the wording there.</p>
-<p><strong>Name the issue, not the pull request.</strong> A pull request is a point in time: it
-describes what was true on the day it merged, and the next change past it can make the
-citation wrong without touching it. The issue is the durable half – where the ruling
-was asked for and given – and it survives the work that implemented it. So cite the
-issue a rule was settled on, and describe a change by what it did rather than by its
-number. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
+<p>Write a ruling in your own words. <strong>Do not quote the owner verbatim</strong> – a standing
+instruction on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, which every page here follows (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/949">#949</a> converted the
+earlier ones).</p>
+<p>The cost is not style. A quotation is pinned to the moment it was said, so it cannot
+be corrected when its subject moves, and a test asserting on it fails when the wording
+is tidied rather than when the claim stops being true; such tests derive the claim from
+the tree instead. <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a> and <a class="reference internal" href="mint-criterion.html#mint-criterion"><span class="std std-ref">Minting an Unrecognised Value</span></a> show the form: say what was
+ruled and where, and leave the wording there.</p>
+<p><strong>Name the issue, not the pull request.</strong> A pull request describes the day it merged,
+and a later change can make the citation wrong without touching it. The issue, where
+the ruling was asked for and given, outlives the work. So cite the issue a rule was
+settled on, and describe a change by what it did rather than by its number. Ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
 <p><strong>Cite a ruling given in a pull request’s review by the issue that pull request
 closes</strong>, as <code class="docutils literal notranslate"><span class="pre">ruled</span> <span class="pre">in</span> <span class="pre">review</span> <span class="pre">of</span> <span class="pre">&lt;PR&gt;</span> <span class="pre">(:issue:`N`)</span></code>. Where it closes none, cite the
 pull request with <code class="docutils literal notranslate"><span class="pre">:pr:</span></code> and say that no issue holds the ruling. Ruled in review of
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2599">#2599</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2557">#2557</a>).</p>
-<p><strong>The changelog and</strong> <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> <strong>are both exempt, for related reasons.</strong> A
-changelog entry exists so a reader can find the change, and the pull-request number <em>is</em>
-that pointer; converting it would delete the thing the entry is for –
-<code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/1.5.0.rst</span></code> is dense with pull-request citations by design.
-A substantial share of the pull requests cited under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> close no issue at
-all – one credits a proposal to an external contributor and closes nothing – and where
-an issue does exist beside a citation, it frequently lacks the fact being cited, which
-lives in the pull request’s own body or review thread instead. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
-<p>The rule reaches the rest of this directory as well: a sibling page that cites a pull
-request is unconverted, not a third exemption. The changelog and <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> are the
-whole exempt set – nothing else is.</p>
+<p><strong>The changelog and</strong> <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> <strong>are exempt.</strong> A changelog entry exists so a
+reader can find the change, and the pull-request number <em>is</em> that pointer –
+<code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/1.5.0.rst</span></code> cites pull requests by design. Many pull
+requests cited under <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> close no issue, and where one exists it often lacks
+the cited fact, which lives in the pull request’s body or review. Ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
+<p>Nothing else is exempt: a sibling page here that cites a pull request is unconverted,
+not a third exemption.</p>
 </section>
 <section id="accuracy">
 <h2>Accuracy<a class="headerlink" href="#accuracy" title="Link to this heading">¶</a></h2>
 <p><strong>Verify a claim against the code it describes, never against another document.</strong> Where
-prose and code disagree the code wins and the prose is what gets fixed – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s
-own charter – and a docstring outliving the thing it described is a demonstrated failure
-mode here rather than a hypothetical one.</p>
+prose and code disagree the code wins and the prose is fixed – <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s own
+charter. Docstrings have outlived what they described here before.</p>
 <p><strong>State no count.</strong> A count of things in the codebase or the documentation drifts as
-soon as what it counts changes, and keeping it in step by hand does not scale, so
-living prose words the claim without one – <em>every registered option</em>, <em>the remaining
-entries</em> – and drops a count that was the only content. Protocol and specification
-quantities, code constants, versions and issue numbers are not counts, and a
-measurement that justifies a design choice stays, stated as a measurement. Ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>; the released changelogs are a frozen record and keep theirs.</p>
-<p>A keyword search is not a sweep: the reliable method takes every cited
-repository path in each of the forms it gets written in – slash path, dotted module,
-bare filename, and the elided spellings – intersects them with the diff since the
-merge base, and re-measures the intersection. A tense-keyword grep misses a claim
-phrased as a fraction of a total.</p>
+soon as what it counts changes, so living prose words the claim without one – <em>every
+registered option</em>, <em>the remaining entries</em> – and drops a count that was the only
+content. Protocol and specification quantities, code constants, versions and issue
+numbers are not counts, and a measurement that justifies a design choice stays, stated
+as a measurement. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>; the released changelogs are a frozen record
+and keep theirs.</p>
+<p>A keyword search is not a sweep. Take every cited repository path in each form it is
+written in – slash path, dotted module, bare filename, elided spellings – intersect
+them with the diff since the merge base, and re-measure the intersection. A
+tense-keyword grep misses a claim phrased as a fraction of a total.</p>
 <p><strong>Treat</strong> <code class="docutils literal notranslate"><span class="pre">every</span></code>, <code class="docutils literal notranslate"><span class="pre">all</span></code>, <code class="docutils literal notranslate"><span class="pre">each</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">none</span></code> <strong>as a claim about members, and
-check the members one at a time.</strong> Several of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s findings were of exactly that
-shape:</p>
+check the members one at a time.</strong> Several of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s findings had that shape:</p>
 <ul class="simple">
-<li><p>A sweep asserted that every <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">module::</span></code> target in the documentation resolved.
-One did not: the RARP page declared <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.link.rarp</span></code>, which has
-never existed, because RARP and DRARP reuse ARP’s data class. Fixed in <code class="docutils literal notranslate"><span class="pre">68fbccd90</span></code>.</p></li>
-<li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s ruling – export the sentinel objects and leave their types out – was
-read as describing every module that then held a sentinel. One ran the other
-way: <a class="reference internal" href="../../pcapkit/corekit/fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> exported neither, so applying the rule
-there meant <em>adding</em> a name rather than removing one.</p></li>
+<li><p>A sweep asserted every <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">module::</span></code> target resolved. The RARP page declared
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.link.rarp</span></code>, which never existed, since RARP and DRARP reuse
+ARP’s data class. Fixed in <code class="docutils literal notranslate"><span class="pre">68fbccd90</span></code>.</p></li>
+<li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s ruling – export the sentinel objects, not their types – was read as
+describing every module then holding a sentinel. <a class="reference internal" href="../../pcapkit/corekit/fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>
+exported neither, so applying it there meant <em>adding</em> a name.</p></li>
 </ul>
-<p><strong>Some claims on these pages are pinned, and knowing which is part of writing one.</strong>
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conventions_doc_claims.py</span></code> checks what several pages assert
-against the tree by name rather than by figure – the extension-header table against
-the classes it classifies, <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a>’s changelog grouping against the entries,
-<a class="reference internal" href="registry-protocol.html#registry-protocol"><span class="std std-ref">The Registry Protocol</span></a>’s helpers against the code – so a stale claim there goes red
-instead of quiet. A page’s entry in that module’s <code class="docutils literal notranslate"><span class="pre">ANCHORS</span></code> fixes only its existence,
-anchor and toctree position; what the page goes on to say is pinned by nothing unless a
-test reads it. The same module checks something a reader cannot see and Sphinx cannot
-warn about: in a <code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">`#NNN</span> <span class="pre">&lt;.../NNN&gt;`__</span> <span class="pre">`</span></code> link the displayed number has to match the
-number in its own URL. A review round once corrupted a run of them and nothing caught
-it, because both halves were well-formed.</p>
+<p><strong>Know which claims are pinned.</strong> <code class="file docutils literal notranslate"><span class="pre">tests/project/test_conventions_doc_claims.py</span></code>
+checks several pages against the tree by name rather than by figure – the
+extension-header table against the classes it classifies, <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a>’s changelog
+grouping against the entries, <a class="reference internal" href="registry-protocol.html#registry-protocol"><span class="std std-ref">The Registry Protocol</span></a>’s helpers against the code – so
+a stale claim there goes red. A page’s entry in that module’s <code class="docutils literal notranslate"><span class="pre">ANCHORS</span></code> fixes only
+its existence, anchor and toctree position; the rest is pinned only where a test reads
+it. The same module checks what neither a reader nor Sphinx would notice: in a
+<code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">`#NNN</span> <span class="pre">&lt;.../NNN&gt;`__</span> <span class="pre">`</span></code> link the displayed number must match its URL’s, since a
+review round once corrupted a run of well-formed ones.</p>
 </section>
 <section id="resolvable-targets">
 <h2>Resolvable Targets<a class="headerlink" href="#resolvable-targets" title="Link to this heading">¶</a></h2>
 <p><strong>A</strong> <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">module::</span></code> <strong>target must name a file on disk.</strong> A dangling one is worse than
-no directive at all: it registers a module-index entry for a module that does not
-exist, and gives cross-references a target that resolves to nothing. The sweep that
-settled this on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> found exactly one, and repeating it is cheap:</p>
+none: it adds a module-index entry for a module that does not exist and a
+cross-reference target that resolves to nothing. Settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>; the check:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>grep<span class="w"> </span>-rhE<span class="w"> </span><span class="s1">'^\.\. +(py:)?(module|currentmodule):: '</span><span class="w"> </span>docs/source<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.rst'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span>
 <span class="w">    </span>awk<span class="w"> </span><span class="s1">'{print $NF}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-u<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">'.'</span><span class="w"> </span><span class="s1">'/'</span><span class="w"> </span><span class="p">|</span>
@@ -872,79 +834,69 @@ settled this on <a class="extlink-issue reference external" href="https://github
 </pre></div>
 </div>
 <p><strong>Under a</strong> <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">module::</span></code>, <strong>a hand-written</strong> <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">data::</span></code> <strong>or</strong> <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">function::</span></code>
-<strong>takes the bare name.</strong> The module directive already supplies the prefix, so
+<strong>takes the bare name.</strong> The module directive supplies the prefix, so
 <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">data::</span> <span class="pre">pcapkit.x._T</span></code> under <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">module::</span> <span class="pre">pcapkit.x</span></code> registers
-<code class="docutils literal notranslate"><span class="pre">pcapkit.x.pcapkit.x._T</span></code>, which no reference resolves to exactly. Where the object
-lives in a module other than the current one, a <code class="docutils literal notranslate"><span class="pre">:module:</span></code> option names it, as the
-<code class="docutils literal notranslate"><span class="pre">LINKTYPE</span></code> entry on <a class="reference internal" href="../../pcapkit/protocols/link/index.html"><span class="doc">Link Layer</span></a> does. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1775">#1775</a> found
-directives spelled the long way, which left TypeVar references ambiguous;
+<code class="docutils literal notranslate"><span class="pre">pcapkit.x.pcapkit.x._T</span></code>, which no reference resolves to exactly. An object in
+another module takes a <code class="docutils literal notranslate"><span class="pre">:module:</span></code> option, as the <code class="docutils literal notranslate"><span class="pre">LINKTYPE</span></code> entry on
+<a class="reference internal" href="../../pcapkit/protocols/link/index.html"><span class="doc">Link Layer</span></a> does. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1775">#1775</a> found long-form directives
+that left TypeVar references ambiguous;
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_ambiguous_xrefs_1775_unit.py</span></code> fails on the next one.</p>
-<p><strong>Every importable shipped module is documented, with one deliberate exception.</strong> The
-modules under <code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/*/NotImplemented/</span></code> are the set with no entry:
-placeholder sources for dissectors nobody has written yet, carrying no class a reader
-could use. The exception is a choice rather than a consequence of packaging, which is
-worth stating because the opposite is easy to assume – measured on <code class="docutils literal notranslate"><span class="pre">1.5.0b8</span></code>, every one
-is in the source distribution <em>and</em> in the wheel, and each imports as a
-namespace-package submodule. What they are not is a <em>package</em>: none of those
-directories carries an <code class="file docutils literal notranslate"><span class="pre">__init__.py</span></code>, so <code class="docutils literal notranslate"><span class="pre">find_packages</span></code> omits all of them.
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_module_pages_2559_unit.py</span></code> fails on a module with no
-<code class="docutils literal notranslate"><span class="pre">module</span></code>, <code class="docutils literal notranslate"><span class="pre">currentmodule</span></code> or <code class="docutils literal notranslate"><span class="pre">automodule</span></code> directive, and on a placeholder that
-gains one.</p>
-<p>When something is removed, its documentation entry goes with it – carrying a
-deprecation note where a user could have depended on the thing, and deleted outright
-where it never shipped. The <code class="docutils literal notranslate"><span class="pre">rarp</span></code> entry above needed no note for that second reason.
-Asked and ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
+<p><strong>Every importable shipped module is documented, with one deliberate exception</strong>: the
+modules under <code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/*/NotImplemented/</span></code>, placeholders for unwritten
+dissectors with no class a reader could use. Packaging does not force this – measured
+on <code class="docutils literal notranslate"><span class="pre">1.5.0b8</span></code>, each is in the source distribution <em>and</em> the wheel and imports as a
+namespace-package submodule. None of those directories has an <code class="file docutils literal notranslate"><span class="pre">__init__.py</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">find_packages</span></code> omits them. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_module_pages_2559_unit.py</span></code>
+fails on a module with no <code class="docutils literal notranslate"><span class="pre">module</span></code>, <code class="docutils literal notranslate"><span class="pre">currentmodule</span></code> or <code class="docutils literal notranslate"><span class="pre">automodule</span></code> directive,
+and on a placeholder that gains one.</p>
+<p>When something is removed, its documentation entry goes too: with a deprecation note
+where a user could have depended on it, deleted outright where it never shipped, as the
+<code class="docutils literal notranslate"><span class="pre">rarp</span></code> entry was. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
 </section>
 <section id="version-directives">
 <h2>Version Directives<a class="headerlink" href="#version-directives" title="Link to this heading">¶</a></h2>
-<p><strong>One</strong> <code class="docutils literal notranslate"><span class="pre">versionadded</span></code> <strong>per version in a docstring or prose block.</strong> Directives of
-the same version there merge into one. <strong>A body that only names the thing added and
-cites its issue or pull request is dropped</strong>, leaving the bare tag: the summary above
-already names the thing, so the body adds nothing. A body with content of its own
-stays, such as a move (<em>Moved here from</em> …), a rename or a takeover. Ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2530">#2530</a>.</p>
+<p><strong>One</strong> <code class="docutils literal notranslate"><span class="pre">versionadded</span></code> <strong>per version in a docstring or prose block</strong>; same-version
+directives merge. <strong>A body that only names the thing added and cites its issue or pull
+request is dropped</strong>, leaving the bare tag, since the summary already names it. A body
+with content of its own stays, such as a move (<em>Moved here from</em> …), a rename or a
+takeover. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2530">#2530</a>.</p>
 </section>
 <section id="format-and-mechanics">
 <h2>Format and Mechanics<a class="headerlink" href="#format-and-mechanics" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><strong>reStructuredText under</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code>, <strong>Markdown outside it.</strong> The owner
-ruled this on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, correcting a blanket <em>always</em> <code class="docutils literal notranslate"><span class="pre">.rst</span></code> that had been in
-circulation: the Sphinx documentation is reST, and the other documents –
-the READMEs included – are Markdown where that applies. <code class="docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code>’s own
-<em>Documentation</em> section records the same split. The <code class="docutils literal notranslate"><span class="pre">global-include</span></code> in
-<code class="file docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> does not reach Markdown, so the READMEs under <code class="file docutils literal notranslate"><span class="pre">examples/</span></code>
-ship through <code class="docutils literal notranslate"><span class="pre">recursive-include</span> <span class="pre">examples</span> <span class="pre">*.md</span></code>, and any other Markdown file
-ships only if setuptools or an <code class="docutils literal notranslate"><span class="pre">include</span></code> line adds it.</p></li>
+<li><p><strong>reStructuredText under</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/</span></code>, <strong>Markdown outside it</strong>, the READMEs
+included. Ruled by the owner on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, correcting a blanket <em>always</em> <code class="docutils literal notranslate"><span class="pre">.rst</span></code>;
+<code class="docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code>’s <em>Documentation</em> section records the same split. The
+<code class="docutils literal notranslate"><span class="pre">global-include</span></code> in <code class="file docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> does not reach Markdown, so the READMEs
+under <code class="file docutils literal notranslate"><span class="pre">examples/</span></code> ship through <code class="docutils literal notranslate"><span class="pre">recursive-include</span> <span class="pre">examples</span> <span class="pre">*.md</span></code>, and any
+other Markdown file ships only if setuptools or an <code class="docutils literal notranslate"><span class="pre">include</span></code> line adds it.</p></li>
 <li><p><strong>Cite an issue or a pull request by role wherever Sphinx renders the text.</strong> In an
 <code class="docutils literal notranslate"><span class="pre">.rst</span></code> page, a docstring or a <code class="docutils literal notranslate"><span class="pre">#:</span></code> doc-comment an issue is <code class="docutils literal notranslate"><span class="pre">:issue:`NNN`</span></code> and
 a pull request <code class="docutils literal notranslate"><span class="pre">:pr:`NNN`</span></code>, by what the number is rather than what a URL says: a
-bare <code class="docutils literal notranslate"><span class="pre">#NNN</span></code> there renders as plain text, and a hand-written link to the tracker
-hides which of the two it names. A plain <code class="docutils literal notranslate"><span class="pre">#</span></code> comment, a workflow’s YAML comment,
-<code class="file docutils literal notranslate"><span class="pre">tests/</span></code> and any other file nothing renders keep <code class="docutils literal notranslate"><span class="pre">#NNN</span></code>, which GitHub links
-itself. A link into another repository or to a Discussion keeps its URL, and
-<code class="docutils literal notranslate"><span class="pre">GH-NNN</span></code> is a deliberate issue form. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>;
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_issue_pr_roles_1103_unit.py</span></code> fails on a bare number
-or a hand-written link in rendered text, and
+bare <code class="docutils literal notranslate"><span class="pre">#NNN</span></code> renders as plain text there, and a hand-written tracker link hides
+which of the two it names. A plain <code class="docutils literal notranslate"><span class="pre">#</span></code> comment, a workflow’s YAML comment,
+<code class="file docutils literal notranslate"><span class="pre">tests/</span></code> and any other unrendered file keep <code class="docutils literal notranslate"><span class="pre">#NNN</span></code>, which GitHub links. A
+link into another repository or to a Discussion keeps its URL, and <code class="docutils literal notranslate"><span class="pre">GH-NNN</span></code> is a
+deliberate issue form. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_issue_pr_roles_1103_unit.py</span></code> fails on a bare number,
+a hand-written link or a role of the wrong kind in rendered text, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_issue_refs_in_comments.py</span></code> on a role in a plain comment.
-The first also fails on a role of the wrong kind, reading each number’s kind from
+Each number’s kind comes from
 <code class="file docutils literal notranslate"><span class="pre">tests/project/issue_pr_roles_fixtures/kinds.json</span></code>, which
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/issue_pr_kinds.py</span></code> regenerates from the tracker, and which the
-scheduled Issue and PR Kinds workflow proposes a refresh of
-(<a class="reference internal" href="../workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).
-It skips a number above the file’s highest until a refresh, and fails on a lower
-one the file lacks, such as a Discussion’s. Its <code class="docutils literal notranslate"><span class="pre">ALLOWED</span></code> set exempts the
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/issue_pr_kinds.py</span></code> regenerates from the tracker and the scheduled
+Issue and PR Kinds workflow proposes refreshing (<a class="reference internal" href="../workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).
+The test skips a number above the file’s highest until a refresh, and fails on a
+lower one the file lacks, such as a Discussion’s. Its <code class="docutils literal notranslate"><span class="pre">ALLOWED</span></code> set exempts the
 hand-written links and the bare <code class="docutils literal notranslate"><span class="pre">#1962</span></code> on <a class="reference internal" href="../workflows.html"><span class="doc">GitHub Actions Workflows</span></a>, which
-other tests pin in that form, so converting one means changing its pin in the same
-commit.</p></li>
-<li><p><strong>Prose names the real defining module, not a re-export.</strong> One strand of the
-consistency sweep on <a class="reference internal" href="../pep.html"><span class="doc">the roadmap</span></a>. The sentinels are the
-worked example: every one is defined in <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>, and
-<a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a Sentinel</span></a>’s table names it rather than any of the modules that
-use them, which do not re-export them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a>).</p></li>
+other tests pin in that form, so converting one changes its pin in the same commit.</p></li>
+<li><p><strong>Prose names the real defining module, not a re-export</strong>, a strand of the
+consistency sweep on <a class="reference internal" href="../pep.html"><span class="doc">the roadmap</span></a>. Every sentinel is
+defined in <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>, and <a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a Sentinel</span></a>’s table
+names it rather than the modules that use them, which do not re-export them
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a>).</p></li>
 <li><p><strong>A verbatim upstream port is exempt from these conventions.</strong>
-<a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a Sentinel</span></a> carries the reason: the value of a
-vendored copy is that it can still be diffed against upstream, and a house-style
-rewrite destroys that in exchange for nothing a reader ever sees.</p></li>
+<a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a Sentinel</span></a> gives the reason: a vendored copy’s value is that it can
+still be diffed against upstream, which a house-style rewrite destroys.</p></li>
 </ul>
 </section>
 </section>
@@ -1026,7 +978,7 @@ rewrite destroys that in exchange for nothing a reader ever sees.</p></li>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

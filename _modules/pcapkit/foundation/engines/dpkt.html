@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -893,11 +894,8 @@
                      <span class="s1">'PCAP record gives its captured length instead'</span><span class="p">,</span> <span class="n">DPKTWarning</span><span class="p">,</span>
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="c1"># NOTE: the loop is ``dpkt.pcap.Reader.__iter__``'s, over the stream</span>
-        <span class="c1"># and the record header type that method reads them through. A generator,</span>
-        <span class="c1"># so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before</span>
-        <span class="c1"># :attr:`_upstream` is set. The timestamp is a ``Decimal`` for a</span>
-        <span class="c1"># nanosecond file, from upstream's loop and from this one alike.</span>
+        <span class="c1"># NOTE: ``dpkt.pcap.Reader.__iter__``'s loop, as a generator so ``Reader.__init__`` runs</span>
+        <span class="c1"># none of it before :attr:`_upstream` is set; nanosecond files yield ``Decimal`` timestamps.</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[float | decimal.Decimal, bytes]]'</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream</span><span class="p">:</span>
                 <span class="k">yield from</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
@@ -1128,14 +1126,8 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>  <span class="c1"># type: DPKTPacket</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
-            <span class="c1"># NOTE: Caught broadly, as :meth:`Protocol.analyze</span>
-            <span class="c1"># &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;` does: dpkt raises</span>
-            <span class="c1"># more than its own ``UnpackError`` while parsing -- dpkt 1.9.8 reads</span>
-            <span class="c1"># ``frag_off`` from whatever header follows an IPv6 Fragment header,</span>
-            <span class="c1"># so a Fragment header followed by ESP or Destination Options raises</span>
-            <span class="c1"># :exc:`AttributeError` (#1351). The frame is kept as a raw</span>
-            <span class="c1"># packet, so one undecodable frame neither ends the extraction nor</span>
-            <span class="c1"># shifts the numbering of the frames after it.</span>
+            <span class="c1"># NOTE: caught broadly, as :meth:`Protocol.analyze` does, since dpkt raises more than</span>
+            <span class="c1"># ``UnpackError`` (#1351); the frame is kept raw so later frames keep their numbering.</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">: dpkt cannot parse the frame '</span>
                  <span class="sa">f</span><span class="s1">'(</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">); kept as raw data'</span><span class="p">,</span>
                  <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -1288,7 +1280,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

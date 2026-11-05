@@ -42,9 +42,8 @@ underscore-separated word and append ``Type``, with no per-sentinel exception:
 single defining module, and it is the only import path. The modules that *use* a
 sentinel import it from there but do not re-export it: :issue:`1744` dropped the
 per-module re-exports, under the ruling that a moved name keeps no re-export at its old
-path. It was ruled in review of :pr:`1715` (:issue:`1711`), overturning the re-export
-that issue's own plan kept. Import the object, and the type for an annotation, from
-:mod:`pcapkit.corekit.sentinels`.
+path, ruled in review of :pr:`1715` (:issue:`1711`). Import the object, and the type for
+an annotation, from :mod:`pcapkit.corekit.sentinels`.
 
 Where a sentinel name already exists and already follows SCREAMING_SNAKE, keep it;
 renaming a published sentinel again costs every caller for no further gain.
@@ -101,8 +100,7 @@ appears in a signature, in :func:`help` output and in a traceback. Compare what
 
    Do **not** justify a dedicated class by claiming a subclass "could still compare
    equal via a custom ``__eq__``". A class that defines only ``__repr__`` inherits
-   identity ``__eq__`` and is exactly as safe as ``object()``. That argument appeared
-   in an early draft of :mod:`pcapkit.corekit.enum` and was wrong.
+   identity ``__eq__`` and is exactly as safe as ``object()``.
 
 **Ported code is exempt.** A verbatim upstream port keeps its upstream's sentinels
 as written: the value of a vendored copy is that it can still be diffed against
@@ -143,8 +141,7 @@ Where the sentinels differ, the differences are **needs, not inconsistencies**:
 ``__copy__`` / ``__deepcopy__`` / ``__reduce__``
    Every sentinel has them, from the base. The owner ruled on :issue:`1842` that every
    sentinel is a true singleton, rather than gaining these only once a deep copy is
-   found to reach it -- as one had by then, through a parsed schema and a field that
-   hold ``NO_VALUE``. ``__copy__`` and ``__deepcopy__`` return the object itself, and
+   found to reach it. ``__copy__`` and ``__deepcopy__`` return the object itself, and
    ``__reduce__`` returns its module-level name, so :mod:`pickle` stores a reference to
    that name and every protocol loads the same object back. A guarded ``__new__``
    alone would not do, since pickle protocols 0 and 1 rebuild through

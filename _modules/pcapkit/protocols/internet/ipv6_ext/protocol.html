@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -1288,18 +1289,8 @@
 
 
 
-<span class="c1"># NOTE: Registered by direct assignment into ``Internet.__proto__``, as</span>
-<span class="c1"># ``pcapkit.protocols.internet.internet`` does for every other entry, rather</span>
-<span class="c1"># than via the ``code=`` keyword of ``ProtocolBase.__init_subclass__``. The two</span>
-<span class="c1"># are equivalent in effect, but ``code=`` resolves through</span>
-<span class="c1"># ``register_protocol_code``, which imports</span>
-<span class="c1"># ``pcapkit.foundation.registry.protocols`` *at class-definition time*, while</span>
-<span class="c1"># ``pcapkit.protocols.internet`` (which imports this module) is still being</span>
-<span class="c1"># built. From here that completes a cycle back into the unfinished</span>
-<span class="c1"># ``pcapkit.protocols.internet`` through ``pcapkit.foundation.extraction``:</span>
-<span class="c1"># ``ImportError: cannot import name 'Extractor' from partially initialized</span>
-<span class="c1"># module 'pcapkit.foundation.extraction'`` on a bare ``import pcapkit``. Plain</span>
-<span class="c1"># dict assignment carries no import of its own.</span>
+<span class="c1"># NOTE: Assigned directly rather than via ``code=``, whose registry import at class definition</span>
+<span class="c1"># closes an import cycle through the half-built ``pcapkit.protocols.internet``.</span>
 <span class="n">Internet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Shim6</span><span class="p">]</span> <span class="o">=</span> <span class="n">IPv6_Ext</span>
 </pre></div>
         </article>
@@ -1333,7 +1324,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

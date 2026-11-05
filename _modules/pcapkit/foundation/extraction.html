@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -627,24 +628,20 @@
     <span class="c1">#: registries expose the same keys, so ``'cap'`` and the ``'txt'``/``'xml'``</span>
     <span class="c1">#: aliases are spellable for a type checker as they are accepted at runtime.</span>
     <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'text'</span><span class="p">,</span> <span class="s1">'txt'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">,</span> <span class="s1">'xml'</span><span class="p">]</span>
-    <span class="c1"># NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; each</span>
-    <span class="c1"># copy needs updating when a new engine lands. The duplication is left</span>
-    <span class="c1"># as-is on purpose.</span>
+    <span class="c1"># NOTE: deliberately duplicated verbatim in ``pcapkit.interface.misc``; update</span>
+    <span class="c1"># both copies when a new engine lands.</span>
     <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span>
                       <span class="s1">'pypcapfile'</span><span class="p">]</span>
     <span class="n">Layers</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'link'</span><span class="p">,</span> <span class="s1">'internet'</span><span class="p">,</span> <span class="s1">'transport'</span><span class="p">,</span> <span class="s1">'application'</span><span class="p">,</span> <span class="s1">'none'</span><span class="p">]</span>
 
-    <span class="c1"># NOTE: the PyPCAP and PCAP_CT engines perform no dissection, so their</span>
-    <span class="c1"># "packet" is the ``(timestamp, bytes)`` pair that ``pcap.pcap`` yields.</span>
-    <span class="c1"># One member covers both: they read the same interface, from two independent</span>
-    <span class="c1"># distributions of it.</span>
+    <span class="c1"># NOTE: the PyPCAP and PCAP_CT engines dissect nothing, so their packet is the</span>
+    <span class="c1"># ``(timestamp, bytes)`` pair ``pcap.pcap`` yields; one member covers both.</span>
     <span class="n">Packet</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Frame</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">,</span> <span class="n">ScapyPacket</span><span class="p">,</span> <span class="n">DPKTPacket</span><span class="p">,</span> <span class="n">PySharkPacket</span><span class="p">,</span>
                    <span class="n">PCAPFilePacket</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span>
 
     <span class="n">Protocols</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">ProtocolBase</span><span class="p">]]</span>
-    <span class="c1"># NOTE: every caller discards the callback's result, so it is typed ``Any``:</span>
-    <span class="c1"># any two-argument callback is accepted, whatever it returns, e.g.</span>
-    <span class="c1"># ``lambda e, f: sys.stdout.write(str(f))``.</span>
+    <span class="c1"># NOTE: every caller discards the result, so any two-argument callback is</span>
+    <span class="c1"># accepted, e.g. ``lambda e, f: sys.stdout.write(str(f))``.</span>
     <span class="n">VerboseHandler</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">'Extractor'</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Extractor'</span><span class="p">]</span>
@@ -884,12 +881,8 @@
         <span class="s1">'dpkt'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.dpkt'</span><span class="p">,</span> <span class="s1">'DPKT'</span><span class="p">),</span>
         <span class="s1">'pyshark'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pyshark'</span><span class="p">,</span> <span class="s1">'PyShark'</span><span class="p">),</span>
         <span class="s1">'pypcap'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pypcap'</span><span class="p">,</span> <span class="s1">'PyPCAP'</span><span class="p">),</span>
-        <span class="c1"># NOTE: ``pcap-ct`` is a separate distribution that reimplements the</span>
-        <span class="c1"># ``pypcap`` interface, and it installs the same top-level ``pcap``</span>
-        <span class="c1"># module. It gets its own entry rather than sharing ``pypcap``'s because</span>
-        <span class="c1"># the two are independent projects with different install requirements</span>
-        <span class="c1"># and different Python version coverage; ``PCAP_CT.__engine_module__``</span>
-        <span class="c1"># explains how ``import_test`` tells them apart.</span>
+        <span class="c1"># NOTE: ``pcap-ct`` installs the same ``pcap`` module as ``pypcap`` but is an independent</span>
+        <span class="c1"># project; ``PCAP_CT.__engine_module__`` explains how ``import_test`` tells them apart.</span>
         <span class="s1">'pcap_ct'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pcap_ct'</span><span class="p">,</span> <span class="s1">'PCAP_CT'</span><span class="p">),</span>
         <span class="s1">'pypcapfile'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.engines.pypcapfile'</span><span class="p">,</span> <span class="s1">'PyPCAPFile'</span><span class="p">),</span>
     <span class="p">}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[EngineBase] | Type[EngineBase]]</span>
@@ -1169,15 +1162,8 @@
             <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be a class, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="c1"># NOTE: checked against the public ``Engine``, the class third-party engines are</span>
-        <span class="c1"># meant to extend and the one carrying the ``engine=`` registration hook. The</span>
-        <span class="c1"># built-ins derive from ``EngineBase`` directly, so this door refuses them;</span>
-        <span class="c1"># they go through :meth:`_register_internal_engine` instead, which checks the</span>
-        <span class="c1"># base. The wider ``EngineBase`` is deliberately not accepted here: it is</span>
-        <span class="c1"># the internal base of the built-ins, and a class deriving only from it</span>
-        <span class="c1"># lacks the ``engine=`` hook, so the public door admits the public base</span>
-        <span class="c1"># alone (#513, #1016). The exception is the built-in a name shipped with,</span>
-        <span class="c1"># restored above, which the library registered itself (#1363).</span>
+        <span class="c1"># NOTE: the public door admits ``Engine`` subclasses only, not bare ``EngineBase``, which</span>
+        <span class="c1"># lacks the ``engine=`` hook (#513, #1016); a shipped built-in is restored above (#1363).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">Engine</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be an Engine subclass, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_engine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span></div>
@@ -1267,10 +1253,8 @@
             <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly must be a class, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="c1"># NOTE: ``Reassembly`` rather than ``ReassemblyBase``, for the reason given in</span>
-        <span class="c1"># :meth:`register_engine` above -- see #1016. Built-ins go through</span>
-        <span class="c1"># :meth:`_register_internal_reassembly`, except the one a name shipped</span>
-        <span class="c1"># with, restored above (#1363).</span>
+        <span class="c1"># NOTE: ``Reassembly`` rather than ``ReassemblyBase``, as in :meth:`register_engine`</span>
+        <span class="c1"># (#1016); built-ins go through :meth:`_register_internal_reassembly` (#1363).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">Reassembly</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly must be a Reassembly subclass, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">)</span></div>
@@ -1358,10 +1342,8 @@
             <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow must be a class, not </span><span class="si">{</span><span class="n">traceflow</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="c1"># NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, for the reason given in</span>
-        <span class="c1"># :meth:`register_engine` above -- see #1016. Built-ins go through</span>
-        <span class="c1"># :meth:`_register_internal_traceflow`, except the one a name shipped</span>
-        <span class="c1"># with, restored above (#1363).</span>
+        <span class="c1"># NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, as in :meth:`register_engine`</span>
+        <span class="c1"># (#1016); built-ins go through :meth:`_register_internal_traceflow` (#1363).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">TraceFlow</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow must be a TraceFlow subclass, not </span><span class="si">{</span><span class="n">traceflow</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">)</span></div>
@@ -1610,11 +1592,8 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ifnm</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">FileNotFound</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'No such file or directory'</span><span class="p">,</span> <span class="n">ifnm</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: a binary IO object need not have a ``name`` -- an</span>
-            <span class="c1"># :class:`io.BytesIO` has none, and one wrapping a descriptor has an</span>
-            <span class="c1"># :obj:`int` (#1506). The name is only a label here: the stream is</span>
-            <span class="c1"># read as given, and the output name comes from ``fout`` alone. So</span>
-            <span class="c1"># fall back to ``&lt;BytesIO&gt;``-style, after Python's own ``&lt;stdin&gt;``.</span>
+            <span class="c1"># NOTE: a binary IO object need not have a ``str`` ``name`` (#1506); it is only a label</span>
+            <span class="c1"># here, so fall back to a ``&lt;BytesIO&gt;``-style one, after Python's own ``&lt;stdin&gt;``.</span>
             <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">ifnm</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">fin</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&gt;'</span>
 
@@ -1622,23 +1601,15 @@
             <span class="n">ofnm</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: ``__output__`` is a defaultdict, so look ``fmt`` up with</span>
-            <span class="c1"># :meth:`dict.get` -- subscripting would insert an unknown format</span>
-            <span class="c1"># into the registry before the error below is raised.</span>
+            <span class="c1"># NOTE: ``__output__`` is a defaultdict; subscripting would insert an</span>
+            <span class="c1"># unknown format into the registry before the error below is raised.</span>
             <span class="n">entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
             <span class="n">registered</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">registered</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: ``__output__`` spells its extensions with the leading dot,</span>
-            <span class="c1"># and so does every ``ext=`` handed to</span>
-            <span class="c1"># :func:`pcapkit.foundation.registry.foundation.register_dumper`.</span>
-            <span class="c1"># The value we hand back, though, is documented bare and is used</span>
-            <span class="c1"># bare -- ``Extractor._fext`` reaches the engines, which each</span>
-            <span class="c1"># compose a per-frame name as ``f'{name}.{ext._fext}'``. Leaving the</span>
-            <span class="c1"># dot on is what produced ``Frame 1..json`` (see #358), so</span>
-            <span class="c1"># normalise it away once, here, rather than in every engine that</span>
-            <span class="c1"># composes a per-frame name.</span>
+            <span class="c1"># NOTE: registered extensions carry the leading dot but the value returned is bare, so</span>
+            <span class="c1"># strip it once here; per-frame names otherwise read ``Frame 1..json`` (#358).</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="n">registered</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">registered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span> <span class="k">else</span> <span class="n">registered</span>
 
             <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fout</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
@@ -1904,29 +1875,21 @@
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">format</span> <span class="o">=</span> <span class="s1">'tree'</span>
 
-        <span class="c1"># NOTE: the engine is settled first, because the format checks below and</span>
-        <span class="c1"># in the trace settings depend on which engine *runs*: an unavailable</span>
-        <span class="c1"># one falls back to the default engine, which writes PCAP perfectly well.</span>
+        <span class="c1"># NOTE: settled first, since the format and trace checks depend on which</span>
+        <span class="c1"># engine *runs*: an unavailable one falls back to the default engine.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engines'</span><span class="p">,</span> <span class="p">(</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>  <span class="c1"># extract using engine</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_select_engine</span><span class="p">()</span>
 
-        <span class="c1"># NOTE: the third-party engines' adapters hand the output writer each</span>
-        <span class="c1"># frame as a plain :obj:`dict` built by ``packet2dict``, which carries</span>
-        <span class="c1"># no record header, so there is nothing for the PCAP writer to write.</span>
-        <span class="c1"># The flow tracer has the same limitation where an engine's adapters</span>
-        <span class="c1"># build no frame record, and is given the same replacement below.</span>
+        <span class="c1"># NOTE: these engines' adapters hand the writer a plain :obj:`dict` with no record</span>
+        <span class="c1"># header, so the PCAP writer has nothing to write; the flow tracer gets the same fix below.</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">)):</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'format=</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">'; "</span>
                  <span class="s2">"using 'format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="nb">format</span> <span class="o">=</span> <span class="s1">'json'</span>
 
-        <span class="c1"># NOTE: these engines hand ``_ifnm`` to their library as a *path*, so a</span>
-        <span class="c1"># stream without a ``str`` name -- labelled ``&lt;BytesIO&gt;`` by</span>
-        <span class="c1"># :meth:`make_name` -- would be opened as a file of that name (#1506).</span>
-        <span class="c1"># Refuse before anything runs, rather than relying on no such file</span>
-        <span class="c1"># existing. ``dpkt``, ``pypcapfile`` and the default engine read</span>
-        <span class="c1"># ``_ifile`` and take a stream as it is.</span>
+        <span class="c1"># NOTE: these engines open ``_ifnm`` as a path, so a stream without a ``str`` name would</span>
+        <span class="c1"># be opened as a file named ``&lt;BytesIO&gt;`` (#1506); refuse before anything runs.</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="n">_PATH_ENGINES</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' requires a file on disk, "</span>
@@ -1958,13 +1921,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="n">verbose</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_vfunc_default</span> <span class="o">=</span> <span class="n">verbose</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="c1"># NOTE: ``verbose=True`` and the CLI's ``-v`` are a request for</span>
-                <span class="c1"># user-facing output on stdout, not diagnostics -- the frame</span>
-                <span class="c1"># chains are a feature of the tool, so they stay on ``print``</span>
-                <span class="c1"># rather than becoming log records a consumer has to configure</span>
-                <span class="c1"># a handler to see (and on a different stream at that). Of the</span>
-                <span class="c1"># built-in engines only PCAP and PCAPNG keep this callback, so</span>
-                <span class="c1"># its frame is theirs; the others install their own.</span>
+                <span class="c1"># NOTE: ``verbose=True`` and ``-v`` ask for user-facing output, so this stays on</span>
+                <span class="c1"># ``print`` rather than logging; only PCAP and PCAPNG keep this callback.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">cast</span><span class="p">(</span><span class="s2">"Frame | PCAPNG"</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">protochain</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
                 <span class="p">)</span>
@@ -2037,33 +1995,16 @@
         <span class="k">if</span> <span class="n">trace</span><span class="p">:</span>
             <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="c1"># NOTE: these engines' flow tracing adapters report the frame as a</span>
-            <span class="c1"># plain :obj:`dict`, which the PCAP trace dumper cannot re-serialise</span>
-            <span class="c1"># -- :meth:`PCAPIO._append_value</span>
-            <span class="c1"># &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` reaches for</span>
-            <span class="c1"># ``frame.packet`` and dies with ``AttributeError: 'dict' object has no</span>
-            <span class="c1"># attribute 'packet'``. ``None`` has to be caught along with ``'pcap'``</span>
-            <span class="c1"># here, and replaced by a format that *can* take a mapping, because</span>
-            <span class="c1"># :meth:`TraceFlow.__init__</span>
-            <span class="c1"># &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__&gt;`</span>
-            <span class="c1"># itself substitutes ``'pcap'`` for ``None``.</span>
-            <span class="c1">#</span>
-            <span class="c1"># The guard is written from what the adapters produce, not from which</span>
-            <span class="c1"># engines are seen to crash, because an engine that dissects nothing</span>
-            <span class="c1"># never feeds the tracer and so hides the defect rather than avoiding</span>
-            <span class="c1"># it (#406). DPKT and Scapy are off the list because their adapters</span>
-            <span class="c1"># build a PCAP frame record from the captured octets (#1507).</span>
+            <span class="c1"># NOTE: these adapters report plain :obj:`dict` frames the PCAP dumper cannot serialise,</span>
+            <span class="c1"># and ``None`` means ``'pcap'`` (#406); DPKT and Scapy build frame records (#1507).</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'trace_format=</span><span class="si">{</span><span class="n">trace_format</span><span class="si">}</span><span class="s2">'; "</span>
                      <span class="s2">"using 'trace_format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">trace_format</span> <span class="o">=</span> <span class="s1">'json'</span>
 
-            <span class="c1"># NOTE: PyShark hands the tracer dissected *fields*, not the octets</span>
-            <span class="c1"># behind them, so there is no payload for a flow to reassemble -- which</span>
-            <span class="c1"># is the same reason :mod:`pcapkit.toolkit.pyshark` carries no</span>
-            <span class="c1"># ``tcp_reassembly`` at all. Refuse rather than analyse empty payloads</span>
-            <span class="c1"># into an empty answer that looks like a real one.</span>
+            <span class="c1"># NOTE: PyShark hands the tracer fields, not octets, so there is no payload to</span>
+            <span class="c1"># reassemble; refuse rather than return an empty answer that looks real.</span>
             <span class="k">if</span> <span class="n">trace_analyse</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">==</span> <span class="s1">'pyshark'</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not expose packet payloads; "</span>
                      <span class="s2">"using 'trace_analyse=False' instead"</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span>
@@ -2096,22 +2037,16 @@
         <span class="c1"># NOTE: a Windows pipe says it is seekable and then does not seek (#2097).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">can_seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream is not seekable, wrapping it in SeekableReader'</span><span class="p">)</span>
-            <span class="c1"># NOTE: ``stream_closing`` decides whether closing the wrapper also</span>
-            <span class="c1"># closes the stream underneath it, so it follows *ownership*: only a</span>
-            <span class="c1"># handle this class opened itself is ours to release. A non-seekable</span>
-            <span class="c1"># stream always came from the caller, so the polarity here is the</span>
-            <span class="c1"># same one ``_cleanup`` uses (#610).</span>
+            <span class="c1"># NOTE: ``stream_closing`` follows ownership, closing only a handle this class opened; a</span>
+            <span class="c1"># non-seekable stream always came from the caller, so this matches ``_cleanup`` (#610).</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">SeekableReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">,</span>
                                          <span class="n">stream_closing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="s1">'peek'</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream has no peek(), wrapping it in PeekableStream'</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BufferedReader'</span><span class="p">,</span> <span class="n">PeekableStream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">))</span>
 
-        <span class="c1"># NOTE: the #606 backstop for an extraction abandoned before EOF. GraalPy</span>
-        <span class="c1"># never calls ``__del__``, so it is a ``weakref.finalize`` as well (#1997).</span>
-        <span class="c1"># It closes over the stream alone -- a reference to ``self`` would keep</span>
-        <span class="c1"># the extractor alive for as long as the finaliser is -- and it is only</span>
-        <span class="c1"># registered for a stream this class owns, so a caller's is never closed.</span>
+        <span class="c1"># NOTE: the #606 backstop for an extraction abandoned before EOF, a ``weakref.finalize`` as</span>
+        <span class="c1"># GraalPy never calls ``__del__`` (#1997); it holds the owned stream only, never ``self``.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_finalizer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_finalizer</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_release_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
@@ -2129,34 +2064,27 @@
             <span class="c1"># NOTE: make_dumper() names every subclass it builds 'DictDumper', so the</span>
             <span class="c1"># useful name is the output class it wraps.</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'dumping </span><span class="si">%s</span><span class="s1"> output to </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-            <span class="c1"># NOTE: only the writer *class* is kept here. The writer itself is</span>
-            <span class="c1"># created by :meth:`_open_output` once the engine has read the global</span>
-            <span class="c1"># header, which the PCAP writer needs in order to write its own.</span>
+            <span class="c1"># NOTE: only the writer *class*; :meth:`_open_output` creates the writer</span>
+            <span class="c1"># once the engine has read the global header the PCAP writer needs.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">dumper</span>  <span class="c1"># output file</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'file output disabled'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: we use peek() to read the magic number, as the file pointer</span>
-        <span class="c1"># will not be moved after reading; however, the returned bytes object</span>
-        <span class="c1"># may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes</span>
+        <span class="c1"># NOTE: peek() reads the magic number without moving the file pointer,</span>
+        <span class="c1"># but may return other than 4 bytes, hence the [:4].</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="c1"># NOTE: ``peek`` makes at most one read of the stream, which a pipe or a</span>
-                <span class="c1"># raw stream may answer with fewer than four octets, so a short peek is</span>
-                <span class="c1"># not a short file. Read them instead, and seek back (#1586).</span>
+                <span class="c1"># NOTE: a pipe or raw stream may answer ``peek``'s one read with fewer</span>
+                <span class="c1"># than four octets, so read them instead and seek back (#1586).</span>
                 <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span>
         <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
-            <span class="c1"># NOTE: a constructor that raises leaves the caller nothing to close,</span>
-            <span class="c1"># and Windows cannot delete a file still open (#2100). ``_cleanup``</span>
-            <span class="c1"># releases the input and the engine, if one was chosen (#2107);</span>
-            <span class="c1"># ``failed`` keeps it from finishing a trace whose capture never</span>
-            <span class="c1"># reached its end, and from letting an error out of the engine's close</span>
-            <span class="c1"># replace the one being handled here.</span>
+            <span class="c1"># NOTE: a raising constructor leaves the caller nothing to close (#2100), so ``_cleanup``</span>
+            <span class="c1"># releases input and engine (#2107); ``failed`` skips the trace and keeps this error.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">raise</span></div>
 
@@ -2271,8 +2199,7 @@
 <span class="sd">        """</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'closing </span><span class="si">%s</span><span class="s1"> on context exit after </span><span class="si">%d</span><span class="s1"> frame(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
         <span class="c1"># NOTE: ownership, not the ``with`` statement, decides who closes the</span>
-        <span class="c1"># input (#610, #1999): entering the block does not hand the caller's</span>
-        <span class="c1"># stream over to this class.</span>
+        <span class="c1"># input (#610, #1999); entering the block does not take the caller's stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">()</span></div>
 
 
@@ -2354,11 +2281,8 @@
 <span class="sd">            instead of :data:`False`.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: read through ``__dict__``, and answer for the *stream* rather</span>
-        <span class="c1"># than for the flag alone, so that this is :data:`False` rather than</span>
-        <span class="c1"># raising on a partially constructed instance -- ``_flag_s`` is assigned</span>
-        <span class="c1"># early in ``__init__`` and ``_ifile`` only much later, so a constructor</span>
-        <span class="c1"># that failed in between leaves the flag set and no stream behind it.</span>
+        <span class="c1"># NOTE: read through ``__dict__`` and answered for the stream, so a constructor that</span>
+        <span class="c1"># failed between setting ``_flag_s`` and ``_ifile`` yields :data:`False`, not an error.</span>
         <span class="n">ifile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_ifile'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ifile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -2407,9 +2331,6 @@
 <span class="sd">        read on a pipe whose writer is open but idle *blocks*; it does not report</span>
 <span class="sd">        end of stream. So a pipe reports it only once the writer has closed --</span>
 <span class="sd">        permanently -- and a capture that merely pauses never reaches here at all.</span>
-<span class="sd">        Measured: a pipe paused mid-capture for 1.5s blocked for the whole pause</span>
-<span class="sd">        and then delivered its remaining frames, with this method not consulted</span>
-<span class="sd">        until after the writer closed.</span>
 
 <span class="sd">        For a **seekable regular file**, only the microseconds between two</span>
 <span class="sd">        immediately consecutive probes, because such a file does not block -- it</span>
@@ -2510,12 +2431,8 @@
 <span class="sd">                an :exc:`Exception` from its close is logged rather than raised.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: *Ownership* decides who closes the input, not seekability --</span>
-        <span class="c1"># see :meth:`_owns_input` and #610. Keying on seekability</span>
-        <span class="c1"># (``not self._flag_s``) gets both halves wrong at once: the handle this</span>
-        <span class="c1"># class opened itself is never closed, leaking a descriptor and emitting</span>
-        <span class="c1"># the ``ResourceWarning`` #606 tripped over, while a stream the caller</span>
-        <span class="c1"># supplied and still needs *is* closed.</span>
+        <span class="c1"># NOTE: ownership, not seekability, decides who closes the input (#610): keying on</span>
+        <span class="c1"># ``not self._flag_s`` leaks our own handle (#606) and closes the caller's.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_detach_finalizer</span><span class="p">()</span>
@@ -2570,7 +2487,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

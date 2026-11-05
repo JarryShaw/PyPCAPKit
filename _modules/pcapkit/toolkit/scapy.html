@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -1132,12 +1133,8 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>  <span class="c1"># a zero-length frame (#1676)</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="c1"># NOTE: ``bytes(ipv4)`` ends with the frame's trailer, which Scapy files</span>
-        <span class="c1"># as padding at the end of the packet however deep the IPv4 layer, so</span>
-        <span class="c1"># only the octets inside every IP datagram above it are kept, the</span>
-        <span class="c1"># Payload Length of IPv6 carrying it included (#1623). The IHL</span>
-        <span class="c1"># and Total Length are read off them, as Scapy leaves ``ihl`` and</span>
-        <span class="c1"># ``len`` None on a layer built by hand until it is built (#1676).</span>
+        <span class="c1"># NOTE: keep only the octets inside every enclosing datagram, dropping the</span>
+        <span class="c1"># trailer Scapy files as padding (#1623); read IHL and Total Length off them (#1676).</span>
         <span class="n">octets</span> <span class="o">=</span> <span class="n">_within_datagrams</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
         <span class="n">ihl</span> <span class="o">=</span> <span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x0F</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">octets</span> <span class="k">else</span> <span class="n">IPV4_HEADER_LEN</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">ihl</span><span class="p">,</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">):</span>     <span class="c1"># a header those octets cut short</span>
@@ -1153,20 +1150,15 @@
                 <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">proto</span><span class="p">),</span>        <span class="c1"># payload protocol type</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                 <span class="c1"># original packet range number</span>
-            <span class="c1"># NOTE: Scapy reports ``IP.frag`` in on-wire 8-octet units</span>
-            <span class="c1"># (:rfc:`791#section-3.1`), but the reassembly machinery indexes the</span>
-            <span class="c1"># datagram buffer with ``fo`` in octets, so it must be scaled -- the</span>
-            <span class="c1"># same scaling this module's own IPv6 path already applies to</span>
-            <span class="c1"># ``IPv6ExtHdrFragment.offset`` below.</span>
+            <span class="c1"># NOTE: ``IP.frag`` counts 8-octet units (:rfc:`791#section-3.1`);</span>
+            <span class="c1"># reassembly indexes by octets.</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">frag</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>                          <span class="c1"># fragment offset</span>
             <span class="n">ihl</span><span class="o">=</span><span class="n">ihl</span><span class="p">,</span>                                   <span class="c1"># internet header length</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">MF</span><span class="p">),</span>                    <span class="c1"># more fragment flag</span>
             <span class="n">tl</span><span class="o">=</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>     <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="n">octets</span><span class="p">[:</span><span class="n">ihl</span><span class="p">],</span>                       <span class="c1"># raw bytes type header</span>
-            <span class="c1"># NOTE: this keeps the octets past the Total Length, since the</span>
-            <span class="c1"># reassembly machinery cuts the payload at ``tl - ihl`` itself.</span>
-            <span class="c1"># :func:`ipv6_reassembly` derives its ``tl`` from the payload, so it</span>
-            <span class="c1"># has to cut them (#1584).</span>
+            <span class="c1"># NOTE: octets past the Total Length stay, as reassembly cuts at</span>
+            <span class="c1"># ``tl - ihl`` itself (#1584).</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="n">ihl</span><span class="p">:]),</span>           <span class="c1"># raw bytearray type payload</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>              <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
@@ -1222,10 +1214,8 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">ipv6_frag</span> <span class="o">:=</span> <span class="n">_fragment_header</span><span class="p">(</span><span class="n">ipv6</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>                        <span class="c1"># dismiss not fragmented packet</span>
 
-        <span class="c1"># NOTE: ``len()`` of a Scapy layer spans that layer and everything after</span>
-        <span class="c1"># it, so the difference is the unfragmentable part -- every octet before</span>
-        <span class="c1"># the Fragment header, which is the only part of the header the</span>
-        <span class="c1"># reassembled packet keeps (:rfc:`8200#section-4.5`).</span>
+        <span class="c1"># NOTE: ``len()`` of a Scapy layer spans everything after it, so this is</span>
+        <span class="c1"># the unfragmentable part before the Fragment header (:rfc:`8200#section-4.5`).</span>
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="p">)</span>
         <span class="c1"># the fragment's data stops at the Payload Length, so neither it nor</span>
         <span class="c1"># ``tl`` below counts the frame's trailer (#1584)</span>
@@ -1241,16 +1231,13 @@
                 <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nh</span><span class="p">),</span>         <span class="c1"># next header field in IPv6 Fragment Header</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                    <span class="c1"># original packet range number</span>
-            <span class="c1"># NOTE: Scapy reports ``IPv6ExtHdrFragment.offset`` in on-wire 8-octet</span>
-            <span class="c1"># units (:rfc:`8200#section-4.5`), but the reassembly machinery indexes</span>
-            <span class="c1"># the datagram buffer with ``fo``, so it must be scaled into octets.</span>
+            <span class="c1"># NOTE: ``IPv6ExtHdrFragment.offset`` counts 8-octet units</span>
+            <span class="c1"># (:rfc:`8200#section-4.5`); reassembly indexes by octets.</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">offset</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>                      <span class="c1"># fragment offset</span>
             <span class="n">ihl</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span>                                  <span class="c1"># header length, only headers before IPv6-Frag</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">m</span><span class="p">),</span>                         <span class="c1"># more fragment flag</span>
-            <span class="c1"># NOTE: ``len(ipv6)`` counts the Fragment header, so it overstates</span>
-            <span class="c1"># this by 8 -- and the reassembly machinery writes the payload over</span>
-            <span class="c1"># the span ``tl - ihl``, so using it would leave 8 octets of stray</span>
-            <span class="c1"># zeroes in every reassembled datagram.</span>
+            <span class="c1"># NOTE: not ``len(ipv6)``, which counts the Fragment header and would</span>
+            <span class="c1"># leave 8 stray zero octets in every reassembled datagram.</span>
             <span class="n">tl</span><span class="o">=</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                    <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv6</span><span class="p">)[:</span><span class="n">hdr_len</span><span class="p">],</span>                 <span class="c1"># raw bytes type header before IPv6-Frag</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>                              <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
@@ -1337,9 +1324,8 @@
     <span class="k">if</span> <span class="p">(</span><span class="n">found</span> <span class="o">:=</span> <span class="n">_tcp_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">found</span>
 
-        <span class="c1"># NOTE: the link type the Scapy engine attaches with ``attach_linktype``,</span>
-        <span class="c1"># not one inferred from the first layer, which a raw IPv4 interface's</span>
-        <span class="c1"># packets share with no link type (#1517).</span>
+        <span class="c1"># NOTE: the link type ``attach_linktype`` attached, not one inferred from</span>
+        <span class="c1"># the first layer, which raw IPv4 shares with no link type (#1517).</span>
         <span class="n">linktype</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">LINKTYPE_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">linktype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">linktype</span><span class="p">)</span>
@@ -1408,7 +1394,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -734,32 +735,17 @@
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="c1"># NOTE: A forward match consumes nothing and contributes no octets to</span>
-        <span class="c1"># ``bytes(schema)`` either, see the ``ForwardMatchField`` branches of</span>
-        <span class="c1"># :meth:`Schema.pack &lt;pcapkit.protocols.schema.Schema.pack&gt;` and</span>
-        <span class="c1"># :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`.</span>
+        <span class="c1"># NOTE: A forward match consumes nothing and adds no octets to ``bytes(schema)``, see</span>
+        <span class="c1"># the ``ForwardMatchField`` branches of ``Schema.pack`` and ``Schema.unpack``.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
             <span class="k">continue</span>
 
-        <span class="c1"># NOTE: The only conditional field a Quick-Start suboption has is the</span>
-        <span class="c1"># ``length`` octet it inherits from :class:`Option`, whose test is false</span>
-        <span class="c1"># only for ``EOOL`` and ``NOP`` -- neither of which is a Quick-Start</span>
-        <span class="c1"># function -- so it is always on the wire and always counted.</span>
+        <span class="c1"># NOTE: A Quick-Start suboption's only conditional field is the inherited ``length``,</span>
+        <span class="c1"># false only for ``EOOL`` and ``NOP``, neither a Quick-Start function, so always counted.</span>
         <span class="n">inner</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ConditionalField</span><span class="p">)</span> <span class="k">else</span> <span class="n">field</span>
 
-        <span class="c1"># NOTE: ``_length_callback`` rather than a ``length &lt; 0`` test, because a</span>
-        <span class="c1"># dynamically sized field does not report a negative width: it reports</span>
-        <span class="c1"># whatever its template says, and the templates fall back to a</span>
-        <span class="c1"># "reasonable default" of ``1024s`` -- measured on ``LSROption.remainder``,</span>
-        <span class="c1"># a ``PaddingField`` with a length callback, which reports 1024. So the</span>
-        <span class="c1"># callback's presence is the only reliable signal, and reaching for it is</span>
-        <span class="c1"># worth one private access. A :class:`~pcapkit.corekit.fields.misc.SwitchField`</span>
-        <span class="c1"># is named separately because its width is dynamic *without* a length</span>
-        <span class="c1"># callback: it carries a</span>
-        <span class="c1"># :class:`~pcapkit.corekit.fields.misc.NoValueField` until its own selector</span>
-        <span class="c1"># resolves it, and so reports a width of zero rather than refusing to</span>
-        <span class="c1"># answer. That is exactly what :class:`_QSOption` -- the outer wrapper,</span>
-        <span class="c1"># which is not itself a suboption -- would hand back here.</span>
+        <span class="c1"># NOTE: A dynamic field reports its template's default width, so the length callback is</span>
+        <span class="c1"># the signal; a ``SwitchField`` has none and reports zero until resolved.</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inner</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
                 <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">inner</span><span class="p">,</span> <span class="s1">'_length_callback'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
@@ -800,10 +786,8 @@
 <span class="sd">        leftover octets are read as a further, fabricated option.</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: The enumeration admits the whole four-bit range, ``0`` to ``15``,</span>
-    <span class="c1"># as an ``Unassigned`` member for every code but ``0`` and ``8``, and only</span>
-    <span class="c1"># those have a schema registered. A value past four bits, which only a</span>
-    <span class="c1"># caller-built packet can carry, fails the lookup and is just as unassigned.</span>
+    <span class="c1"># NOTE: Every four-bit code but ``0`` and ``8`` is an ``Unassigned`` member with no schema;</span>
+    <span class="c1"># a value past four bits, only in a caller-built packet, fails the lookup, as unassigned.</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
     <span class="k">except</span> <span class="n">EnumValueError</span><span class="p">:</span>
@@ -998,11 +982,8 @@
 <span class="sd">        """</span>
         <span class="n">ts_flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'flag'</span><span class="p">])</span>
 
-        <span class="c1"># NOTE: Only the slots wholly before the pointer have been filled in, so</span>
-        <span class="c1"># the rest are kept apart, as the raw 32-bit words, in ``remaining``. A</span>
-        <span class="c1"># pre-specified address is part of the option's content whether or not</span>
-        <span class="c1"># its timestamp has been filled in yet, so that flag consumes every whole</span>
-        <span class="c1"># address and timestamp pair. A paired flag never splits a pair.</span>
+        <span class="c1"># NOTE: Slots past the pointer are unfilled and stay raw in ``remaining``, but pre-specified</span>
+        <span class="c1"># addresses count either way, so that flag uses all; a paired flag never splits a pair.</span>
         <span class="k">if</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span><span class="p">:</span>
             <span class="n">used</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1073,15 +1054,8 @@
         <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
         <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'</span>
 
-        <span class="c1"># NOTE: The keyword is ``ts_data``, the name of the field above, not</span>
-        <span class="c1"># ``data``. ``data`` is the *derived* attribute :meth:`post_process`</span>
-        <span class="c1"># writes and is declared just above; passing it as a constructor</span>
-        <span class="c1"># argument would drop the timestamps in silence, because</span>
-        <span class="c1"># :meth:`Schema.__update__</span>
-        <span class="c1"># &lt;pcapkit.protocols.schema.Schema.__update__&gt;` answers an unknown</span>
-        <span class="c1"># field name with an</span>
-        <span class="c1"># :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` rather than an</span>
-        <span class="c1"># error.</span>
+        <span class="c1"># NOTE: The keyword is ``ts_data``, not the derived ``data``, which as an unknown field</span>
+        <span class="c1"># draws only an ``UnknownFieldWarning`` and so drops the timestamps silently.</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'TSFlags'</span><span class="p">,</span> <span class="n">ts_data</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">remainder</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1451,7 +1425,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

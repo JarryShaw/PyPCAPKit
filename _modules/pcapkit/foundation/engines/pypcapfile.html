@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -681,20 +682,16 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Why this engine cannot run here, or :data:`None` when it can.</span>
 
-<span class="sd">        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*</span>
-<span class="sd">        the import test, because the import test cannot answer this question.</span>
-<span class="sd">        |pcapfile|_'s top-level package imports perfectly well on Python 3.12</span>
-<span class="sd">        and newer -- it is ``pcapfile.linklayer`` that fails, and</span>
-<span class="sd">        ``pcapfile.savefile`` imports it -- so a guard that only tries</span>
-<span class="sd">        ``import pcapfile`` is satisfied and the :exc:`ModuleNotFoundError` then</span>
-<span class="sd">        escapes from :meth:`__init__` as a hard error instead of degrading to the</span>
-<span class="sd">        default engine with a warning, which is what happens when the package is</span>
-<span class="sd">        simply absent.</span>
+<span class="sd">        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles</span>
+<span class="sd">        its engine, *before* the import test, which cannot answer this.</span>
+<span class="sd">        |pcapfile|_'s top-level package imports on Python 3.12 and newer; it is</span>
+<span class="sd">        ``pcapfile.linklayer`` that fails, imported by ``pcapfile.savefile``. So</span>
+<span class="sd">        ``import pcapfile`` succeeds and the :exc:`ModuleNotFoundError` escapes</span>
+<span class="sd">        from :meth:`__init__` as a hard error instead of degrading to the default</span>
+<span class="sd">        engine with a warning.</span>
 
-<span class="sd">        The version is checked rather than the import attempted so that the answer</span>
-<span class="sd">        does not depend on which of the package's submodules happens to be</span>
-<span class="sd">        imported first, and so it is the same answer on a machine that has never</span>
-<span class="sd">        installed |pcapfile|_ at all.</span>
+<span class="sd">        The version is checked rather than the import attempted, so the answer</span>
+<span class="sd">        does not depend on which submodule happens to be imported first.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
@@ -1089,7 +1086,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

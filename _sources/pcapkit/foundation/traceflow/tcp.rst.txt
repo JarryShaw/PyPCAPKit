@@ -3,8 +3,8 @@ Follow TCP Stream
 
 .. module:: pcapkit.foundation.traceflow.tcp
 
-:mod:`pcapkit.foundation.traceflow.tcp` is the interface to trace
-TCP flows from a series of packets and connections.
+:mod:`pcapkit.foundation.traceflow.tcp` traces TCP flows from a series of
+packets.
 
 .. autoclass:: pcapkit.foundation.traceflow.tcp.TCP
    :no-members:
@@ -91,24 +91,21 @@ Terminology
            |                                            analyse is off
            |--> (tuple) BUFID ...
 
-       When tracing bidirectionally -- the default -- ``BUFID`` orders the two
-       endpoints canonically rather than as (source, destination), so both halves
-       of a conversation reduce to the same key. It stays a plain :obj:`tuple`
-       either way, because it is a :obj:`dict` key and an
-       :class:`~pcapkit.corekit.infoclass.Info` cannot be one --
-       :class:`collections.abc.Mapping` sets its ``__hash__`` to :data:`None`.
+       When tracing bidirectionally, the default, ``BUFID`` orders the endpoints
+       canonically, so both halves of a conversation share one key;
+       :data:`~pcapkit.foundation.traceflow.data.tcp.BufferID` says why it stays a
+       plain :obj:`tuple`.
 
        A teardown -- a FIN from each endpoint, or a RST from either -- is recorded
-       in ``fin`` and ``reset`` but does **not** finalise the flow. The four-way
-       close of :rfc:`9293#section-3.6` is FIN, ACK, FIN, ACK, so the
-       acknowledgement that completes it arrives after the second FIN; finalising
-       on that FIN would drop the ACK from the flow and let it open a fresh buffer
-       under the same ``BUFID``, which a later connection reusing those endpoints
-       would then merge into. The flow is finalised instead by proof that nothing
-       more can arrive -- a new connection's SYN on the same endpoints, or
+       in ``fin`` and ``reset`` but does **not** finalise the flow. The ACK that
+       completes :rfc:`9293#section-3.6`'s four-way close (FIN, ACK, FIN, ACK)
+       arrives after the second FIN, so finalising on that FIN would let the ACK
+       open a fresh buffer under the same ``BUFID``, for a later connection reusing
+       those endpoints to merge into. Only proof that nothing more can arrive
+       finalises it -- a new connection's SYN on the same endpoints, or
        :meth:`TCP.finish <pcapkit.foundation.traceflow.tcp.TCP.finish>` at the end
-       of the capture. Telling that SYN from the peer's SYN-ACK is what the
-       recorded teardown is for.
+       of the capture -- and the recorded teardown is what tells that SYN from the
+       peer's SYN-ACK.
 
        .. mermaid::
 
@@ -156,16 +153,12 @@ Terminology
 
        ``forward`` and ``reverse`` partition ``index``, so
        ``frame_number in flow.forward`` answers which way a packet went without
-       taking the label apart. ``forward`` is the direction of the packet that
-       opened the flow, whose endpoints the label names first.
+       taking the label apart.
 
-       ``packet`` is the conversation's application layer: its reassembled
-       datagrams, one per direction and acknowledgement number, present only when
-       the tracer was constructed with ``analyse=True``. It is reassembled on the
-       *first read*, and each datagram's
-       own :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is
-       parsed later still, so a caller that wanted only frame numbers pays for
-       none of it. The tracer does not reassemble the stream itself -- it feeds
+       ``packet`` is reassembled on its *first read*, and each datagram's own
+       :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` parsed later
+       still, so a caller that wanted only frame numbers pays for none of it. The
+       tracer does not reassemble the stream itself: it feeds
        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, whose :rfc:`815` algorithm
        handles the reordering and retransmission that concatenating payloads in
        capture order would corrupt.

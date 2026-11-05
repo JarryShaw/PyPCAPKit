@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -572,20 +573,17 @@
 
 <span class="sd">SSLv1 was never publicly released, so it has no wire format to dissect.</span>
 
-<span class="sd">Decoding ``CLIENT-HELLO``/``SERVER-HELLO`` bodies assumes the record is</span>
-<span class="sd">genuinely cleartext. Per the draft's §5.4, most other message types are sent</span>
-<span class="sd">*encrypted* once session keys exist, and this package implements no</span>
-<span class="sd">decryption -- so a ``CLIENT-HELLO``/``SERVER-HELLO``-tagged record that is</span>
-<span class="sd">actually ciphertext (e.g. a replayed or malformed capture) is only partly</span>
-<span class="sd">caught. Before decoding, the body's own declared sub-field lengths are</span>
-<span class="sd">checked against the record's ``RECORD-LENGTH`` (see</span>
-<span class="sd">:func:`~pcapkit.protocols.application.sslv2.schema.sslv2_hello_probe_is_plausible`):</span>
-<span class="sd">when they do not add up, the body is kept as raw octets instead. When they</span>
-<span class="sd">happen to add up, the ciphertext still decodes as if it were the hello's own</span>
-<span class="sd">fields, rather than failing cleanly. ``CIPHER-SPECS-DATA`` itself is kept as</span>
-<span class="sd">an opaque concatenation of 3-octet ``CIPHER-KIND`` entries in every case;</span>
-<span class="sd">none of the draft's own constraints on it, or on e.g. ``session_id`` being</span>
-<span class="sd">``0`` or ``16`` octets, are validated here.</span>
+<span class="sd">Decoding a ``CLIENT-HELLO`` or ``SERVER-HELLO`` body assumes it is cleartext:</span>
+<span class="sd">most other message types are sent *encrypted* once session keys exist (the</span>
+<span class="sd">draft's §5.4), and this package implements no decryption. A hello-tagged record</span>
+<span class="sd">that is actually ciphertext is only partly caught. Its body is kept as raw</span>
+<span class="sd">octets when its declared sub-field lengths do not add up to the record's</span>
+<span class="sd">``RECORD-LENGTH`` (see</span>
+<span class="sd">:func:`~pcapkit.protocols.application.sslv2.schema.sslv2_hello_probe_is_plausible`),</span>
+<span class="sd">and decodes as if it were the hello's own fields when they happen to.</span>
+<span class="sd">``CIPHER-SPECS-DATA`` is kept as an opaque run of 3-octet ``CIPHER-KIND``</span>
+<span class="sd">entries, and none of the draft's constraints on it, or on ``session_id`` being</span>
+<span class="sd">``0`` or ``16`` octets, are validated.</span>
 
 <span class="sd">.. [*] https://datatracker.ietf.org/doc/html/draft-hickman-netscape-ssl-00</span>
 
@@ -1151,7 +1149,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

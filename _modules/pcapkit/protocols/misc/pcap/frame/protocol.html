@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -901,9 +902,8 @@
             <span class="c1"># move backward to the beginning of the packet</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: Copied, to keep the original frame data intact. ``unpack`` has consumed</span>
-            <span class="c1"># the whole record, packet data included, so seek to the start ``__post_init__``</span>
-            <span class="c1"># recorded, as ``PCAPNG.read`` does, not back over ``self.length``.</span>
+            <span class="c1"># NOTE: A copy, to keep the frame data intact. ``unpack`` consumed the whole record, so</span>
+            <span class="c1"># seek to the start ``__post_init__`` recorded, as ``PCAPNG.read`` does, not back over it.</span>
             <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span>
 
             <span class="c1"># move backward to the beginning of the frame</span>
@@ -938,11 +938,8 @@
             <span class="c1">#: io.BytesIO: Source data stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The octets *present*, ``cap_len``, never the on-wire ``len`` a snapshot cut</span>
-        <span class="c1"># exceeds; ``test_truncated_ipv4_header_is_raw_with_its_error`` pins it (#2236).</span>
-        <span class="c1">#</span>
-        <span class="c1"># NOTE: A layer that states no length cannot see the cut, so the layers</span>
-        <span class="c1"># below are told both lengths (#2653).</span>
+        <span class="c1"># NOTE: The octets *present*, ``cap_len``, never the on-wire ``len`` (#2236); a layer stating</span>
+        <span class="c1"># no length cannot see the cut, so the layers below are told both lengths (#2653).</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">frame_length</span><span class="o">.</span><span class="n">set</span><span class="p">((</span><span class="n">_ilen</span><span class="p">,</span> <span class="n">_olen</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">cap_len</span><span class="p">)</span>
@@ -986,9 +983,8 @@
             <span class="n">incl_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span> <span class="n">snaplen</span><span class="p">)</span> <span class="k">if</span> <span class="n">snaplen</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">orig_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">orig_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-        <span class="c1"># NOTE: The record holds exactly ``incl_len`` octets of packet data, so a</span>
-        <span class="c1"># packet longer than that -- e.g. than the snaplen -- is cut to it rather</span>
-        <span class="c1"># than written out whole behind a clipped length.</span>
+        <span class="c1"># NOTE: The record holds exactly ``incl_len`` octets of packet data, so a longer</span>
+        <span class="c1"># packet is cut to it rather than written out whole behind a clipped length.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">incl_len</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)[:</span><span class="n">incl_len</span><span class="p">]</span>
 
@@ -1049,9 +1045,8 @@
             <span class="n">_read</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="c1">#: io.BytesIO: Source packet stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">file</span>
-        <span class="c1"># NOTE: Taken *before* the unpack, which advances the stream past the</span>
-        <span class="c1"># whole record; :meth:`self.read &lt;read&gt;` needs the record's own start and</span>
-        <span class="c1"># cannot work it out afterwards. See the note there.</span>
+        <span class="c1"># NOTE: Taken *before* the unpack moves the stream past the whole record, as</span>
+        <span class="c1"># :meth:`self.read &lt;read&gt;` needs the record's own start.</span>
         <span class="n">_seek_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
         <span class="c1">#: pcapkit.corekit.infoclass.Info: Parsed packet data.</span>
@@ -1132,14 +1127,11 @@
 <span class="sd">            Current protocol with packet extracted.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We added a new key ``__next_type__`` to ``dict_`` to store the</span>
-<span class="sd">            next layer protocol type, and a new key ``__next_name__`` to</span>
-<span class="sd">            store the next layer protocol name. :meth:`Info.to_dict</span>
-<span class="sd">            &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries both, and the</span>
-<span class="sd">            dumpers leave them out.</span>
-
-<span class="sd">            We also added a new key ``protocols`` to ``dict_`` to store the</span>
-<span class="sd">            protocol chain of the current packet (frame).</span>
+<span class="sd">            ``dict_`` gains ``__next_type__`` and ``__next_name__``, the next</span>
+<span class="sd">            layer's protocol type and name, which :meth:`Info.to_dict</span>
+<span class="sd">            &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries and the dumpers</span>
+<span class="sd">            leave out, and ``protocols``, the protocol chain of the current</span>
+<span class="sd">            packet (frame).</span>
 
 <span class="sd">            ``proto`` is dispatched as :meth:`_dispatch_linktype` says, so</span>
 <span class="sd">            ``LINKTYPE_RAW`` data is read as IPv4 or IPv6 (:issue:`1502`).</span>
@@ -1299,7 +1291,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

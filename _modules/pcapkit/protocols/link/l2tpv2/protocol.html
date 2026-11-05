@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -633,14 +634,8 @@
 <span class="n">_UDP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_UDP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.udp'</span><span class="p">,</span> <span class="s1">'UDP'</span><span class="p">)</span>
 
 
-<span class="c1"># NOTE: ``schema`` and ``data`` are stated here rather than inherited from</span>
-<span class="c1"># :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`, which declares none: the base is</span>
-<span class="c1"># version-agnostic and the header schema is not. They must be passed explicitly</span>
-<span class="c1"># in any case, since</span>
-<span class="c1"># :meth:`ProtocolBase.__init_subclass__ &lt;pcapkit.protocols.protocol.ProtocolBase.__init_subclass__&gt;`</span>
-<span class="c1"># resolves an omitted schema by looking the *subclass name* up in</span>
-<span class="c1"># :mod:`pcapkit.protocols.schema` -- there is no ``L2TPv2`` there -- and assigns</span>
-<span class="c1"># unconditionally, so omitting them would silently bind ``Schema_Raw``/``Data_Raw``.</span>
+<span class="c1"># NOTE: ``schema`` and ``data`` are explicit because the version-agnostic base declares none,</span>
+<span class="c1"># and an omitted one is looked up by class name and would silently bind ``Schema_Raw``.</span>
 <div class="viewcode-block" id="L2TPv2">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">L2TPv2</span><span class="p">(</span><span class="n">L2TP</span><span class="p">[</span><span class="n">Data_L2TP</span><span class="p">,</span> <span class="n">Schema_L2TP</span><span class="p">],</span>
@@ -773,19 +768,8 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span>
 
-        <span class="c1"># NOTE: :rfc:`2661` §3.1 fixes ``Ver`` at 2 and reserves 1 "to permit</span>
-        <span class="c1"># detection of L2F packets should they arrive intermixed with L2TP</span>
-        <span class="c1"># packets", while :rfc:`3931` uses 3 -- so a datagram carrying any other</span>
-        <span class="c1"># nibble is a different protocol, exactly as ``version`` documents.</span>
-        <span class="c1"># Refuse it rather than parse it: every field after this word has a</span>
-        <span class="c1"># different meaning (or no meaning) in another version, so continuing</span>
-        <span class="c1"># reports a tunnel and session ID assembled out of octets that are</span>
-        <span class="c1"># neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise</span>
-        <span class="c1"># yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read</span>
-        <span class="c1"># out of the lower half of a Session ID and the first two octets of the</span>
-        <span class="c1"># PPP frame behind it (#548). This is also what keeps the hard-coded</span>
-        <span class="c1"># ``Literal[2]`` of ``version`` true, instead of disagreeing with</span>
-        <span class="c1"># ``info.version`` on the same datagram.</span>
+        <span class="c1"># NOTE: Any ``Ver`` but 2 is another protocol (RFC 2661 Section 3.1), whose later fields</span>
+        <span class="c1"># mean something else, so it is refused rather than misread (#548).</span>
         <span class="k">if</span> <span class="n">_flag</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid version: </span><span class="si">{</span><span class="n">_flag</span><span class="p">[</span><span class="s2">"version"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -819,9 +803,8 @@
         <span class="k">if</span> <span class="n">_size</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: Octets captured past the Length field belong to this layer,</span>
-        <span class="c1"># since its own length field is what leaves them out of the payload,</span>
-        <span class="c1"># and the rebuild keeps them as captured (#1455).</span>
+        <span class="c1"># NOTE: Octets captured past the Length field belong to this layer, as its own</span>
+        <span class="c1"># length field leaves them out of the payload; the rebuild keeps them (#1455).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">l2tp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
@@ -894,8 +877,7 @@
 
 <span class="sd">        """</span>
         <span class="n">type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">Enum_Type</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">)</span>
-        <span class="c1"># NOTE: :rfc:`2661` §3.1 makes ``S`` mark the presence of *both* Ns and</span>
-        <span class="c1"># Nr, so a header cannot carry one without the other. Refuse a lone</span>
+        <span class="c1"># NOTE: :rfc:`2661` §3.1 makes ``S`` mark *both* Ns and Nr, so refuse a lone</span>
         <span class="c1"># value rather than drop it, or invent the other on the wire.</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">ns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">nr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: ns and nr must be given together'</span><span class="p">)</span>
@@ -909,10 +891,8 @@
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">length_flag</span> <span class="ow">and</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: total_length given without the Length field'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: An explicit ``total_length`` is not checked against the octets</span>
-        <span class="c1"># at hand, so that a ``from_data`` rebuild of a capture truncated by</span>
-        <span class="c1"># snaplen keeps the length the sender declared, as UDP does</span>
-        <span class="c1"># (#1155).</span>
+        <span class="c1"># NOTE: An explicit ``total_length`` is not checked against the octets, so a rebuild</span>
+        <span class="c1"># of a snaplen-truncated capture keeps the declared length, as UDP does (#1155).</span>
         <span class="k">if</span> <span class="n">length_flag</span> <span class="ow">and</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">total_length</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">seq</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
@@ -1013,14 +993,11 @@
             <span class="s1">'priority'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">prio</span><span class="p">,</span>
             <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-            <span class="c1"># NOTE: Passed as ``total_length`` since ``length`` is the parse</span>
-            <span class="c1"># length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so</span>
-            <span class="c1"># under that key it would never reach :meth:`make`, and the rebuild</span>
-            <span class="c1"># would drop both the Length field and the ``L`` flag (#1172).</span>
+            <span class="c1"># NOTE: As ``total_length``: ``length`` is ProtocolBase's parse length and would</span>
+            <span class="c1"># never reach :meth:`make`, dropping the Length field and ``L`` flag (#1172).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="c1"># NOTE: Passed so that a control message captured without ``L``</span>
-            <span class="c1"># rebuilds as captured, rather than gaining the Length field</span>
-            <span class="c1"># :meth:`make` would give it by default.</span>
+            <span class="c1"># NOTE: So a control message captured without ``L`` rebuilds as captured, not</span>
+            <span class="c1"># gaining the Length field :meth:`make` gives by default.</span>
             <span class="s1">'length_flag'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="s1">'tunnel_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tunnelid</span><span class="p">,</span>
             <span class="s1">'session_id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sessionid</span><span class="p">,</span>
@@ -1066,7 +1043,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

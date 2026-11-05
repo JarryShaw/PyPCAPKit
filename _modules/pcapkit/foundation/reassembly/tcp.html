@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -1287,13 +1288,8 @@
 <span class="sd">            the analyser.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: ``_make_port`` is protected, and reached from outside its own</span>
-        <span class="c1"># class as :meth:`SCTP._decode_next_layer</span>
-        <span class="c1"># &lt;pcapkit.protocols.transport.sctp.protocol.SCTP._decode_next_layer&gt;` reaches</span>
-        <span class="c1"># ``ProtocolBase._decode_next_layer``. Duplicating it here instead would</span>
-        <span class="c1"># put a second port normaliser beside the maker path's, free to drift</span>
-        <span class="c1"># from it; it is idempotent, so a ``bufid`` that already holds a member</span>
-        <span class="c1"># passes through unchanged.</span>
+        <span class="c1"># NOTE: the protected ``_make_port`` is reused rather than duplicated, so no second port</span>
+        <span class="c1"># normaliser drifts from the maker path's; it is idempotent on members.</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">TCP_Protocol</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">),</span>  <span class="c1"># pylint: disable=protected-access</span>
                 <span class="n">TCP_Protocol</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">))</span>  <span class="c1"># pylint: disable=protected-access</span></div>
 
@@ -1413,11 +1409,8 @@
             <span class="c1"># if this buffer is complete -- or if it is not, and ``strict``</span>
             <span class="c1"># asked for one contiguous payload rather than the received runs</span>
             <span class="c1">#</span>
-            <span class="c1"># NOTE: ``strict=False`` deliberately reports the whole</span>
-            <span class="c1"># payload buffer with its holes zero-filled, which is what</span>
-            <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` wants of a stream</span>
-            <span class="c1"># it is reconstructing best-effort. ``completed`` says so, rather than</span>
-            <span class="c1"># reporting :attr:`Completion.COMPLETE` for a buffer with holes in it.</span>
+            <span class="c1"># NOTE: ``strict=False`` reports the buffer with holes zero-filled, as</span>
+            <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` wants, and ``completed`` says so.</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span>
                 <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>
@@ -1474,7 +1467,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

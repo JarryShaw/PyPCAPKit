@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -596,13 +597,12 @@ the ones that qualify: the CLI addon, the crypto addon, and <code class="docutil
 <p>So <code class="docutils literal notranslate"><span class="pre">all</span></code> is exactly the union of those extras, written out as literals rather
 than referenced.</p>
 <p>Two groups stay out, for <strong>different</strong> reasons; keeping them apart stops the list
-drifting as it once did:</p>
+drifting:</p>
 <ul class="simple">
 <li><p><strong>The third-party capture engines are excluded by kind.</strong> <code class="docutils literal notranslate"><span class="pre">DPKT</span></code>, <code class="docutils literal notranslate"><span class="pre">Scapy</span></code>,
 <code class="docutils literal notranslate"><span class="pre">PyShark</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPCAPFile</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> and <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> are not core addons, so
 they are on demand – one extra at a time, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[Scapy]</span></code> and so
-on. This holds however easy they are to install, and it is what the ruling
-changed: the 1.4 <code class="docutils literal notranslate"><span class="pre">all</span></code> carried some of them.</p></li>
+on. This holds however easy they are to install.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> <strong>are also excluded for installability</strong>, a reason the
 ruling leaves untouched. <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> is an sdist-only C extension needing a
 compiler and the libpcap development files; <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> and <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> are
@@ -611,8 +611,8 @@ beta they did not ask for.</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">vendor</span></code> is the crawler dependency set and is not for end users, so it is out on the
 same audience grounds. Narrowing <code class="docutils literal notranslate"><span class="pre">all</span></code> costs a user nothing at run time:
-<a class="reference internal" href="../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a> warns and falls
-back to the default engine rather than raising when a requested engine is absent.</p>
+<a class="reference internal" href="../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> warns and falls back to the default
+engine rather than raising when a requested engine is absent.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">dev</span></code> extra exists <strong>because</strong> of this narrowing, and is not a second
@@ -692,9 +692,6 @@ module the change is <em>about</em>, name the others in the entry’s own text, 
 <strong>not</strong> duplicate the entry into each section. A reader scanning one module’s
 section wants that module’s changes; the same prose appearing twice reads as two
 separate changes. Raised originally on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
-<p>The restructure itself was done on the shared changelog’s own pull request, which
-owned the file and merged last; doing it earlier would have conflicted with every
-open change that touched an entry.</p>
 </div>
 </section>
 <section id="issue-and-pull-request-labels">
@@ -713,9 +710,8 @@ it:</p>
 pull requests, and only those: <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code> configures the
 <code class="docutils literal notranslate"><span class="pre">pip</span></code> and <code class="docutils literal notranslate"><span class="pre">github-actions</span></code> ecosystems and no <code class="docutils literal notranslate"><span class="pre">labels:</span></code> key, so each bump
 takes dependabot’s defaults – <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> always, with <code class="docutils literal notranslate"><span class="pre">python</span></code> on a
-<code class="docutils literal notranslate"><span class="pre">pip</span></code> bump and <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> on a workflow bump. On anyone else’s pull
-request <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> is <strong>hand-applied like the rest</strong>. PyUp opens no pull requests here: <code class="file docutils literal notranslate"><span class="pre">.pyup.yml</span></code> sets
-<code class="docutils literal notranslate"><span class="pre">update:</span> <span class="pre">False</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">pip</span></code> bump and <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> on a workflow bump. PyUp opens no pull
+requests here: <code class="file docutils literal notranslate"><span class="pre">.pyup.yml</span></code> sets <code class="docutils literal notranslate"><span class="pre">update:</span> <span class="pre">False</span></code>.</p></li>
 <li><p><strong>The issue templates</strong> apply an issue-kind label from their front matter, before
 anyone reads the issue – <code class="file docutils literal notranslate"><span class="pre">.github/ISSUE_TEMPLATE/bug_report.md</span></code> carries
 <code class="docutils literal notranslate"><span class="pre">labels:</span> <span class="pre">bug</span></code> and <code class="file docutils literal notranslate"><span class="pre">.github/ISSUE_TEMPLATE/feature_request.md</span></code> carries
@@ -794,9 +790,8 @@ and like <code class="docutils literal notranslate"><span class="pre">breaking</
 rather than instead of it.</p>
 </div>
 <p><strong>Issue kind</strong>, for issues rather than pull requests: <code class="docutils literal notranslate"><span class="pre">design</span></code> marks a pattern being
-decided rather than a defect or a request, and a majority of the rulings on these pages
-were filed under it – though not all, several having been settled on a <code class="docutils literal notranslate"><span class="pre">bug</span></code> or
-<code class="docutils literal notranslate"><span class="pre">enhancement</span></code> thread instead. Alongside <code class="docutils literal notranslate"><span class="pre">bug</span></code>, <code class="docutils literal notranslate"><span class="pre">enhancement</span></code> and <code class="docutils literal notranslate"><span class="pre">question</span></code>.</p>
+decided rather than a defect or a request, alongside <code class="docutils literal notranslate"><span class="pre">bug</span></code>, <code class="docutils literal notranslate"><span class="pre">enhancement</span></code> and
+<code class="docutils literal notranslate"><span class="pre">question</span></code>.</p>
 <p><strong>State – what is happening to it now.</strong> An open issue is meant to carry one of
 these, so that its status is readable without opening it:</p>
 <ul class="simple">
@@ -839,7 +834,7 @@ the first was never given. Separating the two makes <em>which pull requests stil
 reviewer</em> answerable from the board rather than from memory of what was dispatched.</p>
 <p><strong>Scope.</strong> <code class="docutils literal notranslate"><span class="pre">dependencies</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code> and <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> are dependabot’s on
 its own pull requests, per above. <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> scopes a change to the
-workflows, and on any other pull request it is hand-applied.</p>
+workflows, and on any other pull request it is <strong>hand-applied like the rest</strong>.</p>
 </section>
 <section id="the-breaking-label">
 <h2>The <code class="docutils literal notranslate"><span class="pre">breaking</span></code> Label<a class="headerlink" href="#the-breaking-label" title="Link to this heading">¶</a></h2>
@@ -1006,8 +1001,8 @@ their step cap’s rationale.</p></li>
 <h2>The PEP Discussion, Kept Current<a class="headerlink" href="#the-pep-discussion-kept-current" title="Link to this heading">¶</a></h2>
 <p><code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/pep.rst</span></code> is the source of truth for the roadmap: what
 is done and what remains. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2483">#2483</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2449">#2449</a>):
-upon each release, amend that page inline, and also post the update – or edit it
-inline, either is fine – to the roadmap’s own GitHub Discussion,
+upon each release, amend that page inline, and post the update to, or edit it in, the
+roadmap’s own GitHub Discussion,
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">PyPCAPKit Enhancement Proposals</a>.
 The page stays authoritative; the Discussion is kept in step with it, not the other
 way round, so a contributor who only reads the Discussion is not working from a stale
@@ -1089,7 +1084,7 @@ picture.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

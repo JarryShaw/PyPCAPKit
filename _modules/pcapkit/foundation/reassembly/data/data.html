@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -805,12 +806,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyze</span><span class="p">:</span> <span class="s1">'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]'</span><span class="p">,</span>
                  <span class="n">proto</span><span class="p">:</span> <span class="s1">'_KT'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1"># NOTE: the two type-parameterized attributes are annotated on their</span>
-        <span class="c1"># assignment, as ``_omd_bucket`` in :mod:`pcapkit.corekit.multidict`</span>
-        <span class="c1"># does. A slotted class declares no class-level attributes, so mypy</span>
-        <span class="c1"># infers each one from this assignment, and it cannot infer a *class*</span>
-        <span class="c1"># attribute's type from a type variable -- it asks for an annotation</span>
-        <span class="c1"># instead. ``payload`` needs none: :obj:`bytes` is inferred.</span>
+        <span class="c1"># NOTE: annotated on assignment, as in :mod:`pcapkit.corekit.multidict`: mypy cannot infer</span>
+        <span class="c1"># a slotted attribute's type from a type variable.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span><span class="p">:</span> <span class="s1">'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]'</span> <span class="o">=</span> <span class="n">analyze</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">:</span> <span class="s1">'_KT'</span> <span class="o">=</span> <span class="n">proto</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span>
@@ -906,7 +903,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

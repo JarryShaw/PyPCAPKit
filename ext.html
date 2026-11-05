@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/ext.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit is built for customisation: new protocols, layers, fields and even new file formats can all be added from outside the library. Customising Protocols: Protocol is the most essential concept ..." />
-<meta name="description" content="pcapkit is built for customisation: new protocols, layers, fields and even new file formats can all be added from outside the library. Customising Protocols: Protocol is the most essential concept ..." />
+<meta property="og:description" content="New protocols, layers, fields and file formats can all be added to pcapkit from outside the library. Customising Protocols: Protocol is the user-facing abstract base class of a protocol, which pars..." />
+<meta name="description" content="New protocols, layers, fields and file formats can all be added to pcapkit from outside the library. Customising Protocols: Protocol is the user-facing abstract base class of a protocol, which pars..." />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="How to …" href="demo.html"><link rel="prev" title="Engine Comparison" href="engines.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -570,16 +571,15 @@
         <article role="main" id="furo-main-content">
           <section id="customisation-extensions">
 <h1>Customisation &amp; Extensions<a class="headerlink" href="#customisation-extensions" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is built for customisation: new protocols, layers, fields and
-even new file formats can all be added from outside the library.</p>
+<p>New protocols, layers, fields and file formats can all be added to
+<a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> from outside the library.</p>
 <section id="customising-protocols">
 <h2>Customising Protocols<a class="headerlink" href="#customising-protocols" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> is the most essential concept
-and class in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>: the user-facing abstract base class for a
-protocol, which is responsible for parsing and/or constructing the protocol
-packets, as in the network stack. The built-in protocol classes derive from
-its internal base, <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>,
-rather than from <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> itself.</p>
+<p><a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> is the user-facing abstract base
+class of a protocol, which parses and constructs its packets. The built-in
+protocol classes and layer base classes derive from its internal base,
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, rather than from
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> itself.</p>
 <p>The protocol classes <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> ships:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -734,97 +734,28 @@ subclasses)</p></td>
 </div>
 <section id="new-protocol">
 <span id="ext-new-protocol"></span><h3>New Protocol<a class="headerlink" href="#new-protocol" title="Link to this heading">¶</a></h3>
-<p>To add a new protocol to an existing layer, you need to create a new class
-inherited from that layer’s base class, specifically, the
+<p>A protocol in an existing layer subclasses that layer’s base class:
 <a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
 <a class="reference internal" href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>,
-<a class="reference internal" href="pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>, and
-<a class="reference internal" href="pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> classes, which
-are the base classes for link, internet, transport, and application layer
-protocols, respectively.</p>
+<a class="reference internal" href="pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> or
+<a class="reference internal" href="pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> class is the user-facing
-abstract base class for protocols, and it is not recommended to inherit from
-it directly, unless you are going to create a new protocol stack, e.g., a new
-miscellaneous protocol stack as in <a class="reference internal" href="pcapkit/protocols/misc/index.html#module-pcapkit.protocols.misc" title="pcapkit.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc</span></code></a> module. The
-layer base classes above, like the built-in miscellaneous protocols,
-derive from <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> rather than
-from <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>.</p>
+<p>Subclass <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> directly only for a new
+protocol stack, such as the miscellaneous protocols of
+<a class="reference internal" href="pcapkit/protocols/misc/index.html#module-pcapkit.protocols.misc" title="pcapkit.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc</span></code></a>.</p>
 </div>
-<p>Besides, you need to implement the corresponding schema and data model for the
-new protocol. The schema is a <a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>
-subclass that defines the field structure of the protocol, and the data model
-is a <a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a> subclass that defines the data
-attributes of the protocol.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The schema classes are used for parsing and/or constructing the protocol
-packets, each field should be defined as a class attribute with the value of
-a <a class="reference internal" href="pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> subclass instance.</p>
-<p>The data classes are used for storing the parsed protocol packets. Each data
-attribute should be defined as a class attribute with no value besides the
-type annotations of the corresponding field.</p>
-</div>
-<p>Once the class exists, register it through
-<a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>, picking the registry that matches
-the protocol’s layer – a link layer protocol goes to
-<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_linktype" title="pcapkit.foundation.registry.protocols.misc.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>, and so on.</p>
-<p>The registry function per protocol type:</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Protocol Type</p></th>
-<th class="head" colspan="2"><p>Registry Function</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td rowspan="2"><p>Link Layer</p></td>
-<td rowspan="2"><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_linktype" title="pcapkit.foundation.registry.protocols.misc.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a></p></td>
-<td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcap" title="pcapkit.foundation.registry.protocols.misc.register_pcap"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_pcap()</span></code></a></p></td>
-<td rowspan="8"><p>Registry functions
-on the left column
-are combined calls
-to those on the
-right columns.</p>
-<p>It is recommended
-to use those on
-the left columns
-when registering
-new protocols.</p>
-</td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng" title="pcapkit.foundation.registry.protocols.misc.register_pcapng"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_pcapng()</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>Internet Layer</p></td>
-<td colspan="2"><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_ethertype" title="pcapkit.foundation.registry.protocols.link.register_ethertype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_ethertype()</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>Transport Layer</p></td>
-<td colspan="2"><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.internet.register_transtype" title="pcapkit.foundation.registry.protocols.internet.register_transtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_transtype()</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td rowspan="4"><p>Application Layer</p></td>
-<td rowspan="2"><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_apptype" title="pcapkit.foundation.registry.protocols.transport.register_apptype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_apptype()</span></code></a></p></td>
-<td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_tcp" title="pcapkit.foundation.registry.protocols.transport.register_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_tcp()</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_udp" title="pcapkit.foundation.registry.protocols.transport.register_udp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_udp()</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td></td>
-<td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp" title="pcapkit.foundation.registry.protocols.transport.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td></td>
-<td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_dccp" title="pcapkit.foundation.registry.protocols.transport.register_dccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_dccp()</span></code></a></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>A protocol carried over IPX is keyed by IPX Packet Type rather than by IP protocol
-number, so it registers through
-<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.internet.register_ipx" title="pcapkit.foundation.registry.protocols.internet.register_ipx"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_ipx()</span></code></a>; one carried over BSD
-loopback is keyed by address family rather than by EtherType, and registers through
-<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_loopback" title="pcapkit.foundation.registry.protocols.link.register_loopback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_loopback()</span></code></a>.</p>
-<p>A table belongs to the protocol that reads it, and is keyed by that protocol’s own
-code for its payload:</p>
+<p>Each protocol also needs a schema and a data model:</p>
+<ul class="simple">
+<li><p>the schema, a <a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> subclass, lays out the
+fields that parse and construct a packet, each a class attribute set to a
+<a class="reference internal" href="pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> instance;</p></li>
+<li><p>the data model, a <a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a> subclass, holds a
+parsed packet, each attribute a bare type annotation.</p></li>
+</ul>
+<p>Then register the class through <a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>,
+into the table of the protocol that carries it. A table belongs to the protocol
+that reads it, and is keyed by that protocol’s own code for its payload:</p>
 <pre  class="mermaid">
         flowchart TD
     FR[&quot;Frame.\_\_proto\_\_ for PCAP,&lt;br/&gt;PCAPNG.\_\_proto\_\_ for PCAP-NG&lt;br/&gt;keyed by LinkType&lt;br/&gt;register\_linktype for both,&lt;br/&gt;register\_pcap or register\_pcapng for one&quot;]
@@ -857,14 +788,8 @@ code for its payload:</p>
 <a class="reference internal" href="pcapkit/protocols/protocol.html#protocol-next-layer-dispatch"><span class="std std-ref">Next-Layer Dispatch</span></a> shows.</p>
 <section id="samples">
 <h4>Samples<a class="headerlink" href="#samples" title="Link to this heading">¶</a></h4>
-<p>The following code snippet shows how to create a new protocol class:</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Following is a PoC implementation of a new internet layer protocol. For
-demonstration purposes, we use the IPv4 protocol as an example, where the
-comprehensive implementation can be found in the
-<a class="reference internal" href="pcapkit/protocols/internet/ipv4.html#module-pcapkit.protocols.internet.ipv4.protocol" title="pcapkit.protocols.internet.ipv4.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv4.protocol</span></code></a> module.</p>
-</div>
+<p>A sketch of a new internet layer protocol, modelled on IPv4, whose full
+implementation is <a class="reference internal" href="pcapkit/protocols/internet/ipv4.html#module-pcapkit.protocols.internet.ipv4.protocol" title="pcapkit.protocols.internet.ipv4.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv4.protocol</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>  <span class="c1"># import base class</span>
@@ -920,22 +845,20 @@ comprehensive implementation can be found in the
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><strong>Declare every construction keyword your protocol accepts.</strong> Building a
-protocol <em>through its constructor</em> with a keyword that no signature
-declares raises <a class="reference internal" href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> rather than
-discarding it silently, so a misspelling costs an exception instead of a
-silently wrong field. The accepted set is read from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> – the union of every
-keyword-taking parameter of <code class="docutils literal notranslate"><span class="pre">make</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">pack</span></code>, <code class="docutils literal notranslate"><span class="pre">unpack</span></code>,
-<code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> and <code class="docutils literal notranslate"><span class="pre">__init__</span></code> anywhere in the class’s MRO – which is
-wider than <code class="docutils literal notranslate"><span class="pre">make</span></code> alone because <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands the same
-<code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> to the construction and to the parse, so a keyword only <code class="docutils literal notranslate"><span class="pre">read</span></code>
-declares still travels through <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p>
-<p>Shapes a signature cannot express are declared on the class instead, via
-<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.__keywords__</span></code></a>:</p>
+<p><strong>Declare every construction keyword your protocol accepts.</strong> Constructing a
+protocol with a keyword no signature declares raises
+<a class="reference internal" href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, so a misspelling fails
+instead of building a wrong field. The accepted set, read by
+<a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a>, is the union of the keyword-taking parameters of
+<code class="docutils literal notranslate"><span class="pre">make</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">pack</span></code>, <code class="docutils literal notranslate"><span class="pre">unpack</span></code>, <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> and <code class="docutils literal notranslate"><span class="pre">__init__</span></code>
+across the MRO: <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands one <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>
+to both construction and parse, so a keyword only <code class="docutils literal notranslate"><span class="pre">read</span></code> declares still
+travels through <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p>
+<p>A keyword no signature can express is listed in <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.__keywords__</span></code></a> instead:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyIPv4</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">IPv4Data</span><span class="p">,</span> <span class="n">IPv4Schema</span><span class="p">],</span>
              <span class="n">schema</span><span class="o">=</span><span class="n">IPv4Schema</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">IPv4Data</span><span class="p">):</span>
-    <span class="c1">#: A keyword read out of ``**kwargs`` by name rather than declared as a</span>
-    <span class="c1">#: parameter, as ``ESP.read`` does with ``packet``. Unioned down the MRO.</span>
+    <span class="c1">#: Read out of ``**kwargs`` by name, as ``IPv6_Ext.read`` does with</span>
+    <span class="c1">#: ``alias``; unioned down the MRO.</span>
     <span class="n">__keywords__</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'my_extra_keyword'</span><span class="p">})</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -943,74 +866,65 @@ declares still travels through <code class="docutils literal notranslate"><span 
         <span class="o">...</span>
 </pre></div>
 </div>
-<p>Setting it to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> skips the check entirely, and is meant only for a
-<em>dispatcher</em> whose real signature belongs to a class chosen at call time –
+<p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> skips the check, and is meant only for a <em>dispatcher</em> whose real
+signature belongs to a class chosen at call time, such as
 <a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>, whose
-<a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> builds the HTTP version it
-is given, is the
-only such class in the library. Unlike a set, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is not inherited, so a
-subclass of a dispatcher is checked normally. Prefer a declared parameter to
-either: it is also what documents the keyword to your callers.</p>
-<p>Parsing is unaffected. <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> checks the keywords its
-caller passes just as strictly, raising
-<a class="reference internal" href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, but only warns with
-<a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.UnknownFieldWarning" title="pcapkit.utilities.warnings.UnknownFieldWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnknownFieldWarning</span></code></a> for a key that comes
-from your <code class="docutils literal notranslate"><span class="pre">_make_data</span></code> – a mismatch there is a disagreement between two of
-your own mappings rather than a caller’s typo.</p>
+<a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> builds the
+version it is given. Unlike a set, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is not inherited, so a
+dispatcher’s subclasses stay checked. Prefer a declared parameter to either,
+since it also documents the keyword.</p>
+<p>Parsing is unaffected. <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> checks its caller’s keywords
+as strictly, but only warns with
+<a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.UnknownFieldWarning" title="pcapkit.utilities.warnings.UnknownFieldWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnknownFieldWarning</span></code></a> for a key from your
+<code class="docutils literal notranslate"><span class="pre">_make_data</span></code>, a disagreement between two of your own mappings rather than a
+caller’s typo.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The check lives in <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>, where every producer’s
 keywords converge, so it covers <code class="docutils literal notranslate"><span class="pre">SomeProtocol(...)</span></code> and the <code class="docutils literal notranslate"><span class="pre">pack</span></code> it
-leads to – but <strong>not</strong> a direct <code class="docutils literal notranslate"><span class="pre">SomeProtocol.make(...)</span></code> call, which still
-discards an undeclared keyword in silence. <code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(...)</span></code>
-is the idiom that reaches it, used by this package’s own tests and by
-<a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> to reach its
-versioned implementation. Covering that would mean interposing on every
-<code class="docutils literal notranslate"><span class="pre">make</span></code> in the tree – a larger change this package deliberately does not
-make. Construct through the constructor to get the check.</p>
+leads to, but <strong>not</strong> <code class="docutils literal notranslate"><span class="pre">make</span></code> called on a bare instance, such as
+<code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(...)</span></code>, which drops an undeclared keyword
+silently. This package’s tests and <a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> call <code class="docutils literal notranslate"><span class="pre">make</span></code> that
+way. Covering it would mean interposing on every <code class="docutils literal notranslate"><span class="pre">make</span></code> in the tree, which
+this package deliberately does not do.</p>
 </div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Registering after the fact, as above, is one option. The other is passing
-<code class="docutils literal notranslate"><span class="pre">code=</span></code> at class definition, which is <strong>opt-in</strong> – a class that omits it
-stays unregistered, exactly as if no <code class="docutils literal notranslate"><span class="pre">register_*</span></code> call had been made
-either:</p>
+<p>Instead of a <code class="docutils literal notranslate"><span class="pre">register_*</span></code> call, pass <code class="docutils literal notranslate"><span class="pre">code=</span></code> at class definition; a class
+with neither stays unregistered:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyIPv4</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">IPv4Data</span><span class="p">,</span> <span class="n">IPv4Schema</span><span class="p">],</span>
              <span class="n">schema</span><span class="o">=</span><span class="n">IPv4Schema</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">IPv4Data</span><span class="p">,</span>
              <span class="n">code</span><span class="o">=</span><span class="n">EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">):</span>
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>The key’s own type decides which registry it goes to – an
-<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> member always means
-<a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>, a
-<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> member always means
-<a class="reference internal" href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>, and so on – so a
-raw <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, such as a TCP or UDP port, cannot say which registry it
-belongs to and must be given explicitly: <code class="docutils literal notranslate"><span class="pre">code={TCP:</span> <span class="pre">21}</span></code>. Either form
-may appear in an iterable to register one class into several registries
-at once. See
-<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__</span></code></a> for the full
+<p>The key’s type picks the registry – an
+<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> member means
+<a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>’s, a
+<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> member
+<a class="reference internal" href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>’s, and so on – so a
+raw <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, such as a TCP or UDP port, names its registry explicitly:
+<code class="docutils literal notranslate"><span class="pre">code={TCP:</span> <span class="pre">21}</span></code>. An iterable of either form registers into several at
+once. <a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__</span></code></a> gives the full
 rule, and
-<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> for
-what runs underneath it.</p>
+<a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>
+runs underneath it.</p>
 </div>
 </section>
 </section>
 <section id="extending-existing-protocol">
 <h3>Extending Existing Protocol<a class="headerlink" href="#extending-existing-protocol" title="Link to this heading">¶</a></h3>
-<p>Several protocols carry customisable attributes – the option headers of IPv4,
-for one. To add handling for one of them, check the protocol class for the
-extension point you need, then register your methods against it.</p>
+<p>Several protocols carry extension points, such as the options of IPv4. To
+handle a new code, register your methods against the protocol’s extension
+point.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Do not inherit from the protocol class directly – it may cause unexpected
-errors. Use the helper registry functions in
-<a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> instead.</p>
+<p>Do not subclass the protocol class for this, which may cause unexpected
+errors; use the registry functions in
+<a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>.</p>
 </div>
-<p>The extension points of each protocol class, with the registry function that
-writes them:</p>
+<p>The extension points, with the registry function that writes each:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1118,17 +1032,16 @@ class, and the rest match the built-in methods it sits beside.</p>
 </section>
 <section id="and-speaking-of-library-foundations">
 <h2>And Speaking of Library Foundations…<a class="headerlink" href="#and-speaking-of-library-foundations" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> carries the library’s own machinery – extraction,
-reassembly, flow tracing and the registries behind them – and each part of it
-is extensible in the same way the protocols are.</p>
+<p><a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> carries extraction, reassembly, flow tracing and the
+registries behind them, each extensible as the protocols are.</p>
 <section id="extractor-engines">
 <h3>Extractor Engines<a class="headerlink" href="#extractor-engines" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="pcapkit/foundation/engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> holds the built-in engines that read packets
-out of an input PCAP, PCAP-NG or other capture file. The shipped engines derive
-from <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>;
-<a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a> is the subclass to build your
-own on, since it is the one carrying the <code class="docutils literal notranslate"><span class="pre">engine=</span></code> registration hook.</p>
-<p>The available engines and the file formats they read:</p>
+<p><a class="reference internal" href="pcapkit/foundation/engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> holds the engines that read packets out of a
+capture file. The shipped engines derive from
+<a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>; build your own on
+<a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>, which carries the
+<code class="docutils literal notranslate"><span class="pre">engine=</span></code> registration hook.</p>
+<p>The engines and the file formats they read:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1169,12 +1082,11 @@ own on, since it is the one carrying the <code class="docutils literal notransla
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>An engine is free to support less than <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
-offers, and several do. <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> perform no protocol dissection
-whatsoever, so they support neither reassembly nor flow tracing; <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>
-has no IPv6 decoder, so it supports IPv4 and TCP reassembly but not IPv6. What
-matters is that the gap is <em>announced</em> – each engine warns, or raises, for the
-capability it cannot provide, rather than silently producing an empty result.
+<p>An engine may support less than <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
+offers. <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> dissect no protocol, so they support neither
+reassembly nor flow tracing; <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder, so it
+reassembles IPv4 and TCP but not IPv6. Each engine warns, or raises, for a
+capability it cannot provide rather than silently producing an empty result.
 The exceptions pass without a warning: <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> and <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> leave TCP
 behind some tags, tunnels and extension headers out of TCP reassembly and
 flow tracing, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> also leaves IPv4 in IPv6, and IPv6 in IPv4, out of IP
@@ -1186,22 +1098,16 @@ case.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> are two distributions of one <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>
-interface, and both install a top-level <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> module, so they are two
-engines rather than one: <code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> and <code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code>. Upstream
-<a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> cannot be installed on Python 3.12 or newer, and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> can –
-which is why both exist. See
-<a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> for which to pick.</p>
+interface, both installing a top-level <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> module, and are two engines:
+<code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> and <code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code>. Both exist because upstream
+<a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> cannot be installed on Python 3.12 or newer and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> can.
+<a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> says which to pick.</p>
 </div>
 <section id="id1">
 <h4>Samples<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
-<p>The following code snippet shows how to create a new engine class:</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Following is a PoC implementation of a new engine based on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post34)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>. For documentation
-purposes, we use the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> engine as an example,
-where the comprehensive implementation can be found in the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.scapy" title="pcapkit.foundation.engines.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.scapy</span></code></a>
-module.</p>
-</div>
+<p>A sketch of a new engine on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post34)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>, modelled on
+<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a>, whose full implementation is
+<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.scapy" title="pcapkit.foundation.engines.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.scapy</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span>  <span class="c1"># import base class</span>
@@ -1212,77 +1118,48 @@ module.</p>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
 
-<span class="c1"># NOTE: The ``engine`` keyword is what registers the engine with the Extractor,</span>
-<span class="c1"># and it is the key ``Extractor(engine=...)`` will look it up under. It is</span>
-<span class="c1"># required: registration is opt-in, so omitting it defines a perfectly usable</span>
-<span class="c1"># class that is simply not selectable by name. Note that __engine_name__ is</span>
-<span class="c1"># *not* an opt-in -- it sets the name the engine reports about itself, which</span>
-<span class="c1"># it does whether or not the engine is registered.</span>
+<span class="c1"># NOTE: ``engine`` registers the class under the key ``Extractor(engine=...)``</span>
+<span class="c1"># looks up; without it, the class is not selectable by name.</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MyScapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">'Packet'</span><span class="p">],</span> <span class="n">engine</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">):</span>
 
     <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">'Scapy'</span>  <span class="c1"># friendly name of the engine</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'scapy'</span>  <span class="c1"># module name that the engine is based on</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">'Extractor'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1"># NOTE: the API entry point of the underlying engine module should</span>
-        <span class="c1"># be imported here, instead of at the top of the module, to avoid</span>
-        <span class="c1"># dependency issues.</span>
+        <span class="c1"># NOTE: Imported here, not at module level, so the engine's</span>
+        <span class="c1"># library stays an optional dependency.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sendrecv</span>  <span class="c1"># import API entry point</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">sendrecv</span>  <span class="c1"># store API entry point</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># intermediate storage for the iterator</span>
-                            <span class="c1"># generated by the API entry point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># iterator over the packets, set by run()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>  <span class="c1"># initialise base class</span>
 
-    <span class="c1"># NOTE: The following methods are the core methods of the engine class,</span>
-    <span class="c1"># which are responsible for parsing the input file and extracting the</span>
-    <span class="c1"># network packets for further processing. It is expected to create an</span>
-    <span class="c1"># iterator instance that yields the network packets, and store it in</span>
-    <span class="c1"># the intermediate storage, i.e., self._extmp for further processing,</span>
-    <span class="c1"># using the API entry point as in the self._expkg attribute.</span>
+    <span class="c1"># NOTE: Open the input through ``self._expkg`` and store an iterator</span>
+    <span class="c1"># over its packets in ``self._extmp``.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>  <span class="c1"># get extractor instance</span>
 
-        <span class="c1"># NOTE: You may wish to do some pre-processing here, e.g., to</span>
-        <span class="c1"># check if there's any extraction protocol and/or layer thresholds</span>
-        <span class="c1"># set by the user (some engines may not support this feature); or</span>
-        <span class="c1"># to set up the verbose handler for the underlying engine module,</span>
-        <span class="c1"># as in the following code snippet. Install it only when the user</span>
-        <span class="c1"># asked for the default output, i.e., `verbose=True`, which sets</span>
-        <span class="c1"># `ext._vfunc_default`: a callable given as `verbose=` is the</span>
-        <span class="c1"># user's own handler, already stored as `ext._vfunc`, so it must</span>
-        <span class="c1"># be kept rather than replaced.</span>
+        <span class="c1"># NOTE: Replace the verbose handler only for ``verbose=True``; a</span>
+        <span class="c1"># callable ``verbose=`` is the user's own, already in ``ext._vfunc``.</span>
 
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc_default</span><span class="p">:</span>  <span class="c1"># check if the default verbose output is requested</span>
-            <span class="c1"># NOTE: PyPCAPKit has its own bundled supporting functions for</span>
-            <span class="c1"># third-party libraries, e.g., the `packet2chain` function is</span>
-            <span class="c1"># to convert a given Packet instance of the Scapy library to a</span>
-            <span class="c1"># human-readable string, which is used for verbose output.</span>
+            <span class="c1"># NOTE: pcapkit.toolkit bundles per-engine helpers;</span>
+            <span class="c1"># ``packet2chain`` renders a Scapy packet as its protocol chain.</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># import utility function</span>
 
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">extractor</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">extractor</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>
             <span class="p">)</span>  <span class="c1"># print verbose message as `Frame XXX: Ethernet:IP:TCP:...`</span>
 
-        <span class="c1"># NOTE: The extractor's shared global-header step parses the global</span>
-        <span class="c1"># header with the built-in engine and, unless output is disabled,</span>
-        <span class="c1"># dumps it and sets the output format that `ext.format` reports.</span>
+        <span class="c1"># NOTE: Parse the global header with the built-in engine and, unless</span>
+        <span class="c1"># output is disabled, dump it and set ``ext.format``.</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">record_header</span><span class="p">()</span>
 
-        <span class="c1"># NOTE: Here we use the API entry point, i.e., scapy.sendrecv.sniff,</span>
-        <span class="c1"># to read the input file and extract the network packets. The API</span>
-        <span class="c1"># entry point returns an iterable instance, which is then converted</span>
-        <span class="c1"># as an iterator and stored in the intermediate storage for further</span>
-        <span class="c1"># processing.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">offline</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">))</span>
 
-    <span class="c1"># NOTE: The following methods are the helper methods of the engine class,</span>
-    <span class="c1"># which are responsible for extracting the network packets from the</span>
-    <span class="c1"># intermediate storage, i.e., self._extmp, and returning the extracted</span>
-    <span class="c1"># network packets for further processing. It is also expected to handle</span>
-    <span class="c1"># necessary actions, including but not limited to, verbose output, file</span>
-    <span class="c1"># output, reassembly and flow tracing, etc.</span>
+    <span class="c1"># NOTE: Return the next packet from ``self._extmp``, handling its</span>
+    <span class="c1"># verbose output, file output, reassembly and flow tracing.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Packet'</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
                                            <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>  <span class="c1"># import utility functions</span>
@@ -1293,32 +1170,21 @@ module.</p>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># increment frame number</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># print verbose message</span>
 
-        <span class="c1"># NOTE: The following code snippet is to handle the file output,</span>
-        <span class="c1"># i.e., to write the packet to the output file if the output file</span>
-        <span class="c1"># is specified by the user.</span>
+        <span class="c1"># NOTE: Dump the packet unless output is disabled.</span>
         <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="n">info</span> <span class="o">=</span> <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># convert packet to dict-like object</span>
 
-            <span class="c1"># NOTE: Now, we need to check if output file is to be a single</span>
-            <span class="c1"># file. If so, we can directly write the packet to the output</span>
-            <span class="c1"># file, i.e., ext._ofile; otherwise, we need to create a new</span>
-            <span class="c1"># dumper instance by initialising ext._ofile, and write the</span>
-            <span class="c1"># packet to the dumper instance. For more information, please</span>
-            <span class="c1"># refer to the documentation of DictDumper library.</span>
+            <span class="c1"># NOTE: In split mode (``ext._flag_f``) ``ext._ofile`` is a dumper</span>
+            <span class="c1"># class, built per frame; otherwise it is one dumper instance.</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
                 <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The following code snippet is to handle the reassembly of</span>
-        <span class="c1"># the network packets, i.e., to reassemble the fragmented packets</span>
-        <span class="c1"># into a complete packet. Before reassembly, we need to convert</span>
-        <span class="c1"># the packet to a tailored format, i.e., a dict-like object, which</span>
-        <span class="c1"># is then passed to the reassembly function. For more information,</span>
-        <span class="c1"># please refer to the documentation of pcapkit.foundation.reassembly</span>
-        <span class="c1"># module.</span>
+        <span class="c1"># NOTE: Each toolkit helper converts the packet to its reassembly's</span>
+        <span class="c1"># format, or gives None for a packet it does not apply to.</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ipv4</span><span class="p">:</span>
                 <span class="n">data_ipv4</span> <span class="o">=</span> <span class="n">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
@@ -1333,21 +1199,14 @@ module.</p>
                 <span class="k">if</span> <span class="n">data_tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">tcp</span><span class="p">(</span><span class="n">data_tcp</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The following code snippet is to handle the flow tracing of</span>
-        <span class="c1"># the network packets, i.e., to trace a series of packets as they</span>
-        <span class="c1"># will compose as a flow and/or stream. Before flow tracing, we need</span>
-        <span class="c1"># to convert the packet to a tailored format, i.e., a dict-like object,</span>
-        <span class="c1"># which is then passed to the flow tracing function. For more</span>
-        <span class="c1"># information, please refer to the documentation of</span>
-        <span class="c1"># pcapkit.foundation.traceflow module.</span>
+        <span class="c1"># NOTE: Flow tracing, likewise.</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
                 <span class="n">data_tf_tcp</span> <span class="o">=</span> <span class="n">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_tf_tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="p">(</span><span class="n">data_tf_tcp</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The following code snippet is to record extracted frames</span>
-        <span class="c1"># into the internal storage, i.e., ext._frame, for further processing.</span>
+        <span class="c1"># NOTE: Store the frame when storing is on (``ext._flag_d``).</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_d</span><span class="p">:</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_frame</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -1358,16 +1217,10 @@ module.</p>
 </section>
 <section id="output-dumpers">
 <h3>Output Dumpers<a class="headerlink" href="#output-dumpers" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> wraps <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>, which writes the
-extracted packets to the output file. New output formats are added by
-subclassing a dumper, on the same extensibility <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>
-itself offers.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>’s own documentation covers the dumpers in
-detail.</p>
-</div>
-<p>The available output dumpers and their formats:</p>
+<p><a class="reference internal" href="pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> builds on <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>, which writes
+the extracted packets to the output file, and whose own documentation covers its
+dumpers. A new output format is a dumper subclass.</p>
+<p>The output dumpers and their formats:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1402,14 +1255,8 @@ detail.</p>
 </div>
 <section id="id2">
 <h4>Samples<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
-<p>The following code snippet shows how to create a new dumper class:</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Following is a PoC implementation of a new dumper for the PCAP format. For
-documentation purposes, we use the <a class="reference internal" href="pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a>
-dumper as an example, where the comprehensive implementation can be found
-in the <a class="reference internal" href="pcapkit/dumpkit/pcap.html#module-pcapkit.dumpkit.pcap" title="pcapkit.dumpkit.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit.pcap</span></code></a> module.</p>
-</div>
+<p>A sketch of a PCAP dumper, modelled on <a class="reference internal" href="pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a>,
+whose full implementation is <a class="reference internal" href="pcapkit/dumpkit/pcap.html#module-pcapkit.dumpkit.pcap" title="pcapkit.dumpkit.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit.pcap</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>  <span class="c1"># import base class</span>
@@ -1421,60 +1268,41 @@ in the <a class="reference internal" href="pcapkit/dumpkit/pcap.html#module-pcap
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 
-<span class="c1"># NOTE: We need to specify the output file format and extension here at the</span>
-<span class="c1"># class definition, as in the following code snippet. Such that PyPCAPKit</span>
-<span class="c1"># will be able to automatically register our dumper class to the corresponding</span>
-<span class="c1"># dumper registries, and use it to dump the extracted network packets.</span>
+<span class="c1"># NOTE: ``fmt`` registers the dumper under that output format, with ``ext``</span>
+<span class="c1"># its file extension; without ``fmt``, the class is not registered.</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MyDumper</span><span class="p">(</span><span class="n">Dumper</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">'.pcap'</span><span class="p">):</span>
 
-    <span class="c1"># NOTE: This property names the file format of the dumper, as a string.</span>
-    <span class="c1"># It is not the file extension -- that is the ``ext`` given at class</span>
-    <span class="c1"># definition above.</span>
+    <span class="c1"># NOTE: The format name, not the extension, which is ``ext`` above.</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">'pcap'</span>
 
-    <span class="c1"># NOTE: We need to collect some necessary information here thru the necessary</span>
-    <span class="c1"># arguments, e.g., the file name, link-layer protocol, etc., which will be</span>
-    <span class="c1"># used to generate the top-level header of the output file.</span>
+    <span class="c1"># NOTE: Take what the file header needs, e.g. the link-layer protocol,</span>
+    <span class="c1"># and keep any state later frames need.</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1"># NOTE: We can do some pre-processing here if necessary, e.g., to</span>
-        <span class="c1"># save the nanosecond-resolution flag, link-layer protocol type, etc.,</span>
-        <span class="c1"># such that we can use them later when dumping the network packets.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># initialise frame number counter to 1</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>  <span class="c1"># initialise base class with the file name</span>
-                                      <span class="c1"># and other necessary arguments</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>  <span class="c1"># initialise base class</span>
 
-    <span class="c1"># NOTE: We need to overwrite the original ``__call__`` method, cause the</span>
-    <span class="c1"># PCAP file format is a binary format, thus we need to re-open the output</span>
-    <span class="c1"># file in binary mode, instead of the default text mode.</span>
+    <span class="c1"># NOTE: Overridden because PCAP is binary, so the file reopens in binary</span>
+    <span class="c1"># rather than text mode.</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'MyDumper'</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">'ab'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_append_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># append value to the file</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="c1"># NOTE: The following method will be called at the initialisation of the</span>
-    <span class="c1"># dumper class, which is expected to write the top-level header of the</span>
-    <span class="c1"># output file.</span>
+    <span class="c1"># NOTE: Called on initialisation, to write the file header.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">Header</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># create PCAP header instance based on the given arguments</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># write the header to the output file</span>
 
-    <span class="c1"># NOTE: The following method is to write the network packets to the output</span>
-    <span class="c1"># file. It is expected to convert the network packet to a tailored format,</span>
-    <span class="c1"># i.e., a Frame instance, which is then converted to the binary format and</span>
-    <span class="c1"># written to the output file.</span>
+    <span class="c1"># NOTE: Write one packet, here as a PCAP frame.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Frame'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># create PCAP frame instance based on the given arguments</span>
 
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># write the frame to the output file</span>
-
-        <span class="c1"># NOTE: We can do some post-processing here if necessary, e.g., to</span>
-        <span class="c1"># update the frame number counter, etc., such that we can use them</span>
-        <span class="c1"># later when dumping other network packets.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># increment frame number counter</span>
 </pre></div>
 </div>
@@ -1483,13 +1311,13 @@ in the <a class="reference internal" href="pcapkit/dumpkit/pcap.html#module-pcap
 <section id="reassembly-and-flow-tracing">
 <h3>Reassembly and Flow Tracing<a class="headerlink" href="#reassembly-and-flow-tracing" title="Link to this heading">¶</a></h3>
 <p><a class="reference internal" href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> reassembles fragmented packets;
-<a class="reference internal" href="pcapkit/foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> follows packets that compose a flow or
-stream. The shipped classes derive from
+<a class="reference internal" href="pcapkit/foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> follows the packets of a flow. The shipped
+classes derive from
 <a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a> and
-<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a>;
-<a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> and
-<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> are the ones to build
-your own on, since they carry the <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> registration hook.</p>
+<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a>; build your own on
+<a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> or
+<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>, which carry the
+<code class="docutils literal notranslate"><span class="pre">protocol=</span></code> registration hook.</p>
 <p>The reassembly and flow tracing classes, per protocol:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -1512,28 +1340,24 @@ your own on, since they carry the <code class="docutils literal notranslate"><sp
 <td><p><a class="reference internal" href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.tcp.TCP</span></code></a></p></td>
 <td><p><a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP" title="pcapkit.foundation.traceflow.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp.TCP</span></code></a></p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS" title="pcapkit.protocols.application.dtls.protocol.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a></p></td>
+<td><p><a class="reference internal" href="pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS" title="pcapkit.foundation.reassembly.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.dtls.DTLS</span></code></a></p></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Please refer to the documentation of <a class="reference internal" href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> and
-<a class="reference internal" href="pcapkit/foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> modules for more information about the
-reassembly and flow tracing classes, as well as the underlying algorithms.</p>
+<p><a class="reference internal" href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> and <a class="reference internal" href="pcapkit/foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a>
+document the classes and their algorithms.</p>
 </div>
 <section id="new-implementation">
 <h4>New Implementation<a class="headerlink" href="#new-implementation" title="Link to this heading">¶</a></h4>
-<p>A new reassembly or flow tracing class subclasses
-<a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> or
-<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>:</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Following is a PoC implementation of a new reassembly class for the IPv4
-protocol. For documentation purposes, we use the
-<a class="reference internal" href="pcapkit/foundation/reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4" title="pcapkit.foundation.reassembly.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> reassembly class as an
-example, where the comprehensive implementation can be found in the
-<a class="reference internal" href="pcapkit/foundation/reassembly/ip/ipv4.html#module-pcapkit.foundation.reassembly.ipv4" title="pcapkit.foundation.reassembly.ipv4"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ipv4</span></code></a> module.</p>
-</div>
+<p>A sketch of an IPv4 reassembly class, modelled on
+<a class="reference internal" href="pcapkit/foundation/reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4" title="pcapkit.foundation.reassembly.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>, whose full implementation is
+<a class="reference internal" href="pcapkit/foundation/reassembly/ip/ipv4.html#module-pcapkit.foundation.reassembly.ipv4" title="pcapkit.foundation.reassembly.ipv4"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ipv4</span></code></a>; a flow tracing class subclasses
+<a class="reference internal" href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> the same way:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>  <span class="c1"># import Info class for data model definitions</span>
@@ -1544,99 +1368,64 @@ example, where the comprehensive implementation can be found in the
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeAlias</span>
 
-<span class="c1"># NOTE: We need to specify some useful data structure before creating the</span>
-<span class="c1"># reassembly class, e.g., the data model for the reassembled packet, the</span>
-<span class="c1"># data model for the reassembly table, etc., which will be used to store</span>
-<span class="c1"># the reassembled packet and the reassembly table, respectively.</span>
+<span class="c1"># NOTE: First the data models the class is generic over.</span>
 
-<span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># a tuple-like object to identify the reassembly</span>
-                             <span class="c1"># table entry's ID, e.g. (src, dst, id, proto)</span>
-                             <span class="c1"># for both IPv4 and IPv6, and</span>
+<span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># key of a reassembly table entry, e.g.</span>
+                             <span class="c1"># (src, dst, id, proto) for IPv4 and IPv6,</span>
                              <span class="c1"># (src, srcport, dst, dstport) for TCP</span>
 
 
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
-    <span class="c1"># NOTE: This is the data model for the extracted packet, which is</span>
-    <span class="c1"># expected to be a dict-like object, and will be used to store the</span>
-    <span class="c1"># information from the extracted packets to be reassembled.</span>
+    <span class="c1"># NOTE: An extracted packet, as the reassembly reads it.</span>
     <span class="o">...</span>
 
 
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
-    <span class="c1"># NOTE: This is the data model for the reassembled datagram's ID,</span>
-    <span class="c1"># which is expected to be a dict-like object, and will be used to</span>
-    <span class="c1"># store the information to identify the reassembled datagram.</span>
+    <span class="c1"># NOTE: The key identifying a reassembled datagram.</span>
     <span class="o">...</span>
 
 
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
-    <span class="c1"># NOTE: This is the data model for the reassembled datagram, which</span>
-    <span class="c1"># is expected to be a dict-like object, and will be used to store</span>
-    <span class="c1"># the information of the reassembled datagram.</span>
+    <span class="c1"># NOTE: A reassembled datagram.</span>
     <span class="o">...</span>
 
 
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 
-    <span class="c1"># NOTE: This is the data model for the reassembly table, which is</span>
-    <span class="c1"># expected to be a dict-like object, and will be used to store the</span>
-    <span class="c1"># information of each buffered entry in the reassembly table, that</span>
-    <span class="c1"># is to be reassembled with the following fragmented packets.</span>
+    <span class="c1"># NOTE: A reassembly table entry, buffering fragments until complete.</span>
     <span class="o">...</span>
 
 
-<span class="c1"># NOTE: Now we can create the reassembly class, which is expected to be</span>
-<span class="c1"># a subclass of the base class, i.e., Reassembly, and implement the core</span>
-<span class="c1"># methods, i.e., reassembly and submit, for reassembling the fragmented</span>
-<span class="c1"># packets and submitting the reassembled datagram, respectively.</span>
-<span class="c1">#</span>
-<span class="c1"># The ``protocol`` keyword is what registers the class, and it is the key it</span>
-<span class="c1"># will be looked up under. It is required: registration is opt-in, so omitting</span>
-<span class="c1"># it defines a perfectly usable class that is simply not selectable by name.</span>
-<span class="c1"># Note that __protocol_name__ is *not* an opt-in -- it sets the name the class</span>
-<span class="c1"># reports about itself, registered or not. Note also that the keyword is</span>
-<span class="c1"># spelled ``protocol`` here and ``engine`` on Engine above.</span>
+<span class="c1"># NOTE: ``protocol`` registers the class under that key; without it, the</span>
+<span class="c1"># class is not selectable by name.</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MyReassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">],</span>
                    <span class="n">protocol</span><span class="o">=</span><span class="s1">'ipv4'</span><span class="p">):</span>
 
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'IPv4'</span>  <span class="c1"># name of the protocol</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv4</span>  <span class="c1"># type of the protocol</span>
 
-    <span class="c1"># NOTE: This method is to reassemble the fragmented packets, i.e.,</span>
-    <span class="c1"># ``info`` formatted as a ``Packet`` instance, into the reassembly</span>
-    <span class="c1"># table, i.e., ``self._buffer`` formatted as a dict of ``BufferID``</span>
-    <span class="c1"># mapped to ``Buffer`` instances.</span>
+    <span class="c1"># NOTE: Buffer ``info`` in ``self._buffer``, a dict of ``BufferID`` to</span>
+    <span class="c1"># ``Buffer``.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="o">...</span>  <span class="c1"># reassembly algorithm implementation</span>
 
-        <span class="c1"># NOTE: Once the fragmented packets are reassembled, we need to</span>
-        <span class="c1"># submit the reassembled datagram, i.e., ``Datagram`` instance,</span>
-        <span class="c1"># to the storage, i.e., ``self._dtgram``, for further processing.</span>
+        <span class="c1"># NOTE: Once a buffer is complete, store its datagrams.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># submit reassembled datagram</span>
         <span class="p">)</span>
 
-    <span class="c1"># NOTE: This method is to convert the reassembled datagram, i.e.,</span>
-    <span class="c1"># ``buf`` formatted as a ``Buffer`` instance, to a ``Datagram``</span>
-    <span class="c1"># instance, which is then submitted to the storage, i.e.,</span>
-    <span class="c1"># ``self._dtgram``.</span>
+    <span class="c1"># NOTE: Convert a complete ``Buffer`` into ``Datagram`` instances.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>
-        <span class="n">datagram</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># submit algorithm implementation, e.g., to convert</span>
-                        <span class="c1"># the reassembled datagram to a list of ``Datagram``</span>
-                        <span class="c1"># instances, which is then returned for further</span>
-                        <span class="c1"># processing by the caller</span>
+        <span class="n">datagram</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># list of ``Datagram`` instances</span>
 
-        <span class="c1"># NOTE: Before we submit the reassembled datagram, we need to</span>
-        <span class="c1"># run the registered callback functions, if any, to process the</span>
-        <span class="c1"># reassembled datagram, e.g., to check if the reassembled datagram</span>
-        <span class="c1"># is to be discarded, etc.</span>
+        <span class="c1"># NOTE: Run the registered callbacks on the submission.</span>
         <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
             <span class="n">callback</span><span class="p">(</span><span class="n">datagram</span><span class="p">)</span>  <span class="c1"># run callback functions</span>
         <span class="k">return</span> <span class="n">datagram</span>
@@ -1645,9 +1434,8 @@ example, where the comprehensive implementation can be found in the
 </section>
 <section id="callback-functions">
 <h4>Callback Functions<a class="headerlink" href="#callback-functions" title="Link to this heading">¶</a></h4>
-<p>Callback functions can be registered on the reassembly and flow tracing
-classes, to inspect the reassembled datagrams or traced flows as they are
-produced.</p>
+<p>A callback registered on a reassembly or flow tracing class inspects the
+datagrams or flows as they are produced.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a> holds the callback registry
@@ -1664,10 +1452,9 @@ takes one argument, the list of datagrams that submission produced. A flow traci
 callback runs as each flow is finalised and takes that flow’s
 <a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>. Each should return
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; any return value is ignored.</p>
-<p>A reassembly callback can modify its list in place, which discards datagrams,
-but prefer not to: if the reassembly or tracing result itself is wrong for your
-purpose, subclass the reassembly or flow tracing class and change its algorithm
-instead.</p>
+<p>A reassembly callback can discard datagrams by modifying its list in place, but
+prefer not to: if the result itself is wrong for your purpose, subclass the
+class and change its algorithm instead.</p>
 </section>
 </section>
 </section>
@@ -1764,7 +1551,7 @@ instead.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="_static/documentation_options.js?v=662e1299"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

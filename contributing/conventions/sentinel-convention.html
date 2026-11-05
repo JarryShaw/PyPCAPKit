@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -621,9 +622,8 @@ underscore-separated word and append <code class="docutils literal notranslate">
 single defining module, and it is the only import path. The modules that <em>use</em> a
 sentinel import it from there but do not re-export it: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a> dropped the
 per-module re-exports, under the ruling that a moved name keeps no re-export at its old
-path. It was ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1715">#1715</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1711">#1711</a>), overturning the re-export
-that issue’s own plan kept. Import the object, and the type for an annotation, from
-<a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>.</p>
+path, ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1715">#1715</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1711">#1711</a>). Import the object, and the type for
+an annotation, from <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>.</p>
 <p>Where a sentinel name already exists and already follows SCREAMING_SNAKE, keep it;
 renaming a published sentinel again costs every caller for no further gain.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> carries no leading underscore even though it is private – it is read in
@@ -673,8 +673,7 @@ default: 'Any' = NO_DEFAULT
 <p class="admonition-title">Warning</p>
 <p>Do <strong>not</strong> justify a dedicated class by claiming a subclass “could still compare
 equal via a custom <code class="docutils literal notranslate"><span class="pre">__eq__</span></code>”. A class that defines only <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> inherits
-identity <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> and is exactly as safe as <code class="docutils literal notranslate"><span class="pre">object()</span></code>. That argument appeared
-in an early draft of <a class="reference internal" href="../../pcapkit/corekit/enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> and was wrong.</p>
+identity <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> and is exactly as safe as <code class="docutils literal notranslate"><span class="pre">object()</span></code>.</p>
 </div>
 <p><strong>Ported code is exempt.</strong> A verbatim upstream port keeps its upstream’s sentinels
 as written: the value of a vendored copy is that it can still be diffed against
@@ -711,8 +710,7 @@ confusion the sentinel exists to prevent.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">__copy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code></dt><dd><p>Every sentinel has them, from the base. The owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1842">#1842</a> that every
 sentinel is a true singleton, rather than gaining these only once a deep copy is
-found to reach it – as one had by then, through a parsed schema and a field that
-hold <code class="docutils literal notranslate"><span class="pre">NO_VALUE</span></code>. <code class="docutils literal notranslate"><span class="pre">__copy__</span></code> and <code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> return the object itself, and
+found to reach it. <code class="docutils literal notranslate"><span class="pre">__copy__</span></code> and <code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> return the object itself, and
 <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code> returns its module-level name, so <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> stores a reference to
 that name and every protocol loads the same object back. A guarded <code class="docutils literal notranslate"><span class="pre">__new__</span></code>
 alone would not do, since pickle protocols 0 and 1 rebuild through
@@ -813,7 +811,7 @@ and <a class="reference external" href="https://docs.python.org/3/builtins/const
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

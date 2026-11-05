@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -975,10 +976,8 @@ reduce an <a class="reference external" href="https://docs.python.org/3/library/
 <code class="docutils literal notranslate"><span class="pre">Enum.__reduce_ex__</span></code>, which returns <code class="docutils literal notranslate"><span class="pre">(cls,</span> <span class="pre">(value,))</span></code> – the
 one lookup this member is deliberately absent from. A minted
 member is registered and so round-trips; left alone, this one
-would not. Measured on CPython 3.14.7, resolving port 53406
-through the TCP schema’s <a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField" title="pcapkit.corekit.fields.numbers.PortEnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code></a>
-with nothing in place of the override,
-<code class="docutils literal notranslate"><span class="pre">pickle.loads(pickle.dumps(member))</span></code> raised
+would not: without the override, an unknown TCP port’s member
+made <code class="docutils literal notranslate"><span class="pre">pickle.loads(pickle.dumps(member))</span></code> raise
 <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">'unknown</span> <span class="pre">[53406</span> <span class="pre">-</span> <span class="pre">tcp]'</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">TCP</span></code> – while
 <code class="docutils literal notranslate"><span class="pre">pickle.dumps</span></code> still succeeded, so the failure surfaced only on
 read-back rather than where it was caused.</p>
@@ -1719,7 +1718,7 @@ exactly as it would the plain value.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -4,18 +4,16 @@ Protocol Family Grouping
 ------------------------
 
 A protocol family is a base class named after the family plus its member classes.
-What each class returns from :meth:`~pcapkit.protocols.protocol.Protocol.id` is what
-the selectors on :class:`~pcapkit.protocols.protocol.Protocol` match against. Each
-ruling below names the thread it was set on.
+The selectors on :class:`~pcapkit.protocols.protocol.Protocol` match against what each
+class returns from :meth:`~pcapkit.protocols.protocol.Protocol.id`. Each ruling names
+the thread it was set on.
 
 The ``id()`` Criterion
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**A family base lists its direct concrete subclasses.** An abstract intermediate is
-left out, and so is everything beneath it. Ruled in review of :pr:`2441`; no issue
-holds the ruling.
-
-The member list takes either of these forms:
+**A family base lists its direct concrete subclasses**, leaving out an abstract
+intermediate and everything beneath it. Ruled in review of :pr:`2441`; no issue holds
+the ruling. The list takes either form:
 
 * **Members only.** :meth:`IP.id() <pcapkit.protocols.internet.ip.protocol.IP.id>` is
   ``('IPv4', 'IPv6')``; :class:`~pcapkit.protocols.internet.ah.protocol.AH` and
@@ -35,9 +33,9 @@ The member list takes either of these forms:
 Abstract Family Names
 ~~~~~~~~~~~~~~~~~~~~~
 
-**An abstract family name composes its members.** The ruling on :issue:`2462` is that
+**An abstract family name composes its members.** Ruled on :issue:`2462`:
 :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` lists its direct concrete
-members in its ``id()``, and that each member narrows its own ``id()`` to itself.
+members in its ``id()``, and each member narrows its own ``id()`` to itself.
 
 Grouping by Name
 ~~~~~~~~~~~~~~~~
@@ -91,9 +89,9 @@ choose. Every registry that reaches IPv4, IPv6, AH, ESP, TLS or DTLS has a code 
 that member alone, so no registry binds :class:`~pcapkit.protocols.internet.ip.protocol.IP`,
 :class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec` or
 :class:`~pcapkit.protocols.application.ssl.protocol.SSL`, and none of the three defines
-``read()``: none needs a dispatcher there. Ruled for IGMP on :pr:`2444` and for SSL on
-:pr:`2441`; no issue holds either ruling. The asymmetry is deliberate, and it concerns
-the registry only; parsing or building through a base directly is the rule below.
+``read()``. Ruled for IGMP on :pr:`2444` and for SSL on :pr:`2441`; no issue holds
+either ruling. The asymmetry is deliberate and concerns the registry only; parsing or
+building through a base directly is the rule below.
 
 **A versioned family's base dispatches on both paths** (:issue:`2524`). Parsing
 octets through it, constructing it from fields and its ``from_data`` give a member,
@@ -108,11 +106,11 @@ data model's class or its ``version``, as the table below gives. No field picks 
 member, not even a field only one member takes, and no member is a default: fields
 without ``version`` raise :exc:`~pcapkit.utilities.exceptions.ProtocolError`, and a
 field the member does not take fails that member's own keyword check. Ruled on
-:issue:`2574`. A class built directly takes ``version`` as well, which must then be
-its own version: a member's, or, for a subclass outside the members, the one an IGMP
-class states in its ``version``, which a subclass of the other bases does not have.
-While parsing, the keyword is handed on unread, since an IP layer passes its own
-version under that name to the layer it carries.
+:issue:`2574`. A class built directly takes ``version`` too, which must be its own: a
+member's, or, for a subclass outside the members, the one an IGMP class states in its
+``version`` (a subclass of the other bases has none). While parsing, the keyword is
+handed on unread, since an IP layer passes its own version under that name to the
+layer it carries.
 
 The member a call through a versioned base gives, as a decision:
 
@@ -202,9 +200,9 @@ then refuses, such as a preface and three octets, are
 Handled Refusals
 ~~~~~~~~~~~~~~~~
 
-**A refusal a next-layer fallback handles is quiet**, for every protocol and not only
-a family's members (:issue:`2588`). The fallback is
-:func:`~pcapkit.corekit.decorators.beholder`. It decorates
+**A refusal a next-layer fallback handles is quiet**, for every protocol, not only a
+family's members (:issue:`2588`). The fallback,
+:func:`~pcapkit.corekit.decorators.beholder`, decorates
 :meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`
 and the overrides that parse a next layer themselves.
 :meth:`Application._import_next_layer
@@ -347,8 +345,8 @@ parser's ``error``, a frame the segment ends inside stays
 Canonical Names
 ~~~~~~~~~~~~~~~
 
-**A versioned protocol's display name includes its version.** This is the preference
-stated in review of :pr:`2444`, not a settled rule; no issue holds it.
+**A versioned protocol's display name includes its version** -- a preference stated
+in review of :pr:`2444`, not a settled rule; no issue holds it.
 :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`'s ``name`` is
 ``Layer 2 Tunnelling Protocol version 2``. The HTTP/1.1 and HTTP/2 classes define no
 ``name`` of their own, so they report ``Hypertext Transfer Protocol``, which carries
@@ -360,8 +358,8 @@ but its ``id()`` drops the version for the RFC canonical name (:rfc:`792` names 
 plain ``ICMP``), and its ``name`` carries no "version 4". ``ICMPv6`` keeps its own
 version, since :rfc:`4443` names it with one.
 
-**IGMPv1 follows the same shape, by the same reasoning**, ruled in review of
-:pr:`2506`; no issue holds the ruling.
+**IGMPv1 follows the same shape**, ruled in review of :pr:`2506`; no issue holds the
+ruling.
 :rfc:`1112` names IGMPv1's protocol plain ``IGMP``, so
 :meth:`IGMPv1.id() <pcapkit.protocols.internet.igmpv1.protocol.IGMPv1.id>` is ``('IGMP',)`` and
 its ``alias`` is ``'IGMP'``, while

@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -757,11 +758,9 @@ records the chunk’s raw flags and value verbatim rather than raising.</p>
 </tbody>
 </table>
 </div>
-<p>This class supports parsing of every error cause defined
-by <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.10"><strong>RFC 9260 Section 3.3.10</strong></a>, which are directly mapped to the
-<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.cause_code.CauseCode" title="pcapkit.const.sctp.cause_code.CauseCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.cause_code.CauseCode</span></code></a> enumeration; see
-<a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__cause__</span></code></a> for the mapping. Unknown cause
-codes fall through to
+<p>It parses every error cause <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.10"><strong>RFC 9260 Section 3.3.10</strong></a> defines, by
+<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.cause_code.CauseCode" title="pcapkit.const.sctp.cause_code.CauseCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.cause_code.CauseCode</span></code></a> code, as mapped in
+<a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__cause__</span></code></a>. Any other code falls through to
 <a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_donone" title="pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_donone"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_cause_donone()</span></code></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0.</span></p>
@@ -5885,7 +5884,7 @@ anywhere else. <code class="docutils literal notranslate"><span class="pre">make
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

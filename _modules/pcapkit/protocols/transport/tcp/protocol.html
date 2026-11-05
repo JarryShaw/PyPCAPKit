@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -2699,15 +2700,14 @@
 <span class="sd">            ProtocolError: If the length is neither **3** nor **4**.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            The figure above is :rfc:`6824`'s, deliberately, because it is the one</span>
-<span class="sd">            with an Address ID in it and this method accepts both forms.</span>
-<span class="sd">            :rfc:`8684` section 3.3.8 figure 11 draws MP_PRIO as **3** octets and</span>
-<span class="sd">            nothing more -- ``Kind`` (1) + ``Length`` (1) + subtype/reserved/``B``</span>
-<span class="sd">            (1) -- since section 5 of that document "specifies the removal of the</span>
-<span class="sd">            AddrID field [RFC6824] in the MP_PRIO option", closing a theoretical</span>
-<span class="sd">            attack in which a subflow could be forced into backup mode. The</span>
-<span class="sd">            4-octet :rfc:`6824` form is therefore legacy, and the guard stays</span>
-<span class="sd">            permissive so that traffic carrying it still parses.</span>
+<span class="sd">            The figure above is :rfc:`6824`'s, the one with an Address ID, as this</span>
+<span class="sd">            method accepts both forms. :rfc:`8684` section 3.3.8 figure 11 draws</span>
+<span class="sd">            MP_PRIO as **3** octets -- ``Kind`` (1) + ``Length`` (1) +</span>
+<span class="sd">            subtype/reserved/``B`` (1) -- since its section 5 "specifies the</span>
+<span class="sd">            removal of the AddrID field [RFC6824] in the MP_PRIO option", closing</span>
+<span class="sd">            an attack that could force a subflow into backup mode. The 4-octet</span>
+<span class="sd">            form is legacy, and the guard stays permissive so that traffic</span>
+<span class="sd">            carrying it still parses.</span>
 
 <span class="sd">            On the construction side,</span>
 <span class="sd">            :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPPriority`'s</span>
@@ -4465,7 +4465,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

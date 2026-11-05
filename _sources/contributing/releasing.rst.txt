@@ -3,45 +3,37 @@ Release Process
 
 .. important::
 
-   This page records the **operational contract** for cutting a release --
-   what a maintainer is expected to touch by hand, what the workflow is
-   expected to do unattended, and the precautions that follow from the two
-   being different.
+   The **operational contract** for cutting a release: what a maintainer touches
+   by hand, what the workflow does unattended, and the precautions that follow.
 
-   The short version: **the only manual edit is bumping**
-   :data:`pcapkit.__version__`. Everything else -- the ``v*`` tag, the GitHub
-   Release, the PyPI and Anaconda uploads, the ``conda-*`` tag and its commit
-   to ``main`` -- is produced by
+   **The only manual edit is bumping** :data:`pcapkit.__version__`. Everything
+   else -- the ``v*`` tag, the GitHub Release, the PyPI and Anaconda uploads, the
+   ``conda-*`` tag and its commit to ``main`` -- is produced by
    ``.github/workflows/create-release.yml`` and is never hand-made.
 
 The One Manual Step
 -------------------
 
-Bumping :data:`pcapkit.__version__` is done by :file:`util/bump_version.py`, whose
-own docstring is the authority on what it does; summarised here rather than
-duplicated. Given the current version, it works out the next one under
+:file:`util/bump_version.py` bumps :data:`pcapkit.__version__`; its docstring is the
+authority. Given the current version, it works out the next one under
 :pep:`440` -- a ``devN`` counter, a pre-release counter, a post-release
 counter, or a fresh ``.post1`` for a final release -- and then:
 
 * rewrites the ``__version__`` assignment in ``pcapkit/__init__.py``;
 * moves :file:`CITATION.cff`'s ``version`` and ``date-released`` fields to
-  match, line-oriented so the file's own quoting and comments survive.
-  ``date-released`` becomes the bump's own date in UTC, not the date the
-  release is later published, which is its intended meaning
-  (:issue:`2163`);
+  match, line-oriented so the file's quoting and comments survive.
+  ``date-released`` becomes the bump's date in UTC, its intended meaning, not
+  the later publication date (:issue:`2163`);
 * resets :file:`conda/build` to ``0``.
 
 Its one scheduled caller is the ``Bump Version`` step of
-``.github/workflows/cron-vendor.yml``, and only when a registry crawl changed
-code. ``util/vendor_code_changed.py`` compares each changed file with ``HEAD``;
-a crawl whose changes are all to comments or docstrings is committed as
-"Updated vendor documentation without a version bump" instead, so it reaches
-``main`` without starting a release
-(:issue:`1674`). A crawl that
-finds nothing commits nothing. The bump commit carries every module the crawl
-wrote under ``pcapkit/const/``, new and deleted ones included
-(:issue:`1685`), and is what
-starts the automated path described below.
+``.github/workflows/cron-vendor.yml``, run only when a registry crawl changed code.
+``util/vendor_code_changed.py`` compares each changed file with ``HEAD``; a crawl
+changing only comments or docstrings is committed as "Updated vendor documentation
+without a version bump", reaching ``main`` without starting a release
+(:issue:`1674`). A crawl that finds nothing commits nothing. The bump commit carries
+every module the crawl wrote under ``pcapkit/const/``, new and deleted ones included
+(:issue:`1685`), and starts the automated path below.
 
 The steps of a ``vendor-update`` run, from the crawl to the push:
 
@@ -61,13 +53,11 @@ The steps of a ``vendor-update`` run, from the crawl to the push:
        DOCS -->|committed| PUSH["Push changes to main<br/>not on a manual run"]
        COMMIT --> PUSH
 
-The same script is also the manual entry point: run
-``python util/bump_version.py`` and commit the result to ``main`` for a
-release that is not a vendor-registry refresh -- a feature or a fix that has
-landed and is ready to go out. Running it while ``main``'s version is still a
-``.devN`` one only advances that counter (``1.6.0.dev2`` to ``1.6.0.dev3``) --
-see the dev-release note below -- so it produces another blocked dev version,
-not a release.
+The same script is the manual entry point: run ``python util/bump_version.py`` and
+commit the result to ``main`` for a release that is not a vendor-registry refresh.
+While ``main``'s version is a ``.devN`` one it only advances that counter
+(``1.6.0.dev2`` to ``1.6.0.dev3``), producing another blocked dev version, not a
+release (see the dev-release note below).
 
 Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 ``version`` field to match is **not** a safe shortcut: it blocks the release.

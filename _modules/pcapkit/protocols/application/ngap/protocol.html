@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -576,13 +577,12 @@
 <span class="sd">:func:`pcapkit.foundation.registry.protocols.transport.register_sctp`.</span>
 
 <span class="sd">An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded</span>
-<span class="sd">in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). There is no</span>
-<span class="sd">header to read and no framing to resolve: the whole payload is the encoding,</span>
-<span class="sd">and none of its structure is visible until an ASN.1 decoder has run over it.</span>
+<span class="sd">in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). The whole</span>
+<span class="sd">payload is the encoding, with no header or framing of its own, so none of its</span>
+<span class="sd">structure is visible until an ASN.1 decoder has run over it.</span>
 
 <span class="sd">Decoding therefore needs the optional |pycrate|_ dependency</span>
-<span class="sd">(``pip install pypcapkit[NGAP]``). :mod:`pcapkit` imports and works without</span>
-<span class="sd">it; an NGAP payload simply degrades to the opaque payload path, exactly as an</span>
+<span class="sd">(``pip install pypcapkit[NGAP]``). Without it an NGAP payload degrades as an</span>
 <span class="sd">unregistered PPID would, because</span>
 <span class="sd">:meth:`~pcapkit.protocols.protocol.Protocol._import_next_layer`, which</span>
 <span class="sd">:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` inherits, is wrapped in</span>
@@ -616,14 +616,12 @@
 <span class="sd">``INTEGER``, ``OCTET STRING``, ``ENUMERATED``, ``BOOLEAN``  kept as :obj:`int`, :obj:`bytes`, :obj:`str`, :obj:`bool`</span>
 <span class="sd">==========================================================  ==========================================================</span>
 
-<span class="sd">That is a deliberate trade. Every elementary procedure and protocol IE</span>
-<span class="sd">works on the day it is decoded, and a new 3GPP release needs no</span>
-<span class="sd">code change here; what is given up is per-IE typing, so an IE's value is</span>
-<span class="sd">reported in the specification's own shape rather than as a</span>
-<span class="sd">:mod:`pcapkit`-specific model. The fields worth reading at a glance -- the PDU</span>
-<span class="sd">kind, procedure code, criticality, message type name and the IE list -- are</span>
-<span class="sd">surfaced as first-class fields on</span>
-<span class="sd">:class:`~pcapkit.protocols.application.ngap.data.NGAP` regardless.</span>
+<span class="sd">That is a deliberate trade: every elementary procedure and protocol IE</span>
+<span class="sd">decodes, and a new 3GPP release needs no code change here, at the cost of</span>
+<span class="sd">per-IE typing, so an IE's value is reported in the specification's own shape.</span>
+<span class="sd">The PDU kind, procedure code, criticality, message type name and IE list are</span>
+<span class="sd">first-class fields on :class:`~pcapkit.protocols.application.ngap.data.NGAP`</span>
+<span class="sd">regardless.</span>
 
 <span class="sd">Known Limitations</span>
 <span class="sd">-----------------</span>
@@ -639,15 +637,14 @@
 <span class="sd">* **The specification version is that of the installed decoder, not this</span>
 <span class="sd">  package's.** :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and</span>
 <span class="sd">  :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` were generated from</span>
-<span class="sd">  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era). A |pycrate|_ that</span>
-<span class="sd">  carries a newer</span>
-<span class="sd">  NGAP will decode values these enumerations do not name. Such a value</span>
+<span class="sd">  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era), so a newer NGAP in</span>
+<span class="sd">  |pycrate|_ decodes values these enumerations do not name. Such a value</span>
 <span class="sd">  resolves to a non-registering member called ``Unassigned`` rather than</span>
 <span class="sd">  failing or adding a member to either enumeration -- see</span>
 <span class="sd">  :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`.</span>
 <span class="sd">* **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk</span>
 <span class="sd">  is decoded on its own, so an ``NGAP-PDU`` split across chunks by SCTP</span>
-<span class="sd">  fragmentation fails to decode rather than being reassembled first.</span>
+<span class="sd">  fragmentation fails to decode.</span>
 <span class="sd">* **Private IEs** (``PrivateMessage``) **carry no schema.** Their contents are</span>
 <span class="sd">  vendor defined, so the generic conversion reports whatever ASN.1 shape the</span>
 <span class="sd">  encoding declares and cannot name the fields.</span>
@@ -1202,7 +1199,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

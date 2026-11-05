@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -707,10 +708,8 @@
 
 
 
-<span class="c1"># NOTE: The option helpers are shared with HOPOPT and live in</span>
-<span class="c1"># :mod:`pcapkit.protocols.internet.ipv6_ext.schema`. The functions below bind</span>
-<span class="c1"># what differs between the two headers: the ``IPv6-Opts`` error prefix, and the</span>
-<span class="c1"># option schemas of this module.</span>
+<span class="c1"># NOTE: The option helpers shared with HOPOPT live in ``ipv6_ext.schema``; these bind the</span>
+<span class="c1"># ``IPv6-Opts`` error prefix and this module's option schemas.</span>
 
 
 <div class="viewcode-block" id="mpl_opt_seed_id_len">
@@ -1149,11 +1148,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_QSFunction</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts quick start options."""</span>
 
-    <span class="c1"># NOTE: This declaration scopes the QS-function registry to this class. Without</span>
-    <span class="c1"># it the subclasses below register into the *parent* ``Option`` registry, whose</span>
-    <span class="c1"># keys are IPv6-Opts option *types* -- and since ``Quick_Start_Request`` is 0</span>
-    <span class="c1"># and ``Report_of_Approved_Rate`` is 8, they would clobber option types 0</span>
-    <span class="c1"># (``Pad1``) and 8 (``SMF_DPD``). ``hopopt.py`` carries the same declaration.</span>
+    <span class="c1"># NOTE: Scopes the QS-function registry here; in the parent's, keyed by option type, the</span>
+    <span class="c1"># subclasses below would clobber ``Pad1`` (0) and ``SMF_DPD`` (8).</span>
     <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[Enum_QSFunction, Type[QuickStartOption]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
 
     <span class="c1">#: Flags.</span>
@@ -1416,7 +1412,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

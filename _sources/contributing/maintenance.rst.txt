@@ -5,13 +5,11 @@ Maintenance Workflow
 
 .. important::
 
-   Between releases the repository is maintained by a **coordinator** session: it
-   watches the board on a schedule, dispatches agents to do the work, verifies what
-   they return, and is the only thing that writes to GitHub. This page is that loop
-   written down -- as a brief another agent can take over, and as a record of what
-   the owner has established. What the labels mean is on :ref:`process`, how CI is
-   wired on :doc:`workflows`, and the release itself on :doc:`releasing`; this page
-   links to them rather than restating them.
+   Between releases a **coordinator** session maintains the repository: it watches
+   the board on a schedule, dispatches agents to do the work, verifies what they
+   return, and alone writes to GitHub. This page is that loop, as a brief another
+   agent can take over and a record of what the owner has established. The labels are
+   on :ref:`process`, CI on :doc:`workflows` and the release on :doc:`releasing`.
 
 Actors and Roles
 ----------------
@@ -78,19 +76,18 @@ Actors and Roles
      - Settles readiness by itself: green is necessary, not sufficient.
 
 **One GitHub account posts everything.** The coordinator posts under the owner's
-login, so a comment from that account may be the coordinator's rather than the
-owner's, and an agent reading a thread cannot tell them apart. Every brief says so,
-and says that the coordinator sets the labels by hand, so that no agent reads them as
-automation. The coordinator itself tells the two apart by the ids of its own posts,
-which the post gate records (`Helper Scripts`_).
+login, so an agent reading a thread cannot tell their comments apart. Every brief says
+so, and that the coordinator sets the labels by hand, so no agent reads them as
+automation. The coordinator tells the two apart by the ids of its own posts, which the
+post gate records (`Helper Scripts`_).
 
 The Recurring Loops
 -------------------
 
 Each loop is a scheduled prompt that only points at a policy file, so the file is what
-gets edited. The scheduler expires a recurring job after seven days without notice,
-which once left the owner's answers unread; the sweep therefore checks that every loop
-is scheduled and re-creates a missing one from its file.
+gets edited. The scheduler silently expires a recurring job after seven days, which
+once left the owner's answers unread, so the sweep checks every loop is scheduled and
+re-creates a missing one from its file.
 
 .. list-table::
    :header-rows: 1
@@ -226,20 +223,20 @@ Board Sweep
 Notes Checkpoint
 ~~~~~~~~~~~~~~~~
 
-The coordinator is the store's only writer; no agent touches it. A checkpoint records
-what is expensive to rediscover -- pull requests with their head shas, rulings
-paraphrased, every refuted claim including the coordinator's own, and the open threads
-with what each live agent is doing -- not a transcript. It makes at most one append per
-tick. A failed append goes to a local backlog and bumps a failure streak; after ten
-failures in a row the coordinator opens a continuation note and repoints the loop at
-it. A write that errors may still have committed, so the note is searched for the
-heading just written before anything is retried.
+The coordinator is the store's only writer. A checkpoint records what is expensive to
+rediscover -- pull requests with their head shas, rulings paraphrased, every refuted
+claim including the coordinator's own, and the open threads with what each live agent
+is doing -- not a transcript, in at most one append per tick. A failed append goes to a
+local backlog and bumps a failure streak; after ten failures in a row the coordinator
+opens a continuation note and repoints the loop at it. A write that errors may still
+have committed, so the note is searched for the heading just written before any
+retry.
 
 Label State Machines
 --------------------
 
 The meanings, and the one legal pair of state labels, are on :ref:`process`; these
-are the moves the loops make.
+are the loops' moves.
 
 .. mermaid::
 
@@ -455,6 +452,9 @@ process pages included -- or only tests needs no issue and no pull request, and 
 pushed straight to ``main``. A pull request is for a change to code or behaviour. A fix
 for a red ``main`` goes direct, whatever it touches. Every direct push waits out the
 release freeze below, and first checks that no open pull request edits the same hunk.
+It lands as one commit per logical change, never a stack of worker or fix commits, its
+squashed tree checked against the verified tree. All of ``tests/project/`` runs first,
+not only the docs tests.
 
 **The release freeze.** Once the push that moves ``__version__`` lands, nothing else
 does until Create Release's ``github`` job is waiting on approval (:doc:`releasing`),

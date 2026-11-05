@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/mint-criterion.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Nearly every registry under pcapkit.const resolves an unrecognised value through a_missing_ override, which decides what happens when a value has no member. Only ExtensionHeader and TLSKeyLabel hav..." />
-<meta name="description" content="Nearly every registry under pcapkit.const resolves an unrecognised value through a_missing_ override, which decides what happens when a value has no member. Only ExtensionHeader and TLSKeyLabel hav..." />
+<meta property="og:description" content="A registry under pcapkit.const resolves a value with no member through a_missing_ override. Only ExtensionHeader and TLSKeyLabel have none anywhere in their MRO, so they carry no declared-but-unass..." />
+<meta name="description" content="A registry under pcapkit.const resolves a value with no member through a_missing_ override. Only ExtensionHeader and TLSKeyLabel have none anywhere in their MRO, so they carry no declared-but-unass..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Naming a Sentinel" href="sentinel-convention.html"><link rel="prev" title="House Conventions" href="index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -570,28 +571,26 @@
         <article role="main" id="furo-main-content">
           <section id="minting-an-unrecognised-value">
 <span id="mint-criterion"></span><h1>Minting an Unrecognised Value<a class="headerlink" href="#minting-an-unrecognised-value" title="Link to this heading">¶</a></h1>
-<p>Nearly every registry under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> resolves an unrecognised value through
-a <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> override, which decides what happens when a value has no member. Only
+<p>A registry under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> resolves a value with no member through a
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> override. Only
 <a class="reference internal" href="../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a> and
 <a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> have none anywhere in their
-MRO, so they carry no declared-but-unassigned range to resolve. The rest define one
-themselves, except the transport subclasses of
-<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>, which inherit
-<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType._missing_" title="pcapkit.const.reg.apptype.apptype.AppType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType._missing_</span></code></a>
-(<code class="file docutils literal notranslate"><span class="pre">pcapkit/const/reg/apptype/apptype.py</span></code>). The behaviours below follow from it, and
-which one a given range gets is a <strong>design decision, not a style preference</strong>:</p>
+MRO, so they carry no declared-but-unassigned range. The rest define their own, except
+the transport subclasses of <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>, which
+inherit <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType._missing_" title="pcapkit.const.reg.apptype.apptype.AppType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType._missing_</span></code></a>.
+Which of these behaviours a range gets is a <strong>design decision, not a style
+preference</strong>:</p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">extend_enum(cls,</span> <span class="pre">name,</span> <span class="pre">value)</span></code> – <em>mint</em></dt><dd><p>Creates a real, permanent member on the class. It is installed in
-<code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> and <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, so it is visible to iteration,
-lookup and <code class="docutils literal notranslate"><span class="pre">__members__</span></code> from then on, for the life of the process.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">extend_enum(cls,</span> <span class="pre">name,</span> <span class="pre">value)</span></code> – <em>mint</em></dt><dd><p>Creates a permanent member, installed in <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> and
+<code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, so iteration, lookup and <code class="docutils literal notranslate"><span class="pre">__members__</span></code> see it for the life
+of the process.</p>
 </dd>
-<dt><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> – <em>unmint</em></dt><dd><p>Returns a member-like object for the value <strong>without</strong> installing it. The registry
-does not grow, and a second lookup of the same value builds an equal but distinct
-object rather than handing back the first.</p>
+<dt><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> – <em>unmint</em></dt><dd><p>Returns a member-like object <strong>without</strong> installing it. The registry does not grow,
+and a second lookup builds an equal but distinct object.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">super()._missing_(value)</span></code> – <em>hand back to</em> <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a></dt><dd><p>Neither of the above. For an <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> flag base this composes a pseudo-member and
-caches it in <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> only, so <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and iteration are
-unchanged but a second lookup returns the same object. For a plain enum it
+<dt><code class="docutils literal notranslate"><span class="pre">super()._missing_(value)</span></code> – <em>hand back to</em> <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a></dt><dd><p>For an <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> flag base this composes a pseudo-member and caches it in
+<code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> only, so <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and iteration are unchanged but a
+second lookup returns the same object. For a plain enum it
 returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and the lookup raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>; the measured case is
 an in-range hole in an unmint registry, <code class="docutils literal notranslate"><span class="pre">BlockType(11)</span></code>.</p>
 </dd>
@@ -606,12 +605,12 @@ CGA extension tags rather than an IANA-style range of codes.</p></li>
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.sctp.SCTP" title="pcapkit.const.reg.apptype.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.dccp.DCCP" title="pcapkit.const.reg.apptype.dccp.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a>) inherit the method; every other registry
 here calls <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> itself, though
-<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> never gets there: it holds no
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> never reaches it: it holds no
 members and raises for every value through its <code class="docutils literal notranslate"><span class="pre">cls.__registry__</span> <span class="pre">is</span> <span class="pre">None</span></code> guard.</p>
-<p><strong>Some of the rest can never reach the call either</strong>, because every range they declare is
-already covered by their own members – <a class="reference internal" href="../../pcapkit/const/ipv4.html#pcapkit.const.ipv4.tos_del.ToSDelay" title="pcapkit.const.ipv4.tos_del.ToSDelay"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSDelay</span></code></a>
-declares <code class="docutils literal notranslate"><span class="pre">0..1</span></code> and has members <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>, so its <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> call is
-dead code. They are <a class="reference internal" href="../../pcapkit/const/ipv4.html#module-pcapkit.const.ipv4.option_class" title="pcapkit.const.ipv4.option_class"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipv4.option_class</span></code></a>,
+<p><strong>Some never reach the call either</strong>, because their own members cover every range
+they declare – <a class="reference internal" href="../../pcapkit/const/ipv4.html#pcapkit.const.ipv4.tos_del.ToSDelay" title="pcapkit.const.ipv4.tos_del.ToSDelay"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSDelay</span></code></a> declares <code class="docutils literal notranslate"><span class="pre">0..1</span></code> and
+has members <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>, so its <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> call is dead code. They are
+<a class="reference internal" href="../../pcapkit/const/ipv4.html#module-pcapkit.const.ipv4.option_class" title="pcapkit.const.ipv4.option_class"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipv4.option_class</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/ipv4.html#module-pcapkit.const.ipv4.tos_del" title="pcapkit.const.ipv4.tos_del"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipv4.tos_del</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/ipv4.html#module-pcapkit.const.ipv4.tos_ecn" title="pcapkit.const.ipv4.tos_ecn"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipv4.tos_ecn</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/ipv4.html#module-pcapkit.const.ipv4.tos_pre" title="pcapkit.const.ipv4.tos_pre"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipv4.tos_pre</span></code></a>,
@@ -636,24 +635,21 @@ reaches <code class="docutils literal notranslate"><span class="pre">_create_pse
 <a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.transport.Transport" title="pcapkit.const.hip.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.type.Type" title="pcapkit.const.ieee802_11.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a> and
-<a class="reference internal" href="../../pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManagementSubtype</span></code></a>.
-<a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.transport.Transport" title="pcapkit.const.hip.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>,
-<a class="reference internal" href="../../pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.type.Type" title="pcapkit.const.ieee802_11.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a> and
-<a class="reference internal" href="../../pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManagementSubtype</span></code></a> raise from their
-own range checks: each declared range is exactly its member set, so no unassigned value
-is left for <code class="docutils literal notranslate"><span class="pre">super()._missing_</span></code> (the line after the check is unreachable).</p></li>
+<a class="reference internal" href="../../pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManagementSubtype</span></code></a>. The last
+three raise from their own range checks: each declared range is exactly its member
+set, so the <code class="docutils literal notranslate"><span class="pre">super()._missing_</span></code> line after the check is unreachable.</p></li>
 </ul>
-<p>Note that these are <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> classes: <code class="docutils literal notranslate"><span class="pre">issubclass(Flags,</span> <span class="pre">enum.IntFlag)</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>
-against the standard library and <code class="docutils literal notranslate"><span class="pre">True</span></code> against <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code>, so a probe against
+<p>These are <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> classes: <code class="docutils literal notranslate"><span class="pre">issubclass(Flags,</span> <span class="pre">enum.IntFlag)</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code> against
+the standard library and <code class="docutils literal notranslate"><span class="pre">True</span></code> against <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code>, so a probe against
 <code class="docutils literal notranslate"><span class="pre">enum</span></code> answers about the wrong hierarchy.</p>
-<p>The mint criterion below therefore applies only to the registries that unmint, where it
-decides the <em>name</em> an unregistered member carries – the registrar’s own label suffixed
-with the individual code, or the bare block label on its own – not whether it
-registers. In the others it never runs: <a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a> names
-its tag from the value, the flag registries compose a name from their members’ bits, and
-those that raise name nothing. The crawlers that generate the ranges record that narrowing
-in their own comments: <code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/reg/ethertype.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_ROW_NAMES</span></code>
-and <code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/ipx/socket.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_RANGE_NAMES</span></code>.</p>
+<p>So the mint criterion below applies only to the registries that unmint, where it
+decides the <em>name</em> an unregistered member carries – the registrar’s label suffixed with
+the code, or the bare block label – not whether it registers. Elsewhere it never runs:
+<a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a> names its tag from the value, the flag
+registries compose a name from their members’ bits, and those that raise name nothing.
+The crawlers that generate the ranges record this in their comments:
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/reg/ethertype.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_ROW_NAMES</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/vendor/ipx/socket.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">UNASSIGNED_RANGE_NAMES</span></code>.</p>
 <pre  class="mermaid">
         ---
 config:
@@ -672,24 +668,20 @@ flowchart TD
     RAISE ~~~ MINT ~~~ FLAG ~~~ SUFFIXED ~~~ BARE
     </pre><section id="the-criterion">
 <h2>The Criterion<a class="headerlink" href="#the-criterion" title="Link to this heading">¶</a></h2>
-<p>The test, paraphrased from the maintainer’s ruling: does the upstream registry treat
-the label as the final, concrete assigned name, or only as a notation for a human
-reading the table?</p>
-<p>Settled in review of the
+<p>Does the upstream registry treat the label as the final, concrete assigned name, or
+only as a notation for a human reading the table? Settled in review of the
 <a class="reference internal" href="../../pcapkit/const/ipx.html#pcapkit.const.ipx.socket.Socket._missing_" title="pcapkit.const.ipx.socket.Socket._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Socket._missing_</span></code></a> branch-order fix
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/841">#841</a>) and reaffirmed on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> as a core concept of the ruling.</p>
-<p>So the question to ask of a range is <strong>what the upstream registry actually did</strong>, not
-what the generated code happens to look like:</p>
+<p>So ask <strong>what the upstream registry actually did</strong>, not what the generated code looks
+like:</p>
 <ul class="simple">
-<li><p>The source assigns a <strong>real, specific name</strong> to those codes. The name records
-something the registry genuinely says, so it is carried across and suffixed with the
-code it belongs to.</p></li>
-<li><p>The source says only that the codes are spoken for, without naming them –
-<code class="docutils literal notranslate"><span class="pre">Unassigned</span></code>, <code class="docutils literal notranslate"><span class="pre">Reserved</span></code>, <code class="docutils literal notranslate"><span class="pre">Reserved</span> <span class="pre">for</span> <span class="pre">Private</span> <span class="pre">Use</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Reserved</span> <span class="pre">for</span> <span class="pre">Experimental</span> <span class="pre">Use</span></code>, <code class="docutils literal notranslate"><span class="pre">Deprecated</span></code>, <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code>
-and <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span></code>. These are written for a human reading the table, so the
-bare label stands: suffixing one with a code would <strong>manufacture a name nobody
-assigned</strong>, and the value will get its real name if and when something assigns it.</p></li>
+<li><p>The source assigns a <strong>real, specific name</strong> to those codes, so it is carried across
+and suffixed with each code.</p></li>
+<li><p>The source says only that the codes are spoken for – <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code>, <code class="docutils literal notranslate"><span class="pre">Reserved</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Reserved</span> <span class="pre">for</span> <span class="pre">Private</span> <span class="pre">Use</span></code>, <code class="docutils literal notranslate"><span class="pre">Reserved</span> <span class="pre">for</span> <span class="pre">Experimental</span> <span class="pre">Use</span></code>, <code class="docutils literal notranslate"><span class="pre">Deprecated</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code> and <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span></code>. These are notation for a human
+reader, so the bare label stands: suffixing it would <strong>manufacture a name nobody
+assigned</strong>, and the value gets its real name when something assigns it.</p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -706,47 +698,42 @@ Recorded on <a class="extlink-issue reference external" href="https://github.com
 <p><em>Bare label.</em> <a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code>, <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Experimental</span></code> ranges. Each names <strong>how the socket will be allocated</strong>, not what
-occupies it; the real name arrives with the allocation.</p>
+occupies it.</p>
 <p><em>Suffixed.</em> <a class="reference internal" href="../../pcapkit/const/reg.html#module-pcapkit.const.reg.ethertype" title="pcapkit.const.reg.ethertype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype</span></code></a>’s company names – <code class="docutils literal notranslate"><span class="pre">Xyplex</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Datability</span></code>, <code class="docutils literal notranslate"><span class="pre">Qualcomm</span></code>, <code class="docutils literal notranslate"><span class="pre">Motorola</span></code> and many others, some of them holding more
-than one range block – and
-<a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code>. A company name is the
-assignment, for the reason in the next section.</p>
-<p>Further ranges in <a class="reference internal" href="../../pcapkit/const/reg.html#module-pcapkit.const.reg.ethertype" title="pcapkit.const.reg.ethertype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype</span></code></a> carry a suffixed name without
-being company names at all: <code class="docutils literal notranslate"><span class="pre">IEEE802.3</span> <span class="pre">Length</span> <span class="pre">Field</span></code>, which names a field in a standard, and
-<code class="docutils literal notranslate"><span class="pre">Berkeley</span> <span class="pre">Trailer</span> <span class="pre">encap/IP</span></code>, which names an encapsulation. Neither is among the company names, and
-neither is suffixed for the reason the next section gives.</p>
+<code class="docutils literal notranslate"><span class="pre">Datability</span></code>, <code class="docutils literal notranslate"><span class="pre">Qualcomm</span></code>, <code class="docutils literal notranslate"><span class="pre">Motorola</span></code> and others, some holding more than one range
+block – and <a class="reference internal" href="../../pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code>. A company name
+is the assignment, as the next section explains.</p>
+<p>Other suffixed ranges in <a class="reference internal" href="../../pcapkit/const/reg.html#module-pcapkit.const.reg.ethertype" title="pcapkit.const.reg.ethertype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype</span></code></a> are not company names:
+<code class="docutils literal notranslate"><span class="pre">IEEE802.3</span> <span class="pre">Length</span> <span class="pre">Field</span></code> names a field in a standard and <code class="docutils literal notranslate"><span class="pre">Berkeley</span> <span class="pre">Trailer</span>
+<span class="pre">encap/IP</span></code> an encapsulation, so the next section’s reason does not cover them.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Those two groups look alike and the line between them is <strong>not</strong> range-versus-single
-code. <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code> covers a range and is still suffixed per socket,
-because it names <em>who registered the socket</em>. <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code> also covers a
-range and is not, because it names only the <em>mechanism</em> by which some future party
-will take it. Ask what the label tells you: a party, or a procedure.</p>
+<p>The line between the two groups is <strong>not</strong> range versus single code. <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span>
+<span class="pre">Xerox</span></code> covers a range and is suffixed per socket, because it names <em>who registered
+the socket</em>. <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code> covers a range and is not, because it names
+only the <em>mechanism</em> by which some future party will take it. Ask whether the label
+names a party or a procedure.</p>
 </div>
 </section>
 <section id="suffixed-company-names">
 <h2>Suffixed Company Names<a class="headerlink" href="#suffixed-company-names" title="Link to this heading">¶</a></h2>
-<p>The ethertype case looks like an exception to the rule and is not. The maintainer’s
-reasoning, settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> after
-being raised in review of the same
-<a class="reference internal" href="../../pcapkit/const/ipx.html#pcapkit.const.ipx.socket.Socket._missing_" title="pcapkit.const.ipx.socket.Socket._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Socket._missing_</span></code></a> fix (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/841">#841</a>): a
-proprietary protocol will never have a public name, so the company name is what serves
-that purpose in its place.</p>
-<p>So the company name is not a note <em>about</em> the code – it is the best name that will ever
-exist <em>for</em> it, which makes it the final concrete assigned name under the test above.
-That is also why <code class="docutils literal notranslate"><span class="pre">DEC</span> <span class="pre">Unassigned</span></code> goes the other way despite carrying the same
-attribution: there the company holds the block and assigned nothing, so the notation is
-“Unassigned” and the attribution is incidental.</p>
+<p>The ethertype case is not an exception. Settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>, after being raised
+in review of the same
+<a class="reference internal" href="../../pcapkit/const/ipx.html#pcapkit.const.ipx.socket.Socket._missing_" title="pcapkit.const.ipx.socket.Socket._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Socket._missing_</span></code></a> fix (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/841">#841</a>):
+a proprietary protocol will never have a public name, so the company name serves in its
+place. It is not a note <em>about</em> the code but the best name that will ever exist <em>for</em>
+it, which makes it the final concrete assigned name under the test above.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DEC</span> <span class="pre">Unassigned</span></code> goes the other way despite the same attribution: the company holds
+the block and assigned nothing, so the notation is “Unassigned” and the attribution is
+incidental.</p>
 </section>
 <section id="checking-the-current-state">
 <h2>Checking the Current State<a class="headerlink" href="#checking-the-current-state" title="Link to this heading">¶</a></h2>
-<p>The split is measurable rather than a matter of memory. Slice each <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> body
-and see which call it makes – an <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> walk is reliable where a text search is
-not, because <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> also appears in imports and in prose. Match on the
-attribute name as well as on the bare name: <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> is called as a plain
-function, but <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> is called on <code class="docutils literal notranslate"><span class="pre">cls</span></code>, so a walk that inspects
-only <code class="docutils literal notranslate"><span class="pre">ast.Name</span></code> nodes finds every mint and no unmint at all:</p>
+<p>Measure the split: walk each <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> body with <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> for the call it makes.
+A text search is unreliable, since <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> also appears in imports and prose.
+Match the attribute name as well as the bare name: <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> is a plain function
+but <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> is called on <code class="docutils literal notranslate"><span class="pre">cls</span></code>, so a walk of <code class="docutils literal notranslate"><span class="pre">ast.Name</span></code> nodes alone
+finds no unmint:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ast</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span>
 
 <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s1">'pcapkit/const'</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s1">'*.py'</span><span class="p">)):</span>
@@ -776,15 +763,15 @@ neither function) nor for
 <a class="reference internal" href="../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a> and
 <a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> (they define no
 <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>), and does not see the transport subclasses, which inherit theirs.
-<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.CommandType" title="pcapkit.const.ftp.command.CommandType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandType</span></code></a> is one of those flag registries, and
-the <code class="docutils literal notranslate"><span class="pre">UNMINT</span></code> lines for <code class="file docutils literal notranslate"><span class="pre">pcapkit/const/ftp/command.py</span></code> are the file’s other
-registries. Reconcile it against a runtime probe for the split in the list above.</p>
+<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.CommandType" title="pcapkit.const.ftp.command.CommandType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandType</span></code></a> is a flag registry; the <code class="docutils literal notranslate"><span class="pre">UNMINT</span></code>
+lines for <code class="file docutils literal notranslate"><span class="pre">pcapkit/const/ftp/command.py</span></code> are the file’s other registries.
+Reconcile the walk against a runtime probe for the split above.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Calling <code class="docutils literal notranslate"><span class="pre">Cls(value)</span></code> on a registry that mints or hands back to a flag base
-<strong>mutates the class</strong>. A probe is not a read: it installs something that every later
-lookup then finds. <a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>
+<strong>mutates the class</strong>: every later lookup finds what the probe installed.
+<a class="reference internal" href="../../pcapkit/const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>
 grows <code class="docutils literal notranslate"><span class="pre">__members__</span></code>, <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> and <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>;
 <a class="reference internal" href="../../pcapkit/const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.CommandType" title="pcapkit.const.ftp.command.CommandType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandType</span></code></a> and the Mobility Header and
@@ -868,7 +855,7 @@ revisions.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

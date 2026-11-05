@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -738,61 +739,23 @@
 <span class="sd">       protocol per argument, with no alias (:issue:`806`).</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: which of TCP's and UDP's registries this writes into depends on</span>
-    <span class="c1"># ``*transport``, which is resolved below -- after this check, so a bad</span>
-    <span class="c1"># ``code`` is still reported before a bad transport protocol. The two are</span>
-    <span class="c1"># keyed alike, so the check itself is the same for either and TCP names it.</span>
-    <span class="c1"># :func:`register_tcp` and :func:`register_udp` name one each.</span>
+    <span class="c1"># NOTE: checked before ``*transport`` is resolved, so a bad ``code`` is reported first;</span>
+    <span class="c1"># TCP's and UDP's registries are keyed alike, so TCP names the check.</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">,</span> <span class="n">TCP</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: ``class_`` sits at the sibling position -- positional, ahead of</span>
-    <span class="c1"># ``*transport`` -- per maintainer ruling, so a third positional that is</span>
-    <span class="c1"># really a transport would be swallowed as a class name. That is</span>
-    <span class="c1"># disambiguated here by ``type(module)`` alone, never by what ``class_``</span>
-    <span class="c1"># itself looks like. A ``str`` module means</span>
-    <span class="c1"># ``class_`` really is a class name, so it is left untouched -- including</span>
-    <span class="c1"># when it happens to be a string like ``'tcp'``, which is not sniffed for</span>
-    <span class="c1"># looking like a transport. Any other module type means the third</span>
-    <span class="c1"># positional was never a class name to begin with, so it is moved to the</span>
-    <span class="c1"># front of ``transport`` -- prepended, so argument order survives -- and</span>
-    <span class="c1"># ``class_`` is reset to ``NULL`` so the ``ModuleDescriptor`` branch below</span>
-    <span class="c1"># never sees it.</span>
+    <span class="c1"># NOTE: a non-``str`` module means the third positional was a transport, never a class</span>
+    <span class="c1"># name, so it is prepended to ``transport``; a ``str`` ``class_`` is never sniffed.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">class_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NULL</span><span class="p">:</span>
         <span class="n">transport</span> <span class="o">=</span> <span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'TransportProtocol | str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">),)</span> <span class="o">+</span> <span class="n">transport</span>
         <span class="n">class_</span> <span class="o">=</span> <span class="n">NULL</span>
 
-    <span class="c1"># NOTE: a ``str`` transport is coerced to its ``TransportProtocol`` member</span>
-    <span class="c1"># up front, before any registry work, so every downstream use -- the</span>
-    <span class="c1"># ``code.proto`` default and the registries lookup below -- sees members</span>
-    <span class="c1"># only. Resolution is by the member's own ``name``, case-insensitively --</span>
-    <span class="c1"># a ruling given in review of the work for #806 -- via ``__members__``</span>
-    <span class="c1"># directly rather than ``TransportProtocol[name]``: this function's</span>
-    <span class="c1"># contract is :exc:`~pcapkit.utilities.exceptions.RegistryError` for</span>
-    <span class="c1"># anything unrecognised, composite-spelled or not, and ``__getitem__``</span>
-    <span class="c1"># raises a bare :exc:`KeyError` on a miss instead of that -- both</span>
-    <span class="c1"># ``TransportProtocol['tcp|udp']`` and ``TransportProtocol['bogus']`` do,</span>
-    <span class="c1"># because ``TransportProtocol`` is not an ``IntFlag``, under which the</span>
-    <span class="c1"># first would silently compose into the value ``3`` (#808).</span>
-    <span class="c1"># ``__members__.get(...)`` lets this function</span>
-    <span class="c1"># raise its own exception on a miss instead of letting ``__getitem__``'s</span>
-    <span class="c1"># propagate, and lowercasing does not turn ``'tcp|udp'`` into a member</span>
-    <span class="c1"># name either way. Anything that is neither a ``str`` nor a</span>
-    <span class="c1"># ``TransportProtocol`` member is rejected here too, rather than falling</span>
-    <span class="c1"># through to the registries lookup below: a bare ``int`` still hashes</span>
-    <span class="c1"># and compares equal to its matching member -- ``TransportProtocol``</span>
-    <span class="c1"># being an ``IntEnum`` rather than an ``IntFlag`` changes neither -- so</span>
-    <span class="c1"># ``registries.get(1)`` resolves to ``TCP`` just as</span>
-    <span class="c1"># ``registries.get(TransportProtocol.tcp)`` does, and would otherwise</span>
-    <span class="c1"># register the port before the ``proto.name`` access below it</span>
-    <span class="c1"># raised -- leaving the port written into ``TCP.__proto__`` with</span>
-    <span class="c1"># ``register_protocol`` never called.</span>
+    <span class="c1"># NOTE: coerce up front, by case-insensitive member name via ``__members__`` so a miss is a</span>
+    <span class="c1"># ``RegistryError`` (#806, #808); a bare ``int`` is refused, or it would half-register the port.</span>
     <span class="n">coerced</span><span class="p">:</span> <span class="s1">'list[TransportProtocol]'</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">transport</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># NOTE: ``proto`` itself -- not the lowercased lookup key -- is</span>
-            <span class="c1"># what the error message formats with ``!r``, so a mismatched</span>
-            <span class="c1"># name such as ``'TCP '`` still shows its own casing and its</span>
-            <span class="c1"># trailing space rather than the lowercased form.</span>
+            <span class="c1"># NOTE: the error formats ``proto`` itself, not the lowercased key, so a name such</span>
+            <span class="c1"># as ``'TCP '`` shows its own casing and trailing space.</span>
             <span class="n">member</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">member</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
@@ -802,12 +765,8 @@
         <span class="n">coerced</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
     <span class="n">transport</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">coerced</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: the member's own ``proto`` is the single transport protocol of the</span>
-    <span class="c1"># registry it lives in -- GitHub issue #806 -- so it names one destination</span>
-    <span class="c1"># rather than fanning out across every transport IANA gave the service. A</span>
-    <span class="c1"># fan-out would make ``register_apptype(TCP.http, Dummy)`` displace the UDP</span>
-    <span class="c1"># handler for port 80 as well, which no caller naming the TCP member asked</span>
-    <span class="c1"># for.</span>
+    <span class="c1"># NOTE: the member's ``proto`` names the one registry it lives in (#806), so</span>
+    <span class="c1"># ``register_apptype(TCP.http, Dummy)`` does not displace the UDP port 80 handler.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">transport</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'no transport protocol given for port </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">; name each '</span>
@@ -824,9 +783,8 @@
     <span class="p">})</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[type, Any]]</span>
     <span class="k">for</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">transport</span><span class="p">:</span>
-        <span class="c1"># NOTE: a composite is not a key here, so ``tcp | udp`` is rejected</span>
-        <span class="c1"># rather than quietly registering under both. Naming them one at a time</span>
-        <span class="c1"># is what the varargs are for.</span>
+        <span class="c1"># NOTE: a composite is not a key, so ``tcp | udp`` is rejected rather than</span>
+        <span class="c1"># registering under both; the varargs name them one at a time.</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">registries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -1307,7 +1265,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

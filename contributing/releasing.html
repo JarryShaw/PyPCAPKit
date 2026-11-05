@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/releasing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The One Manual Step: Bumping pcapkit.__version__ is done by util/bump_version.py, whose own docstring is the authority on what it does; summarised here rather than duplicated. Given the current ver..." />
-<meta name="description" content="The One Manual Step: Bumping pcapkit.__version__ is done by util/bump_version.py, whose own docstring is the authority on what it does; summarised here rather than duplicated. Given the current ver..." />
+<meta property="og:description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, it works out the next one under PEP 440 – a devN counter, a pre-relea..." />
+<meta name="description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, it works out the next one under PEP 440 – a devN counter, a pre-relea..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="Const-Vendor Pairing" href="conventions/const-vendor-pairing.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -572,43 +573,35 @@
 <h1>Release Process<a class="headerlink" href="#release-process" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>This page records the <strong>operational contract</strong> for cutting a release –
-what a maintainer is expected to touch by hand, what the workflow is
-expected to do unattended, and the precautions that follow from the two
-being different.</p>
-<p>The short version: <strong>the only manual edit is bumping</strong>
-<a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>. Everything else – the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag, the GitHub
-Release, the PyPI and Anaconda uploads, the <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag and its commit
-to <code class="docutils literal notranslate"><span class="pre">main</span></code> – is produced by
+<p>The <strong>operational contract</strong> for cutting a release: what a maintainer touches
+by hand, what the workflow does unattended, and the precautions that follow.</p>
+<p><strong>The only manual edit is bumping</strong> <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>. Everything
+else – the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag, the GitHub Release, the PyPI and Anaconda uploads, the
+<code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag and its commit to <code class="docutils literal notranslate"><span class="pre">main</span></code> – is produced by
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> and is never hand-made.</p>
 </div>
 <section id="the-one-manual-step">
 <h2>The One Manual Step<a class="headerlink" href="#the-one-manual-step" title="Link to this heading">¶</a></h2>
-<p>Bumping <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> is done by <code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code>, whose
-own docstring is the authority on what it does; summarised here rather than
-duplicated. Given the current version, it works out the next one under
+<p><code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> bumps <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>; its docstring is the
+authority. Given the current version, it works out the next one under
 <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0440/"><strong>PEP 440</strong></a> – a <code class="docutils literal notranslate"><span class="pre">devN</span></code> counter, a pre-release counter, a post-release
 counter, or a fresh <code class="docutils literal notranslate"><span class="pre">.post1</span></code> for a final release – and then:</p>
 <ul class="simple">
 <li><p>rewrites the <code class="docutils literal notranslate"><span class="pre">__version__</span></code> assignment in <code class="docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code>;</p></li>
 <li><p>moves <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s <code class="docutils literal notranslate"><span class="pre">version</span></code> and <code class="docutils literal notranslate"><span class="pre">date-released</span></code> fields to
-match, line-oriented so the file’s own quoting and comments survive.
-<code class="docutils literal notranslate"><span class="pre">date-released</span></code> becomes the bump’s own date in UTC, not the date the
-release is later published, which is its intended meaning
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2163">#2163</a>);</p></li>
+match, line-oriented so the file’s quoting and comments survive.
+<code class="docutils literal notranslate"><span class="pre">date-released</span></code> becomes the bump’s date in UTC, its intended meaning, not
+the later publication date (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2163">#2163</a>);</p></li>
 <li><p>resets <code class="file docutils literal notranslate"><span class="pre">conda/build</span></code> to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
 </ul>
 <p>Its one scheduled caller is the <code class="docutils literal notranslate"><span class="pre">Bump</span> <span class="pre">Version</span></code> step of
-<code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-vendor.yml</span></code>, and only when a registry crawl changed
-code. <code class="docutils literal notranslate"><span class="pre">util/vendor_code_changed.py</span></code> compares each changed file with <code class="docutils literal notranslate"><span class="pre">HEAD</span></code>;
-a crawl whose changes are all to comments or docstrings is committed as
-“Updated vendor documentation without a version bump” instead, so it reaches
-<code class="docutils literal notranslate"><span class="pre">main</span></code> without starting a release
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1674">#1674</a>). A crawl that
-finds nothing commits nothing. The bump commit carries every module the crawl
-wrote under <code class="docutils literal notranslate"><span class="pre">pcapkit/const/</span></code>, new and deleted ones included
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1685">#1685</a>), and is what
-starts the automated path described below.</p>
+<code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-vendor.yml</span></code>, run only when a registry crawl changed code.
+<code class="docutils literal notranslate"><span class="pre">util/vendor_code_changed.py</span></code> compares each changed file with <code class="docutils literal notranslate"><span class="pre">HEAD</span></code>; a crawl
+changing only comments or docstrings is committed as “Updated vendor documentation
+without a version bump”, reaching <code class="docutils literal notranslate"><span class="pre">main</span></code> without starting a release
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1674">#1674</a>). A crawl that finds nothing commits nothing. The bump commit carries
+every module the crawl wrote under <code class="docutils literal notranslate"><span class="pre">pcapkit/const/</span></code>, new and deleted ones included
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1685">#1685</a>), and starts the automated path below.</p>
 <p>The steps of a <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> run, from the crawl to the push:</p>
 <pre  class="mermaid">
         flowchart TD
@@ -624,13 +617,11 @@ starts the automated path described below.</p>
     BUMP --&gt; COMMIT[&quot;Commit changes, new&lt;br/&gt;const modules too&quot;]
     DOCS --&gt;|committed| PUSH[&quot;Push changes to main&lt;br/&gt;not on a manual run&quot;]
     COMMIT --&gt; PUSH
-    </pre><p>The same script is also the manual entry point: run
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code> and commit the result to <code class="docutils literal notranslate"><span class="pre">main</span></code> for a
-release that is not a vendor-registry refresh – a feature or a fix that has
-landed and is ready to go out. Running it while <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version is still a
-<code class="docutils literal notranslate"><span class="pre">.devN</span></code> one only advances that counter (<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to <code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>) –
-see the dev-release note below – so it produces another blocked dev version,
-not a release.</p>
+    </pre><p>The same script is the manual entry point: run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code> and
+commit the result to <code class="docutils literal notranslate"><span class="pre">main</span></code> for a release that is not a vendor-registry refresh.
+While <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version is a <code class="docutils literal notranslate"><span class="pre">.devN</span></code> one it only advances that counter
+(<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to <code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>), producing another blocked dev version, not a
+release (see the dev-release note below).</p>
 <p>Editing <code class="docutils literal notranslate"><span class="pre">__version__</span></code> by hand without also moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">version</span></code> field to match is <strong>not</strong> a safe shortcut: it blocks the release.
 <code class="docutils literal notranslate"><span class="pre">tests/project/test_bump_version.py</span></code>’s
@@ -1270,7 +1261,7 @@ hand-rolled recovery.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../_static/documentation_options.js?v=662e1299"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/utilities-or-corekit.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Which of the two support packages a module belongs in. Settled by the owner on#1712, over alternatives that sorted modules by packet knowledge or by who uses them. This rule can be checked from the..." />
-<meta name="description" content="Which of the two support packages a module belongs in. Settled by the owner on#1712, over alternatives that sorted modules by packet knowledge or by who uses them. This rule can be checked from the..." />
+<meta property="og:description" content="Which of the two support packages a module belongs in. Settled by the owner on#1712, over sorting modules by packet knowledge or by who uses them: this rule can be checked from the import graph alo..." />
+<meta name="description" content="Which of the two support packages a module belongs in. Settled by the owner on#1712, over sorting modules by packet knowledge or by who uses them: this rule can be checked from the import graph alo..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Reassembly Integration" href="reassembly-integration.html"><link rel="prev" title="Testing a Change" href="test-coverage.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -571,10 +572,9 @@
           <section id="choosing-between-utilities-and-corekit">
 <span id="utilities-or-corekit"></span><h1>Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code><a class="headerlink" href="#choosing-between-utilities-and-corekit" title="Link to this heading">¶</a></h1>
 <p>Which of the two support packages a module belongs in. Settled by the owner on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1712">#1712</a>, over alternatives that sorted modules by packet knowledge or by
-who uses them. This rule can be checked from the import graph alone, and it needed
-the fewest moves: one.</p>
-<p>The questions this page asks, as one decision:</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1712">#1712</a>, over sorting modules by packet knowledge or by who uses them: this rule
+can be checked from the import graph alone, and needed the fewest moves.</p>
+<p>The page’s questions, as one decision:</p>
 <pre  class="mermaid">
         flowchart TD
     NEW[&quot;a new support module,&lt;br/&gt;helper or ContextVar&quot;] --&gt; LAYER{&quot;a schema-layer&lt;br/&gt;helper used&lt;br/&gt;outside it?&quot;}
@@ -592,45 +592,43 @@ the fewest moves: one.</p>
     VER --&gt;|no| OWN[&quot;a utilities module,&lt;br/&gt;not compat&quot;]
     </pre><p><a class="reference internal" href="../../pcapkit/utilities/index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> <strong>is for cross-cutting services</strong>: exceptions, warnings,
 logging, the compatibility layer, configuration, and wrappers around third-party
-libraries such as <a class="reference internal" href="../../pcapkit/utilities/chardet.html#module-pcapkit.utilities.chardet" title="pcapkit.utilities.chardet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">chardet</span></code></a>. The question to ask of a module
-is <em>could any code use this service, and does it import nothing from</em> <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-<em>outside</em> <code class="docutils literal notranslate"><span class="pre">utilities</span></code>? Both halves have to hold, and <em>nothing</em> covers a top-level
-import, one inside a function and one under <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> alike.
+libraries such as <a class="reference internal" href="../../pcapkit/utilities/chardet.html#module-pcapkit.utilities.chardet" title="pcapkit.utilities.chardet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">chardet</span></code></a>. Ask of a module: <em>could any code
+use this service, and does it import nothing from</em> <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> <em>outside</em>
+<code class="docutils literal notranslate"><span class="pre">utilities</span></code>? Both halves must hold, and <em>nothing</em> covers top-level, in-function and
+<code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> imports alike.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_utilities_import_boundary_1735_unit.py</span></code> checks every module
-under <code class="file docutils literal notranslate"><span class="pre">pcapkit/utilities/</span></code> for it.</p>
+under <code class="file docutils literal notranslate"><span class="pre">pcapkit/utilities/</span></code>.</p>
 <p><a class="reference internal" href="../../pcapkit/utilities/index.html#module-pcapkit.utilities.compat" title="pcapkit.utilities.compat"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.compat</span></code></a> <strong>holds compatibility implementations and re-exports
 only.</strong> Where a name or behaviour differs by interpreter version, <code class="docutils literal notranslate"><span class="pre">compat</span></code> re-exports
 the right one behind a <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.version_info" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.version_info</span></code></a> gate rather than a <code class="docutils literal notranslate"><span class="pre">getattr</span></code> or
-<code class="docutils literal notranslate"><span class="pre">hasattr</span></code> probe. That was ruled in review of the threading excepthook and
-<code class="docutils literal notranslate"><span class="pre">AppType</span></code> union fixes for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1691">#1691</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1694">#1694</a>, neither of whose threads
-holds it, and applied to the package’s other probes on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1709">#1709</a>.
+<code class="docutils literal notranslate"><span class="pre">hasattr</span></code> probe. Ruled in review of the threading excepthook and <code class="docutils literal notranslate"><span class="pre">AppType</span></code> union
+fixes for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1691">#1691</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1694">#1694</a>, whose threads do not hold it, and applied to
+the other probes on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1709">#1709</a>.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_stdlib_feature_probes_1709_unit.py</span></code> fails on a <code class="docutils literal notranslate"><span class="pre">getattr</span></code>
 or <code class="docutils literal notranslate"><span class="pre">hasattr</span></code> call naming its attribute in a string literal, where the receiver is a
 builtin class or a module the file binds with an <code class="docutils literal notranslate"><span class="pre">import</span></code> statement, or where the
-attribute is one the test lists with the interpreter version that added it; the calls
-it exempts pass. A helper that has to behave the same on every platform is
-neither a compatibility implementation nor a re-export, so it gets a module of its
-own: that is why <a class="reference internal" href="../../pcapkit/utilities/datetime.html#pcapkit.utilities.datetime.fromtimestamp" title="pcapkit.utilities.datetime.fromtimestamp"><code class="xref py py-func docutils literal notranslate"><span class="pre">fromtimestamp()</span></code></a> is in
+attribute is one the test lists with the interpreter version that added it, unless the
+test exempts the call. A helper that must behave the same on every platform is neither
+a compatibility implementation nor a re-export, so it gets its own module:
+<a class="reference internal" href="../../pcapkit/utilities/datetime.html#pcapkit.utilities.datetime.fromtimestamp" title="pcapkit.utilities.datetime.fromtimestamp"><code class="xref py py-func docutils literal notranslate"><span class="pre">fromtimestamp()</span></code></a> is in
 <a class="reference internal" href="../../pcapkit/utilities/datetime.html#module-pcapkit.utilities.datetime" title="pcapkit.utilities.datetime"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.datetime</span></code></a>, ruled in review of the timestamp fix for
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2099">#2099</a>, whose thread does not hold it.</p>
 <p><a class="reference internal" href="../../pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> <strong>is for the types the packet model is built from</strong>: what
 <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>, <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> and <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>
-subclass, instantiate or decorate with. The question is <em>is this part of what a
-protocol or its schema is made of?</em> A support module that fails the <code class="docutils literal notranslate"><span class="pre">utilities</span></code>
-question belongs here instead. <a class="reference internal" href="../../pcapkit/corekit/decorators.html#module-pcapkit.corekit.decorators" title="pcapkit.corekit.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.decorators</span></code></a> is the worked example: it acts on a
-protocol’s file and falls back to protocol classes, so it moved out of <code class="docutils literal notranslate"><span class="pre">utilities</span></code>
-on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1735">#1735</a>. <code class="docutils literal notranslate"><span class="pre">corekit</span></code> may import <code class="docutils literal notranslate"><span class="pre">utilities</span></code>; the reverse is what the rule
-forbids.</p>
-<p>A second worked example is <a class="reference internal" href="../../pcapkit/corekit/checksum/index.html#module-pcapkit.corekit.checksum" title="pcapkit.corekit.checksum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.checksum</span></code></a>, settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2580">#2580</a>.
-It fails the <code class="docutils literal notranslate"><span class="pre">utilities</span></code> question because
-<a class="reference internal" href="../../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus" title="pcapkit.corekit.checksum.internet.ChecksumStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChecksumStatus</span></code></a> subclasses
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>. The protocols compute and verify their
-checksums through it, so it imports
-<a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> only from <code class="docutils literal notranslate"><span class="pre">corekit</span></code> and <code class="docutils literal notranslate"><span class="pre">utilities</span></code>, never from
-<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>; <code class="file docutils literal notranslate"><span class="pre">tests/corekit/test_checksum_import_boundary_2580_unit.py</span></code>
-checks that. What needs IPv4 and IPv6 stays beside
-<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a>. The package holds one
-module per checksum family, so a new family sits beside
+subclass, instantiate or decorate with. Ask: <em>is this part of what a protocol or its
+schema is made of?</em> A support module that fails the <code class="docutils literal notranslate"><span class="pre">utilities</span></code> question belongs
+here. <a class="reference internal" href="../../pcapkit/corekit/decorators.html#module-pcapkit.corekit.decorators" title="pcapkit.corekit.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.decorators</span></code></a> acts on a protocol’s file and falls back to
+protocol classes, so it moved out of <code class="docutils literal notranslate"><span class="pre">utilities</span></code> on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1735">#1735</a>. <code class="docutils literal notranslate"><span class="pre">corekit</span></code> may
+import <code class="docutils literal notranslate"><span class="pre">utilities</span></code>; the rule forbids the reverse.</p>
+<p><a class="reference internal" href="../../pcapkit/corekit/checksum/index.html#module-pcapkit.corekit.checksum" title="pcapkit.corekit.checksum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.checksum</span></code></a>, settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2580">#2580</a>, fails the <code class="docutils literal notranslate"><span class="pre">utilities</span></code>
+question because <a class="reference internal" href="../../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus" title="pcapkit.corekit.checksum.internet.ChecksumStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChecksumStatus</span></code></a> subclasses
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>. The protocols compute and verify checksums
+through it, so it imports <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> only from <code class="docutils literal notranslate"><span class="pre">corekit</span></code> and <code class="docutils literal notranslate"><span class="pre">utilities</span></code>, never
+from <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>, as
+<code class="file docutils literal notranslate"><span class="pre">tests/corekit/test_checksum_import_boundary_2580_unit.py</span></code> checks. What needs IPv4
+and IPv6 stays beside
+<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a>. The package has
+a module per checksum family, so a new family sits beside
 <a class="reference internal" href="../../pcapkit/corekit/checksum/internet.html#module-pcapkit.corekit.checksum.internet" title="pcapkit.corekit.checksum.internet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">internet</span></code></a>.</p>
 <section id="shared-schema-helpers">
 <h2>Shared Schema Helpers<a class="headerlink" href="#shared-schema-helpers" title="Link to this heading">¶</a></h2>
@@ -638,16 +636,15 @@ module per checksum family, so a new family sits beside
 <a class="reference internal" href="../../pcapkit/corekit/schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema</span></code></a>, one module per group, rather than in the module that
 first needed it; the schema layer is <a class="reference internal" href="../../pcapkit/corekit/fields/index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> and
 <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a>. It keeps no re-export at its old path. Ruled by the
-owner in session, on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>, who grouped these helpers in one package instead
-of placing each by the questions above. So
+owner in session on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>, grouping these helpers in one package rather than
+placing each by the questions above. So
 <a class="reference internal" href="../../pcapkit/corekit/schema/padding.html#pcapkit.corekit.schema.padding.pad_length" title="pcapkit.corekit.schema.padding.pad_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">pad_length()</span></code></a> is in
 <a class="reference internal" href="../../pcapkit/corekit/schema/padding.html#module-pcapkit.corekit.schema.padding" title="pcapkit.corekit.schema.padding"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.padding</span></code></a>, and
 <a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.keep_short_read" title="pcapkit.corekit.schema.shortread.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a> and
 <a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.replay_short_read" title="pcapkit.corekit.schema.shortread.replay_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">replay_short_read()</span></code></a> in
-<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#module-pcapkit.corekit.schema.shortread" title="pcapkit.corekit.schema.shortread"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.shortread</span></code></a>. <a class="reference internal" href="../../pcapkit/corekit/schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema</span></code></a> is not the
-header schema framework, which stays <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a> and its
-<a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>; it holds only the helpers shared
-across the layer.</p>
+<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#module-pcapkit.corekit.schema.shortread" title="pcapkit.corekit.schema.shortread"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.shortread</span></code></a>. The header schema framework stays
+<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a> and its <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>;
+<a class="reference internal" href="../../pcapkit/corekit/schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema</span></code></a> holds only the helpers shared across the layer.</p>
 <p><strong>A capture cut belongs to the built-in short read of</strong>
 <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>. <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records the field the data ends
 inside, through <code class="docutils literal notranslate"><span class="pre">_note_short_read</span></code>, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>;
@@ -662,18 +659,17 @@ of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/P
 <a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.keep_short_read" title="pcapkit.corekit.schema.shortread.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a> records that width beside
 the record, as <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code>, and <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> reads the rebuild at it, so it holds
 the values and the next layer its parse did. Ruled by the owner on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>, over
-a clamp inside <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>, the one
-protocol whose overrunning <code class="docutils literal notranslate"><span class="pre">length</span></code> showed the gap.</p>
-<p>A field callback tells a value the cut left as zero from one read through the same
-record: <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> gives
-it to the fields after the one the data ends inside, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> in their
-packet. A callback that would refuse such a zero leaves it to the short read, and
-refuses a value read with a <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, as
-the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> helpers of
-<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext.schema" title="pcapkit.protocols.internet.ipv6_ext.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.schema</span></code></a> do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>).</p>
+a clamp inside <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>, whose
+overrunning <code class="docutils literal notranslate"><span class="pre">length</span></code> showed the gap.</p>
+<p>A field callback tells a zero the cut left from a zero read through the same record:
+<a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> passes it to the fields
+after the one the data ends inside, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> in their packet. A callback
+that would refuse such a zero leaves it to the short read, and refuses a read value
+with a <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, as the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>
+helpers of <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext.schema" title="pcapkit.protocols.internet.ipv6_ext.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.schema</span></code></a> do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>).</p>
 <p><strong>A helper in one protocol’s own schema module moves there too once code outside that
-protocol uses it and it is generic enough to reuse</strong>, so that another implementor can
-find it; a helper only its own protocol calls stays beside the schema. Ruled on
+protocol uses it and it is generic enough to reuse</strong>, so other implementors can find
+it; a helper only its own protocol calls stays beside the schema. Ruled on
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>. A protocol’s own modules are its protocol, data and schema modules. So
 <a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html#pcapkit.corekit.schema.jumbogram.jumbo_payload_length" title="pcapkit.corekit.schema.jumbogram.jumbo_payload_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">jumbo_payload_length()</span></code></a>, which the IPv6
 pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
@@ -683,9 +679,9 @@ calls, stays in <a class="reference internal" href="../../pcapkit/protocols/inte
 helpers in <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext.schema" title="pcapkit.protocols.internet.ipv6_ext.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.schema</span></code></a> belong to the HOPOPT
 and IPv6-Opts headers that share them, and stay there too.</p>
 <p>The field modules and the protocols import these helpers, so a helper module imports
-neither of them, nor <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>, outside an <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code>
-block; the package’s <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> imports none of its modules, so a field module
-loads only the group it asks for.
+neither, nor <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>, outside an <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> block. The
+package’s <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> imports none of its modules, so a field module loads only the
+group it asks for.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_schema_helpers_boundary_2674_unit.py</span></code> fails on a helper
 module that does, on a module outside the layer that refers to a function defined in
 a field module or in <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a>, and on a module outside
@@ -703,12 +699,11 @@ other module re-exports it, so every reader imports it from there.</p></li>
 <li><p><strong>One that only its own module uses stays in that module</strong>, private, as
 <code class="docutils literal notranslate"><span class="pre">_exthdr_rebuilt</span></code> does in <a class="reference internal" href="../../pcapkit/protocols/internet/internet.html#module-pcapkit.protocols.internet.internet" title="pcapkit.protocols.internet.internet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.internet</span></code></a>.</p></li>
 </ul>
-<p>A shared variable kept in one of the modules that use it makes the others import a
-private name from that module, and ties them to its place in the import graph. A
-module of bare declarations that imports nothing from <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> passes the
-<code class="docutils literal notranslate"><span class="pre">utilities</span></code> question above, so any module may import it –
-<a class="reference internal" href="../../pcapkit/corekit/checksum/index.html#module-pcapkit.corekit.checksum" title="pcapkit.corekit.checksum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.checksum</span></code></a> included, which must not reach
-<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_shared_contextvars_2616_unit.py</span></code>
+<p>A shared variable kept in one of its users makes the others import a private name
+and ties them to that module’s place in the import graph. A module of bare
+declarations importing nothing from <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> passes the <code class="docutils literal notranslate"><span class="pre">utilities</span></code> question,
+so any module may import it – <a class="reference internal" href="../../pcapkit/corekit/checksum/index.html#module-pcapkit.corekit.checksum" title="pcapkit.corekit.checksum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.checksum</span></code></a> included, which must not
+reach <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_shared_contextvars_2616_unit.py</span></code>
 fails on a module that takes a context variable from anywhere else, by name or as an
 attribute of an imported module, and on a variable there that is private, missing
 from <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, or read by one module alone.</p>
@@ -784,7 +779,7 @@ from <code class="docutils literal notranslate"><span class="pre">__all__</span>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

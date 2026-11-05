@@ -3,31 +3,29 @@
 Minting an Unrecognised Value
 -----------------------------
 
-Nearly every registry under :mod:`pcapkit.const` resolves an unrecognised value through
-a ``_missing_`` override, which decides what happens when a value has no member. Only
+A registry under :mod:`pcapkit.const` resolves a value with no member through a
+``_missing_`` override. Only
 :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` and
 :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` have none anywhere in their
-MRO, so they carry no declared-but-unassigned range to resolve. The rest define one
-themselves, except the transport subclasses of
-:class:`~pcapkit.const.reg.apptype.apptype.AppType`, which inherit
-:meth:`AppType._missing_ <pcapkit.const.reg.apptype.apptype.AppType._missing_>`
-(:file:`pcapkit/const/reg/apptype/apptype.py`). The behaviours below follow from it, and
-which one a given range gets is a **design decision, not a style preference**:
+MRO, so they carry no declared-but-unassigned range. The rest define their own, except
+the transport subclasses of :class:`~pcapkit.const.reg.apptype.apptype.AppType`, which
+inherit :meth:`AppType._missing_ <pcapkit.const.reg.apptype.apptype.AppType._missing_>`.
+Which of these behaviours a range gets is a **design decision, not a style
+preference**:
 
 ``extend_enum(cls, name, value)`` -- *mint*
-   Creates a real, permanent member on the class. It is installed in
-   ``_member_map_`` and ``_value2member_map_``, so it is visible to iteration,
-   lookup and ``__members__`` from then on, for the life of the process.
+   Creates a permanent member, installed in ``_member_map_`` and
+   ``_value2member_map_``, so iteration, lookup and ``__members__`` see it for the life
+   of the process.
 
 :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` -- *unmint*
-   Returns a member-like object for the value **without** installing it. The registry
-   does not grow, and a second lookup of the same value builds an equal but distinct
-   object rather than handing back the first.
+   Returns a member-like object **without** installing it. The registry does not grow,
+   and a second lookup builds an equal but distinct object.
 
 ``super()._missing_(value)`` -- *hand back to* |aenum|_
-   Neither of the above. For an |aenum|_ flag base this composes a pseudo-member and
-   caches it in ``_value2member_map_`` only, so ``__members__`` and iteration are
-   unchanged but a second lookup returns the same object. For a plain enum it
+   For an |aenum|_ flag base this composes a pseudo-member and caches it in
+   ``_value2member_map_`` only, so ``__members__`` and iteration are unchanged but a
+   second lookup returns the same object. For a plain enum it
    returns ``None`` and the lookup raises :exc:`ValueError`; the measured case is
    an in-range hole in an unmint registry, ``BlockType(11)``.
 
@@ -41,13 +39,13 @@ Measured against the tree, by class:
   :class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
   :class:`~pcapkit.const.reg.apptype.dccp.DCCP`) inherit the method; every other registry
   here calls ``_unregistered_member`` itself, though
-  :class:`~pcapkit.const.reg.apptype.apptype.AppType` never gets there: it holds no
+  :class:`~pcapkit.const.reg.apptype.apptype.AppType` never reaches it: it holds no
   members and raises for every value through its ``cls.__registry__ is None`` guard.
 
-  **Some of the rest can never reach the call either**, because every range they declare is
-  already covered by their own members -- :class:`~pcapkit.const.ipv4.tos_del.ToSDelay`
-  declares ``0..1`` and has members ``[0, 1]``, so its ``_unregistered_member`` call is
-  dead code. They are :mod:`ipv4.option_class <pcapkit.const.ipv4.option_class>`,
+  **Some never reach the call either**, because their own members cover every range
+  they declare -- :class:`~pcapkit.const.ipv4.tos_del.ToSDelay` declares ``0..1`` and
+  has members ``[0, 1]``, so its ``_unregistered_member`` call is dead code. They are
+  :mod:`ipv4.option_class <pcapkit.const.ipv4.option_class>`,
   :mod:`ipv4.tos_del <pcapkit.const.ipv4.tos_del>`,
   :mod:`ipv4.tos_ecn <pcapkit.const.ipv4.tos_ecn>`,
   :mod:`ipv4.tos_pre <pcapkit.const.ipv4.tos_pre>`,
@@ -71,25 +69,22 @@ Measured against the tree, by class:
   :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`,
   :class:`~pcapkit.const.hip.transport.Transport`,
   :class:`~pcapkit.const.ieee802_11.type.Type` and
-  :class:`~pcapkit.const.ieee802_11.management_subtype.ManagementSubtype`.
-  :class:`~pcapkit.const.hip.transport.Transport`,
-  :class:`~pcapkit.const.ieee802_11.type.Type` and
-  :class:`~pcapkit.const.ieee802_11.management_subtype.ManagementSubtype` raise from their
-  own range checks: each declared range is exactly its member set, so no unassigned value
-  is left for ``super()._missing_`` (the line after the check is unreachable).
+  :class:`~pcapkit.const.ieee802_11.management_subtype.ManagementSubtype`. The last
+  three raise from their own range checks: each declared range is exactly its member
+  set, so the ``super()._missing_`` line after the check is unreachable.
 
-Note that these are |aenum|_ classes: ``issubclass(Flags, enum.IntFlag)`` is ``False``
-against the standard library and ``True`` against ``aenum.IntFlag``, so a probe against
+These are |aenum|_ classes: ``issubclass(Flags, enum.IntFlag)`` is ``False`` against
+the standard library and ``True`` against ``aenum.IntFlag``, so a probe against
 ``enum`` answers about the wrong hierarchy.
 
-The mint criterion below therefore applies only to the registries that unmint, where it
-decides the *name* an unregistered member carries -- the registrar's own label suffixed
-with the individual code, or the bare block label on its own -- not whether it
-registers. In the others it never runs: :class:`~pcapkit.const.mh.cga_type.CGAType` names
-its tag from the value, the flag registries compose a name from their members' bits, and
-those that raise name nothing. The crawlers that generate the ranges record that narrowing
-in their own comments: :file:`pcapkit/vendor/reg/ethertype.py`'s ``UNASSIGNED_ROW_NAMES``
-and :file:`pcapkit/vendor/ipx/socket.py`'s ``UNASSIGNED_RANGE_NAMES``.
+So the mint criterion below applies only to the registries that unmint, where it
+decides the *name* an unregistered member carries -- the registrar's label suffixed with
+the code, or the bare block label -- not whether it registers. Elsewhere it never runs:
+:class:`~pcapkit.const.mh.cga_type.CGAType` names its tag from the value, the flag
+registries compose a name from their members' bits, and those that raise name nothing.
+The crawlers that generate the ranges record this in their comments:
+:file:`pcapkit/vendor/reg/ethertype.py`'s ``UNASSIGNED_ROW_NAMES`` and
+:file:`pcapkit/vendor/ipx/socket.py`'s ``UNASSIGNED_RANGE_NAMES``.
 
 .. mermaid::
 
@@ -112,26 +107,21 @@ and :file:`pcapkit/vendor/ipx/socket.py`'s ``UNASSIGNED_RANGE_NAMES``.
 The Criterion
 ~~~~~~~~~~~~~
 
-The test, paraphrased from the maintainer's ruling: does the upstream registry treat
-the label as the final, concrete assigned name, or only as a notation for a human
-reading the table?
-
-Settled in review of the
+Does the upstream registry treat the label as the final, concrete assigned name, or
+only as a notation for a human reading the table? Settled in review of the
 :meth:`Socket._missing_ <pcapkit.const.ipx.socket.Socket._missing_>` branch-order fix
 (:issue:`841`) and reaffirmed on :issue:`775` as a core concept of the ruling.
 
-So the question to ask of a range is **what the upstream registry actually did**, not
-what the generated code happens to look like:
+So ask **what the upstream registry actually did**, not what the generated code looks
+like:
 
-*  The source assigns a **real, specific name** to those codes. The name records
-   something the registry genuinely says, so it is carried across and suffixed with the
-   code it belongs to.
-*  The source says only that the codes are spoken for, without naming them --
-   ``Unassigned``, ``Reserved``, ``Reserved for Private Use``,
-   ``Reserved for Experimental Use``, ``Deprecated``, ``Dynamically Assigned``
-   and ``Statically Assigned``. These are written for a human reading the table, so the
-   bare label stands: suffixing one with a code would **manufacture a name nobody
-   assigned**, and the value will get its real name if and when something assigns it.
+*  The source assigns a **real, specific name** to those codes, so it is carried across
+   and suffixed with each code.
+*  The source says only that the codes are spoken for -- ``Unassigned``, ``Reserved``,
+   ``Reserved for Private Use``, ``Reserved for Experimental Use``, ``Deprecated``,
+   ``Dynamically Assigned`` and ``Statically Assigned``. These are notation for a human
+   reader, so the bare label stands: suffixing it would **manufacture a name nobody
+   assigned**, and the value gets its real name when something assigns it.
 
 .. note::
 
@@ -148,52 +138,47 @@ Worked Examples
 *Bare label.* :mod:`pcapkit.const.ipx.socket`'s ``Dynamically Assigned``,
 ``Dynamically Assigned Socket Numbers``, ``Statically Assigned Socket Numbers`` and
 ``Experimental`` ranges. Each names **how the socket will be allocated**, not what
-occupies it; the real name arrives with the allocation.
+occupies it.
 
 *Suffixed.* :mod:`pcapkit.const.reg.ethertype`'s company names -- ``Xyplex``,
-``Datability``, ``Qualcomm``, ``Motorola`` and many others, some of them holding more
-than one range block -- and
-:mod:`pcapkit.const.ipx.socket`'s ``Registered by Xerox``. A company name is the
-assignment, for the reason in the next section.
+``Datability``, ``Qualcomm``, ``Motorola`` and others, some holding more than one range
+block -- and :mod:`pcapkit.const.ipx.socket`'s ``Registered by Xerox``. A company name
+is the assignment, as the next section explains.
 
-Further ranges in :mod:`pcapkit.const.reg.ethertype` carry a suffixed name without
-being company names at all: ``IEEE802.3 Length Field``, which names a field in a standard, and
-``Berkeley Trailer encap/IP``, which names an encapsulation. Neither is among the company names, and
-neither is suffixed for the reason the next section gives.
+Other suffixed ranges in :mod:`pcapkit.const.reg.ethertype` are not company names:
+``IEEE802.3 Length Field`` names a field in a standard and ``Berkeley Trailer
+encap/IP`` an encapsulation, so the next section's reason does not cover them.
 
 .. note::
 
-   Those two groups look alike and the line between them is **not** range-versus-single
-   code. ``Registered by Xerox`` covers a range and is still suffixed per socket,
-   because it names *who registered the socket*. ``Dynamically Assigned`` also covers a
-   range and is not, because it names only the *mechanism* by which some future party
-   will take it. Ask what the label tells you: a party, or a procedure.
+   The line between the two groups is **not** range versus single code. ``Registered by
+   Xerox`` covers a range and is suffixed per socket, because it names *who registered
+   the socket*. ``Dynamically Assigned`` covers a range and is not, because it names
+   only the *mechanism* by which some future party will take it. Ask whether the label
+   names a party or a procedure.
 
 Suffixed Company Names
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The ethertype case looks like an exception to the rule and is not. The maintainer's
-reasoning, settled on :issue:`775` after
-being raised in review of the same
-:meth:`Socket._missing_ <pcapkit.const.ipx.socket.Socket._missing_>` fix (:issue:`841`): a
-proprietary protocol will never have a public name, so the company name is what serves
-that purpose in its place.
+The ethertype case is not an exception. Settled on :issue:`775`, after being raised
+in review of the same
+:meth:`Socket._missing_ <pcapkit.const.ipx.socket.Socket._missing_>` fix (:issue:`841`):
+a proprietary protocol will never have a public name, so the company name serves in its
+place. It is not a note *about* the code but the best name that will ever exist *for*
+it, which makes it the final concrete assigned name under the test above.
 
-So the company name is not a note *about* the code -- it is the best name that will ever
-exist *for* it, which makes it the final concrete assigned name under the test above.
-That is also why ``DEC Unassigned`` goes the other way despite carrying the same
-attribution: there the company holds the block and assigned nothing, so the notation is
-"Unassigned" and the attribution is incidental.
+``DEC Unassigned`` goes the other way despite the same attribution: the company holds
+the block and assigned nothing, so the notation is "Unassigned" and the attribution is
+incidental.
 
 Checking the Current State
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The split is measurable rather than a matter of memory. Slice each ``_missing_`` body
-and see which call it makes -- an :mod:`ast` walk is reliable where a text search is
-not, because ``extend_enum`` also appears in imports and in prose. Match on the
-attribute name as well as on the bare name: ``extend_enum`` is called as a plain
-function, but ``_unregistered_member`` is called on ``cls``, so a walk that inspects
-only ``ast.Name`` nodes finds every mint and no unmint at all:
+Measure the split: walk each ``_missing_`` body with :mod:`ast` for the call it makes.
+A text search is unreliable, since ``extend_enum`` also appears in imports and prose.
+Match the attribute name as well as the bare name: ``extend_enum`` is a plain function
+but ``_unregistered_member`` is called on ``cls``, so a walk of ``ast.Name`` nodes alone
+finds no unmint:
 
 .. code-block:: python
 
@@ -225,15 +210,15 @@ only ``ast.Name`` nodes finds every mint and no unmint at all:
    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` and
    :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (they define no
    ``_missing_``), and does not see the transport subclasses, which inherit theirs.
-   :class:`~pcapkit.const.ftp.command.CommandType` is one of those flag registries, and
-   the ``UNMINT`` lines for :file:`pcapkit/const/ftp/command.py` are the file's other
-   registries. Reconcile it against a runtime probe for the split in the list above.
+   :class:`~pcapkit.const.ftp.command.CommandType` is a flag registry; the ``UNMINT``
+   lines for :file:`pcapkit/const/ftp/command.py` are the file's other registries.
+   Reconcile the walk against a runtime probe for the split above.
 
 .. warning::
 
    Calling ``Cls(value)`` on a registry that mints or hands back to a flag base
-   **mutates the class**. A probe is not a read: it installs something that every later
-   lookup then finds. :class:`~pcapkit.const.mh.cga_type.CGAType`
+   **mutates the class**: every later lookup finds what the probe installed.
+   :class:`~pcapkit.const.mh.cga_type.CGAType`
    grows ``__members__``, ``_member_map_`` and ``_value2member_map_``;
    :class:`~pcapkit.const.tcp.flags.Flags`,
    :class:`~pcapkit.const.ftp.command.CommandType` and the Mobility Header and

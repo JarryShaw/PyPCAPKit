@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -869,23 +870,8 @@
 <span class="sd">            extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: ``scapy.all``, not :mod:`scapy.sendrecv`. Scapy dispatches on two</span>
-        <span class="c1"># registries filled only as import side effects of its layer modules:</span>
-        <span class="c1"># ``conf.l2types``, mapping a link type onto a link-layer class, and the</span>
-        <span class="c1"># ``bind_layers`` payload table. With just the sniffing submodule both are</span>
-        <span class="c1"># empty, so :class:`~scapy.utils.PcapReader` cannot map even link type 1,</span>
-        <span class="c1"># writes ``unknown LL type [1]/[0x1]`` to stderr and returns every frame as</span>
-        <span class="c1"># one :class:`~scapy.packet.Raw` layer, raising nothing (#406).</span>
-        <span class="c1">#</span>
-        <span class="c1"># Importing the layer modules by name repairs the link layer but leaves the</span>
-        <span class="c1"># payload table short (``dhcp.pcapng`` stops at ``Ethernet / IP / UDP /</span>
-        <span class="c1"># Raw``), and goes stale silently as scapy adds types; ``scapy.all`` defers</span>
-        <span class="c1"># to ``conf.load_layers``, which scapy keeps current. The cost is the layer</span>
-        <span class="c1"># loading, not the façade: ``scapy.layers.all`` alone measures the same.</span>
-        <span class="c1">#</span>
-        <span class="c1"># It stays in ``__init__`` so ``import pcapkit`` does not pay for it, and is</span>
-        <span class="c1"># bound to :attr:`_expkg`, which :meth:`run` calls ``sniff`` on, so it</span>
-        <span class="c1"># cannot later be dropped as an unused import.</span>
+        <span class="c1"># NOTE: ``scapy.all`` fills the layer registries scapy dispatches on, which the sniffing</span>
+        <span class="c1"># submodule alone leaves empty (#406); imported here to keep ``import pcapkit`` cheap.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="nb">all</span> <span class="k">as</span> <span class="n">scapy</span>  <span class="c1"># isort:skip</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">scapy</span>
@@ -955,13 +941,8 @@
 
         <span class="c1"># extract &amp; analyse file</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'scapy: sniffing </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
-        <span class="c1"># NOTE: the reader is opened here rather than by ``sniff(offline=...)`` so</span>
-        <span class="c1"># that every packet carries its capture's timestamp resolution, which</span>
-        <span class="c1"># Scapy's own readers discard (#1507). Labelled with the file name, as</span>
-        <span class="c1"># ``offline=`` labels it, so ``Packet.sniffed_on`` is unchanged. ``sniff``</span>
-        <span class="c1"># closes it at the end of the file, as it closes the reader ``offline=``</span>
-        <span class="c1"># opens; it is closed here as well in case ``sniff`` raised first, which</span>
-        <span class="c1"># the reader takes as a no-op once closed.</span>
+        <span class="c1"># NOTE: opened here rather than by ``sniff(offline=...)`` so packets keep the capture's</span>
+        <span class="c1"># timestamp resolution (#1507); closed here too in case ``sniff`` raised first.</span>
         <span class="n">reader</span> <span class="o">=</span> <span class="n">_reader_type</span><span class="p">()(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">opened_socket</span><span class="o">=</span><span class="p">{</span><span class="n">reader</span><span class="p">:</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">}))</span>
@@ -1067,7 +1048,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

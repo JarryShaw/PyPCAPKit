@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -675,12 +676,8 @@
         <span class="n">_member_map_</span><span class="p">:</span> <span class="s1">'dict[str, Self]'</span>
         <span class="n">_member_names_</span><span class="p">:</span> <span class="s1">'list[str]'</span>
         <span class="n">_value2member_map_</span><span class="p">:</span> <span class="s1">'dict[Any, Self]'</span>
-        <span class="c1"># NOTE: deliberately ``Any`` rather than ``type``. Annotating the member</span>
-        <span class="c1"># data type precisely makes ``cls._member_type_.__new__(cls, value)``</span>
-        <span class="c1"># resolve to ``type.__new__``, which mypy then reads as building a</span>
-        <span class="c1"># *class* rather than an instance -- mypy errors for a call that is</span>
-        <span class="c1"># correct. Which concrete type it is depends on the Enum base each</span>
-        <span class="c1"># subclass picks, so there is nothing more precise to say here anyway.</span>
+        <span class="c1"># NOTE: ``Any``, not ``type``, as a precise type makes mypy read</span>
+        <span class="c1"># ``cls._member_type_.__new__(cls, value)`` as building a class, not an instance.</span>
         <span class="n">_member_type_</span><span class="p">:</span> <span class="s1">'Any'</span>
 
 <div class="viewcode-block" id="EnumLookup._validate_value">
@@ -970,10 +967,8 @@
                                        <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
                 <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">default</span><span class="p">]</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># NOTE: GitHub issue #1845. Every ValueError raised in this block is</span>
-            <span class="c1"># this method's own lookup miss -- answered with ``default`` below,</span>
-            <span class="c1"># or raised as the miss -- so a loud one is quiet here, whoever</span>
-            <span class="c1"># constructed it.</span>
+            <span class="c1"># NOTE: Every ValueError raised here is this method's own lookup miss, so a loud</span>
+            <span class="c1"># one is quiet here, whoever constructed it (#1845).</span>
             <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
@@ -1365,7 +1360,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

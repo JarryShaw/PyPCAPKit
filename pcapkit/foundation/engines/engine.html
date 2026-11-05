@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -655,20 +656,12 @@ registered; only the keyword decides registration.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The keyword is <code class="docutils literal notranslate"><span class="pre">engine</span></code> rather than <code class="docutils literal notranslate"><span class="pre">name</span></code> because <code class="docutils literal notranslate"><span class="pre">name</span></code>
-cannot be passed as a class keyword at all below Python 3.11:
-<code class="docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__</span></code> takes <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">bases</span></code> and
-<code class="docutils literal notranslate"><span class="pre">namespace</span></code> as positional-<em>or-keyword</em> parameters
-there, so a class keyword by any of those names collides
-with one of them and the class statement raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> from
-the metaclass before this method is reached. <code class="docutils literal notranslate"><span class="pre">engine</span></code> is outside
-that set, so the documented registration path works on every
-supported version. Measured on 3.8.20, 3.9.25, 3.10.21, 3.11.15 and
-3.14.7; those names are the whole of the <code class="docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__</span></code> collision
-surface. Separately, and for an unrelated reason that holds on every
-version, <code class="docutils literal notranslate"><span class="pre">metaclass</span></code> is not usable as a class keyword either: a
-<code class="docutils literal notranslate"><span class="pre">class</span></code> statement consumes it to choose the metaclass, so it never
-reaches this method at all.</p>
+<p>The keyword is <code class="docutils literal notranslate"><span class="pre">engine</span></code> rather than <code class="docutils literal notranslate"><span class="pre">name</span></code> because, below
+Python 3.11, <code class="docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__</span></code> takes <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bases</span></code> and <code class="docutils literal notranslate"><span class="pre">namespace</span></code> as positional-<em>or-keyword</em> parameters, so
+a class keyword by any of those names makes the class statement raise
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> before this method is reached. <code class="docutils literal notranslate"><span class="pre">metaclass</span></code> is
+unusable on every version, since the <code class="docutils literal notranslate"><span class="pre">class</span></code> statement consumes it.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -915,7 +908,7 @@ extraction process.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

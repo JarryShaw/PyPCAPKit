@@ -35,13 +35,12 @@ So ``all`` is exactly the union of those extras, written out as literals rather
 than referenced.
 
 Two groups stay out, for **different** reasons; keeping them apart stops the list
-drifting as it once did:
+drifting:
 
 *  **The third-party capture engines are excluded by kind.** ``DPKT``, ``Scapy``,
    ``PyShark``, ``PyPCAPFile``, ``PyPCAP`` and ``PCAP_CT`` are not core addons, so
    they are on demand -- one extra at a time, ``pip install pypcapkit[Scapy]`` and so
-   on. This holds however easy they are to install, and it is what the ruling
-   changed: the 1.4 ``all`` carried some of them.
+   on. This holds however easy they are to install.
 *  ``PyPCAP`` **and** ``PCAP_CT`` **are also excluded for installability**, a reason the
    ruling leaves untouched. ``pypcap`` is an sdist-only C extension needing a
    compiler and the libpcap development files; ``pcap-ct`` and ``libpcap`` are
@@ -50,8 +49,8 @@ drifting as it once did:
 
 ``vendor`` is the crawler dependency set and is not for end users, so it is out on the
 same audience grounds. Narrowing ``all`` costs a user nothing at run time:
-:meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` warns and falls
-back to the default engine rather than raising when a requested engine is absent.
+:class:`~pcapkit.foundation.extraction.Extractor` warns and falls back to the default
+engine rather than raising when a requested engine is absent.
 
 .. note::
 
@@ -138,10 +137,6 @@ belongs to none. The map is one-to-one with the package list below -- every pack
    section wants that module's changes; the same prose appearing twice reads as two
    separate changes. Raised originally on :issue:`918`.
 
-   The restructure itself was done on the shared changelog's own pull request, which
-   owned the file and merged last; doing it earlier would have conflicted with every
-   open change that touched an entry.
-
 Issue and Pull Request Labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -161,9 +156,8 @@ it:
    pull requests, and only those: :file:`.github/dependabot.yml` configures the
    ``pip`` and ``github-actions`` ecosystems and no ``labels:`` key, so each bump
    takes dependabot's defaults -- ``dependencies`` always, with ``python`` on a
-   ``pip`` bump and ``github_actions`` on a workflow bump. On anyone else's pull
-   request ``github_actions`` is **hand-applied like the rest**. PyUp opens no pull requests here: :file:`.pyup.yml` sets
-   ``update: False``.
+   ``pip`` bump and ``github_actions`` on a workflow bump. PyUp opens no pull
+   requests here: :file:`.pyup.yml` sets ``update: False``.
 *  **The issue templates** apply an issue-kind label from their front matter, before
    anyone reads the issue -- :file:`.github/ISSUE_TEMPLATE/bug_report.md` carries
    ``labels: bug`` and :file:`.github/ISSUE_TEMPLATE/feature_request.md` carries
@@ -228,9 +222,8 @@ commit, so the label and the message agree by construction:
    rather than instead of it.
 
 **Issue kind**, for issues rather than pull requests: ``design`` marks a pattern being
-decided rather than a defect or a request, and a majority of the rulings on these pages
-were filed under it -- though not all, several having been settled on a ``bug`` or
-``enhancement`` thread instead. Alongside ``bug``, ``enhancement`` and ``question``.
+decided rather than a defect or a request, alongside ``bug``, ``enhancement`` and
+``question``.
 
 **State -- what is happening to it now.** An open issue is meant to carry one of
 these, so that its status is readable without opening it:
@@ -279,7 +272,7 @@ reviewer* answerable from the board rather than from memory of what was dispatch
 
 **Scope.** ``dependencies``, ``python`` and ``github_actions`` are dependabot's on
 its own pull requests, per above. ``github_actions`` scopes a change to the
-workflows, and on any other pull request it is hand-applied.
+workflows, and on any other pull request it is **hand-applied like the rest**.
 
 The ``breaking`` Label
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -434,14 +427,13 @@ thresholds are on :doc:`../workflows`.
    comments that the report shows to be stale -- the ordering cells' timings and
    their step cap's rationale.
 
-
 The PEP Discussion, Kept Current
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :file:`docs/source/contributing/pep.rst` is the source of truth for the roadmap: what
 is done and what remains. Ruled in review of :pr:`2483` (:issue:`2449`):
-upon each release, amend that page inline, and also post the update -- or edit it
-inline, either is fine -- to the roadmap's own GitHub Discussion,
+upon each release, amend that page inline, and post the update to, or edit it in, the
+roadmap's own GitHub Discussion,
 `PyPCAPKit Enhancement Proposals <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__.
 The page stays authoritative; the Discussion is kept in step with it, not the other
 way round, so a contributor who only reads the Discussion is not working from a stale

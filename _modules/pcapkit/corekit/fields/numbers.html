@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -773,13 +774,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
 
-        <span class="c1"># NOTE: ``__signed__`` fixes the sign for a subclass such as</span>
-        <span class="c1"># :class:`UInt32Field`; discarding a contradicting ``signed`` would make</span>
-        <span class="c1"># ``UInt32Field(signed=True)`` return an unsigned field and</span>
-        <span class="c1"># ``Int8Field(signed=False)`` a signed one, both without a word.</span>
-        <span class="c1"># ``None`` is what "not given" looks like, which is what</span>
-        <span class="c1"># lets a contradicting value be told apart from the default and rejected</span>
-        <span class="c1"># while leaving an agreeing one alone. See #545.</span>
+        <span class="c1"># NOTE: ``__signed__`` fixes a subclass's sign, so a contradicting ``signed`` is rejected rather</span>
+        <span class="c1"># than discarded; ``None`` means not given, which tells it apart from the default (#545).</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">signed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">signed</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">signed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">signed</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span><span class="p">:</span>
@@ -797,10 +793,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__template__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__template__</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: ``self._signed``, not the ``signed`` argument. A subclass</span>
-            <span class="c1"># that fixes ``__signed__`` without also fixing ``__template__``</span>
-            <span class="c1"># would otherwise build its template from the argument and parse</span>
-            <span class="c1"># with the opposite sign to the one it declared.</span>
+            <span class="c1"># NOTE: ``self._signed``, not the argument, so a subclass fixing ``__signed__`` but not</span>
+            <span class="c1"># ``__template__`` parses with the sign it declared.</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">'</span>
 
@@ -1397,17 +1391,15 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">member</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                <span class="c1"># NOTE: An in-library rejection is pcapkit's own decision about</span>
-                <span class="c1"># the value, rather than the enumeration library reporting that</span>
-                <span class="c1"># no member carries it, so it is not this layer's to absorb.</span>
+                <span class="c1"># NOTE: an in-library rejection is pcapkit's own verdict on the</span>
+                <span class="c1"># value, not a missing member, so it is not this layer's to absorb.</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">BaseError</span><span class="p">):</span>
                     <span class="k">raise</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">member</span>
-                <span class="c1"># NOTE: A registry member is shared, so the captured bits</span>
-                <span class="c1"># outside ``bit_length`` go on an unregistered copy of it</span>
-                <span class="c1"># rather than on the member itself (#1488).</span>
+                <span class="c1"># NOTE: a registry member is shared, so the bits outside</span>
+                <span class="c1"># ``bit_length`` go on an unregistered copy of it (#1488).</span>
                 <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">member</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                          <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'_name_'</span><span class="p">,</span> <span class="s1">'_value_'</span><span class="p">,</span> <span class="s1">'__reduce_ex__'</span><span class="p">)}</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="n">_OUTSIDE_BITS</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span>
@@ -1502,10 +1494,8 @@
 <span class="sd">            ``Enum.__reduce_ex__``, which returns ``(cls, (value,))`` -- the</span>
 <span class="sd">            one lookup this member is deliberately absent from. A minted</span>
 <span class="sd">            member is registered and so round-trips; left alone, this one</span>
-<span class="sd">            would not. Measured on CPython 3.14.7, resolving port 53406</span>
-<span class="sd">            through the TCP schema's :class:`PortEnumField`</span>
-<span class="sd">            with nothing in place of the override,</span>
-<span class="sd">            ``pickle.loads(pickle.dumps(member))`` raised</span>
+<span class="sd">            would not: without the override, an unknown TCP port's member</span>
+<span class="sd">            made ``pickle.loads(pickle.dumps(member))`` raise</span>
 <span class="sd">            ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP`` -- while</span>
 <span class="sd">            ``pickle.dumps`` still succeeded, so the failure surfaced only on</span>
 <span class="sd">            read-back rather than where it was caused.</span>
@@ -1568,18 +1558,14 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">namespace</span><span class="si">!r}</span><span class="s1"> derives from neither str nor int; '</span>
                 <span class="s1">'_unregistered_member does not know how to build one of its members'</span><span class="p">)</span>
-        <span class="c1"># NOTE: setting the enum protocol's own name/value attributes</span>
-        <span class="c1"># directly, rather than through namespace's own __new__, is what</span>
-        <span class="c1"># skips the registration that __new__ would otherwise have done.</span>
+        <span class="c1"># NOTE: setting name/value directly rather than through the namespace's</span>
+        <span class="c1"># __new__ is what skips the registration __new__ would do.</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_name_</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># pylint: disable=protected-access</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># pylint: disable=protected-access</span>
         <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
-        <span class="c1"># NOTE: ``Enum.__reduce_ex__`` reduces a member to ``(cls, (value,))``,</span>
-        <span class="c1"># i.e. to the one lookup this member is deliberately absent from, so</span>
-        <span class="c1"># pickle and copy would both raise on it without this. Overriding it</span>
-        <span class="c1"># per instance, which pickle and copy both honour, rebuilds an</span>
-        <span class="c1"># equivalent unregistered member instead.</span>
+        <span class="c1"># NOTE: ``Enum.__reduce_ex__`` would reduce to the value lookup this member is absent from, so a</span>
+        <span class="c1"># per-instance override lets pickle and copy rebuild an equivalent unregistered member.</span>
         <span class="k">return</span> <span class="n">reduce_to</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">_rebuild_unregistered_member</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span></div>
 </div>
 
@@ -1688,9 +1674,8 @@
 <span class="sd">            one :meth:`post_process` tests. See GitHub issue :issue:`2314`.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: imported here rather than at module level, as</span>
-        <span class="c1"># :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested</span>
-        <span class="c1"># against AppType rather than ``self._namespace`` (#1516).</span>
+        <span class="c1"># NOTE: imported here since :mod:`pcapkit.const` imports</span>
+        <span class="c1"># :mod:`pcapkit.corekit`; tested against AppType, not ``self._namespace`` (#1516).</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">AppType</span><span class="p">):</span>
@@ -1763,39 +1748,22 @@
         <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="n">proto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_proto</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">))):</span>
-            <span class="c1"># NOTE: lets AppType.get() -- unmodified -- raise its rejection</span>
-            <span class="c1"># for a port this field's own width cannot represent, rather than</span>
-            <span class="c1"># risking it being absorbed below as a foreign miss.</span>
+            <span class="c1"># NOTE: lets AppType.get() raise its own rejection for a port this</span>
+            <span class="c1"># field's width cannot hold, rather than absorbing it below as a miss.</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
         <span class="n">owner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">_dispatch</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">owner</span><span class="o">.</span><span class="n">__registry__</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>  <span class="c1"># type: ignore[union-attr]</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">declared</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                <span class="c1"># NOTE: value is already known to be in-width here, so this</span>
-                <span class="c1"># ValueError is never the out-of-range rejection, which never</span>
-                <span class="c1"># reaches this branch; it could only be a foreign "no member has</span>
-                <span class="c1"># this value", absorbed as a miss. AppType._missing_ raises</span>
-                <span class="c1"># neither for an in-width port: it answers a miss with None. A</span>
-                <span class="c1"># pcapkit.utilities.exceptions error is still a deliberate</span>
-                <span class="c1"># registry decision and propagates unchanged.</span>
+                <span class="c1"># NOTE: ``value`` is in width here, so a ValueError is a foreign "no such member" miss; a</span>
+                <span class="c1"># ``pcapkit.utilities.exceptions`` error is a deliberate registry decision and propagates.</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">BaseError</span><span class="p">):</span>
                     <span class="k">raise</span>
                 <span class="n">declared</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">declared</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># NOTE: an unregistered member of ``owner`` itself, per the</span>
-                <span class="c1"># ruling in EnumField._unregistered_member, rather than a foreign</span>
-                <span class="c1"># pseudo-enum. ``.port``, ``.svc`` and ``.proto`` are what a real</span>
-                <span class="c1"># AppType member carries -- read unconditionally by e.g.</span>
-                <span class="c1"># Transport._decode_next_layer's ``srcport.port`` -- and</span>
-                <span class="c1"># ``svc='unknown'`` marks a port with no declared service. They</span>
-                <span class="c1"># are passed in the order AppType.__new__ sets them, because</span>
-                <span class="c1"># DictDumper.object_hook renders a member's addon keys straight</span>
-                <span class="c1"># out of its ``__dict__`` in insertion order -- so any other</span>
-                <span class="c1"># order here would make an unassigned port dump ``port`` before</span>
-                <span class="c1"># ``svc`` while every declared one dumps ``svc`` first. The</span>
-                <span class="c1"># transport is ``owner.__transport__``, as AppType.get uses,</span>
-                <span class="c1"># since ``proto`` may be a bare int with no ``.name`` (#1774).</span>
+                <span class="c1"># NOTE: An unregistered ``owner`` member, attributes set in ``AppType.__new__``'s order, which</span>
+                <span class="c1"># dumps follow; ``owner.__transport__`` is used as ``proto`` may be a bare int (#1774).</span>
                 <span class="n">transport</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">__transport__</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span>
                     <span class="n">owner</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'unknown [</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">transport</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span><span class="p">,</span>
@@ -1977,7 +1945,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

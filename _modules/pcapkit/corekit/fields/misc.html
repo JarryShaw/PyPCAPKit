@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -865,26 +866,12 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> \
                 <span class="n">ProtocolBase</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
-            <span class="c1"># NOTE: The registry is keyed on the upper-cased class name, and the</span>
-            <span class="c1"># getter upper-cases the name it is given, so a name in any other</span>
-            <span class="c1"># case still resolves -- where a miss leaves ``_protocol`` as</span>
-            <span class="c1"># :obj:`None`, which the property above resolves to</span>
-            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So</span>
-            <span class="c1"># ``PayloadField(protocol='http')`` would yield a raw payload instead</span>
-            <span class="c1"># of HTTP, with nothing to say so (#787).</span>
+            <span class="c1"># NOTE: The getter upper-cases the name, so any case resolves rather than missing into None, which</span>
+            <span class="c1"># reads as ``Raw`` and would turn ``protocol='http'`` silently raw (#787).</span>
             <span class="n">resolved</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">get_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: Warned rather than left silent, and warned rather than</span>
-            <span class="c1"># raised. Unlike the registry lookups that dispatch on a code read</span>
-            <span class="c1"># off the wire -- where a miss is ordinary traffic and</span>
-            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the right answer --</span>
-            <span class="c1"># this branch is reached only from a caller that named a protocol in</span>
-            <span class="c1"># source, so a miss is a mistake in that name rather than a property</span>
-            <span class="c1"># of the captured packet, and it is otherwise indistinguishable from</span>
-            <span class="c1"># an unparsed payload. It stays a warning because the :obj:`None`</span>
-            <span class="c1"># fallback is itself legitimate (a ``PayloadField`` with no protocol</span>
-            <span class="c1"># at all is the common case), so refusing the assignment outright</span>
-            <span class="c1"># would reject a lenient spelling the field has always accepted.</span>
+            <span class="c1"># NOTE: A miss here is a mistake in source, not traffic, so it warns; it does not raise, since</span>
+            <span class="c1"># the None fallback is legitimate and the field has always accepted the lenient spelling.</span>
             <span class="k">if</span> <span class="n">resolved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unregistered payload protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
 
@@ -900,18 +887,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span>  <span class="c1"># type: ignore[assignment]</span>
 
-        <span class="c1"># NOTE: Through the property rather than straight to ``_protocol``, so a</span>
-        <span class="c1"># name given here is resolved exactly as one assigned later is. Writing</span>
-        <span class="c1"># the attribute directly would store the :obj:`str` verbatim and the</span>
-        <span class="c1"># getter would hand that same string back, so</span>
-        <span class="c1"># ``PayloadField(protocol='http')`` -- or ``protocol='HTTP'`` -- would</span>
-        <span class="c1"># yield neither the protocol nor</span>
-        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.protocol.Raw` but the string itself (#787).</span>
-        <span class="c1"># The lookup the setter performs stays inside</span>
-        <span class="c1"># its ``isinstance(protocol, str)`` branch, so a field declared in a</span>
-        <span class="c1"># schema class body -- every in-library use, none of which names a</span>
-        <span class="c1"># protocol -- still does not import :mod:`pcapkit.protocols` while that</span>
-        <span class="c1"># package may itself be mid-import.</span>
+        <span class="c1"># NOTE: Through the property, so a name given here resolves as one assigned later does (#787); the</span>
+        <span class="c1"># lookup stays in its ``str`` branch, so a schema class body never imports a mid-import package.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
@@ -1346,10 +1323,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
 
-        <span class="c1"># NOTE: :meth:`Schema.to_dict &lt;pcapkit.protocols.schema.Schema.to_dict&gt;`</span>
-        <span class="c1"># flattens a nested schema into a plain mapping, so a schema rebuilt</span>
-        <span class="c1"># through ``from_dict`` hands that mapping back here; turn it into the</span>
-        <span class="c1"># declared schema before packing it.</span>
+        <span class="c1"># NOTE: ``Schema.to_dict`` flattens a nested schema to a mapping, so one rebuilt through</span>
+        <span class="c1"># ``from_dict`` hands it back here to become the declared schema before packing.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -1382,14 +1357,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">buffer</span>
 
-        <span class="c1"># NOTE: a negative length means the field was declared without one, so</span>
-        <span class="c1"># the nested schema is sized by whatever remains in ``file`` instead.</span>
-        <span class="c1"># Passing ``-1`` on would seed its ``__length__`` negative, and every</span>
-        <span class="c1"># sub-field read would then warn ``packet length &lt; 0``. The remainder is</span>
-        <span class="c1"># measured here rather than left to ``prepare`` (by passing</span>
-        <span class="c1"># :data:`None`), because there a remainder of zero raises the quiet</span>
-        <span class="c1"># end-of-stream signal that ends a whole extraction, whereas here it</span>
-        <span class="c1"># only means the item is truncated.</span>
+        <span class="c1"># NOTE: A negative length sizes the nested schema by what remains in ``file``; it is measured here, as</span>
+        <span class="c1"># ``prepare`` would read a zero remainder as end of stream rather than a truncated item.</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">current</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
@@ -1546,7 +1515,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

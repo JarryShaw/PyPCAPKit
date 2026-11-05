@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -691,13 +692,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Why this engine cannot run here, or :data:`None` when it can.</span>
 
-<span class="sd">        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*</span>
-<span class="sd">        the import test, because none of the things that stop this engine is</span>
-<span class="sd">        visible to an import. `PyShark`_ imports perfectly well and then fails</span>
-<span class="sd">        when it is used, which without this hook escapes from :meth:`run` as a hard</span>
-<span class="sd">        error rather than degrading to the default engine with a warning.</span>
+<span class="sd">        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles</span>
+<span class="sd">        its engine, *before* the import test, because nothing that stops this</span>
+<span class="sd">        engine is visible to an import. `PyShark`_ imports fine and fails when</span>
+<span class="sd">        used, which without this hook escapes from :meth:`run` as a hard error</span>
+<span class="sd">        rather than degrading to the default engine with a warning.</span>
 
-<span class="sd">        **The interpreter.** |pyshark|_ 0.6 does</span>
+<span class="sd">        **The interpreter.** |pyshark|_ 0.6 calls</span>
 <span class="sd">        ``asyncio.get_event_loop_policy().get_event_loop()`` in</span>
 <span class="sd">        ``Capture._setup_eventloop``, in a fresh interpreter with no</span>
 <span class="sd">        running loop. Measured: 3.10 and 3.11 return a loop</span>
@@ -706,31 +707,19 @@
 <span class="sd">        'MainThread'``; on 3.13 |pyshark|_ extracted a capture. Hence</span>
 <span class="sd">        :attr:`PYTHON_CEILING` is ``(3, 14)``.</span>
 
-<span class="sd">        **The** :program:`tshark` **binary.** |pyshark|_ is a wrapper around</span>
-<span class="sd">        Wireshark's command-line tool and does no parsing itself, so it is useless</span>
-<span class="sd">        without it. The check delegates to |pyshark|_'s own</span>
-<span class="sd">        ``get_process_path()`` rather than calling :func:`shutil.which`, because</span>
-<span class="sd">        the two are not equivalent and ``which`` would refuse setups that work:</span>
-<span class="sd">        |pyshark|_ looks at ``tshark_path`` in its :file:`config.ini` *first*, and</span>
-<span class="sd">        then at :envvar:`PATH` on POSIX, at both Program Files directories on</span>
-<span class="sd">        Windows, and at :file:`/Applications/Wireshark.app` on macOS. Asking</span>
-<span class="sd">        |pyshark|_ gets all of that for free and cannot disagree with what</span>
-<span class="sd">        |pyshark|_ will do a moment later.</span>
+<span class="sd">        **The** :program:`tshark` **binary.** |pyshark|_ wraps Wireshark's</span>
+<span class="sd">        command-line tool and parses nothing itself. The check asks |pyshark|_'s</span>
+<span class="sd">        own ``get_process_path()`` rather than :func:`shutil.which`, which would</span>
+<span class="sd">        refuse setups that work: |pyshark|_ reads ``tshark_path`` from its</span>
+<span class="sd">        :file:`config.ini` first, then :envvar:`PATH` on POSIX, both Program Files</span>
+<span class="sd">        directories on Windows, and :file:`/Applications/Wireshark.app` on macOS.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            Deliberately **not cached**, and the cost was measured rather than</span>
-<span class="sd">            assumed: the failing path -- which is the expensive one, since it</span>
-<span class="sd">            exhausts every candidate -- takes about 290 microseconds with 39</span>
-<span class="sd">            :envvar:`PATH` entries, against about 120 for a bare</span>
-<span class="sd">            :func:`shutil.which`. This runs once per</span>
-<span class="sd">            :class:`~pcapkit.foundation.extraction.Extractor`, not once per frame,</span>
-<span class="sd">            so it is far below the cost of opening the capture. Caching would trade</span>
-<span class="sd">            that for an answer about the *environment* that cannot change within</span>
-<span class="sd">            the process -- so installing Wireshark, or fixing</span>
-<span class="sd">            :envvar:`PATH`, would not take effect until restart. The Windows path</span>
-<span class="sd">            does more work than the POSIX one (two Program Files directories, and</span>
-<span class="sd">            :func:`shutil.which` there would multiply by ``PATHEXT``), but it is</span>
-<span class="sd">            still a bounded handful of :func:`os.stat` calls.</span>
+<span class="sd">            Deliberately **not cached**: it runs per</span>
+<span class="sd">            :class:`~pcapkit.foundation.extraction.Extractor` rather than per</span>
+<span class="sd">            frame, far below the cost of opening the capture, and caching would</span>
+<span class="sd">            keep a stale answer after Wireshark is installed or :envvar:`PATH` is</span>
+<span class="sd">            fixed.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
@@ -985,7 +974,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

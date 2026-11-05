@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -966,10 +967,8 @@
 <span class="sd">            Payload for protocol construction.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: IPv6 parses its upper layer after the headers it walked, not one</span>
-        <span class="c1"># past itself, but its walk stops short of an extension header only</span>
-        <span class="c1"># where that header is kept raw (at a limit, in a later fragment, or</span>
-        <span class="c1"># where it does not parse), so no rebuilt upper layer reads this place.</span>
+        <span class="c1"># NOTE: IPv6 parses its upper layer after the headers it walked, and its walk stops short</span>
+        <span class="c1"># only of a header kept raw, so no rebuilt upper layer reads this place.</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">_exthdr_rebuilt</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_rebuilt_exthdr_depth</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1021,9 +1020,8 @@
             <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: a chain of IPv6 extension headers reached the limit of '</span>
                        <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s1"> headers; the rest of the packet, from Next '</span>
                        <span class="sa">f</span><span class="s1">'Header </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="n">proto</span><span class="p">))</span><span class="si">}</span><span class="s1">, is left undissected'</span><span class="p">)</span>
-            <span class="c1"># NOTE: Inside a payload being rebuilt, the layer it is rebuilt for</span>
-            <span class="c1"># warns of the same octets once its own parse gets here, as for</span>
-            <span class="c1"># :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
+            <span class="c1"># NOTE: Inside a payload being rebuilt, the layer it is rebuilt for warns of the</span>
+            <span class="c1"># same octets once its own parse gets here, as for ``config.FRAME_LAYER_LIMIT``.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
                 <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{</span><span class="s1">'error'</span><span class="p">:</span> <span class="n">message</span><span class="p">}</span>
@@ -1074,9 +1072,8 @@
 <span class="sd">            or to the end of the parent's (:issue:`2689`).</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: The length this layer hands on bounds the payload, so octets the</span>
-        <span class="c1"># capture cut off the frame past it are none of the next layer's (#2653).</span>
-        <span class="c1"># A layer declaring none hands the frame's cut on instead (#2689).</span>
+        <span class="c1"># NOTE: The length this layer hands on bounds the payload, so a cut past it is none of</span>
+        <span class="c1"># the next layer's (#2653); a layer declaring none hands the frame's cut on (#2689).</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">frame_length</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">declared</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span>  <span class="c1"># type: ignore[redundant-cast]</span>
@@ -1181,7 +1178,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

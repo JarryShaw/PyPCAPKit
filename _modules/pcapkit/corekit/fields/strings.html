@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -750,10 +751,8 @@
         <span class="c1"># since re-encoding its text is exactly what would not reproduce them.</span>
         <span class="n">buffer</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">raw</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">DecodedString</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: A negative length is resolved from the *encoded* octets, not from</span>
-        <span class="c1"># the character count -- the ``Ns`` template counts octets, so counting</span>
-        <span class="c1"># characters would truncate any text that does not encode one octet per</span>
-        <span class="c1"># character.</span>
+        <span class="c1"># NOTE: A negative length resolves from the encoded octets, not the character count, since the</span>
+        <span class="c1"># ``Ns`` template counts octets.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s'</span>
@@ -784,19 +783,15 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">charset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
-                <span class="c1"># NOTE: A codec may raise under ``'replace'`` too -- ``idna``</span>
-                <span class="c1"># supports ``'strict'`` alone, and ``punycode`` before Python 3.13</span>
-                <span class="c1"># decodes some non-ASCII octets strictly whatever the handler -- so</span>
-                <span class="c1"># the last resort is the fallback encoding, UTF-8, which cannot.</span>
-                <span class="c1"># The check below keeps the octets, as for any lossy decoding.</span>
+                <span class="c1"># NOTE: A codec may raise under ``'replace'`` (``idna``, older ``punycode``), so UTF-8, which</span>
+                <span class="c1"># cannot, is the last resort; the check below keeps the octets, as for any lossy decoding.</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">ret</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">charset</span><span class="p">,</span> <span class="s1">'replace'</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
                     <span class="n">ret</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">,</span> <span class="s1">'replace'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: Encoding may itself fail -- ``errors='strict'`` over text that</span>
-        <span class="c1"># decoded under a lone-surrogate scheme, for one -- which is as much a</span>
-        <span class="c1"># failure to reproduce the octets as a mismatch is.</span>
+        <span class="c1"># NOTE: encoding may itself fail, e.g. ``errors='strict'`` over text decoded</span>
+        <span class="c1"># under a lone-surrogate scheme; that fails to reproduce the octets too.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">lossless</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span>
         <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
@@ -877,11 +872,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="o">=</span> <span class="n">namespace</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="c1"># NOTE: A subfield reaching past the end of the field is a mistake in the</span>
-        <span class="c1"># schema that declares it, not something a packet can cause, so it is</span>
-        <span class="c1"># rejected here rather than at packing time -- where it would instead grow</span>
-        <span class="c1"># the buffer, and surface much later as an opaque ``OverflowError`` from</span>
-        <span class="c1"># :meth:`int.to_bytes`.</span>
+        <span class="c1"># NOTE: A subfield past the field's end is a schema mistake, so it is rejected here rather than</span>
+        <span class="c1"># growing the buffer at pack time into an opaque ``OverflowError``.</span>
         <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">+</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="n">width</span><span class="p">:</span>
@@ -913,14 +905,8 @@
 <span class="sd">                integer.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: The buffer holds one ASCII digit per bit, so it must be seeded with</span>
-        <span class="c1"># ``b'0'`` rather than with NUL bytes -- a zero bit written by the loop below</span>
-        <span class="c1"># is the *character* ``b'0'``, which is itself non-zero, so a truthiness test</span>
-        <span class="c1"># over the buffer cannot tell a cleared bit from a set one and would report</span>
-        <span class="c1"># every named bit as set.</span>
-        <span class="c1">#</span>
-        <span class="c1"># The unnamed bits seed it, so that they come back as captured; masking</span>
-        <span class="c1"># them keeps a stray named bit in the record from overriding a subfield.</span>
+        <span class="c1"># NOTE: One ASCII digit per bit, seeded from the unnamed bits so they come back as captured;</span>
+        <span class="c1"># masking them keeps a stray named bit in the record from overriding a subfield.</span>
         <span class="n">unnamed</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UNNAMED</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unnamed</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unnamed</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
@@ -1086,7 +1072,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

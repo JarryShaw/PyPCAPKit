@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -669,9 +670,7 @@
 <span class="sd">        &lt;pcapkit.foundation.reassembly.data.tcp.Datagram.packet&gt;` can parse alone.</span>
 <span class="sd">        Where a sender **pipelines** -- several requests in flight before any reply</span>
 <span class="sd">        -- they all carry the same acknowledgement number, so they share a bucket</span>
-<span class="sd">        and are concatenated after all. Measured: two requests sent back to back</span>
-<span class="sd">        on one acknowledgement number come back as a single datagram carrying</span>
-<span class="sd">        ``b'req1req2'``, which</span>
+<span class="sd">        and are concatenated after all, as</span>
 <span class="sd">        ``test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`` in</span>
 <span class="sd">        :file:`tests/foundation/traceflow/test_tcp.py` pins. So this narrows the</span>
 <span class="sd">        concatenation to within one exchange rather than eliminating it, and an</span>
@@ -952,13 +951,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analyse</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># NOTE: imported here rather than at module scope. ``traceflow`` and</span>
-        <span class="c1"># ``reassembly`` are sibling subpackages and this is the only edge between</span>
-        <span class="c1"># them; at module scope it is evaluated while ``pcapkit/__init__`` is still</span>
-        <span class="c1"># running, which is the import cycle that already runs through</span>
-        <span class="c1"># ``foundation.extraction``. Kept off the per-*packet* path by caching the</span>
-        <span class="c1"># segment model here: this runs once per flow, ``_make_segment`` once per</span>
-        <span class="c1"># packet.</span>
+        <span class="c1"># NOTE: imported here, since at module scope this sibling-subpackage edge joins the</span>
+        <span class="c1"># ``foundation.extraction`` import cycle; cached per flow, not per packet.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Reasm_Packet</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
 
@@ -1199,7 +1193,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

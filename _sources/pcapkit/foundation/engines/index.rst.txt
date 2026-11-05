@@ -10,8 +10,7 @@ Engine Support
 
 .. seealso::
 
-   For more information on customisation and extension, please
-   refer to :doc:`../../../ext`.
+   :doc:`../../../ext`, on customisation and extension.
 
 .. toctree::
    :maxdepth: 2
@@ -20,10 +19,8 @@ Engine Support
    builtin
    3rdparty
 
-All engines are implemented as :class:`~pcapkit.foundation.engines.engine.EngineBase`
-subclasses, which are responsible for parsing the input files and extracting
-the network packets for further processing. Below is a brief diagram of the
-class hierarchy of :mod:`pcapkit.foundation.engines`:
+Every engine subclasses :class:`~pcapkit.foundation.engines.engine.EngineBase`,
+parsing the input file and extracting its packets:
 
 .. mermaid::
 
@@ -70,9 +67,8 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        click PCAP_CT "3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT"
        click PyPCAPFile "3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile"
 
-Not every engine can do everything :class:`~pcapkit.foundation.extraction.Extractor`
-offers, and the ones that cannot say so rather than quietly doing less, unless
-their row says otherwise:
+An engine that cannot do all :class:`~pcapkit.foundation.extraction.Extractor`
+offers says so rather than quietly doing less, unless its row says otherwise:
 
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | Gap, and how it is surfaced                                   |
@@ -137,11 +133,10 @@ their row says otherwise:
 Availability
 ------------
 
-A third-party engine is usable only where its backing package is, and some are
-harder to obtain than a plain :program:`pip install` suggests. A missing package
-is not fatal -- :mod:`pcapkit` emits an
-:class:`~pcapkit.utilities.warnings.EngineWarning` and falls back to its own
-parser -- but the extraction then does not use the engine requested.
+A third-party engine needs its backing package, and some are harder to obtain
+than a plain :program:`pip install` suggests. Without it, :mod:`pcapkit` warns
+with an :class:`~pcapkit.utilities.warnings.EngineWarning` and falls back to its
+own parser instead of the engine requested.
 
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | What it needs beyond ``pip install``                          |
@@ -172,11 +167,11 @@ parser -- but the extraction then does not use the engine requested.
 |                                                                 | ``imp`` module, removed in Python 3.12                        |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 
-A constraint that an import cannot reveal is enforced by overriding
+A constraint an import cannot reveal is enforced by overriding
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
 the :class:`~pcapkit.foundation.extraction.Extractor` constructor consults
-*before* the import test, so asking for an engine that cannot run here produces
-one warning naming the actual cause and a fall back to the built-in parser.
+*before* the import test, so an engine that cannot run here gives one warning
+naming the cause and a fall back to the built-in parser.
 :class:`~pcapkit.foundation.engines.pyshark.PyShark` checks its Python ceiling and for
 ``tshark``, :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` its Python ceiling,
 and :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
@@ -184,7 +179,7 @@ and :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 whether it loads at all -- for :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`, whether
 a system ``libpcap`` is present (:issue:`2132`).
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` deliberately has no Python ceiling
-check, even though upstream cannot be installed on 3.12 or newer: what matters is which
+check, though upstream cannot be installed on 3.12 or newer: what matters is which
 distribution is present, and a version check would refuse a working build.
 
 .. _engine-selection:
@@ -238,10 +233,9 @@ Choosing Between PyPCAP and PCAP_CT
 
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` read the same
-:manpage:`libpcap(3)` interface from two independent distributions, both of which
-install a top-level |pcap|_ module. They are separate engines because they
-are separate projects, with different authors, different install requirements
-and different interpreter coverage:
+:manpage:`libpcap(3)` interface from two independent distributions, both
+installing a top-level |pcap|_ module. They are separate engines because they are
+separate projects, with different install requirements and interpreter coverage:
 
 +---------------------------------------------------------------+---------------------+-------------------+---------------------------------------------------+
 | Engine (``engine=``)                                          | Distribution        | Python            | What it needs                                     |
@@ -254,42 +248,40 @@ and different interpreter coverage:
 |                                                               | 1.11.0b29 (**beta**)|                   | same -- see the warning below                     |
 +---------------------------------------------------------------+---------------------+-------------------+---------------------------------------------------+
 
-Neither engine dissects anything, so the capability gaps in the table above are
-identical for both and are a property of :manpage:`libpcap(3)`, not of the
-distribution: **reassembly and flow tracing are unavailable whichever one is
-installed.** Pick on availability, not on features.
+Neither engine dissects anything, so both have the same gaps -- **no reassembly
+and no flow tracing, whichever is installed** -- a property of
+:manpage:`libpcap(3)` rather than of the distribution. Pick on availability, not
+on features.
 
 .. warning::
 
    :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` needs no toolchain to *install*,
-   but it does need a system :manpage:`libpcap(3)` to *run*. `libpcap`_ ships a vendored
+   but needs a system :manpage:`libpcap(3)` to *run*. `libpcap`_ ships a vendored
    :file:`libpcap.so` and, as published, does not use it: its :file:`libpcap.cfg` says
    ``LIBPCAP = None``, which sends the loader to :func:`ctypes.util.find_library`. With no
-   system library at all ``import pcap`` raises :exc:`OSError` rather than
-   :exc:`ImportError`; :meth:`PCAP_CT.unsupported_reason
-   <pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason>` catches that and turns
-   it into an ordinary fall back to the :term:`default engine`, instead of the hard error it would
-   otherwise be.
+   system library, ``import pcap`` raises :exc:`OSError` rather than
+   :exc:`ImportError`, which :meth:`PCAP_CT.unsupported_reason
+   <pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason>` turns into an
+   ordinary fall back to the :term:`default engine` instead of a hard error.
 
 **The two distributions collide, so install exactly one.** Both own the top-level
-|pcap|_ module, and pip will happily install both -- on Python 3.10,
-the ``pcap-ct`` package then wins the import and upstream's extension module is
-shadowed and unreachable. Each engine therefore detects which distribution it
-actually got, via
+|pcap|_ module, and pip installs both -- on Python 3.10, the ``pcap-ct`` package
+then wins the import and upstream's extension module is unreachable. Each engine
+therefore detects which distribution it got, via
 :func:`pcapkit.foundation.engines._pcap_backend.probe`, and:
 
 * reports it -- :attr:`PyPCAP.backend
   <pcapkit.foundation.engines.pypcap.PyPCAP.backend>` and
   :attr:`PCAP_CT.backend <pcapkit.foundation.engines.pcap_ct.PCAP_CT.backend>`
-  name the distribution, version and file actually in use, so a bug report about
+  name the distribution, version and file in use, so a bug report about
   "the pypcap engine" says which one ran;
-* declines to run on the other one, through ``unsupported_reason()``, with a
-  message naming the ``engine=`` string that does want it, and likewise on a
-  |pcap|_ that is installed but cannot load, falling back to the
-  :term:`default engine` instead of letting the import error escape; and
-* warns with an :class:`~pcapkit.utilities.warnings.EngineWarning` when it finds
-  both installed, since that state leaves one engine permanently unselectable
-  and nothing else would explain why.
+* declines to run on the other, through ``unsupported_reason()``, naming the
+  ``engine=`` string that wants it, and likewise on a |pcap|_ that is installed
+  but cannot load, falling back to the :term:`default engine` rather than letting
+  the import error escape; and
+* warns with an :class:`~pcapkit.utilities.warnings.EngineWarning` when both are
+  installed, since that leaves one engine permanently unselectable and nothing
+  else would explain why.
 
 .. _PCAP-NG: https://wiki.wireshark.org/Development/PcapNg
 .. _libpcap: https://pypi.org/project/libpcap/

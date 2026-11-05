@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Parsing and Construction, Next-Layer Dispatch, Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type ..." />
-<meta name="description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Parsing and Construction, Next-Layer Dispatch, Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type ..." />
+<meta property="og:description" content="pcapkit.protocols holds the protocol families. Root Protocol- Parsing and Construction, Next-Layer Dispatch, Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type Variables., Lin..." />
+<meta name="description" content="pcapkit.protocols holds the protocol families. Root Protocol- Parsing and Construction, Next-Layer Dispatch, Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type Variables., Lin..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Root Protocol" href="protocol.html"><link rel="prev" title="Registry Management" href="../foundation/registry.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -570,7 +571,7 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols">
 <span id="protocol-family"></span><h1>Protocol Family<a class="headerlink" href="#module-pcapkit.protocols" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> is the collection of all protocol families.</p>
+<p><a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> holds the protocol families.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Root Protocol</a><ul>
@@ -670,9 +671,8 @@
 </li>
 </ul>
 </div>
-<p>All protocol classes are <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>
-subclasses, which parse extracted binary packet data and/or construct a packet
-from given information. The class hierarchy of <a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>:</p>
+<p>Every protocol class subclasses <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>,
+parsing a packet from its octets or building one from field values:</p>
 <pre  class="mermaid">
         flowchart LR
     A{{ProtocolMeta}} -.-&gt;|metaclass| B(ProtocolBase)
@@ -847,12 +847,12 @@ from given information. The class hierarchy of <a class="reference internal" hre
     click Frame &quot;misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame&quot;
     </pre><section id="protocol-registry">
 <h2>Protocol Registry<a class="headerlink" href="#protocol-registry" title="Link to this heading">¶</a></h2>
-<p>The registry of protocol classes by name is
-<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>.
+<p><a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>
+maps names to protocol classes.
 <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolMeta.registry" title="pcapkit.protocols.protocol.ProtocolMeta.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolMeta.registry</span></code></a> reads it
 as <code class="docutils literal notranslate"><span class="pre">AnyProtocol.registry</span></code>, a read-only view importing nothing, and
 <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.get_protocol</span></code></a>
-looks a name up in it and returns the class.</p>
+returns the class a name maps to.</p>
 <div class="versionremoved">
 <p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code>, with no alias: read
 <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>
@@ -860,8 +860,8 @@ through <a class="reference internal" href="protocol.html#pcapkit.protocols.prot
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Please refer to <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol()</span></code></a>
-for more information.</p>
+<p><a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol()</span></code></a>, which
+registers a protocol.</p>
 </div>
 </section>
 <section id="module-pcapkit.protocols.schema">
@@ -952,11 +952,9 @@ by: <code class="docutils literal notranslate"><span class="pre">for</span> <spa
 <dd><p>Convert <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>We only convert nested <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> objects into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> if
-they are the direct value of the <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> object’s attribute.
-Should such <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> objects be nested within other data
-types, such as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#set" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>, etc., we
-leave them intact rather than converting them into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
+<p>Only a nested <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> that is an attribute’s direct value
+is converted into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>; one held within another type, such
+as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#set" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>, is left intact.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1023,12 +1021,9 @@ are absent otherwise.</p>
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>Since we do not know the length of the packet, we use a
-reasonable default value <code class="docutils literal notranslate"><span class="pre">-1</span></code> for the <code class="docutils literal notranslate"><span class="pre">__length__</span></code>
-field, as the <a class="reference internal" href="../corekit/fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>
-class will consider negative value as a placeholder.</p>
-<p>If you want to pack the packet with the correct length,
-please provide the <code class="docutils literal notranslate"><span class="pre">__length__</span></code> value before packing.</p>
+<p>The packet’s length being unknown, <code class="docutils literal notranslate"><span class="pre">__length__</span></code> defaults to
+<code class="docutils literal notranslate"><span class="pre">-1</span></code>, which <a class="reference internal" href="../corekit/fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> takes
+as a placeholder; give <code class="docutils literal notranslate"><span class="pre">__length__</span></code> to pack the correct length.</p>
 </div>
 </dd></dl>
 
@@ -1241,7 +1236,7 @@ what was captured (<a class="extlink-issue reference external" href="https://git
 <p><a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> with enumeration mapping support.</p>
 <div class="admonition-examples admonition">
 <p class="admonition-title">Examples</p>
-<p>To create an enumeration mapping supported schema, simply</p>
+<p>Subclass it with the enumeration:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MySchema</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">MyEnum</span><span class="p">]):</span>
 
     <span class="c1"># optional, set the default schema for enumeration mapping</span>
@@ -1249,8 +1244,7 @@ what was captured (<a class="extlink-issue reference external" href="https://git
     <span class="n">__default__</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownSchema</span>  <span class="c1"># by default, None</span>
 </pre></div>
 </div>
-<p>then, you can use inheritance to create a list of schemas
-for this given enumeration mapping:</p>
+<p>then subclass that per code, or list of codes:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">OneSchema</span><span class="p">(</span><span class="n">MySchema</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">ONE</span><span class="p">):</span>
     <span class="o">...</span>
 
@@ -1615,8 +1609,8 @@ dispatched, and without <code class="docutils literal notranslate"><span class="
 <dd><p>Metadata keys that <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and the dumps leave out.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Please refer to <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Protocol._decode_next_layer</span></code></a>
-for more information with the inserted names to be excluded.</p>
+<p><a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Protocol._decode_next_layer</span></code></a>,
+which inserts <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code> and <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>.</p>
 </div>
 </dd></dl>
 
@@ -1699,7 +1693,7 @@ for more information with the inserted names to be excluded.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

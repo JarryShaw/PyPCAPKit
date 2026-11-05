@@ -6,26 +6,28 @@ IGMP - Internet Group Management Protocol
 
 :mod:`pcapkit.protocols.internet.igmp.protocol` contains
 :class:`~pcapkit.protocols.internet.igmp.protocol.IGMP`, the abstract base of the
-Internet Group Management Protocol (IGMP) [*]_ versions 1, 2 and 3. IGMPv1
-and IGMPv2 share the 8-octet structure below.
-:class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.protocol.IGMPv1>` and
-:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.protocol.IGMPv2>` set
-:attr:`~pcapkit.protocols.internet.igmp.protocol.IGMP.version` and reuse this schema and
-data model as-is; IGMPv3's wire format differs materially by message, so
-:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.protocol.IGMPv3>` carries its own
-instead -- see :doc:`igmpv3`.
-:attr:`~pcapkit.protocols.internet.igmp.protocol.IGMP.alias` names the protocol each
-message is read as: ``'IGMP'`` for IGMPv1, the name :rfc:`1112` gives it, and
-``'IGMPv2'`` or ``'IGMPv3'`` for the others. Constructing the base gives the
-version class its ``version`` keyword names; without it, octets give the class
-the message classifies as, and fields are refused. Its
-:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP.from_data` gives the class the
-``version`` of its data names: every IGMP data model carries one, ``1``, ``2`` or
+Internet Group Management Protocol (IGMP) [*]_ versions 1, 2 and 3:
+
+=========================================================== ============== =========================================
+Version class                                               ``alias``      Schema and data model
+=========================================================== ============== =========================================
+:class:`~pcapkit.protocols.internet.igmpv1.protocol.IGMPv1` ``'IGMP'``     this page's, keyed ``igmpv1``
+:class:`~pcapkit.protocols.internet.igmpv2.protocol.IGMPv2` ``'IGMPv2'``   this page's, keyed ``igmpv2``
+:class:`~pcapkit.protocols.internet.igmpv3.protocol.IGMPv3` ``'IGMPv3'``   its own, as its wire format differs by
+                                                                           message (:doc:`igmpv3`)
+=========================================================== ============== =========================================
+
+IGMPv1's :attr:`~pcapkit.protocols.internet.igmp.protocol.IGMP.alias` is the name
+:rfc:`1112` gives it. Constructing the base gives the version class its
+``version`` keyword names; without it, octets give the class the message
+classifies as, and fields are refused.
+:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP.from_data` gives the class
+its data's ``version`` names: every IGMP data model carries one, ``1``, ``2`` or
 ``3``, set by the class that read or built the message and on no octet, so an
 IGMPv1 and an IGMPv2 message read alike apart from it (:issue:`2574`).
 
-Octets are given a member, or :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, by
-:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch`, which
+:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch` gives octets a
+version class, or :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as
 :meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP._classify` decides:
 
 .. mermaid::
@@ -61,8 +63,7 @@ Octets are given a member, or :class:`~pcapkit.protocols.misc.raw.protocol.Raw`,
        click V2 "igmpv2.html#pcapkit.protocols.internet.igmpv2.protocol.IGMPv2"
        click V3 "igmpv3.html#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3"
 
-The structure is keyed as for IGMPv1; an IGMPv2 message's keys start ``igmpv2``
-instead:
+The IGMPv1 and IGMPv2 structure, keyed as for IGMPv1:
 
 ======= ========= ========================= ===================================
 Octets      Bits        Name                    Description

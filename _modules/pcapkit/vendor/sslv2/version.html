@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -561,6 +562,10 @@
 <span class="sd">This module contains the vendor crawler for **SSLv2 Protocol Version**, which</span>
 <span class="sd">is automatically generating :class:`pcapkit.const.sslv2.version.Version`.</span>
 
+<span class="sd">Any other version resolves to an unregistered member rather than raising, as an</span>
+<span class="sd">SSLv3-capable client sends an SSLv2-framed ``CLIENT-HELLO`` reading ``0x0300``</span>
+<span class="sd">(:rfc:`6101#appendix-E`).</span>
+
 <span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
@@ -575,23 +580,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Version'</span><span class="p">]</span>
 
 <span class="c1">###############################################################################</span>
-<span class="c1"># NOTE: this crawler does not crawl. Its source is the expired Netscape SSLv2</span>
-<span class="c1"># draft, draft-hickman-netscape-ssl-00, which is not an IANA (or any other)</span>
-<span class="c1"># live registry a crawler could re-fetch -- there is nothing upstream of this</span>
-<span class="c1"># module to go stale against. Per the const-vendor-pairing convention, a</span>
-<span class="c1"># hand-maintained registry still gets a crawler, reading</span>
-<span class="c1"># :data:`~pcapkit.vendor.sslv2.version.DATA` instead of fetching a URL -- the</span>
-<span class="c1"># same shape as :mod:`pcapkit.vendor.linux.arphrd`,</span>
-<span class="c1"># :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.</span>
-<span class="c1">#</span>
-<span class="c1"># SSLv2 carries no record-layer version field; ``CLIENT-VERSION`` and</span>
-<span class="c1"># ``SERVER-VERSION`` are handshake-body fields, which is why the registry</span>
-<span class="c1"># below names a single value rather than a numbered range: any value other</span>
-<span class="c1"># than ``SSL-2.0`` is not necessarily malformed -- per :rfc:`6101#appendix-E`,</span>
-<span class="c1"># an SSLv3-capable client sends an SSLv2-framed ``CLIENT-HELLO`` whose version</span>
-<span class="c1"># reads ``768`` (``0x0300``) -- so :meth:`~pcapkit.const.sslv2.version.Version._missing_`</span>
-<span class="c1"># resolves any other in-range value to an unregistered member instead of</span>
-<span class="c1"># raising.</span>
+<span class="c1"># NOTE: reads the hand-maintained :data:`~pcapkit.vendor.sslv2.version.DATA`, as</span>
+<span class="c1"># draft-hickman-netscape-ssl-00 is no live registry.</span>
 <span class="c1">###############################################################################</span>
 
 <span class="c1">#: SSLv2 protocol version registry, transcribed from</span>
@@ -693,7 +683,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

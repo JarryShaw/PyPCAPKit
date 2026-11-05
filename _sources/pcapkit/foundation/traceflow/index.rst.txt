@@ -9,13 +9,11 @@ Flow Tracing
    This approximates the *Follow TCP Stream* feature of
    `Wireshark <https://www.wireshark.org/>`__.
 
-:mod:`pcapkit.foundation.traceflow` implements flow tracing functions
-for :mod:`pcapkit` package.
+:mod:`pcapkit.foundation.traceflow` implements flow tracing.
 
 .. seealso::
 
-   For more information on customisation and extension, please
-   refer to :doc:`../../../ext`.
+   :doc:`../../../ext`, on customisation and extension.
 
 .. toctree::
    :maxdepth: 2
@@ -23,10 +21,9 @@ for :mod:`pcapkit` package.
    traceflow
    tcp
 
-All flow tracing classes are implemented as :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
-subclasses, which are responsible for processing extracted packets and
-following the flow and/or stream to provide more insights. Below is a brief
-diagram of the class hierarchy of :mod:`pcapkit.foundation.traceflow`:
+Every flow tracing class subclasses
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, following the
+flows of extracted packets:
 
 .. mermaid::
 

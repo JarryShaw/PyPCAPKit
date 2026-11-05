@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -811,33 +812,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: ``SchemaField`` is imported at module level rather than inside</span>
-        <span class="c1"># this method body -- there is no cyclic import to dodge by doing so;</span>
-        <span class="c1"># :mod:`pcapkit.corekit.fields.misc` does not import this module. A local</span>
-        <span class="c1"># ``from ... import`` re-resolves against :data:`sys.modules` on *every*</span>
-        <span class="c1"># call, and normally that is a cheap dict lookup returning the same</span>
-        <span class="c1"># cached module -- except when something has popped</span>
-        <span class="c1"># :mod:`pcapkit.corekit.fields.misc` out of :data:`sys.modules` since</span>
-        <span class="c1"># this ``ListField`` was built (the ``#439`` regression tests do exactly</span>
-        <span class="c1"># that, to get a clean ABC-cache state between cases). The next call</span>
-        <span class="c1"># would then re-execute the module from scratch and mint a *second*,</span>
-        <span class="c1"># distinct ``SchemaField`` class, while ``self._item_type`` -- built long</span>
-        <span class="c1"># before, from the first one -- is still an instance of the original.</span>
-        <span class="c1"># ``isinstance`` against the new class would report :data:`False` for an</span>
-        <span class="c1"># item that plainly is a ``SchemaField``, ``is_schema`` would go the</span>
-        <span class="c1"># wrong way, and the item loop's other branch would bill each item by its</span>
-        <span class="c1"># *declared* length instead of by what it actually consumed -- so a</span>
-        <span class="c1"># malformed TCP SACK option's length check could raise</span>
-        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead</span>
-        <span class="c1"># of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from</span>
-        <span class="c1"># :meth:`TCP._read_mode_sack</span>
-        <span class="c1"># &lt;pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sack&gt;`, depending on</span>
-        <span class="c1"># unrelated things that ran earlier in the same process. Cf. #525.</span>
-        <span class="c1"># Importing at module level, once, for the life of this module object,</span>
-        <span class="c1"># closes that off: ``SchemaField`` then stays whatever class this</span>
-        <span class="c1"># module resolved at its own import time, regardless of what happens to</span>
-        <span class="c1"># :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`</span>
-        <span class="c1"># afterwards.</span>
+        <span class="c1"># NOTE: ``SchemaField`` is imported at module level: a re-executed ``misc`` (as the #439 tests</span>
+        <span class="c1"># force) would mint a second class this ``isinstance`` misses, mis-sizing items (#525).</span>
         <span class="n">is_schema</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">start</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
@@ -884,22 +860,8 @@
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
         <span class="n">item_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'FieldBase'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The item-typed branch below sizes each item by ``field.length``,</span>
-        <span class="c1"># which is what it read, but the schema branch sizes it by ``len(data)``,</span>
-        <span class="c1"># which is only what the schema *recorded*. A schema that reads nothing</span>
-        <span class="c1"># records nothing, so ``length -= len(data)`` makes no progress and the</span>
-        <span class="c1"># loop spins forever. The zero-fill in ``unpack`` gives the item the data</span>
-        <span class="c1"># ends inside octets to read, and every item before it reads octets of the</span>
-        <span class="c1"># data, but an item schema may still consume none of them. Remembering where the</span>
-        <span class="c1"># previous item ended is what bounds the iteration count, since it does</span>
-        <span class="c1"># not depend on what the schema reports. Cf. #431, which is the same</span>
-        <span class="c1"># defect in the ``OptionField`` subclass.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``start`` is where the field itself begins. The comparison needs stream</span>
-        <span class="c1"># positions, but the diagnostic wants an offset into the field, and the two</span>
-        <span class="c1"># only coincide when the field happens to be reading from the front of its</span>
-        <span class="c1"># stream -- which it does when handed a :obj:`bytes` buffer and does not</span>
-        <span class="c1"># when handed a live file.</span>
+        <span class="c1"># NOTE: A schema item that reads nothing records ``len(data) == 0`` and would spin forever, so</span>
+        <span class="c1"># progress is measured by stream position (#431); ``start`` turns positions into field offsets.</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_TL]</span>
@@ -925,12 +887,8 @@
 
                 <span class="n">end</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">offset</span><span class="p">:</span>
-                    <span class="c1"># NOTE: ``len(temp)`` counts the items already parsed, so it</span>
-                    <span class="c1"># names the failing one as a count rather than as an ordinal --</span>
-                    <span class="c1"># "after 2 item(s)" rather than "item 2", which would read as</span>
-                    <span class="c1"># the second item when it is the third. The ``OptionField``</span>
-                    <span class="c1"># message below names the option code in this slot and so has</span>
-                    <span class="c1"># no index to be read either way.</span>
+                    <span class="c1"># NOTE: ``len(temp)`` counts items already parsed, so it reads "after N item(s)",</span>
+                    <span class="c1"># not an ordinal that would be off by one.</span>
                     <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has an item that consumed no data: '</span>
                         <span class="sa">f</span><span class="s1">'after </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="si">}</span><span class="s1"> item(s), at offset </span><span class="si">{</span><span class="n">offset</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s1"> of '</span>
@@ -1054,22 +1012,8 @@
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">'Field &lt;option&gt; has no registry.'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_registry</span> <span class="o">=</span> <span class="n">registry</span>
 
-        <span class="c1"># NOTE: Decided once, here, rather than per option in ``unpack``. See the</span>
-        <span class="c1"># docstring above for what the fast path requires and why a base schema</span>
-        <span class="c1"># that does not meet it is accommodated rather than rejected.</span>
-        <span class="c1">#</span>
-        <span class="c1"># The conditions above are exactly what makes reading the type field alone</span>
-        <span class="c1"># the same read that ``Schema.unpack`` performs for it: it must sit at the</span>
-        <span class="c1"># front of the option, ``Schema.unpack`` must handle it through its generic</span>
-        <span class="c1"># branch rather than one of the special ones (a ``NumberField`` is never</span>
-        <span class="c1"># ``PayloadField``, ``PaddingField``, ``ConditionalField``,</span>
-        <span class="c1"># ``ForwardMatchField``, ``SwitchField`` or ``OptionField``), and its width</span>
-        <span class="c1"># must not depend on packet state that the full unpack would have</span>
-        <span class="c1"># established first.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Every test is written so that an unexpected base schema selects the full</span>
-        <span class="c1"># unpack instead of raising, so this cannot turn a working registration</span>
-        <span class="c1"># into an import-time failure.</span>
+        <span class="c1"># NOTE: Decided once here (see the docstring); each test falls back to the full unpack rather than</span>
+        <span class="c1"># raising, so an unexpected base schema cannot turn a registration into an import-time failure.</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_schema</span><span class="p">,</span> <span class="s1">'__fields__'</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">type_field</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span>
 
@@ -1143,28 +1087,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">buffer</span>
 
-        <span class="c1"># NOTE: The loop below sizes each option by ``len(data)`` -- the size of</span>
-        <span class="c1"># the schema the option reported -- and that is not always the number of</span>
-        <span class="c1"># octets the option took from ``file``. The two part company for a schema</span>
-        <span class="c1"># whose ``post_process`` returns a *nested* schema, since ``len(data)``</span>
-        <span class="c1"># then measures the nested schema rather than what the outer one read. So</span>
-        <span class="c1"># ``len(data)`` cannot be the loop's progress measure: an option that</span>
-        <span class="c1"># over-reads leaves ``length`` above zero with ``file`` already exhausted,</span>
-        <span class="c1"># every field of the next option reads ``b''``, and an option that read</span>
-        <span class="c1"># nothing reports ``len(data) == 0`` and leaves ``length`` untouched --</span>
-        <span class="c1"># which spins forever, with no exception and no diagnostic. Cf. #431.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Remembering where the previous option ended gives the loop a measure of</span>
-        <span class="c1"># progress that does not depend on what a schema reports, and one octet of</span>
-        <span class="c1"># it per iteration is what bounds the iteration count. ``length`` is</span>
-        <span class="c1"># decremented by ``len(data)`` as well, so the guard changes nothing for</span>
-        <span class="c1"># an option area that parses.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``start`` is where the option area itself begins. The comparison needs</span>
-        <span class="c1"># stream positions, but the diagnostic wants an offset into the area, and</span>
-        <span class="c1"># the two only coincide when the field happens to be reading from the front</span>
-        <span class="c1"># of its stream -- which it does when handed a :obj:`bytes` buffer and does</span>
-        <span class="c1"># not when handed a live file.</span>
+        <span class="c1"># NOTE: ``len(data)`` measures the reported schema, not the octets read, so an option reading</span>
+        <span class="c1"># nothing would spin forever; stream position bounds the loop (#431), ``start`` maps it to offsets.</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
         <span class="c1"># make a copy of the ``packet`` dict so that we can include</span>
@@ -1172,49 +1096,12 @@
         <span class="n">new_packet</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">new_packet</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
-        <span class="c1"># NOTE: Where it can, this reads the base schema's type field alone rather</span>
-        <span class="c1"># than the whole base schema. The option schema below re-reads the same</span>
-        <span class="c1"># octets from the rewound stream, and the base schema's result is used for</span>
-        <span class="c1"># nothing but the type code, so unpacking it in full parses every option</span>
-        <span class="c1"># twice -- 2274 schema unpacks for 1137 options of</span>
-        <span class="c1"># ``examples/captures/profile.pcapng``.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Reading the type field alone deliberately mirrors what</span>
-        <span class="c1"># :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
-        <span class="c1"># does for one field -- ``field(packet)``, read ``field.length`` octets,</span>
-        <span class="c1"># then ``field.unpack(byte, packet.copy())`` -- rather than reaching for</span>
-        <span class="c1"># :func:`struct.unpack`. That keeps ``code``'s enumeration type, which both</span>
-        <span class="c1"># the ``self._eool`` comparison and the ``OrderedMultiDict`` key depend on,</span>
-        <span class="c1"># and it is what makes the two spellings equivalent rather than merely</span>
-        <span class="c1"># similar.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``self._type_field`` is :data:`None` for a base schema that the shortcut</span>
-        <span class="c1"># does not fit -- see the class docstring -- and the full unpack is used</span>
-        <span class="c1"># for it instead. Whichever way the code was read, ``consumed`` is the</span>
-        <span class="c1"># number of octets to rewind to get back to the front of the option.</span>
+        <span class="c1"># NOTE: Reads only the type field, as ``Schema.unpack`` reads it, so no option is parsed twice and</span>
+        <span class="c1"># ``code`` keeps its enum type; a None ``_type_field`` falls back to the full unpack.</span>
         <span class="n">type_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_field</span>
 
-        <span class="c1"># NOTE: An option whose declared length runs past the octets behind it</span>
-        <span class="c1"># reads short, and every field reading off the end pads the missing</span>
-        <span class="c1"># octets with zeros, so the option would rebuild octets that were never</span>
-        <span class="c1"># there: a HIP ``ACK`` declaring 256 octets with 4 present, or an MH</span>
-        <span class="c1"># ``PadN`` declaring 3 with none. Nothing downstream can tell, because</span>
-        <span class="c1"># the schema records the zeros as values. Cf. #1325.</span>
-        <span class="c1">#</span>
-        <span class="c1"># So the stream is read through a proxy that notes any short read, and</span>
-        <span class="c1"># an option that began with at least one octet present and then read</span>
-        <span class="c1"># short is rejected. An option that begins at the end of the data reads</span>
-        <span class="c1"># nothing at all and is left to the end-of-option-list and progress</span>
-        <span class="c1"># handling below, which is what an option area declared longer than its</span>
-        <span class="c1"># octets relies on.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Unless the data ends inside the area: fewer octets are left than it</span>
-        <span class="c1"># declares, as a capture cut short leaves them. An option the cut lands</span>
-        <span class="c1"># inside, or in front of, is not one running past its area, and is read</span>
-        <span class="c1"># as the short read :meth:`Schema.unpack` records (#2694). An enclosing</span>
-        <span class="c1"># layer that knows the data ends at the length it declares, not at a cut,</span>
-        <span class="c1"># says so with ``__capture_cut__`` false in ``packet``, and the area then</span>
-        <span class="c1"># runs past that length.</span>
+        <span class="c1"># NOTE: An option reading short past its octets would rebuild zeros as values, so it is rejected</span>
+        <span class="c1"># (#1325) unless a capture cut ends the data inside the area, read as a short read (#2694).</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">present</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1244,12 +1131,8 @@
                 <span class="n">code</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
                 <span class="n">consumed</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: The data ends where this option would begin, inside the area: the</span>
-            <span class="c1"># cut leaves no option to read, so the list ends with the data, and</span>
-            <span class="c1"># :meth:`Schema.unpack` records the cut from the rest of the area left</span>
-            <span class="c1"># as ``option_padding`` (#2694). Where no cut ends it, the area runs</span>
-            <span class="c1"># past the data. A registry whose end-of-option-list code is 0 reads its</span>
-            <span class="c1"># exhausted type as that code, and stops at it below.</span>
+            <span class="c1"># NOTE: A cut where this option would begin ends the list, the rest left as ``option_padding``</span>
+            <span class="c1"># (#2694); with no cut the area runs past the data, and a 0 end-of-list code stops below.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">consumed</span> <span class="ow">and</span> <span class="n">short</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eool</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">cut</span><span class="p">:</span>
                     <span class="k">break</span>
@@ -1265,10 +1148,8 @@
             <span class="c1"># unpack option using option schema</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg,misc,var-annotated]</span>
 
-            <span class="c1"># NOTE: An option the cut lands inside stands when the fields it</span>
-            <span class="c1"># declares fit the area, as ``__length__`` left at zero or more shows,</span>
-            <span class="c1"># and it read the octets there (#2694). One whose fields reach past</span>
-            <span class="c1"># the area runs past both (#1325).</span>
+            <span class="c1"># NOTE: An option the cut lands inside stands if its fields fit the area (``__length__`` &gt;= 0)</span>
+            <span class="c1"># and it read octets there (#2694); one reaching past the area runs past both (#1325).</span>
             <span class="n">stands</span> <span class="o">=</span> <span class="p">(</span><span class="n">cut</span> <span class="ow">and</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">offset</span>
                       <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepts_cut</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">tracker</span><span class="o">.</span><span class="n">short</span> <span class="ow">and</span> <span class="n">consumed</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">stands</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepts_short_read</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
@@ -1288,23 +1169,8 @@
             <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eool</span><span class="p">:</span>
                 <span class="k">break</span>
 
-            <span class="c1"># NOTE: The progress check comes *after* the end-of-option-list break,</span>
-            <span class="c1"># and that order is not incidental. An area declared longer than the</span>
-            <span class="c1"># octets behind it -- an over-long ``ihl``, or a capture cut short by</span>
-            <span class="c1"># the snapshot length -- exhausts ``file`` early, and the exhausted</span>
-            <span class="c1"># read then decodes the type field as 0. For the IPv4, TCP and PCAP-NG</span>
-            <span class="c1"># registries 0 *is* the end-of-option-list code, so the break above</span>
-            <span class="c1"># absorbs that case and reports the rest of the area as padding.</span>
-            <span class="c1"># Checking progress first would turn all of those into errors: measured</span>
-            <span class="c1"># on ``IPv4(bytes.fromhex('4a00001800010000400600000a0000010a000002'))``,</span>
-            <span class="c1"># 20 octets of options declared with none present, and on a TCP segment</span>
-            <span class="c1"># with a data offset of 10 and four option octets, both of which parse.</span>
-            <span class="c1">#</span>
-            <span class="c1"># The registries that spin are the ones where 0 is *not* the</span>
-            <span class="c1"># end-of-option-list code, so they never reach the break: HOPOPT,</span>
-            <span class="c1"># IPv6-Opts and MH read 0 as ``Pad1``, HIP as an unassigned parameter,</span>
-            <span class="c1"># SCTP as a DATA chunk. Those are what this guards, and one octet of</span>
-            <span class="c1"># measured progress per surviving iteration is what bounds the loop.</span>
+            <span class="c1"># NOTE: Checked after the end-of-list break, where an exhausted read decoding as a 0 end code ends</span>
+            <span class="c1"># as padding; registries whose 0 is not that code (e.g. HOPOPT ``Pad1``) would otherwise spin.</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">offset</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
@@ -1392,7 +1258,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

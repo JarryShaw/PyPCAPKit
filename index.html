@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -587,90 +588,80 @@ still tests the end-of-life 3.8 to 3.10 without letting a failure block anything
 <section id="about">
 <h2>About<a class="headerlink" href="#about" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> is an independent open source library, with
-<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a> as its formatted output dumper.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>There is a project called <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> that works on <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which is
-a command line tool for PCAP extraction.</p>
+<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a> as its formatted output dumper. Compared with
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post34)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> and <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, it gives more detailed packet
+information through a more <em>Pythonic</em> interface.</p>
 <div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 0.8.0: </span>The <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> project is deprecated and has been merged into the
-<a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> project as its CLI support.</p>
+<p><span class="versionmodified deprecated">Deprecated since version 0.8.0: </span><a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a>, a command line tool for PCAP extraction built on <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>,
+has been merged into <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> as its CLI.</p>
 </div>
-</div>
-<p>Unlike popular PCAP extractors such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post34)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
-<a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> and <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> aims to be more
-comprehensive: more detailed packet information, and a more <em>Pythonic</em>
-interface.</p>
 <section id="module-structure">
 <h3>Module Structure<a class="headerlink" href="#module-structure" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is made of these subpackages.</p>
-<ul>
-<li><p>Interface (<a class="reference internal" href="pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a>)</p>
-<p>User interface for the <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> library, which
-standardises and simplifies the usage of this library.</p>
-</li>
-<li><p>Foundation (<a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>)</p>
-<p>Synthesises file I/O and protocol analysis, coordinates
-information exchange in all network layers, and
-provides the fundamental functions for <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
-</li>
-<li><p>Protocols (<a class="reference internal" href="pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>)</p>
-<p>Collection of all protocol families, with detailed
-implementation and methods.</p>
-</li>
-<li><p>Utilities (<a class="reference internal" href="pcapkit/utilities/index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a>)</p>
-<p>Auxiliary functions and tools for <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
-</li>
-<li><p>CoreKit (<a class="reference internal" href="pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a>)</p>
-<p>Core utilities for <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implementation, mainly
-for internal data structure and processing.</p>
-</li>
-<li><p>ToolKit (<a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>)</p>
-<p>Auxiliary tools for <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> to support the multiple
-extraction engines with a unified interface.</p>
-</li>
-<li><p>DumpKit (<a class="reference internal" href="pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a>)</p>
-<p>File output formatters for <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
-</li>
-<li><p>Constants (<a class="reference internal" href="pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>)</p>
-<p>Constant enumerations used in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> for protocol
-family extraction and representation.</p>
-</li>
-<li><p>Vendor (<a class="reference internal" href="pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>)</p>
-<p>Crawlers that regenerate the <a class="reference internal" href="pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> enumerations
-from the upstream registries.</p>
-</li>
-</ul>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Subpackage</p></th>
+<th class="head"><p>Holds</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Interface (<a class="reference internal" href="pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a>)</p></td>
+<td><p>the user-facing functions</p></td>
+</tr>
+<tr class="row-odd"><td><p>Foundation (<a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>)</p></td>
+<td><p>extraction, reassembly, flow tracing and the registries behind them</p></td>
+</tr>
+<tr class="row-even"><td><p>Protocols (<a class="reference internal" href="pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>)</p></td>
+<td><p>every protocol family</p></td>
+</tr>
+<tr class="row-odd"><td><p>Utilities (<a class="reference internal" href="pcapkit/utilities/index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a>)</p></td>
+<td><p>the cross-cutting services the library is built with</p></td>
+</tr>
+<tr class="row-even"><td><p>CoreKit (<a class="reference internal" href="pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a>)</p></td>
+<td><p>the core data structures, such as
+<a class="reference internal" href="pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> and
+<a class="reference internal" href="pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>ToolKit (<a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>)</p></td>
+<td><p>the per-engine adapters behind reassembly and flow tracing</p></td>
+</tr>
+<tr class="row-even"><td><p>DumpKit (<a class="reference internal" href="pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a>)</p></td>
+<td><p>the output dumpers added to those of <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Constants (<a class="reference internal" href="pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>)</p></td>
+<td><p>the constant enumerations, generated by <a class="reference internal" href="pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>Vendor (<a class="reference internal" href="pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>)</p></td>
+<td><p>the crawlers that regenerate <a class="reference internal" href="pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> from the upstream
+registries</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 <section id="engine-comparison">
 <h3>Engine Comparison<a class="headerlink" href="#engine-comparison" title="Link to this heading">¶</a></h3>
 <p>Besides its own parser, <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> can extract through <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>,
 <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>: every one of them but
-<a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> is faster, and every one supports less. <a class="reference internal" href="engines.html"><span class="doc">Engine Comparison</span></a> compares them
-– what each supports, which Python versions each runs on, what each needs
-installed, and how fast each measured per packet.</p>
+<a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> is faster, and every one supports less. <a class="reference internal" href="engines.html"><span class="doc">Engine Comparison</span></a> compares their
+support, Python versions, prerequisites and per-packet speed.</p>
 </section>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The sources use 3.8 syntax, so <code class="docutils literal notranslate"><span class="pre">requires-python</span></code> is <code class="docutils literal notranslate"><span class="pre">&gt;=3.8</span></code> and pip
-refuses an older interpreter. Before 1.5.0 the <code class="docutils literal notranslate"><span class="pre">bpc-*</span></code> backport tools
-converted it at install time; they are no longer maintained, and the
-conversion is gone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
+<p>The sources use 3.8 syntax and nothing converts them, since the <code class="docutils literal notranslate"><span class="pre">bpc-*</span></code>
+backport tools are unmaintained (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>), so <code class="docutils literal notranslate"><span class="pre">requires-python</span></code> is
+<code class="docutils literal notranslate"><span class="pre">&gt;=3.8</span></code> and pip refuses an older interpreter. 3.8 to 3.10 are end-of-life
+and best-effort, and individual <em>engines</em> stop earlier than the library
+does; see <a class="reference internal" href="engines.html#engine-prerequisites"><span class="std std-ref">Engine Prerequisites</span></a>.</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>3.8 to 3.10 are end-of-life and best-effort: CI builds and tests them, but a
-failure there blocks nothing. Individual <em>engines</em> also stop earlier than the
-library does; see <a class="reference internal" href="engines.html#engine-prerequisites"><span class="std std-ref">Engine Prerequisites</span></a>.</p>
-</div>
-<p>Run the following to install the current version from PyPI:</p>
+<p>Install the current version from PyPI:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit
 </pre></div>
 </div>
-<p>Or install the latest version from the git repository:</p>
+<p>Or the latest version from the repository:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/JarryShaw/PyPCAPKit.git
 <span class="nb">cd</span><span class="w"> </span>PyPCAPKit
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
@@ -678,25 +669,23 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 git<span class="w"> </span>pull
 </pre></div>
 </div>
-<p>For local development with <code class="docutils literal notranslate"><span class="pre">pipenv</span></code>, the repository already includes a
-<code class="file docutils literal notranslate"><span class="pre">Pipfile</span></code> and <code class="file docutils literal notranslate"><span class="pre">Makefile</span></code> targets that keep both the virtualenv and
-the package caches inside the project directory:</p>
+<p>For local development, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">setup</span></code> installs the <code class="file docutils literal notranslate"><span class="pre">Pipfile</span></code> through
+<code class="docutils literal notranslate"><span class="pre">pipenv</span></code> with the virtualenv and package caches inside the project directory,
+and points <code class="docutils literal notranslate"><span class="pre">lxml</span></code> at Homebrew’s <code class="docutils literal notranslate"><span class="pre">libxml2</span></code>/<code class="docutils literal notranslate"><span class="pre">libxslt</span></code> where they are
+installed. That avoids <code class="docutils literal notranslate"><span class="pre">pipenv</span></code> cache permission errors under
+<code class="file docutils literal notranslate"><span class="pre">~/Library/Caches</span></code> and <code class="docutils literal notranslate"><span class="pre">lxml</span></code> builds missing those headers:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>setup
 </pre></div>
 </div>
-<p>This resolves common local setup issues on macOS/Homebrew installations:
-<code class="docutils literal notranslate"><span class="pre">pipenv</span></code> cache permission errors under <code class="file docutils literal notranslate"><span class="pre">~/Library/Caches</span></code>, and <code class="docutils literal notranslate"><span class="pre">lxml</span></code>
-builds failing to locate Homebrew’s <code class="docutils literal notranslate"><span class="pre">libxml2</span></code>/<code class="docutils literal notranslate"><span class="pre">libxslt</span></code> headers.</p>
-<p>If you prefer to run <code class="docutils literal notranslate"><span class="pre">pipenv</span></code> directly, use the same local cache layout and
-skip any stale, user-local <code class="file docutils literal notranslate"><span class="pre">Pipfile.lock</span></code>:</p>
+<p>To run <code class="docutils literal notranslate"><span class="pre">pipenv</span></code> directly, use the same cache layout and skip any stale,
+user-local <code class="file docutils literal notranslate"><span class="pre">Pipfile.lock</span></code>:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">PIPENV_VENV_IN_PROJECT</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
 <span class="nv">PIPENV_CACHE_DIR</span><span class="o">=</span><span class="nv">$PWD</span>/.pipenv-cache<span class="w"> </span><span class="se">\</span>
 <span class="nv">PIP_CACHE_DIR</span><span class="o">=</span><span class="nv">$PWD</span>/.pip-cache<span class="w"> </span><span class="se">\</span>
 pipenv<span class="w"> </span>install<span class="w"> </span>--skip-lock<span class="w"> </span>--dev
 </pre></div>
 </div>
-<p>And since <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports various extraction engines, and extensive
-plug-in functions, you may want to install the optional ones:</p>
+<p>The optional engines and addons install as extras:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># for DPKT only</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>DPKT<span class="o">]</span>
 <span class="c1"># for Scapy only</span>
@@ -705,33 +694,28 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PyShark<span class="o">]</span>
 <span class="c1"># for PyPCAPFile only</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PyPCAPFile<span class="o">]</span>
-<span class="c1"># for PyPCAP only -- see the note below, this one builds from source</span>
+<span class="c1"># for PyPCAP only -- builds from source, see below</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PyPCAP<span class="o">]</span>
-<span class="c1"># for pcap-ct only -- the pure-Python alternative to PyPCAP, and the one that</span>
-<span class="c1"># works on Python 3.12+; do not install it alongside PyPCAP</span>
+<span class="c1"># for pcap-ct only -- pure Python, works on 3.12+; never alongside PyPCAP</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PCAP_CT<span class="o">]</span>
 <span class="c1"># for ESP payload decryption</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>crypto<span class="o">]</span>
-<span class="c1"># and to install every core addon at once -- CLI display, ESP decryption</span>
-<span class="c1"># and NGAP decoding; none of the engines above are included, install each</span>
-<span class="c1"># on demand as shown</span>
+<span class="c1"># every core addon -- CLI display, ESP decryption and NGAP decoding;</span>
+<span class="c1"># no engine above is included</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>all<span class="o">]</span>
-<span class="c1"># or to do this explicitly</span>
+<span class="c1"># or explicitly</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="w"> </span>emoji<span class="w"> </span>cryptography<span class="w"> </span>pycrate
 </pre></div>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">all</span></code> extra deliberately excludes both <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>, for
-different reasons. Everything
-else in <code class="docutils literal notranslate"><span class="pre">all</span></code> installs from a published wheel, whereas <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> compiles a C
-extension; pulling it into <code class="docutils literal notranslate"><span class="pre">all</span></code> would demand a working compiler and the
-<a class="reference external" href="https://www.tcpdump.org">libpcap</a> development files from everyone installing <code class="docutils literal notranslate"><span class="pre">pypcapkit[all]</span></code>.
-<code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> needs no compiler, but it and its <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> dependency are
-published only as <strong>pre-releases</strong> (1.3.0b3 and 1.11.0b29), and <code class="docutils literal notranslate"><span class="pre">all</span></code> should
-not be how somebody ends up with a beta they did not ask for. Install either
-explicitly: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[PyPCAP]</span></code> or
-<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[PCAP_CT]</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">all</span></code> leaves out <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> on purpose. <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> compiles a
+C extension, which would demand a compiler and the <a class="reference external" href="https://www.tcpdump.org">libpcap</a> development
+files from everyone installing <code class="docutils literal notranslate"><span class="pre">pypcapkit[all]</span></code>; everything else in <code class="docutils literal notranslate"><span class="pre">all</span></code>
+installs from a wheel. <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> needs no compiler, but it and its
+<code class="docutils literal notranslate"><span class="pre">libpcap</span></code> dependency are published only as <strong>pre-releases</strong> (1.3.0b3 and
+1.11.0b29), and <code class="docutils literal notranslate"><span class="pre">all</span></code> should not install a beta nobody asked for. Install
+either through its own extra, as above.</p>
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">all</span></code> installs the core addons only: <code class="docutils literal notranslate"><span class="pre">emoji</span></code>, <code class="docutils literal notranslate"><span class="pre">cryptography</span></code> and
@@ -742,19 +726,18 @@ moved to the <code class="docutils literal notranslate"><span class="pre">dev</s
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>Install only one of</strong> <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>. Both own the top-level
-<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> module, and <code class="docutils literal notranslate"><span class="pre">pip</span></code> will install both without complaint. With both
-present the <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> package wins the import and <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s extension
-module is shadowed and unreachable, so <code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> stops working –
-measured on Python 3.10. <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> detects that state and warns with an
-<a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> naming both distributions
-and which one won, but it cannot undo it.</p>
+<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> module, and <code class="docutils literal notranslate"><span class="pre">pip</span></code> installs both without complaint. <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> then
+wins the import and shadows <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s extension module, so
+<code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> stops working – measured on Python 3.10. <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
+warns with an <a class="reference internal" href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> naming both
+distributions and the winner, but cannot undo it.</p>
 </div>
 <p>Some engines need more than a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> – a <strong class="program">tshark</strong> binary, a C
 compiler and the <a class="reference external" href="https://www.tcpdump.org">libpcap</a> headers, or an older interpreter.
 <a class="reference internal" href="engines.html#engine-prerequisites"><span class="std std-ref">Engine Prerequisites</span></a> gives each constraint and its reason.</p>
-<p>For CLI usage, you will need to install the optional packages:</p>
+<p>The CLI needs the <code class="docutils literal notranslate"><span class="pre">cli</span></code> extra:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>cli<span class="o">]</span>
-<span class="c1"># or explicitly...</span>
+<span class="c1"># or explicitly</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="w"> </span>emoji
 </pre></div>
 </div>
@@ -833,7 +816,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="_static/documentation_options.js?v=662e1299"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

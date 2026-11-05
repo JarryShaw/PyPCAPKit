@@ -4,10 +4,8 @@ File Extractor
 .. module:: pcapkit.foundation.extraction
 
 :mod:`pcapkit.foundation.extraction` contains
-:class:`~pcapkit.foundation.extraction.Extractor` only,
-which synthesises file I/O and protocol analysis,
-coordinates information exchange in all network layers,
-and extracts parameters from a PCAP file.
+:class:`~pcapkit.foundation.extraction.Extractor` only, which reads a capture
+file and dissects its frames, dumping, reassembling and tracing them as asked.
 
 .. seealso::
 
@@ -15,9 +13,9 @@ and extracts parameters from a PCAP file.
    :class:`pcapkit.foundation.engines.pypcap.PyPCAP` (``engine='pypcap'``),
    :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT` (``engine='pcap_ct'``)
    and :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
-   (``engine='pypcapfile'``). Each supports less than the
-   :term:`default engine` does; :doc:`engines/index` tabulates the gaps, and
-   :ref:`engine-prerequisites` gives what each needs installed.
+   (``engine='pypcapfile'``), each with gaps against the :term:`default engine`
+   that :doc:`engines/index` tabulates; :ref:`engine-prerequisites` gives what
+   each needs installed.
 
 An extraction runs in this order; a third-party engine implements its own
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.read_frame`:

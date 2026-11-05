@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/protocol.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.protocol contains Protocol, an abstract base class with pre-defined utility arguments and methods. Inherit it directly only to create a new protocol stack; a new protocol in an ex..." />
-<meta name="description" content="pcapkit.protocols.protocol contains Protocol, an abstract base class with pre-defined utility arguments and methods. Inherit it directly only to create a new protocol stack; a new protocol in an ex..." />
+<meta property="og:description" content="pcapkit.protocols.protocol contains Protocol, the abstract base for a new protocol stack. A protocol in an existing layer subclasses that layer’s base instead – Link, Internet, Transport or Applica..." />
+<meta name="description" content="pcapkit.protocols.protocol contains Protocol, the abstract base for a new protocol stack. A protocol in an existing layer subclasses that layer’s base instead – Link, Internet, Transport or Applica..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Link Layer" href="link/index.html"><link rel="prev" title="Protocol Family" href="index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -571,17 +572,16 @@
           <section id="module-pcapkit.protocols.protocol">
 <span id="root-protocol"></span><h1>Root Protocol<a class="headerlink" href="#module-pcapkit.protocols.protocol" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, an abstract base class with
-pre-defined utility arguments and methods. Inherit it directly only to create a
-new protocol stack; a new protocol in an existing layer subclasses that layer’s
-base class – <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, the abstract base for a new
+protocol stack. A protocol in an existing layer subclasses that layer’s base
+instead – <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
 <a class="reference internal" href="internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>,
 <a class="reference internal" href="transport/transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> or
-<a class="reference internal" href="application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> – instead; see
-<a class="reference internal" href="../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>. The built-in protocol families, those layer classes included,
-derive from <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, whose metaclass
-is <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolMeta" title="pcapkit.protocols.protocol.ProtocolMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolMeta</span></code></a>; both are listed under
-Internal Definitions below.</p>
+<a class="reference internal" href="application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> (<a class="reference internal" href="../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>).
+The built-in families, those bases included, derive from
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, whose metaclass is
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolMeta" title="pcapkit.protocols.protocol.ProtocolMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolMeta</span></code></a>, both under
+<a class="reference internal" href="#internal-definitions">Internal Definitions</a>.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Constructing a protocol with a keyword that none of its signatures
 declares raises <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>,
@@ -2539,7 +2539,7 @@ without <code class="docutils literal notranslate"><span class="pre">__init__</s
 <section id="parsing-and-construction">
 <h2>Parsing and Construction<a class="headerlink" href="#parsing-and-construction" title="Link to this heading">¶</a></h2>
 <p>Parsing, construction, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_schema" title="pcapkit.protocols.protocol.Protocol.from_schema"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_schema()</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a>
-all run through one path:</p>
+share one path:</p>
 <pre  class="mermaid">
         flowchart TD
     FS[&quot;from\_schema(schema)&quot;] --&gt;|&quot;\_\_header\_\_ = schema,&lt;br/&gt;then its octets&quot;| P
@@ -2615,42 +2615,63 @@ payload being rebuilt the parse’s warnings are held and dropped (<a class="ext
 <section id="layers-per-frame">
 <h2>Layers per Frame<a class="headerlink" href="#layers-per-frame" title="Link to this heading">¶</a></h2>
 <p>A frame is dissected to at most
-<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers of its protocol
-chain, counted from the first layer the frame record carries, through tunnels,
-VLAN tags and IPv6 extension headers alike. What follows is kept as
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers, counted from the
+first layer its frame record carries, through tunnels, VLAN tags and IPv6
+extension headers alike; a protocol constructed from its own octets is not
+counted, so its count starts at the first layer it dissects. The rest is kept as
 <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
-<a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>), and is
-marked <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._past_layer_limit" title="pcapkit.protocols.protocol.Protocol._past_layer_limit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_past_layer_limit</span></code></a>, so the
+<a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>), and marked
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._past_layer_limit" title="pcapkit.protocols.protocol.Protocol._past_layer_limit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_past_layer_limit</span></code></a>, so the
 <a class="reference internal" href="../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a>’s TCP reassembly and flow tracing do not read a TCP segment
-there back out, as they do one the TCP parser rejected (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>). A
-protocol constructed from its own octets is not counted itself, so the count
-starts at the first layer it dissects. One chain of extension headers is also bounded on
-its own, by <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>.
-The <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>, <code class="docutils literal notranslate"><span class="pre">scapy</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> engines dissect with their own
-parsers, which do not apply the frame’s layer bound (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>). The
-<code class="docutils literal notranslate"><span class="pre">dpkt</span></code> toolkit reads what <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> decodes, which applies neither bound.</p>
+back out of it, as they do one the TCP parser rejected (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>). One chain
+of extension headers is bounded separately, by
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>, <code class="docutils literal notranslate"><span class="pre">scapy</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> engines dissect with their own
+parsers, which do not apply the frame’s bound (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>); the <code class="docutils literal notranslate"><span class="pre">dpkt</span></code>
+toolkit reads what <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> decodes, which applies neither bound.</p>
 </section>
 <section id="value-helpers">
 <h2>Value Helpers<a class="headerlink" href="#value-helpers" title="Link to this heading">¶</a></h2>
-<p>A protocol reads and makes its field values through the helpers
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> carries, rather than through
-copies of its own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2614">#2614</a>). A maker checks a caller’s values through them
-before packing, and raises <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for
-one its field cannot carry rather than masking it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2617">#2617</a>):</p>
-<ul class="simple">
-<li><p>an unsigned integer through <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_uint" title="pcapkit.protocols.protocol.Protocol._make_uint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_uint()</span></code></a>, which takes a
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> for a one-bit field only;</p></li>
-<li><p>a two’s-complement integer through <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_sint" title="pcapkit.protocols.protocol.Protocol._make_sint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_sint()</span></code></a>, the inverse of
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._read_sint" title="pcapkit.protocols.protocol.Protocol._read_sint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_sint()</span></code></a>;</p></li>
-<li><p>the octets of a fixed-size field through <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_octets" title="pcapkit.protocols.protocol.Protocol._make_octets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_octets()</span></code></a>, which
-refuses any other width rather than padding or cutting it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2676">#2676</a>). A
-value taken from a model of a cut capture goes through
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._fill_short_read" title="pcapkit.protocols.protocol.Protocol._fill_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_fill_short_read()</span></code></a> first, which zero-fills just the octets the
-cut left out, for the rebuild to cut back.</p></li>
-</ul>
-<p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._uint_size" title="pcapkit.protocols.protocol.Protocol._uint_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_uint_size()</span></code></a> counts the octets a variable-width integer needs,
-and <a class="reference internal" href="../corekit/schema/padding.html#pcapkit.corekit.schema.padding.pad_length" title="pcapkit.corekit.schema.padding.pad_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">pad_length()</span></code></a> the padding that takes a
-length to an alignment boundary.</p>
+<p>A protocol reads and makes field values through the helpers on
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, not copies of its own
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2614">#2614</a>). A maker checks a caller’s values through them before packing,
+and raises <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for a value its
+field cannot carry rather than masking it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2617">#2617</a>):</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Helper</p></th>
+<th class="head"><p>Does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_uint" title="pcapkit.protocols.protocol.Protocol._make_uint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_uint()</span></code></a></p></td>
+<td><p>checks an unsigned integer; a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> passes for a
+one-bit field only</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_sint" title="pcapkit.protocols.protocol.Protocol._make_sint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_sint()</span></code></a></p></td>
+<td><p>checks a two’s-complement integer, the inverse of
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._read_sint" title="pcapkit.protocols.protocol.Protocol._read_sint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_sint()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_octets" title="pcapkit.protocols.protocol.Protocol._make_octets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_octets()</span></code></a></p></td>
+<td><p>checks a fixed-size field’s octets, refusing any other
+width rather than padding or cutting it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2676">#2676</a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._fill_short_read" title="pcapkit.protocols.protocol.Protocol._fill_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_fill_short_read()</span></code></a></p></td>
+<td><p>zero-fills the octets a cut capture left out of a value
+taken from its model, before <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_octets" title="pcapkit.protocols.protocol.Protocol._make_octets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_octets()</span></code></a>,
+for the rebuild to cut back</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._uint_size" title="pcapkit.protocols.protocol.Protocol._uint_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_uint_size()</span></code></a></p></td>
+<td><p>counts the octets a variable-width integer needs</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../corekit/schema/padding.html#pcapkit.corekit.schema.padding.pad_length" title="pcapkit.corekit.schema.padding.pad_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">pad_length()</span></code></a></p></td>
+<td><p>counts the padding that takes a length to an alignment
+boundary</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 <section id="data-models">
 <h2>Data Models<a class="headerlink" href="#data-models" title="Link to this heading">¶</a></h2>
@@ -3263,7 +3284,7 @@ counts only while no subclass overrides it (<a class="extlink-issue reference ex
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

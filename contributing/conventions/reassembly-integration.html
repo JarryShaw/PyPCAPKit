@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/reassembly-integration.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the rest of the package. Points 1 to 3 are the owner’s ruling on the DTLS reassembly work, applied in review of#2451(#24..." />
-<meta name="description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the rest of the package. Points 1 to 3 are the owner’s ruling on the DTLS reassembly work, applied in review of#2451(#24..." />
+<meta property="og:description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the package. Points 1 to 3 were ruled on the DTLS reassembly work in review of#2451(#2440), whose issue does not hold th..." />
+<meta name="description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the package. Points 1 to 3 were ruled on the DTLS reassembly work in review of#2451(#2440), whose issue does not hold th..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Const-Vendor Pairing" href="const-vendor-pairing.html"><link rel="prev" title="Choosing Between utilities and corekit" href="utilities-or-corekit.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -571,38 +572,34 @@
           <section id="reassembly-integration">
 <span id="id1"></span><h1>Reassembly Integration<a class="headerlink" href="#reassembly-integration" title="Link to this heading">¶</a></h1>
 <p>Where a new reassembly engine under <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> plugs into
-the rest of the package. Points 1 to 3 are the owner’s ruling on the DTLS reassembly
-work, applied in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2451">#2451</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>); the issue itself does not hold
-it. Point 4 rests on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2469">#2469</a>, which settled the DTLS case alone: in review of
-how DTLS sizes a handshake message’s buffer, the owner had DTLS reassembly follow its
-RFCs.
-No issue holds that ruling.</p>
+the package. Points 1 to 3 were ruled on the DTLS reassembly work in review of
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2451">#2451</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>), whose issue does not hold them. Point 4 rests on
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2469">#2469</a>: reviewing how DTLS sizes a handshake message’s buffer, the owner had DTLS
+reassembly follow its RFCs. No issue holds that ruling.</p>
 <section id="the-rule">
 <h2>The Rule<a class="headerlink" href="#the-rule" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
-<li><p><strong>A protocol class does not handle or integrate reassembly itself.</strong> The protocol
-dissector stays a parser; it does not reach into
-<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> directly. A public method that parses a
-reassembled unit from its own octets is still a parser, so a protocol class may
-offer one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>).</p></li>
+<li><p><strong>A protocol class does not handle or integrate reassembly itself.</strong> The dissector
+stays a parser and does not reach into <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a>. A
+public method that parses a reassembled unit from its own octets is still a parser,
+so a protocol class may offer one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>).</p></li>
 <li><p><strong>A new engine needs a new</strong> <a class="reference internal" href="../../pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> <strong>helper</strong> that declares which
 output engines (<a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>, <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a>, <code class="docutils literal notranslate"><span class="pre">scapy</span></code>, the default) support it.</p></li>
 <li><p><strong>A new engine’s reassembled outcome needs a new</strong>
-<a class="reference internal" href="../../pcapkit/foundation/analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> <strong>method</strong> to parse that outcome into a usable
-result, rather than leaving the caller to interpret raw reassembled bytes. The
-package mirrors <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a>: a module per engine, whose
-public names the package, <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> and <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit.all" title="pcapkit.all"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.all</span></code></a>
-export (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>).</p></li>
+<a class="reference internal" href="../../pcapkit/foundation/analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> <strong>method</strong> that parses it into a usable result,
+rather than leaving the caller raw reassembled bytes. The package mirrors
+<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> with a module per engine, whose public names
+the package, <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> and <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit.all" title="pcapkit.all"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.all</span></code></a> export
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>).</p></li>
 <li><p><strong>Reassembly always follows the RFC’s own definition</strong>, never an algorithm this
-package invents. Where the RFC states no required algorithm – buffer the whole
-message, accept overlaps – the engine does the same and adds no timeout, cap or
-ordering rule the RFC does not call for.</p></li>
+package invents. Where the RFC requires no algorithm – buffer the whole message,
+accept overlaps – the engine adds no timeout, cap or ordering rule of its own.</p></li>
 </ol>
 <p><strong>TCP’s gap cap is a safety limit, not a reassembly rule.</strong> No RFC calls for
 <a class="reference internal" href="../../pcapkit/utilities/config.html#pcapkit.utilities.config.TCP_GAP_LIMIT" title="pcapkit.utilities.config.TCP_GAP_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">TCP_GAP_LIMIT</span></code></a>, the widest gap TCP reassembly
-zero-fills to merge a segment. It bounds the memory a capture can have zero-filled, as
+zero-fills to merge a segment. It bounds zero-filled memory, as
 <a class="reference internal" href="../../pcapkit/utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> does for a field, and <code class="docutils literal notranslate"><span class="pre">-1</span></code>
-lifts it to give the uncapped reassembly point 4 asks for. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>.</p>
+lifts it for the uncapped reassembly point 4 asks for. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>.</p>
 </section>
 <section id="parse-ownership">
 <h2>Parse Ownership<a class="headerlink" href="#parse-ownership" title="Link to this heading">¶</a></h2>
@@ -619,13 +616,12 @@ for a DTLS handshake message.</p></li>
 method and holds no parsing of its own.</p></li>
 <li><p>The reassembly <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> calls the
 same method, on the reassembly’s own <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>.</p></li>
-<li><p>Protocol code never imports <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> to do its own work: the
-dependency runs from <code class="docutils literal notranslate"><span class="pre">foundation</span></code> to the protocols. What the protocol base does
-import from <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> registers a class rather
-than parsing. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_protocols_import_boundary_2622_unit.py</span></code> fails
-on any other import of <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> under <code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/</span></code>
-made outside a <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> block, the rest of
-<a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> included.</p></li>
+<li><p>Protocol code never imports <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> to do its own work; the
+dependency runs from <code class="docutils literal notranslate"><span class="pre">foundation</span></code> to the protocols. The protocol base’s import from
+<a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> registers a class rather than parsing.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_protocols_import_boundary_2622_unit.py</span></code> fails on any other
+import of <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> under <code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/</span></code> outside a
+<code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> block, the rest of <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> included.</p></li>
 </ul>
 <pre  class="mermaid">
         flowchart TD
@@ -653,20 +649,20 @@ made outside a <code class="docutils literal notranslate"><span class="pre">TYPE
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>,
 <a class="reference internal" href="../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> and
 <a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS" title="pcapkit.protocols.application.dtls.protocol.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a> imports or calls into
-<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> at all. The real path is
-<a class="reference internal" href="../../pcapkit/foundation/engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> calling a <code class="docutils literal notranslate"><span class="pre">pcapkit.toolkit.&lt;engine&gt;</span></code> extraction
-function on an already-parsed frame, feeding the result to the reassembly instance the
+<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a>. Instead <a class="reference internal" href="../../pcapkit/foundation/engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines</span></code></a> calls a
+<code class="docutils literal notranslate"><span class="pre">pcapkit.toolkit.&lt;engine&gt;</span></code> extraction function on an already-parsed frame and feeds
+the result to the reassembly instance the
 <a class="reference internal" href="../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> holds; for DTLS that function is
 <a class="reference internal" href="../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.dtls_reassembly" title="pcapkit.toolkit.pcap.dtls_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap.dtls_reassembly()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>).
 <a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake" title="pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.read_handshake</span></code></a>
 and <a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake" title="pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.analyze_handshake</span></code></a>
 are the parser methods the rule allows.</p>
-<p><strong>No engine meets point 2.</strong> No single <a class="reference internal" href="../../pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> helper enumerates which
-output engines support a given reassembly engine. Support is established ad hoc, per
-engine backend, by defining the extraction functions, by defining them raising
-<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, or by disabling reassembly at the
-engine level, as <a class="reference internal" href="../../pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.pyshark" title="pcapkit.foundation.engines.pyshark"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pyshark</span></code></a> does. DTLS defines them for
-the default engine and is disabled at the engine level on every other.</p>
+<p><strong>No engine meets point 2.</strong> No <a class="reference internal" href="../../pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> helper declares which output
+engines support a reassembly engine. Each engine backend settles it ad hoc: by defining
+the extraction functions, by defining them to raise
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, or by disabling reassembly, as
+<a class="reference internal" href="../../pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.pyshark" title="pcapkit.foundation.engines.pyshark"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pyshark</span></code></a> does. DTLS defines them for the default
+engine and is disabled on every other.</p>
 <p><strong>Point 3 holds for every engine.</strong>
 <a class="reference internal" href="../../pcapkit/foundation/analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a> parses a reassembled IPv4 or IPv6
 datagram’s payload by its payload protocol type, through
@@ -677,22 +673,20 @@ datagram’s by its ports, through
 and <a class="reference internal" href="../../pcapkit/foundation/analysis/dtls.html#pcapkit.foundation.analysis.dtls.dtls_handshake" title="pcapkit.foundation.analysis.dtls.dtls_handshake"><code class="xref py py-func docutils literal notranslate"><span class="pre">dtls_handshake()</span></code></a> decodes a reassembled
 DTLS handshake message (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>), through
 <a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake" title="pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.analyze_handshake</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>). The owner chose on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2581">#2581</a> to give IP and TCP modules of their
-own, each function named for the datagram its engine reassembles, rather than leave
-their outcomes to those dispatchers with no analysis method, which kept the rule true
-for DTLS alone.</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>). IP and TCP have analysis modules of their own, each function named
+for the datagram its engine reassembles, by the owner’s choice on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2581">#2581</a>; without
+them the rule held for DTLS alone.</p>
 <p><strong>Where the rule is silent, DTLS takes the IP/TCP shape</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2531">#2531</a>). IPv4, IPv6,
-TCP and DTLS reassembly each set <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>, and each reports its parsed
-outcome as a datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code>, deferred to first read by
+TCP and DTLS reassembly each set <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> and report the parsed outcome as
+a datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code>, deferred to first read by
 <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>. Each <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> runs the
 parse behind its engine’s analysis function, so a <code class="docutils literal notranslate"><span class="pre">packet</span></code> is what that function
-returns. Each binds that parse to <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>, calling its <code class="docutils literal notranslate"><span class="pre">analyze</span></code> for
-IP and TCP (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2581">#2581</a>) and its <code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>), so a
-subclass naming another protocol has its <code class="docutils literal notranslate"><span class="pre">packet</span></code> parsed by that one. The engines
-differ in what an incomplete outcome holds. IP and TCP parse a contiguous payload
-whether or not it is complete, as <code class="docutils literal notranslate"><span class="pre">strict=False</span></code> reports one, and hold <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>
-only for the received runs <code class="docutils literal notranslate"><span class="pre">strict=True</span></code> reports; DTLS holds <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for any
-incomplete message.</p>
+returns, and binds it to <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> – <code class="docutils literal notranslate"><span class="pre">analyze</span></code> for IP and TCP
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2581">#2581</a>), <code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>) – so a subclass naming
+another protocol has its <code class="docutils literal notranslate"><span class="pre">packet</span></code> parsed by that one. They differ on an incomplete
+outcome: IP and TCP parse a contiguous payload, complete or not, as <code class="docutils literal notranslate"><span class="pre">strict=False</span></code>
+reports one, and hold <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> only for the received runs <code class="docutils literal notranslate"><span class="pre">strict=True</span></code> reports;
+DTLS holds <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for any incomplete message.</p>
 </section>
 </section>
 
@@ -766,7 +760,7 @@ incomplete message.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

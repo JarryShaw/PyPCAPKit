@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -978,10 +979,8 @@ buffer.</p>
 <a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.data.Alert" title="pcapkit.protocols.application.ssl.data.Alert"><code class="xref py py-class docutils literal notranslate"><span class="pre">Alert</span></code></a>, or a
 <a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.data.ChangeCipherSpec" title="pcapkit.protocols.application.ssl.data.ChangeCipherSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChangeCipherSpec</span></code></a> respectively <em>only when the record is
 cleartext</em> (as decided by
-<a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext" title="pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SSL._tls_content_is_cleartext</span></code></a>) –
-an encrypted record of any of those three types, which is the common
-case for TLS 1.2 post-handshake traffic, stays raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> instead,
-same as every other content type.</p>
+<a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext" title="pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SSL._tls_content_is_cleartext</span></code></a>);
+any other record is raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1073,7 +1072,7 @@ same as every other content type.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

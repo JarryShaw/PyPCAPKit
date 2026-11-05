@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -769,49 +770,16 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">'The following error occurred while parsing the packet:'</span><span class="p">)</span>
                     <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
 
-            <span class="c1"># NOTE: ``self._get_payload()`` rather than</span>
-            <span class="c1"># ``self.__header__.get_payload()``, which it wraps. The two agree</span>
-            <span class="c1"># for every protocol whose payload is a schema field, and differ for</span>
-            <span class="c1"># the protocols that override it: SCTP carries user data inside a DATA</span>
-            <span class="c1"># chunk and PCAP-NG inside a block, so neither header schema has a</span>
-            <span class="c1"># ``payload`` field at all. Going through the schema there raises</span>
-            <span class="c1"># ProtocolUnbound('unknown field: payload') *from the recovery path*,</span>
-            <span class="c1"># turning a next-layer parse failure that should have degraded to</span>
-            <span class="c1"># Raw into a crash. Reachable once something is registered on an</span>
-            <span class="c1"># SCTP payload protocol identifier, which NGAP is.</span>
-            <span class="c1">#</span>
-            <span class="c1"># A ``payload`` passed to the decorated method is the octets that</span>
-            <span class="c1"># method was asked to parse, and wins: IPv6 hands its upper layer</span>
-            <span class="c1"># the payload *past* the extension headers, so falling back to the</span>
-            <span class="c1"># whole IPv6 payload would hold those headers twice, once in the</span>
-            <span class="c1"># extension header chain and once more in this ``Raw``</span>
-            <span class="c1"># (#1471).</span>
+            <span class="c1"># NOTE: A ``payload`` passed in wins, as IPv6 hands its upper layer the octets</span>
+            <span class="c1"># past the extension headers, which would otherwise be held twice (#1471).</span>
             <span class="n">file_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[bytes]'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'payload'</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">file_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># NOTE: Not ``self.__header__.get_payload()``, as SCTP and PCAP-NG schemas</span>
+                <span class="c1"># have no ``payload`` field and the recovery path would crash on them.</span>
                 <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
 
-            <span class="c1"># NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so</span>
-            <span class="c1"># a payload that failed to parse still reports the code it arrived</span>
-            <span class="c1"># with, which is what ``Data_Raw.protocol`` means. A plain integer has</span>
-            <span class="c1"># no ``name`` and still renders as ``Raw`` in the protochain, cf.</span>
-            <span class="c1"># ``Raw.__post_init__``, so this only adds a name where the registry</span>
-            <span class="c1"># key is an enumeration.</span>
-            <span class="c1">#</span>
-            <span class="c1"># Measured, because the layers differ and it is easy to state this too</span>
-            <span class="c1"># broadly: SCTP's unregistered path keeps its enumeration -- an unknown</span>
-            <span class="c1"># PPID gives ``SCTP:Unassigned`` and ``protocol=4243`` -- so</span>
-            <span class="c1"># without this line, *registering* NGAP on PPID 60 would make a</span>
-            <span class="c1"># failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less</span>
-            <span class="c1"># than the same bytes gave while unregistered. TCP's unregistered</span>
-            <span class="c1"># path keeps its code too, but as a plain integer: an unknown port</span>
-            <span class="c1"># yields ``TCP:Raw`` with ``protocol=49998``, because</span>
-            <span class="c1"># ``Transport._decode_next_layer`` resolves ports through</span>
-            <span class="c1"># ``__proto__`` and never reaches here, and forwards the port</span>
-            <span class="c1"># whether or not it is registered. So both *unknown* paths preserve</span>
-            <span class="c1"># the code that arrived; what differs is only that SCTP's is an</span>
-            <span class="c1"># enumeration the protochain can name, while TCP's is an ``int`` and</span>
-            <span class="c1"># renders as ``Raw`` (#418). This line is about the *failure* path,</span>
-            <span class="c1"># which it makes uniform.</span>
+            <span class="c1"># NOTE: ``alias=proto`` matches ``_import_next_layer``, so a failed parse still</span>
+            <span class="c1"># reports the code it arrived with as ``Data_Raw.protocol`` (#418).</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_beholder'</span><span class="p">,</span> <span class="n">next_</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">behold</span></div>
@@ -869,15 +837,8 @@
         <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[dict[str, Any]]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-        <span class="c1"># NOTE: The decorated function's real signature is exactly the</span>
-        <span class="c1"># parameters above -- see #454. Anything left over here is therefore</span>
-        <span class="c1"># unwanted rather than something to forward: an extra positional</span>
-        <span class="c1"># argument, or a keyword that ``kwargs.pop`` above never touched</span>
-        <span class="c1"># because ``length``/``packet`` arrived positionally instead. The</span>
-        <span class="c1"># latter is also what catches ``length`` (or ``packet``) supplied</span>
-        <span class="c1"># *both* positionally and by keyword -- the positional value wins</span>
-        <span class="c1"># above and the keyword is left in ``kwargs`` unconsumed, so it</span>
-        <span class="c1"># surfaces here rather than silently losing the keyword's value.</span>
+        <span class="c1"># NOTE: The real signature is exactly the parameters above (#454), so anything left is</span>
+        <span class="c1"># unwanted, including ``length``/``packet`` given both positionally and by keyword.</span>
         <span class="n">extra_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
         <span class="k">if</span> <span class="n">extra_args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">culprits</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">extra_args</span><span class="p">]</span>
@@ -921,23 +882,8 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: ``Schema.unpack`` clears ``__updated__``, but ``post_process``</span>
-        <span class="c1"># runs after it and every field assignment sets the flag again</span>
-        <span class="c1"># (``Schema.__setattr__``), so the next ``bytes(schema)`` or</span>
-        <span class="c1"># ``len(schema)`` silently re-packs a schema whose ``__buffer__`` already</span>
-        <span class="c1"># holds the octets read. That re-pack calls ``post_process`` again with a</span>
-        <span class="c1"># packet context rebuilt from the schema's own fields, overwriting what</span>
-        <span class="c1"># the first call derived from the enclosing layer -- such as the IPv6</span>
-        <span class="c1"># source address</span>
-        <span class="c1"># ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``</span>
-        <span class="c1"># resolves, re-packed one option later by ``OptionField.unpack``'s</span>
-        <span class="c1"># ``len(data)``. So clear the flag after ``post_process``, as</span>
-        <span class="c1"># ``Schema.pack`` does.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Guarded because ``post_process`` may return something other than a</span>
-        <span class="c1"># schema: a nested one, as</span>
-        <span class="c1"># ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, or the</span>
-        <span class="c1"># packet mapping, as stand-ins in the test suite do.</span>
+        <span class="c1"># NOTE: ``post_process`` sets ``__updated__`` again, so a later re-pack would rerun it</span>
+        <span class="c1"># without the enclosing layer's context; clear it as ``Schema.pack`` does, if present.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">):</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -976,7 +922,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

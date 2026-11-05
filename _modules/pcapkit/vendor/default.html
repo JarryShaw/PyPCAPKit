@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -1324,10 +1325,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">LINK</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">()</span>  <span class="c1"># type: ignore[unreachable]</span>
 
-        <span class="c1"># NOTE: both branches below send this. Wikimedia rejects ``requests``'</span>
-        <span class="c1"># default agent with HTTP 403, so a crawler without it fetches 126 bytes</span>
-        <span class="c1"># of robot-policy text and retries MAX_RETRY times against a refusal</span>
-        <span class="c1"># that no amount of retrying will lift; see #518.</span>
+        <span class="c1"># NOTE: both branches send this, as Wikimedia rejects ``requests``' default</span>
+        <span class="c1"># agent with HTTP 403 that no retry lifts (#518).</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'User-Agent'</span><span class="p">:</span> <span class="n">get_user_agent</span><span class="p">()}</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -1403,11 +1402,8 @@
                         <span class="k">try</span><span class="p">:</span>
                             <span class="nb">input</span><span class="p">(</span><span class="s1">'Press ENTER to continue...'</span><span class="p">)</span>  <span class="c1"># nosec</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                            <span class="c1"># NOTE: once ``input()`` fails, this loop would spin at</span>
-                            <span class="c1"># full speed (26.7 million lines, 2.6 GB measured in #522).</span>
-                            <span class="c1"># The terminal can still go mid-wait: a closed ``stdin``</span>
-                            <span class="c1"># raises ``ValueError``, a dropped one ``EOFError``, a</span>
-                            <span class="c1"># vanished ``sys.stdin`` ``RuntimeError``.</span>
+                            <span class="c1"># NOTE: give up once ``input()`` fails on a closed, dropped or</span>
+                            <span class="c1"># vanished stdin, or this spins at full speed (2.6 GB in #522).</span>
                             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Connection failed; cannot prompt for manual intervene (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">)...'</span><span class="p">,</span>
                                  <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
                             <span class="k">raise</span> <span class="n">error</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
@@ -1457,7 +1453,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

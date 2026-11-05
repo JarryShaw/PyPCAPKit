@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -694,22 +695,19 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Why this engine cannot run here, or :data:`None` when it can.</span>
 
-<span class="sd">        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*</span>
-<span class="sd">        the import test, because the import test cannot answer this question:</span>
+<span class="sd">        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles</span>
+<span class="sd">        its engine, *before* the import test, which cannot answer this:</span>
 <span class="sd">        ``import pcap`` succeeds when `pcap-ct`_ is installed and upstream</span>
-<span class="sd">        `PyPCAP`_ is not, so the guard is satisfied and this engine would run on a</span>
-<span class="sd">        distribution it does not drive -- reporting :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` for work that</span>
-<span class="sd">        ``pcap-ct`` did.</span>
+<span class="sd">        `PyPCAP`_ is not, so this engine would run on a distribution it does not</span>
+<span class="sd">        drive and take credit for work ``pcap-ct`` did.</span>
 
 <span class="sd">        The condition is deliberately *not* a Python version ceiling, even though</span>
 <span class="sd">        upstream cannot be installed on 3.12 or newer. What matters is which</span>
-<span class="sd">        distribution is actually present: a version check would refuse a</span>
-<span class="sd">        hypothetical upstream build that someone got working on a newer</span>
-<span class="sd">        interpreter, and would say nothing useful on 3.10 and 3.11, where both</span>
-<span class="sd">        distributions install happily and either could be the one in place.</span>
+<span class="sd">        distribution is present: a version check would refuse an upstream build</span>
+<span class="sd">        someone got working on a newer interpreter, and would say nothing on 3.10</span>
+<span class="sd">        and 3.11, where either distribution could be the one in place.</span>
 
-<span class="sd">        It also reports a |pcap|_ that is installed but cannot load -- one whose</span>
-<span class="sd">        import raises something other than :exc:`ImportError`, such as the</span>
+<span class="sd">        It also reports a |pcap|_ that is installed but cannot load, such as the</span>
 <span class="sd">        :exc:`OSError` a loader raises when it cannot find :manpage:`libpcap(3)`.</span>
 <span class="sd">        :meth:`Extractor.import_test</span>
 <span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.import_test&gt;` lets that through,</span>
@@ -777,10 +775,8 @@
 <span class="sd">                backstop rather than the usual path.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: the probe comes *before* ``import pcap`` so that this engine and</span>
-        <span class="c1"># :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` behave the same way</span>
-        <span class="c1"># here. Either import can raise ``OSError`` rather than ``ImportError``</span>
-        <span class="c1"># (#2132), which the probe turns into a reason instead of a crash.</span>
+        <span class="c1"># NOTE: probe before ``import pcap``, as ``PCAP_CT`` does: either import can raise</span>
+        <span class="c1"># ``OSError`` (#2132), which the probe reports as a reason rather than a crash.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">probe</span><span class="p">()</span>
 
         <span class="n">collision</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">collision_reason</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="p">)</span>
@@ -880,10 +876,8 @@
             <span class="n">warn</span><span class="p">(</span><span class="s2">"'Extractor(engine=pypcap)' object does not support flow tracing; "</span>
                  <span class="sa">f</span><span class="s2">"so 'tcp=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="si">}</span><span class="s2">' will be ignored"</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="c1"># NOTE: ``promisc=False`` is defensive only -- the offline branch of</span>
-        <span class="c1"># ``pcap.pcap`` ignores it, but should ``pcap_open_offline`` ever fail the</span>
-        <span class="c1"># constructor falls through to opening the name as a live device, and we</span>
-        <span class="c1"># do not want that attempt to request promiscuous mode.</span>
+        <span class="c1"># NOTE: ``promisc=False`` is defensive: should ``pcap_open_offline`` fail, the constructor</span>
+        <span class="c1"># falls back to a live device, which must not request promiscuous mode.</span>
         <span class="n">handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">pcap</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="n">promisc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
 
@@ -995,7 +989,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

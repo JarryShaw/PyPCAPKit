@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -684,11 +685,8 @@
 <span class="sd">        """</span>
         <span class="c1">#: int: Frame counter.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="c1"># NOTE: Both of these only record how the dumper was configured -- the</span>
-        <span class="c1"># values that shape the output reach it through :meth:`self._dump_header</span>
-        <span class="c1"># &lt;_dump_header&gt;`'s own arguments, and are readable afterwards from</span>
-        <span class="c1"># :attr:`self._ghdr &lt;_ghdr&gt;`. They are kept because they are part of the</span>
-        <span class="c1"># instance surface a subclass may already read.</span>
+        <span class="c1"># NOTE: record-only, as the output is shaped by ``_dump_header``'s arguments;</span>
+        <span class="c1"># kept because a subclass may read them.</span>
         <span class="c1">#: bool: Nanosecond-resolution file flag.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="n">nanosecond</span>
         <span class="c1">#: Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int: Data link type.</span>
@@ -794,11 +792,8 @@
 <span class="sd">            the end of the file (:issue:`1541`).</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: The payload is read before the metadata so that a caller passing a</span>
-        <span class="c1"># mapping rather than a dissected frame -- which the flow-tracing adapters</span>
-        <span class="c1"># of several engines do -- still fails naming ``packet``.</span>
-        <span class="c1"># :mod:`pcapkit.foundation.extraction` cites that error when it</span>
-        <span class="c1"># substitutes a dict-capable trace format for those engines up front.</span>
+        <span class="c1"># NOTE: payload first, so a mapping passed for a frame fails naming ``packet``,</span>
+        <span class="c1"># the error :mod:`pcapkit.foundation.extraction` cites.</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">packet</span>
         <span class="n">frame_info</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">frame_info</span>
         <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_frac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">frame_info</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">)</span>
@@ -850,9 +845,8 @@
         <span class="n">ts_sec</span> <span class="o">=</span> <span class="n">frame_info</span><span class="o">.</span><span class="n">ts_sec</span>
         <span class="n">ts_usec</span> <span class="o">=</span> <span class="n">frame_info</span><span class="o">.</span><span class="n">ts_usec</span>
 
-        <span class="c1"># NOTE: In integers rather than in :class:`decimal.Decimal`, whose</span>
-        <span class="c1"># context precision would round a long fraction, e.g. from an interface</span>
-        <span class="c1"># with a binary ``if_tsresol``.</span>
+        <span class="c1"># NOTE: in integers, as :class:`decimal.Decimal`'s context precision would</span>
+        <span class="c1"># round a long fraction, e.g. from a binary ``if_tsresol``.</span>
         <span class="n">num</span><span class="p">,</span> <span class="n">den</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time_epoch</span><span class="p">)</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="n">num</span> <span class="o">-</span> <span class="n">ts_sec</span> <span class="o">*</span> <span class="n">den</span>  <span class="c1"># ``time_epoch - ts_sec``, over ``den``</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">_truncates_to</span><span class="p">(</span><span class="n">offset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsres</span><span class="p">,</span> <span class="n">den</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">)</span>
@@ -895,7 +889,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

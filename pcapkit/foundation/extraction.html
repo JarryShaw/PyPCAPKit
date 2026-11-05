@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/extraction.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.extraction contains Extractor only, which synthesises file I/O and protocol analysis, coordinates information exchange in all network layers, and extracts parameters from a PCAP ..." />
-<meta name="description" content="pcapkit.foundation.extraction contains Extractor only, which synthesises file I/O and protocol analysis, coordinates information exchange in all network layers, and extracts parameters from a PCAP ..." />
+<meta property="og:description" content="pcapkit.foundation.extraction contains Extractor only, which reads a capture file and dissects its frames, dumping, reassembling and tracing them as asked. An extraction runs in this order; a third..." />
+<meta name="description" content="pcapkit.foundation.extraction contains Extractor only, which reads a capture file and dissects its frames, dumping, reassembling and tracing them as asked. An extraction runs in this order; a third..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Engine Support" href="engines/index.html"><link rel="prev" title="Library Foundation" href="index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -571,19 +572,17 @@
           <section id="module-pcapkit.foundation.extraction">
 <span id="file-extractor"></span><h1>File Extractor<a class="headerlink" href="#module-pcapkit.foundation.extraction" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.foundation.extraction" title="pcapkit.foundation.extraction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code></a> contains
-<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> only,
-which synthesises file I/O and protocol analysis,
-coordinates information exchange in all network layers,
-and extracts parameters from a PCAP file.</p>
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> only, which reads a capture
+file and dissects its frames, dumping, reassembling and tracing them as asked.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference external" href="https://github.com/pynetwork/pypcap"><code class="docutils literal notranslate"><span class="pre">pypcap</span></code></a>, <a class="reference external" href="https://pypi.org/project/pcap-ct/"><code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code></a> and <a class="reference external" href="https://github.com/kisom/pypcapfile"><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code></a> are supported by
 <a class="reference internal" href="engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcap.PyPCAP</span></code></a> (<code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code>),
 <a class="reference internal" href="engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap_ct.PCAP_CT</span></code></a> (<code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code>)
 and <a class="reference internal" href="engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a>
-(<code class="docutils literal notranslate"><span class="pre">engine='pypcapfile'</span></code>). Each supports less than the
-<a class="reference internal" href="../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a> does; <a class="reference internal" href="engines/index.html"><span class="doc">Engine Support</span></a> tabulates the gaps, and
-<a class="reference internal" href="../../engines.html#engine-prerequisites"><span class="std std-ref">Engine Prerequisites</span></a> gives what each needs installed.</p>
+(<code class="docutils literal notranslate"><span class="pre">engine='pypcapfile'</span></code>), each with gaps against the <a class="reference internal" href="../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a>
+that <a class="reference internal" href="engines/index.html"><span class="doc">Engine Support</span></a> tabulates; <a class="reference internal" href="../../engines.html#engine-prerequisites"><span class="std std-ref">Engine Prerequisites</span></a> gives what
+each needs installed.</p>
 </div>
 <p>An extraction runs in this order; a third-party engine implements its own
 <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.read_frame" title="pcapkit.foundation.engines.engine.EngineBase.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_frame()</span></code></a>:</p>
@@ -1795,10 +1794,7 @@ the <em>same</em> position therefore mean nothing arrived between them.</p>
 <p>For a <strong>pipe</strong>, everything, and the live-capture case is safe. A blocking
 read on a pipe whose writer is open but idle <em>blocks</em>; it does not report
 end of stream. So a pipe reports it only once the writer has closed –
-permanently – and a capture that merely pauses never reaches here at all.
-Measured: a pipe paused mid-capture for 1.5s blocked for the whole pause
-and then delivered its remaining frames, with this method not consulted
-until after the writer closed.</p>
+permanently – and a capture that merely pauses never reaches here at all.</p>
 <p>For a <strong>seekable regular file</strong>, only the microseconds between two
 immediately consecutive probes, because such a file does not block – it
 reports end of stream at once. So an extraction over a file that is still
@@ -1912,7 +1908,7 @@ end of stream, or the input has advanced since the last one.
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

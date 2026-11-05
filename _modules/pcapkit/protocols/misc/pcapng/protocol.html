@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -1002,9 +1003,8 @@
 
 
 
-<span class="c1"># NOTE: RFC 9850 section 4.2 makes the TLS key labels an IANA registry, generated</span>
-<span class="c1"># as ``Enum_TLSKeyLabel`` and not re-exported here (#1744). ``WireGuardKeyLabel``</span>
-<span class="c1"># stays hand-written: draft-ietf-opsawg-pcapng-06 section 4.7 closes it to four names.</span>
+<span class="c1"># NOTE: RFC 9850 section 4.2 makes the TLS key labels the IANA registry ``Enum_TLSKeyLabel``,</span>
+<span class="c1"># not re-exported here (#1744); draft-ietf-opsawg-pcapng-06 closes ``WireGuardKeyLabel``.</span>
 
 
 <div class="viewcode-block" id="WireGuardKeyLabel">
@@ -1914,33 +1914,28 @@
         <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
 
-            <span class="c1"># NOTE: A tail too short for any block is refused here, on the</span>
-            <span class="c1"># construction path as on the parsing one: a caller's raw octets</span>
-            <span class="c1"># are no more trustworthy than a file's.</span>
+            <span class="c1"># NOTE: A tail too short for any block is refused on construction too:</span>
+            <span class="c1"># a caller's raw octets are no more trustworthy than a file's.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_block_floor</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span>
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'byteorder'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span>
-                <span class="c1"># NOTE: A Simple Packet Block's data is ``min(original_len,</span>
-                <span class="c1"># snaplen)`` octets, with the snaplen of interface 0.</span>
-                <span class="c1"># A snaplen of zero means no limit.</span>
+                <span class="c1"># NOTE: A Simple Packet Block's data is ``min(original_len, snaplen)``</span>
+                <span class="c1"># octets, with interface 0's snaplen; zero means no limit.</span>
                 <span class="n">interfaces</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="p">,</span> <span class="s1">'interfaces'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">interfaces</span> <span class="ow">and</span> <span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span><span class="p">:</span>
                     <span class="n">packet</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'snaplen'</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span><span class="p">)</span>
-            <span class="c1"># NOTE: A zero snaplen handed in, e.g. interface 0's passed through,</span>
-            <span class="c1"># means no limit as well; kept, it reads as a limit of no octets and</span>
-            <span class="c1"># the block's padding becomes packet data (#1558).</span>
+            <span class="c1"># NOTE: A zero snaplen handed in means no limit too; kept, it reads as a</span>
+            <span class="c1"># limit of no octets and the block's padding becomes packet data (#1558).</span>
             <span class="k">if</span> <span class="s1">'snaplen'</span> <span class="ow">in</span> <span class="n">packet</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'snaplen'</span><span class="p">]:</span>
                 <span class="k">del</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'snaplen'</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_PCAPNG'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: One source of truth for the captured octets. Reading them through</span>
-        <span class="c1"># the :attr:`packet` property means the value ``ProtocolBase.__init__``</span>
-        <span class="c1"># injects from ``self.packet.payload`` is the value computed here, rather</span>
-        <span class="c1"># than a second attempt at it.</span>
+        <span class="c1"># NOTE: Read through :attr:`packet`, so the payload ``ProtocolBase.__init__``</span>
+        <span class="c1"># injects is the value computed here, not a second attempt at it.</span>
         <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -2002,19 +1997,14 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">block</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">BaseError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="c1"># NOTE: Fields past the end of a block the capture ended inside are</span>
-            <span class="c1"># read as zeros, and a value its parser refuses is an artefact of</span>
-            <span class="c1"># that, not of the block; it is kept as captured instead.</span>
+            <span class="c1"># NOTE: Fields past the end of a cut block read as zeros, so a value its</span>
+            <span class="c1"># parser refuses is an artefact of the cut and is kept as captured.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_read</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_captured</span><span class="p">(</span><span class="n">_seek_set</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                 <span class="k">raise</span>
             <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_cut</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">_seek_set</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: An option or record area holding a malformed entry is kept as</span>
-        <span class="c1"># the octets captured, as one :obj:`bytes` item (see</span>
-        <span class="c1"># :class:`~pcapkit.protocols.misc.pcapng.schema.OptionAreaField`), and</span>
-        <span class="c1"># parses as no options. The octets are kept on the block as</span>
-        <span class="c1"># ``options_raw`` or ``records_raw``, which the block's ``make`` writes</span>
-        <span class="c1"># back verbatim (#1325).</span>
+        <span class="c1"># NOTE: A malformed option or record area arrives as one :obj:`bytes` item and parses</span>
+        <span class="c1"># as none; kept as ``options_raw`` or ``records_raw``, ``make`` writes it back (#1325).</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'records'</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">):</span>
             <span class="n">area</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">area</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -2024,8 +2014,7 @@
             <span class="c1"># move backward to the beginning of the packet</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: We create a copy of the block data here for parsing</span>
-            <span class="c1"># scenarios to keep the original packet data intact.</span>
+            <span class="c1"># NOTE: A copy of the block, to keep the original packet data intact.</span>
             <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="n">block</span><span class="o">.</span><span class="n">length</span>
 
             <span class="c1"># move backward to the beginning of the block</span>
@@ -2033,15 +2022,13 @@
 
             <span class="c1">#: bytes: Raw block data.</span>
             <span class="c1">#</span>
-            <span class="c1"># NOTE: Asked for no further than one read can go, :data:`sys.maxsize`,</span>
-            <span class="c1"># past which the read raises :exc:`OverflowError` instead of coming</span>
-            <span class="c1"># back short as the truncation handling below expects (#1975).</span>
+            <span class="c1"># NOTE: Bounded at :data:`sys.maxsize`, past which the read raises :exc:`OverflowError`</span>
+            <span class="c1"># rather than coming back short as the truncation handling below expects (#1975).</span>
             <span class="n">bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">bound</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: Block Total Length is checked only against its trailing copy, so on a cut</span>
-            <span class="c1"># capture it runs past the end, and the next block would read a negative length,</span>
-            <span class="c1"># failing the whole extraction against #431; the octets read mark the block's end.</span>
+            <span class="c1"># NOTE: On a cut capture Block Total Length runs past the end, and the next block would</span>
+            <span class="c1"># read a negative length and fail the extraction (#431), so the octets read mark its end.</span>
             <span class="n">read</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">read</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length '</span>
@@ -2050,18 +2037,12 @@
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">seek_cur</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="n">read</span><span class="p">)</span>
 
-                <span class="c1"># NOTE: The fields read past the end of the capture are zeros,</span>
-                <span class="c1"># and an option, record or packet the end cut through is only</span>
-                <span class="c1"># its first octets, so the block cannot be rebuilt from them at</span>
-                <span class="c1"># the length it declares. The octets captured are kept as</span>
-                <span class="c1"># ``__truncated_raw__`` instead, which :meth:`__post_init__` parses</span>
-                <span class="c1"># again in place of building the block (#1470).</span>
+                <span class="c1"># NOTE: Zero-filled fields and cut entries cannot rebuild the block at its declared</span>
+                <span class="c1"># length, so :meth:`__post_init__` re-parses the ``__truncated_raw__`` kept (#1470).</span>
                 <span class="n">block</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'__truncated_raw__'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)])</span>
 
-            <span class="c1"># NOTE: A read that came back whole at the bound stopped there, not</span>
-            <span class="c1"># at the end of the file: the block runs on past it, and the next one</span>
-            <span class="c1"># starts where its Block Total Length says, so the stream is moved</span>
-            <span class="c1"># over the rest (#1975).</span>
+            <span class="c1"># NOTE: A whole read at the bound stopped short of the block's end, so the stream skips</span>
+            <span class="c1"># the rest, to where Block Total Length puts the next block (#1975).</span>
             <span class="k">if</span> <span class="n">read</span> <span class="o">==</span> <span class="n">bound</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                 <span class="n">advance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">bound</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -2102,9 +2083,8 @@
         <span class="n">type_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">Enum_BlockType</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'block type'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'PCAP-NG'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">type_val</span>
 
-        <span class="c1"># NOTE: Settle the byte order before the block maker, which reads the type code of</span>
-        <span class="c1"># a raw option or record back in it (#2353); an SHB overrides it from its own magic.</span>
-        <span class="c1"># ``or {}``, as ``__packet__`` may be given as ``None``, which ``Schema.pack`` takes too.</span>
+        <span class="c1"># NOTE: Settle the byte order before the block maker reads a raw option's or record's type</span>
+        <span class="c1"># code in it (#2353); an SHB overrides it. ``or {}``, as ``__packet__`` may be ``None``.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2163,8 +2143,8 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            For the first block, ``num`` will be set to ``0`` and ctx as :obj:`None`,</span>
-<span class="sd">            such that we can be sure that the first block is the section header block.</span>
+<span class="sd">            The first block has ``num`` ``0`` and ``ctx`` :obj:`None`, marking it</span>
+<span class="sd">            as the section header block.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For construction arguments, please refer to :meth:`make`.</span>
@@ -2179,9 +2159,8 @@
         <span class="c1">#: collections.Counter: Counter for option types.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>  <span class="c1"># type: Counter[Enum_OptionType]</span>
 
-        <span class="c1"># NOTE: A block the capture ended inside rebuilds as the octets that</span>
-        <span class="c1"># were captured, parsed again as they were the first time (see</span>
-        <span class="c1"># :meth:`read`), rather than at the length it declares (#1470).</span>
+        <span class="c1"># NOTE: A block the capture ended inside rebuilds as the captured octets, parsed</span>
+        <span class="c1"># again as in :meth:`read`, rather than at its declared length (#1470).</span>
         <span class="n">block</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'block'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'__truncated_raw__'</span> <span class="ow">in</span> <span class="n">block</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">'__truncated_raw__'</span><span class="p">])</span>
@@ -2193,10 +2172,8 @@
             <span class="c1">#: io.BytesIO: Source packet stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: The block just built is parsed again below on this same</span>
-            <span class="c1"># instance, and the parse counts each option afresh against its</span>
-            <span class="c1"># "only one" guard -- so the count left by the make pass must not</span>
-            <span class="c1"># carry over into it.</span>
+            <span class="c1"># NOTE: The block just built is re-parsed on this instance, counting each option</span>
+            <span class="c1"># afresh against its "only one" guard, so the make pass's count must not carry over.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_read</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2682,9 +2659,8 @@
         <span class="c1"># zeros (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: A block holding more packet data than the snaplen of interface 0</span>
-        <span class="c1"># allows keeps the excess (#1384); the specification says the</span>
-        <span class="c1"># snaplen determines the length, so the excess is reported.</span>
+        <span class="c1"># NOTE: Packet data past interface 0's snaplen is kept (#1384) but reported,</span>
+        <span class="c1"># as the specification says the snaplen determines the length.</span>
         <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">snaplen</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">captured_len</span> <span class="o">&gt;</span> <span class="n">snaplen</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] packet data of </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">captured_len</span><span class="si">}</span><span class="s1"> octet(s) '</span>
@@ -2930,10 +2906,8 @@
 
 <span class="sd">        """</span>
         <span class="n">entries</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
-        <span class="c1"># NOTE: A malformed entry is kept as the octets captured, as one</span>
-        <span class="c1"># :obj:`bytes` item, and parses as no entries. The octets are kept on</span>
-        <span class="c1"># the block as ``entry_raw``, which the block's ``make`` writes back</span>
-        <span class="c1"># verbatim (#1406).</span>
+        <span class="c1"># NOTE: A malformed entry arrives as one :obj:`bytes` item and parses as none;</span>
+        <span class="c1"># kept as ``entry_raw``, the block's ``make`` writes it back verbatim (#1406).</span>
         <span class="n">kept</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SystemdJournalExportBlock</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -4440,9 +4414,8 @@
             <span class="c1"># stores them (#1484, #2726).</span>
             <span class="n">entries</span><span class="o">=</span><span class="n">Data_TLSKeyLogEntries</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: the log text is kept as well, since :attr:`entries` holds</span>
-        <span class="c1"># neither its comments nor the order of its lines, and a rebuild writes</span>
-        <span class="c1"># it back verbatim.</span>
+        <span class="c1"># NOTE: the log text is kept too, as :attr:`entries` loses its comments and</span>
+        <span class="c1"># line order; a rebuild writes it back verbatim.</span>
         <span class="n">secrets</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">secrets</span></div>
 
@@ -4464,9 +4437,8 @@
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_WireGuardKeyLog</span><span class="p">(</span>
             <span class="n">entries</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: the log text is kept as well, since :attr:`entries` holds</span>
-        <span class="c1"># neither its comments nor the order of its lines, and a rebuild writes</span>
-        <span class="c1"># it back verbatim.</span>
+        <span class="c1"># NOTE: the log text is kept too, as :attr:`entries` loses its comments and</span>
+        <span class="c1"># line order; a rebuild writes it back verbatim.</span>
         <span class="n">secrets</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">secrets</span></div>
 
@@ -4573,9 +4545,8 @@
             <span class="n">nwk_key</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
             <span class="n">pan_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">panid</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: the octets as the block holds them are kept as well, since a</span>
-        <span class="c1"># Secrets Length may declare fewer or more than the key's fixed width,</span>
-        <span class="c1"># and a rebuild writes them back verbatim (#1986).</span>
+        <span class="c1"># NOTE: the octets are kept too, as Secrets Length may differ from the key's</span>
+        <span class="c1"># fixed width; a rebuild writes them back verbatim (#1986).</span>
         <span class="n">secrets</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">secrets</span></div>
 
@@ -4747,9 +4718,8 @@
             <span class="n">captured_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">),</span> <span class="n">snaplen</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
-        <span class="c1"># NOTE: Packet Data holds exactly Captured Packet Length octets, so a</span>
-        <span class="c1"># packet longer than that -- e.g. than the interface's snaplen -- is cut</span>
-        <span class="c1"># to it rather than written out whole behind a clipped length.</span>
+        <span class="c1"># NOTE: Packet Data holds exactly Captured Packet Length octets, so a longer</span>
+        <span class="c1"># packet is cut to it rather than written out whole behind a clipped length.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">captured_len</span><span class="p">:</span>
             <span class="n">packet_data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)[:</span><span class="n">captured_len</span><span class="p">]</span>
         <span class="n">packet_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">+</span> <span class="n">pad_length</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
@@ -4803,9 +4773,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
-            <span class="c1"># NOTE: An SPB always belongs to interface 0, and its Packet Data is</span>
-            <span class="c1"># ``min(original_len, snaplen)`` octets long -- the length the parser</span>
-            <span class="c1"># reads back -- so a longer packet is cut to it.</span>
+            <span class="c1"># NOTE: An SPB belongs to interface 0, its Packet Data ``min(original_len,</span>
+            <span class="c1"># snaplen)`` octets long as the parser reads it, so a longer packet is cut.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">:</span>
                 <span class="n">snaplen</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span>
             <span class="k">else</span><span class="p">:</span>
@@ -4958,9 +4927,8 @@
             <span class="n">captured_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">),</span> <span class="n">snaplen</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
-        <span class="c1"># NOTE: Packet Data holds exactly Captured Packet Length octets, so a</span>
-        <span class="c1"># packet longer than that -- e.g. than the interface's snaplen -- is cut</span>
-        <span class="c1"># to it rather than written out whole behind a clipped length.</span>
+        <span class="c1"># NOTE: Packet Data holds exactly Captured Packet Length octets, so a longer</span>
+        <span class="c1"># packet is cut to it rather than written out whole behind a clipped length.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">captured_len</span><span class="p">:</span>
             <span class="n">packet_data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)[:</span><span class="n">captured_len</span><span class="p">]</span>
         <span class="n">packet_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">+</span> <span class="n">pad_length</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
@@ -5068,10 +5036,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secrets_data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">dsb_secrets_selector</span>
 
-            <span class="c1"># NOTE: Read through the schema the parse side selects, as the</span>
-            <span class="c1"># block's Secrets Data is read, since :meth:`read` consumes a</span>
-            <span class="c1"># secrets schema rather than raw octets; the schema packs back to</span>
-            <span class="c1"># exactly ``secrets_data`` (#2273).</span>
+            <span class="c1"># NOTE: Read through the secrets schema the parse side selects, as :meth:`read`</span>
+            <span class="c1"># consumes a schema rather than raw octets; it packs back to ``secrets_data`` (#2273).</span>
             <span class="n">secrets_data_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_DSBSecrets'</span><span class="p">,</span> <span class="n">dsb_secrets_selector</span><span class="p">({</span>
                 <span class="s1">'secrets_type'</span><span class="p">:</span> <span class="n">secrets_type_val</span><span class="p">,</span>
                 <span class="s1">'secrets_length'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">secrets_data</span><span class="p">),</span>
@@ -5106,12 +5072,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">secrets_held</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">secrets_data_val</span><span class="p">)</span>
         <span class="n">secrets_padded</span> <span class="o">=</span> <span class="n">secrets_held</span> <span class="o">+</span> <span class="n">pad_length</span><span class="p">(</span><span class="n">secrets_held</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="c1"># NOTE: A Secrets Length running past the block is kept as declared, as</span>
-        <span class="c1"># an EPB keeps its captured length, so the block rebuilds as captured;</span>
-        <span class="c1"># the block length is still sized from the secrets written (#1980).</span>
-        <span class="c1"># Only a true overrun is kept -- the one the parse side bounds and</span>
-        <span class="c1"># warns on, measured by ``secrets_area`` -- so a length that fits the</span>
-        <span class="c1"># block, or one an edit has outdated, follows the secrets written.</span>
+        <span class="c1"># NOTE: Only a true overrun, past ``secrets_area`` as the parse side bounds it, keeps its</span>
+        <span class="c1"># declared Secrets Length so the block rebuilds as captured; others follow the secrets (#1980).</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">secrets_area</span>
 
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">declared</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">declared</span> <span class="o">&gt;</span> <span class="n">secrets_area</span><span class="p">({</span>
@@ -5247,9 +5209,8 @@
                 <span class="n">major_version</span> <span class="o">=</span> <span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">minor_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">minor_version</span> <span class="o">=</span> <span class="n">version</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="c1"># NOTE: the field is signed and the specification spells "not specified"</span>
-        <span class="c1"># both -1 and 0xFFFFFFFFFFFFFFFF, so both spellings are accepted and the</span>
-        <span class="c1"># field packs them to the same octets; any other value is refused (#2617).</span>
+        <span class="c1"># NOTE: the specification spells "not specified" both -1 and 0xFFFFFFFFFFFFFFFF, so the</span>
+        <span class="c1"># signed field also takes its unsigned spelling, packing both alike; wider is refused (#2617).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_make_sint</span><span class="p">(</span><span class="n">section_length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'[SHB] section_length'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'PCAP-NG'</span><span class="p">,</span> <span class="n">allow_unsigned</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -7394,11 +7355,8 @@
 
         <span class="n">ts_ratio</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># NOTE: ``tzone`` survives only here, as the zone the instant is</span>
-            <span class="c1"># *rendered* in -- which is all a ``tzinfo`` can affect on an aware</span>
-            <span class="c1"># datetime. It never moves the instant itself. Not the stdlib's</span>
-            <span class="c1"># ``fromtimestamp``, whose range is the C library's: Windows' takes</span>
-            <span class="c1"># nothing before 1970 or after 3000 (#2099).</span>
+            <span class="c1"># NOTE: ``tzone`` sets only the zone the instant renders in, never the instant. Not the</span>
+            <span class="c1"># stdlib's ``fromtimestamp``, whose C-library range on Windows is 1970 to 3000 (#2099).</span>
             <span class="n">ts_datetime</span> <span class="o">=</span> <span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_ratio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ts_ratio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tzone</span><span class="p">)</span>
         <span class="c1"># an epoch past what ``datetime`` or a 64-bit ``time_t`` holds, e.g.</span>
         <span class="c1"># from an extreme ``if_tsoffset``, raises one of these</span>
@@ -7618,14 +7576,11 @@
 <span class="sd">            Current protocol with packet extracted.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We added a new key ``__next_type__`` to ``dict_`` to store the</span>
-<span class="sd">            next layer protocol type, and a new key ``__next_name__`` to</span>
-<span class="sd">            store the next layer protocol name. :meth:`Info.to_dict</span>
-<span class="sd">            &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries both, and the</span>
-<span class="sd">            dumpers leave them out.</span>
-
-<span class="sd">            We also added a new key ``protocols`` to ``dict_`` to store the</span>
-<span class="sd">            protocol chain of the current packet (frame).</span>
+<span class="sd">            ``dict_`` gains ``__next_type__`` and ``__next_name__``, the next</span>
+<span class="sd">            layer's protocol type and name, which :meth:`Info.to_dict</span>
+<span class="sd">            &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries and the dumpers</span>
+<span class="sd">            leave out, and ``protocols``, the protocol chain of the current</span>
+<span class="sd">            packet (frame).</span>
 
 <span class="sd">            ``proto`` is dispatched as :meth:`_dispatch_linktype` says, so</span>
 <span class="sd">            ``LINKTYPE_RAW`` data is read as IPv4 or IPv6 (:issue:`1502`).</span>
@@ -8037,7 +7992,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

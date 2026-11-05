@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -631,7 +632,7 @@ IPv6 fragments behind some IPv6 extension headers, go undissected.</p></li>
 <p><a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> tabulates them.</p>
 <p>Every engine also answers a preflight check,
 <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>, which
-<a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a> consults
+the <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> constructor consults
 before importing the engine. An engine that cannot run here therefore gives one
 warning naming the cause (a Python version, a missing <strong class="program">tshark</strong>, a
 missing <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, the wrong <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> distribution) and falls back
@@ -1237,7 +1238,7 @@ smaller than that is noise, not a result.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="_static/documentation_options.js?v=662e1299"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

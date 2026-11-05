@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -575,8 +576,7 @@ of IP packets, TCP segments and DTLS handshake messages, based on the
 algorithms described in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>, <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> and <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html"><strong>RFC 6347</strong></a>.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For more information on customisation and extension, please
-refer to <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
+<p><a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>, on customisation and extension.</p>
 </div>
 <div class="toctree-wrapper compound">
 <ul>
@@ -608,10 +608,9 @@ refer to <a class="reference internal" href="../../../ext.html"><span class="doc
 </li>
 </ul>
 </div>
-<p>All reassembly classes are implemented as <a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a>
-subclasses, which are responsible for processing extracted packets and
-reassembling the datagrams into unfragmented packets. Below is a brief
-diagram of the class hierarchy of <a class="reference internal" href="#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a>:</p>
+<p>Every reassembly class subclasses
+<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a>, reassembling
+extracted fragments into whole datagrams:</p>
 <pre  class="mermaid">
         flowchart TD
     A{{ReassemblyMeta}} -.-&gt;|metaclass| B(ReassemblyBase)
@@ -1066,7 +1065,7 @@ pickled (<a class="extlink-issue reference external" href="https://github.com/Ja
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

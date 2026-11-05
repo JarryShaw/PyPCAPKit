@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/dumpkit/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.dumpkit is the collection of pcapkit ’s own dumpers, like those in dictdumper. Common Utilities- Internal Definitions., PCAP Dumper, Null Dumper. Every dumper class is a dictdumper.dumper.D..." />
-<meta name="description" content="pcapkit.dumpkit is the collection of pcapkit ’s own dumpers, like those in dictdumper. Common Utilities- Internal Definitions., PCAP Dumper, Null Dumper. Every dumper class is a dictdumper.dumper.D..." />
+<meta property="og:description" content="pcapkit.dumpkit holds pcapkit ’s own dumpers, beside those of dictdumper. Common Utilities- Internal Definitions., PCAP Dumper, Null Dumper. Every dumper class subclasses dictdumper.dumper.Dumper, ..." />
+<meta name="description" content="pcapkit.dumpkit holds pcapkit ’s own dumpers, beside those of dictdumper. Common Utilities- Internal Definitions., PCAP Dumper, Null Dumper. Every dumper class subclasses dictdumper.dumper.Dumper, ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Common Utilities" href="common.html"><link rel="prev" title="3rd-Party Support" href="../toolkit/3rdparty.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -570,8 +571,8 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.dumpkit">
 <span id="dump-utilities"></span><h1>Dump Utilities<a class="headerlink" href="#module-pcapkit.dumpkit" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> is the collection of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own dumpers,
-like those in <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dictdumper</span></code></a>.</p>
+<p><a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> holds <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own dumpers, beside those of
+<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dictdumper</span></code></a>.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Utilities</a><ul>
@@ -582,9 +583,8 @@ like those in <a class="reference external" href="https://dictdumper.jarryshaw.m
 <li class="toctree-l1"><a class="reference internal" href="null.html">Null Dumper</a></li>
 </ul>
 </div>
-<p>Every dumper class is a <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a> subclass, responsible
-for writing parsed packet data into a formatted output file. The class
-hierarchy:</p>
+<p>Every dumper class subclasses <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a>, writing parsed
+packet data to a formatted output file:</p>
 <pre  class="mermaid">
         ---
 config:
@@ -623,12 +623,11 @@ flowchart TD
     click NotImplementedIO &quot;null.html#pcapkit.dumpkit.null.NotImplementedIO&quot;
     </pre><div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">tree</span></code> output (also selected as <code class="docutils literal notranslate"><span class="pre">text</span></code> and <code class="docutils literal notranslate"><span class="pre">txt</span></code>) is a lossy,
-human-readable view, and nothing reads it back. It renders <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">b''</span></code>,
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and <code class="docutils literal notranslate"><span class="pre">{}</span></code> all as <code class="docutils literal notranslate"><span class="pre">NIL</span></code>, writes a newline inside a short
-string as is, breaking the layout, and rewraps a longer one, turning its
-newlines into spaces. Use <code class="docutils literal notranslate"><span class="pre">json</span></code> or <code class="docutils literal notranslate"><span class="pre">plist</span></code> (also selected as
-<code class="docutils literal notranslate"><span class="pre">xml</span></code>) where the report has to round-trip.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">tree</span></code> output (also <code class="docutils literal notranslate"><span class="pre">text</span></code> and <code class="docutils literal notranslate"><span class="pre">txt</span></code>) is a lossy, human-readable
+view that nothing reads back. It renders <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">b''</span></code>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and
+<code class="docutils literal notranslate"><span class="pre">{}</span></code> all as <code class="docutils literal notranslate"><span class="pre">NIL</span></code>, writes a newline inside a short string as is, breaking
+the layout, and rewraps a longer one, turning its newlines into spaces. Use
+<code class="docutils literal notranslate"><span class="pre">json</span></code> or <code class="docutils literal notranslate"><span class="pre">plist</span></code> (also <code class="docutils literal notranslate"><span class="pre">xml</span></code>) where the report has to round-trip.</p>
 </div>
 </section>
 
@@ -681,7 +680,7 @@ newlines into spaces. Use <code class="docutils literal notranslate"><span class
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

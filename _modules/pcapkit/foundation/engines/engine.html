@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -870,42 +871,20 @@
 <span class="sd">            registered; only the keyword decides registration.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            The keyword is ``engine`` rather than ``name`` because ``name``</span>
-<span class="sd">            cannot be passed as a class keyword at all below Python 3.11:</span>
-<span class="sd">            ``abc.ABCMeta.__new__`` takes ``mcls``, ``name``, ``bases`` and</span>
-<span class="sd">            ``namespace`` as positional-*or-keyword* parameters</span>
-<span class="sd">            there, so a class keyword by any of those names collides</span>
-<span class="sd">            with one of them and the class statement raises :exc:`TypeError` from</span>
-<span class="sd">            the metaclass before this method is reached. ``engine`` is outside</span>
-<span class="sd">            that set, so the documented registration path works on every</span>
-<span class="sd">            supported version. Measured on 3.8.20, 3.9.25, 3.10.21, 3.11.15 and</span>
-<span class="sd">            3.14.7; those names are the whole of the ``abc.ABCMeta.__new__`` collision</span>
-<span class="sd">            surface. Separately, and for an unrelated reason that holds on every</span>
-<span class="sd">            version, ``metaclass`` is not usable as a class keyword either: a</span>
-<span class="sd">            ``class`` statement consumes it to choose the metaclass, so it never</span>
-<span class="sd">            reaches this method at all.</span>
+<span class="sd">            The keyword is ``engine`` rather than ``name`` because, below</span>
+<span class="sd">            Python 3.11, ``abc.ABCMeta.__new__`` takes ``mcls``, ``name``,</span>
+<span class="sd">            ``bases`` and ``namespace`` as positional-*or-keyword* parameters, so</span>
+<span class="sd">            a class keyword by any of those names makes the class statement raise</span>
+<span class="sd">            :exc:`TypeError` before this method is reached. ``metaclass`` is</span>
+<span class="sd">            unusable on every version, since the ``class`` statement consumes it.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For more details, please refer to</span>
 <span class="sd">            :meth:`pcapkit.foundation.extraction.Extractor.register_engine`.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then</span>
-        <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, since</span>
-        <span class="c1"># ``object.__init_subclass__`` takes none. Since a missing keyword means</span>
-        <span class="c1"># "do not register", silently swallowing it would make</span>
-        <span class="c1"># ``class MyEngine(Engine, engnie='x')`` skip registration altogether --</span>
-        <span class="c1"># no exception, no warning. So reject it.</span>
-        <span class="c1">#</span>
-        <span class="c1"># One typo this cannot catch is ``name=``, and only below Python 3.11: it is</span>
-        <span class="c1"># one of the names that collide with ``ABCMeta.__new__``, so it fails</span>
-        <span class="c1"># in the metaclass before reaching here. It is still loud, just as a</span>
-        <span class="c1"># ``TypeError`` rather than an ``UnsupportedCall``.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``args`` is checked alongside ``kwargs`` for completeness rather than</span>
-        <span class="c1"># because a ``class`` statement can fill it -- class creation passes</span>
-        <span class="c1"># keywords only. It is reachable through a direct</span>
-        <span class="c1"># ``__init_subclass__(...)`` call, which the declared signature permits.</span>
+        <span class="c1"># NOTE: an unknown class keyword would be dropped by ``super().__init_subclass__()``,</span>
+        <span class="c1"># silently skipping registration, so reject it; ``args`` is reachable by a direct call.</span>
         <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unexpected class keyword(s): </span><span class="si">{</span><span class="n">unexpected</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -951,7 +930,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

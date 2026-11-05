@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -694,18 +695,8 @@
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
             <span class="n">label</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">ref</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="c1"># NOTE: fails loudly rather than guessing. A silent fallback to</span>
-            <span class="c1"># '9850' here would mis-cite a future row referenced by anything</span>
-            <span class="c1"># other than a bare ``[RFCnnnn]``, and blindly appending</span>
-            <span class="c1"># ``#section-4.2`` below to whatever number *did* match would</span>
-            <span class="c1"># mis-cite a row citing a different RFC entirely -- section 4.2 is</span>
-            <span class="c1"># specifically RFC 9850's own "TLS SSLKEYLOGFILE Labels" registry</span>
-            <span class="c1"># section, not a fact about any other RFC's structure. All ten</span>
-            <span class="c1"># rows fetched on 2026-09-28 are ``[RFC9850]``, so each takes the</span>
-            <span class="c1"># ``rfc == '9850'`` branch; a future registry</span>
-            <span class="c1"># change either still fits it or raises here for a human to look</span>
-            <span class="c1"># at, rather than rendering a citation nobody checked. IANA has</span>
-            <span class="c1"># spelt it ``[RFC 9850]`` since 2026-10-13, which fits too (#1664).</span>
+            <span class="c1"># NOTE: raise rather than guess a citation; ``#section-4.2`` is RFC 9850's</span>
+            <span class="c1"># own registry section, true of no other RFC (#1664).</span>
             <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[RFC\s*(\d+)\]'</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -719,12 +710,8 @@
             <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">, c.f., :rfc:`</span><span class="si">{</span><span class="n">rfc</span><span class="si">}{</span><span class="n">section</span><span class="si">}</span><span class="s1">`.'</span><span class="p">)</span>
 
             <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = '</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">'"</span>
-            <span class="c1"># NOTE: mirrors the ``nosec B105`` bandit suppression every</span>
-            <span class="c1"># such member carried in the hand-written</span>
-            <span class="c1"># ``pcapkit.protocols.misc.pcapng.protocol.TLSKeyLabel`` (#882) --</span>
-            <span class="c1"># bandit's B105 (hardcoded password string) flags a string</span>
-            <span class="c1"># constant assigned to a name containing ``SECRET``, which most</span>
-            <span class="c1"># of these labels' names do.</span>
+            <span class="c1"># NOTE: bandit's B105 flags a string assigned to a name containing</span>
+            <span class="c1"># ``SECRET``, as most of these labels are (#882).</span>
             <span class="k">if</span> <span class="s1">'SECRET'</span> <span class="ow">in</span> <span class="n">label</span><span class="p">:</span>
                 <span class="n">pref</span> <span class="o">+=</span> <span class="s1">'  # nosec B105'</span>
 
@@ -781,7 +768,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

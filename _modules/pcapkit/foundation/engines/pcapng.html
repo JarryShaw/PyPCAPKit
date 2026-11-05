@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -827,11 +828,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_name</span><span class="p">(</span><span class="s1">'Decryption Secrets'</span><span class="p">))</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">:</span>
-                <span class="c1"># NOTE: The interface ID is bounds-checked while the block is</span>
-                <span class="c1"># parsed, by ``PCAPNG._get_interface``. Re-checking it here</span>
-                <span class="c1"># cannot fire: parsing an ISB resolves its interface to read the</span>
-                <span class="c1"># block's timestamp, so a block that reaches this branch has</span>
-                <span class="c1"># already been validated.</span>
+                <span class="c1"># NOTE: no interface ID check here: parsing an ISB already resolved its interface</span>
+                <span class="c1"># through ``PCAPNG._get_interface`` to read the block's timestamp.</span>
                 <span class="n">isb_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_InterfaceStatisticsBlock'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">statistics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isb_info</span><span class="p">)</span>
 
@@ -1033,9 +1031,8 @@
                 <span class="k">if</span> <span class="n">block_type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">:</span>
                     <span class="n">secrets</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_peek</span><span class="p">(</span><span class="mi">16</span><span class="p">)[</span><span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">byteorder</span><span class="p">)</span>
                     <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">block_type</span><span class="p">]</span> <span class="o">+</span> <span class="n">secrets</span> <span class="o">+</span> <span class="n">pad_length</span><span class="p">(</span><span class="n">secrets</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-        <span class="c1"># NOTE: No buffer holds more than :data:`sys.maxsize` octets, so a block</span>
-        <span class="c1"># longer than that is read ahead only so far; the reader moves past the</span>
-        <span class="c1"># rest itself (#1975).</span>
+        <span class="c1"># NOTE: no buffer holds more than :data:`sys.maxsize` octets; the reader</span>
+        <span class="c1"># moves past the rest of a longer block itself (#1975).</span>
         <span class="n">ifile</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_packet_block_context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -1113,7 +1110,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

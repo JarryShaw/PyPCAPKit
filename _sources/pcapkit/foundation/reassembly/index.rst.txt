@@ -10,8 +10,7 @@ algorithms described in :rfc:`791`, :rfc:`815` and :rfc:`6347`.
 
 .. seealso::
 
-   For more information on customisation and extension, please
-   refer to :doc:`../../../ext`.
+   :doc:`../../../ext`, on customisation and extension.
 
 .. toctree::
    :maxdepth: 2
@@ -21,10 +20,9 @@ algorithms described in :rfc:`791`, :rfc:`815` and :rfc:`6347`.
    tcp
    dtls
 
-All reassembly classes are implemented as :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
-subclasses, which are responsible for processing extracted packets and
-reassembling the datagrams into unfragmented packets. Below is a brief
-diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
+Every reassembly class subclasses
+:class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, reassembling
+extracted fragments into whole datagrams:
 
 .. mermaid::
 

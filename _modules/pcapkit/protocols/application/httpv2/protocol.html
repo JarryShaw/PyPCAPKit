@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -676,9 +677,8 @@
 
     <span class="n">FrameParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">)],</span> <span class="n">Data_HTTP</span><span class="p">]</span>
     <span class="c1"># NB: ``Flags`` is bound just above, so it goes in unquoted. Quoted, it would</span>
-    <span class="c1"># leave a bare ``ForwardRef('Flags')`` inside the alias, which every *other*</span>
-    <span class="c1"># module that spells ``FrameConstructor`` in an annotation would have to</span>
-    <span class="c1"># resolve in its own namespace -- where the name does not exist.</span>
+    <span class="c1"># leave a bare ``ForwardRef('Flags')`` in the alias, which another module</span>
+    <span class="c1"># annotating with ``FrameConstructor`` cannot resolve in its own namespace.</span>
     <span class="n">FrameConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">]),</span>
                                  <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Schema_FrameType</span><span class="p">,</span> <span class="n">Flags</span><span class="p">]]</span>
 
@@ -990,10 +990,9 @@
 <span class="sd">                constructor derives from ``frame``.</span>
 <span class="sd">            reserved: Reserved bit of the frame header.</span>
 <span class="sd">            sid: Stream ID of HTTP/2 frame.</span>
-<span class="sd">            frame: Frame data of HTTP/2 frame. Omitting it, i.e. :data:`None`,</span>
-<span class="sd">                builds the frame type's own default payload, exactly as ``{}``</span>
-<span class="sd">                does. An explicit :obj:`bytes` value, ``b''`` included, is</span>
-<span class="sd">                packed as raw octets instead.</span>
+<span class="sd">            frame: Frame data of HTTP/2 frame. Omitted (:data:`None`), the frame</span>
+<span class="sd">                type's own default payload is built, as for ``{}``; a</span>
+<span class="sd">                :obj:`bytes` value, ``b''`` included, is packed as raw octets.</span>
 <span class="sd">            payload: Octets after the frame, e.g. the next frame.</span>
 <span class="sd">            preface: Whether the HTTP/2 connection preface goes ahead of the</span>
 <span class="sd">                frame; :meth:`pack` writes it.</span>
@@ -2397,7 +2396,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

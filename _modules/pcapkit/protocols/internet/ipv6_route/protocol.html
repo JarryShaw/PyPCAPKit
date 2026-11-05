@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -880,9 +881,8 @@
             <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hdr_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
             <span class="n">data_raw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">ipv6_route_data_length</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: Unpacked into the routing type's own schema, since</span>
-            <span class="c1"># :meth:`read` hands the schema's ``data`` to the per-type reader,</span>
-            <span class="c1"># which reads fields rather than octets off it.</span>
+            <span class="c1"># NOTE: Unpacked into the routing type's own schema, since :meth:`read` hands its</span>
+            <span class="c1"># ``data`` to the per-type reader, which reads fields rather than octets off it.</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">data_val</span> <span class="o">=</span> <span class="n">Schema_RoutingType</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">type_val</span><span class="p">]</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span>  <span class="c1"># pylint: disable=unsubscriptable-object</span>
                     <span class="n">data_raw</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_raw</span><span class="p">),</span> <span class="p">{})</span>  <span class="c1"># type: Schema_RoutingType</span>
@@ -898,10 +898,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="c1"># NOTE: Through ``parse_ip_address`` rather than</span>
-            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``</span>
-            <span class="c1"># subclass the latter accepts silently: ``dst=True`` would become</span>
-            <span class="c1"># ``::1``.</span>
+            <span class="c1"># NOTE: Not ``ipaddress.ip_address``, which silently takes a ``bool`` as an ``int``:</span>
+            <span class="c1"># ``dst=True`` would become ``::1``.</span>
             <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">dst</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid destination address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span> <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -915,10 +913,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid routing data type: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: An explicit ``hdr_ext_len`` is written as given, so that a</span>
-        <span class="c1"># ``from_data`` rebuild of a header the capture cut short keeps the</span>
-        <span class="c1"># length the sender declared instead of the one that was recorded</span>
-        <span class="c1"># (#1457), the same as IPv6's ``payload_length``.</span>
+        <span class="c1"># NOTE: An explicit ``hdr_ext_len`` is written as given, so a ``from_data`` rebuild of a</span>
+        <span class="c1"># cut header keeps the declared length, not the recorded one (#1457), as IPv6 does.</span>
         <span class="k">if</span> <span class="n">hdr_ext_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">hdr_ext_len</span>
 
@@ -1063,10 +1059,8 @@
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="s1">'seg_left'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="s1">'data'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
-            <span class="c1"># NOTE: ``data.length`` is the parsed header length in octets,</span>
-            <span class="c1"># passed through as ``Hdr Ext Len`` rather than left to ``make`` to</span>
-            <span class="c1"># recompute, so that a truncated capture rebuilds with the length</span>
-            <span class="c1"># that was on the wire (#1457).</span>
+            <span class="c1"># NOTE: The parsed header length, passed through as ``Hdr Ext Len`` rather than</span>
+            <span class="c1"># recomputed, so a truncated capture rebuilds with the length on the wire (#1457).</span>
             <span class="s1">'hdr_ext_len'</span><span class="p">:</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
@@ -1303,24 +1297,8 @@
 <span class="sd">                one (:rfc:`6554#section-4.2`).</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: ``header.length`` is ``Hdr Ext Len``, in the 8-octet units</span>
-        <span class="c1"># :rfc:`6554#section-3` specifies, not octets, and the addresses are</span>
-        <span class="c1"># not always 16 octets: an SRH carries full addresses only when</span>
-        <span class="c1"># ``CmprI`` and ``CmprE`` are both 0. A plain ``% 16`` bound on the</span>
-        <span class="c1"># length is therefore wrong on both counts.</span>
-        <span class="c1">#</span>
-        <span class="c1"># :rfc:`6554#section-4.2` derives the address count from the fields</span>
-        <span class="c1"># this reader has to hand:</span>
-        <span class="c1">#</span>
-        <span class="c1">#     n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1</span>
-        <span class="c1">#</span>
-        <span class="c1"># so the invariant available is that the division closes: non-negative</span>
-        <span class="c1"># and whole. ``16 - cmpr_i`` cannot be zero, since ``CmprI`` is a</span>
-        <span class="c1"># 4-bit unsigned integer (:rfc:`6554#section-3`), at most 15. This is</span>
-        <span class="c1"># the well-formedness check the library needs to walk</span>
-        <span class="c1"># ``Addresses[1..n]`` at all; the RFC specifies no malformed-header</span>
-        <span class="c1"># drop condition beyond ``Segments Left &gt; n``, so nothing stricter is</span>
-        <span class="c1"># imposed. Not checked against a real RPL capture.</span>
+        <span class="c1"># NOTE: The check is that :rfc:`6554#section-4.2`'s count ``n`` divides out non-negative</span>
+        <span class="c1"># and whole (``CmprI`` is four bits, so never by zero); the RFC names nothing stricter.</span>
         <span class="n">cmpr_i</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr</span><span class="p">[</span><span class="s1">'cmpr_i'</span><span class="p">]</span>
         <span class="n">cmpr_e</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr</span><span class="p">[</span><span class="s1">'cmpr_e'</span><span class="p">]</span>
         <span class="n">pad_len</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span>
@@ -1484,13 +1462,8 @@
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: A parsed address is decoded to its full 16 octets whenever</span>
-            <span class="c1"># the header sat inside IPv6, the ``dst`` prefix restored, so it is</span>
-            <span class="c1"># compressed again here: ``Addresses[n]`` by ``CmprE``, every other</span>
-            <span class="c1"># one by ``CmprI``. Which item is ``Addresses[n]`` comes from the</span>
-            <span class="c1"># count ``Hdr Ext Len`` declares (:rfc:`6554#section-4.2`), since a</span>
-            <span class="c1"># capture cut inside the list holds fewer; one it cut short is left</span>
-            <span class="c1"># as the raw :obj:`bytes` read and written back as is.</span>
+            <span class="c1"># NOTE: Recompressed, ``Addresses[n]`` by ``CmprE`` and the rest by ``CmprI``; ``n``</span>
+            <span class="c1"># is from ``Hdr Ext Len``, as a cut capture holds fewer, and a cut-short one stays raw.</span>
             <span class="n">area</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pad</span>
             <span class="n">count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">area</span> <span class="o">-</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_e</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_i</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">last</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span> <span class="n">count</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
@@ -1501,17 +1474,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ip</span>
 
-            <span class="c1"># NOTE: Through ``parse_ip_address`` rather than</span>
-            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``</span>
-            <span class="c1"># subclass the latter accepts silently. Here the value would not</span>
-            <span class="c1"># just pack wrong but also feed ``cmpr_i``/``cmpr_e`` below,</span>
-            <span class="c1"># corrupting the compression metadata: ``ip=[True]`` would pack an</span>
-            <span class="c1"># address of ``00000001`` with ``cmpr_e=0``.</span>
+            <span class="c1"># NOTE: ``parse_ip_address`` refuses a ``bool``, which would otherwise pack wrong and</span>
+            <span class="c1"># corrupt ``cmpr_i``/``cmpr_e`` below.</span>
             <span class="n">descr</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid RPL source address'</span>
 
-            <span class="c1"># NOTE: :rfc:`6554#section-4.2` counts ``n`` as ``(...) + 1``, so</span>
-            <span class="c1"># a header always carries ``Addresses[n]``; one with none would not</span>
-            <span class="c1"># parse back.</span>
+            <span class="c1"># NOTE: :rfc:`6554#section-4.2` counts ``n`` as ``(...) + 1``, so a header always</span>
+            <span class="c1"># carries ``Addresses[n]``; one with none would not parse back.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ip</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] RPL source route needs at least one address'</span><span class="p">)</span>
 
@@ -1531,11 +1499,8 @@
                         <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">descr</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
                 <span class="n">prefix_i</span> <span class="o">=</span> <span class="n">os_path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
 
-                <span class="c1"># NOTE: ``CmprI`` and ``CmprE`` are 4-bit fields</span>
-                <span class="c1"># (:rfc:`6554#section-3`), so a prefix of all 16 octets -- an</span>
-                <span class="c1"># address equal to ``dst``, or no ``Addresses[1..n-1]`` at all,</span>
-                <span class="c1"># which leaves ``dst`` alone in the list -- is elided as 15. With</span>
-                <span class="c1"># no ``Addresses[1..n-1]``, ``CmprI`` governs nothing and is 0.</span>
+                <span class="c1"># NOTE: ``CmprI``/``CmprE`` are 4-bit (:rfc:`6554#section-3`), so a whole</span>
+                <span class="c1"># 16-octet prefix is elided as 15; with no ``Addresses[1..n-1]``, ``CmprI`` is 0.</span>
                 <span class="n">cmpr_i</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix_i</span><span class="p">),</span> <span class="mi">15</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
 
                 <span class="n">test_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dst</span><span class="o">.</span><span class="n">packed</span><span class="p">]</span>
@@ -1607,7 +1572,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

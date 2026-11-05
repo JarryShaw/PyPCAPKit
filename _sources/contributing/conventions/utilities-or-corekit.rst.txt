@@ -4,11 +4,10 @@ Choosing Between ``utilities`` and ``corekit``
 ----------------------------------------------
 
 Which of the two support packages a module belongs in. Settled by the owner on
-:issue:`1712`, over alternatives that sorted modules by packet knowledge or by
-who uses them. This rule can be checked from the import graph alone, and it needed
-the fewest moves: one.
+:issue:`1712`, over sorting modules by packet knowledge or by who uses them: this rule
+can be checked from the import graph alone, and needed the fewest moves.
 
-The questions this page asks, as one decision:
+The page's questions, as one decision:
 
 .. mermaid::
 
@@ -29,48 +28,46 @@ The questions this page asks, as one decision:
 
 :mod:`pcapkit.utilities` **is for cross-cutting services**: exceptions, warnings,
 logging, the compatibility layer, configuration, and wrappers around third-party
-libraries such as :mod:`~pcapkit.utilities.chardet`. The question to ask of a module
-is *could any code use this service, and does it import nothing from* :mod:`pcapkit`
-*outside* ``utilities``? Both halves have to hold, and *nothing* covers a top-level
-import, one inside a function and one under ``TYPE_CHECKING`` alike.
+libraries such as :mod:`~pcapkit.utilities.chardet`. Ask of a module: *could any code
+use this service, and does it import nothing from* :mod:`pcapkit` *outside*
+``utilities``? Both halves must hold, and *nothing* covers top-level, in-function and
+``TYPE_CHECKING`` imports alike.
 :file:`tests/project/test_utilities_import_boundary_1735_unit.py` checks every module
-under :file:`pcapkit/utilities/` for it.
+under :file:`pcapkit/utilities/`.
 
 :mod:`pcapkit.utilities.compat` **holds compatibility implementations and re-exports
 only.** Where a name or behaviour differs by interpreter version, ``compat`` re-exports
 the right one behind a :data:`sys.version_info` gate rather than a ``getattr`` or
-``hasattr`` probe. That was ruled in review of the threading excepthook and
-``AppType`` union fixes for :issue:`1691` and :issue:`1694`, neither of whose threads
-holds it, and applied to the package's other probes on :issue:`1709`.
+``hasattr`` probe. Ruled in review of the threading excepthook and ``AppType`` union
+fixes for :issue:`1691` and :issue:`1694`, whose threads do not hold it, and applied to
+the other probes on :issue:`1709`.
 :file:`tests/project/test_stdlib_feature_probes_1709_unit.py` fails on a ``getattr``
 or ``hasattr`` call naming its attribute in a string literal, where the receiver is a
 builtin class or a module the file binds with an ``import`` statement, or where the
-attribute is one the test lists with the interpreter version that added it; the calls
-it exempts pass. A helper that has to behave the same on every platform is
-neither a compatibility implementation nor a re-export, so it gets a module of its
-own: that is why :func:`~pcapkit.utilities.datetime.fromtimestamp` is in
+attribute is one the test lists with the interpreter version that added it, unless the
+test exempts the call. A helper that must behave the same on every platform is neither
+a compatibility implementation nor a re-export, so it gets its own module:
+:func:`~pcapkit.utilities.datetime.fromtimestamp` is in
 :mod:`pcapkit.utilities.datetime`, ruled in review of the timestamp fix for
 :issue:`2099`, whose thread does not hold it.
 
 :mod:`pcapkit.corekit` **is for the types the packet model is built from**: what
 :mod:`pcapkit.protocols`, :mod:`pcapkit.const` and :mod:`pcapkit.foundation`
-subclass, instantiate or decorate with. The question is *is this part of what a
-protocol or its schema is made of?* A support module that fails the ``utilities``
-question belongs here instead. :mod:`pcapkit.corekit.decorators` is the worked example: it acts on a
-protocol's file and falls back to protocol classes, so it moved out of ``utilities``
-on :issue:`1735`. ``corekit`` may import ``utilities``; the reverse is what the rule
-forbids.
+subclass, instantiate or decorate with. Ask: *is this part of what a protocol or its
+schema is made of?* A support module that fails the ``utilities`` question belongs
+here. :mod:`pcapkit.corekit.decorators` acts on a protocol's file and falls back to
+protocol classes, so it moved out of ``utilities`` on :issue:`1735`. ``corekit`` may
+import ``utilities``; the rule forbids the reverse.
 
-A second worked example is :mod:`pcapkit.corekit.checksum`, settled on :issue:`2580`.
-It fails the ``utilities`` question because
-:class:`~pcapkit.corekit.checksum.internet.ChecksumStatus` subclasses
-:class:`~pcapkit.corekit.enum.EnumLookup`. The protocols compute and verify their
-checksums through it, so it imports
-:mod:`pcapkit` only from ``corekit`` and ``utilities``, never from
-:mod:`pcapkit.protocols`; :file:`tests/corekit/test_checksum_import_boundary_2580_unit.py`
-checks that. What needs IPv4 and IPv6 stays beside
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`. The package holds one
-module per checksum family, so a new family sits beside
+:mod:`pcapkit.corekit.checksum`, settled on :issue:`2580`, fails the ``utilities``
+question because :class:`~pcapkit.corekit.checksum.internet.ChecksumStatus` subclasses
+:class:`~pcapkit.corekit.enum.EnumLookup`. The protocols compute and verify checksums
+through it, so it imports :mod:`pcapkit` only from ``corekit`` and ``utilities``, never
+from :mod:`pcapkit.protocols`, as
+:file:`tests/corekit/test_checksum_import_boundary_2580_unit.py` checks. What needs IPv4
+and IPv6 stays beside
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`. The package has
+a module per checksum family, so a new family sits beside
 :mod:`~pcapkit.corekit.checksum.internet`.
 
 Shared Schema Helpers
@@ -80,16 +77,15 @@ Shared Schema Helpers
 :mod:`pcapkit.corekit.schema`, one module per group, rather than in the module that
 first needed it; the schema layer is :mod:`pcapkit.corekit.fields` and
 :mod:`pcapkit.protocols.schema`. It keeps no re-export at its old path. Ruled by the
-owner in session, on :issue:`2674`, who grouped these helpers in one package instead
-of placing each by the questions above. So
+owner in session on :issue:`2674`, grouping these helpers in one package rather than
+placing each by the questions above. So
 :func:`~pcapkit.corekit.schema.padding.pad_length` is in
 :mod:`pcapkit.corekit.schema.padding`, and
 :func:`~pcapkit.corekit.schema.shortread.keep_short_read` and
 :func:`~pcapkit.corekit.schema.shortread.replay_short_read` in
-:mod:`pcapkit.corekit.schema.shortread`. :mod:`pcapkit.corekit.schema` is not the
-header schema framework, which stays :mod:`pcapkit.protocols.schema` and its
-:class:`~pcapkit.protocols.schema.Schema`; it holds only the helpers shared
-across the layer.
+:mod:`pcapkit.corekit.schema.shortread`. The header schema framework stays
+:mod:`pcapkit.protocols.schema` and its :class:`~pcapkit.protocols.schema.Schema`;
+:mod:`pcapkit.corekit.schema` holds only the helpers shared across the layer.
 
 **A capture cut belongs to the built-in short read of**
 :class:`~pcapkit.protocols.schema.Schema`. :meth:`Schema.unpack
@@ -108,20 +104,19 @@ of :pr:`2682` (:issue:`2680`), and applied to option areas on :issue:`2694`.
 the record, as ``__short_width__``, and :meth:`Protocol.from_data
 <pcapkit.protocols.protocol.Protocol.from_data>` reads the rebuild at it, so it holds
 the values and the next layer its parse did. Ruled by the owner on :issue:`2761`, over
-a clamp inside :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`, the one
-protocol whose overrunning ``length`` showed the gap.
+a clamp inside :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`, whose
+overrunning ``length`` showed the gap.
 
-A field callback tells a value the cut left as zero from one read through the same
-record: :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` gives
-it to the fields after the one the data ends inside, as ``__short_read__`` in their
-packet. A callback that would refuse such a zero leaves it to the short read, and
-refuses a value read with a :exc:`~pcapkit.utilities.exceptions.ProtocolError`, as
-the ``Opt Data Len`` helpers of
-:mod:`pcapkit.protocols.internet.ipv6_ext.schema` do (:issue:`2727`).
+A field callback tells a zero the cut left from a zero read through the same record:
+:meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` passes it to the fields
+after the one the data ends inside, as ``__short_read__`` in their packet. A callback
+that would refuse such a zero leaves it to the short read, and refuses a read value
+with a :exc:`~pcapkit.utilities.exceptions.ProtocolError`, as the ``Opt Data Len``
+helpers of :mod:`pcapkit.protocols.internet.ipv6_ext.schema` do (:issue:`2727`).
 
 **A helper in one protocol's own schema module moves there too once code outside that
-protocol uses it and it is generic enough to reuse**, so that another implementor can
-find it; a helper only its own protocol calls stays beside the schema. Ruled on
+protocol uses it and it is generic enough to reuse**, so other implementors can find
+it; a helper only its own protocol calls stays beside the schema. Ruled on
 :issue:`2674`. A protocol's own modules are its protocol, data and schema modules. So
 :func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length`, which the IPv6
 pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
@@ -132,9 +127,9 @@ helpers in :mod:`pcapkit.protocols.internet.ipv6_ext.schema` belong to the HOPOP
 and IPv6-Opts headers that share them, and stay there too.
 
 The field modules and the protocols import these helpers, so a helper module imports
-neither of them, nor :mod:`pcapkit.foundation`, outside an ``if TYPE_CHECKING:``
-block; the package's ``__init__.py`` imports none of its modules, so a field module
-loads only the group it asks for.
+neither, nor :mod:`pcapkit.foundation`, outside an ``if TYPE_CHECKING:`` block. The
+package's ``__init__.py`` imports none of its modules, so a field module loads only the
+group it asks for.
 :file:`tests/project/test_schema_helpers_boundary_2674_unit.py` fails on a helper
 module that does, on a module outside the layer that refers to a function defined in
 a field module or in :mod:`pcapkit.protocols.schema`, and on a module outside
@@ -153,12 +148,11 @@ Settled by the owner on :issue:`2616`:
 *  **One that only its own module uses stays in that module**, private, as
    ``_exthdr_rebuilt`` does in :mod:`pcapkit.protocols.internet.internet`.
 
-A shared variable kept in one of the modules that use it makes the others import a
-private name from that module, and ties them to its place in the import graph. A
-module of bare declarations that imports nothing from :mod:`pcapkit` passes the
-``utilities`` question above, so any module may import it --
-:mod:`pcapkit.corekit.checksum` included, which must not reach
-:mod:`pcapkit.protocols`. :file:`tests/project/test_shared_contextvars_2616_unit.py`
+A shared variable kept in one of its users makes the others import a private name
+and ties them to that module's place in the import graph. A module of bare
+declarations importing nothing from :mod:`pcapkit` passes the ``utilities`` question,
+so any module may import it -- :mod:`pcapkit.corekit.checksum` included, which must not
+reach :mod:`pcapkit.protocols`. :file:`tests/project/test_shared_contextvars_2616_unit.py`
 fails on a module that takes a context variable from anywhere else, by name or as an
 attribute of an imported module, and on a variable there that is private, missing
 from ``__all__``, or read by one module alone.

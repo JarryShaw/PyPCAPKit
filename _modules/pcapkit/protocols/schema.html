@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -667,9 +668,8 @@
     <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NO_VALUE'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
     <span class="n">dict_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
 
-    <span class="c1"># NOTE: Only where the class defines none (``hasattr`` is always true). Without it,</span>
-    <span class="c1"># ``Schema(...)`` skips ``__post_init__``, leaving omitted fields as field objects.</span>
-    <span class="c1"># ``NoPayload`` declares an argument-less ``__init__`` so that none is generated.</span>
+    <span class="c1"># NOTE: Only where the class defines none, as ``NoPayload`` does (``hasattr`` is always true);</span>
+    <span class="c1"># without one, ``Schema(...)`` skips ``__post_init__``, leaving omitted fields as field objects.</span>
     <span class="k">if</span> <span class="s1">'__init__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
         <span class="c1"># NOTE: A typed ``__init__`` only for a class with fields, own or inherited.</span>
         <span class="k">if</span> <span class="n">args_</span><span class="p">:</span>
@@ -921,11 +921,9 @@
 <span class="w">        </span><span class="sd">"""Convert :class:`Schema` into :obj:`dict`.</span>
 
 <span class="sd">        Important:</span>
-<span class="sd">            We only convert nested :class:`Schema` objects into :obj:`dict` if</span>
-<span class="sd">            they are the direct value of the :class:`Schema` object's attribute.</span>
-<span class="sd">            Should such :class:`Schema` objects be nested within other data</span>
-<span class="sd">            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we</span>
-<span class="sd">            leave them intact rather than converting them into :obj:`dict`.</span>
+<span class="sd">            Only a nested :class:`Schema` that is an attribute's direct value</span>
+<span class="sd">            is converted into :obj:`dict`; one held within another type, such</span>
+<span class="sd">            as :obj:`list`, :obj:`tuple` or :obj:`set`, is left intact.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            A schema unpacked as the value of a</span>
@@ -1000,13 +998,9 @@
 <span class="sd">            Packed :class:`Schema` as :obj:`bytes`.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            Since we do not know the length of the packet, we use a</span>
-<span class="sd">            reasonable default value ``-1`` for the ``__length__``</span>
-<span class="sd">            field, as the :class:`~pcapkit.corekit.fields.field.Field`</span>
-<span class="sd">            class will consider negative value as a placeholder.</span>
-
-<span class="sd">            If you want to pack the packet with the correct length,</span>
-<span class="sd">            please provide the ``__length__`` value before packing.</span>
+<span class="sd">            The packet's length being unknown, ``__length__`` defaults to</span>
+<span class="sd">            ``-1``, which :class:`~pcapkit.corekit.fields.field.Field` takes</span>
+<span class="sd">            as a placeholder; give ``__length__`` to pack the correct length.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1065,9 +1059,8 @@
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">):</span>
-                <span class="c1"># NOTE: the octets as captured, or zeros when there are none</span>
-                <span class="c1"># (#1223) -- see :meth:`PaddingField.pack</span>
-                <span class="c1"># &lt;pcapkit.corekit.fields.strings.PaddingField.pack&gt;`.</span>
+                <span class="c1"># NOTE: the octets as captured, or zeros when there are none (#1223), per</span>
+                <span class="c1"># :meth:`PaddingField.pack &lt;pcapkit.corekit.fields.strings.PaddingField.pack&gt;`.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
                 <span class="k">continue</span>
 
@@ -1088,9 +1081,8 @@
                 <span class="n">temp</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
-                <span class="c1"># NOTE: Re-emit the ``__remainder__`` a nested schema left unread while it still</span>
-                <span class="c1"># packs to its ``__remainder_offset__``; else zero-fill, keeping the declared</span>
-                <span class="c1"># width (#1292, #1380). Not for a SwitchField: PCAP-NG's spans the whole stream.</span>
+                <span class="c1"># NOTE: Re-emit a nested schema's unread ``__remainder__`` at its ``__remainder_offset__``,</span>
+                <span class="c1"># else zero-fill the width (#1292, #1380); not a SwitchField's, which spans the stream.</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
                     <span class="n">record</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>  <span class="c1"># type: Mapping[str, Any]</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
@@ -1296,15 +1288,13 @@
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
-                <span class="c1"># NOTE: A forward match consumes neither the stream nor ``__length__``, and its</span>
-                <span class="c1"># buffer is zeroed, as in ``pack``, so ``len(self)`` counts consumed octets only.</span>
-                <span class="c1"># The rewind is by the octets read, which come back short near the stream's end.</span>
+                <span class="c1"># NOTE: A forward match consumes neither the stream nor ``__length__``, and its buffer</span>
+                <span class="c1"># is zeroed as in ``pack``; the rewind is by the octets read, short near the end.</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">),</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
 
-                <span class="c1"># NOTE: Left out of the record, but the values it matched past the</span>
-                <span class="c1"># end of the data are zeros all the same, so the fields after it</span>
-                <span class="c1"># are told (#2727).</span>
+                <span class="c1"># NOTE: Left out of the record, but what it matched past the end of the</span>
+                <span class="c1"># data is zeros all the same, so the fields after it are told (#2727).</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
                     <span class="n">packet</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">,</span> <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)))</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1425,10 +1415,8 @@
 <span class="sd">                :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: The earliest a bare ``@final`` can be caught, once per class, as in</span>
-        <span class="c1"># ``Info.__new__``. Both markers are inherited, so read from ``cls.__dict__``:</span>
-        <span class="c1"># an inherited ``BASE`` would skip finalising and leak bookkeeping from</span>
-        <span class="c1"># ``to_dict`` (#1498), and an inherited ``__final__`` would blame a subclass.</span>
+        <span class="c1"># NOTE: Catches a bare ``@final`` once per class, as in ``Info.__new__``, via ``cls.__dict__``:</span>
+        <span class="c1"># inherited, ``BASE`` leaks ``to_dict`` bookkeeping (#1498) and ``__final__`` blames a subclass.</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__finalised__'</span><span class="p">,</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">SchemaError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: marked final but never finalised, so it has no generated '</span>
@@ -1457,9 +1445,8 @@
 
 <span class="sd">        """</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># NOTE: With a fallback, as ``from_dict`` seeds only the keys it is given. Only</span>
-            <span class="c1"># ``NO_VALUE`` is unset: a ``None`` is a chosen absence, as ``unpack`` stores</span>
-            <span class="c1"># for a failed ConditionalField, so a default here would break the round trip.</span>
+            <span class="c1"># NOTE: A fallback, as ``from_dict`` seeds only given keys. Only ``NO_VALUE`` is unset:</span>
+            <span class="c1"># ``None`` is a chosen absence, as ``unpack`` stores for a failed ConditionalField.</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">NO_VALUE</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_VALUE</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -1479,10 +1466,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1"># NOTE: Keys with the same names as the class's builtin methods will be</span>
-        <span class="c1"># renamed with the class name prefixed as mangled class variables</span>
-        <span class="c1"># implicitly and internally. Such mapping information will be stored</span>
-        <span class="c1"># within the ``__map__`` attribute.</span>
+        <span class="c1"># NOTE: A key named like a builtin method is stored as ``_&lt;ClassName&gt;&lt;key&gt;``,</span>
+        <span class="c1"># the renaming kept both ways in ``__map__`` and ``__map_reverse__``.</span>
 
         <span class="vm">__name__</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 
@@ -1507,7 +1492,6 @@
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">:</span>
                 <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span>
 
-                <span class="c1"># NOTE: We keep record of the mapping bidirectionally.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_key</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="p">[</span><span class="n">new_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
 
@@ -1516,9 +1500,7 @@
             <span class="c1"># if key in self.__dict__:</span>
             <span class="c1">#     raise KeyExists(f'{key!r} already exists')</span>
 
-            <span class="c1"># NOTE: We don't rewrite the key names here, just keep the</span>
-            <span class="c1"># original ones, even though they might break on the ``.``</span>
-            <span class="c1"># (:obj:`getattr`) operator.</span>
+            <span class="c1"># NOTE: Keys are kept as given, even where ``getattr`` cannot reach them.</span>
 
             <span class="c1"># if isinstance(key, str):</span>
             <span class="c1">#     key = re.sub(r'\W', '_', key)</span>
@@ -1772,7 +1754,7 @@
 
 <span class="sd">    Examples:</span>
 
-<span class="sd">        To create an enumeration mapping supported schema, simply</span>
+<span class="sd">        Subclass it with the enumeration:</span>
 
 <span class="sd">        .. code-block:: python</span>
 
@@ -1782,8 +1764,7 @@
 <span class="sd">               # if the enumeration number is not found in the mapping</span>
 <span class="sd">               __default__ = lambda: UnknownSchema  # by default, None</span>
 
-<span class="sd">        then, you can use inheritance to create a list of schemas</span>
-<span class="sd">        for this given enumeration mapping:</span>
+<span class="sd">        then subclass that per code, or list of codes:</span>
 
 <span class="sd">        .. code-block:: python</span>
 
@@ -1965,7 +1946,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

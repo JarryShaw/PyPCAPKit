@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/traceflow/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.traceflow implements flow tracing functions for pcapkit package. Flow Tracing Base Class- Internal Definitions, Type Variables., Follow TCP Stream- Terminology, Data Structures, ..." />
-<meta name="description" content="pcapkit.foundation.traceflow implements flow tracing functions for pcapkit package. Flow Tracing Base Class- Internal Definitions, Type Variables., Follow TCP Stream- Terminology, Data Structures, ..." />
+<meta property="og:description" content="pcapkit.foundation.traceflow implements flow tracing. Flow Tracing Base Class- Internal Definitions, Type Variables., Follow TCP Stream- Terminology, Data Structures, Type Variables.. Every flow tr..." />
+<meta name="description" content="pcapkit.foundation.traceflow implements flow tracing. Flow Tracing Base Class- Internal Definitions, Type Variables., Follow TCP Stream- Terminology, Data Structures, Type Variables.. Every flow tr..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Flow Tracing Base Class" href="traceflow.html"><link rel="prev" title="DTLS Handshake-Message Analysis" href="../analysis/dtls.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -461,6 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -575,12 +576,10 @@
 <p>This approximates the <em>Follow TCP Stream</em> feature of
 <a class="reference external" href="https://www.wireshark.org/">Wireshark</a>.</p>
 </div>
-<p><a class="reference internal" href="#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> implements flow tracing functions
-for <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> package.</p>
+<p><a class="reference internal" href="#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> implements flow tracing.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For more information on customisation and extension, please
-refer to <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
+<p><a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>, on customisation and extension.</p>
 </div>
 <div class="toctree-wrapper compound">
 <ul>
@@ -597,10 +596,9 @@ refer to <a class="reference internal" href="../../../ext.html"><span class="doc
 </li>
 </ul>
 </div>
-<p>All flow tracing classes are implemented as <a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a>
-subclasses, which are responsible for processing extracted packets and
-following the flow and/or stream to provide more insights. Below is a brief
-diagram of the class hierarchy of <a class="reference internal" href="#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a>:</p>
+<p>Every flow tracing class subclasses
+<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a>, following the
+flows of extracted packets:</p>
 <pre  class="mermaid">
         flowchart TD
     A{{TraceFlowMeta}} -.-&gt;|metaclass| B(TraceFlowBase)
@@ -860,7 +858,7 @@ loads on either side of 1.6.0.</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

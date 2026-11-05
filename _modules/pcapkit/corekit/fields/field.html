@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -610,8 +611,7 @@
 <span class="c1">#: back the *same* default object to every context, so a mutable default would</span>
 <span class="c1">#: be the shared global this is meant to avoid.</span>
 <span class="c1">#:</span>
-<span class="c1">#: Measured, because the two cases differ and the difference is easy to state</span>
-<span class="c1">#: wrongly: a thread gets its own ledger, but an :mod:`asyncio` task does *not*</span>
+<span class="c1">#: A thread gets its own ledger, but an :mod:`asyncio` task does *not*</span>
 <span class="c1">#: -- :func:`asyncio.create_task` copies the current context, and a copied</span>
 <span class="c1">#: context carries the same list object, so a task started after a ledger exists</span>
 <span class="c1">#: shares and mutates it. :func:`_zero_pad_budget` is how such a task gets a</span>
@@ -736,10 +736,8 @@
                 <span class="p">)</span>
         <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">padding</span>
 
-    <span class="c1"># NOTE: The items credit the zeros they read as octets supplied, so they are taken off in</span>
-    <span class="c1"># advance and those left unread given back, an enclosing fill's too, which it took off</span>
-    <span class="c1"># (#2756, #2760); items that fail credit an unknown share, so the octets read go back as</span>
-    <span class="c1"># they were.</span>
+    <span class="c1"># NOTE: Items credit the zeros they read as supplied octets, so the fill is debited up front and the</span>
+    <span class="c1"># unread rest given back (#2756, #2760); a failed item restores the ledger as it was.</span>
     <span class="n">read</span> <span class="o">=</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">padding</span>
     <span class="n">filled</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">padding</span><span class="p">))</span>
@@ -830,13 +828,8 @@
         <span class="n">_template</span><span class="p">:</span> <span class="s1">'str'</span>
         <span class="n">_callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span>
 
-    <span class="c1"># NOTE: Declared on the class, not only assigned in :meth:`__init__`, so that</span>
-    <span class="c1"># :attr:`default` is answerable for every field. A field class is free to</span>
-    <span class="c1"># replace :meth:`__init__` without chaining to this one -- as</span>
-    <span class="c1"># :class:`~pcapkit.corekit.fields.collections.ListField` does, since a list of</span>
-    <span class="c1"># fields takes no default value of its own -- and reading :attr:`default` off</span>
-    <span class="c1"># one of those would otherwise raise :exc:`AttributeError` for a private</span>
-    <span class="c1"># attribute rather than report that the field declares no default. See #422.</span>
+    <span class="c1"># NOTE: Declared on the class so :attr:`default` answers even for a field whose ``__init__`` does</span>
+    <span class="c1"># not chain to this one, as ``ListField``'s does not (#422).</span>
     <span class="n">_default</span><span class="p">:</span> <span class="s1">'_T | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span>
 
     <span class="nd">@property</span>
@@ -1045,12 +1038,8 @@
 
         <span class="n">pre_processed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: CPython's ``s`` and ``p`` formats take a bytearray, PyPy's take</span>
-        <span class="c1"># bytes alone (``TypeError: expected bytes, got bytearray object``), so a</span>
-        <span class="c1"># bytearray is handed over as bytes, packing identically on both (#2004).</span>
-        <span class="c1"># The ``c`` format is converted too: CPython's refuses a bytearray and</span>
-        <span class="c1"># GraalPy's takes one, so converting it packs alike everywhere (#2015).</span>
-        <span class="c1"># A memoryview is left to the engine, which CPython refuses for all three.</span>
+        <span class="c1"># NOTE: A bytearray goes over as bytes for ``s``/``p`` (PyPy refuses it, #2004) and ``c`` (CPython</span>
+        <span class="c1"># refuses it, #2015), so every engine packs alike; a memoryview is left to the engine.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pre_processed</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'s'</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">):</span>
             <span class="n">pre_processed</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">pre_processed</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">pre_processed</span><span class="p">)</span></div>
@@ -1107,18 +1096,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: ``length`` is frequently wire-derived -- resolved by a</span>
-        <span class="c1"># ``_length_callback`` against the very packet being parsed, per</span>
-        <span class="c1"># :meth:`Field.__call__` below, or by a schema's own selector building a</span>
-        <span class="c1"># field from a value it just read off the wire (e.g. HIP's</span>
-        <span class="c1"># ``host_id_hi_selector`` returning ``BytesField(length=pkt['hi_len'])``) --</span>
-        <span class="c1"># and is thus attacker-controlled: a corrupt or hostile capture can</span>
-        <span class="c1"># declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a</span>
-        <span class="c1"># length that ``buffer`` falls short of is provably bogus: the padding</span>
-        <span class="c1"># cannot recover data that was never in the buffer, only zero-fill for</span>
-        <span class="c1"># it, and no field this large is legitimate to begin with. Honouring it</span>
-        <span class="c1"># would allocate and zero-fill up to ``length`` octets on nothing but</span>
-        <span class="c1"># the packet's own say-so. Cf. #554.</span>
+        <span class="c1"># NOTE: ``length`` is often wire-derived, so past ``MAX_ZERO_PAD_LENGTH`` a length the buffer falls</span>
+        <span class="c1"># short of is bogus, and honouring it would zero-fill on the packet's own say-so (#554).</span>
         <span class="n">ceiling</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_LENGTH</span>
         <span class="k">if</span> <span class="n">ceiling</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">ceiling</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
@@ -1126,22 +1105,8 @@
                 <span class="sa">f</span><span class="s1">'but only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) are available.'</span>
             <span class="p">)</span>
 
-        <span class="c1"># NOTE: The ceiling above bounds one field; this bounds their sum. A</span>
-        <span class="c1"># declared length just under :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` passes it every</span>
-        <span class="c1"># time it is declared, so 200 of them amplify 4,800 wire octets into</span>
-        <span class="c1"># 50.0 MiB of retained zeros with the ceiling doing exactly what it was</span>
-        <span class="c1"># written to do. Cf. #573.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``max(length, 0)`` is defensive rather than a case anything is known to</span>
-        <span class="c1"># reach. :attr:`length` here resolves through :func:`struct.calcsize`, so</span>
-        <span class="c1"># it cannot be negative; the classes that instead answer it straight out</span>
-        <span class="c1"># of ``self._length``, which *is* negative for a variable-length field --</span>
-        <span class="c1"># :class:`~pcapkit.corekit.fields.misc.PayloadField` and</span>
-        <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SchemaField` -- each replace this</span>
-        <span class="c1"># method outright and so never arrive here. The clamp costs one</span>
-        <span class="c1"># comparison and stops a negative width ever *granting* padding allowance</span>
-        <span class="c1"># for reading nothing, which is the one way this bookkeeping could be</span>
-        <span class="c1"># turned against itself.</span>
+        <span class="c1"># NOTE: The ceiling above bounds one field and this bounds their sum (#573); ``max(length, 0)``</span>
+        <span class="c1"># is defensive, so a negative width can never grant padding allowance.</span>
         <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">supplied</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="k">else</span> <span class="n">width</span>
         <span class="n">padding</span> <span class="o">=</span> <span class="n">width</span> <span class="o">-</span> <span class="n">supplied</span>
@@ -1197,26 +1162,8 @@
                 <span class="p">)</span>
             <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">padding</span>
 
-        <span class="c1"># NOTE: ``ljust()``, not ``rjust()``. A short read has lost the *trailing*</span>
-        <span class="c1"># octets of the field -- the buffer ran out, so what is missing is</span>
-        <span class="c1"># whatever came after what was read -- so the zeros belong at the end,</span>
-        <span class="c1"># where the unread octets were. ``rjust()`` would put them at the</span>
-        <span class="c1"># front, which asserts that the octets never read were the *leading*</span>
-        <span class="c1"># ones, and that is wrong for every byte order rather than only for</span>
-        <span class="c1"># little-endian ones. Under ``rjust()``, one octet of a four-octet</span>
-        <span class="c1"># little-endian 120 (``0x78``) reads as 2,013,265,920, and three octets</span>
-        <span class="c1"># of a four-octet big-endian ``0x01020304`` read as ``0x10203``.</span>
-        <span class="c1"># ``ljust()`` answers 120 and ``0x1020300``. The big-endian error is the</span>
-        <span class="c1"># more dangerous of the two -- it scales the value *down*, so it passes a</span>
-        <span class="c1"># sanity check far more easily than the inflated little-endian one. See</span>
-        <span class="c1"># #604.</span>
-        <span class="c1">#</span>
-        <span class="c1"># The choice decides what a truncated field *reports*, not *whether* a</span>
-        <span class="c1"># truncated capture parses, which must not change: the</span>
-        <span class="c1"># accommodation itself is deliberate (#431) and the budget above is built</span>
-        <span class="c1"># around preserving it. An entirely empty buffer pads to all zeros either</span>
-        <span class="c1"># way, so the end-of-option-list and ``Pad1`` reads the option and list</span>
-        <span class="c1"># loops depend on are unaffected.</span>
+        <span class="c1"># NOTE: ``ljust()``, not ``rjust()``: a short read lost the trailing octets, so zeros go at the end</span>
+        <span class="c1"># for any byte order (#604); it changes what a cut field reports, not whether it parses (#431).</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">buffer</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
 </div>
@@ -1314,7 +1261,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

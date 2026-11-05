@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -993,11 +994,8 @@
 <span class="sd">        """</span>
         <span class="n">next_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'next header'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: No options is not the same as no options area. The header is at</span>
-        <span class="c1"># least 8 octets, 2 of them the fixed part, so the remaining 6 must be</span>
-        <span class="c1"># padding options. Passing the empty list through the same path produces</span>
-        <span class="c1"># them; returning ``[], 0`` would emit the 2 fixed octets alone, under a</span>
-        <span class="c1"># ``Hdr Ext Len`` that ``(0 - 6) // 8`` makes ``-1``.</span>
+        <span class="c1"># NOTE: No options still means six octets of padding options; returning ``[], 0``</span>
+        <span class="c1"># would emit the fixed two octets alone under a ``Hdr Ext Len`` of ``-1``.</span>
         <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hopopt_options</span><span class="p">(</span>
             <span class="n">options</span> <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[])</span>
 
@@ -1185,10 +1183,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span><span class="p">,</span> <span class="n">maker</span> <span class="o">=</span> <span class="n">name</span>
 
-            <span class="c1"># NOTE: The capture cut this option short, as its short read records, so</span>
-            <span class="c1"># the octets it lacks read as zeros. It stands if its parser takes those</span>
-            <span class="c1"># zeros and its maker writes the octets captured back (#2694); otherwise</span>
-            <span class="c1"># it is refused, as an option running past the data is (#1325).</span>
+            <span class="c1"># NOTE: A capture-cut option reads its missing octets as zeros; it stands if its parser</span>
+            <span class="c1"># takes them and its maker writes the captured ones back (#2694), or is refused (#1325).</span>
             <span class="k">if</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="n">BaseError</span><span class="p">):</span>
@@ -1296,9 +1292,8 @@
             <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
             <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
 
-        <span class="c1"># NOTE: Options given as parsed data are emitted as they are, padding</span>
-        <span class="c1"># included and in place, so that a parsed header rebuilds byte for</span>
-        <span class="c1"># byte; only a header left short of alignment gets trailing padding.</span>
+        <span class="c1"># NOTE: Parsed options are emitted as they are, padding in place, so a parsed header</span>
+        <span class="c1"># rebuilds byte for byte; only a header short of alignment gets trailing padding.</span>
         <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'option type'</span><span class="p">)</span>
@@ -1600,10 +1595,8 @@
             <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
                 <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_SMFIdentificationBasedDPDOption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: An unresolvable *string* key raises KeyError rather than</span>
-            <span class="c1"># minting a member, so only a hand-constructed schema hits this</span>
-            <span class="c1"># guard. An unassigned *wire* value still mints via _missing_ and</span>
-            <span class="c1"># never reaches here.</span>
+            <span class="c1"># NOTE: An unresolvable *string* key raises KeyError and an unassigned *wire* value</span>
+            <span class="c1"># mints via _missing_, so only a hand-constructed schema reaches this guard.</span>
             <span class="n">tid_key</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">tid_key</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>
@@ -1865,10 +1858,8 @@
 <span class="sd">            ProtocolError: If the option is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: An unresolvable *string* key raises KeyError rather than</span>
-        <span class="c1"># minting a member, so only a hand-constructed schema hits this guard.</span>
-        <span class="c1"># An unassigned *wire* value still mints via _missing_ and never</span>
-        <span class="c1"># reaches here.</span>
+        <span class="c1"># NOTE: An unresolvable *string* key raises KeyError and an unassigned *wire* value</span>
+        <span class="c1"># mints via _missing_, so only a hand-constructed schema reaches this guard.</span>
         <span class="n">seed_key</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">seed_key</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>
@@ -2966,32 +2957,19 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_hopopt_option_length</span><span class="p">(</span><span class="n">schema_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Compute a HOPOPT option's whole-option length from its on-the-wire ``Opt Data Len``.</span>
 
-<span class="sd">        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field</span>
-<span class="sd">        (what each ``Schema_*Option.len`` here holds) counts *"the length of</span>
-<span class="sd">        the Option Data field of this option, in octets"* -- i.e. it</span>
-<span class="sd">        excludes the Option Type and Opt Data Len fields themselves, so the</span>
-<span class="sd">        whole option, which is what every ``_read_opt_*`` below reports back</span>
-<span class="sd">        as the parsed option's own ``.length``, is two octets more. This is</span>
-<span class="sd">        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``</span>
-<span class="sd">        vs. ``Schema_PadOption.len`` below). The read-side half lives in this</span>
-<span class="sd">        one helper so the arithmetic has a single home. Do NOT drop the</span>
-<span class="sd">        ``+ 2``.</span>
+<span class="sd">        Per :rfc:`8200#section-4.2`, ``Opt Data Len`` (each ``Schema_*Option.len``)</span>
+<span class="sd">        counts *"the length of the Option Data field of this option, in octets"*,</span>
+<span class="sd">        so the whole option, which each ``_read_opt_*`` reports as ``.length``,</span>
+<span class="sd">        is two octets more. Do NOT drop the ``+ 2``.</span>
 
-<span class="sd">        Section 4.2 is the citation because it defines the TLV option format and</span>
-<span class="sd">        contains the sentence quoted above. The Hop-by-Hop Options header this</span>
-<span class="sd">        class implements is :rfc:`8200#section-4.3`, but it defers option</span>
-<span class="sd">        encoding to Section 4.2 (*"one or more TLV-encoded options, as</span>
-<span class="sd">        described in Section 4.2"*) and its only length field is</span>
-<span class="sd">        ``Hdr Ext Len``, *"the length of the Hop-by-Hop Options header in</span>
-<span class="sd">        8-octet units, not including the first 8 octets"*: the whole header, a</span>
-<span class="sd">        different quantity from one option's ``Opt Data Len`` in octets.</span>
-<span class="sd">        Section 4.3 remains the reference for the header itself, as in the</span>
-<span class="sd">        ``Note:`` on the whole extension header being a multiple of 8 octets.</span>
+<span class="sd">        Section 4.2 is cited because the Hop-by-Hop Options header of</span>
+<span class="sd">        :rfc:`8200#section-4.3` defers option encoding to it (*"one or more</span>
+<span class="sd">        TLV-encoded options, as described in Section 4.2"*), and its own</span>
+<span class="sd">        ``Hdr Ext Len`` is *"the length of the Hop-by-Hop Options header in</span>
+<span class="sd">        8-octet units, not including the first 8 octets"*, not one option's.</span>
 
-<span class="sd">        Note that only the *stored-length* read-side call sites are</span>
-<span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>
-<span class="sd">        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed</span>
-<span class="sd">        ``.length`` back, so they have nothing to unify against this helper.</span>
+<span class="sd">        Only the read side's stored lengths go through it; most ``_make_opt_*``</span>
+<span class="sd">        methods recompute ``Opt Data Len`` from the value instead.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema_len: raw ``Opt Data Len`` field value, as read off the wire.</span>
@@ -3073,7 +3051,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

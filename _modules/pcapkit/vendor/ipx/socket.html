@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -585,36 +586,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Socket'</span><span class="p">]</span>
 
 <span class="c1">###############################################################################</span>
-<span class="c1"># NOTE: this crawler does not crawl: the registry below is maintained by hand;</span>
-<span class="c1"># see #507.</span>
-<span class="c1">#</span>
-<span class="c1"># Its source was the well-known-socket table in</span>
-<span class="c1"># https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number,</span>
-<span class="c1"># and two separate things broke that. Wikipedia answers ``requests``'</span>
-<span class="c1"># default ``python-requests/&lt;version&gt;`` User-Agent with HTTP 403 (measured</span>
-<span class="c1"># 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent,</span>
-<span class="c1"># 200 and 114117 bytes for a descriptive one), so ``Vendor._request`` could not</span>
-<span class="c1"># fetch the page at all. And the table itself was deleted from the article on</span>
-<span class="c1"># 2026-08-25, in revision 1371327031 ("deleted some irrelevant technical</span>
-<span class="c1"># tables"), leaving the page with a single ``wikitable`` -- the IPX header</span>
-<span class="c1"># format one -- so that ``find_all('table', class_='wikitable')[3]`` raises</span>
-<span class="c1"># ``IndexError`` even once the fetch is fixed.</span>
-<span class="c1">#</span>
-<span class="c1"># Pointing ``LINK`` at the last revision that still carries the table</span>
-<span class="c1"># (``oldid=1368657333``) would have worked, but it buys none of what a crawler</span>
-<span class="c1"># is for: a network fetch pinned to a frozen snapshot is all of the fragility</span>
-<span class="c1"># with none of the freshness, and it would still be selecting the table by</span>
-<span class="c1"># index out of a document that nothing stops from changing shape again. The</span>
-<span class="c1"># registry itself is closed, which is what settles it -- IPX socket numbers</span>
-<span class="c1"># were Novell's to assign, and Novell's own documentation still ends the list</span>
-<span class="c1"># with "software developers writing NetWare applications can contact Novell to</span>
-<span class="c1"># reserve well-known sockets". No Novell remains to contact, and IPX</span>
-<span class="c1"># will not gain new socket numbers, so there is nothing for a crawler to pick</span>
-<span class="c1"># up on its next run.</span>
-<span class="c1">#</span>
-<span class="c1"># The table below is therefore transcribed from that last revision that carried</span>
-<span class="c1"># it, row for row, and each entry names the primary source for the assignment</span>
-<span class="c1"># where one exists.</span>
+<span class="c1"># NOTE: maintained by hand, not crawled (#507): the Wikipedia table is gone from</span>
+<span class="c1"># the live article, and IPX socket numbers are a closed Novell registry.</span>
 <span class="c1">###############################################################################</span>
 
 <span class="c1">#: Socket number registry, transcribed from the last revision of the Wikipedia</span>
@@ -625,19 +598,8 @@
 <span class="c1">#: rendered above it. Names go through :meth:`~Vendor.rename`, so the generated</span>
 <span class="c1">#: member is the :meth:`~Vendor.safe_name` of the first element.</span>
 <span class="n">DATA</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="c1"># NOTE: 0x0000 was never listed as a well-known socket in the scraped</span>
-    <span class="c1"># registry table, but it is the IPX protocol's own default for the</span>
-    <span class="c1"># ``dst``/``src`` socket field (an ordinary "unspecified socket"), so it</span>
-    <span class="c1"># must be present regardless of what the registry says; see #492.</span>
-    <span class="c1">#</span>
-    <span class="c1"># That is a statement about the *scraped table*, not about the number being</span>
-    <span class="c1"># unsourced. XSIS 028112 Appendix D (cited under RANGES below) reserves it</span>
-    <span class="c1"># in the primary standard: "The socket numbers zero and all ones are</span>
-    <span class="c1"># reserved to mean unknown and all, respectively." The same sentence</span>
-    <span class="c1"># reserves all-ones -- 0xFFFF, to mean "all" -- and this table has no entry</span>
-    <span class="c1"># for that; ``_missing_`` resolves 0xFFFF through the "Dynamically Assigned"</span>
-    <span class="c1"># range instead. Adding it would change the generated file, so it is left</span>
-    <span class="c1"># out.</span>
+    <span class="c1"># NOTE: absent from the scraped table, but the IPX default for the ``dst``/``src``</span>
+    <span class="c1"># socket field (#492); all-ones (0xFFFF) is left to ``_missing_``'s dynamic range.</span>
     <span class="mh">0x0000</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Unspecified'</span><span class="p">,</span> <span class="s2">"Unspecified socket; this is IPX's own default for the dst/src socket field."</span><span class="p">),</span>
 
     <span class="c1"># Sockets in the "Registered by Xerox" range below. These are formally</span>
@@ -672,23 +634,11 @@
     <span class="c1"># Processes", https://www.novell.com/documentation/nw6p/ipx_enu/data/hvvqznoa.html</span>
     <span class="c1"># -- still live. That page is also the citation the article itself used.</span>
     <span class="c1">#</span>
-    <span class="c1"># NOTE: Table 2 has **seven** rows and not all of them are below. In full</span>
-    <span class="c1"># it reads 0x451 NCP, 0x452 SAP, 0x453 RIP, 0x455 Novell NetBIOS, 0x456</span>
-    <span class="c1"># Diagnostics, 0x9001 NLSP, 0x9004 "IPXWAN(TM) protocol". The last two have</span>
-    <span class="c1"># never been in this enumeration, and 0x9004 is independently reserved by</span>
-    <span class="c1"># :rfc:`1634#section-4`, "Information Exchange Packet Formats" -- "The</span>
-    <span class="c1"># socket number 0x9004 is a Novell reserved socket number for exclusive use</span>
-    <span class="c1"># with IPX WAN protocol exchange" -- and by the same section of the two RFCs</span>
-    <span class="c1"># it obsoletes: :rfc:`1551` word for word, and :rfc:`1362` with</span>
-    <span class="c1"># "information exchange" for "protocol exchange". So they are known</span>
-    <span class="c1"># omissions with good sourcing, not rows nobody noticed. Adding them would</span>
-    <span class="c1"># add members to the generated file and so give up the byte-identity proof</span>
-    <span class="c1"># #507 rests on.</span>
+    <span class="c1"># The archived revision writes "NetBIOS" and "Diagnostic Packet" for Novell's</span>
+    <span class="c1"># "Novell NetBIOS" and "Diagnostics", kept against renaming.</span>
     <span class="c1">#</span>
-    <span class="c1"># Some of the rows below also depart from Novell's own wording: Novell writes</span>
-    <span class="c1"># "Novell NetBIOS" and "Diagnostics" where this table says "NetBIOS" and</span>
-    <span class="c1"># "Diagnostic Packet". Those are the archived revision's strings, kept for</span>
-    <span class="c1"># the same member-renaming reason as everything else here.</span>
+    <span class="c1"># NOTE: Table 2's 0x9001 NLSP and 0x9004 IPXWAN (:rfc:`1634#section-4`) are known</span>
+    <span class="c1"># omissions: adding them would break the byte-identity #507 rests on.</span>
     <span class="mh">0x0451</span><span class="p">:</span> <span class="p">(</span><span class="s1">'NetWare Core Protocol'</span><span class="p">,</span> <span class="s1">'NetWare Core Protocol, NCP – used by Novell NetWare servers'</span><span class="p">),</span>
     <span class="mh">0x0452</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Service Advertising Protocol'</span><span class="p">,</span> <span class="s1">'Service Advertising Protocol, SAP'</span><span class="p">),</span>
     <span class="mh">0x0453</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Routing Information Protocol'</span><span class="p">,</span> <span class="s1">'Routing Information Protocol, RIP'</span><span class="p">),</span>
@@ -713,23 +663,8 @@
     <span class="mh">0x0457</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Serialization Packet'</span><span class="p">,</span> <span class="s1">'Serialization Packet, used for NCP as well'</span><span class="p">),</span>
     <span class="mh">0x4003</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Used by Novell NetWare Client'</span><span class="p">,</span> <span class="s1">'Used by Novell NetWare Client'</span><span class="p">),</span>
 
-    <span class="c1"># NOTE: :rfc:`1132`, "A Standard for the Transmission of 802.2 Packets over</span>
-    <span class="c1"># IPX Networks", reserves this one -- "The IPX socket 0x8060 has been</span>
-    <span class="c1"># reserved by Novell for the implementation of this protocol."</span>
-    <span class="c1">#</span>
-    <span class="c1"># The archived table renders the row as ``LLC[4]``, where ``[4]`` is</span>
-    <span class="c1"># Wikipedia's own footnote marker for its citation of that RFC rather than</span>
-    <span class="c1"># any part of the protocol name -- the cell markup is an ``&lt;a&gt;`` reading</span>
-    <span class="c1"># "LLC" followed by ``&lt;sup id="cite_ref-RFC1132_4-1"&gt;``. The spaces in</span>
-    <span class="c1"># ``LLC [ 4 ]`` are not in the page at all: they are an artefact of the</span>
-    <span class="c1"># scrape, which joined the cell's strings with a space and so picked up the</span>
-    <span class="c1"># ``&lt;span class="cite-bracket"&gt;`` wrappers around the ``[`` and ``]`` as</span>
-    <span class="c1"># separate tokens. The value is right and the explanation of it was not.</span>
-    <span class="c1"># Both the name and the comment are kept verbatim so that</span>
-    <span class="c1"># regenerating the constant file stays a no-op against the last scraped</span>
-    <span class="c1"># output: renaming the member would break</span>
-    <span class="c1"># :attr:`pcapkit.const.ipx.socket.Socket.LLC_4` for anyone using it, which</span>
-    <span class="c1"># is a call for the maintainer rather than for #507.</span>
+    <span class="c1"># NOTE: :rfc:`1132` reserves 0x8060; ``[4]`` is Wikipedia's footnote marker, kept</span>
+    <span class="c1"># verbatim, as renaming :attr:`~pcapkit.const.ipx.socket.Socket.LLC_4` breaks it (#507).</span>
     <span class="mh">0x8060</span><span class="p">:</span> <span class="p">(</span><span class="s1">'LLC_4'</span><span class="p">,</span> <span class="s1">'LLC [ 4 ]'</span><span class="p">),</span>
 
     <span class="c1"># :rfc:`1791`, "TCP And UDP Over IPX Networks With Fixed Path MTU" -- "The</span>
@@ -737,24 +672,8 @@
     <span class="c1"># receive the packets on IPX/IPXF socket 0x9092", and "IPXF fragments are</span>
     <span class="c1"># received by IPXF on the IPX socket 0x9093".</span>
     <span class="c1">#</span>
-    <span class="c1"># NOTE: the name ``TCP over IPXF`` is wrong, and it is the archived</span>
-    <span class="c1"># revision's wording rather than the RFC's. RFC 1791 reserves 0x9091 for TCP</span>
-    <span class="c1"># over plain **IPX**: the section that assigns it is s3, "Running TCP Over</span>
-    <span class="c1"># IPX", which opens "Unlike UDP, TCP runs directly over IPX", and the same</span>
-    <span class="c1"># section ends "Hence, running TCP over IPXF is not recommended." So the</span>
-    <span class="c1"># member name describes the one arrangement the cited RFC advises against.</span>
-    <span class="c1"># Only the name is wrong; 0x9091 is the right value for TCP. It is kept for</span>
-    <span class="c1"># the member-renaming reason set out above, and is the strongest candidate in</span>
-    <span class="c1"># this table for a rename with a deprecated alias.</span>
-    <span class="c1">#</span>
-    <span class="c1"># ``UDP over IPXF`` for 0x9092, by contrast, is accurate: "UDP must run on</span>
-    <span class="c1"># IPXF rather than directly on IPX", and the socket is named as</span>
-    <span class="c1"># "IPX/IPXF socket 0x9092".</span>
-    <span class="c1">#</span>
-    <span class="c1"># One more scruple about wording: "reserved" is the RFC's own word for</span>
-    <span class="c1"># 0x9091 only. For 0x9092 and 0x9093 it says packets "must" be sent and</span>
-    <span class="c1"># received on them, which amounts to the same reservation in practice but is</span>
-    <span class="c1"># an inference rather than a quote.</span>
+    <span class="c1"># NOTE: ``TCP over IPXF`` is the archived wording, kept against renaming: RFC 1791</span>
+    <span class="c1"># section 3 assigns 0x9091 to TCP over plain IPX and advises against IPXF.</span>
     <span class="mh">0x9091</span><span class="p">:</span> <span class="p">(</span><span class="s1">'TCP over IPXF'</span><span class="p">,</span> <span class="s1">'TCP over IPXF'</span><span class="p">),</span>
     <span class="mh">0x9092</span><span class="p">:</span> <span class="p">(</span><span class="s1">'UDP over IPXF'</span><span class="p">,</span> <span class="s1">'UDP over IPXF'</span><span class="p">),</span>
     <span class="mh">0x9093</span><span class="p">:</span> <span class="p">(</span><span class="s1">'IPXF'</span><span class="p">,</span> <span class="s1">'IPXF, IPX Fragmentation Protocol'</span><span class="p">),</span>
@@ -786,16 +705,8 @@
 <span class="c1">#: dynamic sockets", so the upper bound is 0x7FFF. The transcribed 0x4FFF is</span>
 <span class="c1">#: kept because widening it would change the generated ``_missing_``.</span>
 <span class="n">RANGES</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="c1"># NOTE: order is significant. The generated ``_missing_`` tests these in</span>
-    <span class="c1"># sequence and returns on the first match, so a wide range placed before a</span>
-    <span class="c1"># narrower one it fully contains would mask that narrower one -- it would</span>
-    <span class="c1"># never be reached, and the socket would be misdescribed under the wide</span>
-    <span class="c1"># range's name instead. See GitHub issue #841, which found exactly that:</span>
-    <span class="c1"># ``(0x0020, 0x003F)`` is a strict subset of ``(0x0001, 0x0BB8)``, and both</span>
-    <span class="c1"># ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` are strict subsets of</span>
-    <span class="c1"># ``(0x0BB9, 0xFFFF)``. Each subset range is therefore listed ahead of the</span>
-    <span class="c1"># wider range that contains it, rather than in the order the rows appeared</span>
-    <span class="c1"># in the archived revision.</span>
+    <span class="c1"># NOTE: order matters: ``_missing_`` returns on the first match, so each range</span>
+    <span class="c1"># precedes any wider one containing it (#841).</span>
     <span class="p">(</span><span class="mh">0x0020</span><span class="p">,</span> <span class="mh">0x003F</span><span class="p">,</span> <span class="s1">'Experimental'</span><span class="p">),</span>
     <span class="p">(</span><span class="mh">0x0001</span><span class="p">,</span> <span class="mh">0x0BB8</span><span class="p">,</span> <span class="s1">'Registered by Xerox'</span><span class="p">),</span>
     <span class="p">(</span><span class="mh">0x4000</span><span class="p">,</span> <span class="mh">0x4FFF</span><span class="p">,</span> <span class="s1">'Dynamically Assigned Socket Numbers'</span><span class="p">),</span>
@@ -870,10 +781,8 @@
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">pval</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: the range names are emitted raw, spaces and all, rather than</span>
-        <span class="c1"># through ``safe_name``, because that is what the scrape did and what</span>
-        <span class="c1"># the shipped constant file contains; sanitising them here would rename</span>
-        <span class="c1"># every member ``_missing_`` builds for a range; see #507.</span>
+        <span class="c1"># NOTE: range names are emitted raw, not through ``safe_name``, as the shipped</span>
+        <span class="c1"># constant file has them; sanitising would rename every range member (#507).</span>
         <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">RANGES</span><span class="p">:</span>
             <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if 0x</span><span class="si">{</span><span class="n">start</span><span class="si">:</span><span class="s1">04X</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= 0x</span><span class="si">{</span><span class="n">stop</span><span class="si">:</span><span class="s1">04X</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
             <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -919,7 +828,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

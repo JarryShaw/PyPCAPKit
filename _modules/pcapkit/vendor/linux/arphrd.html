@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -576,20 +577,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ARPHRD'</span><span class="p">]</span>
 
 <span class="c1">###############################################################################</span>
-<span class="c1"># NOTE: this crawler does not crawl. Its source is the Linux kernel header</span>
-<span class="c1"># ``&lt;linux/if_arp.h&gt;``, which assigns ``ARPHRD_*`` values in C source under the</span>
-<span class="c1"># kernel's own versioning, not an IANA or IETF table :mod:`pcapkit.vendor` could</span>
-<span class="c1"># scrape. Per the const-vendor-pairing convention, a hand-maintained registry</span>
-<span class="c1"># still gets a crawler, reading :data:`~pcapkit.vendor.linux.arphrd.DATA`</span>
-<span class="c1"># instead of fetching a URL -- the same shape as</span>
-<span class="c1"># :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.</span>
-<span class="c1">#</span>
-<span class="c1"># pcapkit names only the ``ARPHRD_*`` values its Linux "cooked" capture</span>
-<span class="c1"># dissector (:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`) actually</span>
-<span class="c1"># matches on, not every value the header defines. The rest of the ARP</span>
-<span class="c1"># hardware-type numbering is IANA's own</span>
-<span class="c1"># (:class:`~pcapkit.const.arp.hardware.Hardware`), which differs for most</span>
-<span class="c1"># non-Ethernet types.</span>
+<span class="c1"># NOTE: reads the hand-maintained :data:`~pcapkit.vendor.linux.arphrd.DATA`, as ``&lt;linux/if_arp.h&gt;``</span>
+<span class="c1"># is no scrapable table; it names only the values ``LinuxSLL`` matches on.</span>
 <span class="c1">###############################################################################</span>
 
 <span class="c1">#: ARPHRD hardware-type registry, transcribed from ``&lt;linux/if_arp.h&gt;`` for the</span>
@@ -699,7 +688,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

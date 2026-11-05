@@ -454,6 +454,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -585,9 +586,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'C_Tag'</span><span class="p">]</span>
 
 
-<span class="c1"># NOTE: ``schema`` and ``data`` are restated, not inherited: ProtocolBase.__init_subclass__</span>
-<span class="c1"># looks an omitted pair up by class name in the ``schema`` and ``data`` modules beside</span>
-<span class="c1"># this one, and this package has neither, so it would bind Raw's. RARP does the same.</span>
+<span class="c1"># NOTE: ``schema`` and ``data`` are restated: with no such modules in this package,</span>
+<span class="c1"># ProtocolBase.__init_subclass__ would bind Raw's. RARP does the same.</span>
 <div class="viewcode-block" id="C_Tag">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.protocol.C_Tag">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">C_Tag</span><span class="p">(</span><span class="n">VLAN</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Schema_VLAN</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_VLAN</span><span class="p">):</span>
@@ -693,7 +693,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=cf6e66ff"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=662e1299"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>
