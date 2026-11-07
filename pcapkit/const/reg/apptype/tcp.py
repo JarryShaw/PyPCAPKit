@@ -21366,6 +21366,9 @@ class TCP(AppType):
     #: - [UDP] ARCATrust vault API
     arca_api = 8023, 'arca-api', TransportProtocol.tcp
 
+    #: [TCP] Reserved
+    reserved_8024 = 8024, 'reserved', TransportProtocol.tcp
+
     #: - [TCP] CA Audit Distribution Agent
     #: - [UDP] CA Audit Distribution Agent
     ca_audit_da = 8025, 'ca-audit-da', TransportProtocol.tcp

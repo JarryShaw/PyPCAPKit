@@ -17021,7 +17021,8 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_4788 = 4788, 'reserved', TransportProtocol.udp
 
-    #: [UDP] Virtual eXtensible Local Area Network (VXLAN) [:rfc:`7348`]
+    #: [UDP] Virtual eXtensible Local Area Network (VXLAN)
+    #: [RFC-ietf-nvo3-rfc7348bis-12]
     vxlan = 4789, 'vxlan', TransportProtocol.udp
 
     #: [UDP] Generic Protocol Extension for Virtual eXtensible Local Area Network
@@ -20796,6 +20797,9 @@ class UDP(AppType):
     #: - [TCP] ARCATrust vault API
     #: - [UDP] ARCATrust vault API
     arca_api = 8023, 'arca-api', TransportProtocol.udp
+
+    #: [UDP] GAAP Control Packets [RFC-ietf-pim-gaap-25]
+    gaap = 8024, 'gaap', TransportProtocol.udp
 
     #: - [TCP] CA Audit Distribution Agent
     #: - [UDP] CA Audit Distribution Agent

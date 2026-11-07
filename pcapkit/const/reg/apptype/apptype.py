@@ -453,9 +453,6 @@ class AppType(EnumRegistry, StrEnum):
          - 8018
          - [N/A] Unassigned
        * - ``unassigned``
-         - 8024
-         - [N/A] Unassigned
-       * - ``unassigned``
          - 8085
          - [N/A] Unassigned
        * - ``unassigned``
