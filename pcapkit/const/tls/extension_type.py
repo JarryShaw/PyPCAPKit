@@ -217,6 +217,9 @@ class ExtensionType(EnumRegistry, IntEnum):
     #: tls_flags [draft-ietf-tls-tlsflags-14]
     tls_flags = 62
 
+    #: dane_clientid [RFC-ietf-dance-client-auth-17] -- For TLS 1.3 or later
+    dane_clientid = 63
+
     #: Reserved [:rfc:`8701`]
     Reserved_2570 = 2570
 
@@ -309,7 +312,7 @@ class ExtensionType(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 63 <= value <= 2569:
+        if 64 <= value <= 2569:
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 2571 <= value <= 6681:

@@ -120,22 +120,22 @@ class PayloadProtocolIdentifier(EnumRegistry, IntEnum):
     #: ForCES-LP [:rfc:`5811`]
     ForCES_LP = 23
 
-    #: SBc-AP [3GPP TS 29.168][Kimmo Kymalainen]
+    #: SBc-AP [3GPP TS 29.168][Dongwook Kim]
     SBc_AP = 24
 
-    #: NBAP [3GPP TS 25.433][Kimmo Kymalainen]
+    #: NBAP [3GPP TS 25.433][Dongwook Kim]
     NBAP = 25
 
     #: Unassigned
     Unassigned_26 = 26
 
-    #: X2AP [3GPP TS 36.423][Kimmo Kymalainen]
+    #: X2AP [3GPP TS 36.423][Dongwook Kim]
     X2AP = 27
 
     #: IRCP - Inter Router Capability Protocol [Randall Stewart]
     IRCP_Inter_Router_Capability_Protocol = 28
 
-    #: LCS-AP [3GPP TS 29.271][Kimmo Kymalainen]
+    #: LCS-AP [3GPP TS 29.271][Dongwook Kim]
     LCS_AP = 29
 
     #: MPICH2 [Michael Tuexen][http://www.mcs.anl.gov/research/projects/mpich2/]

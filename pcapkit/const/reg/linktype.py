@@ -716,7 +716,8 @@ class LinkType(EnumRegistry, IntEnum):
     #: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames.
     ATSC_ALP = 289
 
-    #: [``DLT_ETW``] Event Tracing for Windows messages.
+    #: [``DLT_ETW``] Event Tracing for Windows messages v1. Wireshark ≤ 4.6.X will
+    #: use this to talk with its etwdump extcap.
     ETW = 290
 
     #: [``DLT_NETANALYZER_NG``] Reserved for Hilscher Gesellschaft fuer
@@ -763,6 +764,10 @@ class LinkType(EnumRegistry, IntEnum):
     #: [``DLT_DECT_NR_TAP``] DECT-2020 New Radio (NR) TAP with a custom metadata
     #: header prepended to a standard DLT\_DECT\_NR MAC-layer frame.
     DECT_NR_TAP = 304
+
+    #: [``DLT_ETW2``] Event Tracing for Windows messages v2. Wireshark > 4.6 will
+    #: use this to talk with its etwdump extcap.
+    ETW2 = 305
 
     # The following legacy alias(es) are emitted here, after every
     # current entry above, instead of at their original numeric

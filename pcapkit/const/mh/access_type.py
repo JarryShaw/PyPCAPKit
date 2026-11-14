@@ -65,7 +65,7 @@ class AccessType(EnumRegistry, IntEnum):
     #: 3GPP2 UMB [3GPP2 X.S0054][Kuntal Chowdhury]
     AccessType_3GPP2_UMB = 12
 
-    #: 3GPP NB-IOT [3GPP TS 29.275][Kimmo Kymalainen]
+    #: 3GPP NB-IOT [3GPP TS 29.275][Dongwook Kim]
     AccessType_3GPP_NB_IOT = 13
 
     @classmethod
