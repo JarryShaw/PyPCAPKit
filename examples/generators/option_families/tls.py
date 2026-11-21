@@ -31,18 +31,35 @@ def _tls_extension_registry() -> 'Any':
 
 def _tls_extension_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
-    from pcapkit.protocols.application.ssl.data import KeyShareEntry, ServerName
+    from pcapkit.protocols.application.ssl.data import (HpkeSymmetricCipherSuite, KeyShareEntry,
+                                                        PskIdentity, ServerName)
     return {
-        # Each of these defaults to an empty list.
+        # Each of these defaults to an empty list or empty octets.
         Enum_ExtensionType.server_name: {
             'server_name_list': (ServerName(name_type=0, name=b'example.com'),)},
+        Enum_ExtensionType.status_request: {'responder_id_list': (b'\x30\x00',), 'request_extensions': b'\x30\x00'},
         Enum_ExtensionType.supported_groups: {'named_group_list': (0x001D, 0x0017)},
+        Enum_ExtensionType.ec_point_formats: {'ec_point_format_list': (0, 1, 2)},
         Enum_ExtensionType.signature_algorithms: {'supported_signature_algorithms': (0x0403, 0x0804)},
         Enum_ExtensionType.application_layer_protocol_negotiation: {
             'protocol_name_list': (b'h2', b'http/1.1')},
+        Enum_ExtensionType.padding: {'padding': bytes(5)},
+        Enum_ExtensionType.compress_certificate: {'algorithms': (2, 1)},
+        Enum_ExtensionType.session_ticket: {'ticket': bytes(range(16))},
+        Enum_ExtensionType.pre_shared_key: {
+            'identities': (PskIdentity(identity=b'ticket', obfuscated_ticket_age=0x01020304),),
+            'binders': (bytes(range(32)),)},
         Enum_ExtensionType.supported_versions: {'versions': (0x0304, 0x0303)},
+        Enum_ExtensionType.cookie: {'cookie': b'cookie'},
+        Enum_ExtensionType.psk_key_exchange_modes: {'ke_modes': (1, 0)},
         Enum_ExtensionType.key_share: {
             'client_shares': (KeyShareEntry(group=0x001D, key_exchange=bytes(range(32))),)},
+        Enum_ExtensionType.renegotiation_info: {'renegotiated_connection': bytes(12)},
+        # These have no default to build from.
+        Enum_ExtensionType.record_size_limit: {'record_size_limit': 0x4001},
+        Enum_ExtensionType.encrypted_client_hello: {
+            'cipher_suite': HpkeSymmetricCipherSuite(kdf_id=0x0001, aead_id=0x0001), 'config_id': 0x2A,
+            'enc': bytes(32), 'payload': bytes(range(16))},
     }
 
 

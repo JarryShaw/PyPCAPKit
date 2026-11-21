@@ -17,6 +17,14 @@ Shared by the record-layer implementations under
      - TLS/DTLS HandshakeType [*]_
    * - :class:`TLS_ExtensionType <pcapkit.const.tls.extension_type.ExtensionType>`
      - TLS/DTLS ExtensionType Values [*]_
+   * - :class:`TLS_ECPointFormat <pcapkit.const.tls.ec_point_format.ECPointFormat>`
+     - TLS EC Point Formats [*]_
+   * - :class:`TLS_CertificateStatusType <pcapkit.const.tls.certificate_status_type.CertificateStatusType>`
+     - TLS Certificate Status Types [*]_
+   * - :class:`TLS_PskKeyExchangeMode <pcapkit.const.tls.psk_key_exchange_mode.PskKeyExchangeMode>`
+     - TLS PskKeyExchangeMode Values [*]_
+   * - :class:`TLS_CertificateCompressionAlgorithm <pcapkit.const.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm>`
+     - TLS Certificate Compression Algorithm IDs [*]_
 
 .. versionadded:: 1.6.0
 
@@ -57,8 +65,60 @@ Generated from :class:`pcapkit.vendor.tls.extension_type.ExtensionType`.
    :undoc-members:
    :show-inheritance:
 
+TLS EC Point Formats
+====================
+
+.. module:: pcapkit.const.tls.ec_point_format
+
+Generated from :class:`pcapkit.vendor.tls.ec_point_format.ECPointFormat`.
+
+.. autoclass:: pcapkit.const.tls.ec_point_format.ECPointFormat
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+TLS Certificate Status Types
+============================
+
+.. module:: pcapkit.const.tls.certificate_status_type
+
+Generated from :class:`pcapkit.vendor.tls.certificate_status_type.CertificateStatusType`.
+
+.. autoclass:: pcapkit.const.tls.certificate_status_type.CertificateStatusType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+TLS PskKeyExchangeMode Values
+=============================
+
+.. module:: pcapkit.const.tls.psk_key_exchange_mode
+
+Generated from :class:`pcapkit.vendor.tls.psk_key_exchange_mode.PskKeyExchangeMode`.
+
+.. autoclass:: pcapkit.const.tls.psk_key_exchange_mode.PskKeyExchangeMode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+TLS Certificate Compression Algorithm IDs
+=========================================
+
+.. module:: pcapkit.const.tls.certificate_compression_algorithm
+
+Generated from :class:`pcapkit.vendor.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm`.
+
+.. autoclass:: pcapkit.const.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7
 .. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-9
+.. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode
+.. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids

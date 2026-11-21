@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=unused-import
+# pylint: disable=unused-import,line-too-long
 """:class:`~pcapkit.protocols.application.ssl.protocol.SSL` Constant Enumerations
 ====================================================================================
 
@@ -19,10 +19,22 @@ enumerations include:
      - TLS/DTLS HandshakeType [*]_
    * - :class:`TLS_ExtensionType <pcapkit.const.tls.extension_type.ExtensionType>`
      - TLS/DTLS ExtensionType Values [*]_
+   * - :class:`TLS_ECPointFormat <pcapkit.const.tls.ec_point_format.ECPointFormat>`
+     - TLS EC Point Formats [*]_
+   * - :class:`TLS_CertificateStatusType <pcapkit.const.tls.certificate_status_type.CertificateStatusType>`
+     - TLS Certificate Status Types [*]_
+   * - :class:`TLS_PskKeyExchangeMode <pcapkit.const.tls.psk_key_exchange_mode.PskKeyExchangeMode>`
+     - TLS PskKeyExchangeMode Values [*]_
+   * - :class:`TLS_CertificateCompressionAlgorithm <pcapkit.const.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm>`
+     - TLS Certificate Compression Algorithm IDs [*]_
 
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7
 .. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-9
+.. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode
+.. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids
 
 """
 
@@ -31,14 +43,27 @@ from typing import TYPE_CHECKING
 from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
+    from pcapkit.const.tls.certificate_compression_algorithm import \
+        CertificateCompressionAlgorithm as TLS_CertificateCompressionAlgorithm
+    from pcapkit.const.tls.certificate_status_type import \
+        CertificateStatusType as TLS_CertificateStatusType
     from pcapkit.const.tls.content_type import ContentType as TLS_ContentType
+    from pcapkit.const.tls.ec_point_format import ECPointFormat as TLS_ECPointFormat
     from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
     from pcapkit.const.tls.handshake_type import HandshakeType as TLS_HandshakeType
+    from pcapkit.const.tls.psk_key_exchange_mode import PskKeyExchangeMode as TLS_PskKeyExchangeMode
 
-__all__ = ['TLS_ContentType', 'TLS_HandshakeType', 'TLS_ExtensionType']
+__all__ = [
+    'TLS_ContentType', 'TLS_HandshakeType', 'TLS_ExtensionType', 'TLS_ECPointFormat',
+    'TLS_CertificateStatusType', 'TLS_PskKeyExchangeMode', 'TLS_CertificateCompressionAlgorithm',
+]
 
 __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'TLS_ContentType': ('content_type', 'ContentType'),
     'TLS_HandshakeType': ('handshake_type', 'HandshakeType'),
     'TLS_ExtensionType': ('extension_type', 'ExtensionType'),
+    'TLS_ECPointFormat': ('ec_point_format', 'ECPointFormat'),
+    'TLS_CertificateStatusType': ('certificate_status_type', 'CertificateStatusType'),
+    'TLS_PskKeyExchangeMode': ('psk_key_exchange_mode', 'PskKeyExchangeMode'),
+    'TLS_CertificateCompressionAlgorithm': ('certificate_compression_algorithm', 'CertificateCompressionAlgorithm'),
 })

@@ -98,7 +98,7 @@ class QuietRejectionTests(unittest.TestCase):
         from pcapkit.utilities.logging import logger
 
         def parser(ext_type: object, data: bytes, *, msg_type: object) -> bytes:  # pylint: disable=unused-argument
-            raise ProtocolError('padding: rejected')
+            raise ProtocolError('heartbeat: rejected')
 
         def constructor(ext_type: object, data: object = None, *, msg_type: object,  # pylint: disable=unused-argument
                         **kwargs: object) -> bytes:
@@ -106,17 +106,17 @@ class QuietRejectionTests(unittest.TestCase):
 
         # The same error, constructed outside the parse, is loud.
         with capture(logger) as package, capture(exceptions.logger) as module:
-            ProtocolError('padding: rejected')
-        self.assertIn(('CRITICAL', 'ProtocolError: padding: rejected'), package.messages + module.messages)
+            ProtocolError('heartbeat: rejected')
+        self.assertIn(('CRITICAL', 'ProtocolError: heartbeat: rejected'), package.messages + module.messages)
         sys.excepthook, threading.excepthook = self.sys_sentinel, self.threading_sentinel
 
         shipped = dict(SSL.__extension__)
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter('error')
-                register_tls_extension(ExtensionType.padding, (parser, constructor))
-            ext, = self._parse_quietly(_client_hello(_ext(21, bytes(3))))
-            self.assertEqual(ext.data, bytes(3))
+                register_tls_extension(ExtensionType.heartbeat, (parser, constructor))
+            ext, = self._parse_quietly(_client_hello(_ext(15, b'\x01')))
+            self.assertEqual(ext.data, b'\x01')
         finally:
             SSL.__extension__.clear()
             SSL.__extension__.update(shipped)
