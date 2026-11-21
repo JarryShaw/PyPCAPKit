@@ -190,6 +190,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          - :class:`pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`
        * - 21
          - :class:`pcapkit.protocols.application.ftp.protocol.FTP`
+       * - 53
+         - :class:`pcapkit.protocols.application.dns.protocol.DNS`
        * - 80
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
        * - 443
@@ -389,6 +391,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
 
+    .. versionchanged:: 1.7.0
+
+       Port 53 binds
+       :class:`~pcapkit.protocols.application.dns.protocol.DNS`
+       (:issue:`2816`).
+
     """
 
     ##########################################################################
@@ -408,6 +416,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             #
             #   20    ftp-data   File Transfer [Default Data]
             #   21    ftp        File Transfer Protocol [Control]
+            #   53    domain     Domain Name Server
             #   80    http       World Wide Web HTTP
             #   443   https      http protocol over TLS/SSL
             #   8080  http-alt   HTTP Alternate (see port 80)
@@ -421,6 +430,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # ``HTTP._dispatch_version`` (#2524). UDP's table does the same.
             20: ModuleDescriptor('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
             21: ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'),
+            53: ModuleDescriptor('pcapkit.protocols.application.dns.protocol', 'DNS'),
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
             443: ModuleDescriptor('pcapkit.protocols.application.tls.protocol', 'TLS'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),

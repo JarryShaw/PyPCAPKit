@@ -106,6 +106,7 @@ else:
     # per protocol
     from pcapkit.vendor.arp import *
     from pcapkit.vendor.dccp import *
+    from pcapkit.vendor.dns import *
     from pcapkit.vendor.esp import *
     from pcapkit.vendor.ftp import *
     from pcapkit.vendor.hip import *
@@ -142,6 +143,8 @@ __all__ = [
     # DCCP
     'DCCP_PacketType', 'DCCP_ResetCode', 'DCCP_Option', 'DCCP_Feature',
     'DCCP_AckVectorState', 'DCCP_DropCode',
+    # DNS
+    'DNS_RRClass', 'DNS_RRType', 'DNS_Opcode', 'DNS_RCode', 'DNS_Option',
     # ESP
     'ESP_Cipher', 'ESP_Integrity',
     # FTP

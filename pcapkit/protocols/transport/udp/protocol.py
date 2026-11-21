@@ -64,6 +64,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
        * - Port Number
          - Protocol
+       * - 53
+         - :class:`pcapkit.protocols.application.dns.protocol.DNS`
        * - 80
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
        * - 1701
@@ -103,6 +105,12 @@ class UDP(Transport[Data_UDP, Schema_UDP],
          not two octets, where it wrote the Length's low 16 bits and padded or
          cut the checksum (:issue:`2614`).
 
+    .. versionchanged:: 1.7.0
+
+       Port 53 binds
+       :class:`~pcapkit.protocols.application.dns.protocol.DNS`
+       (:issue:`2816`).
+
     """
 
     ##########################################################################
@@ -120,6 +128,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # Ports are IANA service-name registry assignments, quoting that
             # registry's own service name and description:
             #
+            #   53    domain     Domain Name Server
             #   80    http       World Wide Web HTTP
             #   1701  l2tp       l2tp
             #   5684  coaps      CoAP over DTLS
@@ -127,6 +136,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             #
             # The HTTP entries bind the version-dispatching HTTP base, as TCP's
             # table does.
+            53: ModuleDescriptor('pcapkit.protocols.application.dns.protocol', 'DNS'),
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
 
             # L2TPv2 (RFC 2661) is the only L2TP version implemented, so the

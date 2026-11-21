@@ -15,7 +15,7 @@
    this package (:issue:`2730`).
 
 """
-# TODO: Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT,
+# TODO: Implements BGP, DHCP, DHCPv6, IMAP, LDAP, MQTT,
 #       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP,
 #       SSH, TELNET, XMPP.
 #
@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.application import Application
 
     # Application Layer Protocols
+    from pcapkit.protocols.application.dns import DNS
     from pcapkit.protocols.application.ftp import FTP
     from pcapkit.protocols.application.ftp_data import FTP_DATA
     from pcapkit.protocols.application.httpv1 import HTTPv1
@@ -52,6 +53,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'APPTYPE',
+    'DNS',
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
     'NGAP',
@@ -62,6 +64,7 @@ __all__ = [
 
 __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'Application': ('application', 'Application'),
+    'DNS': ('dns', 'DNS'),
     'FTP': ('ftp', 'FTP'),
     'FTP_DATA': ('ftp_data', 'FTP_DATA'),
     'HTTP': ('http', 'HTTP'),

@@ -50,6 +50,7 @@ APPTYPES = (APP_TCP, APP_UDP, APP_SCTP)
 #: number)``: tcpdump.org's LINKTYPE value, IEEE's EtherType, IANA's protocol
 #: number, or the IANA port the class is bound at.
 EXPECTED = {
+    'pcapkit.protocols.application.dns.protocol.DNS': (APP_UDP, 53),
     'pcapkit.protocols.application.drarp.protocol.DRARP': (ETHERTYPE, 0x8035),
     'pcapkit.protocols.application.dtls.protocol.DTLS': (APP_UDP, 5684),
     'pcapkit.protocols.application.ftp.protocol.FTP': (APP_TCP, 21),
@@ -148,6 +149,7 @@ def _index(cls: 'Any') -> 'Any':
 def _instances() -> 'dict[str, Any]':
     """An instance of each AppType-valued class in :data:`EXPECTED`, by its path."""
     from pcapkit.const.http.frame import Frame
+    from pcapkit.protocols.application.dns.protocol import DNS
     from pcapkit.protocols.application.dtls.protocol import DTLS
     from pcapkit.protocols.application.ftp.protocol import FTP
     from pcapkit.protocols.application.ftp_data.protocol import FTP_DATA
@@ -164,6 +166,7 @@ def _instances() -> 'dict[str, Any]':
     dtls = b'\x14\xfe\xfd\x00\x00' + (1).to_bytes(6, 'big') + b'\x00\x01\x01'
 
     return {
+        'pcapkit.protocols.application.dns.protocol.DNS': DNS(id=1),
         'pcapkit.protocols.application.dtls.protocol.DTLS': DTLS(dtls),
         'pcapkit.protocols.application.ftp.protocol.FTP': FTP(b'USER anonymous\r\n'),
         'pcapkit.protocols.application.ftp_data.protocol.FTP_DATA': FTP_DATA(b'abc'),

@@ -78,6 +78,7 @@ Application Layer
 .. toctree::
    :maxdepth: 2
 
+   dns
    ftp
    http
    ngap

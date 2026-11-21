@@ -92,7 +92,7 @@ __all__ = [
 
     'DCCP', 'TCP', 'UDP', 'SCTP',                           # Transport Layer
 
-    'FTP', 'FTP_DATA',                                      # Application Layer
+    'DNS', 'FTP', 'FTP_DATA',                               # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF',
     'RARP', 'DRARP', 'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
 

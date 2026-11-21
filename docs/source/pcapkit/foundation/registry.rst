@@ -176,6 +176,10 @@ Application Layer Registries
 
 .. module:: pcapkit.foundation.registry.protocols.application
 
+.. autofunction:: pcapkit.foundation.registry.protocols.application.register_dns_rdata
+
+.. autofunction:: pcapkit.foundation.registry.protocols.application.register_dns_option
+
 .. autofunction:: pcapkit.foundation.registry.protocols.application.register_http_frame
 
 .. autofunction:: pcapkit.foundation.registry.protocols.application.register_tls_extension
