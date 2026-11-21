@@ -5,6 +5,23 @@ This is the script the ``Vendor Update`` workflow runs after a registry crawl ha
 changed something under :mod:`pcapkit.const`. It reads the current version, works
 out the next one under :pep:`440`, and writes it back.
 
+Reading and writing the version
+-------------------------------
+
+``__version__`` is read from :data:`INIT` through :mod:`ast`, never by importing
+:mod:`pcapkit`: an import answers for whichever copy is installed, and not at all
+once the file stops parsing (#2800). :data:`INIT` is taken from :data:`ROOT`, as
+:data:`CITATION` is, so the file read is the file written. The rewrite is
+line-oriented, and :func:`rewrite_init` reads its result back through :mod:`ast`
+before writing it, refusing one that would not parse or not hold the new version.
+
+``--github-output`` hands the new version to the workflow as the step output
+``version``, which ``Commit changes`` puts in its subject; ``--print-version``
+prints the current one and writes nothing, for ``Commit documentation changes``,
+which commits without a bump. Importing :mod:`pcapkit` in those steps instead
+fails on a tree that no longer parses, and ``git commit`` still runs, with no
+version in the message (#2800).
+
 Where it is invoked from, and why that matters
 ----------------------------------------------
 
@@ -116,6 +133,7 @@ is a change in behaviour for every existing caller, so it is left as it is.
 from __future__ import annotations
 
 import argparse
+import ast
 import datetime
 import os
 import pathlib
@@ -124,16 +142,25 @@ from typing import TYPE_CHECKING, cast
 
 from packaging.version import Version
 
-if TYPE_CHECKING:
-    from typing import Optional, Sequence
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
 
-__all__ = ['CitationFieldError', 'bump', 'read_citation', 'plan_citation', 'main']
+if TYPE_CHECKING:
+    from typing import Optional, Sequence, Union
+
+__all__ = ['CitationFieldError', 'bump', 'read_version', 'current_version', 'rewrite_init',
+           'read_citation', 'plan_citation', 'main']
 
 #: Repository root, taken from this file's location rather than the working
 #: directory, so the script finds the same :file:`CITATION.cff` run from
 #: anywhere. This is the spelling :file:`util/changelog_md.py` uses and for the
 #: same reason.
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+#: The module carrying ``__version__``, read and rewritten as text.
+INIT = ROOT / 'pcapkit' / '__init__.py'
 
 #: Citation metadata, in Citation File Format 1.2.0. Its ``version`` and
 #: ``date-released`` fields are the ones this script keeps in step with
@@ -182,44 +209,56 @@ class CitationFieldError(RuntimeError):
     """
 
 
-def current_version() -> str:
-    """Read the version that is about to be bumped.
+def read_version(text: str, filename: str = '<unknown>') -> str:
+    """Read the module-level ``__version__`` assignment of ``text`` through :mod:`ast`.
 
-    Prefers the installed package, which is what the ``Vendor Update`` workflow
-    has, and falls back to scraping :file:`pcapkit/__init__.py` out of the working
-    directory when :mod:`pcapkit` cannot be imported.
+    A trailing comment, or a value spanning lines, reads as Python reads it, and
+    the last assignment counts, as on import.
 
-    The fallback strips whitespace before quotes rather than both at once:
-    ``strip(" '")`` stops at the trailing newline and so returns
-    ``"1.5.0b4'\\n"`` -- quote and newline included -- which
-    :class:`~packaging.version.Version` rejects outright with
-    :exc:`~packaging.version.InvalidVersion`. CI never reaches the fallback,
-    because the only caller installs the package first, so :mod:`pcapkit`
-    always imports.
+    Args:
+        text: Source of the module carrying ``__version__``.
+        filename: Its name, for the messages.
+
+    Returns:
+        The version string.
+
+    Raises:
+        SyntaxError: If ``text`` does not parse.
+        RuntimeError: If no module-level statement assigns ``__version__`` a string
+            literal.
+
+    """
+    values = [node.value for node in ast.parse(text, filename).body if isinstance(node, ast.Assign)
+              and any(isinstance(target, ast.Name) and target.id == '__version__' for target in node.targets)]
+    if not values:
+        raise RuntimeError(f'cannot find version: {filename} has no module-level __version__ assignment')
+
+    try:
+        version = ast.literal_eval(values[-1])
+    except ValueError:
+        version = None
+    if not isinstance(version, str):
+        raise RuntimeError(f'cannot find version: {filename} assigns __version__ '
+                           f'{ast.get_source_segment(text, values[-1])}, not a string literal')
+    return version
+
+
+def current_version(path: Union[str, os.PathLike[str]] = INIT) -> str:
+    """Read the version that is about to be bumped, from the file at ``path``.
+
+    Args:
+        path: File carrying the ``__version__`` assignment.
 
     Returns:
         The current version string.
 
     Raises:
-        RuntimeError: If neither source yields a version.
+        SyntaxError: If the file does not parse.
+        RuntimeError: As :func:`read_version`.
 
     """
-    try:
-        import pcapkit
-        return pcapkit.__version__
-    except ImportError:
-        version = ''
-
-        path = os.path.join('pcapkit', '__init__.py')
-        with open(path, 'r', encoding='utf-8') as file:
-            for line in file:
-                if line.startswith('__version__'):
-                    version = line.split('=')[1].strip().strip('\'"')
-
-        if not version:
-            raise RuntimeError('cannot find version')
-
-        return version
+    with open(path, 'r', encoding='utf-8') as file:
+        return read_version(file.read(), os.fspath(path))
 
 
 def bump(version: str) -> str:
@@ -273,24 +312,7 @@ def bump(version: str) -> str:
     return base_version + '.post1'
 
 
-def init_path() -> str:
-    """Locate the :file:`pcapkit/__init__.py` to rewrite.
-
-    Prefers the installed package's copy, which under an editable install is the
-    working tree's own file, and falls back to the working directory.
-
-    Returns:
-        Path to the file carrying ``__version__``.
-
-    """
-    try:
-        import pcapkit
-        return os.path.join(pcapkit.__path__[0], '__init__.py')
-    except ImportError:
-        return os.path.join('pcapkit', '__init__.py')
-
-
-def rewrite_init(path: str, new_ver: str) -> None:
+def rewrite_init(path: Union[str, os.PathLike[str]], new_ver: str) -> None:
     """Write ``new_ver`` into the ``__version__`` assignment at ``path``.
 
     As in :func:`plan_citation`, the assignment keeps its own terminator and every
@@ -298,9 +320,16 @@ def rewrite_init(path: str, new_ver: str) -> None:
     onto it and the file ends as it began. ``newline=''`` stops the read and write
     translating CRLF.
 
+    The rewritten text goes through :func:`read_version` before it is written, so
+    a rewrite that would not parse or not hold ``new_ver`` leaves the file as it
+    was (#2800).
+
     Args:
         path: File carrying the ``__version__`` assignment.
         new_ver: Version string to record.
+
+    Raises:
+        RuntimeError: If the rewritten file would not read back as ``new_ver``.
 
     """
     contents = []  # type: list[str]
@@ -310,9 +339,19 @@ def rewrite_init(path: str, new_ver: str) -> None:
             if body.startswith('__version__'):
                 line = f'__version__ = {new_ver!r}' + line[len(body):]
             contents.append(line)
+    planned = ''.join(contents)
+
+    try:
+        written = read_version(planned, os.fspath(path))
+    except (SyntaxError, RuntimeError) as error:
+        raise RuntimeError(f'refusing to bump {os.fspath(path)} to {new_ver}, as the rewritten '
+                           f'file would not read back ({error}); it is left as it was') from error
+    if written != new_ver:
+        raise RuntimeError(f'refusing to bump {os.fspath(path)} to {new_ver}, as the rewritten '
+                           f'file would assign {written!r}; it is left as it was')
 
     with open(path, 'w', encoding='utf-8', newline='') as out_file:
-        out_file.writelines(contents)
+        out_file.write(planned)
 
 
 def plan_citation(text: str, version: str, released: Optional[str] = None) -> str:
@@ -418,26 +457,46 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         description='Bump pcapkit.__version__ and the citation metadata that tracks it.',
     )
     parser.add_argument(
+        '--init', type=pathlib.Path, default=INIT,
+        help='module carrying __version__ (default: %(default)s)',
+    )
+    parser.add_argument(
         '--citation', type=pathlib.Path, default=CITATION,
         help='citation file to keep in step (default: %(default)s)',
     )
+    parser.add_argument(
+        '--github-output', action='store_true',
+        help='append the new version to $GITHUB_OUTPUT as the step output "version"',
+    )
+    parser.add_argument(
+        '--print-version', action='store_true',
+        help='print the current version and exit, bumping nothing',
+    )
     args = parser.parse_args(argv)
+    if args.print_version:
+        print(current_version(args.init))
+        return 0
+    if args.github_output and not os.environ.get('GITHUB_OUTPUT'):
+        parser.error('--github-output only works inside a workflow step, where GITHUB_OUTPUT is set')
 
-    new_ver = bump(current_version())
+    new_ver = bump(current_version(args.init))
 
-    # Read and planned before anything is written, so the one fatal outcome -- a
-    # citation file with no ``version`` field -- leaves the tree untouched instead
-    # of half-bumped.
+    # Read and planned before anything is written, so the fatal outcomes -- a
+    # citation file with no ``version`` field, or a rewrite of ``__version__`` that
+    # would not read back -- leave the tree untouched instead of half-bumped.
     text = read_citation(args.citation)
     planned = None if text is None else plan_citation(text, new_ver)
 
-    rewrite_init(init_path(), new_ver)
+    rewrite_init(args.init, new_ver)
 
     if planned is not None:
         args.citation.write_text(planned, encoding='utf-8')
 
     with open(os.path.join('conda', 'build'), 'w') as build:
         build.write('0')
+
+    if args.github_output:
+        _actions.set_output('version', new_ver)
 
     return 0
 

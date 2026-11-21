@@ -44,11 +44,12 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
-SCRIPTS = ('apt_packages', 'check_suite_report', 'ci_timing', 'classify_changes', 'codeql_report',
-           'coverage_report', 'discussion_report', 'leg_summary', 'milestone', 'pip_install', 'project_status',
-           'python_versions', 'regenerate_samples', 'release_conda', 'release_published', 'release_reset_build',
-           'release_status', 'release_tags', 'release_tiers', 'release_upload', 'superseded',
-           'update_python_versions', 'vendor_code_changed', 'vendor_test_gate', 'verdict_covers_checkout')
+SCRIPTS = ('apt_packages', 'bump_version', 'check_suite_report', 'ci_timing', 'classify_changes',
+           'codeql_report', 'coverage_report', 'discussion_report', 'leg_summary', 'milestone', 'pip_install',
+           'project_status', 'python_versions', 'regenerate_samples', 'release_conda', 'release_published',
+           'release_reset_build', 'release_status', 'release_tags', 'release_tiers', 'release_upload',
+           'superseded', 'update_python_versions', 'vendor_code_changed', 'vendor_test_gate',
+           'verdict_covers_checkout')
 #: The top-level modules the helper may import, each in Python 3.8's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
 #: pass ``tomllib``, which 3.8 lacks.
@@ -56,6 +57,7 @@ STDLIB_38 = frozenset({'__future__', 'contextlib', 'os', 'subprocess', 'sys', 't
 #: A trivial run of each script, ``(arguments, environment)``, that gets past its imports.
 RUNS = {
     'apt_packages': (['--help'], {}),
+    'bump_version': (['--help'], {}),
     'check_suite_report': (['--help'], {}),
     'ci_timing': (['--help'], {}),
     'classify_changes': ([], {'OWN_PR': 'false'}),

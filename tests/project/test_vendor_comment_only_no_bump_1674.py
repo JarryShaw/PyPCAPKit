@@ -17,7 +17,9 @@ The layers:
 * :class:`TestTheStepsDecide` walks ``vendor-update``'s steps the way the runner
   does, with the evaluator :mod:`tests.project.test_release_gates` pins;
 * :class:`TestTheDocumentationCommitStep` runs that step's script, including the
-  hold that stops documentation commits from chaining.
+  hold that stops documentation commits from chaining, and its read of the version
+  through :file:`util/bump_version.py`, which fails the step rather than commit
+  without one (#2800).
 
 """
 
@@ -45,6 +47,8 @@ if TYPE_CHECKING:
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / 'util' / 'vendor_code_changed.py'
+#: What ``Commit documentation changes`` runs to read the version, beside its helper.
+VERSION_SCRIPTS = ('util/bump_version.py', 'util/_actions.py')
 WORKFLOW = ROOT / '.github' / 'workflows' / 'cron-vendor.yml'
 
 BOT = ('github-actions[bot]', 'github-actions[bot]@users.noreply.github.com')
@@ -503,12 +507,15 @@ class TestTheStepsDecide(WorkflowMixin):
         self.assertEqual(env, {'CHANGED_FILES': '${{ steps.verify-changed-files.outputs.changed_files }}'})
 
     def test_only_the_bump_path_runs_bump_version(self) -> None:
+        # `--print-version` reads the version and writes nothing (#2800).
         self.step('Commit documentation changes')
         for name in self.names:
             if name is None:
                 continue
             with self.subTest(step=name):
-                self.assertEqual('bump_version.py' in step_block(self.block, name), name == 'Bump Version')
+                bumps = [args for args in re.findall(r'util/bump_version\.py([^\n]*)', step_block(self.block, name))
+                         if '--print-version' not in args]
+                self.assertEqual(bool(bumps), name == 'Bump Version')
 
 
 class TestTheDocumentationCommitStep(WorkflowMixin, ScratchRepository):
@@ -516,14 +523,32 @@ class TestTheDocumentationCommitStep(WorkflowMixin, ScratchRepository):
 
     def setUp(self) -> None:
         super().setUp()
-        # `python -c 'import pcapkit'` in the step reads this tree's version.
+        # `python util/bump_version.py` in the step runs on this interpreter, from
+        # the scratch checkout, and so reads its pcapkit/__init__.py.
         bin_dir = self.root / 'bin'
         bin_dir.mkdir()
         (bin_dir / 'python').write_text(
-            f'#!/bin/sh\nexec {shlex.quote(sys.executable)} -S "$@"\n', encoding='utf-8')
+            f'#!/bin/sh\nexec {shlex.quote(sys.executable)} "$@"\n', encoding='utf-8')
         (bin_dir / 'python').chmod(0o755)
         self.env['PATH'] = f'{bin_dir}{os.pathsep}{self.env["PATH"]}'
+        for script in VERSION_SCRIPTS:
+            self.write(script, (ROOT / script).read_text(encoding='utf-8'))
+        self.commit_tree('chore(util): the version reader', *VERSION_SCRIPTS)
         self.write(PATH, edited(EDITS[0][1]))
+
+    def commit_tree(self, message: 'str', *paths: 'str') -> None:
+        """Commit ``paths`` as a person, the base the step's commit goes on top of."""
+        self.git('add', '--', *paths)
+        self.commit(message, HUMAN)
+        self.base = self.git('rev-parse', 'HEAD')
+
+    def assertNotCommitted(self, result: 'subprocess.CompletedProcess[str]', outputs: 'dict[str, str]',
+                           error: 'str') -> None:
+        """The step failed, naming ``error``, before ``git commit``."""
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(error, result.stderr)
+        self.assertEqual(outputs, {})
+        self.assertEqual(self.git('rev-parse', 'HEAD'), self.base)
 
     def run_step(self, event_name: 'str', head_commit: 'Optional[dict[str, object]]' = None,
                  ) -> 'tuple[subprocess.CompletedProcess[str], dict[str, str]]':
@@ -607,6 +632,27 @@ class TestTheDocumentationCommitStep(WorkflowMixin, ScratchRepository):
                             'message': message}  # type: dict[str, object]
                 self.assertCommitted(*self.run_step('workflow_run', verified))
                 self.git('reset', '-q', '--soft', 'HEAD~1')
+
+    def test_the_version_is_read_without_importing_the_package(self) -> None:
+        """#2800: the message names the file's version though the package cannot be imported."""
+        self.write('pcapkit/__init__.py', "__version__ = '9.9.9b9'\nraise ImportError('broken')\n")
+        self.commit_tree('chore: a package that cannot be imported', 'pcapkit/__init__.py')
+
+        self.assertCommitted(*self.run_step('schedule'))
+
+    def test_an_unparsable_package_commits_nothing(self) -> None:
+        """#2800: the tree 762f283ed committed, which no import could read either."""
+        self.write('pcapkit/__init__.py', "__version__ = '9.9.9b9'__getattr__ = None\n")
+        self.commit_tree('chore: a package that does not parse', 'pcapkit/__init__.py')
+
+        self.assertNotCommitted(*self.run_step('schedule'), 'SyntaxError')
+
+    def test_an_empty_version_commits_nothing(self) -> None:
+        """#2800: a reader that prints nothing fails the step too."""
+        self.write('util/bump_version.py', '# prints nothing\n')
+        self.commit_tree('chore: a reader that prints nothing', 'util/bump_version.py')
+
+        self.assertNotCommitted(*self.run_step('schedule'), 'bump_version.py printed no version')
 
 
 if __name__ == '__main__':

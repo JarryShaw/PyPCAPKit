@@ -1774,7 +1774,10 @@ script not listed here is CI-only.
      - Run by
      - By hand
    * - :file:`util/bump_version.py`
-     - ``Bump Version`` in ``cron-vendor.yml``'s ``vendor-update``.
+     - ``Bump Version`` in ``cron-vendor.yml``'s ``vendor-update``, as
+       ``bump_version.py --github-output``, whose ``version`` output ``Commit
+       changes`` puts in its subject, and ``Commit documentation changes`` there,
+       as ``bump_version.py --print-version`` (:issue:`2800`).
      - ``python util/bump_version.py``, committed to ``main``, to release what is
        not a vendor refresh (see :doc:`releasing`).
    * - :file:`util/changelog_md.py`

@@ -250,17 +250,21 @@ jobs:
         run: python util/vendor_code_changed.py
 
       - name: Bump Version
+        id: bump
         if: >-
           steps.verify-changed-files.outputs.files_changed == 'true' &&
           steps.classify.outputs.code_changed != 'false'
         run: |
           set -x
 
-          python util/bump_version.py
+          python util/bump_version.py --github-output
           isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
           find pcapkit/const -mindepth 2 -name '*.py' -exec isort -l100 -ppcapkit {} +
           find pcapkit/vendor -mindepth 2 -name '*.py' -exec isort -l100 -ppcapkit {} +
 
+      # #2800: the version is `Bump Version`'s output, written only once the
+      # bumped file reads back through `ast`. `import pcapkit` here fails on a
+      # tree that no longer parses, and `git commit` would still run.
       - name: Commit changes
         id: commit
         if: >-
@@ -268,7 +272,9 @@ jobs:
           steps.classify.outputs.code_changed != 'false'
         env:
           CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
+          VERSION: ${{ steps.bump.outputs.version }}
         run: |
+          : "${VERSION:?Bump Version wrote no version output}"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           # #1685: `-a` skips untracked files, so a new module is staged here;
@@ -276,7 +282,7 @@ jobs:
           # for it again. Quoted, so git matches at any depth; `.py` only, so a
           # leftover backup stays out.
           git add -A -- 'pcapkit/const/*.py'
-          git commit -am"Bumped version to $(python -c 'import pcapkit; print(pcapkit.__version__)')
+          git commit -am"Bumped version to $VERSION
 
           Updated vendor constant enumerations at $(date). The following files
           have been changed: $CHANGED_FILES"
@@ -309,14 +315,17 @@ jobs:
             exit 0
           fi
 
+          # #2800: read through `ast`, not by import, as for `Commit changes`.
+          version=$(python util/bump_version.py --print-version)
+          : "${version:?bump_version.py printed no version}"
+
           git config --local user.email "$bot"
           git config --local user.name "github-actions[bot]"
           git commit -am"$subject
 
           Updated vendor constant enumerations at $(date). Only comments and
           docstrings changed, so the version stays at
-          $(python -c 'import pcapkit; print(pcapkit.__version__)') (#1674). The
-          following files have been changed: $CHANGED_FILES"
+          $version (#1674). The following files have been changed: $CHANGED_FILES"
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
       - name: Push changes
