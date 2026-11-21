@@ -94,7 +94,7 @@ class TestTwoOctetPadding(unittest.TestCase):
                           [(IPv6_Option.Router_Alert, 4), (IPv6_Option.PadN, 2)]),
             # 6 + 2 octets of reserved + a 6-octet PadN = 14, two short of 16
             'MH': (protocols['MH'](next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
-                                   chksum=b'\x00\x00', data={'options': [(MH_Option.PadN, {'length': 4})]}),
+                                   checksum=b'\x00\x00', data={'options': [(MH_Option.PadN, {'length': 4})]}),
                    '3b01000000000000' '010400000000' '0100',
                    [(MH_Option.PadN, 6), (MH_Option.PadN, 2)]),
         }

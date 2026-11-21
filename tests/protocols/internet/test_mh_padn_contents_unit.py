@@ -54,7 +54,7 @@ class TestMHPadNContents(unittest.TestCase):
         def build(pad: 'dict[str, object]') -> 'bytes':
             args = {'fid': 7, 'fid_pri': 2, 'status': 0,
                     'suboptions': [(FlowIDSuboption.PadN, pad)]}
-            return bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+            return bytes(MH(next=TransType.UDP, checksum=b'\x12\x34',
                             type=Packet.Binding_Refresh_Request,
                             data={'options': [(Option.Flow_Identification_Mobility_Option, args)]}))
 
@@ -64,7 +64,7 @@ class TestMHPadNContents(unittest.TestCase):
         self.assertNotEqual(raw, zeros)
 
         parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
-        rebuilt = bytes(MH(next=parsed.next, type=parsed.type, chksum=parsed.chksum, data=parsed))
+        rebuilt = bytes(MH(next=parsed.next, type=parsed.type, checksum=parsed.chksum, data=parsed))
         self.assertEqual(rebuilt.hex(), raw.hex())
 
 

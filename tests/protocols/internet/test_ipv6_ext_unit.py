@@ -182,7 +182,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.mh.protocol import MH, FastBindingAcknowledgmentStatus
 
         mh_raw = bytearray(bytes(MH(
-            next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
+            next=TransType.UDP, checksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
             data={'status': FastBindingAcknowledgmentStatus.Insufficient_resources,
                   'key_mngt': True, 'seq': 0x1234, 'lifetime': 40, 'options': []})))
         mh_raw[6] = 50  # unassigned FastBindingAcknowledgmentStatus byte -- MH.read raises

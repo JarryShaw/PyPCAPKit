@@ -229,7 +229,7 @@ class MHMakeCodeTests(unittest.TestCase):
 
         _, kind, target, field, *_, base = row
         header = {'next': 59, 'type': Packet.Binding_Refresh_Request,
-                  'chksum': b'\x00\x00', 'payload': b''}  # type: dict[str, object]
+                  'checksum': b'\x00\x00', 'payload': b''}  # type: dict[str, object]
         if kind == 'header':
             header[field] = value
         elif kind == 'message':
@@ -315,7 +315,7 @@ class MHMakeCodeTests(unittest.TestCase):
                 octets = self._build(row, code)
                 self.assertEqual(int(self._read(row, octets)), code)  # type: ignore[call-overload]
                 info = MH(io.BytesIO(octets), len(octets), extension=True).info
-                rebuilt = bytes(MH(next=info.next, type=info.type, chksum=info.chksum,
+                rebuilt = bytes(MH(next=info.next, type=info.type, checksum=info.chksum,
                                    data=info, payload=b''))
                 self.assertEqual(rebuilt.hex(), octets.hex())
 
@@ -338,7 +338,7 @@ class MHMakeCodeTests(unittest.TestCase):
         for value in (2, BindingError.Unrecognized_MH_Type_value):
             with self.subTest(value=value):
                 schema = object.__new__(MH).make(next=59, type=Packet.Binding_Error,
-                                                 chksum=b'\x00\x00', data={'status': value})
+                                                 checksum=b'\x00\x00', data={'status': value})
                 status = schema['data']['status']
                 self.assertIs(type(status), BindingError)
                 self.assertEqual(status, BindingError.Unrecognized_MH_Type_value)
@@ -382,7 +382,7 @@ class MHListTypeTests(unittest.TestCase):
             options = [(Option.CGA_Parameters, {'parameters': [param]})]
         else:
             options = [(getattr(Option, carrier[0]), {carrier[1]: items})]
-        return bytes(MH(next=59, type=Packet.Binding_Refresh_Request, chksum=b'\x00\x00',
+        return bytes(MH(next=59, type=Packet.Binding_Refresh_Request, checksum=b'\x00\x00',
                         payload=b'', data={'options': options}))
 
     def _parsed(self, row: 'tuple', octets: 'bytes') -> 'Any':
@@ -444,7 +444,7 @@ class MHListTypeTests(unittest.TestCase):
                     # the options of the message end in the padding that aligns them
                     self.assertEqual(int(list(self._parsed(row, octets))[0]), code)
                     info = MH(io.BytesIO(octets), len(octets), extension=True).info
-                    rebuilt = bytes(MH(next=info.next, type=info.type, chksum=info.chksum,
+                    rebuilt = bytes(MH(next=info.next, type=info.type, checksum=info.chksum,
                                        data=info, payload=b''))
                     self.assertEqual(rebuilt.hex(), octets.hex())
 

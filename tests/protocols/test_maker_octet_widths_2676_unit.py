@@ -322,7 +322,7 @@ class MHTests(_Case):
 
     def test_header_checksum(self) -> None:
         # RFC 6275 section 6.1.1: Checksum is octets 4 and 5.
-        self.assertWidth('MH', 'checksum', 2, lambda value: self._make(chksum=value), self._rebuild, offset=4)
+        self.assertWidth('MH', 'checksum', 2, lambda value: self._make(checksum=value), self._rebuild, offset=4)
 
     def test_message_octets(self) -> None:
         from pcapkit.protocols.internet.mh.protocol import MH

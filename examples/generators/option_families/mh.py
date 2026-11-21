@@ -22,7 +22,7 @@ generator = globals()['generator']  # type: Any
 
 #: Header fields shared by every constructed Mobility Header. ``next`` is
 #: IPv6-NoNxt, so nothing downstream has to be constructed as well.
-MH_BASE = {'next': 59, 'chksum': b'\x00\x00', 'payload': b''}
+MH_BASE = {'next': 59, 'checksum': b'\x00\x00', 'payload': b''}
 
 
 def _mh_message_registry() -> 'Any':

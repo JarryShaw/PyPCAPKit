@@ -666,12 +666,20 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
     """Verify the checksum of the upper layer ``ip`` carries over its pseudo-header.
 
     The upper layer is the payload of ``ip``, past any Authentication Header
-    of IPv4. It is verified if it defines ``_verify_pseudo_checksum``, against
-    the :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo` of ``ip``,
+    of IPv4, and for IPv6 also the Mobility Header or HIP its walk ends at
+    (:rfc:`6275#section-6.1.1`, :rfc:`7401#section-5.1.1`), which it parses as
+    an extension header. Each is verified if it defines
+    ``_verify_pseudo_checksum``, against the
+    :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo` of ``ip``,
     or against :data:`None` if that cannot be derived or names another protocol.
 
     Args:
         ip: Parsed IPv4 or IPv6 layer.
+
+    .. versionchanged:: 1.7.0
+
+       Verifies a Mobility Header or HIP that IPv6 walks as an extension
+       header (:issue:`2813`).
 
     """
     ah = _AH.klass
@@ -679,14 +687,24 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
     # NOTE: IPv6 walks an AH as an extension header; IPv4 carries it as its payload.
     while isinstance(upper, ah):
         upper = upper.payload
-    verify = getattr(upper, '_verify_pseudo_checksum', None)
-    if verify is None:
-        return
+    layers = [upper]
+    if isinstance(ip, IPv6):
+        code, _ = IP_Pseudo._walk(ip)  # pylint: disable=protected-access
+        if code in _TERMINAL_HEADERS:
+            # NOTE: The first such header is the one the walk ended at; none was parsed
+            # when the walk stopped short of it, as at a later fragment.
+            layers = ip.extension_headers.getlist(Enum_ExtensionHeader(code))[:1] + layers
 
-    try:
-        pseudo = IP_Pseudo(ip=ip)  # type: Optional[IP_Pseudo]
-    except (ProtocolError, FieldValueError):
-        pseudo = None
-    if pseudo is not None and pseudo.protocol != upper.__index__():
-        pseudo = None
-    verify(pseudo)
+    pseudo = None  # type: Optional[IP_Pseudo]
+    derived = False
+    for layer in layers:
+        verify = getattr(layer, '_verify_pseudo_checksum', None)
+        if verify is None:
+            continue
+        if not derived:
+            derived = True
+            try:
+                pseudo = IP_Pseudo(ip=ip)
+            except (ProtocolError, FieldValueError):
+                pseudo = None
+        verify(pseudo if pseudo is not None and pseudo.protocol == layer.__index__() else None)

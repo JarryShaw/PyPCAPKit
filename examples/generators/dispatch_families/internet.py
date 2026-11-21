@@ -117,7 +117,7 @@ def _payload(code: 'int') -> 'bytes':
     if code == TransType.Mobility_Header:
         from pcapkit.const.mh.packet import Packet
         from pcapkit.protocols.internet.mh.protocol import MH
-        return bytes(MH(next=6, chksum=b'\x00\x00', type=Packet.Binding_Refresh_Request,
+        return bytes(MH(next=6, checksum=b'\x00\x00', type=Packet.Binding_Refresh_Request,
                         data={'options': []}, payload=_tcp(9999)))
     if code == TransType.HIP:
         from pcapkit.const.hip.parameter import Parameter

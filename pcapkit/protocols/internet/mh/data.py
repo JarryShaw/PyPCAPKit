@@ -63,6 +63,7 @@ if TYPE_CHECKING:
     from pcapkit.const.mh.upn_reason import \
         UpdateNotificationReason as Enum_UpdateNotificationReason
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
     from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
@@ -145,6 +146,10 @@ class MH(Protocol):
        New required field ``reserved``, which every message data model
        inherits (:issue:`1329`).
 
+    .. versionchanged:: 1.7.0
+
+       New optional field ``checksum_status`` (:issue:`2813`).
+
     """
 
     #: Next header.
@@ -157,6 +162,12 @@ class MH(Protocol):
     reserved: 'int'
     #: Checksum.
     chksum: 'bytes'
+
+    if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`chksum`, present only when
+        #: the enclosing IPv6 layer verified it
+        #: under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`.
+        checksum_status: 'ChecksumStatus'
 
 
 @info_final

@@ -171,7 +171,7 @@ class TestMHReservedPadding(unittest.TestCase):
 
         module, enum = ENUMS[carrier]
         code = getattr(getattr(importlib.import_module(module), enum), name)
-        base = {'next': 59, 'chksum': b'\x00\x00', 'payload': b''}
+        base = {'next': 59, 'checksum': b'\x00\x00', 'payload': b''}
         if carrier == 'msg':
             return bytes(MH(type=code, data={}, **base))
         if carrier == 'opt':
@@ -193,7 +193,7 @@ class TestMHReservedPadding(unittest.TestCase):
             with self.subTest(site=site):
                 self.assertNotEqual(raw_hex, zero_hex)
                 parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
-                rebuilt = bytes(MH(next=parsed.next, type=parsed.type, chksum=parsed.chksum,
+                rebuilt = bytes(MH(next=parsed.next, type=parsed.type, checksum=parsed.chksum,
                                    data=parsed, payload=b''))
                 self.assertEqual(rebuilt.hex(), raw_hex)
 
@@ -205,7 +205,7 @@ class TestMHReservedPadding(unittest.TestCase):
                 self.assertEqual(self.fresh(carrier, name).hex(), zero_hex)
                 zero = bytes.fromhex(zero_hex)
                 parsed = MH(io.BytesIO(zero), len(zero), extension=True).info
-                rebuilt = bytes(MH(next=parsed.next, type=parsed.type, chksum=parsed.chksum,
+                rebuilt = bytes(MH(next=parsed.next, type=parsed.type, checksum=parsed.chksum,
                                    data=parsed, payload=b''))
                 self.assertEqual(rebuilt.hex(), zero_hex)
 

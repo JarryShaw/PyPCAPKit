@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 __tier__ = 'LATEST'
 
 #: Header fields shared by every MH built here; Next Header is IPv6-NoNxt.
-MH_BASE = {'next': 59, 'chksum': b'\x00\x00', 'payload': b''}
+MH_BASE = {'next': 59, 'checksum': b'\x00\x00', 'payload': b''}
 
 #: The octets of a Mobility Header IPv6 keeps as its own layer: its
 #: ``__length_hint__``, under which it is kept as raw octets (#1170).
