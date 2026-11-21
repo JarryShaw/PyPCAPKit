@@ -1,14 +1,16 @@
-## 1.6.1 -- 2026-11-05
+## 1.6.2 -- 2026-11-21
 
-A documentation release; no library behaviour changed.
+A registry and bug-fix release: the vendor enumerations under `pcapkit.const` follow their upstream registries, the `1.6.1.post1` refresh included, and closing a buffered reader works on PyPy 3.12; no dissector changed.
 
-- **Changed** -- Every documentation diagram is laid out vertically, so it renders at a readable size, and new diagrams draw next-layer dispatch, the registry dispatch chain, engine selection, the `Extractor` lifecycle, reassembly triggers, TCP flow buffers, the IPv6 extension-header walk and ESP status, among others ([#2787](https://github.com/JarryShaw/PyPCAPKit/issues/2787)).
+- **Added** -- `ExtensionType` names `dane_clientid` (63), for TLS 1.3 or later, and the temporary `trust_anchors_TEMPORARY_registered_2026_11_18_expires_2027_11_18` (51764), so neither value resolves to `Unassigned`.
 
-- **Changed** -- A concision and accuracy sweep of the whole repository's pages, docstrings and comments cuts restatement and narration, turns parallel prose into tables, and adds missing version directives ([#2786](https://github.com/JarryShaw/PyPCAPKit/issues/2786)).
+- **Added** -- `LinkType` names `ETW2` (305), Event Tracing for Windows messages v2; `ETW` (290) is described as v1.
 
-- **Changed** -- The contributing conventions record the concision rule and the vertical, graphs-over-prose diagram convention ([#2787](https://github.com/JarryShaw/PyPCAPKit/issues/2787)).
+- **Added** -- The app-type tables name TCP port 7151 `ambesasql` (AmbesaSQL Database Server) and UDP port 8024 `gaap` (GAAP Control Packets), and reserve each port on the other transport, so `AppType` resolves neither to `unassigned`.
 
-- **Fixed** -- Documentation the code contradicted: the TCP and UDP port tables now list 443 (TLS) and 5684 (DTLS), which they bind; `Flags` refuses a value outside `0`-`0xFFF`, not the whole 16-bit field; and the `PyPCAP` extra installs on every Python below 3.12, not only 3.10 and 3.11 ([#2786](https://github.com/JarryShaw/PyPCAPKit/issues/2786)).
+- **Changed** -- Entry references follow their registries: EPP over QUIC (port 700) cites [RFC 10087](https://datatracker.ietf.org/doc/html/rfc10087), VXLAN (UDP port 4789) the draft revising [RFC 7348](https://datatracker.ietf.org/doc/html/rfc7348), and the 3GPP entries of `AccessType`, `UpdateNotificationReason` and `PayloadProtocolIdentifier` the 3GPP contact IANA lists.
+
+- **Fixed** -- On PyPy 3.12, closing a `SeekableReader`, or tearing down an `Extractor` over a non-seekable stream, raised `BufferError`, as slices of the reader's buffer view stayed exported until collected. Each slice is released once used ([#2806](https://github.com/JarryShaw/PyPCAPKit/issues/2806)).
 
 ---
 
