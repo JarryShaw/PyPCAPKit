@@ -190,7 +190,10 @@ class SeekableReader(io.BufferedReader):
                 # of no size is ``buf[-0:]``, the whole of ``buf``.
                 self._buffer_view[:] = buf[buf_len - self._buffer_size:]
             else:
-                self._buffer_view[:-buf_len] = self._buffer_view[old_ptr - (self._buffer_size - buf_len):old_ptr]
+                # NOTE: The slice is released at once, as in :meth:`_take_buffer`, since a live one
+                # keeps the buffer exported.
+                with self._buffer_view[old_ptr - (self._buffer_size - buf_len):old_ptr] as kept:
+                    self._buffer_view[:-buf_len] = kept
                 self._buffer_view[-buf_len:] = buf
 
             self._buffer_set += self._buffer_cur - self._buffer_size
@@ -337,10 +340,14 @@ class SeekableReader(io.BufferedReader):
             is exported, as this one's is, so the next :meth:`_write_buffer`, which writes
             through the view, would change octets that had already been returned
             (:issue:`1963`). A slice of the view, copied, is a copy on every interpreter.
+            The slice is released once copied: until then it exports the buffer, and PyPy
+            releases a dropped one only when collected, so :meth:`close` would raise
+            :exc:`BufferError`.
 
         """
         buf_off = self._buffer.tell()
-        buf = self._buffer_view[buf_off:buf_off + size].tobytes()
+        with self._buffer_view[buf_off:buf_off + size] as view:
+            buf = view.tobytes()
         if line and (eol := buf.find(b'\n')) >= 0:
             buf = buf[:eol + 1]
         self._buffer.seek(buf_off + len(buf), io.SEEK_SET)
@@ -814,8 +821,9 @@ class SeekableReader(io.BufferedReader):
                 # position; advancing it would start the next buffered read at the wrong octet.
                 buf_rem = self._seek_buffer()
                 buf_off = self._buffer.tell()
-                buf = bytes(self._buffer_view[
-                    buf_off:buf_off + (buf_rem if size < 0 else min(size, buf_rem))])
+                with self._buffer_view[
+                        buf_off:buf_off + (buf_rem if size < 0 else min(size, buf_rem))] as view:
+                    buf = bytes(view)
 
             if not buf and len(buf) < size:  # pragma: no cover
                 size_rem = -1
