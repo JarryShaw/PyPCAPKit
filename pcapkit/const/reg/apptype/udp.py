@@ -11467,7 +11467,7 @@ class UDP(AppType):
     brp = 3043, 'brp', TransportProtocol.udp
 
     #: - [TCP] Extensible Provisioning Protocol [:rfc:`5734`]
-    #: - [UDP] EPP running over QUIC [:rfc:`5734`][RFC-ietf-regext-epp-quic-12]
+    #: - [UDP] EPP running over QUIC [:rfc:`5734`][:rfc:`10087`]
     epp_700 = 700, 'epp', TransportProtocol.udp
 
     #: - [TCP] EndPoint Protocol
@@ -20071,6 +20071,9 @@ class UDP(AppType):
     #: - [TCP] Catalog Content Search
     #: - [UDP] Catalog Content Search
     scenccs = 7129, 'scenccs', TransportProtocol.udp
+
+    #: [UDP] Reserved
+    reserved_7151 = 7151, 'reserved', TransportProtocol.udp
 
     #: - [TCP] CA BSM Comm
     #: - [UDP] CA BSM Comm

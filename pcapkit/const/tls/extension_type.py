@@ -256,6 +256,10 @@ class ExtensionType(EnumRegistry, IntEnum):
     #: Reserved [:rfc:`8701`]
     Reserved_47802 = 47802
 
+    #: trust_anchors (TEMPORARY - registered 2026-11-18, expires 2027-11-18)
+    #: [draft-ietf-tls-trust-anchor-ids-07]
+    trust_anchors_TEMPORARY_registered_2026_11_18_expires_2027_11_18 = 51764
+
     #: Reserved [:rfc:`8701`]
     Reserved_51914 = 51914
 
@@ -348,7 +352,10 @@ class ExtensionType(EnumRegistry, IntEnum):
         if 43691 <= value <= 47801:
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
-        if 47803 <= value <= 51913:
+        if 47803 <= value <= 51763:
+            #: Unassigned
+            return cls._unregistered_member(value, 'Unassigned')
+        if 51765 <= value <= 51913:
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 51915 <= value <= 56025:

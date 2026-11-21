@@ -3610,7 +3610,10 @@ class AppType(EnumRegistry, StrEnum):
         if 7124 <= value <= 7127:
             #: [N/A] Unassigned
             return cls._unregistered_member(value, 'unassigned', cls.__transport__)
-        if 7130 <= value <= 7160:
+        if 7130 <= value <= 7150:
+            #: [N/A] Unassigned
+            return cls._unregistered_member(value, 'unassigned', cls.__transport__)
+        if 7152 <= value <= 7160:
             #: [N/A] Unassigned
             return cls._unregistered_member(value, 'unassigned', cls.__transport__)
         if 7175 <= value <= 7180:

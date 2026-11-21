@@ -12007,7 +12007,7 @@ class TCP(AppType):
     brp = 3043, 'brp', TransportProtocol.tcp
 
     #: - [TCP] Extensible Provisioning Protocol [:rfc:`5734`]
-    #: - [UDP] EPP running over QUIC [:rfc:`5734`][RFC-ietf-regext-epp-quic-12]
+    #: - [UDP] EPP running over QUIC [:rfc:`5734`][:rfc:`10087`]
     epp_700 = 700, 'epp', TransportProtocol.tcp
 
     #: - [TCP] EndPoint Protocol
@@ -20630,6 +20630,9 @@ class TCP(AppType):
     #: - [TCP] Catalog Content Search
     #: - [UDP] Catalog Content Search
     scenccs = 7129, 'scenccs', TransportProtocol.tcp
+
+    #: [TCP] AmbesaSQL Database Server
+    ambesasql = 7151, 'ambesasql', TransportProtocol.tcp
 
     #: - [TCP] CA BSM Comm
     #: - [UDP] CA BSM Comm
