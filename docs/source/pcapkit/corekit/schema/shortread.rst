@@ -16,3 +16,5 @@ checking only, since those import it.
 .. autofunction:: pcapkit.corekit.schema.shortread.keep_short_read
 
 .. autofunction:: pcapkit.corekit.schema.shortread.replay_short_read
+
+.. autofunction:: pcapkit.corekit.schema.shortread.hoist_short_read

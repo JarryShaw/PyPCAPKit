@@ -3064,6 +3064,71 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             raise ProtocolError(f'{self.alias}: invalid Quick-Start rate: {rate!r}')
         return (rate // 40).bit_length() - 1 if rate else 0
 
+    def _read_float_code(self, code: 'int', *, bits: 'int') -> 'int':
+        """Read an IGMPv3 or MLDv2 floating-point code as the value it encodes.
+
+        A code below ``2 ** (bits - 1)`` is the value itself. At or above it, the
+        code is ``1``, a three-bit ``exp`` and a ``bits - 4``-bit ``mant``, standing
+        for ``(mant | 2 ** (bits - 4)) << (exp + 3)``: the eight-bit Max Resp Code and
+        QQIC of IGMPv3 (:rfc:`3376#section-4.1.1`, :rfc:`3376#section-4.1.7`) and
+        QQIC of MLDv2 (:rfc:`9777#section-5.1.9`), and the 16-bit Maximum Response
+        Code of MLDv2 (:rfc:`9777#section-5.1.3`).
+
+        Args:
+            code: the code, as on the wire
+            bits: the code's width, 8 or 16
+
+        Returns:
+            The value the code encodes.
+
+        .. versionadded:: 1.7.0
+
+        """
+        if code < 1 << (bits - 1):
+            return code
+        width = bits - 4
+        exp = (code >> width) & 0x07
+        mant = code & ((1 << width) - 1)
+        return (mant | (1 << width)) << (exp + 3)
+
+    def _make_float_code(self, value: 'Any', *, bits: 'int', name: 'str') -> 'int':
+        """Make the IGMPv3 or MLDv2 floating-point code for a value.
+
+        The inverse of :meth:`_read_float_code`. A value below ``2 ** (bits - 1)``
+        is its own code. Above it, the smallest exponent whose mantissa fits is
+        taken, so a value the format can carry reads back exactly, and any other
+        floors to the nearest one it can, the largest above them all.
+
+        Args:
+            value: the value, in the units the code stands for
+            bits: the code's width, 8 or 16
+            name: the field, named in an error message
+
+        Returns:
+            The code.
+
+        Raises:
+            ProtocolError: If ``value`` is not an :class:`int`, is a :obj:`bool`,
+                or is negative. The message names :attr:`alias`.
+
+        .. versionadded:: 1.7.0
+
+        """
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
+        if value < 1 << (bits - 1):
+            return value
+
+        width = bits - 4
+        limit = (1 << (width + 1)) - 1
+        exp = 0
+        mant = value >> 3
+        while mant > limit and exp < 7:
+            exp += 1
+            mant = value >> (exp + 3)
+        mant = min(mant, limit)
+        return (1 << (bits - 1)) | (exp << width) | (mant & ((1 << width) - 1))
+
 
 class Protocol(ProtocolBase, Generic[_PT, _ST]):
     """User-facing abstract base class for third-party protocols.

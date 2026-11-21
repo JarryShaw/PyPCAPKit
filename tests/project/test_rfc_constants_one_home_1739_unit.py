@@ -441,15 +441,15 @@ UNRELATED = {
     'pcapkit/protocols/internet/hopopt/protocol.py': ((6, 16, 32), 'HOPOPT option fields, widths and sizes'),
     'pcapkit/protocols/internet/hopopt/schema.py': ((6, 16), 'HOPOPT option field sizes '
                                                    'and bit-fields'),
+    'pcapkit/protocols/internet/icmpv6/schema.py': ((16, 20), 'an IPv6 address is 16 octets, and '
+                                                  'the fixed part of an MLDv2 multicast address '
+                                                  'record 20 (RFC 9777 section 5.2)'),
     'pcapkit/protocols/internet/igmp/protocol.py': ((12,), "the minimum overall length (RFC 3376 "
                                            "section 7.1) at which a Membership Query carries "
                                            "IGMPv3's source-list extension rather than being "
                                            "IGMPv1/v2; unrelated to AH_HEADER_LEN, "
                                            "TCP_DATA_OFFSET_OCTET or GENERIC_BLOCK_MINIMUM, "
                                            "which happen to share the value"),
-    'pcapkit/protocols/internet/igmpv3/protocol.py': ((16,), "the floating-point Max Resp Code/QQIC "
-                                             "decode's mantissa mask (RFC 3376 section 4.1.1's "
-                                             "own 0x10), not the PCAP record header length"),
     'pcapkit/protocols/internet/ipv4/protocol.py': ((9, 12, 40), 'IPv4 option counts and sizes; '
                                            '40 is the option area maximum, not an IPv6 header'),
     'pcapkit/protocols/internet/ipv4/schema.py': ((6, 16), 'the ECN and option-function '
@@ -644,7 +644,8 @@ def _context(text: 'str', operand: 'ast.Constant', parents: 'dict[int, ast.AST]'
 #: Value helpers and the keyword each takes a field width by, in bits or octets (#2614,
 #: #2594).
 _WIDTHS = {'_make_uint': 'bits', '_make_sint': 'bits', '_make_index': 'bits', '_make_pack': 'size',
-           '_read_uint': 'size', '_make_octets': 'size'}
+           '_read_uint': 'size', '_make_octets': 'size', '_read_float_code': 'bits',
+           '_make_float_code': 'bits'}
 
 
 def _field_widths(tree: 'ast.Module') -> 'set[int]':

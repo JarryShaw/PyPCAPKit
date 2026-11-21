@@ -779,40 +779,43 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
 
         224 in units of 1/10 second is 22.4 seconds.
         """
-        from pcapkit.protocols.internet.igmpv3.protocol import _decode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
-        self.assertEqual(_decode_resp_code(0x8c), 224)
+        self.assertEqual(object.__new__(IGMPv3)._read_float_code(0x8c, bits=8), 224)
         self.assertEqual(224 / 10, 22.4)
 
     def test_decode_values_below_128_are_literal(self) -> None:
-        from pcapkit.protocols.internet.igmpv3.protocol import _decode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
+        proto = object.__new__(IGMPv3)
         for code in (0, 1, 100, 127):
             with self.subTest(code=code):
-                self.assertEqual(_decode_resp_code(code), code)
+                self.assertEqual(proto._read_float_code(code, bits=8), code)
 
     def test_encode_is_the_inverse_of_decode_for_exact_values(self) -> None:
         """Every value a floating-point code can represent exactly --
         ``(mant | 0x10) << (exp + 3)`` for ``mant`` in ``0..15`` and ``exp``
-        in ``0..7`` -- round-trips through :func:`_encode_resp_code` and
-        :func:`_decode_resp_code` to the same code and the same value.
+        in ``0..7`` -- round-trips through ``_make_float_code`` and
+        ``_read_float_code`` to the same code and the same value.
         """
-        from pcapkit.protocols.internet.igmpv3.protocol import _decode_resp_code, _encode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
+        proto = object.__new__(IGMPv3)
         for exp in range(8):
             for mant in range(16):
                 value = (mant | 0x10) << (exp + 3)
                 with self.subTest(exp=exp, mant=mant, value=value):
-                    code = _encode_resp_code(value)
+                    code = proto._make_float_code(value, bits=8, name='qqi')
                     self.assertTrue(0x80 <= code <= 0xFF)
-                    self.assertEqual(_decode_resp_code(code), value)
+                    self.assertEqual(proto._read_float_code(code, bits=8), value)
 
     def test_encode_values_below_128_are_literal(self) -> None:
-        from pcapkit.protocols.internet.igmpv3.protocol import _encode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
+        proto = object.__new__(IGMPv3)
         for value in (0, 1, 100, 127):
             with self.subTest(value=value):
-                self.assertEqual(_encode_resp_code(value), value)
+                self.assertEqual(proto._make_float_code(value, bits=8, name='qqi'), value)
 
     def test_query_with_max_resp_code_0x8c_decodes_max_resp_time_224(self) -> None:
         """An IGMPv3 Query whose Max Resp Code is ``0x8c`` reports
@@ -863,10 +866,10 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
         ``0x89`` (``(9 | 0x10) << 3 = 200``), and parsing that octet gives
         200 back.
         """
-        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3, _encode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
-        self.assertEqual(_encode_resp_code(200), 0x89)
         proto = object.__new__(IGMPv3)
+        self.assertEqual(proto._make_float_code(200, bits=8, name='max_resp_time'), 0x89)
         packet = bytes(proto.make(max_resp_time=200))
         self.assertEqual(len(packet), 12)
         self.assertEqual(packet[1], 0x89)

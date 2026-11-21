@@ -48,6 +48,7 @@ __tier__ = 'LATEST'
 LISTS = {
     'application.httpv2:SettingsFrame.settings': 'application.httpv2:SettingPair',
     'internet.hip:LocatorSetParameter.locators': 'internet.hip:Locator',
+    'internet.icmpv6:MLDv2Report.records': 'internet.icmpv6:MulticastAddressRecord',
     'internet.igmpv3:Report.records': 'internet.igmpv3:GroupRecord',
     'internet.mh:CGAParametersOption.parameters': 'internet.mh:CGAParameter',
     'transport.sctp:SACKChunk.gap_blocks': 'transport.sctp:GapAckBlock',
