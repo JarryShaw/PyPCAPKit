@@ -44,12 +44,12 @@ SHARDS = ['tests/protocols/internet', 'tests/protocols/application', 'tests/prot
 DOC = ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst'
 
 
-def pypy_leg() -> 'dict[str, object]':
-    """The supported PyPy leg of ``test``, which blocks."""
+def pypy_legs() -> 'list[dict[str, object]]':
+    """Each supported PyPy leg of ``test``, all of which block; the tier file may hold several."""
     found = [leg for leg in legs(*JOB) if str(leg['python-version']).startswith('pypy')]
-    if len(found) != 1:
-        raise AssertionError(f'expected one PyPy leg of test, found {found}')
-    return found[0]
+    if not found:
+        raise AssertionError('expected a PyPy leg of test, found none')
+    return found
 
 
 class TestOnlyPyPyShards(unittest.TestCase):
@@ -78,15 +78,16 @@ class TestOnlyPyPyShards(unittest.TestCase):
 @unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')
 class TestTheRunsCoverTheTier(unittest.TestCase):
 
-    def test_a_pypy_leg_runs_each_shard_then_the_rest(self) -> None:
-        leg = pypy_leg()
-        runs = run_step_each(leg)
-        self.assertEqual(len(runs), len(SHARDS) + 1)
-        common = unsharded(leg, runs)
-        self.assertEqual(common[:2], ['-m', 'pytest'])
-        self.assertIn(f'--junitxml={RUNNER_TEMP}/junit.xml', common)
-        self.assertEqual([run[-1] for run in runs[:-1]], SHARDS)
-        self.assertEqual(runs[-1][-len(SHARDS):], [f'--ignore={shard}' for shard in SHARDS])
+    def test_each_pypy_leg_runs_each_shard_then_the_rest(self) -> None:
+        for leg in pypy_legs():
+            with self.subTest(python=leg['python-version']):
+                runs = run_step_each(leg)
+                self.assertEqual(len(runs), len(SHARDS) + 1)
+                common = unsharded(leg, runs)
+                self.assertEqual(common[:2], ['-m', 'pytest'])
+                self.assertIn(f'--junitxml={RUNNER_TEMP}/junit.xml', common)
+                self.assertEqual([run[-1] for run in runs[:-1]], SHARDS)
+                self.assertEqual(runs[-1][-len(SHARDS):], [f'--ignore={shard}' for shard in SHARDS])
 
     def test_every_other_leg_runs_pytest_once(self) -> None:
         for leg in legs(*JOB):
@@ -96,24 +97,25 @@ class TestTheRunsCoverTheTier(unittest.TestCase):
                 self.assertEqual(len(run_step_each(leg)), 1)
 
     def test_a_shard_that_fails_fails_the_step_after_the_rest_ran(self) -> None:
-        """A failing run does not stop the others, and its status is the step's."""
-        with tempfile.TemporaryDirectory() as temp:
-            stub = pathlib.Path(temp, 'python')
-            # The first pytest run fails as pytest does on a failed test; `-c` asks the real interpreter.
-            stub.write_text('#!/bin/sh\ncase "$1" in -c|util/pytest_shards.py) exec "$REAL_PYTHON" "$@";; '
-                            'util/cap_file_size.py) shift; exec "$@";; esac\n'
-                            'echo run >> "$RUNS"\n'
-                            '[ "$(wc -l < "$RUNS")" -eq 1 ] && exit 1\nexit 0\n', encoding='utf-8')
-            stub.chmod(0o755)
-            runs = pathlib.Path(temp, 'runs')
-            env = dict(os.environ, **step_env(pypy_leg()), RUNS=str(runs), RUNNER_TEMP=temp,
-                       REAL_PYTHON=sys.executable, ANNOTATION_LEVEL='error',
-                       PATH=temp + os.pathsep + os.environ.get('PATH', ''))
-            env.pop('PYTHONSAFEPATH', None)
-            result = subprocess.run(bash_argv('-e', '-c', step()['run']), env=env, cwd=ROOT,  # nosec B603 B607
-                                    capture_output=True, text=True, check=False, timeout=120)
-            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-            self.assertEqual(runs.read_text(encoding='utf-8').count('run'), len(SHARDS) + 1)
+        """A failing run does not stop the others, and its status is the step's, on each PyPy leg."""
+        for leg in pypy_legs():
+            with self.subTest(python=leg['python-version']), tempfile.TemporaryDirectory() as temp:
+                stub = pathlib.Path(temp, 'python')
+                # The first pytest run fails as pytest does on a failed test; `-c` asks the real interpreter.
+                stub.write_text('#!/bin/sh\ncase "$1" in -c|util/pytest_shards.py) exec "$REAL_PYTHON" "$@";; '
+                                'util/cap_file_size.py) shift; exec "$@";; esac\n'
+                                'echo run >> "$RUNS"\n'
+                                '[ "$(wc -l < "$RUNS")" -eq 1 ] && exit 1\nexit 0\n', encoding='utf-8')
+                stub.chmod(0o755)
+                runs = pathlib.Path(temp, 'runs')
+                env = dict(os.environ, **step_env(leg), RUNS=str(runs), RUNNER_TEMP=temp,
+                           REAL_PYTHON=sys.executable, ANNOTATION_LEVEL='error',
+                           PATH=temp + os.pathsep + os.environ.get('PATH', ''))
+                env.pop('PYTHONSAFEPATH', None)
+                result = subprocess.run(bash_argv('-e', '-c', step()['run']), env=env, cwd=ROOT,  # nosec B603 B607
+                                        capture_output=True, text=True, check=False, timeout=120)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertEqual(runs.read_text(encoding='utf-8').count('run'), len(SHARDS) + 1)
 
 
 class TestTheTimingsAreUploaded(unittest.TestCase):
@@ -121,10 +123,11 @@ class TestTheTimingsAreUploaded(unittest.TestCase):
     def test_the_upload_takes_each_runs_junit_file(self) -> None:
         upload = next(entry for entry in job(*JOB)['steps'] if entry.get('name') == 'Upload test timings')
         self.assertEqual(upload['with']['path'], '${{ runner.temp }}/junit*.xml')
-        runs = run_step_each(pypy_leg())
-        for shard, run in zip(SHARDS, runs):
-            with self.subTest(shard=shard):
-                self.assertIn(f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', run)
+        for leg in pypy_legs():
+            runs = run_step_each(leg)
+            for shard, run in zip(SHARDS, runs):
+                with self.subTest(python=leg['python-version'], shard=shard):
+                    self.assertIn(f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', run)
 
     def test_the_shards_run_through_the_graalpy_script(self) -> None:
         """#2005 reuses #1963's util/pytest_shards.py, on the leg's interpreter, under the one file-size cap."""
