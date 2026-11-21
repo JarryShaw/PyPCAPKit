@@ -10,6 +10,9 @@ parse then ``from_data``, and ``make`` from the parsed content.
 """
 from __future__ import annotations
 
+import ast
+import inspect
+import textwrap
 import unittest
 import warnings
 
@@ -47,6 +50,21 @@ def _server_hello(*extensions: bytes, random: bytes = bytes(range(32, 64))) -> b
 
 def _encrypted_extensions(*extensions: bytes) -> bytes:
     return _record(_handshake(8, _vec(b''.join(extensions))))
+
+
+def _missing_ranges(cls: type) -> 'dict[str, list[tuple[int, int]]]':
+    """The ``lo <= value <= hi`` branches of ``cls._missing_``, by the name each returns."""
+    func = ast.parse(textwrap.dedent(inspect.getsource(cls._missing_))).body[0]  # type: ignore[attr-defined]
+    ranges: 'dict[str, list[tuple[int, int]]]' = {}
+    for node in ast.walk(func):
+        if not (isinstance(node, ast.If) and isinstance(node.test, ast.Compare) and len(node.test.ops) == 2):
+            continue
+        for call in (n for stmt in node.body for n in ast.walk(stmt)):
+            if (isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+                    and call.func.attr == '_unregistered_member'):
+                bounds = (ast.literal_eval(node.test.left), ast.literal_eval(node.test.comparators[1]))
+                ranges.setdefault(ast.literal_eval(call.args[1]), []).append(bounds)
+    return ranges
 
 
 #: ``server_name`` with one ``host_name`` (RFC 6066 section 3).
@@ -618,11 +636,15 @@ class ExtensionTypeRegistryTests(unittest.TestCase):
     def test_names_and_ranges(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
 
+        # The lowest code ``_missing_`` calls Unassigned, not a pinned one, so an IANA
+        # assignment moves the probe; a member declared inside the range still shadows it.
+        unassigned = _missing_ranges(ExtensionType).get('Unassigned', [])
+        self.assertTrue(unassigned, 'ExtensionType._missing_ defines no Unassigned range')
         for value, name in ((0, 'server_name'), (10, 'supported_groups'), (35, 'session_ticket'),
                             (36, 'TLMSP'), (40, 'Reserved_40'), (53, 'connection_id_deprecated'),
                             (54, 'connection_id'), (0x0A0A, 'Reserved_2570'),
                             (0xFF00, 'Reserved_for_Private_Use'), (0xFF01, 'renegotiation_info'),
-                            (63, 'Unassigned'), (0xFFFF, 'Reserved_for_Private_Use')):
+                            (min(unassigned)[0], 'Unassigned'), (0xFFFF, 'Reserved_for_Private_Use')):
             with self.subTest(value=value):
                 self.assertEqual(ExtensionType(value).name, name)
         with self.assertRaises(ValueError):
