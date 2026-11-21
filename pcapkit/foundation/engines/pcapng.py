@@ -34,7 +34,7 @@ __all__ = ['PCAPNG']
 logger = get_logger(__name__)
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, Optional
+    from typing import Any, Callable, Literal, Optional
 
     from pcapkit.foundation.extraction import Extractor
     from pcapkit.protocols.misc.pcapng.data import PCAPNG as Data_PCAPNG
@@ -50,13 +50,12 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng.data import \
         SystemdJournalExportBlock as Data_SystemdJournalExportBlock
     from pcapkit.protocols.misc.pcapng.data import UnknownBlock as Data_UnknownBlock
+    from pcapkit.protocols.misc.pcapng.protocol import Packet as Data_PCAPNG_Packet
 
-#: The toolkit functions :meth:`PCAPNG.read_frame` hands each frame to, resolved
-#: there rather than imported, so their first import holds
-#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
-_TOOLKIT = tuple(ModuleDescriptor('pcapkit.toolkit.pcapng', name) for name in (
-    'dtls_reassembly', 'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
-))  # type: tuple[ModuleDescriptor[Any], ...]
+#: The flow tracing adapter :meth:`PCAPNG.read_frame` hands each frame to, resolved
+#: there rather than imported, as :attr:`PCAPNG.__reassembly__`'s are, so its first
+#: import holds :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_TOOLKIT = ModuleDescriptor('pcapkit.toolkit.pcapng', 'tcp_traceflow')  # type: ModuleDescriptor[Any]
 
 
 @info_final
@@ -153,6 +152,14 @@ class PCAPNG(EngineBase[P_PCAPNG]):
     #: Engine module name.
     __engine_module__ = 'pcapkit.protocols.misc.pcapng.protocol'
 
+    #: Reassembly adapters, each called on the packet block alone.
+    __reassembly__ = {
+        'ipv4': ModuleDescriptor('pcapkit.toolkit.pcapng', 'ipv4_reassembly'),
+        'ipv6': ModuleDescriptor('pcapkit.toolkit.pcapng', 'ipv6_reassembly'),
+        'tcp': ModuleDescriptor('pcapkit.toolkit.pcapng', 'tcp_reassembly'),
+        'dtls': ModuleDescriptor('pcapkit.toolkit.pcapng', 'dtls_reassembly'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -182,6 +189,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         """
         ext = self._extractor
+        self._setup_reassembly()
 
         self._bound_read_ahead()
         shb = P_PCAPNG(ext._ifile, num=0, sct=1, ctx=None)
@@ -211,7 +219,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         - if not, save the block into the internal context storage and repeat;
         - if yes, save the related information into the internal context storage;
         - write the parsed block into output file;
-        - reassemble IP and/or TCP fragments, and/or DTLS handshake messages;
+        - feed every enabled reassembler;
         - trace TCP flows if any;
         - record frame information if any.
 
@@ -219,8 +227,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
             Parsed PCAP-NG block.
 
         """
-        dtls_reassembly, ipv4_reassembly, ipv6_reassembly, tcp_reassembly, tcp_traceflow = (
-            descriptor.klass for descriptor in _TOOLKIT)
+        tcp_traceflow = _TOOLKIT.klass
         ext = self._extractor
 
         while True:
@@ -311,23 +318,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         # record fragments
         if ext._flag_r:
-            if ext._ipv4:
-                data_ipv4 = ipv4_reassembly(block)
-                if data_ipv4 is not None:
-                    ext._reasm.ipv4(data_ipv4)
-            if ext._ipv6:
-                data_ipv6 = ipv6_reassembly(block)
-                if data_ipv6 is not None:
-                    ext._reasm.ipv6(data_ipv6)
-            if ext._tcp:
-                data_tcp = tcp_reassembly(block)
-                if data_tcp is not None:
-                    ext._reasm.tcp(data_tcp)
-            if ext._dtls:
-                data_dtls = dtls_reassembly(block)
-                if data_dtls is not None:
-                    for packet_dtls in data_dtls:
-                        ext._reasm.dtls(packet_dtls)
+            self._reassemble(float(cast('Data_PCAPNG_Packet', block.info).timestamp_epoch), block)
 
         # trace flows
         if ext._flag_t:

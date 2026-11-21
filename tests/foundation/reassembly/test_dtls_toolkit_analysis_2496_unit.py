@@ -284,9 +284,8 @@ class DTLSThirdPartyEngineTests(unittest.TestCase):
 
         messages = [call.args[0] for call in warn.call_args_list if call.args[1] is AttributeWarning]
         self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages), messages)
-        self.assertFalse(extractor._dtls)
         self.assertTrue(extractor._flag_r)
-        self.assertIsNone(extractor._reasm.dtls)
+        self.assertEqual(list(extractor._reasm), ['ipv4', 'tcp'])
         self.assertIs(extractor._reasm.ipv4, ipv4)
         self.assertIs(extractor._reasm.tcp, tcp)
 
@@ -299,7 +298,7 @@ class DTLSThirdPartyEngineTests(unittest.TestCase):
         engine = DPKT(extractor)
         with mock.patch('pcapkit.foundation.engines.dpkt._pcap_reader',
                         return_value=mock.Mock(return_value=FakeReader())), \
-                mock.patch('pcapkit.foundation.engines.dpkt.warn') as warn:
+                mock.patch('pcapkit.foundation.engines.engine.warn') as warn:
             engine.run()
         self._assert_dtls_dropped(extractor, warn, ipv4, tcp)
 
@@ -315,7 +314,7 @@ class DTLSThirdPartyEngineTests(unittest.TestCase):
         with mock.patch('pcapkit.foundation.engines.scapy._reader_type',
                         return_value=mock.Mock(return_value=mock.Mock())), \
                 mock.patch.object(engine._expkg, 'sniff', return_value=[]), \
-                mock.patch('pcapkit.foundation.engines.scapy.warn') as warn:
+                mock.patch('pcapkit.foundation.engines.engine.warn') as warn:
             engine.run()
         self._assert_dtls_dropped(extractor, warn, ipv4, tcp)
 
@@ -328,12 +327,12 @@ class DTLSThirdPartyEngineTests(unittest.TestCase):
         engine = PyShark(extractor)
         capture = types.SimpleNamespace(close=lambda: None)
         with mock.patch.object(engine._expkg, 'FileCapture', return_value=capture), \
-                mock.patch('pcapkit.foundation.engines.pyshark.warn') as warn:
+                mock.patch('pcapkit.foundation.engines.engine.warn') as warn:
             engine.run()
         messages = [call.args[0] for call in warn.call_args_list if call.args[1] is AttributeWarning]
         self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages), messages)
         self.assertFalse(extractor._flag_r)
-        self.assertIsNone(extractor._reasm.dtls)
+        self.assertFalse(extractor._reasm)
 
 
 if __name__ == '__main__':

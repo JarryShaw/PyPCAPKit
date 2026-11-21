@@ -86,9 +86,9 @@ class PyPCAPEngineTests(unittest.TestCase):
         self.ifnm = path
 
     def make_extractor(self, **overrides):
+        from pcapkit.foundation.reassembly import ReassemblyManager
+
         sink = OutputSink()
-        reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock(),
-                                  dtls=mock.Mock())
         trace = types.SimpleNamespace(tcp=mock.Mock())
         values = {
             '_ifile': io.BytesIO(b'capture'),
@@ -108,17 +108,21 @@ class PyPCAPEngineTests(unittest.TestCase):
             '_ipv6': False,
             '_tcp': False,
             '_dtls': False,
-            '_reasm': reasm,
             '_trace': trace,
             '_frame': [],
             '_frnum': 0,
             '_exlyr': 'none',
             '_exptl': 'null',
+            '_exnam': 'pypcap',
             '_exctx': {},
             '_vfunc': mock.Mock(),
             'magic_number': PCAP_MAGIC,
         }
         values.update(overrides)
+        # NOTE: ``_reasm`` holds a mock for each reassembler the flags enable, as the Extractor
+        # builds it (#2814).
+        values['_reasm'] = ReassemblyManager((name, mock.Mock()) for name in ('ipv4', 'ipv6', 'tcp', 'dtls')
+                                             if values[f'_{name}'])
         return types.SimpleNamespace(**values), sink
 
     def engine(self, extractor):
@@ -251,7 +255,8 @@ class PyPCAPEngineTests(unittest.TestCase):
         extractor, _ = self.make_extractor()
         with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=True)}):
             with self.installed('pypcap', 'pcap-ct'):
-                with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+                with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn, \
+                        mock.patch('pcapkit.foundation.engines.engine.warn', warn):
                     with self.assertRaises(UnsupportedCall):
                         PyPCAP(extractor)
 
@@ -269,7 +274,8 @@ class PyPCAPEngineTests(unittest.TestCase):
         extractor, _ = self.make_extractor()
         with mock.patch.dict('sys.modules', {'pcap': self.fake_pcap_module(is_pcap_ct=False)}):
             with self.installed('pypcap'):
-                with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+                with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn, \
+                        mock.patch('pcapkit.foundation.engines.engine.warn', warn):
                     PyPCAP(extractor)
 
         self.assertEqual([call for call in warn.call_args_list
@@ -304,7 +310,8 @@ class PyPCAPEngineTests(unittest.TestCase):
                 extractor, _ = self.make_extractor(**overrides)
                 engine = self.engine(extractor)
                 with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
-                    with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+                    with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn, \
+                            mock.patch('pcapkit.foundation.engines.engine.warn', warn):
                         engine.run()
                 self.assertEqual(warn.call_count, 1)
                 self.assertIn('protocol and layer threshold', warn.call_args.args[0])
@@ -320,7 +327,8 @@ class PyPCAPEngineTests(unittest.TestCase):
         extractor, _ = self.make_extractor(_exctx={'ipv4': mock.sentinel.context})
         engine = self.engine(extractor)
         with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
-            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn, \
+                    mock.patch('pcapkit.foundation.engines.engine.warn', warn):
                 engine.run()
         self.assertEqual(warn.call_count, 1)
         self.assertEqual(warn.call_args.args[0],
@@ -356,7 +364,8 @@ class PyPCAPEngineTests(unittest.TestCase):
                                            _ipv6=True, _tcp=True)
         engine = self.engine(extractor)
         with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
-            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn, \
+                    mock.patch('pcapkit.foundation.engines.engine.warn', warn):
                 engine.run()
 
         messages = [call.args[0] for call in warn.call_args_list
@@ -366,10 +375,10 @@ class PyPCAPEngineTests(unittest.TestCase):
 
         self.assertFalse(extractor._flag_r)
         self.assertFalse(extractor._flag_t)
-        self.assertIsNone(extractor._reasm.ipv4)
-        self.assertIsNone(extractor._reasm.ipv6)
-        self.assertIsNone(extractor._reasm.tcp)
-        self.assertIsNone(extractor._reasm.dtls)
+        self.assertNotIn('ipv4', extractor._reasm)
+        self.assertNotIn('ipv6', extractor._reasm)
+        self.assertNotIn('tcp', extractor._reasm)
+        self.assertNotIn('dtls', extractor._reasm)
         self.assertIsNone(extractor._trace.tcp)
 
     def test_run_disables_reassembly_requested_for_dtls_alone(self) -> None:
@@ -378,7 +387,8 @@ class PyPCAPEngineTests(unittest.TestCase):
         extractor, _ = self.make_extractor(_flag_r=True, _dtls=True)
         engine = self.engine(extractor)
         with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
-            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn, \
+                    mock.patch('pcapkit.foundation.engines.engine.warn', warn):
                 engine.run()
 
         messages = [call.args[0] for call in warn.call_args_list
@@ -386,7 +396,7 @@ class PyPCAPEngineTests(unittest.TestCase):
         self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages),
                         messages)
         self.assertFalse(extractor._flag_r)
-        self.assertIsNone(extractor._reasm.dtls)
+        self.assertNotIn('dtls', extractor._reasm)
 
     def test_run_leaves_disabled_reassembly_and_tracing_untouched(self) -> None:
         extractor, _ = self.make_extractor(_flag_r=True, _flag_t=True)

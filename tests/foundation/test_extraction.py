@@ -103,6 +103,7 @@ class ExtractorTests(unittest.TestCase):
 
     def _bare_extractor(self):
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.reassembly import ReassemblyManager
 
         extractor = object.__new__(Extractor)
         extractor._frnum = 3
@@ -114,12 +115,9 @@ class ExtractorTests(unittest.TestCase):
         extractor._flag_d = True
         extractor._flag_r = True
         extractor._flag_t = True
-        extractor._ipv4 = True
-        extractor._ipv6 = True
         extractor._tcp = True
-        extractor._dtls = True
         extractor._frame = ['frame']
-        extractor._reasm = types.SimpleNamespace(
+        extractor._reasm = ReassemblyManager(
             ipv4=types.SimpleNamespace(datagram=('ipv4',)),
             ipv6=types.SimpleNamespace(datagram=('ipv6',)),
             tcp=types.SimpleNamespace(datagram=('tcp',)),
@@ -145,6 +143,7 @@ class ExtractorTests(unittest.TestCase):
 
     def test_properties_success_and_unsupported_paths(self) -> None:
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.reassembly import ReassemblyManager
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         extractor = self._bare_extractor()
@@ -161,7 +160,8 @@ class ExtractorTests(unittest.TestCase):
         self.assertIs(extractor.engine, extractor._exeng)
         self.assertEqual(extractor.magic_number, b'fake')
 
-        extractor._ipv4 = extractor._ipv6 = extractor._tcp = extractor._dtls = False
+        extractor._tcp = False
+        extractor._reasm = ReassemblyManager()
         self.assertIsNone(extractor.reassembly.ipv4)
         self.assertIsNone(extractor.reassembly.dtls)
         self.assertIsNone(extractor.trace.tcp)
@@ -985,8 +985,8 @@ class ExtractorTests(unittest.TestCase):
         self.assertTrue(extractor._flag_v)
         # ``verbose=True`` asks for the default printer, which an engine may replace (#1874)
         self.assertTrue(extractor._vfunc_default)
-        self.assertTrue(extractor._ipv4)
-        self.assertTrue(extractor._ipv6)
+        # ``reassembly=False`` makes no reassembler, whatever the flags name (#2814)
+        self.assertFalse(extractor._reasm)
         self.assertTrue(extractor._tcp)
         self.assertEqual(extractor.magic_number, b'\xa1\xb2\xc3\xd4')
 

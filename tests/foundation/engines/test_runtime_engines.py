@@ -28,15 +28,18 @@ class OutputSink:
         return self
 
 
+#: The built-in reassemblers whose ``_<name>`` flag a fake extractor takes.
+REASSEMBLY = ('ipv4', 'ipv6', 'tcp', 'dtls')
+
+
 def make_extractor(**overrides):
     # imported lazily: setUp re-imports ``pcapkit`` for each test class, so the class
     # has to be fetched from the freshly imported package rather than bound at
     # module import time
     from pcapkit.corekit.context import ContextRegistry
+    from pcapkit.foundation.reassembly import ReassemblyManager
 
     sink = OutputSink()
-    reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock(),
-                                  dtls=mock.Mock())
     trace = types.SimpleNamespace(tcp=mock.Mock())
     values = {
         # ``Extractor`` always hands the engines a buffered (peekable) reader,
@@ -58,12 +61,12 @@ def make_extractor(**overrides):
         '_ipv6': True,
         '_tcp': True,
         '_dtls': False,
-        '_reasm': reasm,
         '_trace': trace,
         '_frame': [],
         '_frnum': 0,
         '_exlyr': 'none',
         '_exptl': 'null',
+        '_exnam': 'default',
         '_exctx': ContextRegistry(),
         '_vfunc': mock.Mock(),
         'magic_number': b'\xa1\xb2\xc3\xd4',
@@ -73,6 +76,12 @@ def make_extractor(**overrides):
         '_open_output': mock.Mock(),
     }
     values.update(overrides)
+    # NOTE: ``_reasm`` holds the mocks the flags enable, as the Extractor builds it (#2814);
+    # ``_mocks`` keeps all of them, so a test can check a disabled one was never fed.
+    mocks = types.SimpleNamespace(**{name: mock.Mock() for name in REASSEMBLY})
+    values['_mocks'] = mocks
+    values['_reasm'] = ReassemblyManager((name, getattr(mocks, name)) for name in REASSEMBLY
+                                         if values[f'_{name}'])
     return types.SimpleNamespace(**values), sink
 
 
@@ -133,7 +142,7 @@ class PCAPEngineTests(unittest.TestCase):
             def __init__(self, file, **kwargs) -> None:
                 self.file = file
                 self.kwargs = kwargs
-                self.info = FakeInfo(frame='info')
+                self.info = FakeInfo(frame='info', time_epoch=0)
 
         extractor, sink = make_extractor(_flag_f=True)
         engine = PCAP(extractor)
@@ -152,9 +161,9 @@ class PCAPEngineTests(unittest.TestCase):
         self.assertEqual(extractor._frnum, 1)
         extractor._vfunc.assert_called_once_with(extractor, frame)
         self.assertEqual(sink.paths[-1], 'out/Frame 1.json')
-        extractor._reasm.ipv4.assert_called_once_with('ipv4')
-        extractor._reasm.ipv6.assert_called_once_with('ipv6')
-        extractor._reasm.tcp.assert_called_once_with('tcp')
+        extractor._mocks.ipv4.assert_called_once_with('ipv4')
+        extractor._mocks.ipv6.assert_called_once_with('ipv6')
+        extractor._mocks.tcp.assert_called_once_with('tcp')
         extractor._trace.tcp.assert_called_once_with('trace')
         self.assertEqual(extractor._frame, [frame])
 
@@ -184,9 +193,9 @@ class PCAPEngineTests(unittest.TestCase):
                         with mock.patch('pcapkit.toolkit.pcap.tcp_traceflow', return_value=None):
                             self.assertIsInstance(engine.read_frame(), FakeFrame)
         self.assertEqual(none_sink.records[-1][1], 'Frame 1')
-        none_data._reasm.ipv4.assert_not_called()
-        none_data._reasm.ipv6.assert_not_called()
-        none_data._reasm.tcp.assert_not_called()
+        none_data._mocks.ipv4.assert_not_called()
+        none_data._mocks.ipv6.assert_not_called()
+        none_data._mocks.tcp.assert_not_called()
         none_data._trace.tcp.assert_not_called()
 
         disabled, _ = make_extractor(_flag_r=False, _flag_t=False, _flag_d=False)
@@ -200,7 +209,7 @@ class PCAPEngineTests(unittest.TestCase):
                     with mock.patch('pcapkit.toolkit.pcap.tcp_reassembly', return_value='unused'):
                         with mock.patch('pcapkit.toolkit.pcap.tcp_traceflow', return_value='unused'):
                             self.assertIsInstance(engine.read_frame(), FakeFrame)
-        disabled._reasm.ipv4.assert_not_called()
+        disabled._mocks.ipv4.assert_not_called()
         disabled._trace.tcp.assert_not_called()
 
 
@@ -278,9 +287,9 @@ class ThirdPartyEngineTests(unittest.TestCase):
         self.assertIsInstance(packet, ParsedPacket)
         # the output format is set by ``record_header``, not per frame
         self.assertIsNone(extractor._offmt)
-        extractor._reasm.ipv4.assert_called_once_with('ipv4')
-        extractor._reasm.ipv6.assert_called_once_with('ipv6')
-        extractor._reasm.tcp.assert_called_once_with('tcp')
+        extractor._mocks.ipv4.assert_called_once_with('ipv4')
+        extractor._mocks.ipv6.assert_called_once_with('ipv6')
+        extractor._mocks.tcp.assert_called_once_with('tcp')
         extractor._trace.tcp.assert_called_once_with('trace')
         self.assertEqual(extractor._frame, [packet])
 
@@ -309,7 +318,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                             with mock.patch('pcapkit.toolkit.dpkt.tcp_traceflow', return_value=None):
                                 self.assertIsInstance(engine.read_frame(), ParsedPacket)
         self.assertEqual(quiet_sink.records, [])
-        quiet._reasm.ipv4.assert_not_called()
+        quiet._mocks.ipv4.assert_not_called()
         quiet._trace.tcp.assert_not_called()
 
         no_protocols, _ = make_extractor(_flag_r=True, _flag_t=True, _flag_d=False,
@@ -323,7 +332,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                         with mock.patch('pcapkit.toolkit.dpkt.tcp_reassembly', return_value='unused'):
                             with mock.patch('pcapkit.toolkit.dpkt.tcp_traceflow', return_value='unused'):
                                 self.assertIsInstance(engine.read_frame(), ParsedPacket)
-        no_protocols._reasm.ipv4.assert_not_called()
+        no_protocols._mocks.ipv4.assert_not_called()
         no_protocols._trace.tcp.assert_not_called()
 
         disabled, _ = make_extractor(_flag_r=False, _flag_t=False, _flag_d=False)
@@ -336,7 +345,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                         with mock.patch('pcapkit.toolkit.dpkt.tcp_reassembly', return_value='unused'):
                             with mock.patch('pcapkit.toolkit.dpkt.tcp_traceflow', return_value='unused'):
                                 self.assertIsInstance(engine.read_frame(), ParsedPacket)
-        disabled._reasm.ipv4.assert_not_called()
+        disabled._mocks.ipv4.assert_not_called()
         disabled._trace.tcp.assert_not_called()
 
         engine._extmp = types.SimpleNamespace(datalink=lambda: LinkType.ETHERNET)
@@ -352,7 +361,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
     def test_scapy_run_and_read_frame(self) -> None:
         from pcapkit.foundation.engines.scapy import Scapy
 
-        packet = object()
+        packet = types.SimpleNamespace(time=0)
 
         # The engine opens the capture through its own reader, which stamps each
         # packet with its timestamp resolution (#1507), and hands it to ``sniff``
@@ -387,7 +396,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                         with mock.patch('pcapkit.toolkit.scapy.tcp_traceflow', return_value='trace'):
                             self.assertIs(engine.read_frame(), packet)
         self.assertEqual(extractor._frnum, 1)
-        extractor._reasm.ipv4.assert_called_once_with('ipv4')
+        extractor._mocks.ipv4.assert_called_once_with('ipv4')
         extractor._trace.tcp.assert_called_once_with('trace')
         self.assertEqual(extractor._frame, [packet])
 
@@ -401,7 +410,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                         with mock.patch('pcapkit.toolkit.scapy.tcp_traceflow', return_value=None):
                             self.assertIs(engine.read_frame(), packet)
         self.assertEqual(file_sink.paths[-1], 'out/Frame 1.json')
-        file_mode._reasm.ipv4.assert_not_called()
+        file_mode._mocks.ipv4.assert_not_called()
         file_mode._trace.tcp.assert_not_called()
 
         disabled, _ = make_extractor(_flag_q=True, _flag_r=False, _flag_t=False, _flag_d=False)
@@ -413,7 +422,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                     with mock.patch('pcapkit.toolkit.scapy.tcp_reassembly', return_value='unused'):
                         with mock.patch('pcapkit.toolkit.scapy.tcp_traceflow', return_value='unused'):
                             self.assertIs(engine.read_frame(), packet)
-        disabled._reasm.ipv4.assert_not_called()
+        disabled._mocks.ipv4.assert_not_called()
 
         no_protocols, _ = make_extractor(_flag_q=True, _flag_r=True, _flag_t=True,
                                          _flag_d=False, _ipv4=False, _ipv6=False,
@@ -426,7 +435,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                     with mock.patch('pcapkit.toolkit.scapy.tcp_reassembly', return_value='unused'):
                         with mock.patch('pcapkit.toolkit.scapy.tcp_traceflow', return_value='unused'):
                             self.assertIs(engine.read_frame(), packet)
-        no_protocols._reasm.ipv4.assert_not_called()
+        no_protocols._mocks.ipv4.assert_not_called()
         no_protocols._trace.tcp.assert_not_called()
 
     def test_pyshark_run_read_frame_and_close(self) -> None:
@@ -454,7 +463,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
         file_capture.assert_called_once_with('capture.pcap', keep_packets=False)
         extractor.record_header.assert_called_once_with()
         self.assertFalse(extractor._flag_r)
-        self.assertIsNone(extractor._reasm.ipv4)
+        self.assertFalse(extractor._reasm)
         self.assertTrue(callable(extractor._vfunc))
 
         clean_extractor, _ = make_extractor(_flag_v=False, _flag_r=False,

@@ -13,9 +13,6 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
-from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
-from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities.exceptions import FormatError
@@ -78,7 +75,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
             dtls: 'bool' = False,                                                                                          # reassembly settings # pylint: disable=line-too-long
             buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
             no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
-            context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None) -> 'Extractor':  # context settings # pylint: disable=line-too-long
+            context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # context settings # pylint: disable=line-too-long
+            reasm_protocols: 'Optional[Iterable[str]]' = None) -> 'Extractor':                                              # reassembly settings # pylint: disable=line-too-long
     """Extract a PCAP file.
 
     Arguments:
@@ -151,6 +149,12 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                 ...                          encryption_key=key)
                 >>> extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))
 
+        reasm_protocols: names of further reassemblers to enable (must be used
+            with ``reassembly=True``), each as registered in
+            :attr:`Extractor.__reassembly__
+            <pcapkit.foundation.extraction.Extractor.__reassembly__>`, as
+            ``'ipv4'``, ``'ipv6'``, ``'tcp'`` and ``'dtls'`` are
+
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
@@ -173,6 +177,10 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
        ``dtls`` is inserted after ``tcp``, so a positional argument from
        ``buffer_size`` onwards moves one place along.
 
+    .. versionchanged:: 1.7.0
+
+       ``reasm_protocols`` is appended (:issue:`2814`).
+
     """
     if isinstance(layer, type) and issubclass(layer, ProtocolBase):
         layer = (layer.__layer__ or 'none').lower()  # type: ignore[assignment]
@@ -188,7 +196,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond,
                      trace_bidirectional=trace_bidirectional, trace_analyse=trace_analyse,
                      buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save,
-                     no_eof=no_eof, context=context)
+                     no_eof=no_eof, context=context, reasm_protocols=reasm_protocols)
 
 
 def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
@@ -196,18 +204,23 @@ def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
     """Reassemble fragmented datagrams.
 
     Arguments:
-        protocol: protocol to be reassembled
+        protocol: protocol to be reassembled, a name registered in
+            :attr:`Extractor.__reassembly__
+            <pcapkit.foundation.extraction.Extractor.__reassembly__>`, matched
+            lower-cased, or a protocol class, by the first of its
+            :meth:`~pcapkit.protocols.protocol.ProtocolBase.id`
         strict: if :data:`True`, report a datagram that is not completely
             reassembled as the tuple of its received runs; otherwise as one
             contiguous payload
         timeout: reassembly timeout in seconds, on the capture's own clock;
-            :data:`None` selects the protocol's own default
+            :data:`None` selects the protocol's own default; a reassembly that
+            takes none, as DTLS's, is made without it
 
     Returns:
         A :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` object of corresponding protocol.
 
     Raises:
-        FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.
+        FormatError: If no reassembly is registered under ``protocol``.
 
     .. versionchanged:: 1.5.0
 
@@ -215,17 +228,17 @@ def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
        capture time by default, where 1.4.x held them for the life of the
        object.
 
+    .. versionchanged:: 1.7.0
+
+       Makes any registered reassembly, through
+       :meth:`Extractor.make_reassembly
+       <pcapkit.foundation.extraction.Extractor.make_reassembly>`, where it
+       made IPv4, IPv6 and TCP only (:issue:`2814`).
+
     """
     if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
         protocol = protocol.id()[0]
-
-    if protocol == 'IPv4':
-        return IPv4_Reassembly(strict=strict, timeout=timeout)
-    if protocol == 'IPv6':
-        return IPv6_Reassembly(strict=strict, timeout=timeout)
-    if protocol == 'TCP':
-        return TCP_Reassembly(strict=strict, timeout=timeout)
-    raise FormatError(f'unsupported reassembly protocol: {protocol!r}')
+    return Extractor.make_reassembly(protocol, strict=strict, timeout=timeout)
 
 
 def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',

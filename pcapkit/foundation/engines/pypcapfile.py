@@ -16,8 +16,8 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.io import NamedStream
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, warn
@@ -154,6 +154,15 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     #: Engine module name.
     __engine_module__ = 'pcapfile'
 
+    #: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the
+    #: decoded packet and its frame number. There is no IPv6 adapter, as
+    #: |pcapfile|_ has no IPv6 decoder, nor a DTLS one, as DTLS reassembly reads
+    #: :mod:`pcapkit`'s own DTLS layer.
+    __reassembly__ = {
+        'ipv4': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'ipv4_reassembly'),
+        'tcp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tcp_reassembly'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -220,10 +229,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                 * if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                   is provided, as the PyPCAPFile engine does not parse with :mod:`pcapkit`'s
                   own protocol implementations.
-                * if IPv6 reassembly is enabled, as |pcapfile|_ has no IPv6
-                  decoder.
-                * if DTLS reassembly is enabled, as it reads :mod:`pcapkit`'s own
-                  DTLS layer.
+                * if a reassembler with no adapter in :attr:`__reassembly__` is
+                  enabled, as IPv6's and DTLS's are not.
                 * if |pcapfile|_ has no decoder for the savefile's link layer
                   type, in which case frames are left undecoded.
 
@@ -252,20 +259,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             raise FormatError(f'unsupported file format: {ext.magic_number!r}; '
                               'the PyPCAPFile engine reads PCAP savefiles only')
 
-        if ext._flag_r and ext._ipv6:
-            ext._ipv6 = False
-            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=None, tcp=ext._reasm.tcp,
-                                           dtls=ext._reasm.dtls)
-            warn("'Extractor(engine=pypcapfile)' object does not support IPv6 reassembly; "
-                 "so 'ipv6=True' will be ignored", AttributeWarning, stacklevel=stacklevel())
-
-        if ext._flag_r and ext._dtls:
-            ext._dtls = False
-            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=ext._reasm.ipv6,
-                                           tcp=ext._reasm.tcp, dtls=None)
-            warn("'Extractor(engine=pypcapfile)' object does not support DTLS reassembly, "
-                 "which reads pcapkit's own DTLS layer; so 'dtls=True' will be ignored",
-                 AttributeWarning, stacklevel=stacklevel())
+        self._setup_reassembly()
 
         stream = NamedStream(ext._ifile, ext._ifnm)
         sfile = pcapfile.savefile.load_savefile(stream, layers=0, lazy=True)
@@ -293,8 +287,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.pypcapfile import (ipv4_reassembly, packet2dict, tcp_reassembly,
-                                                tcp_traceflow)
+        from pcapkit.toolkit.pypcapfile import packet2dict, packet2timestamp, tcp_traceflow
         ext = self._extractor
 
         # fetch PyPCAPFile packet
@@ -318,16 +311,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
         # record fragments
         if ext._flag_r:
-            # NOTE: IPv6 reassembly is switched off in ``run``, as ``pcapfile``
-            # cannot decode IPv6 at all.
-            if ext._ipv4:
-                data_ipv4 = ipv4_reassembly(packet, count=ext._frnum)
-                if data_ipv4 is not None:
-                    ext._reasm.ipv4(data_ipv4)
-            if ext._tcp:
-                data_tcp = tcp_reassembly(packet, count=ext._frnum)
-                if data_tcp is not None:
-                    ext._reasm.tcp(data_tcp)
+            self._reassemble(packet2timestamp(packet), packet, count=ext._frnum)
 
         # trace flows
         if ext._flag_t:
