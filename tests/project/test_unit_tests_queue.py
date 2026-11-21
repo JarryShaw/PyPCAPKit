@@ -302,17 +302,16 @@ class TestJobGating(unittest.TestCase):
     def test_project_tests_runs_on_every_diff_and_never_duplicates_test(self) -> None:
         """#1954: ``project-tests`` runs on every diff, but not under ``gate-only``, whose ``gate``
         runs the pins in its full suite. Its pins step runs on a code change, and its steps that
-        stand in for ``test`` only on a docs-only diff, where they take in the pins."""
+        stand in for ``test`` only on a docs-only diff, where they take in the pins. #2798: the
+        docs readers outside the leg run in one cell, since every cell would run them alike."""
         head = header(job('project-tests'))
         self.assertIn('if: ${{ inputs.gate-only != true }}', head)
         self.assertNotIn('needs.changes.outputs.code', head)
         for name, condition in (('Run the project pins', "needs.changes.outputs.code != 'false'"),
-                                ('Run the first half of tests/project and the root-level modules under plain unittest',
-                                 "needs.changes.outputs.code == 'false'"),
-                                ('Run the second half of tests/project and the root-level modules under plain unittest',
+                                ('Run tests/project and the root-level modules under plain unittest',
                                  "needs.changes.outputs.code == 'false'"),
                                 ('Run the other tests that read docs/ or Markdown',
-                                 "needs.changes.outputs.code == 'false'")):
+                                 "needs.changes.outputs.code == 'false' && matrix.half == 1")):
             with self.subTest(step=name):
                 self.assertIn(f'if: ${{{{ {condition} }}}}', step(job('project-tests'), name))
 

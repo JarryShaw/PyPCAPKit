@@ -154,6 +154,7 @@ TESTS_ROOT = ROOT / 'tests'
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tests._tiers import PROJECT_BOUNDARY  # noqa: E402  pylint: disable=wrong-import-position
 from tests._tiers import is_unit_tier  # noqa: E402  pylint: disable=wrong-import-position
 
 #: Root-level modules bundled, in this order, into *every* leg -- see the
@@ -180,10 +181,11 @@ DEFAULT_STALL_DUMP = 1080
 STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
 
 #: The path below each leg at which ``--half`` cuts it (#2254): a module name for
-#: the flat ``project``, and a path inside ``misc/`` for ``protocols``, whose
-#: cells also pass ``--exclude protocols/internet``. Move one to rebalance; the
-#: workflow's cells and steps ask for a half and follow.
-SHARD_BOUNDARIES = {'project': 'test_q', 'protocols': 'misc/test_q'}
+#: the flat ``project``, :data:`tests._tiers.PROJECT_BOUNDARY`, where the
+#: ``project-tests`` cells cut the pins too (#2798), and a path inside ``misc/`` for
+#: ``protocols``, whose cells also pass ``--exclude protocols/internet``. Move one to
+#: rebalance; the workflow's cells ask for a half and follow.
+SHARD_BOUNDARIES = {'project': PROJECT_BOUNDARY, 'protocols': 'misc/test_q'}
 
 #: Run a full :func:`gc.collect` after every this many tests; see the
 #: module docstring for the measurements behind it. ``--gc-every 0`` disables.

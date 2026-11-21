@@ -472,13 +472,13 @@ source entry) and ``python-versions``, which reads ``gate``'s version (see
 `Python Versions`_ below). It skips the rest -- the matrix jobs, ``test``,
 ``test-ktlo``, ``test-latest-tier``, ``integration``, ``integration-ktlo``,
 ``engine-tests`` (a job per engine, each looping over its Python versions),
-``pypcap-parity``, ``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which
-has already run for this commit from Unit Tests' own ``push`` trigger (and, all but
-``unittest-ordering``, which runs on ``main`` pushes only, from its
-``pull_request`` trigger), so a caller would only retest the commit. It also skips
-``changes``, ``coverage``, which combines what ``test`` and ``test-latest-tier`` measured,
-``project-tests``, whose project pins ``gate``'s full suite runs too (see
-`Project Pins`_ below), and ``required-checks`` (see `Required Status
+``pypcap-parity``, ``pypcap-parity-ktlo``, ``unittest-ordering`` and
+``project-tests``, each of which has already run for this commit from Unit Tests'
+own ``push`` trigger (and, all but ``unittest-ordering``, which runs on ``main``
+pushes only, from its ``pull_request`` trigger), so a caller would only retest the
+commit; ``gate``'s full suite runs the project pins too (see `Project Pins`_ below).
+It also skips ``changes``, ``coverage``, which combines what ``test`` and
+``test-latest-tier`` measured, and ``required-checks`` (see `Required Status
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no ``if:`` and runs on every path, deliberately,
 per the comment above the job: ``create-release.yml`` feeds ``CHANGELOG.md`` to the
@@ -901,8 +901,8 @@ one runs everything:
      - skipped
    * - ``unit-tests.yml``: ``project-tests``
      - :file:`tests/project` and the root-level modules under plain unittest, a half
-       per step, and the docs readers
-     - the project pins
+       per cell, and the docs readers
+     - the project pins, a half per cell
    * - ``experimental.yml``: ``experimental``, ``windows``
      - skipped
      - skipped
@@ -1462,7 +1462,7 @@ Which legs run which tier:
      - Tiers
    * - ``test-latest-tier``, on ``latest``, a half per cell
      - ``LATEST``, less the project pins
-   * - ``project-tests``
+   * - ``project-tests``, on ``latest``, a half per cell
      - the project pins
    * - ``test``, ``latest``'s coverage leg and PyPy's among them, ``test-ktlo``,
        ``experimental``, ``windows``
@@ -1542,13 +1542,22 @@ on every push to ``main`` and every pull request but a docs-only one, which runs
 Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
 ``--ignore``, through ``latest_tier_paths()``, which holds each pin, and
 ``latest_tier_half()`` leaves them out of ``test-latest-tier``, whose coverage
-measures only ``pcapkit``, and ``project-tests`` runs what ``project_pin_paths()``
-prints. Each asks at run time, as ``integration`` asks for its selection, so no
-workflow lists the pins, and :file:`tests/test_tier_guard.py` runs
-the steps to check what each does with the answer. Under ``gate-only``, ``gate``'s
-full suite runs the pins with everything else. ``unittest-ordering``'s ``project``
-cells keep them, as they ask how a module runs in one interpreter, in file order and
-without xdist, which is a question about the module rather than the Python version.
+measures only ``pcapkit``, and each cell of ``project-tests`` runs its half of what
+``project_pin_paths()`` prints, which ``project_pin_half()`` gives it. Each asks at
+run time, as ``integration`` asks for its selection, so no workflow lists the pins,
+and :file:`tests/test_tier_guard.py` runs the steps to check what each does with the
+answer. Under ``gate-only``, ``gate``'s full suite runs the pins with everything else.
+``unittest-ordering``'s ``project`` cells keep them, as they ask how a module runs in
+one interpreter, in file order and without xdist, which is a question about the module
+rather than the Python version.
+
+``project-tests`` runs a cell per half of :file:`tests/project` (:issue:`2798`), as its
+docs-only path, run whole, comes near the job's cap. Both paths cut at
+``PROJECT_BOUNDARY`` in :file:`tests/_tiers.py`, where ``unittest-ordering``'s
+``project`` cells cut too: a cell runs its half of the pins on a code diff, and its
+half of the leg on a docs-only one, half 1 the other docs readers as well.
+:file:`tests/project/test_unittest_ordering_shards.py` fails when a module or a pin
+runs in neither cell or in both.
 
 A pin's skip where ``tomllib`` is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner's own ``python3``, and

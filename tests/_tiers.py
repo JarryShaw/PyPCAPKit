@@ -59,6 +59,7 @@ So this module answers, cheaply and without needing the fixtures themselves:
 * :func:`is_project_pin` and :func:`project_pin_paths` -- which
   :file:`tests/project` modules give one answer on every interpreter, and so run
   once per push, in the ``project-tests`` job, rather than on every leg (#1954)?
+  :func:`project_pin_half` gives each cell of that job its half (#2798).
 
 :file:`tests/conftest.py` runs :func:`is_unit_tier` and :func:`audit_module` --
 and through it :func:`committed_captures` and :func:`explain` -- at collection
@@ -205,8 +206,9 @@ __all__ = [
     'PROBE_MODULE_NAME', 'is_probe_module',
     'all_tier_paths', 'latest_tier_paths',
     'LATEST_TIER_HALVES', 'LATEST_TIER_BOUNDARY', 'LATEST_HALF_SELECTOR', 'latest_tier_half',
-    'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
-    'varies_by_interpreter', 'is_project_pin', 'project_pin_paths',
+    'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_HALVES', 'PROJECT_BOUNDARY',
+    'PROJECT_PIN_HALF_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
+    'varies_by_interpreter', 'is_project_pin', 'project_pin_paths', 'project_pin_half',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
     'guard_unavailable_reason', 'handled_lines', 'sample_path_calls', 'sample_root_join_calls',
     'audit_module', 'check_unit_tier_read', 'explain',
@@ -293,15 +295,32 @@ FIXTURE_ALL_TIER_SELECTOR = (
 #: :file:`.github/workflows/unit-tests.yml` rather than on every leg (#1954). See
 #: :func:`is_project_pin`.
 PROJECT_PINS_DIR = 'project'
-#: The project pins' selector, verbatim from the workflows: the ``project-tests``
-#: job runs what it prints. Every ``test`` leg and every ``experimental`` leg leaves
-#: the pins out through :data:`LATEST_TIER_SELECTOR`, since every pin is
-#: ``LATEST``, and :func:`latest_tier_half` leaves them out of the ``LATEST`` tier's
-#: own job. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is, so no
-#: workflow can drift from :func:`is_project_pin`.
+#: Every project pin's selector, which no step asks whole: each cell of the
+#: ``project-tests`` job asks :data:`PROJECT_PIN_HALF_SELECTOR` for its half. Every
+#: ``test`` leg and every ``experimental`` leg leaves the pins out through
+#: :data:`LATEST_TIER_SELECTOR`, since every pin is ``LATEST``, and
+#: :func:`latest_tier_half` leaves them out of the ``LATEST`` tier's own job.
 PROJECT_PINS_SELECTOR = (
     'python -c "from tests._tiers import project_pin_paths; '
     'print(\' \'.join(project_pin_paths()))"'
+)
+#: The halves :file:`tests/project` is cut into, one per cell of the ``project-tests``
+#: job of :file:`.github/workflows/unit-tests.yml` (#2798).
+PROJECT_HALVES = (1, 2)
+#: The name at which :file:`tests/project` is halved (#2254): half 1 is every module
+#: whose path below that directory sorts before it, half 2 the rest, so a new module
+#: lands in exactly one half. :func:`project_pin_half` cuts the pins here and
+#: :file:`util/run_unittest_leg.py`'s ``--half`` cuts the ``project`` leg here, so
+#: ``project-tests`` and ``unittest-ordering`` cut in one place. It is chosen so the
+#: halves take about the same CI time; move it to rebalance, and the cells follow.
+PROJECT_BOUNDARY = 'test_pypy_w'
+#: The selector each cell of the ``project-tests`` job asks for its half of the pins,
+#: verbatim from the workflow, with the half as its one argument. Asked at run time,
+#: as :data:`FIXTURE_TIER_SELECTOR` is, so no workflow can drift from
+#: :func:`is_project_pin`. See :func:`project_pin_half`.
+PROJECT_PIN_HALF_SELECTOR = (
+    'python -c "import sys; from tests._tiers import project_pin_half; '
+    'print(\' \'.join(project_pin_half(int(sys.argv[1]))))"'
 )
 #: The halves :func:`latest_tier_half` cuts the ``LATEST`` tier into (#2751), one per
 #: cell of the ``test-latest-tier`` job of :file:`.github/workflows/unit-tests.yml`.
@@ -1167,13 +1186,37 @@ def project_pin_paths() -> 'tuple[str, ...]':
     """Every :func:`project pin <is_project_pin>`, relative to :data:`ROOT`, sorted.
 
     What :data:`PROJECT_PINS_SELECTOR` prints: the ``project-tests`` job's
-    selection. Each is in :func:`latest_tier_paths` too, which every leg of ``test``
-    leaves out, and none is in :func:`latest_tier_half`.
+    selection, which each of its cells runs a :func:`half <project_pin_half>` of.
+    Each is in :func:`latest_tier_paths` too, which every leg of ``test`` leaves
+    out, and none is in :func:`latest_tier_half`.
 
     """
     return tuple(sorted(path.relative_to(ROOT).as_posix()
                         for path in (TESTS_ROOT / PROJECT_PINS_DIR).rglob('test_*.py')
                         if is_project_pin(path)))
+
+
+def project_pin_half(half: 'int') -> 'tuple[str, ...]':
+    """Half ``half`` of the :func:`project pins <project_pin_paths>`, sorted (#2798).
+
+    What :data:`PROJECT_PIN_HALF_SELECTOR` prints: the selection of one cell of the
+    ``project-tests`` job. Half 1 is every pin whose path below
+    :file:`tests/project` sorts before :data:`PROJECT_BOUNDARY`, half 2 the rest, as
+    :file:`util/run_unittest_leg.py`'s ``--half`` cuts the ``project`` leg; both
+    halves together are :func:`project_pin_paths`.
+
+    Args:
+        half: One of :data:`PROJECT_HALVES`.
+
+    Raises:
+        ValueError: ``half`` is not one of :data:`PROJECT_HALVES`.
+
+    """
+    if half not in PROJECT_HALVES:
+        raise ValueError(f'tests/{PROJECT_PINS_DIR} has the halves {PROJECT_HALVES}, not {half!r}')
+    below = pathlib.PurePosixPath('tests', PROJECT_PINS_DIR)
+    return tuple(path for path in project_pin_paths()
+                 if (pathlib.PurePosixPath(path).relative_to(below).as_posix() < PROJECT_BOUNDARY) == (half == 1))
 
 
 def latest_tier_half(half: 'int') -> 'tuple[str, ...]':
