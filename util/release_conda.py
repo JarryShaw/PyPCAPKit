@@ -27,11 +27,12 @@
     "Upload conda packages to Anaconda (Intel)" (#2044), on setup-python's
     ``python3``, and as ``python util/release_conda.py upload`` "Upload conda
     packages to Anaconda (Windows)" (#2060), under ``bash -el`` on conda's base
-    ``python``. It installs conda-forge's anaconda-client into base and runs the
-    call ``anaconda/actions/upload-package`` makes, ``anaconda --token … upload
-    --user …``, with ``--skip-existing``: a ``--label`` for each of
-    ``PCAPKIT_CONDA_LABELS``' comma-separated names, trimmed, then each line of
-    ``PCAPKIT_CONDA_PACKAGES``. With no package it gets an ``::error`` and exits 1.
+    ``python``. It installs conda-forge's anaconda-client into base, with a typer
+    below 0.26 (#2809), and runs the call ``anaconda/actions/upload-package``
+    makes, ``anaconda --token … upload --user …``, with ``--skip-existing``: a
+    ``--label`` for each of ``PCAPKIT_CONDA_LABELS``' comma-separated names,
+    trimmed, then each line of ``PCAPKIT_CONDA_PACKAGES``. With no package it gets
+    an ``::error`` and exits 1.
     The ``anaconda`` it runs is base's, :func:`client`.
 
 :data:`PLATFORMS` maps each leg of either job to the platform it publishes.
@@ -201,8 +202,10 @@ def build() -> 'int':
 
 def upload() -> 'int':
     """Upload the packages with anaconda-client's CLI, as upload-package would (#2044)."""
+    # NOTE: anaconda-client's `config` passes typer.Option(click_type=...), which typer 0.29 rejects and
+    # 0.26-0.28 misparse; 1.17.0 pins typer<0.26, conda-forge's 1.16.0 leaves it unbounded (#2809).
     status = call('conda', 'install', '-n', 'base', '--override-channels', '-c', 'conda-forge', '-y',
-                  'anaconda-client')
+                  'anaconda-client', 'typer<0.26')
     if status:
         return status
     labels = []  # type: list[str]

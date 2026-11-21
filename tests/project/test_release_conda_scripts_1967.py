@@ -219,7 +219,7 @@ REFERENCE_RELEASE_BUILD = REFERENCE_BUILD.replace('  windows-latest)\n    target
 REFERENCE_UPLOAD = textwrap.dedent(r'''
     set -euo pipefail
 
-    conda install -n base --override-channels -c conda-forge -y anaconda-client
+    conda install -n base --override-channels -c conda-forge -y anaconda-client 'typer<0.26'
 
     # The action's handling of its `labels:` and `packages:` inputs: a
     # comma-separated list, each trimmed, and the build step's
@@ -509,9 +509,23 @@ class TestTheScripts(_Stand):
         status, _, _, _, calls = self.script(UPLOAD_RUN, self.upload_env(UPLOAD_CASES[1]))
         self.assertEqual(status, 0)
         self.assertEqual(str(calls).splitlines(), [
-            'conda install -n base --override-channels -c conda-forge -y anaconda-client', 'anaconda',
+            'conda install -n base --override-channels -c conda-forge -y anaconda-client typer<0.26', 'anaconda',
             '--token', 'TOKEN', 'upload', '--user', 'jarryshaw', '--skip-existing', '--label', 'main',
             '--label', 'dev', *PACKAGES.split('\n')])
+
+    def test_the_upload_installs_a_typer_anaconda_client_loads(self) -> None:
+        """#2809: anaconda-client's ``config`` passes ``typer.Option(click_type=...)``.
+
+        typer 0.29 rejects it, so ``anaconda`` raises :exc:`TypeError` loading its
+        plugins, before uploading anything, and 0.26 to 0.28 misparse it.
+        anaconda-client 1.17.0 pins ``typer>=0.17,<0.26``; conda-forge's 1.14.1 and
+        1.16.0 declare no typer, leaving anaconda-cli-base's unbounded ``typer >=0.17``.
+        """
+        status, _, _, _, calls = self.script(UPLOAD_RUN, self.upload_env(UPLOAD_CASES[0]))
+        self.assertEqual(status, 0)
+        install = str(calls).splitlines()[0].split(' ')
+        self.assertEqual(install[:2], ['conda', 'install'])
+        self.assertEqual([spec for spec in install if spec.startswith('typer')], ['typer<0.26'])
 
     def test_the_outputs_reader_reads_both_forms(self) -> None:
         self.assertEqual(read_outputs('a=1\nb<<EOF_x\nl1\nl2\nEOF_x\nc=x<<y\n'),
