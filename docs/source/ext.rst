@@ -655,6 +655,12 @@ whose full implementation is :mod:`pcapkit.dumpkit.pcap`:
            file.write(packet.data)  # write the frame to the output file
            self._fnum += 1  # increment frame number counter
 
+A flow tracer keeps a dumper's file open between frames through
+:meth:`~pcapkit.dumpkit.common.DumperBase.open` and
+:meth:`~pcapkit.dumpkit.common.DumperBase.close`. A dumper overriding
+``__call__``, as this one does, implements the pair as
+:class:`~pcapkit.dumpkit.pcap.PCAPIO` does, or reopens its file for each frame.
+
 Reassembly and Flow Tracing
 ---------------------------
 

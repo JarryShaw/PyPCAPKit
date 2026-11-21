@@ -52,7 +52,7 @@ if TYPE_CHECKING:
 __all__ = [
     # limits
     'FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT', 'IPV6_TCP_WARNED_LIMIT',
-    'TCP_GAP_LIMIT', 'FALLBACK_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
+    'TCP_GAP_LIMIT', 'FALLBACK_LIMIT', 'TRACE_OPEN_FILE_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
     'MAX_ZERO_PAD_LENGTH', 'MAX_ZERO_PAD_SHORTFALL', 'ZERO_PAD_BUDGET_RATIO',
     # flags
     'CHECKSUM_VERIFY', 'CHECKSUM_COMPUTE',
@@ -258,6 +258,24 @@ TCP_GAP_LIMIT = read_limit('TCP_GAP_LIMIT', 1 << 24, risk=(
 FALLBACK_LIMIT = read_limit('FALLBACK_LIMIT', 10_000, risk=(
     'an object that expands into a large or endless object graph is written out '
     'in full, which takes memory and time without bound'))
+
+#: int: Most flow output files a flow tracer keeps open at once,
+#: :envvar:`PCAPKIT_TRACE_OPEN_FILE_LIMIT`; ``0`` opens a flow's file for each
+#: frame, and ``-1`` keeps every flow's file open until the flow is finalised.
+#:
+#: Keeping the file open saves reopening it per frame (:issue:`2815`). Past
+#: the limit, the file written least recently is closed, and reopened on its
+#: flow's next frame; see :meth:`TraceFlow._write
+#: <pcapkit.foundation.traceflow.traceflow.TraceFlow._write>`.
+#:
+#: Each open file holds a file descriptor. The tightest common ceiling on those
+#: is macOS's default soft limit of 256 per process, and the default leaves
+#: three quarters of it to the rest of the process.
+#:
+#: .. versionadded:: 1.7.0
+TRACE_OPEN_FILE_LIMIT = read_limit('TRACE_OPEN_FILE_LIMIT', 64, risk=(
+    'each file kept open holds a file descriptor, so a capture with that many flows '
+    'at once can exhaust the process limit and fail with "Too many open files"'))
 
 #: int: How many distinct bytestrings :func:`~pcapkit.utilities.chardet.detect`
 #: remembers, :envvar:`PCAPKIT_DETECT_CACHE_SIZE`; ``-1`` leaves the cache

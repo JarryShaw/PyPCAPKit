@@ -160,12 +160,17 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         Arguments:
             packet: a flow packet (:term:`trace.tcp.packet`)
 
+        The flow's output file is kept open for its next frame, as
+        :meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlow._write`
+        describes, unless :meth:`trace` has just finalised the flow.
+
         """
         # fetch flow label
         output = self.trace(packet, output=True)
 
         # dump files
-        output(packet.frame, name=f'Frame {packet.index}')  # pylint: disable=not-callable
+        self._write(output, packet.frame, f'Frame {packet.index}',
+                    hold=self.make_bufid(packet) in self._buffer)
 
     def make_bufid(self, packet: 'Packet[_AT]') -> 'BufferID':
         """Derive the buffer ID a packet belongs to.
@@ -489,6 +494,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         """
         buf = self._buffer.pop(bufid)
         label = buf.label
+        # NOTE: closed before the callbacks run, so they find the file closed.
+        self._release(buf.fpout)
 
         logger.debug('TCP flow %s finalised after %d frame(s) (%d forward, %d reverse)',
                      label, len(buf.index), len(buf.forward), len(buf.reverse))
@@ -516,11 +523,18 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         fired, rather than having to choose between the two.
 
         Idempotent: it drains the buffer, so a second call finds nothing to do.
+        It also closes every output file still kept open, as
+        :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlow.finish>`
+        does, even when a callback raises: the flows after it stay in the
+        buffer, unfinalised, for a later call.
 
         """
-        for bufid in list(self._buffer):
-            self._finalise(bufid)
-        self.__cached__['submit'] = None
+        try:
+            for bufid in list(self._buffer):
+                self._finalise(bufid)
+        finally:
+            self.__cached__['submit'] = None
+            super().finish()
 
     def submit(self) -> 'tuple[Index, ...]':
         """Submit traced TCP flows.

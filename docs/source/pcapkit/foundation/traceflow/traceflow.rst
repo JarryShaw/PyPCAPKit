@@ -57,7 +57,9 @@ built-in TCP flow tracing class derive from.
    .. automethod:: dump
    .. automethod:: trace
    .. automethod:: finish
+   .. automethod:: close
    .. automethod:: submit
+   .. automethod:: _write
 
    .. autoattribute:: __output__
       :no-value:
@@ -76,6 +78,8 @@ built-in TCP flow tracing class derive from.
    .. autoattribute:: _foutio
       :no-value:
    .. autoattribute:: _fdpext
+      :no-value:
+   .. autoattribute:: _fopen
       :no-value:
    .. autoattribute:: _endian
       :no-value:
