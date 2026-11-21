@@ -2312,7 +2312,10 @@
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>  <span class="c1"># bytes-like object</span>
-                <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="nb">memoryview</span><span class="p">(</span><span class="n">bitmap</span><span class="p">))</span>
+                <span class="c1"># NOTE: The block releases the view: PyPy frees a dropped one only on collection,</span>
+                <span class="c1"># and a live one keeps a caller's bytearray from resizing.</span>
+                <span class="k">with</span> <span class="nb">memoryview</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">as</span> <span class="n">view</span><span class="p">:</span>
+                    <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>  <span class="c1"># iterable of octets</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">octets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span>

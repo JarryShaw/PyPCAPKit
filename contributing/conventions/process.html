@@ -968,9 +968,11 @@ being set by hand.</p>
 <p>The board has these views: <em>All items</em>; <em>Board</em>, the open items in one column per
 Status; <em>Needs decision</em> and <em>Blocked</em>, each the open items in that state; <em>Open
 pull requests</em>; <em>History</em>, everything <em>Done</em>; and a <em>Release X.Y</em> board for each
-milestone from <code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">v1.5</span></code> on, filtered on it. Add one when a milestone
-opens. Sorting and grouping are set in the web interface; names, layouts, filters
-and columns can also be set through the GraphQL API (<code class="docutils literal notranslate"><span class="pre">updateProjectV2View</span></code>).</p>
+milestone, grouped by Status, filtered on it and showing the earlier release views’
+fields. A new line gets both: the milestone <code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">vX.Y</span></code>, described <em>Changes for
+the vX.Y.0 release.</em>, and its view; <a class="reference internal" href="../releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a> has the steps that follow.
+Sorting and grouping are set in the web interface; names, layouts, filters and columns
+can also be set through the GraphQL API (<code class="docutils literal notranslate"><span class="pre">updateProjectV2View</span></code>).</p>
 <p>Link neither from docstrings, code comments or Markdown files. Both are tracking
 metadata that changes as work moves, and a link to them goes stale the way a line
 number does; the changelog’s <code class="docutils literal notranslate"><span class="pre">:issue:</span></code> and <code class="docutils literal notranslate"><span class="pre">:pr:</span></code> roles are the durable trail.
@@ -1002,8 +1004,8 @@ their step cap’s rationale.</p></li>
 <h2>The PEP Discussion, Kept Current<a class="headerlink" href="#the-pep-discussion-kept-current" title="Link to this heading">¶</a></h2>
 <p><code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/pep.rst</span></code> is the source of truth for the roadmap: what
 is done and what remains. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2483">#2483</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2449">#2449</a>):
-upon each release, amend that page inline, and post the update to, or edit it in, the
-roadmap’s own GitHub Discussion,
+upon each release (<a class="reference internal" href="../releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>), amend that page inline, and post the update
+to, or edit it in, the roadmap’s own GitHub Discussion,
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">PyPCAPKit Enhancement Proposals</a>.
 The page stays authoritative; the Discussion is kept in step with it, not the other
 way round, so a contributor who only reads the Discussion is not working from a stale

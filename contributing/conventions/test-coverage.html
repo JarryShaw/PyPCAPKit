@@ -683,6 +683,15 @@ rebuild each layer with <code class="docutils literal notranslate"><span class="
 <code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_declared_length_roundtrip_runtime.py</span></code> does for the
 declared lengths of a truncated capture.</p>
 </section>
+<section id="registry-drift">
+<h2>Registry Drift<a class="headerlink" href="#registry-drift" title="Link to this heading">¶</a></h2>
+<p><strong>A probe for a code the registry has not assigned is derived from the registry, never
+pinned.</strong> A vendor refresh can assign a hard-coded <em>Unassigned</em> or <em>Reserved</em> code and
+turn the test red with no change to <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>. <code class="docutils literal notranslate"><span class="pre">_missing_ranges</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">tests/protocols/application/test_tls_extensions_2514_unit.py</span></code> shows the pattern:
+it reads the ranges <code class="docutils literal notranslate"><span class="pre">ExtensionType._missing_</span></code> names <em>Unassigned</em>, and
+<code class="docutils literal notranslate"><span class="pre">test_names_and_ranges</span></code> probes the lowest.</p>
+</section>
 <section id="raising-coverage">
 <h2>Raising Coverage<a class="headerlink" href="#raising-coverage" title="Link to this heading">¶</a></h2>
 <p><strong>Every change raises coverage, and each new test is shown to fail without its fix.</strong>
@@ -883,6 +892,7 @@ input byte for byte is asserted over every sample capture by
             <ul>
 <li><a class="reference internal" href="#">Testing a Change</a><ul>
 <li><a class="reference internal" href="#round-trip-invariants">Round-Trip Invariants</a></li>
+<li><a class="reference internal" href="#registry-drift">Registry Drift</a></li>
 <li><a class="reference internal" href="#raising-coverage">Raising Coverage</a></li>
 <li><a class="reference internal" href="#running-the-tests">Running the Tests</a></li>
 <li><a class="reference internal" href="#adding-a-protocol-option-or-dumper">Adding a Protocol, Option or Dumper</a></li>

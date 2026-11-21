@@ -108,6 +108,16 @@ rebuild each layer with ``from_data`` and require the original octets back, as
 :file:`tests/protocols/test_declared_length_roundtrip_runtime.py` does for the
 declared lengths of a truncated capture.
 
+Registry Drift
+~~~~~~~~~~~~~~
+
+**A probe for a code the registry has not assigned is derived from the registry, never
+pinned.** A vendor refresh can assign a hard-coded *Unassigned* or *Reserved* code and
+turn the test red with no change to :mod:`pcapkit`. ``_missing_ranges`` in
+:file:`tests/protocols/application/test_tls_extensions_2514_unit.py` shows the pattern:
+it reads the ranges ``ExtensionType._missing_`` names *Unassigned*, and
+``test_names_and_ranges`` probes the lowest.
+
 Raising Coverage
 ~~~~~~~~~~~~~~~~
 

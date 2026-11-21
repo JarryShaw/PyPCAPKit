@@ -11,6 +11,33 @@ Release Process
    ``conda-*`` tag and its commit to ``main`` -- is produced by
    ``.github/workflows/create-release.yml`` and is never hand-made.
 
+.. _release-lines:
+
+Release Lines
+-------------
+
+A minor release, ``X.Y.0``, carries the roadmap work (:doc:`pep`) its milestone
+tracks; a patch release, ``X.Y.Z``, ships fixes and vendor refreshes; and a vendor bump
+between releases is a ``.postN`` of the release before it. A line is planned on its
+milestone and its *Release X.Y* view on the project board (:ref:`process`).
+
+A final release, ``X.Y.0`` or ``X.Y.Z``, runs these steps in order, ruled on
+:issue:`2805`:
+
+#. **One central changelog pull request opens first**, for ``X.Y.0`` with the line's
+   milestone and view. It alone edits :file:`CHANGELOG.md` and
+   :file:`docs/source/changelog/`: feature pull requests carry no changelog edits
+   (:issue:`2449`), and each one's entry is folded into it once it merges
+   (:doc:`maintenance`). A patch release of a single change may carry its entry in
+   that change's own pull request instead.
+#. **The release's other issues and pull requests close.**
+#. **A docs sweep** runs once they have closed and before the bump: the documentation
+   re-checked against the code and the rules on :ref:`documentation`. It also brings
+   :doc:`the roadmap <pep>` up to date, a page feature pull requests leave alone.
+#. **The version-bump push** (`The One Manual Step`_) starts the release. The changelog
+   pull request merges no later than that push, since the release ships its run's
+   commit, whose :file:`CHANGELOG.md` leads the release body.
+
 The One Manual Step
 -------------------
 
@@ -116,8 +143,8 @@ workaround for another:
    and ``conda`` upload to. Push ``v1.6.0`` at a commit whose ``__version__`` is
    still ``1.5.0b5`` and ``softprops/action-gh-release`` creates a *new*
    ``v1.5.0b5`` tag and names the Release after it, leaving ``v1.6.0`` dangling.
-   :doc:`pep` calls this workflow "version-driven rather than tag-driven" for that
-   reason: name the tag to match the version, since nothing enforces it.
+   The workflow is version-driven rather than tag-driven, and nothing enforces the
+   match, so name the tag after the version.
 
 ``workflow_run`` after **Vendor Update** completes
    The path a version bump on ``main`` takes without anyone pushing a tag:

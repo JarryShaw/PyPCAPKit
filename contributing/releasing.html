@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/releasing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, read from pcapkit/__init__.py through ast rather than by importing pc..." />
-<meta name="description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, read from pcapkit/__init__.py through ast rather than by importing pc..." />
+<meta property="og:description" content="Release Lines: A minor release, X.Y.0, carries the roadmap work ( Help Wanted) its milestone tracks; a patch release, X.Y.Z, ships fixes and vendor refreshes; and a vendor bump between releases is ..." />
+<meta name="description" content="Release Lines: A minor release, X.Y.0, carries the roadmap work ( Help Wanted) its milestone tracks; a patch release, X.Y.Z, ships fixes and vendor refreshes; and a vendor bump between releases is ..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="Const-Vendor Pairing" href="conventions/const-vendor-pairing.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -581,6 +581,30 @@ else – the <code class="docutils literal notranslate"><span class="pre">v*</sp
 <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag and its commit to <code class="docutils literal notranslate"><span class="pre">main</span></code> – is produced by
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> and is never hand-made.</p>
 </div>
+<section id="release-lines">
+<span id="id1"></span><h2>Release Lines<a class="headerlink" href="#release-lines" title="Link to this heading">¶</a></h2>
+<p>A minor release, <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code>, carries the roadmap work (<a class="reference internal" href="pep.html"><span class="doc">Help Wanted</span></a>) its milestone
+tracks; a patch release, <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code>, ships fixes and vendor refreshes; and a vendor bump
+between releases is a <code class="docutils literal notranslate"><span class="pre">.postN</span></code> of the release before it. A line is planned on its
+milestone and its <em>Release X.Y</em> view on the project board (<a class="reference internal" href="conventions/process.html#process"><span class="std std-ref">Running the Repository</span></a>).</p>
+<p>A final release, <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> or <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code>, runs these steps in order, ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>:</p>
+<ol class="arabic simple">
+<li><p><strong>One central changelog pull request opens first</strong>, for <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> with the line’s
+milestone and view. It alone edits <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>: feature pull requests carry no changelog edits
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2449">#2449</a>), and each one’s entry is folded into it once it merges
+(<a class="reference internal" href="maintenance.html"><span class="doc">Maintenance Workflow</span></a>). A patch release of a single change may carry its entry in
+that change’s own pull request instead.</p></li>
+<li><p><strong>The release’s other issues and pull requests close.</strong></p></li>
+<li><p><strong>A docs sweep</strong> runs once they have closed and before the bump: the documentation
+re-checked against the code and the rules on <a class="reference internal" href="conventions/documentation.html#documentation"><span class="std std-ref">Writing the Documentation</span></a>. It also brings
+<a class="reference internal" href="pep.html"><span class="doc">the roadmap</span></a> up to date, a page feature pull requests leave alone.</p></li>
+<li><p><strong>The version-bump push</strong> (<a class="reference internal" href="#the-one-manual-step">The One Manual Step</a>) starts the release. The changelog
+pull request merges no later than that push, since the release ships its run’s
+commit, whose <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> leads the release body.</p></li>
+</ol>
+</section>
 <section id="the-one-manual-step">
 <h2>The One Manual Step<a class="headerlink" href="#the-one-manual-step" title="Link to this heading">¶</a></h2>
 <p><code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> bumps <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>; its docstring is the
@@ -675,8 +699,8 @@ the <code class="docutils literal notranslate"><span class="pre">tag_name</span>
 and <code class="docutils literal notranslate"><span class="pre">conda</span></code> upload to. Push <code class="docutils literal notranslate"><span class="pre">v1.6.0</span></code> at a commit whose <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is
 still <code class="docutils literal notranslate"><span class="pre">1.5.0b5</span></code> and <code class="docutils literal notranslate"><span class="pre">softprops/action-gh-release</span></code> creates a <em>new</em>
 <code class="docutils literal notranslate"><span class="pre">v1.5.0b5</span></code> tag and names the Release after it, leaving <code class="docutils literal notranslate"><span class="pre">v1.6.0</span></code> dangling.
-<a class="reference internal" href="pep.html"><span class="doc">Help Wanted</span></a> calls this workflow “version-driven rather than tag-driven” for that
-reason: name the tag to match the version, since nothing enforces it.</p>
+The workflow is version-driven rather than tag-driven, and nothing enforces the
+match, so name the tag after the version.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> after <strong>Vendor Update</strong> completes</dt><dd><p>The path a version bump on <code class="docutils literal notranslate"><span class="pre">main</span></code> takes without anyone pushing a tag:
 a push to <code class="docutils literal notranslate"><span class="pre">main</span></code> completes <strong>Unit Tests</strong>, whose completion triggers
@@ -1224,6 +1248,7 @@ attention, not that the release needs a hand-rolled recovery.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Release Process</a><ul>
+<li><a class="reference internal" href="#release-lines">Release Lines</a></li>
 <li><a class="reference internal" href="#the-one-manual-step">The One Manual Step</a></li>
 <li><a class="reference internal" href="#ways-to-start-a-release">Ways to Start a Release</a></li>
 <li><a class="reference internal" href="#one-commit-per-release">One Commit per Release</a></li>

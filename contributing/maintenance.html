@@ -806,7 +806,8 @@ moves with <code class="docutils literal notranslate"><span class="pre">git</spa
 an answer; query again until it settles.</p></li>
 <li><p><strong>Keep the changelog central</strong>: a pull request whose file list touches the
 changelog gets a strip commit, and the text moves to the central changelog pull
-request.</p></li>
+request. A single-change patch release’s own pull request keeps its entry
+(<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>).</p></li>
 <li><p><strong>Read the CI reports</strong> (<a class="reference internal" href="workflows.html#ci-reports"><span class="std std-ref">CI Reports (#2030)</span></a>): each warning or failure there is a
 possible defect, root-caused and filed like a red check.</p></li>
 </ol>
@@ -902,8 +903,9 @@ base, re-running its tests from inside its tree, and taking the fix out of
 coordinator commits from a tree of its own, never inside a live agent’s worktree.</p></li>
 <li><p><strong>The pull request</strong> follows <code class="file docutils literal notranslate"><span class="pre">.github/PULL_REQUEST_TEMPLATE.md</span></code>, ticking only
 what holds: the changelog box is left unticked with a note that the changelog is
-central. It carries its type label from creation (<a class="reference internal" href="conventions/process.html#process"><span class="std std-ref">Running the Repository</span></a>). Comments of 8
-lines or fewer and bodies of 15 or fewer are recommendations, not hard limits.</p></li>
+central, unless the pull request carries its own entry. It carries its type label
+from creation (<a class="reference internal" href="conventions/process.html#process"><span class="std std-ref">Running the Repository</span></a>). Comments of 8 lines or fewer and bodies of 15 or
+fewer are recommendations, not hard limits.</p></li>
 <li><p><strong>A push to an existing branch</strong> uses
 <code class="docutils literal notranslate"><span class="pre">--force-with-lease=&lt;branch&gt;:&lt;last-pushed-sha&gt;</span></code>.</p></li>
 <li><p><strong>The verdict</strong> is posted as its own one-line comment – the verdict, the head sha
@@ -922,6 +924,10 @@ tests before calling it ready.</p></li>
 <li><p><strong>Findings on an unmerged pull request go back to its original worker</strong>, which
 still holds the context, rather than to a new issue; a separate issue is for a
 pull request already merged or a concern genuinely apart from it.</p></li>
+<li><p><strong>A bot-opened pull request is checked against its source.</strong> For an Issue and PR
+Kinds refresh, every number it adds has its kind confirmed on GitHub. A Python
+Versions proposal’s new line enters <code class="docutils literal notranslate"><span class="pre">supported</span></code>, so its legs block and are read
+green before merge.</p></li>
 </ul>
 </section>
 <section id="the-decision-loop">
@@ -997,9 +1003,8 @@ finish.</p></li>
 the sweep. One that is only behind is left alone: <code class="docutils literal notranslate"><span class="pre">main</span></code>’s ruleset requires
 branches to be up to date, every push to <code class="docutils literal notranslate"><span class="pre">main</span></code> puts every open pull request
 behind, and the owner merges through the bypass.</p></li>
-<li><p><strong>The changelog fold</strong>: feature pull requests carry no changelog edits, and their
-entries are written centrally (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2449">#2449</a>), into the changelog pull request –
-the only stream that edits those files, which merges last in the cycle.</p></li>
+<li><p><strong>The changelog fold</strong>: the merged pull request’s entry is written into the
+release’s central changelog pull request (<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>).</p></li>
 <li><p><strong>Worktrees</strong>: the merged pull request’s worktrees become prunable.</p></li>
 </ol>
 <p>On a pull request no run is cancelled: a cancelled run leaves a red mark on its
@@ -1025,17 +1030,23 @@ bounded, timed out – rather than excused.</p>
 docstrings and comments, under <code class="file docutils literal notranslate"><span class="pre">pcapkit/</span></code> as anywhere else, conventions and
 process pages included – or only tests needs no issue and no pull request, and is
 pushed straight to <code class="docutils literal notranslate"><span class="pre">main</span></code>. A pull request is for a change to code or behaviour. A fix
-for a red <code class="docutils literal notranslate"><span class="pre">main</span></code> goes direct, whatever it touches. Every direct push waits out the
-release freeze below, and first checks that no open pull request edits the same hunk.
+for a red <code class="docutils literal notranslate"><span class="pre">main</span></code> goes direct, whatever it touches, freeze or not. Every other direct
+push waits out the release freeze below, and first checks that no open pull request
+edits the same hunk.
 It lands as one commit per logical change, never a stack of worker or fix commits, its
 squashed tree checked against the verified tree. All of <code class="docutils literal notranslate"><span class="pre">tests/project/</span></code> runs first,
 not only the docs tests.</p>
-<p><strong>The release freeze.</strong> Once the push that moves <code class="docutils literal notranslate"><span class="pre">__version__</span></code> lands, nothing else
-does until Create Release’s <code class="docutils literal notranslate"><span class="pre">github</span></code> job is waiting on approval (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>),
-and that commit’s own Unit Tests run is never cancelled. A push mid-chain makes
+<p><strong>The release freeze.</strong> The push that moves <code class="docutils literal notranslate"><span class="pre">__version__</span></code> follows the release’s docs
+sweep (<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>). Once it lands, nothing else does until Create Release’s
+<code class="docutils literal notranslate"><span class="pre">github</span></code> job is waiting on approval (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>), and that commit’s own Unit
+Tests run is never cancelled. A push mid-chain makes
 <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skip, since its verdict no longer covers the checkout, and the
-release silently never starts. A squash merge whose body was cleared can be amended
-only before the chain reaches Vendor Update: after the tag, an amend orphans the tag.</p>
+release silently never starts. A release ships the commit its run was created for, so
+whatever merges between the version push and that run ships in it. A bump that leaves
+<code class="docutils literal notranslate"><span class="pre">main</span></code> red stops its own chain, since Vendor Update runs only after a green Unit Tests
+run: its fix goes direct, and the freeze restarts from that push. A squash merge whose
+body was cleared can be amended only before the chain reaches Vendor Update: after the
+tag, an amend orphans the tag.</p>
 </section>
 <section id="throttles-and-guards">
 <h2>Throttles and Guards<a class="headerlink" href="#throttles-and-guards" title="Link to this heading">¶</a></h2>
@@ -1316,29 +1327,34 @@ of every tick is an empty issue board with every open pull request at
 <tr class="row-odd"><td><p>A push during the release chain stops the release</p></td>
 <td><p>release freeze (<a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and the Main-CI Watch</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A squash merge landed with its body cleared</p></td>
+<tr class="row-even"><td><p>A scheduled <code class="docutils literal notranslate"><span class="pre">pr</span></code> job fails at “Mint the release App’s token” with <em>The
+permissions requested are not granted to this installation</em></p></td>
+<td><p>the owner grants the App Contents and Pull requests write and accepts them on
+the installation (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>A squash merge landed with its body cleared</p></td>
 <td><p>amended before Vendor Update, never after the tag (<a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and
 the Main-CI Watch</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>A test filled the disk</p></td>
+<tr class="row-even"><td><p>A test filled the disk</p></td>
 <td><p>file-size cap (<a class="reference internal" href="#throttles-and-guards">Throttles and Guards</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>Bulk issue filing flooded the Actions queue</p></td>
+<tr class="row-odd"><td><p>Bulk issue filing flooded the Actions queue</p></td>
 <td><p>queue thresholds (<a class="reference internal" href="#throttles-and-guards">Throttles and Guards</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>A held dispatch was dropped</p></td>
+<tr class="row-even"><td><p>A held dispatch was dropped</p></td>
 <td><p>commented holds (<a class="reference internal" href="#throttles-and-guards">Throttles and Guards</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A prune selected live agents’ trees</p></td>
+<tr class="row-odd"><td><p>A prune selected live agents’ trees</p></td>
 <td><p>keep rules (<a class="reference internal" href="#worktree-cleanup">Worktree Cleanup</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>A measurement read the shared checkout</p></td>
+<tr class="row-even"><td><p>A measurement read the shared checkout</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pcapkit.__file__</span></code> assert (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A cross-review likely ran on the author’s model</p></td>
+<tr class="row-odd"><td><p>A cross-review likely ran on the author’s model</p></td>
 <td><p>another model (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>A worker posted and spawned on its own</p></td>
+<tr class="row-even"><td><p>A worker posted and spawned on its own</p></td>
 <td><p>the worker rules (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
 </tbody>
