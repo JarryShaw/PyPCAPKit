@@ -293,21 +293,26 @@ def init_path() -> str:
 def rewrite_init(path: str, new_ver: str) -> None:
     """Write ``new_ver`` into the ``__version__`` assignment at ``path``.
 
+    As in :func:`plan_citation`, the assignment keeps its own terminator and every
+    other line is carried through byte for byte, so the next line is never joined
+    onto it and the file ends as it began. ``newline=''`` stops the read and write
+    translating CRLF.
+
     Args:
         path: File carrying the ``__version__`` assignment.
         new_ver: Version string to record.
 
     """
     contents = []  # type: list[str]
-    with open(path, 'r', encoding='utf-8') as in_file:
+    with open(path, 'r', encoding='utf-8', newline='') as in_file:
         for line in in_file:
-            if line.startswith('__version__'):
-                line = f'__version__ = {new_ver!r}'
+            body = line.rstrip('\r\n')
+            if body.startswith('__version__'):
+                line = f'__version__ = {new_ver!r}' + line[len(body):]
             contents.append(line)
 
-    with open(path, 'w', encoding='utf-8') as out_file:
+    with open(path, 'w', encoding='utf-8', newline='') as out_file:
         out_file.writelines(contents)
-        out_file.write('\n')
 
 
 def plan_citation(text: str, version: str, released: Optional[str] = None) -> str:

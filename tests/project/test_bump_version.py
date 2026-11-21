@@ -33,6 +33,7 @@ to write with.
 
 from __future__ import annotations
 
+import ast
 import contextlib
 import datetime
 import importlib.util
@@ -76,6 +77,22 @@ references:
     version: 9.9.9
     authors:
       - name: Anonymous
+"""
+
+
+#: The tail of :file:`pcapkit/__init__.py`, where statements follow the
+#: ``__version__`` assignment. A rewrite that drops the assignment's terminator
+#: joins the next line onto it on every bump: from ``1.6.1``, ``.post1`` took the
+#: blank line, ``.post2`` the comment and ``.post3`` the ``lazy_exports`` call, a
+#: syntax error.
+INIT_TAIL = """\
+from pcapkit.utilities.importlib import lazy_exports
+
+#: version number
+__version__ = '1.6.1'
+
+# Protocols are imported the first time they are reached (#2730).
+__getattr__, __dir__ = lazy_exports(__name__, globals(), packages=('protocols',))
 """
 
 
@@ -541,6 +558,60 @@ class InitRewriteTests(CitationTreeMixin, unittest.TestCase):
 
         after = path.read_text(encoding='utf-8').splitlines()
         self.assertEqual(before[:-1], after[:-1])
+
+    def bump_tail(self, ending: str) -> tuple[bytes, bytes]:
+        """Bump :data:`INIT_TAIL`, with ``ending`` terminators, to ``1.6.1.post3``.
+
+        Returns:
+            The file's bytes before and after.
+
+        """
+        path = self.tmp_path / 'init.py'
+        before = INIT_TAIL.replace('\n', ending).encode('utf-8')
+        path.write_bytes(before)
+
+        for version in ('1.6.1.post1', '1.6.1.post2', '1.6.1.post3'):
+            bump_version.rewrite_init(str(path), version)
+
+        return before, path.read_bytes()
+
+    def test_the_lines_after_the_assignment_are_unchanged(self) -> None:
+        for ending in ('\n', '\r\n'):
+            with self.subTest(ending=ending):
+                before, after = self.bump_tail(ending)
+
+                expected = [
+                    f"__version__ = '1.6.1.post3'{ending}".encode('utf-8')
+                    if line.startswith(b'__version__') else line
+                    for line in before.splitlines(keepends=True)
+                ]
+                self.assertEqual(after.splitlines(keepends=True), expected)
+
+    def test_the_rewritten_file_parses(self) -> None:
+        for ending in ('\n', '\r\n'):
+            with self.subTest(ending=ending):
+                _, after = self.bump_tail(ending)
+
+                try:
+                    ast.parse(after)
+                except SyntaxError as error:
+                    self.fail(f'the bumped file no longer parses: {error}')
+
+    def test_the_file_ends_as_it_began(self) -> None:
+        for ending in ('\n', '\r\n'):
+            with self.subTest(ending=ending):
+                before, after = self.bump_tail(ending)
+
+                self.assertEqual(after.splitlines(keepends=True)[-1],
+                                 before.splitlines(keepends=True)[-1])
+
+    def test_a_missing_final_newline_is_not_added(self) -> None:
+        path = self.tmp_path / 'init.py'
+        path.write_bytes(b"#: version number\n__version__ = '1.5.0b4'")
+
+        bump_version.rewrite_init(str(path), '1.5.0b5')
+
+        self.assertEqual(path.read_bytes(), b"#: version number\n__version__ = '1.5.0b5'")
 
     def test_the_fallback_reader_strips_the_closing_quote_and_newline(self) -> None:
         # A fallback running ``line.split('=')[1].strip(" '")`` stops at the
