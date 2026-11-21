@@ -1660,7 +1660,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                                 f'{type(bitmap).__name__}')
         else:
             try:  # bytes-like object
-                bitmap_bytes = bytes(memoryview(bitmap))
+                # NOTE: The block releases the view: PyPy frees a dropped one only on collection,
+                # and a live one keeps a caller's bytearray from resizing.
+                with memoryview(bitmap) as view:
+                    bitmap_bytes = bytes(view)
             except TypeError:  # iterable of octets
                 try:
                     octets = tuple(bitmap)
