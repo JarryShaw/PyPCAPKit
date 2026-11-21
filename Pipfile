@@ -81,5 +81,12 @@ setuptools = "*"
 wheel = "*"
 twine = "*"
 
+# Dependabot's ``/`` job resolves on this Python. Without it, the job takes the
+# lowest it ships that ``requires-python`` allows, too old for the docs pins it
+# reads (#2797). It matches ``latest`` in .github/python-versions.toml, which
+# the docs build runs on.
+[requires]
+python_version = "3.15"
+
 [pipenv]
 #allow_prereleases = true
