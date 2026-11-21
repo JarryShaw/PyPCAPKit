@@ -541,7 +541,7 @@ class Job(NamedTuple):
     #: ``'whole-suite'`` when it passes no selection at all, ``'explicit'``
     #: when it names literal test-file paths (see :attr:`paths`), and
     #: ``'project-pins'`` when it runs what :func:`~tests._tiers.project_pin_paths`
-    #: prints (#1954).
+    #: prints (#1954), a :func:`~tests._tiers.project_pin_half` per cell (#2798).
     selection: 'str'
     #: The literal test-file paths named by an ``'explicit'`` selection, empty
     #: for every other shape. Compared to :class:`Gate`.\ ``module`` by exact
@@ -1361,7 +1361,7 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
                 tier = ast.literal_eval(asked.pop())
         elif '--ignore' in run_block:
             selection = 'ignore'
-        elif 'project_pin_paths' in run_block:
+        elif 'project_pin_half' in run_block:
             selection = 'project-pins'
         else:
             selection = 'whole-suite'
@@ -1393,8 +1393,9 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
       since every leg shares the job's one install line. The same holds for a
       ``'fixture-tier'`` job with a ``latest`` leg, whose other legs ask for the
       ``ALL`` tier alone.
-    * ``'project-pins'`` is :func:`~tests._tiers.is_project_pin`, the job running
-      exactly what :func:`~tests._tiers.project_pin_paths` prints.
+    * ``'project-pins'`` is :func:`~tests._tiers.is_project_pin`, the job's cells
+      running between them exactly what :func:`~tests._tiers.project_pin_paths`
+      prints, a :func:`~tests._tiers.project_pin_half` each (#2798).
     * ``'explicit'`` is exact membership in :attr:`Job.paths` -- the literal
       ``TEST_PATHS`` list a ``matrix.engine`` cell of ``engine-tests`` (#849)
       runs, at file granularity (that job names whole files, never node IDs).

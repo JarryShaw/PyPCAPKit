@@ -288,11 +288,11 @@ class WorkflowAgreementTests(unittest.TestCase):
         """#1958: run as bash runs them, the ``test`` legs, ``latest``'s too, ignore each ``LATEST`` module.
 
         #2751: each cell of ``test-latest-tier`` runs its half of the ``LATEST`` tier
-        by name, and the halves leave out each project pin (#1954), which
-        ``project-tests`` runs. Every step asks
+        by name, and the halves leave out each project pin (#1954), which the cells
+        of ``project-tests`` run, a half each (#2798). Every step asks
         :data:`~tests._tiers.LATEST_TIER_SELECTOR`,
         :data:`~tests._tiers.LATEST_HALF_SELECTOR` or
-        :data:`~tests._tiers.PROJECT_PINS_SELECTOR` at run time, so none can drift
+        :data:`~tests._tiers.PROJECT_PIN_HALF_SELECTOR` at run time, so none can drift
         from :func:`~tests._tiers.module_tier`; what can is how each uses the
         answer, which is what running them checks. experimental.yml asks in a step
         of its own, under the runner's ``python3``; its legs run in
@@ -317,11 +317,18 @@ class WorkflowAgreementTests(unittest.TestCase):
                 self.assertEqual(leg_ignores(text, str(half), self.selectors), [])
                 halves.extend(selected)
         self.assertEqual(sorted(halves + pins), sorted(path for path in latest if _tiers.is_unit_tier(path)))
-        self.assertEqual(project_pins_run(text, self.selectors), pins)
+        ran = []  # type: list[str]
+        for half in _tiers.PROJECT_HALVES:
+            with self.subTest(pins=half):
+                chosen = project_pins_run(text, str(half), self.selectors)
+                self.assertTrue(chosen)
+                self.assertEqual(chosen, list(_tiers.project_pin_half(half)))
+                ran.extend(chosen)
+        self.assertEqual(sorted(ran), pins)
         for workflow, job, step, selector in (
                 (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_HALF_SELECTOR),
                 (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_TIER_SELECTOR),
-                (WORKFLOW, 'project-tests', 'Run the project pins', _tiers.PROJECT_PINS_SELECTOR),
+                (WORKFLOW, 'project-tests', 'Run the project pins', _tiers.PROJECT_PIN_HALF_SELECTOR),
                 (EXPERIMENTAL_WORKFLOW, 'experimental', 'List the LATEST tier',
                  _tiers.LATEST_TIER_SELECTOR.replace('python -c', 'python3 -c'))):
             with self.subTest(job=job, selector=selector):
@@ -349,16 +356,23 @@ class WorkflowAgreementTests(unittest.TestCase):
 
     @unittest.skipIf(BASH is None, 'the steps are bash scripts')
     def test_a_leg_that_asks_for_the_wrong_list_is_caught(self) -> None:
-        """The pins alone are not the ``LATEST`` tier, and one half is not the other (#2751)."""
+        """The pins alone are not the ``LATEST`` tier, and one half is not the other (#2751, #2798)."""
         if not WORKFLOW.is_file():
             self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
         text = WORKFLOW.read_text(encoding='utf-8')
         latest = _tiers.LATEST_TIER_SELECTOR.split('"', 1)[1]
         pins = _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1]
         self.assertEqual(text.count(latest), 1)
-        self.assertEqual(text.count(pins), 1)  # `project-tests`'s
+        self.assertEqual(text.count(_tiers.PROJECT_PIN_HALF_SELECTOR), 1)  # `project-tests`'s
         self.assertNotEqual(leg_ignores(text.replace(latest, pins), cache=self.selectors),
                             list(_tiers.latest_tier_paths()))
+        asked = 'project_pin_half(int(sys.argv[1]))'
+        self.assertEqual(text.count(asked), 1)
+        first = _tiers.PROJECT_HALVES[0]
+        for half in _tiers.PROJECT_HALVES[1:]:
+            with self.subTest(pins=half):
+                self.assertNotEqual(project_pins_run(text.replace(asked, f'project_pin_half({first})'), str(half),
+                                                     self.selectors), list(_tiers.project_pin_half(half)))
         asked = 'latest_tier_half(int(sys.argv[1]))'
         self.assertEqual(text.count(asked), 1)
         first = _tiers.LATEST_TIER_HALVES[0]
@@ -494,14 +508,14 @@ def leg_selects(text: 'str', half: 'str' = '', cache: 'str' = '') -> 'list[str]'
     return [arg for arg in leg_argv(text, half, cache) if not arg.startswith('-') and arg.endswith('.py')]
 
 
-def project_pins_run(text: 'str', cache: 'str' = '') -> 'list[str]':
-    """The modules ``project-tests``'s ``Run the project pins`` step hands pytest.
+def project_pins_run(text: 'str', half: 'str', cache: 'str' = '') -> 'list[str]':
+    """The modules ``project-tests``'s ``Run the project pins`` step hands pytest in cell ``half`` (#2798).
 
     ``cache`` is as for :func:`leg_ignores`.
 
     """
     argv = stubbed_argv(run_script(job_section(text, 'project-tests'), 'Run the project pins'),
-                        {'SELECTOR_CACHE': cache})
+                        {'HALF': half, 'SELECTOR_CACHE': cache})
     return [arg for arg in argv if arg.endswith('.py')]
 
 
@@ -2145,8 +2159,9 @@ class DependencyGateSelectionTests(unittest.TestCase):
         (``integration``), pass no selection at all (``gate``), name
         literal test-file paths (``engine-tests``, one :class:`Job` per
         ``matrix.engine`` cell, #849), or run what
-        :func:`~tests._tiers.project_pin_paths` prints (``project-tests``,
-        #1954). A new job selecting some other way would otherwise be
+        :func:`~tests._tiers.project_pin_paths` prints, a
+        :func:`~tests._tiers.project_pin_half` per cell (``project-tests``,
+        #1954, #2798). A new job selecting some other way would otherwise be
         classified ``'whole-suite'`` by the fallback and credited with
         reaching gates it does not run.
 

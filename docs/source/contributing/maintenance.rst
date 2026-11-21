@@ -330,11 +330,11 @@ The steps that the graph compresses:
    appendix. A verdict superseded by a new head is said to be, so a stale one never
    reads as current. A reviewer's correction of an earlier number is itself a claim,
    re-derived before it is relayed.
-*  **The verdict and its label go up** once the review is in and Project tests, Lint
-   and deploy-pages are green, never held for a slow non-blocking leg. Once that leg
-   finishes its failing test ids are re-read, since an experimental or KTLO leg ends
-   green whatever its tests did. A merge wave supersedes every GraalPy run on
-   ``main``, so a pull request's GraalPy leg may be the only full run there is.
+*  **The verdict and its label go up** once the review is in and both Project tests
+   halves, Lint and deploy-pages are green, never held for a slow non-blocking leg.
+   Once that leg finishes its failing test ids are re-read, since an experimental or
+   KTLO leg ends green whatever its tests did. A merge wave supersedes every GraalPy
+   run on ``main``, so a pull request's GraalPy leg may be the only full run there is.
 *  **A green, conflict-free pull request can still break** ``main``: after a merge
    wave, merge it into the current ``main`` in a scratch tree and run the affected
    tests before calling it ready.

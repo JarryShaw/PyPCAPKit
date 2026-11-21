@@ -63,10 +63,13 @@ class TestThePinsJob(unittest.TestCase):
                       .split("pip install -e '", 1)[1].split("'", 1)[0], install)
 
     def test_it_runs_under_the_caps(self) -> None:
-        """xdist as ``test`` runs it, a 2 GiB file cap, and a step cap under the job's."""
+        """xdist as ``test`` runs it, a 2 GiB file cap, and a step cap under the job's; a half
+        of the pins per cell (#2798)."""
         run = str(step(JOB, STEP)['run'])
         self.assertIn('python util/cap_file_size.py python -m pytest -q -n logical --dist load', run)
-        self.assertIn(_tiers.PROJECT_PINS_SELECTOR, run)
+        self.assertIn(f'{_tiers.PROJECT_PIN_HALF_SELECTOR} "$HALF"', run)
+        self.assertEqual(step(JOB, STEP)['env'], {'HALF': '${{ matrix.half }}'})
+        self.assertEqual(job(*JOB)['strategy']['matrix'], {'half': list(_tiers.PROJECT_HALVES)})
         self.assertLess(step(JOB, STEP)['timeout-minutes'], job(*JOB)['timeout-minutes'])
 
 

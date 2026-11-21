@@ -16,7 +16,7 @@ job stays green while covering less. The assertions are therefore over the
   ``--half 1`` in one cell and ``--half 2`` in the other, both read from
   :data:`run_unittest_leg.SHARD_BOUNDARIES`, so they too are disjoint and
   together equal the unsharded leg, a module added later included; and
-  ``project-tests``' docs-only steps cut it the same way. The rest of
+  ``project-tests``' cells cut it the same way, its pins included (#2798). The rest of
   ``protocols``, everything but ``protocols/internet``, is halved at its own
   entry there, both halves leaving out the same subdirectory;
 * every other matrix cell is a bare direct child of ``tests/`` with no
@@ -47,6 +47,8 @@ if str(ROOT / 'util') not in sys.path:
     sys.path.insert(0, str(ROOT / 'util'))
 
 import run_unittest_leg as leg  # noqa: E402  pylint: disable=wrong-import-position
+
+from tests import _tiers  # noqa: E402  pylint: disable=wrong-import-position
 
 #: ``tests/`` subdirectories deliberately not in the matrix, each for the reason
 #: the ``unittest-ordering`` comment in the workflow records (#2115).
@@ -119,6 +121,14 @@ def _matrix() -> 'list[tuple[str, list[str], dict[str, str]]]':
     return cells
 
 
+def _project_tests_halves() -> 'list[str]':
+    """The ``half`` values of the ``project-tests`` matrix (#2798)."""
+    found = re.findall(r'^\s+half:\s*\[([^\]\n]*)\]\s*$', _job('project-tests'), re.M)
+    if len(found) != 1:
+        raise AssertionError(f'expected one half: list in project-tests, found {len(found)}')
+    return [value.strip() for value in found[0].split(',')]
+
+
 def _modules(name: 'str', exclude: 'list[str]', boundary: 'dict[str, str]') -> 'tuple[str, ...]':
     """What the cell ``(name, exclude, boundary)`` runs from its own directory."""
     return leg.leg_modules(name, exclude, **boundary)
@@ -167,15 +177,39 @@ class TestShardedProtocolsLeg(unittest.TestCase):
                         self.assertEqual(len(hits), 1)
 
     def test_project_tests_cuts_where_the_matrix_does(self):
-        """#2254: ``project-tests``' docs-only steps run the two halves the ``project``
-        cells do, one step each, and between them the whole leg, once."""
+        """#2254, #2798: on a docs-only diff each ``project-tests`` cell runs the half of
+        the leg a ``project`` cell does, and between them the whole leg, once."""
         runs = re.findall(r'run_unittest_leg\.py\s+project\b([^\n]*)', _job('project-tests'))
-        self.assertEqual(sorted(half for flags in runs for half in _halves(flags)), ['1', '2'])
-        steps = [leg.leg_modules('project', **_boundary('project', flags)) for flags in runs]
+        self.assertEqual(len(runs), 1, 'one step runs the leg, a half per cell')
+        self.assertIn('--half ${{ matrix.half }}', runs[0])
+        halves = _project_tests_halves()
+        self.assertEqual(sorted(halves), ['1', '2'])
+        steps = [leg.leg_modules('project', **_boundary('project', runs[0].replace('${{ matrix.half }}', half)))
+                 for half in halves]
         cells = [_modules(*cell) for cell in _matrix() if cell[0] == 'project']
         self.assertEqual(sorted(steps), sorted(cells))
         flat = [module for half in steps for module in half]
         self.assertEqual(sorted(flat), sorted(leg.leg_modules('project')))
+
+    def test_project_tests_cells_partition_the_pins(self):
+        """#2798: on a code diff each cell runs the pins on its side of the leg's cut, and
+        between them every pin, once, a pin added later included."""
+        self.assertIs(leg.SHARD_BOUNDARIES['project'], _tiers.PROJECT_BOUNDARY)
+        self.assertIn(f'{_tiers.PROJECT_PIN_HALF_SELECTOR} "$HALF"', _job('project-tests'))
+        self.assertIn('HALF: ${{ matrix.half }}', _job('project-tests'))
+        halves = _project_tests_halves()
+        self.assertEqual(sorted(halves), sorted(str(half) for half in _tiers.PROJECT_HALVES))
+        pins = [_tiers.project_pin_half(int(half)) for half in halves]
+        self.assertTrue(all(pins), 'a cell runs no pin')
+        flat = [pin for half in pins for pin in half]
+        self.assertEqual(len(flat), len(set(flat)), 'a pin runs in two cells')
+        self.assertEqual(sorted(flat), list(_tiers.project_pin_paths()), 'a pin falls between cells')
+        for half, chosen in zip(halves, pins):
+            with self.subTest(half=half):
+                side = leg.leg_modules('project', **leg.half_bounds('project', int(half)))
+                self.assertLessEqual({pin[:-len('.py')].replace('/', '.') for pin in chosen}, set(side))
+        with self.assertRaises(ValueError):
+            _tiers.project_pin_half(3)
 
     def test_every_other_cell_is_a_plain_direct_child(self):
         others = [cell for cell in _matrix() if _top(cell[0]) not in SHARDED]
