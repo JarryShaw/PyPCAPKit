@@ -75,6 +75,7 @@ LISTS = frozenset({
     'transport.sctp:MissingMandatoryParameterCause.types',
     'transport.sctp:SACKChunk.dup_tsn',
     'transport.sctp:SupportedAddressTypesParameter.types',
+    'transport.sctp:SupportedExtensionsParameter.types',
     'transport.tcp:MPTCPRemoveAddress.addr_id',
 })
 

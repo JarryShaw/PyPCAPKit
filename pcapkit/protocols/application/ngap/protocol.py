@@ -11,8 +11,8 @@ NG Application Protocol (NGAP) [*]_ of 3GPP TS 38.413, and the enumerations its
 decoded fields resolve to.
 
 NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.
-It runs over SCTP and is named by the DATA chunk's *payload protocol
-identifier* rather than by a port, so :class:`NGAP` is registered on
+It runs over SCTP and is named by the DATA or I-DATA chunk's *payload
+protocol identifier* rather than by a port, so :class:`NGAP` is registered on
 :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__>` under
 PPID 60
 (:attr:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol`)
@@ -21,10 +21,10 @@ and PPID 66
 see
 :func:`pcapkit.foundation.registry.protocols.transport.register_sctp`.
 
-An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded
-in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). The whole
-payload is the encoding, with no header or framing of its own, so none of its
-structure is visible until an ASN.1 decoder has run over it.
+An SCTP DATA or I-DATA chunk that names NGAP carries exactly one ``NGAP-PDU``,
+encoded in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). The
+whole payload is the encoding, with no header or framing of its own, so none of
+its structure is visible until an ASN.1 decoder has run over it.
 
 Decoding therefore needs the optional |pycrate|_ dependency
 (``pip install pypcapkit[NGAP]``). Without it an NGAP payload degrades as an
@@ -87,9 +87,10 @@ Known Limitations
   resolves to a non-registering member called ``Unassigned`` rather than
   failing or adding a member to either enumeration -- see
   :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`.
-* **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk
-  is decoded on its own, so an ``NGAP-PDU`` split across chunks by SCTP
-  fragmentation fails to decode.
+* **NGAP over a fragmented SCTP association is not reassembled.** A DATA or
+  I-DATA chunk is decoded on its own, so an ``NGAP-PDU`` split across chunks by
+  SCTP fragmentation fails to decode, and a later I-DATA fragment, which
+  carries no PPID, is kept raw.
 * **Private IEs** (``PrivateMessage``) **carry no schema.** Their contents are
   vendor defined, so the generic conversion reports whatever ASN.1 shape the
   encoding declares and cannot name the fields.

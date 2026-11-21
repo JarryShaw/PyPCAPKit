@@ -172,7 +172,7 @@ that reads it, and is keyed by that protocol's own code for its payload:
        subgraph TR ["Transport layer tables"]
            direction TB
            TU["TCP.\_\_proto\_\_ and UDP.\_\_proto\_\_<br/>keyed by port<br/>register\_tcp, register\_udp,<br/>register\_apptype for either or both"]
-           SC["SCTP.\_\_proto\_\_<br/>keyed by the DATA chunk's PPID<br/>register\_sctp"]
+           SC["SCTP.\_\_proto\_\_<br/>keyed by the DATA or I-DATA<br/>chunk's PPID<br/>register\_sctp"]
            DC["DCCP.\_\_proto\_\_<br/>keyed by port<br/>register\_dccp"]
            TU ~~~ SC ~~~ DC
        end

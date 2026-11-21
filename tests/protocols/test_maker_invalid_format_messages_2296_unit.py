@@ -57,10 +57,11 @@ class MakerMessageTestCase(unittest.TestCase):
 class SCTPChunkFlagsMessage(MakerMessageTestCase):
     """``_make_chunk_*`` names ``flags`` and shows the octets it was handed."""
 
-    #: Chunk type per maker, as :rfc:`9260` assigns them. ``_make_chunk_donone``
-    #: serves the unsupported types, so it gets one that has no maker of its own.
+    #: Chunk type per maker, as :rfc:`9260` and its extensions assign them.
+    #: ``_make_chunk_donone`` serves the unsupported types, so it gets one that
+    #: has no maker of its own.
     MAKERS = {
-        '_make_chunk_donone': 'Padding_Chunk',
+        '_make_chunk_donone': 'Re_configuration_Chunk',
         '_make_chunk_init': 'Initiation',
         '_make_chunk_init_ack': 'Initiation_Acknowledgement',
         '_make_chunk_sack': 'Selective_Acknowledgement',
@@ -71,6 +72,9 @@ class SCTPChunkFlagsMessage(MakerMessageTestCase):
         '_make_chunk_error': 'Operation_Error',
         '_make_chunk_cookie_echo': 'State_Cookie',
         '_make_chunk_cookie_ack': 'Cookie_Acknowledgement',
+        '_make_chunk_pad': 'Padding_Chunk',
+        '_make_chunk_forward_tsn': 'Forward_TSN',
+        '_make_chunk_i_forward_tsn': 'I_FORWARD_TSN',
     }
 
     def test_wrong_width_flags_name_the_argument(self) -> None:

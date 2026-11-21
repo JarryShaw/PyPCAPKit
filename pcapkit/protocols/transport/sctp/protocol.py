@@ -49,6 +49,10 @@ from pcapkit.protocols.transport.sctp.data import \
 from pcapkit.protocols.transport.sctp.data import DATAChunk as Data_DATAChunk
 from pcapkit.protocols.transport.sctp.data import DATAChunkFlags as Data_DATAChunkFlags
 from pcapkit.protocols.transport.sctp.data import ErrorChunk as Data_ErrorChunk
+from pcapkit.protocols.transport.sctp.data import ForwardTSNChunk as Data_ForwardTSNChunk
+from pcapkit.protocols.transport.sctp.data import ForwardTSNStream as Data_ForwardTSNStream
+from pcapkit.protocols.transport.sctp.data import \
+    ForwardTSNSupportedParameter as Data_ForwardTSNSupportedParameter
 from pcapkit.protocols.transport.sctp.data import GapAckBlock as Data_GapAckBlock
 from pcapkit.protocols.transport.sctp.data import HeartbeatACKChunk as Data_HeartbeatACKChunk
 from pcapkit.protocols.transport.sctp.data import HeartbeatChunk as Data_HeartbeatChunk
@@ -56,6 +60,9 @@ from pcapkit.protocols.transport.sctp.data import \
     HeartbeatInfoParameter as Data_HeartbeatInfoParameter
 from pcapkit.protocols.transport.sctp.data import \
     HostNameAddressParameter as Data_HostNameAddressParameter
+from pcapkit.protocols.transport.sctp.data import IDATAChunk as Data_IDATAChunk
+from pcapkit.protocols.transport.sctp.data import IForwardTSNChunk as Data_IForwardTSNChunk
+from pcapkit.protocols.transport.sctp.data import IForwardTSNStream as Data_IForwardTSNStream
 from pcapkit.protocols.transport.sctp.data import INITACKChunk as Data_INITACKChunk
 from pcapkit.protocols.transport.sctp.data import INITChunk as Data_INITChunk
 from pcapkit.protocols.transport.sctp.data import \
@@ -68,6 +75,8 @@ from pcapkit.protocols.transport.sctp.data import \
     MissingMandatoryParameterCause as Data_MissingMandatoryParameterCause
 from pcapkit.protocols.transport.sctp.data import NoUserDataCause as Data_NoUserDataCause
 from pcapkit.protocols.transport.sctp.data import OutOfResourceCause as Data_OutOfResourceCause
+from pcapkit.protocols.transport.sctp.data import PaddingChunk as Data_PaddingChunk
+from pcapkit.protocols.transport.sctp.data import PaddingParameter as Data_PaddingParameter
 from pcapkit.protocols.transport.sctp.data import \
     ProtocolViolationCause as Data_ProtocolViolationCause
 from pcapkit.protocols.transport.sctp.data import \
@@ -81,6 +90,8 @@ from pcapkit.protocols.transport.sctp.data import StaleCookieCause as Data_Stale
 from pcapkit.protocols.transport.sctp.data import StateCookieParameter as Data_StateCookieParameter
 from pcapkit.protocols.transport.sctp.data import \
     SupportedAddressTypesParameter as Data_SupportedAddressTypesParameter
+from pcapkit.protocols.transport.sctp.data import \
+    SupportedExtensionsParameter as Data_SupportedExtensionsParameter
 from pcapkit.protocols.transport.sctp.data import TBitFlags as Data_TBitFlags
 from pcapkit.protocols.transport.sctp.data import UnknownCause as Data_UnknownCause
 from pcapkit.protocols.transport.sctp.data import UnknownChunk as Data_UnknownChunk
@@ -105,6 +116,10 @@ from pcapkit.protocols.transport.sctp.schema import \
     CookieReceivedWhileShuttingDownCause as Schema_CookieReceivedWhileShuttingDownCause
 from pcapkit.protocols.transport.sctp.schema import DATAChunk as Schema_DATAChunk
 from pcapkit.protocols.transport.sctp.schema import ErrorChunk as Schema_ErrorChunk
+from pcapkit.protocols.transport.sctp.schema import ForwardTSNChunk as Schema_ForwardTSNChunk
+from pcapkit.protocols.transport.sctp.schema import ForwardTSNStream as Schema_ForwardTSNStream
+from pcapkit.protocols.transport.sctp.schema import \
+    ForwardTSNSupportedParameter as Schema_ForwardTSNSupportedParameter
 from pcapkit.protocols.transport.sctp.schema import GapAckBlock as Schema_GapAckBlock
 from pcapkit.protocols.transport.sctp.schema import HeartbeatACKChunk as Schema_HeartbeatACKChunk
 from pcapkit.protocols.transport.sctp.schema import HeartbeatChunk as Schema_HeartbeatChunk
@@ -112,6 +127,9 @@ from pcapkit.protocols.transport.sctp.schema import \
     HeartbeatInfoParameter as Schema_HeartbeatInfoParameter
 from pcapkit.protocols.transport.sctp.schema import \
     HostNameAddressParameter as Schema_HostNameAddressParameter
+from pcapkit.protocols.transport.sctp.schema import IDATAChunk as Schema_IDATAChunk
+from pcapkit.protocols.transport.sctp.schema import IForwardTSNChunk as Schema_IForwardTSNChunk
+from pcapkit.protocols.transport.sctp.schema import IForwardTSNStream as Schema_IForwardTSNStream
 from pcapkit.protocols.transport.sctp.schema import INITACKChunk as Schema_INITACKChunk
 from pcapkit.protocols.transport.sctp.schema import INITChunk as Schema_INITChunk
 from pcapkit.protocols.transport.sctp.schema import \
@@ -126,6 +144,8 @@ from pcapkit.protocols.transport.sctp.schema import \
     MissingMandatoryParameterCause as Schema_MissingMandatoryParameterCause
 from pcapkit.protocols.transport.sctp.schema import NoUserDataCause as Schema_NoUserDataCause
 from pcapkit.protocols.transport.sctp.schema import OutOfResourceCause as Schema_OutOfResourceCause
+from pcapkit.protocols.transport.sctp.schema import PaddingChunk as Schema_PaddingChunk
+from pcapkit.protocols.transport.sctp.schema import PaddingParameter as Schema_PaddingParameter
 from pcapkit.protocols.transport.sctp.schema import \
     ProtocolViolationCause as Schema_ProtocolViolationCause
 from pcapkit.protocols.transport.sctp.schema import \
@@ -141,6 +161,8 @@ from pcapkit.protocols.transport.sctp.schema import \
     StateCookieParameter as Schema_StateCookieParameter
 from pcapkit.protocols.transport.sctp.schema import \
     SupportedAddressTypesParameter as Schema_SupportedAddressTypesParameter
+from pcapkit.protocols.transport.sctp.schema import \
+    SupportedExtensionsParameter as Schema_SupportedExtensionsParameter
 from pcapkit.protocols.transport.sctp.schema import UnknownCause as Schema_UnknownCause
 from pcapkit.protocols.transport.sctp.schema import UnknownChunk as Schema_UnknownChunk
 from pcapkit.protocols.transport.sctp.schema import UnknownParameter as Schema_UnknownParameter
@@ -315,9 +337,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
     Unlike :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
     :class:`~pcapkit.protocols.transport.udp.protocol.UDP`, SCTP dispatches the next
-    layer on the *payload protocol identifier* (PPID) each DATA chunk carries, not
-    on a port, so :attr:`self.__proto__ <SCTP.__proto__>` is keyed by PPID and
-    populated through :meth:`SCTP.register`::
+    layer on the *payload protocol identifier* (PPID) of its first DATA or I-DATA
+    chunk, not on a port, so :attr:`self.__proto__ <SCTP.__proto__>` is keyed by
+    PPID and populated through :meth:`SCTP.register`::
 
        >>> from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
        >>> SCTP.register(PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)
@@ -382,6 +404,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
        * - :attr:`~pcapkit.const.sctp.chunk.Chunk.Shutdown_Complete`
          - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_shutdown_complete`
          - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_chunk_shutdown_complete`
+       * - :attr:`~pcapkit.const.sctp.chunk.Chunk.Payload_Data_supporting_Interleaving`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_i_data`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_chunk_i_data`
+       * - :attr:`~pcapkit.const.sctp.chunk.Chunk.Padding_Chunk`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_pad`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_chunk_pad`
+       * - :attr:`~pcapkit.const.sctp.chunk.Chunk.Forward_TSN`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_forward_tsn`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_chunk_forward_tsn`
+       * - :attr:`~pcapkit.const.sctp.chunk.Chunk.I_FORWARD_TSN`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_i_forward_tsn`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_chunk_i_forward_tsn`
 
     Any other chunk type -- unassigned, reserved, or defined by an SCTP
     extension that :mod:`pcapkit` does not implement -- falls through to
@@ -421,6 +455,15 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
        * - :attr:`~pcapkit.const.sctp.parameter.Parameter.Supported_Address_Types`
          - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_addrtypes`
          - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_addrtypes`
+       * - :attr:`~pcapkit.const.sctp.parameter.Parameter.Padding`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_pad`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_pad`
+       * - :attr:`~pcapkit.const.sctp.parameter.Parameter.Supported_Extensions`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_extensions`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_extensions`
+       * - :attr:`~pcapkit.const.sctp.parameter.Parameter.Forward_TSN_supported`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_forward_tsn_supported`
+         - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_forward_tsn_supported`
 
     It parses every error cause :rfc:`9260#section-3.3.10` defines, by
     :class:`pcapkit.const.sctp.cause_code.CauseCode` code, as mapped in
@@ -458,17 +501,27 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
          :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than an
          :exc:`AttributeError` (:issue:`2723`).
 
+    .. versionchanged:: 1.7.0
+
+       The I-DATA and I-FORWARD-TSN chunks of :rfc:`8260`, the FORWARD TSN
+       chunk and Forward-TSN-Supported parameter of :rfc:`3758`, the PAD chunk
+       and padding parameter of :rfc:`4820` and the supported extensions
+       parameter of :rfc:`5061` are dissected, where each parsed as an unknown
+       chunk or parameter, and the first DATA or I-DATA chunk, rather than the
+       first DATA chunk, picks the next layer (:issue:`2811`).
+
     """
 
     ##########################################################################
     # Defaults.
     ##########################################################################
 
-    #: Payload of the packet, i.e. the user data of the first DATA chunk found
-    #: in the packet, as located by :meth:`self.read <SCTP.read>`.
+    #: Payload of the packet, i.e. the user data of the first DATA or I-DATA
+    #: chunk found in the packet, as located by :meth:`self.read <SCTP.read>`.
     _payload = b''  # type: bytes
 
-    #: Payload protocol identifier of the first DATA chunk found in the packet.
+    #: Payload protocol identifier of the first DATA or I-DATA chunk found in
+    #: the packet.
     _ppid = None  # type: Optional[Enum_PayloadProtocolIdentifier]
 
     #: Protocol index mapping for decoding next layer, see
@@ -478,8 +531,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #:
     #: Important:
-    #:    Keyed by the DATA chunk's *payload protocol identifier* (PPID), **not**
-    #:    by port number as in :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
+    #:    Keyed by the DATA or I-DATA chunk's *payload protocol identifier*
+    #:    (PPID), **not** by port number as in
+    #:    :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
     #:    :class:`~pcapkit.protocols.transport.udp.protocol.UDP`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
@@ -521,6 +575,10 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Enum_Chunk.State_Cookie: 'cookie_echo',                   # [RFC 9260] COOKIE ECHO
             Enum_Chunk.Cookie_Acknowledgement: 'cookie_ack',          # [RFC 9260] COOKIE ACK
             Enum_Chunk.Shutdown_Complete: 'shutdown_complete',        # [RFC 9260] SHUTDOWN COMPLETE
+            Enum_Chunk.Payload_Data_supporting_Interleaving: 'i_data',  # [RFC 8260] I-DATA
+            Enum_Chunk.Padding_Chunk: 'pad',                          # [RFC 4820] PAD
+            Enum_Chunk.Forward_TSN: 'forward_tsn',                    # [RFC 3758] FORWARD TSN
+            Enum_Chunk.I_FORWARD_TSN: 'i_forward_tsn',                # [RFC 8260] I-FORWARD-TSN
         },
     )  # type: DefaultDict[int, str | tuple[ChunkParser, ChunkConstructor]]
 
@@ -541,6 +599,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Enum_Parameter.Cookie_Preservative: 'preservative',       # [RFC 9260] Cookie Preservative
             Enum_Parameter.Host_Name_Address: 'hostname',             # [RFC 9260] Host Name Address
             Enum_Parameter.Supported_Address_Types: 'addrtypes',      # [RFC 9260] Supported Addr Types
+            Enum_Parameter.Padding: 'pad',                            # [RFC 4820] Padding
+            Enum_Parameter.Supported_Extensions: 'extensions',        # [RFC 5061] Supported Extensions
+            Enum_Parameter.Forward_TSN_supported: 'forward_tsn_supported',  # [RFC 3758] Forward-TSN-Supported
         },
     )  # type: DefaultDict[int, str | tuple[ParameterParser, ParameterConstructor]]
 
@@ -595,11 +656,13 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
     @property
     def ppid(self) -> 'Optional[Enum_PayloadProtocolIdentifier]':
-        """Payload protocol identifier of the first DATA chunk of the packet.
+        """Payload protocol identifier of the first DATA or I-DATA chunk of the packet.
 
         Returns:
             The PPID used to dispatch the next layer, or :obj:`None` if the
-            packet carries no DATA chunk.
+            packet carries neither chunk, or if that chunk is an I-DATA chunk
+            of a later fragment, which carries a fragment sequence number in
+            its place (:rfc:`8260#section-2.1`).
 
         """
         return self._ppid
@@ -670,13 +733,14 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 ('trailer', schema.trailer),
             ])
 
-        # NOTE: The first DATA chunk's payload protocol identifier, not a port, picks the
-        # next layer; further bundled DATA chunks stay recorded in the chunk list.
+        # NOTE: The first DATA or I-DATA chunk's payload protocol identifier, not a port, picks
+        # the next layer; further bundled ones stay recorded in the chunk list.
         self._ppid = None
         self._payload = b''
         for chunk in schema.chunks:
-            if chunk.type == Enum_Chunk.Payload_Data:
-                chunk = cast('Schema_DATAChunk', chunk)
+            if chunk.type in (Enum_Chunk.Payload_Data,
+                              Enum_Chunk.Payload_Data_supporting_Interleaving):
+                chunk = cast('Schema_DATAChunk | Schema_IDATAChunk', chunk)
                 self._ppid = chunk.ppid
                 self._payload = chunk.data
                 break
@@ -717,8 +781,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Note:
             There is no ``payload`` argument: SCTP carries its user data in the
-            ``data`` field of a DATA chunk, so the payload is supplied as part
-            of that chunk.
+            ``data`` field of a DATA or I-DATA chunk, so the payload is supplied
+            as part of that chunk.
 
         """
         if chunks is not None:
@@ -1050,8 +1114,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Arguments:
             dict\_: info buffer
-            proto: payload protocol identifier of the DATA chunk carrying the
-                payload, if any
+            proto: payload protocol identifier of the DATA or I-DATA chunk
+                carrying the payload, if any
             length: valid (*non-padding*) length
             packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
@@ -1062,7 +1126,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             This deliberately bypasses :meth:`Transport._decode_next_layer
             <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`,
             which keys the lookup on port numbers, since SCTP keys it on the
-            DATA chunk's payload protocol identifier instead.
+            DATA or I-DATA chunk's payload protocol identifier instead.
 
             The PPID is passed through **unchanged**, registered or not, so that
             an unregistered payload is still labelled with the identifier it
@@ -1662,6 +1726,220 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             ),
         )
 
+    def _read_chunk_i_data(self, schema: 'Schema_IDATAChunk', *, chunks: 'Chunks') -> 'Data_IDATAChunk':  # pylint: disable=unused-argument
+        """Read SCTP I-DATA chunk.
+
+        Structure of SCTP I-DATA chunk [:rfc:`8260#section-2.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Type = 64   |  Res  |I|U|B|E|       Length = Variable       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                              TSN                              |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Stream Identifier      |           Reserved            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                      Message Identifier                       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    Payload Protocol Identifier / Fragment Sequence Number     |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           \\                                                               \\
+           /                           User Data                           /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed chunk schema
+            chunks: extracted SCTP chunks
+
+        Returns:
+            Parsed chunk data. The field after the message identifier is the
+            payload protocol identifier on the first fragment of a user
+            message, with the ``B`` bit set, whose fragment sequence number is
+            then ``0``, and the fragment sequence number on any later one.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** greater than ``20``, since
+                :rfc:`8260#section-2.2.2` keeps the DATA chunk's requirement of
+                at least one byte of user data.
+
+        """
+        if schema.length <= 20:
+            raise ProtocolError(f'{self.alias}: [Chunk {schema.type}] invalid format')
+
+        first = bool(schema.flags['B'])
+        return Data_IDATAChunk(
+            type=schema.type,
+            length=schema.length,
+            flags=Data_DATAChunkFlags(
+                reserved=schema.flags['reserved'],
+                I=bool(schema.flags['I']),
+                U=bool(schema.flags['U']),
+                B=first,
+                E=bool(schema.flags['E']),
+            ),
+            tsn=schema.tsn,
+            stream_id=schema.stream_id,
+            reserved=schema.reserved,
+            mid=schema.mid,
+            ppid=schema.ppid if first else None,
+            fsn=0 if first else cast('int', schema.fsn),
+            data=schema.data,
+        )
+
+    def _read_chunk_pad(self, schema: 'Schema_PaddingChunk', *, chunks: 'Chunks') -> 'Data_PaddingChunk':  # pylint: disable=unused-argument
+        """Read SCTP PAD chunk.
+
+        Structure of SCTP PAD chunk [:rfc:`4820#section-3`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Type = 0x84   |   Flags=0     |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           \\                         Padding Data                          /
+           /                                                               \\
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed chunk schema
+            chunks: extracted SCTP chunks
+
+        Returns:
+            Parsed chunk data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        Note:
+            The receiver ignores the padding data (:rfc:`4820#section-3`), so
+            it is kept as captured rather than checked.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Chunk {schema.type}] invalid format')
+
+        return Data_PaddingChunk(
+            type=schema.type,
+            length=schema.length,
+            flags=schema.flags,
+            data=schema.data,
+        )
+
+    def _read_chunk_forward_tsn(self, schema: 'Schema_ForwardTSNChunk', *, chunks: 'Chunks') -> 'Data_ForwardTSNChunk':  # pylint: disable=unused-argument
+        """Read SCTP FORWARD TSN chunk.
+
+        Structure of SCTP FORWARD TSN chunk [:rfc:`3758#section-3.2`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Type = 192  |  Flags = 0x00 |        Length = Variable      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                      New Cumulative TSN                       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |         Stream-1              |       Stream Sequence-1       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           \\                                                               /
+           /                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |         Stream-N              |       Stream Sequence-N       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed chunk schema
+            chunks: extracted SCTP chunks
+
+        Returns:
+            Parsed chunk data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``8`` plus a multiple of
+                ``4``, the size of a stream entry.
+
+        """
+        if schema.length < 8:
+            raise ProtocolError(f'{self.alias}: [Chunk {schema.type}] invalid format')
+
+        return Data_ForwardTSNChunk(
+            type=schema.type,
+            length=schema.length,
+            flags=schema.flags,
+            new_cum_tsn=schema.new_cum_tsn,
+            streams=tuple(
+                Data_ForwardTSNStream(
+                    stream_id=entry.stream_id,
+                    stream_seq=entry.stream_seq,
+                ) for entry in schema.streams
+            ),
+        )
+
+    def _read_chunk_i_forward_tsn(self, schema: 'Schema_IForwardTSNChunk', *, chunks: 'Chunks') -> 'Data_IForwardTSNChunk':  # pylint: disable=unused-argument
+        """Read SCTP I-FORWARD-TSN chunk.
+
+        Structure of SCTP I-FORWARD-TSN chunk [:rfc:`8260#section-2.3.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Type = 194  | Flags = 0x00  |      Length = Variable        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       New Cumulative TSN                      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |       Stream Identifier       |          Reserved           |U|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Message Identifier                      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           \\                                                               \\
+           /                                                               /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |       Stream Identifier       |          Reserved           |U|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Message Identifier                      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed chunk schema
+            chunks: extracted SCTP chunks
+
+        Returns:
+            Parsed chunk data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``8`` plus a multiple of
+                ``8``, the size of a stream entry.
+
+        """
+        if schema.length < 8:
+            raise ProtocolError(f'{self.alias}: [Chunk {schema.type}] invalid format')
+
+        return Data_IForwardTSNChunk(
+            type=schema.type,
+            length=schema.length,
+            flags=schema.flags,
+            new_cum_tsn=schema.new_cum_tsn,
+            streams=tuple(
+                Data_IForwardTSNStream(
+                    stream_id=entry.stream_id,
+                    reserved=entry.flags['reserved'],
+                    U=bool(entry.flags['U']),
+                    mid=entry.mid,
+                ) for entry in schema.streams
+            ),
+        )
+
     def _read_param_donone(self, schema: 'Schema_UnknownParameter', *, parameters: 'Parameters') -> 'Data_UnknownParameter':  # pylint: disable=unused-argument
         """Read SCTP chunk parameter of an unsupported type.
 
@@ -1985,6 +2263,118 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             type=schema.type,
             length=schema.length,
             types=tuple(schema.types),
+        )
+
+    def _read_param_pad(self, schema: 'Schema_PaddingParameter', *, parameters: 'Parameters') -> 'Data_PaddingParameter':  # pylint: disable=unused-argument
+        """Read SCTP padding parameter.
+
+        Structure of SCTP padding parameter [:rfc:`4820#section-4`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Parameter Type = 0x8005   |       Parameter Length        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                                                               /
+           \\                          Padding Data                         \\
+           /                                                               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        Note:
+            :rfc:`4820#section-4` allows the parameter in an INIT chunk alone,
+            but it is parsed wherever it is found, as the receiver discards it.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_PaddingParameter(
+            type=schema.type,
+            length=schema.length,
+            data=schema.data,
+        )
+
+    def _read_param_extensions(self, schema: 'Schema_SupportedExtensionsParameter', *, parameters: 'Parameters') -> 'Data_SupportedExtensionsParameter':  # pylint: disable=unused-argument
+        """Read SCTP supported extensions parameter.
+
+        Structure of SCTP supported extensions parameter [:rfc:`5061#section-4.2.7`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Parameter Type = 0x8008   |      Parameter Length         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | CHUNK TYPE 1  |  CHUNK TYPE 2 |  CHUNK TYPE 3 |  CHUNK TYPE 4 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                             ....                              |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | CHUNK TYPE N  |      PAD      |      PAD      |      PAD      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_SupportedExtensionsParameter(
+            type=schema.type,
+            length=schema.length,
+            types=tuple(schema.types),
+        )
+
+    def _read_param_forward_tsn_supported(self, schema: 'Schema_ForwardTSNSupportedParameter', *, parameters: 'Parameters') -> 'Data_ForwardTSNSupportedParameter':  # pylint: disable=unused-argument
+        """Read SCTP Forward-TSN-Supported parameter.
+
+        Structure of SCTP Forward-TSN-Supported parameter [:rfc:`3758#section-3.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    Parameter Type = 49152     |  Parameter Length = 4         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``4``.
+
+        """
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_ForwardTSNSupportedParameter(
+            type=schema.type,
+            length=schema.length,
         )
 
     def _read_cause_donone(self, schema: 'Schema_UnknownCause', *, causes: 'Causes') -> 'Data_UnknownCause':  # pylint: disable=unused-argument
@@ -3090,6 +3480,247 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             length=4,
         )
 
+    def _make_chunk_i_data(self, code: 'Enum_Chunk', chunk: 'Optional[Data_IDATAChunk]' = None, *,
+                           reserved: 'int' = 0,
+                           I: 'bool' = False,  # noqa: E741
+                           U: 'bool' = False,
+                           B: 'bool' = True,
+                           E: 'bool' = True,
+                           tsn: 'int' = 0,
+                           stream_id: 'int' = 0,
+                           mid: 'int' = 0,
+                           ppid: 'Optional[Enum_PayloadProtocolIdentifier | int]' = None,
+                           fsn: 'int' = 0,
+                           data: 'bytes' = b'',
+                           **kwargs: 'Any') -> 'Schema_IDATAChunk':
+        """Make SCTP I-DATA chunk.
+
+        Args:
+            code: chunk type
+            chunk: chunk data
+            reserved: reserved flag bits
+            I: immediate bit
+            U: unordered bit
+            B: beginning fragment bit
+            E: ending fragment bit
+            tsn: transmission sequence number
+            stream_id: stream identifier
+            mid: message identifier
+            ppid: payload protocol identifier of a first fragment, as a member
+                or an :obj:`int` code; :obj:`None` writes ``0`` there
+            fsn: fragment sequence number of a later fragment
+            data: user data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed chunk schema.
+
+        Raises:
+            ProtocolError: If ``data`` is empty, since
+                :rfc:`8260#section-2.2.2` keeps the DATA chunk's requirement of
+                at least one byte of user data, a field does not fit its width,
+                ``ppid`` is a name, a :obj:`bool` or a code the field cannot
+                carry, or the field after the message identifier is given what
+                it cannot hold: a nonzero ``fsn`` with ``B`` set, or a ``ppid``
+                with ``B`` clear (:rfc:`8260#section-2.1`).
+
+        Note:
+            The reserved field after the stream identifier is written as zero,
+            as :rfc:`8260#section-2.1` has the sender do; a parsed chunk's is
+            kept as received.
+
+        """
+        field = 0
+        if chunk is not None:
+            reserved = chunk.flags.reserved
+            I = chunk.flags.I  # noqa: E741
+            U = chunk.flags.U
+            B = chunk.flags.B
+            E = chunk.flags.E
+            tsn = chunk.tsn
+            stream_id = chunk.stream_id
+            field = chunk.reserved
+            mid = chunk.mid
+            ppid = chunk.ppid
+            fsn = chunk.fsn
+            data = chunk.data
+
+        if not data:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid data: '
+                                f'must be at least one octet, not {data!r}')
+
+        fsn = self._make_uint(fsn, bits=32, name=f'[Chunk {code}] fsn')
+        if B and fsn:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid fsn: '
+                                f'must be 0 on a first fragment, not {fsn!r}')
+        if not B and ppid is not None:
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid ppid: '
+                                f'must be None on a later fragment, not {ppid!r}')
+
+        return Schema_IDATAChunk(
+            type=code,
+            flags={
+                'reserved': self._make_uint(reserved, bits=4, name=f'[Chunk {code}] reserved'),
+                'I': int(I),
+                'U': int(U),
+                'B': int(B),
+                'E': int(E),
+            },
+            length=self._make_uint(len(data) + 20, bits=16, name=f'[Chunk {code}] length'),
+            tsn=self._make_uint(tsn, bits=32, name=f'[Chunk {code}] tsn'),
+            stream_id=self._make_uint(stream_id, bits=16, name=f'[Chunk {code}] stream_id'),
+            reserved=self._make_uint(field, bits=16, name=f'[Chunk {code}] reserved field'),
+            mid=self._make_uint(mid, bits=32, name=f'[Chunk {code}] mid'),
+            ppid=self._make_index(0 if ppid is None else ppid, Enum_PayloadProtocolIdentifier,
+                                  bits=32, name=f'[Chunk {code}] ppid') if B else None,
+            fsn=None if B else fsn,
+            data=data,
+        )
+
+    def _make_chunk_pad(self, code: 'Enum_Chunk', chunk: 'Optional[Data_PaddingChunk]' = None, *,
+                        flags: 'bytes' = b'\x00',
+                        data: 'bytes' = b'',
+                        **kwargs: 'Any') -> 'Schema_PaddingChunk':
+        """Make SCTP PAD chunk.
+
+        Args:
+            code: chunk type
+            chunk: chunk data
+            flags: raw chunk flags, as a single byte
+            data: padding data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed chunk schema.
+
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte, or the
+                length does not fit 16 bits.
+
+        """
+        if chunk is not None:
+            flags = chunk.flags
+            data = chunk.data
+
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
+
+        return Schema_PaddingChunk(
+            type=code,
+            flags=flags,
+            length=self._make_uint(len(data) + 4, bits=16, name=f'[Chunk {code}] length'),
+            data=data,
+        )
+
+    def _make_chunk_forward_tsn(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ForwardTSNChunk]' = None, *,
+                                flags: 'bytes' = b'\x00',
+                                new_cum_tsn: 'int' = 0,
+                                streams: 'Optional[list[Schema_ForwardTSNStream | Data_ForwardTSNStream | tuple[int, int]]]' = None,  # pylint: disable=line-too-long
+                                **kwargs: 'Any') -> 'Schema_ForwardTSNChunk':
+        """Make SCTP FORWARD TSN chunk.
+
+        Args:
+            code: chunk type
+            chunk: chunk data
+            flags: raw chunk flags, as a single byte
+            new_cum_tsn: new cumulative TSN
+            streams: skipped streams, each as a schema, a data model or a
+                ``(stream_id, stream_seq)`` pair
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed chunk schema.
+
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte, or a field
+                or a stream entry's field does not fit its width.
+
+        """
+        if chunk is not None:
+            flags = chunk.flags
+            new_cum_tsn = chunk.new_cum_tsn
+            streams = list(chunk.streams)
+
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
+
+        entries = []  # type: list[Schema_ForwardTSNStream]
+        for entry in streams or []:
+            if isinstance(entry, Schema_ForwardTSNStream):
+                entries.append(entry)
+                continue
+            if isinstance(entry, Data_ForwardTSNStream):
+                stream_id, stream_seq = entry.stream_id, entry.stream_seq
+            else:
+                stream_id, stream_seq = entry
+            entries.append(Schema_ForwardTSNStream(
+                stream_id=self._make_uint(stream_id, bits=16, name=f'[Chunk {code}] stream_id'),
+                stream_seq=self._make_uint(stream_seq, bits=16, name=f'[Chunk {code}] stream_seq'),
+            ))
+
+        return Schema_ForwardTSNChunk(
+            type=code,
+            flags=flags,
+            length=self._make_uint(8 + len(entries) * 4, bits=16, name=f'[Chunk {code}] length'),
+            new_cum_tsn=self._make_uint(new_cum_tsn, bits=32, name=f'[Chunk {code}] new_cum_tsn'),
+            streams=entries,
+        )
+
+    def _make_chunk_i_forward_tsn(self, code: 'Enum_Chunk', chunk: 'Optional[Data_IForwardTSNChunk]' = None, *,
+                                  flags: 'bytes' = b'\x00',
+                                  new_cum_tsn: 'int' = 0,
+                                  streams: 'Optional[list[Schema_IForwardTSNStream | Data_IForwardTSNStream | tuple[int, bool, int]]]' = None,  # pylint: disable=line-too-long
+                                  **kwargs: 'Any') -> 'Schema_IForwardTSNChunk':
+        """Make SCTP I-FORWARD-TSN chunk.
+
+        Args:
+            code: chunk type
+            chunk: chunk data
+            flags: raw chunk flags, as a single byte
+            new_cum_tsn: new cumulative TSN
+            streams: skipped streams, each as a schema, a data model or a
+                ``(stream_id, U, mid)`` triple, whose reserved bits are zero
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed chunk schema.
+
+        Raises:
+            ProtocolError: If ``flags`` is **NOT** exactly one byte, or a field
+                or a stream entry's field does not fit its width.
+
+        """
+        if chunk is not None:
+            flags = chunk.flags
+            new_cum_tsn = chunk.new_cum_tsn
+            streams = list(chunk.streams)
+
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
+
+        entries = []  # type: list[Schema_IForwardTSNStream]
+        for entry in streams or []:
+            if isinstance(entry, Schema_IForwardTSNStream):
+                entries.append(entry)
+                continue
+            if isinstance(entry, Data_IForwardTSNStream):
+                stream_id, reserved, unordered, mid = entry.stream_id, entry.reserved, entry.U, entry.mid
+            else:
+                (stream_id, unordered, mid), reserved = entry, 0
+            entries.append(Schema_IForwardTSNStream(
+                stream_id=self._make_uint(stream_id, bits=16, name=f'[Chunk {code}] stream_id'),
+                flags={
+                    'reserved': self._make_uint(reserved, bits=15, name=f'[Chunk {code}] reserved'),
+                    'U': self._make_uint(unordered, bits=1, name=f'[Chunk {code}] U'),
+                },
+                mid=self._make_uint(mid, bits=32, name=f'[Chunk {code}] mid'),
+            ))
+
+        return Schema_IForwardTSNChunk(
+            type=code,
+            flags=flags,
+            length=self._make_uint(8 + len(entries) * 8, bits=16, name=f'[Chunk {code}] length'),
+            new_cum_tsn=self._make_uint(new_cum_tsn, bits=32, name=f'[Chunk {code}] new_cum_tsn'),
+            streams=entries,
+        )
+
     def _make_param_donone(self, code: 'Enum_Parameter', param: 'Optional[Data_UnknownParameter]' = None, *,
                            value: 'bytes' = b'',
                            **kwargs: 'Any') -> 'Schema_UnknownParameter':
@@ -3326,6 +3957,84 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             type=code,
             length=self._make_uint(len(types_value) * 2 + 4, bits=16, name=f'[Param {code}] length'),
             types=types_value,
+        )
+
+    def _make_param_pad(self, code: 'Enum_Parameter', param: 'Optional[Data_PaddingParameter]' = None, *,
+                        data: 'bytes' = b'',
+                        **kwargs: 'Any') -> 'Schema_PaddingParameter':
+        """Make SCTP padding parameter.
+
+        Args:
+            code: parameter type
+            param: parameter data
+            data: padding data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed parameter schema.
+
+        Raises:
+            ProtocolError: If the length does not fit 16 bits.
+
+        """
+        if param is not None:
+            data = param.data
+
+        return Schema_PaddingParameter(
+            type=code,
+            length=self._make_uint(len(data) + 4, bits=16, name=f'[Param {code}] length'),
+            data=data,
+        )
+
+    def _make_param_extensions(self, code: 'Enum_Parameter', param: 'Optional[Data_SupportedExtensionsParameter]' = None, *,
+                               types: 'Optional[list[Enum_Chunk | int]]' = None,
+                               **kwargs: 'Any') -> 'Schema_SupportedExtensionsParameter':
+        """Make SCTP supported extensions parameter.
+
+        Args:
+            code: parameter type
+            param: parameter data
+            types: chunk types of the supported extensions, each a member or
+                an :obj:`int` code
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed parameter schema.
+
+        Raises:
+            ProtocolError: If an item of ``types`` is a :obj:`bool`, a name,
+                any other non-:obj:`int`, or a code the 8-bit chunk type field
+                cannot carry.
+
+        """
+        if param is not None:
+            types = list(param.types)
+
+        types_value = [self._make_index(item, Enum_Chunk, bits=8, name='chunk type')
+                       for item in types or []]
+
+        return Schema_SupportedExtensionsParameter(
+            type=code,
+            length=self._make_uint(len(types_value) + 4, bits=16, name=f'[Param {code}] length'),
+            types=types_value,
+        )
+
+    def _make_param_forward_tsn_supported(self, code: 'Enum_Parameter', param: 'Optional[Data_ForwardTSNSupportedParameter]' = None,
+                                          **kwargs: 'Any') -> 'Schema_ForwardTSNSupportedParameter':
+        """Make SCTP Forward-TSN-Supported parameter.
+
+        Args:
+            code: parameter type
+            param: parameter data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed parameter schema.
+
+        """
+        return Schema_ForwardTSNSupportedParameter(
+            type=code,
+            length=4,
         )
 
     def _make_cause_donone(self, code: 'Enum_CauseCode', cause: 'Optional[Data_UnknownCause]' = None, *,
@@ -3683,11 +4392,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         """Get payload of the packet.
 
         SCTP has no payload field in its header schema -- user data travels
-        inside DATA chunks -- so this returns the user data of the *first* DATA
-        chunk found by :meth:`self.read <SCTP.read>`, which is also the chunk
-        whose payload protocol identifier selects the next layer. Should the
-        packet carry no DATA chunk, an empty :obj:`bytes` is returned and the
-        next layer resolves to
+        inside DATA and I-DATA chunks -- so this returns the user data of the
+        *first* such chunk found by :meth:`self.read <SCTP.read>`, which is also
+        the chunk whose payload protocol identifier selects the next layer.
+        Should the packet carry neither, an empty :obj:`bytes` is returned and
+        the next layer resolves to
         :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`.
 
         Returns:

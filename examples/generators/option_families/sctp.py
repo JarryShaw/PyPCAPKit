@@ -64,6 +64,14 @@ def _sctp_chunk_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Chunk.Operation_Error: {
             'error': [(Enum_CauseCode.Protocol_Violation, {'info': b'\x01\x02\x03'})]},
         Enum_Chunk.State_Cookie: {'cookie': b'\x01\x02\x03'},
+        # I-DATA keeps DATA's rule of at least one octet of user data (RFC 8260
+        # s2.2.2), so this override is required, as DATA's is.
+        Enum_Chunk.Payload_Data_supporting_Interleaving: {
+            'data': b'\x01\x02\x03', 'tsn': 1, 'mid': 2},
+        Enum_Chunk.Padding_Chunk: {'data': b'\x01\x02\x03'},
+        # The defaults skip no stream, which leaves the entry lists unexercised.
+        Enum_Chunk.Forward_TSN: {'new_cum_tsn': 1, 'streams': [(1, 2)]},
+        Enum_Chunk.I_FORWARD_TSN: {'new_cum_tsn': 1, 'streams': [(1, True, 2)]},
     }
 
 
@@ -92,6 +100,7 @@ def _sctp_param_registry() -> 'Any':
 
 
 def _sctp_param_overrides() -> 'dict[Any, dict[str, Any]]':
+    from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
     from pcapkit.const.sctp.parameter import Parameter as Enum_Parameter
     return {
         Enum_Parameter.Heartbeat_Info: {'info': b'\x01\x02\x03'},
@@ -104,6 +113,10 @@ def _sctp_param_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Parameter.Host_Name_Address: {'name': b'localhost\x00'},
         Enum_Parameter.Supported_Address_Types: {
             'types': [Enum_Parameter.IPv4_Address, Enum_Parameter.IPv6_Address]},
+        Enum_Parameter.Padding: {'data': b'\x01\x02\x03'},
+        Enum_Parameter.Supported_Extensions: {
+            'types': [Enum_Chunk.Forward_TSN, Enum_Chunk.Re_configuration_Chunk,
+                      Enum_Chunk.I_FORWARD_TSN]},
     }
 
 

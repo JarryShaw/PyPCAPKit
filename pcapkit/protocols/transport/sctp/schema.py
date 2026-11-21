@@ -14,11 +14,12 @@ from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
-from pcapkit.corekit.fields.misc import PayloadField, SchemaField
+from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField
 from pcapkit.corekit.fields.numbers import EnumField, PortEnumField, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
+from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -28,15 +29,17 @@ __all__ = [
     'UnknownChunk', 'DATAChunk', 'INITChunk', 'INITACKChunk', 'SACKChunk',
     'HeartbeatChunk', 'HeartbeatACKChunk', 'AbortChunk', 'ShutdownChunk',
     'ShutdownACKChunk', 'ErrorChunk', 'CookieEchoChunk', 'CookieACKChunk',
-    'ShutdownCompleteChunk',
+    'ShutdownCompleteChunk', 'IDATAChunk', 'PaddingChunk', 'ForwardTSNChunk',
+    'IForwardTSNChunk',
 
-    'GapAckBlock',
+    'GapAckBlock', 'ForwardTSNStream', 'IForwardTSNStream',
 
     'Parameter',
     'UnknownParameter', 'HeartbeatInfoParameter', 'IPv4AddressParameter',
     'IPv6AddressParameter', 'StateCookieParameter', 'UnrecognizedParameter',
     'CookiePreservativeParameter', 'HostNameAddressParameter',
-    'SupportedAddressTypesParameter',
+    'SupportedAddressTypesParameter', 'PaddingParameter', 'SupportedExtensionsParameter',
+    'ForwardTSNSupportedParameter',
 
     'ErrorCause',
     'UnknownCause', 'InvalidStreamIdentifierCause', 'MissingMandatoryParameterCause',
@@ -50,7 +53,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, Callable
+    from typing import IO, Any, Callable, Optional
 
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -79,6 +82,15 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         reserved: int
         #: T bit, i.e., the verification tag has been reflected.
         T: int
+
+    class IForwardTSNStreamFlags(TypedDict):
+        """SCTP I-FORWARD-TSN chunk stream entry flags."""
+
+        #: Reserved bits.
+        reserved: int
+        #: (U)nordered bit, i.e., the message identifier counts unordered
+        #: messages.
+        U: int
 
 
 def padding_length(pkt: 'dict[str, Any]') -> 'int':
@@ -207,6 +219,36 @@ def nested_length(base: 'int') -> 'Callable[[dict[str, Any]], int]':
     def callback(pkt: 'dict[str, Any]') -> 'int':
         length = pkt.get('length') or 0
         return max(length - base + pad_length(length, 4), 0)
+    return callback
+
+
+def entries_length(base: 'int', width: 'int') -> 'Callable[[dict[str, Any]], int]':
+    """Build a length callback for a chunk's list of fixed-width entries.
+
+    Args:
+        base: Size of the chunk's fixed-length fields, including the four-byte
+            chunk header.
+        width: Octets of each entry.
+
+    Returns:
+        A callback returning the octets of the list.
+
+    The callback raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for a
+    chunk ``length`` that leaves part of an entry, which
+    :class:`~pcapkit.corekit.fields.collections.ListField` would otherwise refuse
+    with a :exc:`~pcapkit.utilities.exceptions.FieldValueError`, logged even
+    where the refusal is handled, as :issue:`2694` found for MH. A ``length``
+    short of ``base`` is left to the chunk's parser, which refuses it.
+
+    .. versionadded:: 1.7.0
+
+    """
+    def callback(pkt: 'dict[str, Any]') -> 'int':
+        length = (pkt.get('length') or 0) - base
+        if length > 0 and length % width:
+            raise ProtocolError(f'SCTP: [Chunk {pkt["type"]}] invalid length: {pkt["length"]}, '
+                                f'not a whole number of {width}-octet entries')
+        return max(length, 0)
     return callback
 
 
@@ -583,6 +625,59 @@ class SupportedAddressTypesParameter(Parameter, code=Enum_Parameter.Supported_Ad
 
 
 @schema_final
+class PaddingParameter(Parameter, code=Enum_Parameter.Padding):
+    """Header schema for SCTP padding parameter.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Padding data, which the receiver ignores.
+    data: 'bytes' = BytesField(length=lambda pkt: max(pkt['length'] - 4, 0))
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=padding_length)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', length: 'int', data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class SupportedExtensionsParameter(Parameter, code=Enum_Parameter.Supported_Extensions):
+    """Header schema for SCTP supported extensions parameter.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Chunk types of the extensions the sender supports.
+    types: 'list[Enum_Chunk]' = ListField(
+        length=bounded(lambda pkt: max(pkt['length'] - 4, 0)),
+        item_type=EnumField(length=1, namespace=Enum_Chunk),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=padding_length)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', length: 'int',
+                     types: 'list[Enum_Chunk]') -> 'None': ...
+
+
+@schema_final
+class ForwardTSNSupportedParameter(Parameter, code=Enum_Parameter.Forward_TSN_supported):
+    """Header schema for SCTP Forward-TSN-Supported parameter.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=padding_length)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', length: 'int') -> 'None': ...
+
+
+@schema_final
 class GapAckBlock(Schema):
     """Header schema for SCTP SACK chunk gap ack blocks."""
 
@@ -593,6 +688,46 @@ class GapAckBlock(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, start: 'int', end: 'int') -> 'None': ...
+
+
+@schema_final
+class ForwardTSNStream(Schema):
+    """Header schema for SCTP FORWARD TSN chunk stream entries.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Stream identifier of the skipped stream.
+    stream_id: 'int' = UInt16Field()
+    #: Largest stream sequence number skipped in the stream.
+    stream_seq: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, stream_id: 'int', stream_seq: 'int') -> 'None': ...
+
+
+@schema_final
+class IForwardTSNStream(Schema):
+    """Header schema for SCTP I-FORWARD-TSN chunk stream entries.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Stream identifier of the skipped stream.
+    stream_id: 'int' = UInt16Field()
+    #: Entry flags.
+    flags: 'IForwardTSNStreamFlags' = BitField(length=2, namespace={
+        'reserved': (0, 15),
+        'U': (15, 1),
+    })
+    #: Largest message identifier skipped in the stream.
+    mid: 'int' = UInt32Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, stream_id: 'int', flags: 'IForwardTSNStreamFlags',
+                     mid: 'int') -> 'None': ...
 
 
 class Chunk(EnumSchema[Enum_Chunk]):
@@ -896,6 +1031,114 @@ class ShutdownCompleteChunk(Chunk, code=Enum_Chunk.Shutdown_Complete):
         def __init__(self, type: 'Enum_Chunk', flags: 'TBitFlags', length: 'int') -> 'None': ...
 
 
+@schema_final
+class IDATAChunk(Chunk, code=Enum_Chunk.Payload_Data_supporting_Interleaving):
+    """Header schema for SCTP I-DATA chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Chunk flags.
+    flags: 'DATAChunkFlags' = BitField(length=1, namespace={
+        'reserved': (0, 4),
+        'I': (4, 1),
+        'U': (5, 1),
+        'B': (6, 1),
+        'E': (7, 1),
+    })
+    #: Transmission sequence number.
+    tsn: 'int' = UInt32Field()
+    #: Stream identifier.
+    stream_id: 'int' = UInt16Field()
+    #: Reserved.
+    reserved: 'int' = UInt16Field()
+    #: Message identifier.
+    mid: 'int' = UInt32Field()
+    #: Payload protocol identifier, which the field holds on the first
+    #: fragment of a user message, with the ``B`` bit set.
+    ppid: 'Optional[Enum_PayloadProtocolIdentifier]' = ConditionalField(
+        EnumField(length=4, namespace=Enum_PayloadProtocolIdentifier),
+        lambda pkt: bool(pkt['flags']['B']),
+    )
+    #: Fragment sequence number, which the field holds on every later fragment.
+    fsn: 'Optional[int]' = ConditionalField(UInt32Field(), lambda pkt: not pkt['flags']['B'])
+    #: User data.
+    data: 'bytes' = BytesField(length=lambda pkt: max(pkt['length'] - 20, 0))
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=padding_length)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Chunk', flags: 'DATAChunkFlags', length: 'int', tsn: 'int',
+                     stream_id: 'int', reserved: 'int', mid: 'int',
+                     ppid: 'Optional[Enum_PayloadProtocolIdentifier | int]',
+                     fsn: 'Optional[int]', data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class PaddingChunk(Chunk, code=Enum_Chunk.Padding_Chunk):
+    """Header schema for SCTP PAD chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Padding data, which the receiver ignores.
+    data: 'bytes' = BytesField(length=lambda pkt: max(pkt['length'] - 4, 0))
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=padding_length)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Chunk', flags: 'bytes', length: 'int',
+                     data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class ForwardTSNChunk(Chunk, code=Enum_Chunk.Forward_TSN):
+    """Header schema for SCTP FORWARD TSN chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: New cumulative TSN.
+    new_cum_tsn: 'int' = UInt32Field()
+    #: Skipped streams.
+    streams: 'list[ForwardTSNStream]' = ListField(
+        length=bounded(entries_length(8, 4)),
+        item_type=SchemaField(length=4, schema=ForwardTSNStream),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=padding_length)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Chunk', flags: 'bytes', length: 'int', new_cum_tsn: 'int',
+                     streams: 'list[ForwardTSNStream] | bytes') -> 'None': ...
+
+
+@schema_final
+class IForwardTSNChunk(Chunk, code=Enum_Chunk.I_FORWARD_TSN):
+    """Header schema for SCTP I-FORWARD-TSN chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: New cumulative TSN.
+    new_cum_tsn: 'int' = UInt32Field()
+    #: Skipped streams.
+    streams: 'list[IForwardTSNStream]' = ListField(
+        length=bounded(entries_length(8, 8)),
+        item_type=SchemaField(length=8, schema=IForwardTSNStream),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=padding_length)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Chunk', flags: 'bytes', length: 'int', new_cum_tsn: 'int',
+                     streams: 'list[IForwardTSNStream] | bytes') -> 'None': ...
+
+
 def whole_chunks_length(data: 'bytes') -> 'int':
     """Length of the run of whole chunks at the front of ``data``.
 
@@ -972,8 +1215,8 @@ class SCTP(Schema):
     Note:
         Unlike :class:`~pcapkit.protocols.transport.tcp.schema.TCP` and
         :class:`~pcapkit.protocols.transport.udp.schema.UDP`, there is **no**
-        payload field, since SCTP carries its user data inside DATA chunks
-        rather than after the common header. See
+        payload field, since SCTP carries its user data inside DATA and I-DATA
+        chunks rather than after the common header. See
         :meth:`SCTP._get_payload <pcapkit.protocols.transport.sctp.protocol.SCTP._get_payload>`
         for how the next layer is located.
 

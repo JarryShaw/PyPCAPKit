@@ -81,6 +81,10 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_chunk_cookie_echo
    .. automethod:: _read_chunk_cookie_ack
    .. automethod:: _read_chunk_shutdown_complete
+   .. automethod:: _read_chunk_i_data
+   .. automethod:: _read_chunk_pad
+   .. automethod:: _read_chunk_forward_tsn
+   .. automethod:: _read_chunk_i_forward_tsn
    .. automethod:: _read_param_donone
    .. automethod:: _read_param_hbinfo
    .. automethod:: _read_param_ipv4
@@ -90,6 +94,9 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_param_preservative
    .. automethod:: _read_param_hostname
    .. automethod:: _read_param_addrtypes
+   .. automethod:: _read_param_pad
+   .. automethod:: _read_param_extensions
+   .. automethod:: _read_param_forward_tsn_supported
    .. automethod:: _read_cause_donone
    .. automethod:: _read_cause_invalid_stream
    .. automethod:: _read_cause_missing_param
@@ -118,6 +125,10 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_chunk_cookie_echo
    .. automethod:: _make_chunk_cookie_ack
    .. automethod:: _make_chunk_shutdown_complete
+   .. automethod:: _make_chunk_i_data
+   .. automethod:: _make_chunk_pad
+   .. automethod:: _make_chunk_forward_tsn
+   .. automethod:: _make_chunk_i_forward_tsn
    .. automethod:: _make_param_donone
    .. automethod:: _make_param_hbinfo
    .. automethod:: _make_param_ipv4
@@ -127,6 +138,9 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_param_preservative
    .. automethod:: _make_param_hostname
    .. automethod:: _make_param_addrtypes
+   .. automethod:: _make_param_pad
+   .. automethod:: _make_param_extensions
+   .. automethod:: _make_param_forward_tsn_supported
    .. automethod:: _make_cause_donone
    .. automethod:: _make_cause_invalid_stream
    .. automethod:: _make_cause_missing_param
@@ -225,7 +239,31 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.IDATAChunk
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.PaddingChunk
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ForwardTSNChunk
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.IForwardTSNChunk
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.transport.sctp.schema.GapAckBlock
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ForwardTSNStream
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.IForwardTSNStream
    :members:
    :show-inheritance:
 
@@ -266,6 +304,18 @@ Header Schemas
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.transport.sctp.schema.SupportedAddressTypesParameter
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.PaddingParameter
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.SupportedExtensionsParameter
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ForwardTSNSupportedParameter
    :members:
    :show-inheritance:
 
@@ -348,6 +398,10 @@ Type Stubs
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.IForwardTSNStreamFlags
+   :members:
+   :show-inheritance:
+
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
@@ -355,6 +409,7 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.transport.sctp.schema.pre_pack_padding
 .. autofunction:: pcapkit.protocols.transport.sctp.schema.bounded
 .. autofunction:: pcapkit.protocols.transport.sctp.schema.nested_length
+.. autofunction:: pcapkit.protocols.transport.sctp.schema.entries_length
 .. autofunction:: pcapkit.protocols.transport.sctp.schema.whole_chunks_length
 
 Data Models
@@ -380,6 +435,14 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.transport.sctp.data.GapAckBlock
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ForwardTSNStream
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.IForwardTSNStream
    :members:
    :show-inheritance:
 
@@ -443,6 +506,22 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.transport.sctp.data.IDATAChunk
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.PaddingChunk
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ForwardTSNChunk
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.IForwardTSNChunk
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.transport.sctp.data.Parameter
    :members:
    :show-inheritance:
@@ -480,6 +559,18 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.transport.sctp.data.SupportedAddressTypesParameter
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.PaddingParameter
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.SupportedExtensionsParameter
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ForwardTSNSupportedParameter
    :members:
    :show-inheritance:
 
