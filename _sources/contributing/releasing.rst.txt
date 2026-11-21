@@ -15,11 +15,14 @@ The One Manual Step
 -------------------
 
 :file:`util/bump_version.py` bumps :data:`pcapkit.__version__`; its docstring is the
-authority. Given the current version, it works out the next one under
+authority. Given the current version, read from ``pcapkit/__init__.py`` through
+:mod:`ast` rather than by importing :mod:`pcapkit`, it works out the next one under
 :pep:`440` -- a ``devN`` counter, a pre-release counter, a post-release
 counter, or a fresh ``.post1`` for a final release -- and then:
 
-* rewrites the ``__version__`` assignment in ``pcapkit/__init__.py``;
+* rewrites the ``__version__`` assignment in ``pcapkit/__init__.py``, refusing,
+  before anything is written, a rewrite that would not parse or not hold the new
+  version (:issue:`2800`);
 * moves :file:`CITATION.cff`'s ``version`` and ``date-released`` fields to
   match, line-oriented so the file's quoting and comments survive.
   ``date-released`` becomes the bump's date in UTC, its intended meaning, not
@@ -28,6 +31,8 @@ counter, or a fresh ``.post1`` for a final release -- and then:
 
 Its one scheduled caller is the ``Bump Version`` step of
 ``.github/workflows/cron-vendor.yml``, run only when a registry crawl changed code.
+It passes ``--github-output``, and ``Commit changes`` takes its subject's version
+from that ``version`` output, failing when it is empty (:issue:`2800`).
 ``util/vendor_code_changed.py`` compares each changed file with ``HEAD``; a crawl
 changing only comments or docstrings is committed as "Updated vendor documentation
 without a version bump", reaching ``main`` without starting a release

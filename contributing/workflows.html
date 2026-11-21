@@ -1048,13 +1048,13 @@ source entry) and <code class="docutils literal notranslate"><span class="pre">p
 <a class="reference internal" href="#python-versions">Python Versions</a> below). It skips the rest – the matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code>,
 <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code>,
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (a job per engine, each looping over its Python versions),
-<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, each of which
-has already run for this commit from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but
-<code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, from its
-<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so a caller would only retest the commit. It also skips
-<code class="docutils literal notranslate"><span class="pre">changes</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>, which combines what <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code> measured,
-<code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, whose project pins <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s full suite runs too (see
-<a class="reference internal" href="#project-pins">Project Pins</a> below), and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> and
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, each of which has already run for this commit from Unit Tests’
+own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code>
+pushes only, from its <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so a caller would only retest the
+commit; <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s full suite runs the project pins too (see <a class="reference internal" href="#project-pins">Project Pins</a> below).
+It also skips <code class="docutils literal notranslate"><span class="pre">changes</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>, which combines what <code class="docutils literal notranslate"><span class="pre">test</span></code> and
+<code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code> measured, and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status
 Checks</a> below), which are gated out by their own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having
 already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no <code class="docutils literal notranslate"><span class="pre">if:</span></code> and runs on every path, deliberately,
 per the comment above the job: <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the
@@ -1473,8 +1473,8 @@ one runs everything:</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">project-tests</span></code></p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> and the root-level modules under plain unittest, a half
-per step, and the docs readers</p></td>
-<td><p>the project pins</p></td>
+per cell, and the docs readers</p></td>
+<td><p>the project pins, a half per cell</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, <code class="docutils literal notranslate"><span class="pre">windows</span></code></p></td>
 <td><p>skipped</p></td>
@@ -2020,7 +2020,7 @@ runs it at collection on every leg.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code>, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>, a half per cell</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, less the project pins</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>, a half per cell</p></td>
 <td><p>the project pins</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span></code>’s coverage leg and PyPy’s among them, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>,
@@ -2101,13 +2101,21 @@ on every push to <code class="docutils literal notranslate"><span class="pre">ma
 Every <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">experimental</span></code> leg passes each pin as an
 <code class="docutils literal notranslate"><span class="pre">--ignore</span></code>, through <code class="docutils literal notranslate"><span class="pre">latest_tier_paths()</span></code>, which holds each pin, and
 <code class="docutils literal notranslate"><span class="pre">latest_tier_half()</span></code> leaves them out of <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code>, whose coverage
-measures only <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs what <code class="docutils literal notranslate"><span class="pre">project_pin_paths()</span></code>
-prints. Each asks at run time, as <code class="docutils literal notranslate"><span class="pre">integration</span></code> asks for its selection, so no
-workflow lists the pins, and <code class="file docutils literal notranslate"><span class="pre">tests/test_tier_guard.py</span></code> runs
-the steps to check what each does with the answer. Under <code class="docutils literal notranslate"><span class="pre">gate-only</span></code>, <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s
-full suite runs the pins with everything else. <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code>
-cells keep them, as they ask how a module runs in one interpreter, in file order and
-without xdist, which is a question about the module rather than the Python version.</p>
+measures only <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, and each cell of <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs its half of what
+<code class="docutils literal notranslate"><span class="pre">project_pin_paths()</span></code> prints, which <code class="docutils literal notranslate"><span class="pre">project_pin_half()</span></code> gives it. Each asks at
+run time, as <code class="docutils literal notranslate"><span class="pre">integration</span></code> asks for its selection, so no workflow lists the pins,
+and <code class="file docutils literal notranslate"><span class="pre">tests/test_tier_guard.py</span></code> runs the steps to check what each does with the
+answer. Under <code class="docutils literal notranslate"><span class="pre">gate-only</span></code>, <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s full suite runs the pins with everything else.
+<code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code> cells keep them, as they ask how a module runs in
+one interpreter, in file order and without xdist, which is a question about the module
+rather than the Python version.</p>
+<p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs a cell per half of <code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2798">#2798</a>), as its
+docs-only path, run whole, comes near the job’s cap. Both paths cut at
+<code class="docutils literal notranslate"><span class="pre">PROJECT_BOUNDARY</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>, where <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">project</span></code> cells cut too: a cell runs its half of the pins on a code diff, and its
+half of the leg on a docs-only one, half 1 the other docs readers as well.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_unittest_ordering_shards.py</span></code> fails when a module or a pin
+runs in neither cell or in both.</p>
 <p>A pin’s skip where <code class="docutils literal notranslate"><span class="pre">tomllib</span></code> is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> checks those skips in a child
@@ -2341,7 +2349,10 @@ script not listed here is CI-only.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Bump</span> <span class="pre">Version</span></code> in <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Bump</span> <span class="pre">Version</span></code> in <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code>, as
+<code class="docutils literal notranslate"><span class="pre">bump_version.py</span> <span class="pre">--github-output</span></code>, whose <code class="docutils literal notranslate"><span class="pre">version</span></code> output <code class="docutils literal notranslate"><span class="pre">Commit</span>
+<span class="pre">changes</span></code> puts in its subject, and <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">documentation</span> <span class="pre">changes</span></code> there,
+as <code class="docutils literal notranslate"><span class="pre">bump_version.py</span> <span class="pre">--print-version</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2800">#2800</a>).</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code>, committed to <code class="docutils literal notranslate"><span class="pre">main</span></code>, to release what is
 not a vendor refresh (see <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>).</p></td>
 </tr>

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/releasing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, it works out the next one under PEP 440 – a devN counter, a pre-relea..." />
-<meta name="description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, it works out the next one under PEP 440 – a devN counter, a pre-relea..." />
+<meta property="og:description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, read from pcapkit/__init__.py through ast rather than by importing pc..." />
+<meta name="description" content="The One Manual Step: util/bump_version.py bumps pcapkit.__version__; its docstring is the authority. Given the current version, read from pcapkit/__init__.py through ast rather than by importing pc..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="Const-Vendor Pairing" href="conventions/const-vendor-pairing.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -583,11 +583,14 @@ else – the <code class="docutils literal notranslate"><span class="pre">v*</sp
 <section id="the-one-manual-step">
 <h2>The One Manual Step<a class="headerlink" href="#the-one-manual-step" title="Link to this heading">¶</a></h2>
 <p><code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> bumps <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>; its docstring is the
-authority. Given the current version, it works out the next one under
+authority. Given the current version, read from <code class="docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code> through
+<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> rather than by importing <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, it works out the next one under
 <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0440/"><strong>PEP 440</strong></a> – a <code class="docutils literal notranslate"><span class="pre">devN</span></code> counter, a pre-release counter, a post-release
 counter, or a fresh <code class="docutils literal notranslate"><span class="pre">.post1</span></code> for a final release – and then:</p>
 <ul class="simple">
-<li><p>rewrites the <code class="docutils literal notranslate"><span class="pre">__version__</span></code> assignment in <code class="docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code>;</p></li>
+<li><p>rewrites the <code class="docutils literal notranslate"><span class="pre">__version__</span></code> assignment in <code class="docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code>, refusing,
+before anything is written, a rewrite that would not parse or not hold the new
+version (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2800">#2800</a>);</p></li>
 <li><p>moves <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s <code class="docutils literal notranslate"><span class="pre">version</span></code> and <code class="docutils literal notranslate"><span class="pre">date-released</span></code> fields to
 match, line-oriented so the file’s quoting and comments survive.
 <code class="docutils literal notranslate"><span class="pre">date-released</span></code> becomes the bump’s date in UTC, its intended meaning, not
@@ -596,6 +599,8 @@ the later publication date (<a class="extlink-issue reference external" href="ht
 </ul>
 <p>Its one scheduled caller is the <code class="docutils literal notranslate"><span class="pre">Bump</span> <span class="pre">Version</span></code> step of
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-vendor.yml</span></code>, run only when a registry crawl changed code.
+It passes <code class="docutils literal notranslate"><span class="pre">--github-output</span></code>, and <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> takes its subject’s version
+from that <code class="docutils literal notranslate"><span class="pre">version</span></code> output, failing when it is empty (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2800">#2800</a>).
 <code class="docutils literal notranslate"><span class="pre">util/vendor_code_changed.py</span></code> compares each changed file with <code class="docutils literal notranslate"><span class="pre">HEAD</span></code>; a crawl
 changing only comments or docstrings is committed as “Updated vendor documentation
 without a version bump”, reaching <code class="docutils literal notranslate"><span class="pre">main</span></code> without starting a release
