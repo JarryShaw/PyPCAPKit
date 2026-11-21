@@ -1901,7 +1901,8 @@ Z-Wave chip over an RS-232 or USB serial connection, as described in section
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ETW">
 <span class="sig-name descname"><span class="pre">ETW</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">290</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ETW" title="Link to this definition">¶</a></dt>
-<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ETW</span></code>] Event Tracing for Windows messages.</p>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ETW</span></code>] Event Tracing for Windows messages v1. Wireshark ≤ 4.6.X will
+use this to talk with its etwdump extcap.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1989,6 +1990,13 @@ described in the specification.</p>
 <span class="sig-name descname"><span class="pre">DECT_NR_TAP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">304</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DECT_NR_TAP" title="Link to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_DECT_NR_TAP</span></code>] DECT-2020 New Radio (NR) TAP with a custom metadata
 header prepended to a standard DLT_DECT_NR MAC-layer frame.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ETW2">
+<span class="sig-name descname"><span class="pre">ETW2</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">305</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ETW2" title="Link to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ETW2</span></code>] Event Tracing for Windows messages v2. Wireshark &gt; 4.6 will
+use this to talk with its etwdump extcap.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -116802,7 +116810,7 @@ be valued on and they are documented here instead.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=6845fc97"></script>
+</div><script src="../../_static/documentation_options.js?v=48f4667c"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

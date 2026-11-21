@@ -1273,7 +1273,8 @@
     <span class="c1">#: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames.</span>
     <span class="n">ATSC_ALP</span> <span class="o">=</span> <span class="mi">289</span>
 
-    <span class="c1">#: [``DLT_ETW``] Event Tracing for Windows messages.</span>
+    <span class="c1">#: [``DLT_ETW``] Event Tracing for Windows messages v1. Wireshark ≤ 4.6.X will</span>
+    <span class="c1">#: use this to talk with its etwdump extcap.</span>
     <span class="n">ETW</span> <span class="o">=</span> <span class="mi">290</span>
 
     <span class="c1">#: [``DLT_NETANALYZER_NG``] Reserved for Hilscher Gesellschaft fuer</span>
@@ -1320,6 +1321,10 @@
     <span class="c1">#: [``DLT_DECT_NR_TAP``] DECT-2020 New Radio (NR) TAP with a custom metadata</span>
     <span class="c1">#: header prepended to a standard DLT\_DECT\_NR MAC-layer frame.</span>
     <span class="n">DECT_NR_TAP</span> <span class="o">=</span> <span class="mi">304</span>
+
+    <span class="c1">#: [``DLT_ETW2``] Event Tracing for Windows messages v2. Wireshark &gt; 4.6 will</span>
+    <span class="c1">#: use this to talk with its etwdump extcap.</span>
+    <span class="n">ETW2</span> <span class="o">=</span> <span class="mi">305</span>
 
     <span class="c1"># The following legacy alias(es) are emitted here, after every</span>
     <span class="c1"># current entry above, instead of at their original numeric</span>
@@ -1400,7 +1405,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=6845fc97"></script>
+</div><script src="../../../../_static/documentation_options.js?v=48f4667c"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
