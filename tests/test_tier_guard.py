@@ -528,7 +528,7 @@ class ProjectPinRuleTests(unittest.TestCase):
             'implementation branch': 'import sys\nGRAAL = sys.implementation.name == "graalpy"\n',
             'a script that imports it, by path': 'import importlib.util\nfrom tests._tiers import ROOT\n'
                                                  'importlib.util.spec_from_file_location('
-                                                 '"b", ROOT / "util" / "bump_version.py")\n',
+                                                 '"b", ROOT / "util" / "conda_vendor.py")\n',
             'a computed script name': 'import importlib.util\ndef load(name):\n'
                                       '    importlib.util.spec_from_file_location(name, f"util/{name}.py")\n',
             'a module that imports it on import': 'from tests.project.test_pyshark_encap_map import ROOT\n',

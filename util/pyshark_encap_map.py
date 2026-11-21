@@ -616,12 +616,11 @@ def main(argv: 'Optional[Sequence[str]]' = None) -> int:
         )
         return 0
 
-    # Imported here rather than at module level, the same way
-    # util/bump_version.py's current_version() imports pcapkit lazily: this
-    # script has to run -- and print its --check verdict -- even where
-    # pcapkit itself is not importable, which is exactly the case argparse
-    # and the earlier tshark/editcap and source-capture checks exist to
-    # report cleanly rather than as a bare ImportError traceback.
+    # Imported here rather than at module level: this script has to run --
+    # and print its --check verdict -- even where pcapkit itself is not
+    # importable, which is exactly the case argparse and the earlier
+    # tshark/editcap and source-capture checks exist to report cleanly rather
+    # than as a bare ImportError traceback.
     #
     # ROOT is put at the front of sys.path, and any pip-installed editable
     # finder is evicted from sys.meta_path first, so that "the LinkType this

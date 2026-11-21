@@ -17,13 +17,14 @@ steps, which shows ``Commit documentation changes``, which stages with ``-a``
 alone, never sees one. The harness is #1674's, from
 :mod:`tests.project.test_vendor_comment_only_no_bump_1674`.
 
+#2800: the step takes the subject's version from ``Bump Version``'s ``version``
+output, and fails, committing nothing, when that is empty.
+
 """
 
 from __future__ import annotations
 
-import os
 import re
-import shlex
 import subprocess
 import sys
 import unittest
@@ -65,14 +66,6 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
 
     def setUp(self) -> None:
         super().setUp()
-        # `python -c 'import pcapkit'` in the step reads this tree's version.
-        bin_dir = self.root / 'bin'
-        bin_dir.mkdir()
-        (bin_dir / 'python').write_text(
-            f'#!/bin/sh\nexec {shlex.quote(sys.executable)} -S "$@"\n', encoding='utf-8')
-        (bin_dir / 'python').chmod(0o755)
-        self.env['PATH'] = f'{bin_dir}{os.pathsep}{self.env["PATH"]}'
-
         # The real tree has one, so an unquoted `pcapkit/const/*.py` would be
         # expanded by the shell to this file alone, and not reach the modules.
         self.write('pcapkit/const/__init__.py', '# the generated tree\n')
@@ -139,12 +132,17 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
         """What ``Bump Version`` leaves behind that this step reads."""
         self.write(VERSION_FILE, "# the package\n__version__ = '9.9.9b10'\n")
 
-    def run_commit_step(self, changed_files: 'list[str]') -> 'subprocess.CompletedProcess[str]':
-        """``Commit changes``' script, given what ``verify-changed-files`` reported."""
+    def run_commit_step(self, changed_files: 'list[str]',
+                        version: 'str' = '9.9.9b10') -> 'subprocess.CompletedProcess[str]':
+        """``Commit changes``' script, given what ``verify-changed-files`` reported and
+        the ``version`` ``Bump Version`` wrote, none where it is empty.
+
+        """
         block = step_block(self.block, 'Commit changes')
         context = {'github': {'event_name': 'schedule', 'event': {}}, 'steps': {
             'verify-changed-files': {'outputs': {'files_changed': 'true',
                                                  'changed_files': ' '.join(changed_files)}},
+            self.step('Bump Version')['id']: {'outputs': {'version': version} if version else {}},
         }}  # type: dict[str, object]
         env = {}  # type: dict[str, str]
         for key, value in step_mapping(block, 'env').items():
@@ -221,6 +219,27 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
             'verify-changed-files': ('success', {'files_changed': 'false', 'changed_files': NULL}),
         })
         self.assertEqual(tuple(name for name in WATCHED if outcomes[name] != 'skipped'), ())
+
+    def test_the_subject_is_the_bump_steps_version(self) -> None:
+        """#2800: read from the step output, not by importing the tree, here unparsable."""
+        self.assertIn('python util/bump_version.py --github-output',
+                      step_block(self.block, 'Bump Version'))
+        self.write(ADDED, MODULE.replace('UDP', 'SCTP'))
+        self.write(VERSION_FILE, "__version__ = '9.9.9b10'__getattr__ = None\n")
+
+        result = self.run_commit_step(self.reported())
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.git('show', '-s', '--format=%s'), 'Bumped version to 9.9.9b10')
+
+    def test_an_empty_version_commits_nothing(self) -> None:
+        """#2800: the step fails before ``git commit`` when ``Bump Version`` wrote no version."""
+        self.write(ADDED, MODULE.replace('UDP', 'SCTP'))
+        self.bump()
+
+        result = self.run_commit_step(self.reported(), version='')
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('Bump Version wrote no version output', result.stderr)
+        self.assertEqual(self.git('rev-parse', 'HEAD'), self.base)
 
 
 if __name__ == '__main__':

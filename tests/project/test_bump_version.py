@@ -19,15 +19,13 @@ script, would leave it. It reads :file:`pcapkit/__init__.py` as text rather than
 importing :mod:`pcapkit`, since an installed copy elsewhere on ``sys.path`` would
 answer for a different file.
 
-:func:`~bump_version.main` is called once, with the version reader and
-:func:`~bump_version.init_path` patched and the working directory moved into the
-scratch tree, because it writes ``conda/build`` relative to the working directory
-and resolves :file:`pcapkit/__init__.py` through ``pcapkit.__path__``; unpatched, it
-would rewrite the checkout running the tests. That call pins what a bump writes
-into ``date-released`` (#2163). The pieces it wires together are each tested
-directly, and that the one fatal outcome comes before any write is structural:
-:func:`~bump_version.plan_citation` takes text and returns text, so it has nothing
-to write with.
+:func:`~bump_version.main` is called with ``--init`` and ``--citation`` naming
+scratch files and the working directory moved into the scratch tree, because it
+writes ``conda/build`` relative to the working directory; otherwise it would rewrite
+the checkout running the tests. Those calls pin what a bump writes into
+``date-released`` (#2163), the ``version`` output the workflow commits under, and
+that a refused bump writes nothing (#2800). The pieces it wires together are each
+tested directly.
 
 """
 
@@ -41,6 +39,8 @@ import io
 import os
 import pathlib
 import re
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -232,18 +232,16 @@ class CitationDateTests(CitationTreeMixin, unittest.TestCase):
         init.write_text("__version__ = '1.5.0b4'\n", encoding='utf-8')
         (self.tmp_path / 'conda').mkdir()
 
-        # ``main`` writes ``conda/build`` relative to the working directory and
-        # finds ``__init__.py`` through ``pcapkit``, so both are pointed at the
-        # scratch tree to keep the checkout running the tests untouched.
+        # ``main`` writes ``conda/build`` relative to the working directory, so
+        # it runs in the scratch tree to keep the checkout running the tests
+        # untouched.
         cwd = os.getcwd()
         self.addCleanup(os.chdir, cwd)
         os.chdir(self.tmp_path)
 
-        with mock.patch.object(bump_version, 'current_version', return_value='1.5.0b4'), \
-                mock.patch.object(bump_version, 'init_path', return_value=str(init)):
-            opened = datetime.datetime.now(datetime.timezone.utc).date()
-            self.assertEqual(bump_version.main(['--citation', str(citation)]), 0)
-            closed = datetime.datetime.now(datetime.timezone.utc).date()
+        opened = datetime.datetime.now(datetime.timezone.utc).date()
+        self.assertEqual(bump_version.main(['--init', str(init), '--citation', str(citation)]), 0)
+        closed = datetime.datetime.now(datetime.timezone.utc).date()
 
         written = citation.read_text(encoding='utf-8')
         self.assertIn('\nversion: 1.5.0b5\n', written)
@@ -613,38 +611,146 @@ class InitRewriteTests(CitationTreeMixin, unittest.TestCase):
 
         self.assertEqual(path.read_bytes(), b"#: version number\n__version__ = '1.5.0b5'")
 
-    def test_the_fallback_reader_strips_the_closing_quote_and_newline(self) -> None:
-        # A fallback running ``line.split('=')[1].strip(" '")`` stops at the
-        # trailing newline and so returns ``"1.5.0b4'\n"`` -- quote and newline
-        # included -- which ``packaging`` rejects as an invalid version. Nothing
-        # in CI notices that, because the only caller installs the package first,
-        # so ``import pcapkit`` always succeeds and the fallback is unreachable.
-        # Forced here by making that import fail.
-        self.write_init()
-        cwd = os.getcwd()
-        self.addCleanup(os.chdir, cwd)
-        os.chdir(self.tmp_path)
+    def assertRefused(self, text: str, fragment: str) -> None:
+        """Bumping a file holding ``text`` raises naming ``fragment``, and leaves it as it was."""
+        path = self.tmp_path / 'init.py'
+        path.write_bytes(text.encode('utf-8'))
 
-        with mock.patch.dict('sys.modules', {'pcapkit': None}):
-            version = bump_version.current_version()
+        with self.assertRaises(RuntimeError) as error:
+            bump_version.rewrite_init(path, '1.6.1.post1')
 
-        self.assertEqual(version, '1.5.0b4')
-        # And the value is usable, which is what that fallback gets wrong.
-        self.assertEqual(bump_version.bump(version), '1.5.0b5')
+        self.assertIn(fragment, str(error.exception))
+        self.assertEqual(path.read_bytes(), text.encode('utf-8'))
 
-    def test_the_fallback_still_complains_when_there_is_no_version(self) -> None:
+    def test_a_rewrite_that_would_not_parse_is_refused(self) -> None:
+        # #2800: the line rewrite keeps only the assignment's first line, so the
+        # rest of a value spanning lines is left dangling.
+        self.assertRefused("__version__ = (\n    '1.6.1'\n)\n", 'would not read back')
+
+    def test_a_rewrite_that_would_not_hold_the_version_is_refused(self) -> None:
+        # Not at the start of its line, so the rewrite never reaches it.
+        self.assertRefused("__all__ = []; __version__ = '1.6.1'\n", "would assign '1.6.1'")
+
+
+class VersionReadTests(CitationTreeMixin, unittest.TestCase):
+    """:func:`~bump_version.current_version`, which reads the file through :mod:`ast` (#2800)."""
+
+    def read(self, text: str) -> str:
+        path = self.tmp_path / 'init.py'
+        path.write_text(text, encoding='utf-8')
+        return bump_version.current_version(path)
+
+    def test_a_plain_assignment_is_read(self) -> None:
+        self.assertEqual(self.read(INIT_TAIL), '1.6.1')
+
+    def test_a_trailing_comment_is_not_read_as_the_version(self) -> None:
+        # The line 762f283ed bumped from, a comment joined onto it.
+        version = self.read("__version__ = '1.6.1.post2'# Protocols are imported (#2730).\n")
+
+        self.assertEqual(version, '1.6.1.post2')
+        self.assertEqual(bump_version.bump(version), '1.6.1.post3')
+
+    def test_a_file_without_the_assignment_is_refused(self) -> None:
+        for text in ('# nothing here\n', "def f():\n    __version__ = '1.6.1'\n",
+                     "__version_info__ = (1, 6, 1)\n"):
+            with self.subTest(text=text):
+                with self.assertRaises(RuntimeError) as error:
+                    self.read(text)
+                self.assertIn('cannot find version', str(error.exception))
+                self.assertIn('no module-level __version__ assignment', str(error.exception))
+
+    def test_a_value_that_is_not_a_string_is_refused(self) -> None:
+        for text in ('__version__ = VERSION\n', '__version__ = 1.6\n'):
+            with self.subTest(text=text):
+                with self.assertRaises(RuntimeError) as error:
+                    self.read(text)
+                self.assertIn('not a string literal', str(error.exception))
+
+    def test_a_file_that_does_not_parse_is_refused(self) -> None:
+        # What the bump behind 762f283ed wrote.
+        with self.assertRaises(SyntaxError):
+            self.read("__version__ = '1.6.1.post3'__getattr__, __dir__ = lazy_exports(__name__)\n")
+
+
+class BumpRunTests(CitationTreeMixin, unittest.TestCase):
+    """:func:`~bump_version.main` over a scratch tree: what it exports and what a refusal leaves."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.citation = self.write_citation()
         package = self.tmp_path / 'pcapkit'
-        package.mkdir(exist_ok=True)
-        (package / '__init__.py').write_text('# nothing here\n', encoding='utf-8')
+        package.mkdir()
+        self.init = package / '__init__.py'
+        self.init.write_text(INIT_TAIL, encoding='utf-8')
+        (self.tmp_path / 'conda').mkdir()
+        self.build = self.tmp_path / 'conda' / 'build'
+        self.output = self.tmp_path / 'github-output'
+        self.output.write_text('', encoding='utf-8')
+
         cwd = os.getcwd()
         self.addCleanup(os.chdir, cwd)
         os.chdir(self.tmp_path)
 
-        with mock.patch.dict('sys.modules', {'pcapkit': None}):
-            with self.assertRaises(RuntimeError) as error:
-                bump_version.current_version()
+    def main(self, *extra: str) -> int:
+        with mock.patch.dict(os.environ, {'GITHUB_OUTPUT': str(self.output)}):
+            return bump_version.main(['--init', str(self.init), '--citation', str(self.citation), *extra])
 
-        self.assertIn('cannot find version', str(error.exception))
+    def assertUntouched(self, init: str = INIT_TAIL) -> None:
+        self.assertEqual(self.init.read_text(encoding='utf-8'), init)
+        self.assertEqual(self.citation.read_text(encoding='utf-8'), FIXTURE)
+        self.assertFalse(self.build.exists(), 'conda/build was written')
+        self.assertEqual(self.output.read_text(encoding='utf-8'), '')
+
+    def test_the_new_version_is_a_step_output(self) -> None:
+        self.assertEqual(self.main('--github-output'), 0)
+
+        self.assertEqual(self.output.read_text(encoding='utf-8'), 'version=1.6.1.post1\n')
+        self.assertEqual(bump_version.current_version(self.init), '1.6.1.post1')
+
+    def test_print_version_prints_and_writes_nothing(self) -> None:
+        # What `Commit documentation changes` names in its message.
+        with contextlib.redirect_stdout(io.StringIO()) as stdout:
+            self.assertEqual(self.main('--print-version'), 0)
+
+        self.assertEqual(stdout.getvalue(), '1.6.1\n')
+        self.assertUntouched()
+
+    def test_no_output_is_written_unasked(self) -> None:
+        self.assertEqual(self.main(), 0)
+
+        self.assertEqual(self.output.read_text(encoding='utf-8'), '')
+
+    def test_github_output_outside_a_workflow_is_refused_before_any_write(self) -> None:
+        with mock.patch.dict(os.environ), contextlib.redirect_stderr(io.StringIO()) as stderr:
+            os.environ.pop('GITHUB_OUTPUT', None)
+            with self.assertRaises(SystemExit):
+                bump_version.main(['--init', str(self.init), '--citation', str(self.citation),
+                                   '--github-output'])
+
+        self.assertIn('GITHUB_OUTPUT', stderr.getvalue())
+        self.assertUntouched()
+
+    def test_a_refused_bump_writes_nothing(self) -> None:
+        spanning = "__version__ = (\n    '1.6.1'\n)\n"
+        self.init.write_text(spanning, encoding='utf-8')
+
+        with self.assertRaises(RuntimeError):
+            self.main('--github-output')
+
+        self.assertUntouched(spanning)
+
+    def test_the_script_runs_as_the_step_runs_it(self) -> None:
+        # `python util/bump_version.py --github-output`, from outside the checkout.
+        env = dict(os.environ, GITHUB_OUTPUT=str(self.output))
+        result = subprocess.run(
+            [sys.executable, str(ROOT / 'util' / 'bump_version.py'), '--init', str(self.init),
+             '--citation', str(self.citation), '--github-output'],
+            cwd=self.tmp_path, env=env, capture_output=True, text=True, check=False, timeout=60)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.output.read_text(encoding='utf-8'), 'version=1.6.1.post1\n')
+        self.assertEqual(self.build.read_text(encoding='utf-8'), '0')
+        self.assertIn('\nversion: 1.6.1.post1\n', self.citation.read_text(encoding='utf-8'))
 
 
 class RepositoryCitationTests(unittest.TestCase):
