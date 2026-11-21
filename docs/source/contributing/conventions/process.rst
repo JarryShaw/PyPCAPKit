@@ -396,9 +396,11 @@ being set by hand.
 The board has these views: *All items*; *Board*, the open items in one column per
 Status; *Needs decision* and *Blocked*, each the open items in that state; *Open
 pull requests*; *History*, everything *Done*; and a *Release X.Y* board for each
-milestone from ``PyPCAPKit v1.5`` on, filtered on it. Add one when a milestone
-opens. Sorting and grouping are set in the web interface; names, layouts, filters
-and columns can also be set through the GraphQL API (``updateProjectV2View``).
+milestone, grouped by Status, filtered on it and showing the earlier release views'
+fields. A new line gets both: the milestone ``PyPCAPKit vX.Y``, described *Changes for
+the vX.Y.0 release.*, and its view; :ref:`release-lines` has the steps that follow.
+Sorting and grouping are set in the web interface; names, layouts, filters and columns
+can also be set through the GraphQL API (``updateProjectV2View``).
 
 Link neither from docstrings, code comments or Markdown files. Both are tracking
 metadata that changes as work moves, and a link to them goes stale the way a line
@@ -432,8 +434,8 @@ The PEP Discussion, Kept Current
 
 :file:`docs/source/contributing/pep.rst` is the source of truth for the roadmap: what
 is done and what remains. Ruled in review of :pr:`2483` (:issue:`2449`):
-upon each release, amend that page inline, and post the update to, or edit it in, the
-roadmap's own GitHub Discussion,
+upon each release (:ref:`release-lines`), amend that page inline, and post the update
+to, or edit it in, the roadmap's own GitHub Discussion,
 `PyPCAPKit Enhancement Proposals <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__.
 The page stays authoritative; the Discussion is kept in step with it, not the other
 way round, so a contributor who only reads the Discussion is not working from a stale
