@@ -143,8 +143,8 @@ workaround for another:
    and ``conda`` upload to. Push ``v1.6.0`` at a commit whose ``__version__`` is
    still ``1.5.0b5`` and ``softprops/action-gh-release`` creates a *new*
    ``v1.5.0b5`` tag and names the Release after it, leaving ``v1.6.0`` dangling.
-   :doc:`pep` calls this workflow "version-driven rather than tag-driven" for that
-   reason: name the tag to match the version, since nothing enforces it.
+   The workflow is version-driven rather than tag-driven, and nothing enforces the
+   match, so name the tag after the version.
 
 ``workflow_run`` after **Vendor Update** completes
    The path a version bump on ``main`` takes without anyone pushing a tag:

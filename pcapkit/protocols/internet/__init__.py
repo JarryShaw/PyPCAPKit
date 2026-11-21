@@ -13,7 +13,7 @@ it is reached rather than with this package, through
 :func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
 
 """
-# TODO: Implement ECN, Shim6.
+# TODO: Decode Shim6 message bodies.
 
 from typing import TYPE_CHECKING
 

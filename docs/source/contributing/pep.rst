@@ -34,18 +34,24 @@ as sketched in
 whose reply is the closest thing to a step-by-step guide. Outstanding, by TCP/IP
 layer and alphabetically:
 
-* Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
-* Internet Layer: ECN, Shim6
+* Link Layer: DSL, EAPOL, FDDI, ISDN, LLC/SNAP, PPP, PPPoE
+* Internet Layer: MLD and NDP, both carried in ICMPv6, which keeps their
+  messages raw; Shim6, which
+  :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` frames without
+  decoding its message bodies
 * Transport Layer: RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
   NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
   XMPP
 
+IPv4 (``tos.ecn``) and TCP (``cwr``/``ece``) decode ECN; IPv6 keeps its traffic
+class as one field.
+
 Several protocols came in pairs that wanted a shared abstract base rather than two
 independent implementations, in the way
 :class:`~pcapkit.protocols.internet.ip.protocol.IP` and
 :class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec` cover their families.
-**Done** in 1.6.0:
+**Done**:
 :class:`~pcapkit.protocols.internet.icmp.protocol.ICMP` is the base of ICMPv4 and
 ICMPv6, :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` that of the two
 Linux cooked-capture headers, and
@@ -54,10 +60,8 @@ Linux cooked-capture headers, and
 :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` share
 :class:`~pcapkit.protocols.application.ssl.protocol.SSL` as their base by name, and only
 TLS and DTLS share its record layer -- see the `DTLS`_ section
-below. Neighbor Discovery (:rfc:`4861`, the ``NDP`` above) and Multicast
-Listener Discovery (:rfc:`9777`), both carried in ICMPv6, are not implemented.
-:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` is the closer precedent for a pair
-whose *layout* is identical -- it holds the whole of the tag, and
+below. :class:`~pcapkit.protocols.link.vlan.protocol.VLAN` is the closer precedent
+for a pair whose *layout* is identical -- it holds the whole of the tag, and
 :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag` and
 :class:`~pcapkit.protocols.link.s_tag.protocol.S_Tag` add only how each names itself.
 
@@ -404,7 +408,7 @@ Follow-ups to the bindings above:
 
 **Done.** ICMP (1), IGMP (2), DCCP (33), GRE (47) and ICMPv6 (58) -- the IP
 protocol numbers most likely to be met in a real capture -- are all implemented
-and bound; ECN and Shim6 above are the open ones.
+and bound.
 
 PCAPNG Support
 --------------
@@ -526,11 +530,6 @@ Logging Integration
 
 See :doc:`/pcapkit/utilities/logging` for the configuration recipes, including
 the one-line restore of :obj:`sys.stderr` output.
-
-One item remains wanted, called out there as deliberately out of scope:
-:func:`pcapkit.utilities.warnings.warn` still reports every warning twice, once
-through :mod:`logging` and once through :mod:`warnings`, so an application that
-has routed :mod:`warnings` into :mod:`logging` sees each one of them twice.
 
 New Engines
 -----------
@@ -849,13 +848,15 @@ reassembly, and the ``dpkt`` and ``scapy`` engines disable DTLS reassembly.
 Checksum and Integrity Verification
 -----------------------------------
 
-**Partly done.** The one's-complement half shipped in 1.6.0; of the cryptographic
-half, ESP's is done and HIP's is open.
+**Partly done.** Of the one's-complement half, MH's and HIP's are open; of the
+cryptographic half, ESP's is done and AH's and HIP's are open.
 
 These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.link.gre.protocol.GRE`,
 :class:`~pcapkit.protocols.internet.hip.protocol.HIP`,
 :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT`,
+:class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4`,
+:class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6`,
 :class:`~pcapkit.protocols.internet.igmp.protocol.IGMP`,
 :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
 :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts`,
@@ -865,23 +866,27 @@ These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.transport.dccp.protocol.DCCP`,
 :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`,
 :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
-:class:`~pcapkit.protocols.transport.udp.protocol.UDP` — and SCTP was the first to
-check whether the value is *right*, through
+:class:`~pcapkit.protocols.transport.udp.protocol.UDP` — and SCTP checks whether
+the value is *right*, through
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.protocol.SCTP.checksum_valid>`.
 IPv4, OSPF, TCP, UDP and DCCP check it too, as do ICMP, ICMPv6, IGMP and GRE, as
-the one's-complement half below describes. For HIP, HOPOPT, IPv6-Opts, IPX and MH
-the field is recorded and never questioned, so a corrupted capture parses as
-cleanly as an intact one.
+the one's-complement half below describes. The rest record the field and never
+question it, so a corrupted capture parses as cleanly as an intact one:
+
+* MH's and HIP's is a one's-complement checksum over the IP pseudo-header
+  (:rfc:`6275#section-6.1.1`, :rfc:`7401#section-5.1.1`), and is still open;
+* HOPOPT's and IPv6-Opts's is the CALIPSO option's CRC-16 (:rfc:`5570#section-5.1.7`);
+* IPX's is unused in practice.
 
 **These are different problems and they want separating**, because only one
 of them is cryptographic and the distinction decides what is actually hard.
 
 **The one's-complement Internet checksum**, which covers IPv4's header, TCP, UDP,
-DCCP, ICMP/ICMPv6, IGMP, GRE and OSPF, needs no cryptography: it is sixteen-bit
-addition with end-around carry. The hard part is the **IP pseudo-header**: the
-TCP, UDP, DCCP and ICMPv6 checksums cover source and destination addresses, the
-protocol number and the payload length, all of which live in the *enclosing*
-layer, so verification is a structural question about
+DCCP, ICMP/ICMPv6, IGMP, GRE, OSPF, MH and HIP, needs no cryptography: it is
+sixteen-bit addition with end-around carry. The hard part is the **IP
+pseudo-header**: the TCP, UDP, DCCP, ICMPv6, MH and HIP checksums cover source and
+destination addresses, the protocol number and the payload length, all of which
+live in the *enclosing* layer, so verification is a structural question about
 :class:`~pcapkit.protocols.protocol.Protocol` rather than an arithmetic one.
 SCTP has no such dependency: :rfc:`9260#section-6.8` defines its CRC32c over the
 common header and chunks with the checksum field zeroed and **no pseudo-header**,
@@ -899,7 +904,10 @@ failure rather than raising, so a forged packet still parses and says so. What i
 parameters, are parsed into their data models and never checked against the
 packet. Verifying them needs a keying context in the shape ESP already
 established through :mod:`pcapkit.corekit.context`, which is the reusable part of
-the design rather than something to invent.
+the design rather than something to invent. Nor is
+:class:`~pcapkit.protocols.internet.ah.protocol.AH`'s ICV checked: it is parsed as
+octets, and verifying it needs that keying context plus the enclosing IP header,
+whose immutable fields it covers (:rfc:`4302#section-3.3.3`).
 
 The policy questions this raised have all been settled by the repo
 owner, and each lands on a precedent the library already has:
@@ -934,8 +942,9 @@ computed* distinctly from *wrong*, or it cries wolf on the commonest capture
 there is. It is ``NOT_COMPUTED`` below, spelled after
 :class:`~pcapkit.protocols.internet.esp.protocol.ESPStatus`'s ``NO_SA``.
 
-**The one's-complement half is done** for every protocol named above
-(:issue:`2470`, :issue:`2472` to :issue:`2475`, :issue:`2489`, :issue:`2618`), on
+**The one's-complement half is done** for every protocol whose checksum is
+one's-complement, MH and HIP aside (:issue:`2470`, :issue:`2472` to
+:issue:`2475`, :issue:`2489`, :issue:`2618`), on
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`
 (:issue:`2471`) and :mod:`pcapkit.corekit.checksum.internet`, settled as
 below: the toggles by the owner on :issue:`2471`, the rest at implementation,
@@ -1000,8 +1009,6 @@ offload heuristic on :issue:`2470`.
   DCCP has no checksum to leave out, and Linux computed it in software rather
   than offloading it. Settled at implementation (:issue:`2489`).
 
-HIP's cryptographic half is open, on the groundwork ESP has already laid.
-
 Deterministic Construction Arguments
 ------------------------------------
 
@@ -1056,57 +1063,6 @@ inference. That is why it is one change across :file:`pcapkit/protocols/`: it
 removes the root cause of the :issue:`2356`/:issue:`2394` family rather than
 leaving its next instance to be found and patched.
 
-Release Plan
-------------
-
-Editing :data:`pcapkit.__version__` is what starts a release; :doc:`releasing`
-covers the workflow it drives.
-
-1.6.0, in One Step
-~~~~~~~~~~~~~~~~~~
-
-``1.6.0`` is released in one step, with no beta. Its version edit rides in
-:pr:`2483` with the 1.6.0 changelog, so merging that pull request is the single
-push that starts the release, as ruled in review of :pr:`2483` (:issue:`2449`).
-As a final version it takes the ``main`` Anaconda label and a full GitHub
-release, as step 2 of `1.5.0, in Two Steps`_ did.
-
-1.5.0, in Two Steps
-~~~~~~~~~~~~~~~~~~~
-
-#. **A beta,** ``1.5.0b1``, **once the remaining defects were closed.** A beta
-   rather than a final release, because the consistency sweep of step 2 had not
-   run and was expected to find things.
-#. **The official** ``1.5.0`` **once a library-wide consistency sweep was done.**
-   The sweep checked prose against code, missing tests, unaligned changes, packet
-   formats against the specifications, and duplicated logic, reproducing each
-   finding before filing it: :issue:`490` to :issue:`496`, and the prose strand,
-   :issue:`719` and its second pass :issue:`1103`.
-
-The two steps differed only in the version string, which
-:file:`.github/workflows/create-release.yml` reads:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 20 20 20 40
-
-   * - version
-     - prerelease
-     - conda label
-     - GitHub release
-   * - ``1.5.0aN`` / ``1.5.0bN`` (step 1)
-     - yes
-     - ``dev``
-     - marked prerelease
-   * - ``1.5.0`` (step 2)
-     - **no**
-     - ``main``
-     - full release
-
-Both publish to PyPI, where the ``pypi`` job carries no prerelease gate, but a
-beta installs only with ``pip install --pre``, so it reaches only those who ask
-for it.
-
 Remaining Work
 --------------
 
@@ -1118,6 +1074,27 @@ claimed: to take an item, say so in the `discussion thread
 and ISDN come last: QUIC because it is really HTTP/3 over a new transport and
 wants that settled first, the rest because a capture in the wild is rare enough
 that the work buys little until the commoner protocols are in.
+
+**SCTP's gaps**, under `SCTP`_ and `Reassembly Beyond IP and TCP`_ above. Only the
+first DATA chunk of a packet is dispatched; I-DATA, FORWARD TSN and I-FORWARD-TSN
+are not dissected, so an I-DATA-only packet yields no payload; and a user message
+split across DATA chunks is never reassembled. The reassembler is reachable only
+once the extractor uses a registered one, as that section describes.
+
+**ESP's algorithm coverage**, under `ESP`_ above: the registered transforms beyond
+AES-CBC, AES-GCM and the HMAC-SHA1 and HMAC-SHA2 truncations, and Extended
+Sequence Numbers.
+
+**TLS records across TCP segments**, under `DTLS`_ above: a record split across
+segments is not reassembled and stays :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
+
+**Flow tracing beyond TCP**, under `Reassembly Beyond IP and TCP`_ above:
+:class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds a TCP tracer alone, so
+UDP, SCTP and IP conversations wait on the same generalisation as the reassemblers.
+
+**The performance leftovers** of `Maybe Even Faster?`_ above: the flow dumper
+reopens its output file once per frame, and IPv4 reassembly is handed every frame
+not marked DF, fragmented or not, which wants a design decision first.
 
 **Per-entry coverage of the option and parameter registries.** The option,
 parameter, block and frame registries are *enumerated* but not *implemented*
@@ -1161,9 +1138,13 @@ codes, not the accounting of them.
 family the same accounting for whether a registered protocol's dispatch reaches
 it.
 
+**The MH and HIP checksums**, the open part of the one's-complement half under
+`Checksum and Integrity Verification`_ above: both are parsed, and neither verified
+nor computed.
+
 **Cryptographic integrity verification.** See `Checksum and Integrity
 Verification`_ above. HIP's ``HIP_MAC``/``RVS_HMAC``/``RELAY_HMAC`` and its
-signature parameters can be taken up at any point, since
+signature parameters, and AH's ICV, can be taken up at any point, since
 :class:`~pcapkit.protocols.internet.esp.protocol.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy.
 
