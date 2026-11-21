@@ -35,6 +35,10 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
+* **1.6.2** (2026-11-21) -- A registry and bug-fix release: new TLS extension
+  types, the ``ETW2`` link type, new TCP and UDP port assignments, and a
+  ``BufferError`` on closing a buffered reader under PyPy 3.12 fixed.
+  :doc:`Full changelog <changelog/1.6.2>`.
 * **1.6.1** (2026-11-05) -- A documentation release: vertical diagrams, new ones
   for the dispatch, extraction and reassembly paths, and a concision and accuracy
   sweep. :doc:`Full changelog <changelog/1.6.1>`.
@@ -174,6 +178,7 @@ carries only the version being released.
    :hidden:
    :maxdepth: 1
 
+   changelog/1.6.2
    changelog/1.6.1
    changelog/1.6.0
    changelog/1.5.1

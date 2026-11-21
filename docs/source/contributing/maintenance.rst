@@ -216,7 +216,8 @@ Board Sweep
    an answer; query again until it settles.
 #. **Keep the changelog central**: a pull request whose file list touches the
    changelog gets a strip commit, and the text moves to the central changelog pull
-   request.
+   request. A single-change patch release's own pull request keeps its entry
+   (:ref:`release-lines`).
 #. **Read the CI reports** (:ref:`CI Reports`): each warning or failure there is a
    possible defect, root-caused and filed like a red check.
 
@@ -321,8 +322,9 @@ The steps that the graph compresses:
    coordinator commits from a tree of its own, never inside a live agent's worktree.
 *  **The pull request** follows :file:`.github/PULL_REQUEST_TEMPLATE.md`, ticking only
    what holds: the changelog box is left unticked with a note that the changelog is
-   central. It carries its type label from creation (:ref:`process`). Comments of 8
-   lines or fewer and bodies of 15 or fewer are recommendations, not hard limits.
+   central, unless the pull request carries its own entry. It carries its type label
+   from creation (:ref:`process`). Comments of 8 lines or fewer and bodies of 15 or
+   fewer are recommendations, not hard limits.
 *  **A push to an existing branch** uses
    ``--force-with-lease=<branch>:<last-pushed-sha>``.
 *  **The verdict** is posted as its own one-line comment -- the verdict, the head sha
@@ -341,6 +343,10 @@ The steps that the graph compresses:
 *  **Findings on an unmerged pull request go back to its original worker**, which
    still holds the context, rather than to a new issue; a separate issue is for a
    pull request already merged or a concern genuinely apart from it.
+*  **A bot-opened pull request is checked against its source.** For an Issue and PR
+   Kinds refresh, every number it adds has its kind confirmed on GitHub. A Python
+   Versions proposal's new line enters ``supported``, so its legs block and are read
+   green before merge.
 
 The Decision Loop
 -----------------
@@ -418,9 +424,8 @@ After every merge the sweep runs, in order:
    the sweep. One that is only behind is left alone: ``main``'s ruleset requires
    branches to be up to date, every push to ``main`` puts every open pull request
    behind, and the owner merges through the bypass.
-#. **The changelog fold**: feature pull requests carry no changelog edits, and their
-   entries are written centrally (:issue:`2449`), into the changelog pull request --
-   the only stream that edits those files, which merges last in the cycle.
+#. **The changelog fold**: the merged pull request's entry is written into the
+   release's central changelog pull request (:ref:`release-lines`).
 #. **Worktrees**: the merged pull request's worktrees become prunable.
 
 On a pull request no run is cancelled: a cancelled run leaves a red mark on its
@@ -450,18 +455,24 @@ bounded, timed out -- rather than excused.
 docstrings and comments, under :file:`pcapkit/` as anywhere else, conventions and
 process pages included -- or only tests needs no issue and no pull request, and is
 pushed straight to ``main``. A pull request is for a change to code or behaviour. A fix
-for a red ``main`` goes direct, whatever it touches. Every direct push waits out the
-release freeze below, and first checks that no open pull request edits the same hunk.
+for a red ``main`` goes direct, whatever it touches, freeze or not. Every other direct
+push waits out the release freeze below, and first checks that no open pull request
+edits the same hunk.
 It lands as one commit per logical change, never a stack of worker or fix commits, its
 squashed tree checked against the verified tree. All of ``tests/project/`` runs first,
 not only the docs tests.
 
-**The release freeze.** Once the push that moves ``__version__`` lands, nothing else
-does until Create Release's ``github`` job is waiting on approval (:doc:`releasing`),
-and that commit's own Unit Tests run is never cancelled. A push mid-chain makes
+**The release freeze.** The push that moves ``__version__`` follows the release's docs
+sweep (:ref:`release-lines`). Once it lands, nothing else does until Create Release's
+``github`` job is waiting on approval (:doc:`releasing`), and that commit's own Unit
+Tests run is never cancelled. A push mid-chain makes
 ``vendor-update`` skip, since its verdict no longer covers the checkout, and the
-release silently never starts. A squash merge whose body was cleared can be amended
-only before the chain reaches Vendor Update: after the tag, an amend orphans the tag.
+release silently never starts. A release ships the commit its run was created for, so
+whatever merges between the version push and that run ships in it. A bump that leaves
+``main`` red stops its own chain, since Vendor Update runs only after a green Unit Tests
+run: its fix goes direct, and the freeze restarts from that push. A squash merge whose
+body was cleared can be amended only before the chain reaches Vendor Update: after the
+tag, an amend orphans the tag.
 
 Throttles and Guards
 --------------------
@@ -706,6 +717,10 @@ Failure Modes and Their Guards
      - never-cancelled list (`The Post-Merge Routine and the Main-CI Watch`_)
    * - A push during the release chain stops the release
      - release freeze (`The Post-Merge Routine and the Main-CI Watch`_)
+   * - A scheduled ``pr`` job fails at "Mint the release App's token" with *The
+       permissions requested are not granted to this installation*
+     - the owner grants the App Contents and Pull requests write and accepts them on
+       the installation (:doc:`releasing`)
    * - A squash merge landed with its body cleared
      - amended before Vendor Update, never after the tag (`The Post-Merge Routine and
        the Main-CI Watch`_)

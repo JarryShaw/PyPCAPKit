@@ -187,7 +187,7 @@ class TestTheCLIStepMatchesTheAction(unittest.TestCase):
                 with self.subTest(workflow=name, job=job_id, labels=labels):
                     calls = self.run_script(entry, packages='\n'.join(packages), labels=labels)
                     self.assertEqual(calls[0], ['conda', 'install', '-n', 'base', '--override-channels',
-                                                '-c', 'conda-forge', '-y', 'anaconda-client'])
+                                                '-c', 'conda-forge', '-y', 'anaconda-client', 'typer<0.26'])
                     expected = action_arguments(given, 'TOKEN', '\n'.join(packages), labels)
                     expected = [argument for argument in expected if argument != '--force']
                     expected.insert(expected.index('--user') + 2, '--skip-existing')
