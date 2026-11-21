@@ -17,6 +17,7 @@ This module provides the registries of the link layer protocols in
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
+from pcapkit.const.ppp.protocol import Protocol as Enum_PPP_Protocol
 from pcapkit.const.radiotap.field_type import FieldType as Radiotap_FieldType
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
@@ -28,6 +29,8 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 from pcapkit.protocols.link.loopback.protocol import Loopback
 from pcapkit.protocols.link.netlink.protocol import Netlink
+from pcapkit.protocols.link.ppp.protocol import PPP
+from pcapkit.protocols.link.ppp.schema import ControlPacket as Schema_PPP_ControlPacket
 from pcapkit.protocols.link.radiotap.protocol import Radiotap
 from pcapkit.protocols.link.radiotap.schema import RadiotapField as Schema_Radiotap_Field
 from pcapkit.utilities.exceptions import RegistryError
@@ -38,6 +41,8 @@ if TYPE_CHECKING:
 
     from pcapkit.const.reg.ethertype import EtherType
     from pcapkit.corekit.sentinels import NullType
+    from pcapkit.protocols.link.ppp.protocol import ControlConstructor as PPP_ControlConstructor
+    from pcapkit.protocols.link.ppp.protocol import ControlParser as PPP_ControlParser
     from pcapkit.protocols.link.radiotap.protocol import \
         FieldConstructor as Radiotap_FieldConstructor
     from pcapkit.protocols.link.radiotap.protocol import FieldParser as Radiotap_FieldParser
@@ -46,8 +51,8 @@ if TYPE_CHECKING:
 __all__ = [
     'register_ethertype',
     'register_loopback',
-    'register_arphrd', 'register_frad', 'register_netlink', 'register_radiotap',
-    'register_radiotap_field',
+    'register_arphrd', 'register_frad', 'register_netlink', 'register_ppp', 'register_ppp_control',
+    'register_radiotap', 'register_radiotap_field',
 ]
 
 #: logging.Logger: Module-level logger, a child of the package-wide
@@ -283,6 +288,94 @@ def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] 
     if isinstance(module, ModuleDescriptor):
         module = module.klass
     _register_name(module, (Netlink, code))
+
+
+@overload
+def register_ppp(code: 'Enum_PPP_Protocol', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_ppp(code: 'Enum_PPP_Protocol', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.link.ppp.protocol.PPP.__proto__
+def register_ppp(code: 'Enum_PPP_Protocol', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                 class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.link.ppp.protocol.PPP.__proto__` registry.
+
+    Arguments:
+        code: PPP protocol number as in :class:`~pcapkit.const.ppp.protocol.Protocol`
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ppp.protocol.Protocol`
+            member, e.g. a member of another enum, or ``module`` is not a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+    .. versionadded:: 1.7.0
+
+    """
+    _check_code(code, Enum_PPP_Protocol, PPP)
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    PPP.register(code, module)
+    logger.debug('registered PPP protocol: %s', code.name)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (PPP, code))
+
+
+# NOTE: pcapkit.protocols.link.ppp.protocol.PPP.__control__
+def register_ppp_control(code: 'Enum_PPP_Protocol',
+                         meth: 'str | tuple[PPP_ControlParser, PPP_ControlConstructor]', *,
+                         schema: 'Optional[Type[Schema_PPP_ControlPacket]]' = None) -> 'None':
+    """Register a PPP control packet parser.
+
+    The function will register the given parser to the
+    :data:`pcapkit.protocols.link.ppp.protocol.PPP.__control__` registry. A
+    frame of that protocol number is read as a control packet at header level,
+    rather than dispatched as a next layer, once the schema registry holds a
+    layout for it.
+
+    Args:
+        code: PPP protocol number as in :class:`~pcapkit.const.ppp.protocol.Protocol`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the control packet. A name names the
+            ``_read_control_*`` and ``_make_control_*`` methods, and has to name
+            an existing ``_read_control_*`` one.
+        schema: Layout the packets are read with, opening with Code,
+            Identifier and Length. It should be a subclass of
+            :class:`pcapkit.protocols.link.ppp.schema.ControlPacket`.
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ppp.protocol.Protocol`
+            member, ``meth`` is a name with no matching ``_read_control_*``
+            method, or ``schema`` is not a
+            :class:`~pcapkit.protocols.link.ppp.schema.ControlPacket` subclass.
+
+    .. versionadded:: 1.7.0
+
+    """
+    _check_code(code, Enum_PPP_Protocol, PPP)
+    if isinstance(meth, str) and not hasattr(PPP, f'_read_control_{meth}'):
+        raise RegistryError('method must be a PPP control packet parser function')
+    if schema is not None and not (isinstance(schema, type) and issubclass(schema, Schema_PPP_ControlPacket)):
+        raise RegistryError('schema must be a PPP control packet schema')
+
+    PPP.register_control(code, meth)
+    if schema is not None:
+        Schema_PPP_ControlPacket.register(code, schema)
+    logger.debug('registered PPP control packet parser: %s', code.name)
 
 
 @overload

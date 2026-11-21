@@ -122,6 +122,8 @@ else:
     from pcapkit.vendor.mh import *
     from pcapkit.vendor.ngap import *
     from pcapkit.vendor.ospf import *
+    from pcapkit.vendor.ppp import *
+    from pcapkit.vendor.pppoe import *
     from pcapkit.vendor.radiotap import *
     from pcapkit.vendor.sctp import *
     from pcapkit.vendor.sslv2 import *
@@ -195,6 +197,10 @@ __all__ = [
     'NGAP_ProcedureCode', 'NGAP_ProtocolIE',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
+    # PPP
+    'PPP_Protocol',
+    # PPPoE
+    'PPPoE_Code', 'PPPoE_Tag',
     # Radiotap
     'Radiotap_FieldType', 'Radiotap_Flags', 'Radiotap_ChannelFlags', 'Radiotap_RXFlags',
     'Radiotap_TXFlags', 'Radiotap_MCSKnown', 'Radiotap_AMPDUFlags', 'Radiotap_VHTKnown',

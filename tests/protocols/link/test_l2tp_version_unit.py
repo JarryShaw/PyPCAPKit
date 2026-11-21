@@ -266,8 +266,11 @@ class L2TPVersionTests(unittest.TestCase):
             0x0800, ipv4(17, udp(1701, 1701, l2tp_data(2))),
         ))[0]
 
-        self.assertEqual(str(frame.protochain), 'Ethernet:IPv4:UDP:L2TPv2:Raw')
+        # NOTE: The data message's PPP frame is dissected (#2817); its three-octet
+        # "datagram" is no IPv4 header, so stays raw under PPP's protocol name.
+        self.assertEqual(str(frame.protochain), 'Ethernet:IPv4:UDP:L2TPv2:PPP:Internet_Protocol_version_4')
         l2tp = frame.info.to_dict()['ethernet']['ipv4']['udp']['l2tp']
+        self.assertEqual(l2tp['ppp']['protocol'], 0x0021)
         self.assertEqual(l2tp['version'], 2)
         self.assertEqual(l2tp['tunnelid'], 0x1234)
         self.assertEqual(l2tp['sessionid'], 0x5678)

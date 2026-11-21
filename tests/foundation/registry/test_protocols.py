@@ -33,6 +33,7 @@ SCHEMA_REGISTRARS = (
     'register_pcapng_option',
     'register_pcapng_record',
     'register_pcapng_secrets',
+    'register_ppp_control',
     'register_radiotap_field',
     'register_sctp_cause',
     'register_sctp_chunk',

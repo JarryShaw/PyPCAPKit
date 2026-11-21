@@ -97,8 +97,8 @@ __all__ = [
     'register_pcap', 'register_pcapng',
     'register_ethertype',
     'register_loopback',
-    'register_arphrd', 'register_frad', 'register_netlink', 'register_radiotap',
-    'register_radiotap_field',
+    'register_arphrd', 'register_frad', 'register_netlink', 'register_ppp', 'register_ppp_control',
+    'register_radiotap', 'register_radiotap_field',
     'register_transtype',
     'register_ipx',
     'register_icmp_type',
@@ -135,8 +135,8 @@ __all__ = [
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'IEEE802_11', 'InARP', 'L2TP', 'L2TPv2',
-    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink', 'Radiotap', 'S_Tag',
-    'VLAN',                                                 # Link Layer
+    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink', 'PPP', 'PPPoE', 'Radiotap',
+    'S_Tag', 'VLAN',                                        # Link Layer
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
     'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',                   # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',

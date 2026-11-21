@@ -69,6 +69,8 @@ Link Layer
    ieee802_11
    l2tp
    linux
+   ppp
+   pppoe
    radiotap
    vlan
 

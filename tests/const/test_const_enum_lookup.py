@@ -87,6 +87,8 @@ EXPECTED_TO_REJECT_ZERO = frozenset({
     'pcapkit.const.sctp.cause_code.CauseCode',
     'pcapkit.const.sctp.parameter.Parameter',
     'pcapkit.const.mh.mn_id_subtype.MNIDSubtype',
+    # IANA registers no PPP protocol number 0, which RFC 1661 Section 2 makes invalid (#2817).
+    'pcapkit.const.ppp.protocol.Protocol',
 })
 
 #: The four Mobility Header flag enumerations of GitHub issue #623, as

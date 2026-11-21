@@ -12,7 +12,7 @@ is imported the first time it is reached rather than with this package, through
 :func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
 
 """
-# TODO: Implement DSL, EAPOL, FDDI, ISDN, NDP, PPP.
+# TODO: Implement DSL, EAPOL, FDDI, ISDN, LLC/SNAP.
 
 from typing import TYPE_CHECKING
 
@@ -33,6 +33,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.link.ieee802_11 import IEEE802_11
     from pcapkit.protocols.link.loopback import Loopback
     from pcapkit.protocols.link.netlink import Netlink
+    from pcapkit.protocols.link.ppp import PPP
+    from pcapkit.protocols.link.pppoe import PPPoE
     from pcapkit.protocols.link.radiotap import Radiotap
 
     # Linux "Cooked" Capture Encapsulation Family
@@ -55,7 +57,8 @@ __all__ = [
 
     # Link Layer Protocols
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'IEEE802_11', 'InARP', 'L2TP', 'L2TPv2',
-    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink', 'Radiotap', 'S_Tag', 'VLAN',
+    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink', 'PPP', 'PPPoE', 'Radiotap', 'S_Tag',
+    'VLAN',
 ]
 
 __getattr__, __dir__ = lazy_exports(__name__, globals(), {
@@ -74,6 +77,8 @@ __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'LinuxSLL2': ('linux_sll2', 'LinuxSLL2'),
     'Loopback': ('loopback', 'Loopback'),
     'Netlink': ('netlink', 'Netlink'),
+    'PPP': ('ppp', 'PPP'),
+    'PPPoE': ('pppoe', 'PPPoE'),
     'Radiotap': ('radiotap', 'Radiotap'),
     'S_Tag': ('s_tag', 'S_Tag'),
     'VLAN': ('vlan', 'VLAN'),

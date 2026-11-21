@@ -546,6 +546,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'LINUXSLL2': ModuleDescriptor('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2'),
         'LOOPBACK': ModuleDescriptor('pcapkit.protocols.link.loopback.protocol', 'Loopback'),
         'NETLINK': ModuleDescriptor('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
+        'PPP': ModuleDescriptor('pcapkit.protocols.link.ppp.protocol', 'PPP'),
+        'PPPOE': ModuleDescriptor('pcapkit.protocols.link.pppoe.protocol', 'PPPoE'),
         'RADIOTAP': ModuleDescriptor('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
         'S_TAG': ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
         'VLAN': ModuleDescriptor('pcapkit.protocols.link.vlan.protocol', 'VLAN'),

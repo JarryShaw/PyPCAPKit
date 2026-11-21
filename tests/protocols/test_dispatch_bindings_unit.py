@@ -216,7 +216,7 @@ class DispatchBindingTests(unittest.TestCase):
 
         # The alias reports the version; the info key deliberately does not, so
         # a consumer finds the datagram under ``l2tp`` whichever version it was.
-        self.assertEqual(str(frame.protochain), 'Ethernet:IPv4:UDP:L2TPv2:Raw')
+        self.assertEqual(str(frame.protochain), 'Ethernet:IPv4:UDP:L2TPv2:PPP:Internet_Protocol_version_4')
         l2tp = frame.info.to_dict()['ethernet']['ipv4']['udp']['l2tp']
         self.assertEqual(l2tp['version'], 2)
         self.assertEqual(l2tp['tunnelid'], 0x1234)
@@ -224,8 +224,8 @@ class DispatchBindingTests(unittest.TestCase):
         self.assertIs(l2tp['flags']['len'], False)
         self.assertIs(l2tp['flags']['seq'], False)
 
-        # PPP is not dissected, so the payload is Raw under the -1 sentinel.
-        self.assertEqual(l2tp['raw']['protocol'], -1)
+        # A data message carries a PPP frame, dispatched as EtherType 0x880B is (#2817).
+        self.assertEqual(l2tp['ppp']['protocol'], 0x0021)
 
     def test_l2tp_over_ip_waits_on_an_l2tpv3_class(self) -> None:
         """``TransType.L2TP`` (115) stays unbound: it is L2TPv3, and v3 has no class.
