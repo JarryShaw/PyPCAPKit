@@ -138,7 +138,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
-            instance.
+            instance. A payload that fails to parse is kept as
+            :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+            keeps one.
 
         Important:
             The annotation names the **base** registry because every transport
@@ -174,6 +176,11 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
            :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, hands
            over the same named ports a parsed header carries (:issue:`2417`).
 
+        .. versionchanged:: 1.7.0
+
+           The fallback holds the whole payload and the failure's message,
+           rather than the octets the failed parse left unread (:issue:`2842`).
+
         """
         port = ports[0] if ports[0] in cls.__proto__ else ports[1]
         protocol = cls._dispatch_family(cls._lookup_next_layer(
@@ -192,6 +199,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             # log error
             logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
 
+            # NOTE: Rewound and given ``error``, as ``Protocol.analyze``'s fallback is (#2842).
+            payload_io.seek(0)
+            kwargs['error'] = str(exc)
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         return report
 
