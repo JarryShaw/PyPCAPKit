@@ -44,6 +44,9 @@ _VT = TypeVar('_VT')
 _ET = TypeVar('_ET', bound='Enum')
 _ST = TypeVar('_ST', bound='Type[Schema]')
 
+#: The bookkeeping attributes :meth:`Schema.__new__` gives every instance.
+_BOOKKEEPING = ('__map__', '__map_reverse__', '__buffer__', '__updated__')
+
 
 def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     """Finalise schema class.
@@ -98,8 +101,7 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     if cls is Schema and cls.__dict__.get('__base_ready__'):
         return cls
 
-    temp = ['__map__', '__map_reverse__', '__builtin__',
-            '__fields__', '__buffer__', '__updated__',
+    temp = [*_BOOKKEEPING, '__builtin__', '__fields__',
             '__payload__', '__finalised__', '__remainder__', '__remainder_offset__',
             '__short_read__']
     temp.extend(cls.__additional__)
@@ -290,6 +292,13 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         field whose values have a range of their own, such as
         :class:`~pcapkit.corekit.fields.numbers.PortEnumField` (:issue:`2314`).
 
+    .. versionchanged:: 1.7.0
+
+       Iterating an instance, ``repr``, ``str`` and :meth:`to_dict` list its
+       fields in :attr:`__fields__` order however it was built, where
+       :meth:`from_dict` followed the order given and PyPy could follow another
+       instance's (:issue:`2831`).
+
     """
 
     if TYPE_CHECKING:
@@ -369,10 +378,12 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
         """
         dict_ = {}  # type: dict[str, Any]
-        for (key, value) in self.__dict__.items():
+        values = self.__dict__
+        for key in self.__ordered_keys():
             if key in self.__excluded__:
                 continue
 
+            value = values[key]
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Schema):
                 dict_[out_key] = value.to_dict()
@@ -913,21 +924,24 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
-        for (key, value) in self.__dict__.items():
+        values = self.__dict__
+        for key in self.__ordered_keys():
             if key in self.__excluded__:
                 continue
 
             out_key = self.__map_reverse__.get(key, key)
-            temp.append(f'{out_key}={value}')
+            temp.append(f'{out_key}={values[key]}')
         args = ', '.join(temp)
         return f'{type(self).__name__}({args})'
 
     def __repr__(self) -> 'str':
         temp = []  # type: list[str]
-        for (key, value) in self.__dict__.items():
+        values = self.__dict__
+        for key in self.__ordered_keys():
             if key in self.__excluded__:
                 continue
 
+            value = values[key]
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Schema):
                 temp.append(f'{out_key}={type(value).__name__}(...)')
@@ -950,10 +964,11 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         return len(self.__bytes__())
 
     def __iter__(self) -> 'Iterator[str]':
-        for key in self.__dict__:
-            if key in self.__builtin__:
+        builtin, reverse = self.__builtin__, self.__map_reverse__
+        for key in self.__ordered_keys():
+            if key in builtin:
                 continue
-            yield self.__map_reverse__.get(key, key)
+            yield reverse.get(key, key)
 
     def __getitem__(self, name: 'str') -> '_VT':
         # NOTE: Every key ``__iter__`` yields, so ``dict(schema)`` reads the values a
@@ -1064,6 +1079,25 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 return None
             return name if near != far else None
         return None
+
+    def __ordered_keys(self) -> 'list[str]':
+        """Every key in :attr:`~object.__dict__`, the fields first.
+
+        The fields set come in :attr:`__fields__` order, as stored (see
+        :attr:`__map__`), then any other key, such as one :meth:`post_process`
+        stores, in ``__dict__`` order. That order is no record of the fields':
+        :meth:`from_dict` sets them in the order given, and PyPy may lay them
+        out in another instance's (:issue:`2831`).
+
+        """
+        values = self.__dict__
+        mapping, names = self.__map__, self.__fields__
+        stored = map(mapping.get, names, names) if mapping else names  # type: Iterable[str]
+        keys = [key for key in stored if key in values]
+        if len(values) != len(keys) + len(_BOOKKEEPING):
+            known = set(keys)
+            keys.extend(key for key in values if key not in known)
+        return keys
 
 
 class _EnumRegistry(collections.defaultdict):
