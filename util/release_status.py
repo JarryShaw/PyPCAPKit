@@ -146,10 +146,11 @@ def report_elsewhere() -> 'None':
     version = var('PCAPKIT_VERSION')
     # #2140: the re-run repeats the tagged commit's own conda legs, so it cannot
     # upload what they could not build -- 1.5.0b14's osx-64, broken at its tag.
-    # Conda Update's `publish` dispatch builds main instead (#2060).
+    # Conda Update's `publish` dispatch builds the tag's tree with main's recipe (#2060, #2841).
     anaconda = (f" Its Anaconda files are the exception: while main's version is still {version}, dispatch Conda "
-                'Update with publish on main, which uploads every platform under a bumped build (#2060); the '
-                "re-run finishes them only if that run's own conda legs can still succeed."
+                f"Update with publish on main, which builds v{version}'s tree and uploads every platform under a "
+                "bumped build (#2060, #2841); the re-run finishes them only if that run's own conda legs can still "
+                'succeed.'
                 if var('PCAPKIT_CONDA_COMPLETE') != 'true' else '')
     say('warning', f'v{version} is unfinished (#1634)',
         f"v{var('PCAPKIT_VERSION')} names {var('PCAPKIT_RELEASED_AT')}, not this run's commit "

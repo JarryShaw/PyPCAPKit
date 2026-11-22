@@ -24,9 +24,11 @@ on:
     inputs:
       publish:
         description: >-
-          Publish from main: bump the build even when nothing changed, then
-          push, tag, upload every platform and post the report, as a scheduled
-          bump does. Refused on any other ref. Unset, the run only builds.
+          Publish main's released version: bump the build even when nothing
+          changed, push and tag the bump, then build the v<version> tag's tree,
+          upload every platform and post the report. Refused on any other ref,
+          and where main's version has no v tag or names other dependencies.
+          Unset, the run only builds.
         type: boolean
         required: false
         default: false
@@ -208,22 +210,96 @@ jobs:
           fi
           echo "forced=$FORCED" >> "$GITHUB_OUTPUT"
 
+      # #2841: every publishing bump is built from the tree `v<version>` names,
+      # so unreleased code on main never ships under a released version. With
+      # no such tag, as for a dev version, a forced bump fails here before
+      # anything is pushed, and any other bump is pushed but neither tagged nor
+      # uploaded. The checkout's `fetch-depth: 0` brings every tag.
+      - name: Find the release tag
+        id: release-tag
+        if: needs.mode.outputs.publishes == 'true' && steps.bump.outputs.bump == 'true'
+        env:
+          FORCED: ${{ steps.bump.outputs.forced }}
+        run: |
+          version="$(python -c 'import pcapkit; print(pcapkit.__version__)')"
+          tag="v${version}"
+          if ! commit="$(git rev-parse --verify --quiet "refs/tags/${tag}^{commit}")"; then
+            if [ "$FORCED" = true ]; then
+              echo "::error title=No ${tag} tag::main's version is ${version}, which no ${tag} tag names, so there is no released tree to publish; a manual run with publish republishes only a released version"
+              exit 1
+            fi
+            echo "::notice title=No ${tag} tag::main's version is ${version}, which no ${tag} tag names, so the bump is pushed but neither tagged nor uploaded: a conda build packages only a released version's tree"
+            exit 0
+          fi
+          echo "::notice title=Publishing ${tag}::this run builds ${tag}'s tree, ${commit}, under the build it bumps on main"
+          {
+            echo "tag=${tag}"
+            echo "commit=${commit}"
+          } >> "$GITHUB_OUTPUT"
+
+      # #2841: the tag's tree is built with the bump's vendored requirements,
+      # derived from main's pyproject.toml, so a release whose dependencies
+      # main has since changed is not built. A forced bump fails here, before
+      # anything is pushed; any other warns, and is pushed but neither tagged
+      # nor uploaded, as an untagged version is. Only a match hands on the tag.
+      - name: Check the release tag's dependencies
+        id: release-deps
+        if: steps.release-tag.outputs.tag != ''
+        env:
+          FORCED: ${{ steps.bump.outputs.forced }}
+          RELEASE_TAG: ${{ steps.release-tag.outputs.tag }}
+          RELEASE_COMMIT: ${{ steps.release-tag.outputs.commit }}
+        run: |
+          status=0
+          reason="$(python util/conda_vendor.py --same-dependencies "$RELEASE_TAG")" || status=$?
+          case "$status" in
+            0)
+              echo "$reason"
+              {
+                echo "same=true"
+                echo "tag=${RELEASE_TAG}"
+                echo "commit=${RELEASE_COMMIT}"
+              } >> "$GITHUB_OUTPUT"
+              ;;
+            3)
+              echo "same=false" >> "$GITHUB_OUTPUT"
+              if [ "$FORCED" = true ]; then
+                echo "::error title=Dependencies differ from ${RELEASE_TAG}::$reason A manual run with publish therefore publishes nothing."
+                exit 1
+              fi
+              echo "::warning title=Dependencies differ from ${RELEASE_TAG}::$reason The bump is pushed but neither tagged nor uploaded."
+              ;;
+            *)
+              echo "$reason"
+              exit "$status"
+              ;;
+          esac
+
       - name: Bump Version
         if: steps.bump.outputs.bump == 'true'
         run: |
           python util/conda-build.py
 
+      # #2841: the message records the tree the build packages, which the
+      # `conda-*` tag on this commit cannot.
       - name: Commit Changes
         if: steps.bump.outputs.bump == 'true'
         env:
           CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
+          RELEASE_TAG: ${{ steps.release-deps.outputs.tag }}
         run: |
+          provenance=""
+          if [ -n "$RELEASE_TAG" ]; then
+            provenance="
+
+          The build packages ${RELEASE_TAG}'s tree, with conda/ and util/ from this commit."
+          fi
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -am"Bumped build to $(cat conda/build)
 
           Updated conda distribution at $(date). The following files have been changed:
-            ${CHANGED_FILES:-none, as a manual run with publish bumps regardless}"
+            ${CHANGED_FILES:-none, as a manual run with publish bumps regardless}${provenance}"
 
       # #1632: writes `pushed` and `commit` for `conda-tag` and `conda-dist`.
       # The verdict covers `$GITHUB_SHA` only, so the commits a rebase onto the
@@ -243,14 +319,17 @@ jobs:
       #
       # #2060: a forced bump is one no later run repeats, so where it is not
       # pushed each notice is a warning instead: nothing was published, and
-      # Conda Update has to be dispatched again with `publish` on `main`. Where
-      # another run already pushed the build, that run tags and uploads it.
+      # Conda Update has to be dispatched again with `publish` on `main`, which
+      # builds the release tag's tree whatever main has merged since (#2841).
+      # Where another run already pushed the build, that run tags and uploads it.
       - name: Push Changes
         id: push-changes
         if: needs.mode.outputs.publishes == 'true' && steps.bump.outputs.bump == 'true'
         env:
           FORCED: ${{ steps.bump.outputs.forced }}
+          RELEASE_TAG: ${{ steps.release-deps.outputs.tag }}
         run: |
+          again="dispatch Conda Update again with publish on main, which builds ${RELEASE_TAG}'s tree, not main's"
           git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git fetch origin "${GITHUB_REF#refs/heads/}"
           tip="$(git rev-parse FETCH_HEAD)"
@@ -263,7 +342,7 @@ jobs:
               ;;
             3)
               if [ "$FORCED" = true ]; then
-                echo "::warning title=Nothing published as main moved past this checkout::$reason No later run repeats this forced bump, so nothing was published: dispatch Conda Update again with publish on main, now at $tip."
+                echo "::warning title=Nothing published as main moved past this checkout::$reason No later run repeats this forced bump, so nothing was published: $again."
               else
                 echo "::notice title=Not pushed as main moved past this checkout::$reason The bump is left to the Conda Update that $tip's own Unit Tests run raises."
               fi
@@ -283,7 +362,7 @@ jobs:
           case "$status" in
             0)
               if [ "$FORCED" = true ]; then
-                echo "::warning title=Nothing published as the build is already on main::conda/build $(cat conda/build) was pushed by another run, which tags and uploads it, so this run published nothing; if that run did not publish it, dispatch Conda Update again with publish on main"
+                echo "::warning title=Nothing published as the build is already on main::conda/build $(cat conda/build) was pushed by another run, which tags and uploads it, so this run published nothing; if that run did not publish it, $again"
               else
                 echo "::notice title=Build already on main::conda/build $(cat conda/build) was pushed by another run; nothing to push, tag or upload"
               fi
@@ -306,7 +385,7 @@ jobs:
                   exit "$status"
                 fi
                 if [ "$FORCED" = true ]; then
-                  echo "::warning title=Nothing published as main moved during the push::main moved from $tip to $moved after the fetch, so $commit is not a fast-forward. No later run repeats this forced bump, so nothing was published: dispatch Conda Update again with publish on main, now at $moved."
+                  echo "::warning title=Nothing published as main moved during the push::main moved from $tip to $moved after the fetch, so $commit is not a fast-forward. No later run repeats this forced bump, so nothing was published: $again."
                 else
                   echo "::notice title=Not pushed as main moved during the push::main moved from $tip to $moved after the fetch, so $commit is not a fast-forward. The bump is left to the Conda Update that $moved's own Unit Tests run raises."
                 fi
@@ -383,11 +462,15 @@ jobs:
           CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
           PUSH: ${{ steps.push-changes.outcome }}
           COMMIT: ${{ steps.push-changes.outputs.commit }}
+          # #2841: 'false' where the release tag names other dependencies.
+          SAME_DEPENDENCIES: ${{ steps.release-deps.outputs.same }}
         run: |
           pins="$RUNNER_TEMP/platform-pins.log"
           if grep -q '^::warning title=Platform pins::' "$pins" 2> /dev/null; then
             echo "status=warning" >> "$GITHUB_OUTPUT"
           elif [ "$FORCED" = true ] && [ -z "$COMMIT" ]; then
+            echo "status=warning" >> "$GITHUB_OUTPUT"
+          elif [ "$SAME_DEPENDENCIES" = false ]; then
             echo "status=warning" >> "$GITHUB_OUTPUT"
           else
             echo "status=success" >> "$GITHUB_OUTPUT"
@@ -444,6 +527,12 @@ jobs:
       CONDA_CHANGED: ${{ steps.push-changes.outputs.pushed }}
       # The commit Push Changes put on `main`, and the one `conda-tag` tags.
       CONDA_COMMIT: ${{ steps.push-changes.outputs.commit }}
+      # #2841: the commit `v<version>` names, written on a publishing bump whose
+      # version has that tag and its dependencies, and the tree `conda-dist`
+      # then builds. The tag is written wherever it was found, so the report can
+      # say which of the two left the commit unwritten.
+      PCAPKIT_RELEASE_COMMIT: ${{ steps.release-deps.outputs.commit }}
+      PCAPKIT_RELEASE_TAG: ${{ steps.release-tag.outputs.tag }}
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
       # #2458: read by `conda-tag` and `conda-dist` below, to block tagging and
       # uploading a dev-release version.
@@ -484,10 +573,14 @@ jobs:
     # enough to reach this job with no human in the path, which mirrors the
     # equivalent gate proposed for create-release.yml's publishers in #2452
     # (not yet merged).
+    #
+    # #2841: nor without a `v<version>` tag whose tree it can build: none, or
+    # one naming other dependencies than main, as conda-update's steps say.
     if: >-
       !cancelled() && needs.mode.outputs.publishes == 'true' &&
       needs.conda-update.result == 'success' &&
       needs.conda-update.outputs.CONDA_CHANGED == 'true' &&
+      needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT != '' &&
       needs.conda-update.outputs.PCAPKIT_DEV_RELEASE != 'true'
     permissions:
       contents: write
@@ -564,12 +657,14 @@ jobs:
     # already leaves `needs.conda-tag.result` at `'skipped'` rather than
     # `'success'`; kept explicit anyway, mirroring how the equivalent gate
     # proposed for create-release.yml's publishers in #2452 (not yet merged)
-    # has each read it rather than relying on one another's cascade.
+    # has each read it rather than relying on one another's cascade. #2841's
+    # release commit is read again the same way.
     if: >-
       !cancelled() && needs.conda-update.result == 'success' &&
       (needs.mode.outputs.publishes != 'true' || (
         needs.conda-tag.result == 'success' &&
         needs.conda-update.outputs.CONDA_CHANGED == 'true' &&
+        needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT != '' &&
         needs.conda-update.outputs.PCAPKIT_DEV_RELEASE != 'true'
       ))
     permissions:
@@ -627,6 +722,22 @@ jobs:
           if grep -q '^diff --git ' "$PATCH_FILE"; then
             git apply "$PATCH_FILE"
           fi
+
+      # #2841: a publishing run builds the tree `v<version>` names, and takes
+      # only conda/ and util/ from the bump checked out above: the build number,
+      # vendored requirements and recipe that can build what the tag's own legs
+      # could not (#2140), and the scripts these steps call. `git restore` also
+      # deletes a file there that the bump lacks.
+      - name: Check out the release tag's tree
+        id: release-tree
+        if: needs.mode.outputs.publishes == 'true' && needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT != ''
+        shell: bash
+        env:
+          PCAPKIT_RELEASE_COMMIT: ${{ needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT }}
+        run: |
+          bump="$(git rev-parse HEAD)"
+          git checkout --quiet --detach "$PCAPKIT_RELEASE_COMMIT"
+          git restore --source="$bump" --staged --worktree -- conda util
 
       - id: setup-python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -881,6 +992,10 @@ jobs:
           # "skipped, a build was pushed but it is a dev release" below.
           CONDA_CHANGED: ${{ needs.conda-update.outputs.CONDA_CHANGED }}
           DEV_RELEASE: ${{ needs.conda-update.outputs.PCAPKIT_DEV_RELEASE }}
+          # #2841: the commit is empty where no tag was found, or where the
+          # tag found names other dependencies.
+          RELEASE_COMMIT: ${{ needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT }}
+          RELEASE_TAG: ${{ needs.conda-update.outputs.PCAPKIT_RELEASE_TAG }}
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
         run: |
           if [ "$UPDATE_RESULT" = skipped ]; then
@@ -910,6 +1025,10 @@ jobs:
               } >> report/conda-report.md
             elif [ "$CONDA_CHANGED" = true ] && [ "$DEV_RELEASE" = true ] && [ -f report/conda-report.md ]; then
               echo "- Tag: skipped, and Upload: skipped -- ${PCAPKIT_VERSION} carries a PEP 440 dev-release suffix (.devN), so PCAPKIT_DEV_RELEASE withheld both deliberately" >> report/conda-report.md
+            elif [ "$CONDA_CHANGED" = true ] && [ -z "$RELEASE_COMMIT" ] && [ -n "$RELEASE_TAG" ] && [ -f report/conda-report.md ]; then
+              echo "- Tag: skipped, and Upload: skipped -- ${RELEASE_TAG} names other dependencies than main, whose vendored requirements the build uses, so Check the release tag's dependencies withheld both" >> report/conda-report.md
+            elif [ "$CONDA_CHANGED" = true ] && [ -z "$RELEASE_COMMIT" ] && [ -f report/conda-report.md ]; then
+              echo "- Tag: skipped, and Upload: skipped -- no v${PCAPKIT_VERSION} tag names a tree to build, so Find the release tag withheld both" >> report/conda-report.md
             fi
           fi
           python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
