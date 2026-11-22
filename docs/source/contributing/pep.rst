@@ -732,9 +732,13 @@ would make each further protocol cheaper than the last rather than dearer.
 
 Smaller items in the same subsystem:
 
-* **Flow tracing is TCP only**, and blocked on the same generalisation --
+* **Flow tracing is TCP only.**
   :class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds a single field,
-  so UDP, SCTP and IP conversation tracing have nowhere to go.
+  and each engine wires TCP's input itself, so UDP, SCTP and IP conversation
+  tracing have nowhere to go. The fix mirrors the reassembly one above: each
+  engine gets an adapter for every registered tracer, keyed by the tracer's
+  name, so a new tracer costs one class plus one adapter per engine
+  (:issue:`2843`).
 
   It does treat both directions of a connection as one flow, though.
   :meth:`TCP.make_bufid
