@@ -211,6 +211,7 @@ __all__ = [
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS
     'TLS_ContentType', 'TLS_HandshakeType', 'TLS_ExtensionType',
+    'TLS_ECPointFormat', 'TLS_CertificateStatusType', 'TLS_PskKeyExchangeMode', 'TLS_CertificateCompressionAlgorithm',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

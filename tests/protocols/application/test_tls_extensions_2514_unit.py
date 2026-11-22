@@ -3,7 +3,8 @@
 
 ``SSL.__extension__`` registers a decoder for ``server_name``,
 ``supported_groups``, ``signature_algorithms``, ALPN, ``supported_versions``
-and ``key_share``; every other extension keeps its raw octets. Each case is
+and ``key_share`` (#2810 adds more, tested in its own module); an extension
+with none keeps its raw octets. Each case is
 checked against the field values of its specification, and both ways round:
 parse then ``from_data``, and ``make`` from the parsed content.
 
@@ -152,6 +153,7 @@ class ExtensionDecodingTests(unittest.TestCase):
     def test_hello_retry_request_extensions(self) -> None:
         """A ``ServerHello`` carrying the ``HelloRetryRequest`` random takes that message's shapes."""
         from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import Cookie
         from pcapkit.protocols.application.ssl.data import KeyShareHelloRetryRequest
         from pcapkit.protocols.application.ssl.data import SupportedVersionsServerHello
 
@@ -160,7 +162,7 @@ class ExtensionDecodingTests(unittest.TestCase):
         versions, key_share, cookie = self._extensions(wire)
         self.assertEqual(versions.data, SupportedVersionsServerHello(selected_version=0x0304))
         self.assertEqual(key_share.data, KeyShareHelloRetryRequest(selected_group=0x0017))
-        self.assertEqual(cookie.data, _vec(b'cookie'))
+        self.assertEqual(cookie.data, Cookie(cookie=b'cookie'))
         self.assertEqual(TLS(wire, len(wire)).alias, 'TLS 1.3')
 
         # The same two octets in a plain ServerHello are no KeyShareEntry.
@@ -213,10 +215,10 @@ class UnknownExtensionTests(unittest.TestCase):
         from pcapkit.protocols.application.tls.protocol import TLS
 
         cases = (
-            (21, bytes(7), 'padding'),
+            (15, b'\x01', 'heartbeat'),
             (0x0A0A, b'', 'Reserved_2570'),           # GREASE (RFC 8701)
             (0x1234, b'\x01\x02', 'Unassigned'),
-            (0xFF01, b'\x00', 'renegotiation_info'),
+            (1, b'\x01', 'max_fragment_length'),
             (0xFF05, b'\xde\xad', 'Reserved_for_Private_Use'),
         )
         wire = _client_hello(*(_ext(code, data) for code, data, _ in cases))
@@ -379,7 +381,7 @@ class ExtensionConstructionTests(unittest.TestCase):
                 ('selected_version missing', ((ExtensionType.supported_versions, {}),), True),
                 ('server_share missing', ((ExtensionType.key_share, {}),), True),
                 ('a model under a type with no constructor', (
-                    Extension(type=ExtensionType.padding, data=NamedGroupList(named_group_list=())),), False),
+                    Extension(type=ExtensionType.heartbeat, data=NamedGroupList(named_group_list=())),), False),
         ):
             with self.subTest(case=name), self.assertRaises(ProtocolError):
                 self._hello(extensions, server=server)
@@ -554,7 +556,7 @@ class ExtensionRegistryTests(unittest.TestCase):
             SSL.__extension__.update(shipped)
 
     def test_a_type_with_no_shipped_entry(self) -> None:
-        """``padding`` (RFC 7685 section 3) has no decoder until one is registered, silently."""
+        """``heartbeat`` (RFC 6520 section 2) has no decoder until one is registered, silently."""
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.const.tls.handshake_type import HandshakeType
         from pcapkit.corekit.infoclass import info_final
@@ -565,41 +567,41 @@ class ExtensionRegistryTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         @info_final
-        class Padding(ExtensionData):
-            """``extension_data`` of ``padding``: zero octets, counted."""
+        class Heartbeat(ExtensionData):
+            """``extension_data`` of ``heartbeat``: a one-octet ``HeartbeatMode``."""
 
-            length: 'int'
+            mode: 'int'
 
         def parser(ext_type: object, data: bytes, *, msg_type: object) -> object:  # pylint: disable=unused-argument
-            if data.strip(b'\x00'):
-                raise ProtocolError('padding: non-zero octet')
-            return Padding(length=len(data))
+            if len(data) != 1:
+                raise ProtocolError('heartbeat: not one octet')
+            return Heartbeat(mode=data[0])
 
         def constructor(ext_type: object, data: object = None, *, msg_type: object,
-                        length: int = 0, **kwargs: object) -> bytes:  # pylint: disable=unused-argument
+                        mode: int = 1, **kwargs: object) -> bytes:  # pylint: disable=unused-argument
             self.assertEqual(msg_type, HandshakeType.client_hello)
-            return bytes(data.length if data is not None else length)  # type: ignore[attr-defined]
+            return bytes([data.mode if data is not None else mode])  # type: ignore[attr-defined]
 
-        wire = _client_hello(_ext(21, bytes(5)), _ext(21, b'\x00\x01'), VERSIONS)
-        self.assertNotIn(ExtensionType.padding, SSL.__extension__)
+        wire = _client_hello(_ext(15, b'\x01'), _ext(15, b'\x00\x01'), VERSIONS)
+        self.assertNotIn(ExtensionType.heartbeat, SSL.__extension__)
         shipped = dict(SSL.__extension__)
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter('error')
-                register_tls_extension(ExtensionType.padding, (parser, constructor))
+                register_tls_extension(ExtensionType.heartbeat, (parser, constructor))
             parsed = TLS(wire, len(wire))
-            padding, rejected, versions = parsed.info.content[0].body.extensions
-            self.assertEqual(padding.data, Padding(length=5))
+            heartbeat, rejected, versions = parsed.info.content[0].body.extensions
+            self.assertEqual(heartbeat.data, Heartbeat(mode=1))
             self.assertEqual(rejected.data, b'\x00\x01')
             self.assertEqual(versions.data.versions, (0x0304, 0x0303))
             self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
-            self.assertEqual(ExtensionConstructionTests._hello(((ExtensionType.padding, {'length': 3}),)).hex(),
-                             _client_hello(_ext(21, bytes(3))).hex())
+            self.assertEqual(ExtensionConstructionTests._hello(((ExtensionType.heartbeat, {'mode': 2}),)).hex(),
+                             _client_hello(_ext(15, b'\x02')).hex())
         finally:
             SSL.__extension__.clear()
             SSL.__extension__.update(shipped)
-        padding, _, _ = TLS(wire, len(wire)).info.content[0].body.extensions
-        self.assertEqual(padding.data, bytes(5))
+        heartbeat, _, _ = TLS(wire, len(wire)).info.content[0].body.extensions
+        self.assertEqual(heartbeat.data, b'\x01')
 
     def test_handing_back_the_shipped_entry_is_a_silent_no_op(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType

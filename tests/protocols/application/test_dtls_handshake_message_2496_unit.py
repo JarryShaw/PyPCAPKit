@@ -71,14 +71,14 @@ class ReadHandshakeTests(unittest.TestCase):
 
     def test_a_message_longer_than_a_record_holds_decodes(self) -> None:
         from pcapkit.protocols.application.dtls.protocol import DTLS
-        from pcapkit.protocols.application.ssl.data import ClientHello, Extension
+        from pcapkit.protocols.application.ssl.data import ClientHello, Extension, Padding
 
         body = _client_hello_body(b'\x00\x15' + (65500).to_bytes(2, 'big') + bytes(65500))
         message = _handshake(1, body)
         self.assertGreater(len(message), 0xFFFF)
         decoded = DTLS.read_handshake(message)
         self.assertIsInstance(decoded.body, ClientHello)
-        self.assertEqual(decoded.body.extensions, (Extension(type=21, data=bytes(65500)),))
+        self.assertEqual(decoded.body.extensions, (Extension(type=21, data=Padding(padding=bytes(65500))),))
         self.assertEqual((decoded.length, decoded.message_seq, decoded.is_fragmented),
                          (len(body), 3, False))
 

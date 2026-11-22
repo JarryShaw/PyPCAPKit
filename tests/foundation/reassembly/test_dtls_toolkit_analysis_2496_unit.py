@@ -173,13 +173,13 @@ class DTLSAnalysisTests(unittest.TestCase):
         """A genuine ``ClientHello`` whose extensions take it past what a
         record's 16-bit length holds decodes all the same."""
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.protocols.application.ssl.data import ClientHello, Extension
+        from pcapkit.protocols.application.ssl.data import ClientHello, Extension, Padding
 
         body = _client_hello_body(extensions=b'\x00\x15' + (65500).to_bytes(2, 'big') + bytes(65500))
         self.assertGreater(len(body) + 12, 0xFFFF)
         decoded = dtls_handshake(self._datagram(body))
         self.assertIsInstance(decoded.body, ClientHello)
-        self.assertEqual(decoded.body.extensions, (Extension(type=21, data=bytes(65500)),))
+        self.assertEqual(decoded.body.extensions, (Extension(type=21, data=Padding(padding=bytes(65500))),))
         self.assertEqual((decoded.length, decoded.fragment_length, decoded.is_fragmented),
                          (len(body), len(body), False))
 

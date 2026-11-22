@@ -49,20 +49,50 @@ accepting bytes that cannot be a genuine record.
 
    .. automethod:: _read_ext_unknown
    .. automethod:: _read_ext_server_name
+   .. automethod:: _read_ext_status_request
    .. automethod:: _read_ext_supported_groups
+   .. automethod:: _read_ext_ec_point_formats
    .. automethod:: _read_ext_signature_algorithms
    .. automethod:: _read_ext_alpn
+   .. automethod:: _read_ext_signed_certificate_timestamp
+   .. automethod:: _read_ext_padding
+   .. automethod:: _read_ext_extended_main_secret
+   .. automethod:: _read_ext_compress_certificate
+   .. automethod:: _read_ext_record_size_limit
+   .. automethod:: _read_ext_session_ticket
+   .. automethod:: _read_ext_pre_shared_key
+   .. automethod:: _read_ext_early_data
    .. automethod:: _read_ext_supported_versions
+   .. automethod:: _read_ext_cookie
+   .. automethod:: _read_ext_psk_key_exchange_modes
+   .. automethod:: _read_ext_post_handshake_auth
    .. automethod:: _read_ext_key_share
    .. automethod:: _read_ext_connection_id
+   .. automethod:: _read_ext_ech
+   .. automethod:: _read_ext_renegotiation_info
    .. automethod:: _make_ext_unknown
    .. automethod:: _make_ext_server_name
+   .. automethod:: _make_ext_status_request
    .. automethod:: _make_ext_supported_groups
+   .. automethod:: _make_ext_ec_point_formats
    .. automethod:: _make_ext_signature_algorithms
    .. automethod:: _make_ext_alpn
+   .. automethod:: _make_ext_signed_certificate_timestamp
+   .. automethod:: _make_ext_padding
+   .. automethod:: _make_ext_extended_main_secret
+   .. automethod:: _make_ext_compress_certificate
+   .. automethod:: _make_ext_record_size_limit
+   .. automethod:: _make_ext_session_ticket
+   .. automethod:: _make_ext_pre_shared_key
+   .. automethod:: _make_ext_early_data
    .. automethod:: _make_ext_supported_versions
+   .. automethod:: _make_ext_cookie
+   .. automethod:: _make_ext_psk_key_exchange_modes
+   .. automethod:: _make_ext_post_handshake_auth
    .. automethod:: _make_ext_key_share
    .. automethod:: _make_ext_connection_id
+   .. automethod:: _make_ext_ech
+   .. automethod:: _make_ext_renegotiation_info
    .. automethod:: _validate_tls_record
    .. automethod:: _tls_content_is_cleartext
    .. automethod:: _read_tls_content
@@ -152,6 +182,102 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.application.ssl.data.ConnectionId
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.Empty
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.CertificateStatusRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.OCSPStatusRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECPointFormatList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.SignedCertificateTimestampList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.Padding
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.CertificateCompressionAlgorithms
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.RecordSizeLimit
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.SessionTicket
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.OfferedPsks
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.PskIdentity
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.PreSharedKeyServerHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.Cookie
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.PskKeyExchangeModes
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECHClientHelloOuter
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECHClientHelloInner
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECHHelloRetryRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECHEncryptedExtensions
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECHConfig
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECHConfigContents
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.HpkeKeyConfig
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.HpkeSymmetricCipherSuite
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.ECHConfigExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.data.RenegotiationInfo
    :members:
    :show-inheritance:
 
