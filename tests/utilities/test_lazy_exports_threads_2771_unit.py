@@ -56,7 +56,7 @@ DEADLINE = 60
 #: unbound, parsed or resolved to the wrong class, or was imported for the first time
 #: without the lock held.
 CHILD = '''
-import importlib, io, json, os, sys, threading, time
+import importlib, io, json, os, sys, threading, time, traceback
 
 spec = json.loads(sys.argv[1])
 import pcapkit
@@ -149,7 +149,7 @@ def reach(*job):
     try:
         run(*job)
     except BaseException as error:
-        errors.append(f'{job[0]} {job[1]}: {error!r}')
+        errors.append(f'{job[0]} {job[1]}: {error!r}\\n{traceback.format_exc()}')
 
 
 threads = [threading.Thread(target=reach, args=job, name=f'{job[0]} {job[1]}', daemon=True) for job in jobs]
