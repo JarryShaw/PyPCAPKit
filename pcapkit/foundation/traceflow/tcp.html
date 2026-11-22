@@ -531,6 +531,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -784,8 +785,8 @@ fired, rather than having to choose between the two.</p>
 <p>Idempotent: it drains the buffer, so a second call finds nothing to do.
 It also closes every output file still kept open, as
 <a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.finish</span></code></a>
-does, even when a callback raises: the flows after it stay in the
-buffer, unfinalised, for a later call.</p>
+does, even when a callback raises: the flow it was handed is finalised,
+and the flows after it stay in the buffer, unfinalised, for a later call.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1018,7 +1019,7 @@ peer’s SYN-ACK.</p>
     O --&gt; T : bidirectional only,&lt;br/&gt;FIN from both endpoints, or a RST
     T --&gt; F : a new connection's SYN on the same BUFID,&lt;br/&gt;or TCP.finish() at the end of the capture
     O --&gt; F : TCP.finish() at the end of the capture, either mode,&lt;br/&gt;or this direction's FIN, when unidirectional
-    F --&gt; [*] : \_finalise pops the buffer, builds its Index,&lt;br/&gt;calls each \_\_callback\_fn\_\_
+    F --&gt; [*] : \_finalise pops the buffer, stores its Index,&lt;br/&gt;then calls each \_\_callback\_fn\_\_
     </pre><div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Buffer" title="pcapkit.foundation.traceflow.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.data.tcp.Buffer</span></code></a></p>

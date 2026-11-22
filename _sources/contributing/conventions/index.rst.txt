@@ -27,7 +27,8 @@ House Conventions
    * :ref:`process` -- the repository rather than any of its code;
    * :ref:`documentation` -- the prose itself, on these pages and in the API
      reference, rather than any code at all;
-   * :ref:`test-coverage` -- what the test suite has to prove;
+   * :ref:`test-coverage` -- what the test suite has to prove, and what a
+     :mod:`pcapkit.dumpkit` dumper writes;
    * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
      :mod:`pcapkit.corekit` a support module belongs in, where a context
      variable lives, where a schema helper used outside the schema layer or
@@ -37,7 +38,11 @@ House Conventions
      :mod:`pcapkit.foundation.analysis`;
    * :ref:`const-vendor-pairing` -- :mod:`pcapkit.const`, the
      :mod:`pcapkit.vendor` crawler each module needs, and how a package of it
-     imports its modules.
+     imports its modules;
+   * :ref:`public-signatures` -- how a public function or class of
+     :mod:`pcapkit.interface`, :mod:`pcapkit.foundation` or
+     :mod:`pcapkit.protocols` takes its arguments, and which settings are
+     options rather than ``PCAPKIT_*`` tunables.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    a question answered in a way the code cannot express on its own -- a
@@ -61,3 +66,4 @@ House Conventions
    utilities-or-corekit
    reassembly-integration
    const-vendor-pairing
+   public-signatures

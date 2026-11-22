@@ -122,7 +122,7 @@ Terminology
               O --> T : bidirectional only,<br/>FIN from both endpoints, or a RST
               T --> F : a new connection's SYN on the same BUFID,<br/>or TCP.finish() at the end of the capture
               O --> F : TCP.finish() at the end of the capture, either mode,<br/>or this direction's FIN, when unidirectional
-              F --> [*] : \_finalise pops the buffer, builds its Index,<br/>calls each \_\_callback\_fn\_\_
+              F --> [*] : \_finalise pops the buffer, stores its Index,<br/>then calls each \_\_callback\_fn\_\_
 
        .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Buffer`
 

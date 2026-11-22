@@ -22,9 +22,9 @@ IP Pseudo-Header
 :mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol` contains
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`,
 which implements the pseudo-header of the IP protocol family
-that the upper-layer checksums cover, and :func:`pseudo_header` and
-:func:`verify_upper`, through which the IP layers use it. The
-pseudo-header's structure is:
+that the upper-layer checksums cover, and :func:`pseudo_header`,
+:func:`compute_upper` and :func:`verify_upper`, through which the IP layers use
+it. The pseudo-header's structure is:
 
 IPv4 (:rfc:`793#section-3.1`, :rfc:`768`):
 
@@ -55,10 +55,11 @@ A checksum over the IP pseudo-header is verified and computed by the enclosing
 :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` layer, which builds the
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`, rather than by
 the upper layer reaching back to its parent. So an upper layer constructed
-alone, or behind another header such as an IPv6 extension header or an
-Authentication Header, has its checksum computed only if given the ``pseudo``
-to compute it over, and one parsed alone records no outcome. The sum itself is
-in :mod:`pcapkit.corekit.checksum.internet`.
+alone, or behind another header such as an IPv4 Authentication Header, has its
+checksum computed only if given the ``pseudo`` to compute it over, and one
+parsed alone records no outcome. IPv6 computes one behind its extension
+headers too, see :func:`compute_upper`. The sum itself is in
+:mod:`pcapkit.corekit.checksum.internet`.
 
 .. autoclass:: pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo
    :no-members:
@@ -84,6 +85,7 @@ in :mod:`pcapkit.corekit.checksum.internet`.
    .. automethod:: _upper_length
 
 .. autofunction:: pcapkit.protocols.misc.checksum.ip_pseudo.protocol.pseudo_header
+.. autofunction:: pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper
 .. autofunction:: pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper
 
 Header Schemas

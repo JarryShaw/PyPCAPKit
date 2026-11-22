@@ -531,6 +531,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -787,6 +788,10 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.internet.ipv
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.make">
 <span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traffic_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransType.UDP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hop_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
+<p>An upper layer whose <code class="docutils literal notranslate"><span class="pre">make()</span></code> left its checksum pending, as the
+payload or past the extension headers it is constructed with, gets it
+computed under <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_COMPUTE" title="pcapkit.utilities.config.CHECKSUM_COMPUTE"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_COMPUTE</span></code></a>, see
+<a class="reference internal" href="../misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_upper()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -820,6 +825,10 @@ as link-layer padding; written as is.</p></li>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Takes <code class="docutils literal notranslate"><span class="pre">payload_length</span></code> ahead of <code class="docutils literal notranslate"><span class="pre">payload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1155">#1155</a>), which
 shifts a positional <code class="docutils literal notranslate"><span class="pre">payload</span></code>.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>Computes the pending checksum of an upper layer past extension
+headers too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2824">#2824</a>).</p>
 </div>
 </dd></dl>
 

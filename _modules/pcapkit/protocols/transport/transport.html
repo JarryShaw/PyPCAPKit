@@ -524,6 +524,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -710,7 +711,9 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
-<span class="sd">            instance.</span>
+<span class="sd">            instance. A payload that fails to parse is kept as</span>
+<span class="sd">            :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`</span>
+<span class="sd">            keeps one.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            The annotation names the **base** registry because every transport</span>
@@ -746,6 +749,11 @@
 <span class="sd">           :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, hands</span>
 <span class="sd">           over the same named ports a parsed header carries (:issue:`2417`).</span>
 
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           The fallback holds the whole payload and the failure's message,</span>
+<span class="sd">           rather than the octets the failed parse left unread (:issue:`2842`).</span>
+
 <span class="sd">        """</span>
         <span class="n">port</span> <span class="o">=</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span> <span class="k">else</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span>
@@ -764,6 +772,9 @@
             <span class="c1"># log error</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">DEVMODE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
+            <span class="c1"># NOTE: Rewound and given ``error``, as ``Protocol.analyze``'s fallback is (#2842).</span>
+            <span class="n">payload_io</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">'error'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
             <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
         <span class="k">return</span> <span class="n">report</span></div>
 

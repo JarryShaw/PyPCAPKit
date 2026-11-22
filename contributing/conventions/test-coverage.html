@@ -531,6 +531,7 @@
 <li class="toctree-l2"><a class="reference internal" href="utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -834,13 +835,19 @@ census, and names a registry it lacks.</p></td>
 <tr class="row-even"><td><p>a dumper</p></td>
 <td><p>Unit tests under <code class="file docutils literal notranslate"><span class="pre">tests/dumpkit/</span></code> asserting the output exactly, and a case
 in <code class="file docutils literal notranslate"><span class="pre">tests/integration/test_output_formats.py</span></code> for the file that lands on
-disk. That a format <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> also reads, such as PCAP, reproduces its
-input byte for byte is asserted over every sample capture by
+disk. That a PCAP dump reproduces a PCAP input byte for byte is asserted over
+every sample PCAP capture by
 <code class="file docutils literal notranslate"><span class="pre">tests/dumpkit/test_capture_dump_runtime.py</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1202">#1202</a>).</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p><strong>A dumper writes the records it is given</strong>, with their interfaces and options, rather
+than re-emitting every block of an input file byte for byte. <a class="reference internal" href="../../pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a>
+serves flow tracing and reassembly output, and the parser already keeps an input’s
+context blocks, as the PCAP-NG engine’s
+<a class="reference internal" href="../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.Context" title="pcapkit.foundation.engines.pcapng.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> does. Ruled by the owner on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2835">#2835</a>. So a dump that leaves those blocks out is not a failed round trip.</p>
 </section>
 </section>
 

@@ -523,6 +523,7 @@
 <li class="toctree-l2"><a class="reference internal" href="contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/releasing.html">Release Process</a></li>
@@ -2086,6 +2087,10 @@
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_unknown">_make_ext_unknown() (pcapkit.protocols.application.ssl.protocol.SSL method)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_value">_make_ext_value() (pcapkit.protocols.application.ssl.protocol.SSL method)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_values">_make_ext_values() (pcapkit.protocols.application.ssl.protocol.SSL method)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_fid_suboption">_make_fid_suboption() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_fid_suboptions">_make_fid_suboptions() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
@@ -2856,10 +2861,10 @@
 </li>
         <li><a href="pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.protocol.ARP._make_proto_resolve">_make_proto_resolve() (pcapkit.protocols.link.arp.protocol.ARP method)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_qos_attribute">_make_qos_attribute() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_qos_attribute">_make_qos_attribute() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_qos_attributes">_make_qos_attributes() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
 </li>
         <li><a href="pcapkit/protocols/link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_qos_control">_make_qos_control() (pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11 method)</a>
@@ -3639,6 +3644,8 @@
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_record_size_limit">_read_ext_record_size_limit() (pcapkit.protocols.application.ssl.protocol.SSL method)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_renegotiation_info">_read_ext_renegotiation_info() (pcapkit.protocols.application.ssl.protocol.SSL method)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_schema">_read_ext_schema() (pcapkit.protocols.application.ssl.protocol.SSL method)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_server_name">_read_ext_server_name() (pcapkit.protocols.application.ssl.protocol.SSL method)</a>
 </li>
@@ -6147,7 +6154,11 @@
         <li><a href="pcapkit/const/tcp.html#pcapkit.const.tcp.flags.Flags.AE">AE (pcapkit.const.tcp.flags.Flags attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeSymmetricCipherSuite.aead_id">aead_id (pcapkit.protocols.application.ssl.data.HpkeSymmetricCipherSuite attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.HpkeSymmetricCipherSuite.aead_id">(pcapkit.protocols.application.ssl.schema.HpkeSymmetricCipherSuite attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.aed_512">aed_512 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -6839,7 +6850,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.CertificateCompressionAlgorithms.algorithms">algorithms (pcapkit.protocols.application.ssl.data.CertificateCompressionAlgorithms attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CertificateCompressionAlgorithms.algorithms">(pcapkit.protocols.application.ssl.schema.CertificateCompressionAlgorithms attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command.ALGS">ALGS (pcapkit.const.ftp.command.Command attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.alias">alias (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -7104,14 +7119,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.amc">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.amcs">amcs (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.amcs">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.amdsched">amdsched (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -9881,6 +9896,12 @@
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.method.Method.BIND">BIND (pcapkit.const.http.method.Method attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OfferedPsks.binders">binders (pcapkit.protocols.application.ssl.data.OfferedPsks attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OfferedPsks.binders">(pcapkit.protocols.application.ssl.schema.OfferedPsks attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OfferedPsks.binders_length">binders_length (pcapkit.protocols.application.ssl.schema.OfferedPsks attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.binderysupport">binderysupport (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -10110,14 +10131,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.blackjack">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.blaze">blaze (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.blaze">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.blizwow">blizwow (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -12049,9 +12070,17 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.CertificateCompressionAlgorithms">CertificateCompressionAlgorithms (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CertificateCompressionAlgorithms">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.CertificateStatusRequest">CertificateStatusRequest (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CertificateStatusRequest">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.certificate_status_type.CertificateStatusType">CertificateStatusType (class in pcapkit.const.tls.certificate_status_type)</a>
 
         <ul>
@@ -12643,6 +12672,8 @@
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ConnectionId.cid">(pcapkit.protocols.application.ssl.data.ConnectionId attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ConnectionId.cid">(pcapkit.protocols.application.ssl.schema.ConnectionId attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLSContext.cid_length">cid_length (pcapkit.protocols.application.dtls.protocol.DTLSContext property)</a>
 </li>
@@ -12727,6 +12758,8 @@
         <ul>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerHello.cipher_suite">(pcapkit.protocols.application.ssl.data.ServerHello attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello.cipher_suite">(pcapkit.protocols.application.ssl.schema.ECHClientHello attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES">CIPHER_SUITES (in module pcapkit.protocols.internet.esp.protocol)</a>
 </li>
@@ -12735,7 +12768,11 @@
         <ul>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeKeyConfig.cipher_suites">(pcapkit.protocols.application.ssl.data.HpkeKeyConfig attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.cipher_suites">(pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.cipher_suites_length">cipher_suites_length (pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.schema.HIPCipherParameter.ciphers">ciphers (pcapkit.protocols.internet.hip.schema.HIPCipherParameter attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.CipherSuite">CipherSuite (class in pcapkit.protocols.internet.esp.protocol)</a>
@@ -13011,7 +13048,11 @@
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel.CLIENT_RANDOM">CLIENT_RANDOM (pcapkit.const.pcapng.tls_key_label.TLSKeyLabel attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareClientHello.client_shares">client_shares (pcapkit.protocols.application.ssl.data.KeyShareClientHello attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareClientHello.client_shares">(pcapkit.protocols.application.ssl.schema.KeyShareClientHello attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel.CLIENT_TRAFFIC_SECRET_0">CLIENT_TRAFFIC_SECRET_0 (pcapkit.const.pcapng.tls_key_label.TLSKeyLabel attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.data.ClientHello.client_version">client_version (pcapkit.protocols.application.sslv2.data.ClientHello attribute)</a>
@@ -13198,10 +13239,10 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.cnap">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.CNAssistedRANTuning">CNAssistedRANTuning (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.cnckadserver">cnckadserver (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.cncp">cncp (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
@@ -13894,6 +13935,8 @@
 </li>
         <li><a href="pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.schema.compress_name">compress_name() (in module pcapkit.protocols.application.dns.schema)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CompressCertificateExtension">CompressCertificateExtension (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType.compressed_certificate">compressed_certificate (pcapkit.const.tls.handshake_type.HandshakeType attribute)</a>
 </li>
         <li><a href="pcapkit/const/ppp.html#pcapkit.const.ppp.protocol.Protocol.Compressed_datagram">Compressed_datagram (pcapkit.const.ppp.protocol.Protocol attribute)</a>
@@ -13909,6 +13952,8 @@
         <li><a href="pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.compute_checksum">compute_checksum() (in module pcapkit.corekit.checksum.internet)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.SecurityAssociation.compute_icv">compute_icv() (pcapkit.protocols.internet.esp.protocol.SecurityAssociation method)</a>
+</li>
+        <li><a href="pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper">compute_upper() (in module pcapkit.protocols.misc.checksum.ip_pseudo.protocol)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.Computgraphic_Corp">Computgraphic_Corp (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
@@ -13991,6 +14036,10 @@
         <ul>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeKeyConfig.config_id">(pcapkit.protocols.application.ssl.data.HpkeKeyConfig attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello.config_id">(pcapkit.protocols.application.ssl.schema.ECHClientHello attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.config_id">(pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.config_port">config_port (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -14015,7 +14064,11 @@
         <li><a href="pcapkit/const/dccp.html#pcapkit.const.dccp.option.Option.Confirm_R">Confirm_R (pcapkit.const.dccp.option.Option attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHHelloRetryRequest.confirmation">confirmation (pcapkit.protocols.application.ssl.data.ECHHelloRetryRequest attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHHelloRetryRequest.confirmation">(pcapkit.protocols.application.ssl.schema.ECHHelloRetryRequest attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Buffer.conflict">conflict (pcapkit.foundation.reassembly.data.ip.Buffer attribute)</a>
 
         <ul>
@@ -14095,7 +14148,11 @@
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode.ConnectionEstablishmentIndication">ConnectionEstablishmentIndication (pcapkit.const.ngap.procedure_code.ProcedureCode attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ConnectionId">ConnectionId (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ConnectionId">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.GroupingInformation.Connections">Connections (pcapkit.const.ftp.return_code.GroupingInformation attribute)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.CONNECTIVITY_CHECKS_FAILED">CONNECTIVITY_CHECKS_FAILED (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
@@ -14165,6 +14222,8 @@
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfig.contents">contents (pcapkit.protocols.application.ssl.data.ECHConfig attribute)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfig.contents">(pcapkit.protocols.application.ssl.schema.ECHConfig attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.data.UnassignedParameter.contents">(pcapkit.protocols.internet.hip.data.UnassignedParameter attribute)</a>
 </li>
         </ul></li>
@@ -14301,6 +14360,8 @@
         <ul>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Cookie">(class in pcapkit.protocols.application.ssl.data)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Cookie">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/dns.html#pcapkit.const.dns.option.Option.COOKIE">COOKIE (pcapkit.const.dns.option.Option attribute)</a>
 </li>
@@ -14310,6 +14371,8 @@
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ClientHello.cookie">(pcapkit.protocols.application.ssl.data.ClientHello attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Cookie.cookie">(pcapkit.protocols.application.ssl.data.Cookie attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Cookie.cookie">(pcapkit.protocols.application.ssl.schema.Cookie attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.CareofTestInitMessage.cookie">(pcapkit.protocols.internet.mh.data.CareofTestInitMessage attribute)</a>
 </li>
@@ -14362,6 +14425,8 @@
           <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.schema.CookieEchoChunk">(class in pcapkit.protocols.transport.sctp.schema)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CookieExtension">CookieExtension (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.data.CookiePreservativeParameter">CookiePreservativeParameter (class in pcapkit.protocols.transport.sctp.data)</a>
 
         <ul>
@@ -15560,6 +15625,50 @@
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigExtension.data">(pcapkit.protocols.application.ssl.data.ECHConfigExtension attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Extension.data">(pcapkit.protocols.application.ssl.data.Extension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CompressCertificateExtension.data">(pcapkit.protocols.application.ssl.schema.CompressCertificateExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CookieExtension.data">(pcapkit.protocols.application.ssl.schema.CookieExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.EarlyDataExtension.data">(pcapkit.protocols.application.ssl.schema.EarlyDataExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigExtension.data">(pcapkit.protocols.application.ssl.schema.ECHConfigExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHExtension.data">(pcapkit.protocols.application.ssl.schema.ECHExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECPointFormatsExtension.data">(pcapkit.protocols.application.ssl.schema.ECPointFormatsExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ExtendedMainSecretExtension.data">(pcapkit.protocols.application.ssl.schema.ExtendedMainSecretExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareExtension.data">(pcapkit.protocols.application.ssl.schema.KeyShareExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Opaque16.data">(pcapkit.protocols.application.ssl.schema.Opaque16 attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Opaque8.data">(pcapkit.protocols.application.ssl.schema.Opaque8 attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PaddingExtension.data">(pcapkit.protocols.application.ssl.schema.PaddingExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PostHandshakeAuthExtension.data">(pcapkit.protocols.application.ssl.schema.PostHandshakeAuthExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PreSharedKeyExtension.data">(pcapkit.protocols.application.ssl.schema.PreSharedKeyExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskKeyExchangeModesExtension.data">(pcapkit.protocols.application.ssl.schema.PskKeyExchangeModesExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RecordSizeLimitExtension.data">(pcapkit.protocols.application.ssl.schema.RecordSizeLimitExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RenegotiationInfoExtension.data">(pcapkit.protocols.application.ssl.schema.RenegotiationInfoExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerNameExtension.data">(pcapkit.protocols.application.ssl.schema.ServerNameExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SessionTicketExtension.data">(pcapkit.protocols.application.ssl.schema.SessionTicketExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampExtension.data">(pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.StatusRequestExtension.data">(pcapkit.protocols.application.ssl.schema.StatusRequestExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedVersionsExtension.data">(pcapkit.protocols.application.ssl.schema.SupportedVersionsExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.UnknownExtension.data">(pcapkit.protocols.application.ssl.schema.UnknownExtension attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.schema.UnknownHandshakeBody.data">(pcapkit.protocols.application.sslv2.schema.UnknownHandshakeBody attribute)</a>
 </li>
@@ -16902,6 +17011,8 @@
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.schema.DFFFlags">(class in pcapkit.protocols.internet.ipv6_opts.schema)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dfn">dfn (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -16930,8 +17041,6 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.dgpf_exchg">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.DH_GROUP_LIST">DH_GROUP_LIST (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dhanalakshmi">dhanalakshmi (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -18758,6 +18867,8 @@
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel.EARLY_EXPORTER_SECRET">EARLY_EXPORTER_SECRET (pcapkit.const.pcapng.tls_key_label.TLSKeyLabel attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.EarlyDataExtension">EarlyDataExtension (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.EarlyMeasurement">EarlyMeasurement (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.EarlyStatusTransfer_TransparentContainer">EarlyStatusTransfer_TransparentContainer (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
@@ -18787,7 +18898,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECPointFormatList.ec_point_format_list">ec_point_format_list (pcapkit.protocols.application.ssl.data.ECPointFormatList attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECPointFormatList.ec_point_format_list">(pcapkit.protocols.application.ssl.schema.ECPointFormatList attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.ec_point_formats">ec_point_formats (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.hi_algorithm.HIAlgorithm.ECDSA">ECDSA (pcapkit.const.hip.hi_algorithm.HIAlgorithm attribute)</a>
@@ -18828,20 +18943,44 @@
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel.ECH_SECRET">ECH_SECRET (pcapkit.const.pcapng.tls_key_label.TLSKeyLabel attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello">ECHClientHello (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHClientHelloInner">ECHClientHelloInner (class in pcapkit.protocols.application.ssl.data)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHClientHelloOuter">ECHClientHelloOuter (class in pcapkit.protocols.application.ssl.data)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfig">ECHConfig (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfig">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigContents">ECHConfigContents (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigExtension">ECHConfigExtension (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigExtension">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHEncryptedExtensions">ECHEncryptedExtensions (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHEncryptedExtensions">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHExtension">ECHExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHHelloRetryRequest">ECHHelloRetryRequest (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHHelloRetryRequest">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/internet/icmpv4.html#pcapkit.protocols.internet.icmpv4.data.Echo">Echo (class in pcapkit.protocols.internet.icmpv4.data)</a>
 
         <ul>
@@ -18995,6 +19134,12 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECPointFormatList">ECPointFormatList (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECPointFormatList">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECPointFormatsExtension">ECPointFormatsExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.ecsqdmn">ecsqdmn (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -19593,7 +19738,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Empty">Empty (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Empty">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.ems">ems (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -19627,6 +19776,12 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHClientHelloOuter.enc">enc (pcapkit.protocols.application.ssl.data.ECHClientHelloOuter attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello.enc">(pcapkit.protocols.application.ssl.schema.ECHClientHello attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello.enc_length">enc_length (pcapkit.protocols.application.ssl.schema.ECHClientHello attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.ENCAP">ENCAP (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
@@ -19872,6 +20027,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.enpp">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.enrp">enrp (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.ENRP">ENRP (pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier attribute)</a>
@@ -19880,8 +20037,6 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.sctp.SCTP.enrp_sctp_tls">enrp_sctp_tls (pcapkit.const.reg.apptype.sctp.SCTP attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.ensure_output">ensure_output() (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.ent_engine">ent_engine (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -20979,6 +21134,8 @@
 </li>
         <li><a href="pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.data.ExtendedError">ExtendedError (class in pcapkit.protocols.application.dns.data)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ExtendedMainSecretExtension">ExtendedMainSecretExtension (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.ExtendedMobilityInformation">ExtendedMobilityInformation (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.ExtendedOldAMF">ExtendedOldAMF (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
@@ -21000,6 +21157,8 @@
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Extension">Extension (class in pcapkit.protocols.application.ssl.data)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Extension">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
           <li><a href="pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.type.Type.Extension">(pcapkit.const.ieee802_11.type.Type attribute)</a>
 </li>
         </ul></li>
@@ -21028,11 +21187,15 @@
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerHello.extensions">(pcapkit.protocols.application.ssl.data.ServerHello attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.extensions">(pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.CGAParameter.extensions">(pcapkit.protocols.internet.mh.data.CGAParameter attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.schema.CGAParameter.extensions">(pcapkit.protocols.internet.mh.schema.CGAParameter attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.extensions_length">extensions_length (pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
         <li><a href="pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype">ExtensionSubtype (class in pcapkit.const.ieee802_11.extension_subtype)</a>
 
         <ul>
@@ -24133,14 +24296,14 @@
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.GlobalW_AGF_ID">GlobalW_AGF_ID (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.globe">globe (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.globe">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.globecast_id">globecast_id (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -24385,6 +24548,8 @@
 
         <ul>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareEntry.group">(pcapkit.protocols.application.ssl.data.KeyShareEntry attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareEntry.group">(pcapkit.protocols.application.ssl.schema.KeyShareEntry attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.schema.DiffieHellmanParameter.group">(pcapkit.protocols.internet.hip.schema.DiffieHellmanParameter attribute)</a>
 </li>
@@ -25503,10 +25668,10 @@
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.HIP_MAC_2">HIP_MAC_2 (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.HIP_MAC_FAILED">HIP_MAC_FAILED (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.hip_nat_t">hip_nat_t (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE">HIP_SIGNATURE (pcapkit.const.hip.parameter.Parameter attribute)</a>
@@ -26078,7 +26243,11 @@
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeKeyConfig">HpkeKeyConfig (class in pcapkit.protocols.application.ssl.data)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeSymmetricCipherSuite">HpkeSymmetricCipherSuite (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.HpkeSymmetricCipherSuite">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.hpocbus">hpocbus (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -27308,10 +27477,18 @@
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.identify">identify() (in module pcapkit.foundation.engines._pcap_backend)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OfferedPsks.identities">identities (pcapkit.protocols.application.ssl.data.OfferedPsks attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OfferedPsks.identities">(pcapkit.protocols.application.ssl.schema.OfferedPsks attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OfferedPsks.identities_length">identities_length (pcapkit.protocols.application.ssl.schema.OfferedPsks attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PskIdentity.identity">identity (pcapkit.protocols.application.ssl.data.PskIdentity attribute)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskIdentity.identity">(pcapkit.protocols.application.ssl.schema.PskIdentity attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.DNSUpdateOption.identity">(pcapkit.protocols.internet.mh.data.DNSUpdateOption attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.schema.DNSUpdateOption.identity">(pcapkit.protocols.internet.mh.schema.DNSUpdateOption attribute)</a>
@@ -28323,14 +28500,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.infowave">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.ingres_net">ingres_net (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.ingres_net">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.ingreslock">ingreslock (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -30812,7 +30989,11 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.kca_service">kca_service (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeSymmetricCipherSuite.kdf_id">kdf_id (pcapkit.protocols.application.ssl.data.HpkeSymmetricCipherSuite attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.HpkeSymmetricCipherSuite.kdf_id">(pcapkit.protocols.application.ssl.schema.HpkeSymmetricCipherSuite attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.kdm">kdm (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -30822,11 +31003,19 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.kdnet">kdnet (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PskKeyExchangeModes.ke_modes">ke_modes (pcapkit.protocols.application.ssl.data.PskKeyExchangeModes attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskKeyExchangeModes.ke_modes">(pcapkit.protocols.application.ssl.schema.PskKeyExchangeModes attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.keep_short_read">keep_short_read() (in module pcapkit.corekit.schema.shortread)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeKeyConfig.kem_id">kem_id (pcapkit.protocols.application.ssl.data.HpkeKeyConfig attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.kem_id">(pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.kentrox_prot">kentrox_prot (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -30874,7 +31063,11 @@
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigContents.key_config">key_config (pcapkit.protocols.application.ssl.data.ECHConfigContents attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareEntry.key_exchange">key_exchange (pcapkit.protocols.application.ssl.data.KeyShareEntry attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareEntry.key_exchange">(pcapkit.protocols.application.ssl.schema.KeyShareEntry attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.data.CryptographicAuthentication.key_id">key_id (pcapkit.protocols.application.ospf.data.CryptographicAuthentication attribute)</a>
 
         <ul>
@@ -30920,13 +31113,31 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareClientHello">KeyShareClientHello (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareClientHello">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareEntry">KeyShareEntry (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareEntry">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareExtension">KeyShareExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareHelloRetryRequest">KeyShareHelloRetryRequest (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareHelloRetryRequest">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareServerHello">KeyShareServerHello (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareServerHello">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.keysrvr">keysrvr (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -30951,6 +31162,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.kftp_data">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.kfxaclicensing">kfxaclicensing (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -30973,8 +31186,6 @@
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.schema.Option.kind">(pcapkit.protocols.transport.tcp.schema.Option attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.kingdomsonline">kingdomsonline (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -31787,6 +31998,48 @@
           <li><a href="pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.schema.OSPF.length">(pcapkit.protocols.application.ospf.schema.OSPF attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Handshake.length">(pcapkit.protocols.application.ssl.data.Handshake attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CertificateCompressionAlgorithms.length">(pcapkit.protocols.application.ssl.schema.CertificateCompressionAlgorithms attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ConnectionId.length">(pcapkit.protocols.application.ssl.schema.ConnectionId attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Cookie.length">(pcapkit.protocols.application.ssl.schema.Cookie attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfig.length">(pcapkit.protocols.application.ssl.schema.ECHConfig attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigExtension.length">(pcapkit.protocols.application.ssl.schema.ECHConfigExtension attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHEncryptedExtensions.length">(pcapkit.protocols.application.ssl.schema.ECHEncryptedExtensions attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECPointFormatList.length">(pcapkit.protocols.application.ssl.schema.ECPointFormatList attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareClientHello.length">(pcapkit.protocols.application.ssl.schema.KeyShareClientHello attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareEntry.length">(pcapkit.protocols.application.ssl.schema.KeyShareEntry attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.NamedGroupList.length">(pcapkit.protocols.application.ssl.schema.NamedGroupList attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Opaque16.length">(pcapkit.protocols.application.ssl.schema.Opaque16 attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Opaque8.length">(pcapkit.protocols.application.ssl.schema.Opaque8 attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ProtocolNameList.length">(pcapkit.protocols.application.ssl.schema.ProtocolNameList attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskIdentity.length">(pcapkit.protocols.application.ssl.schema.PskIdentity attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskKeyExchangeModes.length">(pcapkit.protocols.application.ssl.schema.PskKeyExchangeModes attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RenegotiationInfo.length">(pcapkit.protocols.application.ssl.schema.RenegotiationInfo attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerName.length">(pcapkit.protocols.application.ssl.schema.ServerName attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerNameList.length">(pcapkit.protocols.application.ssl.schema.ServerNameList attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignatureSchemeList.length">(pcapkit.protocols.application.ssl.schema.SignatureSchemeList attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampList.length">(pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampList attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedVersionsClientHello.length">(pcapkit.protocols.application.ssl.schema.SupportedVersionsClientHello attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.protocol.SSLv2.length">(pcapkit.protocols.application.sslv2.protocol.SSLv2 property)</a>
 </li>
@@ -34090,7 +34343,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigContents.maximum_name_length">maximum_name_length (pcapkit.protocols.application.ssl.data.ECHConfigContents attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.maximum_name_length">(pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tcp.html#pcapkit.const.tcp.option.Option.Maximum_Segment_Size">Maximum_Segment_Size (pcapkit.const.tcp.option.Option attribute)</a>
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.MaximumDataBurstVolume">MaximumDataBurstVolume (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
@@ -36238,6 +36495,8 @@
           <li><a href="pcapkit/protocols/application/ssl.html#module-pcapkit.protocols.application.ssl.data">pcapkit.protocols.application.ssl.data</a>
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#module-pcapkit.protocols.application.ssl.protocol">pcapkit.protocols.application.ssl.protocol</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#module-pcapkit.protocols.application.ssl.schema">pcapkit.protocols.application.ssl.schema</a>
 </li>
           <li><a href="pcapkit/protocols/application/sslv2.html#module-pcapkit.protocols.application.sslv2">pcapkit.protocols.application.sslv2</a>
 </li>
@@ -38611,6 +38870,8 @@
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerName.name">(pcapkit.protocols.application.ssl.data.ServerName attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerName.name">(pcapkit.protocols.application.ssl.schema.ServerName attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.protocol.SSLv2.name">(pcapkit.protocols.application.sslv2.protocol.SSLv2 property)</a>
 </li>
           <li><a href="pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.protocol.TLS.name">(pcapkit.protocols.application.tls.protocol.TLS property)</a>
@@ -38721,11 +38982,23 @@
         <li><a href="pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.schema.name_to_text">name_to_text() (in module pcapkit.protocols.application.dns.schema)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerName.name_type">name_type (pcapkit.protocols.application.ssl.data.ServerName attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerName.name_type">(pcapkit.protocols.application.ssl.schema.ServerName attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.NamedGroupList.named_group_list">named_group_list (pcapkit.protocols.application.ssl.data.NamedGroupList attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.NamedGroupList.named_group_list">(pcapkit.protocols.application.ssl.schema.NamedGroupList attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.NamedGroupList">NamedGroupList (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.NamedGroupList">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.NamedStream">NamedStream (class in pcapkit.corekit.io)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.namemunge">namemunge (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -40152,6 +40425,8 @@
 </li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType.new_connection_id">new_connection_id (pcapkit.const.tls.handshake_type.HandshakeType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.data.ForwardTSNChunk.new_cum_tsn">new_cum_tsn (pcapkit.protocols.transport.sctp.data.ForwardTSNChunk attribute)</a>
 
         <ul>
@@ -40162,8 +40437,6 @@
           <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.schema.IForwardTSNChunk.new_cum_tsn">(pcapkit.protocols.transport.sctp.schema.IForwardTSNChunk attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.new_rwho">new_rwho (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -41807,7 +42080,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PskIdentity.obfuscated_ticket_age">obfuscated_ticket_age (pcapkit.protocols.application.ssl.data.PskIdentity attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskIdentity.obfuscated_ticket_age">(pcapkit.protocols.application.ssl.schema.PskIdentity attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.objcall">objcall (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -41895,7 +42172,11 @@
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.certificate_status_type.CertificateStatusType.ocsp_multi_RESERVED">ocsp_multi_RESERVED (pcapkit.const.tls.certificate_status_type.CertificateStatusType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OCSPStatusRequest">OCSPStatusRequest (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OCSPStatusRequest">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.octopus">octopus (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -41973,7 +42254,11 @@
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.oemcacao_websvc">oemcacao_websvc (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OfferedPsks">OfferedPsks (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OfferedPsks">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.office_tools">office_tools (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -42354,6 +42639,10 @@
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.schema.SolutionParameter.opaque">(pcapkit.protocols.internet.hip.schema.SolutionParameter attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Opaque16">Opaque16 (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Opaque8">Opaque8 (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.opc_job_start">opc_job_start (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -42668,12 +42957,12 @@
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_custom_19373">opt_custom_19373 (pcapkit.const.pcapng.option_type.OptionType attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_custom_2988">opt_custom_2988 (pcapkit.const.pcapng.option_type.OptionType attribute)</a>
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_custom_2989">opt_custom_2989 (pcapkit.const.pcapng.option_type.OptionType attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_endofopt">opt_endofopt (pcapkit.const.pcapng.option_type.OptionType attribute)</a>
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.opt_name">opt_name (pcapkit.const.pcapng.option_type.OptionType attribute)</a>
@@ -43891,6 +44180,8 @@
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Padding">Padding (class in pcapkit.protocols.application.ssl.data)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Padding">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
           <li><a href="pcapkit/protocols/transport/dccp.html#pcapkit.protocols.transport.dccp.data.Padding">(class in pcapkit.protocols.transport.dccp.data)</a>
 </li>
           <li><a href="pcapkit/protocols/transport/dccp.html#pcapkit.protocols.transport.dccp.schema.Padding">(class in pcapkit.protocols.transport.dccp.schema)</a>
@@ -43918,6 +44209,8 @@
           <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.schema.PushPromiseFrame.padding">(pcapkit.protocols.application.httpv2.schema.PushPromiseFrame attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Padding.padding">(pcapkit.protocols.application.ssl.data.Padding attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.Padding.padding">(pcapkit.protocols.application.ssl.schema.Padding attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.data.SSLv2.padding">(pcapkit.protocols.application.sslv2.data.SSLv2 attribute)</a>
 </li>
@@ -44244,6 +44537,8 @@
           <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.schema.PaddingChunk">(class in pcapkit.protocols.transport.sctp.schema)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PaddingExtension">PaddingExtension (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField">PaddingField (class in pcapkit.corekit.fields.strings)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.data.PaddingParameter">PaddingParameter (class in pcapkit.protocols.transport.sctp.data)</a>
@@ -44733,6 +45028,8 @@
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHClientHelloOuter.payload">(pcapkit.protocols.application.ssl.data.ECHClientHelloOuter attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello.payload">(pcapkit.protocols.application.ssl.schema.ECHClientHello attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.schema.SSLv2.payload">(pcapkit.protocols.application.sslv2.schema.SSLv2 attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.schema.TLS.payload">(pcapkit.protocols.application.tls.schema.TLS attribute)</a>
@@ -44839,6 +45136,8 @@
         <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.data.ESP.payload_data">payload_data (pcapkit.protocols.internet.esp.data.ESP attribute)</a>
 </li>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.chunk.Chunk.Payload_Data_supporting_Interleaving">Payload_Data_supporting_Interleaving (pcapkit.const.sctp.chunk.Chunk attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello.payload_length">payload_length (pcapkit.protocols.application.ssl.schema.ECHClientHello attribute)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.PAYLOAD_MIC">PAYLOAD_MIC (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
@@ -47313,6 +47612,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.protocols.application.ssl.schema
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#module-pcapkit.protocols.application.ssl.schema">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.protocols.application.sslv2
 
         <ul>
@@ -48621,8 +48927,6 @@
           <li><a href="pcapkit/protocols/transport/dccp.html#module-pcapkit.protocols.transport.dccp.data">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.transport.dccp.protocol
 
@@ -48630,6 +48934,8 @@
           <li><a href="pcapkit/protocols/transport/dccp.html#module-pcapkit.protocols.transport.dccp.protocol">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.transport.dccp.schema
 
@@ -51719,6 +52025,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.postgresql">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PostHandshakeAuthExtension">PostHandshakeAuthExtension (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.pov_ray">pov_ray (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -52153,8 +52461,14 @@
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.WireGuardKeyLabel.PRESHARED_KEY">PRESHARED_KEY (pcapkit.protocols.misc.pcapng.protocol.WireGuardKeyLabel attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PreSharedKeyServerHello">PreSharedKeyServerHello (class in pcapkit.protocols.application.ssl.data)</a>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PreSharedKeyExtension">PreSharedKeyExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PreSharedKeyServerHello">PreSharedKeyServerHello (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PreSharedKeyServerHello">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.presonus_ucnet">presonus_ucnet (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/ipv4.html#pcapkit.const.ipv4.ts_flag.TSFlag.Prespecified_IP_with_Timestamp">Prespecified_IP_with_Timestamp (pcapkit.const.ipv4.ts_flag.TSFlag attribute)</a>
@@ -52758,7 +53072,11 @@
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.error_code.ErrorCode.PROTOCOL_ERROR">PROTOCOL_ERROR (pcapkit.const.http.error_code.ErrorCode attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ProtocolNameList.protocol_name_list">protocol_name_list (pcapkit.protocols.application.ssl.data.ProtocolNameList attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ProtocolNameList.protocol_name_list">(pcapkit.protocols.application.ssl.schema.ProtocolNameList attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/link/gre.html#pcapkit.protocols.link.gre.data.GRE.protocol_type">protocol_type (pcapkit.protocols.link.gre.data.GRE attribute)</a>
 
         <ul>
@@ -52792,7 +53110,11 @@
         <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta">ProtocolMeta (class in pcapkit.protocols.protocol)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ProtocolNameList">ProtocolNameList (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ProtocolNameList">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotFound">ProtocolNotFound</a>
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotImplemented">ProtocolNotImplemented</a>
@@ -52946,7 +53268,11 @@
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.psk_key_exchange_modes">psk_key_exchange_modes (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PskIdentity">PskIdentity (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskIdentity">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.psk_key_exchange_mode.PskKeyExchangeMode">PskKeyExchangeMode (class in pcapkit.const.tls.psk_key_exchange_mode)</a>
 
         <ul>
@@ -52954,6 +53280,12 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PskKeyExchangeModes">PskKeyExchangeModes (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskKeyExchangeModes">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PskKeyExchangeModesExtension">PskKeyExchangeModesExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.psl_management">psl_management (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
@@ -53112,14 +53444,24 @@
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeKeyConfig.public_key">public_key (pcapkit.protocols.application.ssl.data.HpkeKeyConfig attribute)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.public_key">(pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.CGAParameter.public_key">(pcapkit.protocols.internet.mh.data.CGAParameter attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.schema.CGAParameter.public_key">(pcapkit.protocols.internet.mh.schema.CGAParameter attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.public_key_length">public_key_length (pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.schema.CGAParameter.public_key_test">public_key_test (pcapkit.protocols.internet.mh.schema.CGAParameter attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigContents.public_name">public_name (pcapkit.protocols.application.ssl.data.ECHConfigContents attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.public_name">(pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigContents.public_name_length">public_name_length (pcapkit.protocols.application.ssl.schema.ECHConfigContents attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.publiqare_sync">publiqare_sync (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
@@ -55143,6 +55485,8 @@
         <ul>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.RecordSizeLimit.record_size_limit">(pcapkit.protocols.application.ssl.data.RecordSizeLimit attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RecordSizeLimit.record_size_limit">(pcapkit.protocols.application.ssl.schema.RecordSizeLimit attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord.record_type">record_type (pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord attribute)</a>
 
@@ -55177,6 +55521,12 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.RecordSizeLimit">RecordSizeLimit (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RecordSizeLimit">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RecordSizeLimitExtension">RecordSizeLimitExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.RecordTimestamp">RecordTimestamp (class in pcapkit.toolkit.dpkt)</a>
 </li>
@@ -55845,10 +56195,20 @@
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.registration.Registration.RENDEZVOUS">RENDEZVOUS (pcapkit.const.hip.registration.Registration attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.RenegotiationInfo.renegotiated_connection">renegotiated_connection (pcapkit.protocols.application.ssl.data.RenegotiationInfo attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RenegotiationInfo.renegotiated_connection">(pcapkit.protocols.application.ssl.schema.RenegotiationInfo attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.renegotiation_info">renegotiation_info (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.RenegotiationInfo">RenegotiationInfo (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RenegotiationInfo">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.RenegotiationInfoExtension">RenegotiationInfoExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.repcmd">repcmd (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -55919,7 +56279,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.CertificateStatusRequest.request">request (pcapkit.protocols.application.ssl.data.CertificateStatusRequest attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CertificateStatusRequest.request">(pcapkit.protocols.application.ssl.schema.CertificateStatusRequest attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.request">request() (pcapkit.vendor.default.Vendor method)</a>
 </li>
         <li><a href="pcapkit/const/sslv2.html#pcapkit.const.sslv2.handshake_type.HandshakeType.REQUEST_CERTIFICATE">REQUEST_CERTIFICATE (pcapkit.const.sslv2.handshake_type.HandshakeType attribute)</a>
@@ -55927,6 +56291,12 @@
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType.request_connection_id">request_connection_id (pcapkit.const.tls.handshake_type.HandshakeType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OCSPStatusRequest.request_extensions">request_extensions (pcapkit.protocols.application.ssl.data.OCSPStatusRequest attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OCSPStatusRequest.request_extensions">(pcapkit.protocols.application.ssl.schema.OCSPStatusRequest attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OCSPStatusRequest.request_extensions_length">request_extensions_length (pcapkit.protocols.application.ssl.schema.OCSPStatusRequest attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.IPv4HomeAddressOption.request_prefix">request_prefix (pcapkit.protocols.internet.mh.data.IPv4HomeAddressOption attribute)</a>
 </li>
@@ -58244,12 +58614,12 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_8609">reserved_8609 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8615">reserved_8615 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8665">reserved_8665 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8666">reserved_8666 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8668">reserved_8668 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
@@ -58521,6 +58891,12 @@
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.RESPONDER_BUSY_PLEASE_RETRY">RESPONDER_BUSY_PLEASE_RETRY (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OCSPStatusRequest.responder_id_list">responder_id_list (pcapkit.protocols.application.ssl.data.OCSPStatusRequest attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OCSPStatusRequest.responder_id_list">(pcapkit.protocols.application.ssl.schema.OCSPStatusRequest attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.OCSPStatusRequest.responder_id_list_length">responder_id_list_length (pcapkit.protocols.application.ssl.schema.OCSPStatusRequest attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.data.Response">Response (class in pcapkit.protocols.application.ftp.data)</a>
 </li>
@@ -58629,7 +59005,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHEncryptedExtensions.retry_configs">retry_configs (pcapkit.protocols.application.ssl.data.ECHEncryptedExtensions attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHEncryptedExtensions.retry_configs">(pcapkit.protocols.application.ssl.schema.ECHEncryptedExtensions attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.rets">rets (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -59562,7 +59942,7 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-82">RFC 5077</a>, <a href="pcapkit/protocols/application/tls.html#index-5">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-22">RFC 5077 Section 3.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-75">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-112">RFC 5077 Section 3.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-22">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-57">[2]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-277">RFC 5087</a>, <a href="pcapkit/const/reg.html#index-278">[1]</a>, <a href="pcapkit/const/reg.html#index-578">[2]</a>, <a href="pcapkit/const/reg.html#index-579">[3]</a>
 </li>
@@ -59730,7 +60110,7 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-126">RFC 5746</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-33">RFC 5746 Section 3.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-94">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-131">RFC 5746 Section 3.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-33">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-79">[2]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-353">RFC 5762</a>, <a href="pcapkit/const/reg.html#index-358">[1]</a>, <a href="pcapkit/const/reg.html#index-650">[2]</a>, <a href="pcapkit/const/reg.html#index-655">[3]</a>, <a href="pcapkit/const/reg.html#index-824">[4]</a>, <a href="pcapkit/const/reg.html#index-829">[5]</a>
 </li>
@@ -59836,9 +60216,9 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-131">RFC 6066</a>, <a href="pcapkit/const/tls.html#index-30">[1]</a>, <a href="pcapkit/const/tls.html#index-32">[2]</a>, <a href="pcapkit/const/tls.html#index-40">[3]</a>, <a href="pcapkit/const/tls.html#index-42">[4]</a>, <a href="pcapkit/const/tls.html#index-44">[5]</a>, <a href="pcapkit/const/tls.html#index-45">[6]</a>, <a href="pcapkit/const/tls.html#index-46">[7]</a>, <a href="pcapkit/const/tls.html#index-48">[8]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-48">RFC 6066 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-49">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-9">[2]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-44">RFC 6066 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-45">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-85">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-86">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-9">[4]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-10">RFC 6066 Section 8</a>, <a href="pcapkit/protocols/application/ssl.html#index-66">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-67">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-68">[3]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-10">RFC 6066 Section 8</a>, <a href="pcapkit/protocols/application/ssl.html#index-103">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-104">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-105">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-46">[4]</a>, <a href="pcapkit/protocols/application/ssl.html#index-47">[5]</a>
 </li>
           <li><a href="pcapkit/const/hip.html#index-117">RFC 6078</a>, <a href="pcapkit/const/hip.html#index-147">[1]</a>, <a href="pcapkit/const/hip.html#index-148">[2]</a>, <a href="pcapkit/const/hip.html#index-149">[3]</a>, <a href="pcapkit/const/hip.html#index-150">[4]</a>, <a href="pcapkit/protocols/internet/hip.html#index-44">[5]</a>, <a href="pcapkit/protocols/internet/hip.html#index-45">[6]</a>, <a href="pcapkit/protocols/internet/hip.html#index-46">[7]</a>, <a href="pcapkit/protocols/internet/hip.html#index-47">[8]</a>
 </li>
@@ -59892,9 +60272,9 @@
 </li>
           <li><a href="changelog.html#index-1">RFC 6275</a>, <a href="changelog/1.0.2.html#index-0">[1]</a>, <a href="changelog/1.5.0.html#index-33">[2]</a>, <a href="pcapkit/const/icmpv6.html#index-24">[3]</a>, <a href="pcapkit/const/icmpv6.html#index-25">[4]</a>, <a href="pcapkit/const/icmpv6.html#index-26">[5]</a>, <a href="pcapkit/const/icmpv6.html#index-27">[6]</a>, <a href="pcapkit/const/ipv6.html#index-119">[7]</a>, <a href="pcapkit/const/ipv6.html#index-27">[8]</a>, <a href="pcapkit/const/ipv6.html#index-7">[9]</a>, <a href="pcapkit/const/mh.html#index-145">[10]</a>, <a href="pcapkit/const/mh.html#index-146">[11]</a>, <a href="pcapkit/const/mh.html#index-147">[12]</a>, <a href="pcapkit/const/mh.html#index-148">[13]</a>, <a href="pcapkit/const/mh.html#index-149">[14]</a>, <a href="pcapkit/const/mh.html#index-150">[15]</a>, <a href="pcapkit/const/mh.html#index-216">[16]</a>, <a href="pcapkit/const/mh.html#index-217">[17]</a>, <a href="pcapkit/const/mh.html#index-218">[18]</a>, <a href="pcapkit/const/mh.html#index-219">[19]</a>, <a href="pcapkit/const/mh.html#index-22">[20]</a>, <a href="pcapkit/const/mh.html#index-220">[21]</a>, <a href="pcapkit/const/mh.html#index-221">[22]</a>, <a href="pcapkit/const/mh.html#index-222">[23]</a>, <a href="pcapkit/const/mh.html#index-223">[24]</a>, <a href="pcapkit/const/mh.html#index-273">[25]</a>, <a href="pcapkit/const/mh.html#index-275">[26]</a>, <a href="pcapkit/const/mh.html#index-281">[27]</a>, <a href="pcapkit/const/mh.html#index-282">[28]</a>, <a href="pcapkit/const/mh.html#index-283">[29]</a>, <a href="pcapkit/const/mh.html#index-284">[30]</a>, <a href="pcapkit/const/mh.html#index-285">[31]</a>, <a href="pcapkit/const/mh.html#index-286">[32]</a>, <a href="pcapkit/const/mh.html#index-287">[33]</a>, <a href="pcapkit/const/mh.html#index-288">[34]</a>, <a href="pcapkit/const/mh.html#index-289">[35]</a>, <a href="pcapkit/const/mh.html#index-290">[36]</a>, <a href="pcapkit/const/mh.html#index-291">[37]</a>, <a href="pcapkit/const/mh.html#index-292">[38]</a>, <a href="pcapkit/const/mh.html#index-32">[39]</a>, <a href="pcapkit/const/mh.html#index-327">[40]</a>, <a href="pcapkit/const/mh.html#index-33">[41]</a>, <a href="pcapkit/const/mh.html#index-34">[42]</a>, <a href="pcapkit/const/mh.html#index-35">[43]</a>, <a href="pcapkit/const/reg.html#index-75">[44]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-19">[45]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-19">[46]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-7">[47]</a>, <a href="pcapkit/protocols/internet/mh.html#index-10">[48]</a>, <a href="pcapkit/protocols/internet/mh.html#index-11">[49]</a>, <a href="pcapkit/protocols/internet/mh.html#index-12">[50]</a>, <a href="pcapkit/protocols/internet/mh.html#index-196">[51]</a>, <a href="pcapkit/protocols/internet/mh.html#index-2">[52]</a>, <a href="pcapkit/protocols/internet/mh.html#index-211">[53]</a>, <a href="pcapkit/protocols/internet/mh.html#index-42">[54]</a>, <a href="pcapkit/protocols/internet/mh.html#index-5">[55]</a>, <a href="pcapkit/protocols/internet/mh.html#index-53">[56]</a>, <a href="pcapkit/protocols/internet/mh.html#index-56">[57]</a>, <a href="pcapkit/protocols/internet/mh.html#index-58">[58]</a>, <a href="pcapkit/protocols/internet/mh.html#index-59">[59]</a>, <a href="pcapkit/protocols/internet/mh.html#index-6">[60]</a>, <a href="pcapkit/protocols/internet/mh.html#index-60">[61]</a>, <a href="pcapkit/protocols/internet/mh.html#index-7">[62]</a>, <a href="pcapkit/protocols/internet/mh.html#index-8">[63]</a>, <a href="pcapkit/protocols/internet/mh.html#index-81">[64]</a>, <a href="pcapkit/protocols/internet/mh.html#index-9">[65]</a>
 </li>
-          <li><a href="pcapkit/protocols/misc/checksum.html#index-10">RFC 6275 Section 11.3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-5">[1]</a>
+          <li><a href="pcapkit/protocols/misc/checksum.html#index-10">RFC 6275 Section 11.3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-13">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-5">[2]</a>
 </li>
-          <li><a href="contributing/conventions/extension-header-subclassing.html#index-4">RFC 6275 Section 6.1.1</a>, <a href="contributing/pep.html#index-48">[1]</a>, <a href="pcapkit/protocols/internet/hip.html#index-2">[2]</a>, <a href="pcapkit/protocols/internet/mh.html#index-1">[3]</a>, <a href="pcapkit/protocols/internet/mh.html#index-229">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-4">[5]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-12">[6]</a>
+          <li><a href="contributing/conventions/extension-header-subclassing.html#index-4">RFC 6275 Section 6.1.1</a>, <a href="contributing/pep.html#index-48">[1]</a>, <a href="pcapkit/protocols/internet/hip.html#index-2">[2]</a>, <a href="pcapkit/protocols/internet/mh.html#index-1">[3]</a>, <a href="pcapkit/protocols/internet/mh.html#index-229">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-4">[5]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-12">[6]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-16">[7]</a>
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#index-15">RFC 6275 Section 6.1.7</a>, <a href="pcapkit/protocols/internet/mh.html#index-19">[1]</a>
 </li>
@@ -59928,7 +60308,7 @@
 </li>
           <li><a href="pcapkit/protocols/application/dtls.html#index-12">RFC 6347 Section 4.1.1</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-38">RFC 6347 Section 4.2.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-43">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-38">RFC 6347 Section 4.2.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-80">[1]</a>
 </li>
           <li><a href="pcapkit/foundation/reassembly/dtls.html#index-7">RFC 6347 Section 4.2.2</a>, <a href="pcapkit/protocols/application/dtls.html#index-27">[1]</a>, <a href="pcapkit/protocols/application/dtls.html#index-42">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-35">[3]</a>
 </li>
@@ -60090,9 +60470,9 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-64">RFC 6962</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-15">RFC 6962 Section 3.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-70">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-107">RFC 6962 Section 3.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-15">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-52">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-16">RFC 6962 Section 3.3.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-65">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-102">RFC 6962 Section 3.3.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-16">[1]</a>
 </li>
           <li><a href="pcapkit/const/ipv6.html#index-32">RFC 6971</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-1">[1]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-20">[2]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-21">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-1">[4]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-20">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-21">[6]</a>
 </li>
@@ -60192,7 +60572,7 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-387">RFC 7301</a>, <a href="pcapkit/const/reg.html#index-685">[1]</a>, <a href="pcapkit/const/tls.html#index-62">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-14">RFC 7301 Section 3.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-52">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-14">RFC 7301 Section 3.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-51">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-89">[2]</a>
 </li>
           <li><a href="pcapkit/const/dns.html#index-141">RFC 7314</a>
 </li>
@@ -60220,7 +60600,7 @@
 </li>
           <li><a href="changelog/1.6.0.html#index-30">RFC 7401 Section 5.1</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-3">[1]</a>, <a href="pcapkit/protocols/internet/hip.html#index-0">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-8">[3]</a>, <a href="pcapkit/protocols/internet/hip.html#index-9">[4]</a>, <a href="pcapkit/protocols/internet/hip.html#index-97">[5]</a>, <a href="pcapkit/protocols/internet/hip.html#index-98">[6]</a>
 </li>
-          <li><a href="contributing/pep.html#index-49">RFC 7401 Section 5.1.1</a>, <a href="pcapkit/protocols/internet/hip.html#index-10">[1]</a>, <a href="pcapkit/protocols/internet/hip.html#index-5">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-79">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-13">[4]</a>
+          <li><a href="contributing/pep.html#index-49">RFC 7401 Section 5.1.1</a>, <a href="pcapkit/protocols/internet/hip.html#index-10">[1]</a>, <a href="pcapkit/protocols/internet/hip.html#index-5">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-79">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-17">[4]</a>
 </li>
           <li><a href="changelog/1.5.0.html#index-57">RFC 7401 Section 5.1.3</a>
 </li>
@@ -60282,7 +60662,7 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-69">RFC 7627</a>, <a href="pcapkit/protocols/application/tls.html#index-8">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-18">RFC 7627 Section 5.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-62">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-18">RFC 7627 Section 5.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-54">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-99">[2]</a>
 </li>
           <li><a href="contributing/pep.html#index-5">RFC 7634</a>, <a href="pcapkit/const/esp.html#index-37">[1]</a>
 </li>
@@ -60290,7 +60670,7 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-67">RFC 7685</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-17">RFC 7685 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-71">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-72">[2]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-108">RFC 7685 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-109">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-17">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-53">[3]</a>
 </li>
           <li><a href="pcapkit/const/http.html#index-137">RFC 7725</a>
 </li>
@@ -60354,7 +60734,7 @@
 </li>
           <li><a href="changelog/1.6.0.html#index-21">RFC 793</a>, <a href="pcapkit/protocols/misc/checksum.html#index-3">[1]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-3">[2]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-5">[3]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-6">[4]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-7">[5]</a>
 </li>
-          <li><a href="pcapkit/protocols/misc/checksum.html#index-0">RFC 793 Section 3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-14">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-16">[2]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-4">[3]</a>
+          <li><a href="pcapkit/protocols/misc/checksum.html#index-0">RFC 793 Section 3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-18">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-20">[2]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-4">[3]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-31">RFC 7973</a>
 </li>
@@ -60434,7 +60814,7 @@
 </li>
           <li><a href="pcapkit/protocols/internet/ipv6_ext.html#index-3">RFC 8200 Section 4.8</a>
 </li>
-          <li><a href="changelog/1.6.0.html#index-22">RFC 8200 Section 8.1</a>, <a href="contributing/pep.html#index-56">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-15">[2]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-17">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-2">[4]</a>, <a href="pcapkit/protocols/transport/udp.html#index-4">[5]</a>
+          <li><a href="changelog/1.6.0.html#index-22">RFC 8200 Section 8.1</a>, <a href="contributing/pep.html#index-56">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-14">[2]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-15">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-19">[4]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-2">[5]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-21">[6]</a>, <a href="pcapkit/protocols/transport/udp.html#index-4">[7]</a>
 </li>
           <li><a href="pcapkit/protocols/internet/esp.html#index-12">RFC 8221</a>, <a href="pcapkit/protocols/internet/esp.html#index-13">[1]</a>, <a href="pcapkit/protocols/internet/esp.html#index-14">[2]</a>, <a href="pcapkit/protocols/internet/esp.html#index-20">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-7">[4]</a>
 </li>
@@ -60482,7 +60862,7 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-127">RFC 8422</a>, <a href="pcapkit/const/tls.html#index-128">[1]</a>, <a href="pcapkit/const/tls.html#index-129">[2]</a>, <a href="pcapkit/const/tls.html#index-54">[3]</a>, <a href="pcapkit/const/tls.html#index-57">[4]</a>, <a href="pcapkit/protocols/application/tls.html#index-9">[5]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-12">RFC 8422 Section 5.1.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-69">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-106">RFC 8422 Section 5.1.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-12">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-49">[2]</a>
 </li>
           <li><a href="pcapkit/const/http.html#index-84">RFC 8441</a>
 </li>
@@ -60494,7 +60874,7 @@
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#index-21">RFC 8449 Section 1</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-20">RFC 8449 Section 4</a>, <a href="pcapkit/protocols/application/ssl.html#index-74">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-111">RFC 8449 Section 4</a>, <a href="pcapkit/protocols/application/ssl.html#index-20">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-56">[2]</a>
 </li>
           <li><a href="pcapkit/const/http.html#index-132">RFC 8470</a>
 </li>
@@ -60582,7 +60962,7 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-137">RFC 8879</a>, <a href="pcapkit/const/tls.html#index-138">[1]</a>, <a href="pcapkit/const/tls.html#index-139">[2]</a>, <a href="pcapkit/const/tls.html#index-140">[3]</a>, <a href="pcapkit/const/tls.html#index-37">[4]</a>, <a href="pcapkit/const/tls.html#index-74">[5]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-19">RFC 8879 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-73">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-110">RFC 8879 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-19">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-55">[2]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-42">RFC 888</a>
 </li>
@@ -60804,11 +61184,11 @@
 </li>
           <li><a href="changelog/1.6.0.html#index-19">RFC 9146</a>, <a href="pcapkit/const/tls.html#index-100">[1]</a>, <a href="pcapkit/const/tls.html#index-5">[2]</a>, <a href="pcapkit/const/tls.html#index-98">[3]</a>, <a href="pcapkit/protocols/application/dtls.html#index-19">[4]</a>, <a href="pcapkit/protocols/application/dtls.html#index-2">[5]</a>, <a href="pcapkit/protocols/application/dtls.html#index-29">[6]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-31">RFC 9146 Section 10.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-60">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-31">RFC 9146 Section 10.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-97">[1]</a>
 </li>
           <li><a href="pcapkit/protocols/application/dtls.html#index-6">RFC 9146 Section 10.3</a>
 </li>
-          <li><a href="pcapkit/protocols/application/dtls.html#index-9">RFC 9146 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-30">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-59">[2]</a>
+          <li><a href="pcapkit/protocols/application/dtls.html#index-9">RFC 9146 Section 3</a>, <a href="pcapkit/protocols/application/ssl.html#index-30">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-71">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-96">[3]</a>
 </li>
           <li><a href="pcapkit/protocols/application/dtls.html#index-11">RFC 9146 Section 4</a>, <a href="pcapkit/protocols/application/dtls.html#index-23">[1]</a>, <a href="pcapkit/protocols/application/dtls.html#index-26">[2]</a>, <a href="pcapkit/protocols/application/dtls.html#index-32">[3]</a>, <a href="pcapkit/protocols/application/dtls.html#index-33">[4]</a>, <a href="pcapkit/protocols/application/dtls.html#index-39">[5]</a>, <a href="pcapkit/protocols/application/dtls.html#index-41">[6]</a>, <a href="pcapkit/protocols/application/dtls.html#index-7">[7]</a>
 </li>
@@ -60826,7 +61206,7 @@
 </li>
           <li><a href="pcapkit/const/tls.html#index-8">RFC 9147 Section 5.2</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-39">RFC 9147 Section 5.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-44">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-39">RFC 9147 Section 5.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-81">[1]</a>
 </li>
           <li><a href="pcapkit/foundation/reassembly/dtls.html#index-3">RFC 9147 Section 5.5</a>
 </li>
@@ -60842,11 +61222,11 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-110">RFC 9176</a>, <a href="pcapkit/const/reg.html#index-111">[1]</a>, <a href="pcapkit/const/reg.html#index-112">[2]</a>, <a href="pcapkit/const/reg.html#index-427">[3]</a>, <a href="pcapkit/const/reg.html#index-428">[4]</a>, <a href="pcapkit/const/reg.html#index-429">[5]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-89">RFC 9180 Section 7.1</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-126">RFC 9180 Section 7.1</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-91">RFC 9180 Section 7.2</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-128">RFC 9180 Section 7.2</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-92">RFC 9180 Section 7.3</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-129">RFC 9180 Section 7.3</a>
 </li>
           <li><a href="pcapkit/const/http.html#index-26">RFC 9218</a>, <a href="pcapkit/const/http.html#index-85">[1]</a>
 </li>
@@ -61070,43 +61450,45 @@
 </li>
           <li><a href="pcapkit/protocols/protocol.html#index-0">RFC 9846 Section 3.4</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-43">RFC 9846 Section 3.6</a>
+</li>
           <li><a href="pcapkit/protocols/application/ssl.html#index-37">RFC 9846 Section 4.2.2</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-40">RFC 9846 Section 4.2.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-45">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-40">RFC 9846 Section 4.2.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-82">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-42">RFC 9846 Section 4.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-47">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-42">RFC 9846 Section 4.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-84">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-25">RFC 9846 Section 4.3.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-53">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-54">[2]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-25">RFC 9846 Section 4.3.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-62">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-63">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-90">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-91">[4]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-24">RFC 9846 Section 4.3.10</a>, <a href="pcapkit/protocols/application/ssl.html#index-61">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-64">[2]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-101">RFC 9846 Section 4.3.10</a>, <a href="pcapkit/protocols/application/ssl.html#index-24">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-61">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-98">[3]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-23">RFC 9846 Section 4.3.11</a>, <a href="pcapkit/protocols/application/ssl.html#index-76">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-77">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-78">[3]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-113">RFC 9846 Section 4.3.11</a>, <a href="pcapkit/protocols/application/ssl.html#index-114">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-115">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-23">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-58">[4]</a>, <a href="pcapkit/protocols/application/ssl.html#index-59">[5]</a>, <a href="pcapkit/protocols/application/ssl.html#index-60">[6]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-26">RFC 9846 Section 4.3.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-79">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-116">RFC 9846 Section 4.3.2</a>, <a href="pcapkit/protocols/application/ssl.html#index-26">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-64">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-13">RFC 9846 Section 4.3.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-51">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-13">RFC 9846 Section 4.3.3</a>, <a href="pcapkit/protocols/application/ssl.html#index-50">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-88">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-28">RFC 9846 Section 4.3.6</a>, <a href="pcapkit/protocols/application/ssl.html#index-63">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-100">RFC 9846 Section 4.3.6</a>, <a href="pcapkit/protocols/application/ssl.html#index-28">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-66">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-11">RFC 9846 Section 4.3.7</a>, <a href="pcapkit/protocols/application/ssl.html#index-50">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-11">RFC 9846 Section 4.3.7</a>, <a href="pcapkit/protocols/application/ssl.html#index-48">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-87">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-29">RFC 9846 Section 4.3.8</a>, <a href="pcapkit/protocols/application/ssl.html#index-55">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-56">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-57">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-58">[4]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-29">RFC 9846 Section 4.3.8</a>, <a href="pcapkit/protocols/application/ssl.html#index-67">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-68">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-69">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-70">[4]</a>, <a href="pcapkit/protocols/application/ssl.html#index-92">[5]</a>, <a href="pcapkit/protocols/application/ssl.html#index-93">[6]</a>, <a href="pcapkit/protocols/application/ssl.html#index-94">[7]</a>, <a href="pcapkit/protocols/application/ssl.html#index-95">[8]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-27">RFC 9846 Section 4.3.9</a>, <a href="pcapkit/protocols/application/ssl.html#index-80">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-117">RFC 9846 Section 4.3.9</a>, <a href="pcapkit/protocols/application/ssl.html#index-27">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-65">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-41">RFC 9846 Section 4.4.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-46">[1]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-41">RFC 9846 Section 4.4.1</a>, <a href="pcapkit/protocols/application/ssl.html#index-83">[1]</a>
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#index-0">RFC 9846 Section 5.1</a>, <a href="pcapkit/protocols/application/tls.html#index-11">[1]</a>, <a href="pcapkit/protocols/application/tls.html#index-16">[2]</a>
 </li>
           <li><a href="pcapkit/const/tls.html#index-47">RFC 9847</a>, <a href="pcapkit/const/tls.html#index-85">[1]</a>, <a href="pcapkit/const/tls.html#index-91">[2]</a>, <a href="pcapkit/const/tls.html#index-99">[3]</a>
 </li>
-          <li><a href="pcapkit/const/tls.html#index-123">RFC 9849</a>, <a href="pcapkit/const/tls.html#index-124">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-86">[2]</a>
+          <li><a href="pcapkit/const/tls.html#index-123">RFC 9849</a>, <a href="pcapkit/const/tls.html#index-124">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-123">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-85">RFC 9849 Section 4</a>, <a href="pcapkit/protocols/application/ssl.html#index-87">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-88">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-90">[3]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-122">RFC 9849 Section 4</a>, <a href="pcapkit/protocols/application/ssl.html#index-124">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-125">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-127">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-72">[4]</a>, <a href="pcapkit/protocols/application/ssl.html#index-75">[5]</a>, <a href="pcapkit/protocols/application/ssl.html#index-76">[6]</a>, <a href="pcapkit/protocols/application/ssl.html#index-77">[7]</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-93">RFC 9849 Section 4.2</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-130">RFC 9849 Section 4.2</a>
 </li>
-          <li><a href="pcapkit/protocols/application/ssl.html#index-32">RFC 9849 Section 5</a>, <a href="pcapkit/protocols/application/ssl.html#index-81">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-82">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-83">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-84">[4]</a>
+          <li><a href="pcapkit/protocols/application/ssl.html#index-118">RFC 9849 Section 5</a>, <a href="pcapkit/protocols/application/ssl.html#index-119">[1]</a>, <a href="pcapkit/protocols/application/ssl.html#index-120">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-121">[3]</a>, <a href="pcapkit/protocols/application/ssl.html#index-32">[4]</a>, <a href="pcapkit/protocols/application/ssl.html#index-73">[5]</a>, <a href="pcapkit/protocols/application/ssl.html#index-74">[6]</a>, <a href="pcapkit/protocols/application/ssl.html#index-78">[7]</a>
 </li>
           <li><a href="changelog/1.5.0.html#index-0">RFC 9850</a>, <a href="changelog/1.5.0.html#index-84">[1]</a>, <a href="changelog/1.5.0.html#index-85">[2]</a>, <a href="changelog/1.5.0.html#index-86">[3]</a>, <a href="pcapkit/const/pcapng.html#index-1">[4]</a>
 </li>
@@ -62916,7 +63298,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SignedCertificateTimestampList.sct_list">sct_list (pcapkit.protocols.application.ssl.data.SignedCertificateTimestampList attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampList.sct_list">(pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampList attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.scte104">scte104 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -63374,13 +63760,25 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareHelloRetryRequest.selected_group">selected_group (pcapkit.protocols.application.ssl.data.KeyShareHelloRetryRequest attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareHelloRetryRequest.selected_group">(pcapkit.protocols.application.ssl.schema.KeyShareHelloRetryRequest attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PreSharedKeyServerHello.selected_identity">selected_identity (pcapkit.protocols.application.ssl.data.PreSharedKeyServerHello attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.PreSharedKeyServerHello.selected_identity">(pcapkit.protocols.application.ssl.schema.PreSharedKeyServerHello attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.Selected_Target_SNPN_Identity">Selected_Target_SNPN_Identity (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SupportedVersionsServerHello.selected_version">selected_version (pcapkit.protocols.application.ssl.data.SupportedVersionsServerHello attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedVersionsServerHello.selected_version">(pcapkit.protocols.application.ssl.schema.SupportedVersionsServerHello attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.SelectedNID">SelectedNID (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.SelectedPLMNIdentity">SelectedPLMNIdentity (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
@@ -63778,11 +64176,19 @@
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.server_name">server_name (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerNameList.server_name_list">server_name_list (pcapkit.protocols.application.ssl.data.ServerNameList attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerNameList.server_name_list">(pcapkit.protocols.application.ssl.schema.ServerNameList attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED">SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.KeyShareServerHello.server_share">server_share (pcapkit.protocols.application.ssl.data.KeyShareServerHello attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.KeyShareServerHello.server_share">(pcapkit.protocols.application.ssl.schema.KeyShareServerHello attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel.SERVER_TRAFFIC_SECRET_0">SERVER_TRAFFIC_SECRET_0 (pcapkit.const.pcapng.tls_key_label.TLSKeyLabel attribute)</a>
 </li>
         <li><a href="pcapkit/const/sslv2.html#pcapkit.const.sslv2.handshake_type.HandshakeType.SERVER_VERIFY">SERVER_VERIFY (pcapkit.const.sslv2.handshake_type.HandshakeType attribute)</a>
@@ -63810,9 +64216,19 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerName">ServerName (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerName">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerNameExtension">ServerNameExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerNameList">ServerNameList (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerNameList">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.serverstart">serverstart (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -63976,6 +64392,12 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SessionTicket">SessionTicket (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SessionTicket">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SessionTicketExtension">SessionTicketExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.set">set (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -64452,11 +64874,21 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SignatureSchemeList">SignatureSchemeList (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignatureSchemeList">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.signed_certificate_timestamp">signed_certificate_timestamp (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SignedCertificateTimestampList">SignedCertificateTimestampList (class in pcapkit.protocols.application.ssl.data)</a>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampExtension">SignedCertificateTimestampExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SignedCertificateTimestampList">SignedCertificateTimestampList (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampList">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.signet_ctf">signet_ctf (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -65081,6 +65513,8 @@
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.schema.SMFHashBasedDPDOption">(class in pcapkit.protocols.internet.ipv6_opts.schema)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.data.SMFIdentificationBasedDPDOption">SMFIdentificationBasedDPDOption (class in pcapkit.protocols.internet.hopopt.data)</a>
 
         <ul>
@@ -65091,8 +65525,6 @@
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.schema.SMFIdentificationBasedDPDOption">(class in pcapkit.protocols.internet.ipv6_opts.schema)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.smile">smile (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -66578,7 +67010,11 @@
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.status_request_v2">status_request_v2 (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.CertificateStatusRequest.status_type">status_type (pcapkit.protocols.application.ssl.data.CertificateStatusRequest attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.CertificateStatusRequest.status_type">(pcapkit.protocols.application.ssl.schema.CertificateStatusRequest attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.status_code.StatusCode">StatusCode (class in pcapkit.const.http.status_code)</a>
 
         <ul>
@@ -66595,6 +67031,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.statusd">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.StatusRequestExtension">StatusRequestExtension (class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
         <li><a href="pcapkit/protocols/link/radiotap.html#pcapkit.protocols.link.radiotap.data.MCSFlags.stbc_streams">stbc_streams (pcapkit.protocols.link.radiotap.data.MCSFlags attribute)</a>
 </li>
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.stdin_is_interactive">stdin_is_interactive() (in module pcapkit.vendor.default)</a>
@@ -67390,7 +67828,11 @@
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.supported_groups">supported_groups (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SignatureSchemeList.supported_signature_algorithms">supported_signature_algorithms (pcapkit.protocols.application.ssl.data.SignatureSchemeList attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignatureSchemeList.supported_signature_algorithms">(pcapkit.protocols.application.ssl.schema.SignatureSchemeList attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.supported_versions">supported_versions (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.data.SupportedAddressTypesParameter">SupportedAddressTypesParameter (class in pcapkit.protocols.transport.sctp.data)</a>
@@ -67410,9 +67852,19 @@
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.SupportedUETypeList">SupportedUETypeList (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SupportedVersionsClientHello">SupportedVersionsClientHello (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedVersionsClientHello">(class in pcapkit.protocols.application.ssl.schema)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedVersionsExtension">SupportedVersionsExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SupportedVersionsServerHello">SupportedVersionsServerHello (class in pcapkit.protocols.application.ssl.data)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedVersionsServerHello">(class in pcapkit.protocols.application.ssl.schema)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.sur_meas">sur_meas (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -68970,7 +69422,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SessionTicket.ticket">ticket (pcapkit.protocols.application.ssl.data.SessionTicket attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SessionTicket.ticket">(pcapkit.protocols.application.ssl.schema.SessionTicket attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.ticket_pinning">ticket_pinning (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
 </li>
         <li><a href="pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType.ticket_request">ticket_request (pcapkit.const.tls.extension_type.ExtensionType attribute)</a>
@@ -69499,14 +69955,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.tn_timing">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.tn_tl_fd1">tn_tl_fd1 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.tn_tl_fd1">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.tn_tl_fd2">tn_tl_fd2 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -70806,6 +71262,10 @@
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Extension.type">(pcapkit.protocols.application.ssl.data.Extension attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHClientHello.type">(pcapkit.protocols.application.ssl.schema.ECHClientHello attribute)</a>
+</li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfigExtension.type">(pcapkit.protocols.application.ssl.schema.ECHConfigExtension attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.data.HIP.type">(pcapkit.protocols.internet.hip.data.HIP attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.data.Locator.type">(pcapkit.protocols.internet.hip.data.Locator attribute)</a>
@@ -71969,9 +72429,11 @@
           <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.schema.UnknownChunk">(class in pcapkit.protocols.transport.sctp.schema)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.UnknownExtension">UnknownExtension (class in pcapkit.protocols.internet.mh.data)</a>
+        <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.UnknownExtension">UnknownExtension (class in pcapkit.protocols.application.ssl.schema)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.UnknownExtension">(class in pcapkit.protocols.internet.mh.data)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.schema.UnknownExtension">(class in pcapkit.protocols.internet.mh.schema)</a>
 </li>
         </ul></li>
@@ -73122,6 +73584,8 @@
 </li>
           <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ServerHello.version">(pcapkit.protocols.application.ssl.data.ServerHello attribute)</a>
 </li>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ECHConfig.version">(pcapkit.protocols.application.ssl.schema.ECHConfig attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.data.TLS.version">(pcapkit.protocols.application.tls.data.TLS attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.schema.TLS.version">(pcapkit.protocols.application.tls.schema.TLS attribute)</a>
@@ -73204,7 +73668,11 @@
         <li><a href="pcapkit/corekit/version.html#pcapkit.corekit.version.VersionInfo">VersionInfo (class in pcapkit.corekit.version)</a>
 </li>
         <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SupportedVersionsClientHello.versions">versions (pcapkit.protocols.application.ssl.data.SupportedVersionsClientHello attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedVersionsClientHello.versions">(pcapkit.protocols.application.ssl.schema.SupportedVersionsClientHello attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.schema.VersionType">VersionType (class in pcapkit.protocols.internet.hip.schema)</a>
 
         <ul>
@@ -73239,6 +73707,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.vhd">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/link/radiotap.html#pcapkit.protocols.link.radiotap.data.VHT">VHT (class in pcapkit.protocols.link.radiotap.data)</a>
 
         <ul>
@@ -73247,8 +73717,6 @@
           <li><a href="pcapkit/const/radiotap.html#pcapkit.const.radiotap.field_type.FieldType.VHT">(pcapkit.const.radiotap.field_type.FieldType attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/radiotap.html#pcapkit.const.radiotap.vht_flags.VHTFlags.VHT_FLAG_BEAMFORMED">VHT_FLAG_BEAMFORMED (pcapkit.const.radiotap.vht_flags.VHTFlags attribute)</a>
 </li>
         <li><a href="pcapkit/const/radiotap.html#pcapkit.const.radiotap.vht_flags.VHTFlags.VHT_FLAG_LDPC_EXTRA_OFDM_SYM">VHT_FLAG_LDPC_EXTRA_OFDM_SYM (pcapkit.const.radiotap.vht_flags.VHTFlags attribute)</a>

@@ -524,6 +524,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -1733,7 +1734,16 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
-<span class="sd">            instance.</span>
+<span class="sd">            instance. A payload that fails to parse is kept as</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` holding all of it,</span>
+<span class="sd">            its ``error`` the failure's message, or as</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after</span>
+<span class="sd">            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           The fallback holds the whole payload and the failure's message,</span>
+<span class="sd">           rather than the octets the failed parse left unread (:issue:`2842`).</span>
 
 <span class="sd">        """</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
@@ -1751,6 +1761,10 @@
             <span class="c1"># log error</span>
             <span class="c1">#logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())</span>
 
+            <span class="c1"># NOTE: Rewound, as the failed parse read the stream, and given the failure as ``error``,</span>
+            <span class="c1"># as ``beholder`` gives a frame's fallback (#2842).</span>
+            <span class="n">payload_io</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">'error'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
             <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
         <span class="k">return</span> <span class="n">report</span></div>
 

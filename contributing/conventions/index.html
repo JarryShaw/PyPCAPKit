@@ -531,6 +531,7 @@
 <li class="toctree-l2"><a class="reference internal" href="utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -606,7 +607,8 @@ next-layer fallback keeps a refused layer as
 <li><p><a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a> – the repository rather than any of its code;</p></li>
 <li><p><a class="reference internal" href="documentation.html#documentation"><span class="std std-ref">Writing the Documentation</span></a> – the prose itself, on these pages and in the API
 reference, rather than any code at all;</p></li>
-<li><p><a class="reference internal" href="test-coverage.html#test-coverage"><span class="std std-ref">Testing a Change</span></a> – what the test suite has to prove;</p></li>
+<li><p><a class="reference internal" href="test-coverage.html#test-coverage"><span class="std std-ref">Testing a Change</span></a> – what the test suite has to prove, and what a
+<a class="reference internal" href="../../pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> dumper writes;</p></li>
 <li><p><a class="reference internal" href="utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a> – which of <a class="reference internal" href="../../pcapkit/utilities/index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> and
 <a class="reference internal" href="../../pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> a support module belongs in, where a context
 variable lives, where a schema helper used outside the schema layer or
@@ -616,7 +618,11 @@ new engine there needs from <a class="reference internal" href="../../pcapkit/to
 <a class="reference internal" href="../../pcapkit/foundation/analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a>;</p></li>
 <li><p><a class="reference internal" href="const-vendor-pairing.html#const-vendor-pairing"><span class="std std-ref">Const-Vendor Pairing</span></a> – <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, the
 <a class="reference internal" href="../../pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawler each module needs, and how a package of it
-imports its modules.</p></li>
+imports its modules;</p></li>
+<li><p><a class="reference internal" href="public-signatures.html#public-signatures"><span class="std std-ref">Public Signatures</span></a> – how a public function or class of
+<a class="reference internal" href="../../pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a>, <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> or
+<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> takes its arguments, and which settings are
+options rather than <code class="docutils literal notranslate"><span class="pre">PCAPKIT_*</span></code> tunables.</p></li>
 </ul>
 <p><strong>A ruling that stays in its thread is a ruling that gets rediscovered.</strong> So
 a question answered in a way the code cannot express on its own – a
@@ -639,6 +645,7 @@ owner’s standing ask on <a class="extlink-issue reference external" href="http
 <li class="toctree-l1"><a class="reference internal" href="utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="public-signatures.html">Public Signatures</a></li>
 </ul>
 </div>
 </section>

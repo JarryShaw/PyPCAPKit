@@ -524,6 +524,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../contributing/releasing.html">Release Process</a></li>
@@ -572,9 +573,9 @@
 <span class="sd">:mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`,</span>
 <span class="sd">which implements the pseudo-header of the IP protocol family</span>
-<span class="sd">that the upper-layer checksums cover, and :func:`pseudo_header` and</span>
-<span class="sd">:func:`verify_upper`, through which the IP layers use it. The</span>
-<span class="sd">pseudo-header's structure is described as below:</span>
+<span class="sd">that the upper-layer checksums cover, and :func:`pseudo_header`,</span>
+<span class="sd">:func:`compute_upper` and :func:`verify_upper`, through which the IP layers</span>
+<span class="sd">use it. The pseudo-header's structure is described as below:</span>
 
 <span class="sd">IPv4 (:rfc:`793#section-3.1`, :rfc:`768`):</span>
 
@@ -614,13 +615,14 @@
 <span class="sd">  the length it carries with the upper layer's own, see :func:`pseudo_header`;</span>
 <span class="sd">* ``_checksum_pending`` is :data:`True` once ``make()`` left out a checksum it</span>
 <span class="sd">  had no ``pseudo`` for. An IP layer constructed with that upper layer as its</span>
-<span class="sd">  payload then rebuilds it with its own pseudo-header.</span>
+<span class="sd">  payload then rebuilds it with its own pseudo-header; IPv6 also does so past</span>
+<span class="sd">  its extension headers, see :func:`compute_upper`.</span>
 
 <span class="sd">The sum itself is in :mod:`pcapkit.corekit.checksum.internet`.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv4.option_number</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionNumber</span> <span class="k">as</span> <span class="n">Enum_IPv4Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
@@ -638,7 +640,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_Pseudo</span> <span class="k">as</span> <span class="n">Schema_IP_Pseudo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">rebuilding</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CaughtByCaller</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span>
+                                          <span class="n">UnsupportedCall</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -647,13 +651,18 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ah.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">AH</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Schema_IPv6</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IP_Pseudo'</span><span class="p">,</span> <span class="s1">'pseudo_header'</span><span class="p">,</span> <span class="s1">'verify_upper'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IP_Pseudo'</span><span class="p">,</span> <span class="s1">'pseudo_header'</span><span class="p">,</span> <span class="s1">'compute_upper'</span><span class="p">,</span> <span class="s1">'verify_upper'</span><span class="p">]</span>
 
 <span class="c1">#: The Authentication Header :func:`verify_upper` looks past to the upper layer,</span>
-<span class="c1">#: resolved there rather than imported, so its first import holds</span>
+<span class="c1">#: and the extension header base :func:`compute_upper` looks through, resolved</span>
+<span class="c1">#: there rather than imported, so their first import holds</span>
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_AH</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AH]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ah.protocol'</span><span class="p">,</span> <span class="s1">'AH'</span><span class="p">)</span>
+<span class="n">_IPV6_EXT</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[IPv6_Ext]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_ext.protocol'</span><span class="p">,</span> <span class="s1">'IPv6_Ext'</span><span class="p">)</span>
 
 <span class="c1">#: Extension headers that end the chain, as the upper layer -- the Mobility Header</span>
 <span class="c1">#: (:rfc:`6275#section-6.1.1`) and HIP (:rfc:`7401#section-5.1.1`).</span>
@@ -1257,6 +1266,72 @@
         <span class="k">return</span> <span class="n">pseudo</span><span class="o">.</span><span class="n">data</span>
     <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">pseudo</span><span class="p">)(</span><span class="n">src</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
                         <span class="n">upper_length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">zero</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">zero</span><span class="p">)</span><span class="o">.</span><span class="n">data</span></div>
+
+
+
+<div class="viewcode-block" id="compute_upper">
+<a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_upper</span><span class="p">(</span><span class="n">ip</span><span class="p">:</span> <span class="s1">'Schema_IPv6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[bytes]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Compute the pending checksum of the upper layer an IPv6 header carries.</span>
+
+<span class="sd">    The upper layer is the payload of ``ip``, or a layer the extension headers</span>
+<span class="sd">    of that payload carry as constructed, whose ``make()`` left its checksum</span>
+<span class="sd">    pending. Behind extension headers, the pseudo-header is the one</span>
+<span class="sd">    :func:`verify_upper` derives from the packet parsed back: the address of a</span>
+<span class="sd">    Home Address option as the source (:rfc:`6275#section-6.1.1`,</span>
+<span class="sd">    :rfc:`6275#section-11.3.1`), and the final destination of a Routing header</span>
+<span class="sd">    (:rfc:`8200#section-8.1`).</span>
+
+<span class="sd">    Where that packet gives no pseudo-header, the checksum stays pending. So</span>
+<span class="sd">    behind a Fragment header only an atomic fragment's is computed, since the</span>
+<span class="sd">    checksum covers the reassembled packet (:rfc:`8200#section-8.1`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ip: IPv6 header as :meth:`IPv6.make &lt;pcapkit.protocols.internet.ipv6.protocol.IPv6.make&gt;`</span>
+<span class="sd">            constructed it, holding its payload as given.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The payload octets with the checksum computed, or :data:`None` if</span>
+<span class="sd">        there is none to compute.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">payload</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">payload</span>  <span class="c1"># type: Any</span>
+    <span class="n">code</span><span class="p">,</span> <span class="n">before</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">_IPV6_EXT</span><span class="o">.</span><span class="n">klass</span>
+    <span class="c1"># NOTE: Only the layers as constructed keep the pending flag; the walk of the packet</span>
+    <span class="c1"># parsed back then confirms where the upper layer is, as the receiver finds it.</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s1">'_checksum_pending'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="n">layer</span><span class="o">.</span><span class="fm">__index__</span><span class="p">()</span> <span class="o">==</span> <span class="n">code</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">ext</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">before</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">length</span>
+        <span class="n">code</span><span class="p">,</span> <span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">before</span><span class="p">:</span>
+        <span class="c1"># NOTE: Quietly, as the IPv6 layer parses these octets again and reports</span>
+        <span class="c1"># what they carry; a refusal leaves the checksum pending (#2824).</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">):</span>
+                <span class="n">packet</span> <span class="o">=</span> <span class="n">IPv6</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">IP_Pseudo</span><span class="o">.</span><span class="n">_walk</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">before</span><span class="p">):</span>  <span class="c1"># pylint: disable=protected-access</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                <span class="n">pseudo</span> <span class="o">=</span> <span class="n">IP_Pseudo</span><span class="p">(</span><span class="n">ip</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">rebuilding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># NOTE: The upper layer follows the fixed header, so no extension header</span>
+        <span class="c1"># moves an address; it puts its own length in the pseudo-header.</span>
+        <span class="n">pseudo</span> <span class="o">=</span> <span class="n">IP_Pseudo</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">upper_length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">octets</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">computed</span> <span class="o">=</span> <span class="n">upper</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">upper</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pseudo</span><span class="o">=</span><span class="n">pseudo</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">return</span> <span class="n">octets</span><span class="p">[:</span><span class="n">before</span><span class="p">]</span> <span class="o">+</span> <span class="n">computed</span> <span class="o">+</span> <span class="n">octets</span><span class="p">[</span><span class="n">before</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">upper</span><span class="o">.</span><span class="n">data</span><span class="p">):]</span></div>
 
 
 

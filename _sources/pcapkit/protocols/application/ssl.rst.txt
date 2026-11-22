@@ -28,7 +28,8 @@ message. Each record header is declared in its subclass's own schema, and
 :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` reads the epoch and sequence
 number. This base class carries the logic TLS and DTLS share -- content-type
 dispatch, handshake-message decoding (including the DTLS fragment header), the
-extension registry, and the record-level validation that keeps dispatch from
+extension registry and the header schema of each extension's ``extension_data``
+(:mod:`pcapkit.protocols.application.ssl.schema`), and the record-level validation that keeps dispatch from
 accepting bytes that cannot be a genuine record.
 
 .. versionadded:: 1.6.0
@@ -102,12 +103,243 @@ accepting bytes that cannot be a genuine record.
    .. automethod:: _read_tls_server_hello
    .. automethod:: _read_tls_encrypted_extensions
    .. automethod:: _read_tls_extensions
+   .. automethod:: _read_ext_schema
    .. automethod:: _make_tls_content
    .. automethod:: _make_tls_client_hello
    .. automethod:: _make_tls_server_hello
    .. automethod:: _make_tls_encrypted_extensions
    .. automethod:: _make_tls_extensions
+   .. automethod:: _make_ext_values
+   .. automethod:: _make_ext_value
 
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.application.ssl.schema
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.Extension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.UnknownExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.Empty
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.Opaque8
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.Opaque16
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ServerName
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ServerNameList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ServerNameExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.OCSPStatusRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.CertificateStatusRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.StatusRequestExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.NamedGroupList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECPointFormatList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECPointFormatsExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SignatureSchemeList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ProtocolNameList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SignedCertificateTimestampExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.Padding
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.PaddingExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ExtendedMainSecretExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.CertificateCompressionAlgorithms
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.CompressCertificateExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.RecordSizeLimit
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.RecordSizeLimitExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SessionTicket
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SessionTicketExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.PskIdentity
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.OfferedPsks
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.PreSharedKeyServerHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.PreSharedKeyExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.EarlyDataExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SupportedVersionsClientHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SupportedVersionsServerHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SupportedVersionsExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.Cookie
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.CookieExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.PskKeyExchangeModes
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.PskKeyExchangeModesExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.PostHandshakeAuthExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.KeyShareEntry
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.KeyShareClientHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.KeyShareHelloRetryRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.KeyShareServerHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.KeyShareExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ConnectionId
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.HpkeSymmetricCipherSuite
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECHClientHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECHHelloRetryRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECHConfigExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECHConfigContents
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECHConfig
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECHEncryptedExtensions
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ECHExtension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.RenegotiationInfo
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.RenegotiationInfoExtension
+   :members:
+   :show-inheritance:
 Data Models
 -----------
 

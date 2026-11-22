@@ -531,6 +531,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -693,7 +694,9 @@ off a parsed header, resolved the same way.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed payload as a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>
-instance.</p>
+instance. A payload that fails to parse is kept as
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a>
+keeps one.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -721,6 +724,10 @@ the process-wide registry – see <a class="reference internal" href="../protoco
 than of bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> port numbers, so <a class="reference internal" href="../../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a>, through
 <a class="reference internal" href="../../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>, hands
 over the same named ports a parsed header carries (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>The fallback holds the whole payload and the failure’s message,
+rather than the octets the failed parse left unread (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2842">#2842</a>).</p>
 </div>
 </dd></dl>
 

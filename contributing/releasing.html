@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="Release Lines: A minor release, X.Y.0, carries the roadmap work ( Help Wanted) its milestone tracks; a patch release, X.Y.Z, ships fixes and vendor refreshes; and a vendor bump between releases is ..." />
 <meta name="description" content="Release Lines: A minor release, X.Y.0, carries the roadmap work ( Help Wanted) its milestone tracks; a patch release, X.Y.Z, ships fixes and vendor refreshes; and a vendor bump between releases is ..." />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="Const-Vendor Pairing" href="conventions/const-vendor-pairing.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GitHub Actions Workflows" href="workflows.html"><link rel="prev" title="Public Signatures" href="conventions/public-signatures.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Release Process - PyPCAPKit</title>
@@ -531,6 +531,7 @@
 <li class="toctree-l2"><a class="reference internal" href="conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Release Process</a></li>
@@ -850,8 +851,11 @@ exists”. It also uploads only to a published release, read first with <code cl
 <code class="docutils literal notranslate"><span class="pre">commit</span></code> (<code class="docutils literal notranslate"><span class="pre">Action.checkForMissingReleaseError()</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Action.updateDraftOrCreateRelease()</span></code>). Conda Update bumped 1.5.0b9’s build
 three times while that run waited on approval, and <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> runs on
-every pushed bump (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1632">#1632</a>), so a release the action created there would
-tag the pending version at <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip and fail Create Release’s tag check.
+every pushed bump of a version whose <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists and names <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
+dependencies (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1632">#1632</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2841">#2841</a>), which a pushed tag makes true before
+its release, so a release the
+action created there would tag the pending version at <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip and fail
+Create Release’s tag check.
 The action would also retarget a draft at <code class="docutils literal notranslate"><span class="pre">commit</span></code>
 (<code class="docutils literal notranslate"><span class="pre">Action.updateDraftOrCreateRelease()</span></code> and <code class="docutils literal notranslate"><span class="pre">Action.updateRelease()</span></code>), which <code class="docutils literal notranslate"><span class="pre">omitDraftDuringUpdate</span></code> keeps a
 draft, but Create Release’s <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> run finds the draft and resets
@@ -1162,10 +1166,17 @@ upload if it is already there. Neither replaces a file the GitHub Release
 already has (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p>
 <p>A re-run repeats the tagged commit’s own workflow, so it cannot upload
 Anaconda files that commit’s <code class="docutils literal notranslate"><span class="pre">conda</span></code> legs cannot build: 1.5.0b14’s
-<code class="docutils literal notranslate"><span class="pre">osx-64</span></code> legs were broken at its tag (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2140">#2140</a>). While <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version
-is still the tagged one, dispatching Conda Update with <code class="docutils literal notranslate"><span class="pre">publish</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code>
-builds <code class="docutils literal notranslate"><span class="pre">main</span></code> and uploads every platform under a bumped build
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>), and the warning a later commit’s run posts for an
+<code class="docutils literal notranslate"><span class="pre">osx-64</span></code> legs were broken at its tag (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2140">#2140</a>). Dispatching Conda Update
+with <code class="docutils literal notranslate"><span class="pre">publish</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> uploads every platform under a bumped build
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Like every Conda Update bump, it <strong>packages only the tree of the</strong>
+<code class="docutils literal notranslate"><span class="pre">v*</span></code> <strong>tag for</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>’s <strong>version</strong>, never <code class="docutils literal notranslate"><span class="pre">main</span></code>’s own, taking
+<code class="file docutils literal notranslate"><span class="pre">conda/</span></code> and <code class="file docutils literal notranslate"><span class="pre">util/</span></code> from the bump it commits to <code class="docutils literal notranslate"><span class="pre">main</span></code>: the recipe
+that can build what the tag’s legs could not, and the scripts <code class="docutils literal notranslate"><span class="pre">main</span></code>’s workflow
+calls (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2841">#2841</a>). So it works however far <code class="docutils literal notranslate"><span class="pre">main</span></code> has moved, and fails before
+pushing anything while that version has no tag or while the tag’s
+<code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code> names other dependencies than <code class="docutils literal notranslate"><span class="pre">main</span></code>’s, which the bump’s
+vendored requirements follow; a scheduled or <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> bump in either state
+stays green and uploads nothing (<a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>). The warning a later commit’s run posts for an
 unfinished release names that remedy wherever Anaconda files are missing.</p>
 <p><strong>A re-run does not need to be verified by hand against the PyPI and Anaconda
 listings, because</strong> <code class="docutils literal notranslate"><span class="pre">release_status</span></code> <strong>does it.</strong> That job runs on every
@@ -1215,14 +1226,14 @@ attention, not that the release needs a hand-rolled recovery.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="conventions/const-vendor-pairing.html">
+          <a class="prev-page" href="conventions/public-signatures.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Const-Vendor Pairing</div>
+                <div class="title">Public Signatures</div>
                 
               </div>
             </a>

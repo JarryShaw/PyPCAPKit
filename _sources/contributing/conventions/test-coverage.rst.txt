@@ -249,6 +249,13 @@ What each must bring in tests, on top of the fail-without-fix proof above:
    * - a dumper
      - Unit tests under :file:`tests/dumpkit/` asserting the output exactly, and a case
        in :file:`tests/integration/test_output_formats.py` for the file that lands on
-       disk. That a format :mod:`pcapkit` also reads, such as PCAP, reproduces its
-       input byte for byte is asserted over every sample capture by
+       disk. That a PCAP dump reproduces a PCAP input byte for byte is asserted over
+       every sample PCAP capture by
        :file:`tests/dumpkit/test_capture_dump_runtime.py` (:issue:`1202`).
+
+**A dumper writes the records it is given**, with their interfaces and options, rather
+than re-emitting every block of an input file byte for byte. :mod:`pcapkit.dumpkit`
+serves flow tracing and reassembly output, and the parser already keeps an input's
+context blocks, as the PCAP-NG engine's
+:class:`~pcapkit.foundation.engines.pcapng.Context` does. Ruled by the owner on
+:issue:`2835`. So a dump that leaves those blocks out is not a failed round trip.

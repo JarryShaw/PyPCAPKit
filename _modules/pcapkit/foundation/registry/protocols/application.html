@@ -524,6 +524,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -590,6 +591,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span> <span class="k">as</span> <span class="n">Schema_HTTP_FrameType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSL</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extension</span> <span class="k">as</span> <span class="n">Schema_TLS_Extension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
@@ -735,7 +737,8 @@
 <div class="viewcode-block" id="register_tls_extension">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.application.register_tls_extension">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_tls_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TLS_ExtensionType'</span><span class="p">,</span>
-                           <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TLS_ExtensionParser, TLS_ExtensionConstructor]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                           <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TLS_ExtensionParser, TLS_ExtensionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                           <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_TLS_Extension]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Register an extension parser.</span>
 
 <span class="sd">    The function will register the given extension parser to the</span>
@@ -750,6 +753,8 @@
 <span class="sd">            parse and construct the ``extension_data``. A name names the</span>
 <span class="sd">            ``_read_ext_*`` and ``_make_ext_*`` methods, and has to name an</span>
 <span class="sd">            existing ``_read_ext_*`` one.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the ``extension_data``.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.application.ssl.schema.Extension`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not an</span>
@@ -759,12 +764,20 @@
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       Takes ``schema``. The parser is handed the ``extension_data`` unpacked</span>
+<span class="sd">       by that schema, and the constructor returns one, rather than octets</span>
+<span class="sd">       (:issue:`2833`).</span>
+
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">TLS_ExtensionType</span><span class="p">,</span> <span class="n">SSL</span><span class="p">)</span>  <span class="c1"># type: ignore[type-abstract]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">SSL</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_ext_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid TLS extension parser function'</span><span class="p">)</span>
 
     <span class="n">SSL</span><span class="o">.</span><span class="n">register_extension</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Schema_TLS_Extension</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered TLS extension parser: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 </pre></div>

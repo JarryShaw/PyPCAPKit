@@ -531,6 +531,7 @@
 <li class="toctree-l2"><a class="reference internal" href="conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="releasing.html">Release Process</a></li>
@@ -1023,8 +1024,46 @@ not make when no dependency moved. <code class="docutils literal notranslate"><s
 gate, environments and <code class="docutils literal notranslate"><span class="pre">repository-maintenance</span></code> group, but with the build
 bumped regardless: <code class="docutils literal notranslate"><span class="pre">Decide</span> <span class="pre">whether</span> <span class="pre">to</span> <span class="pre">bump</span></code> says so although nothing changed,
 so <code class="docutils literal notranslate"><span class="pre">Bump</span> <span class="pre">Version</span></code>, <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">Changes</span></code> and <code class="docutils literal notranslate"><span class="pre">Push</span> <span class="pre">Changes</span></code> run, <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>
-tags the pushed commit, every <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> leg uploads it, the GitHub
-Release steps run, and <code class="docutils literal notranslate"><span class="pre">discussion</span></code> posts the report as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code>. The
+tags the pushed commit, every <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> leg builds and uploads, the GitHub
+Release steps run, and <code class="docutils literal notranslate"><span class="pre">discussion</span></code> posts the report as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code>.</p>
+<p>Every publishing bump, scheduled or manual, builds the tree of the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag for
+<code class="docutils literal notranslate"><span class="pre">main</span></code>’s version, not <code class="docutils literal notranslate"><span class="pre">main</span></code>’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2841">#2841</a>). Before the bump,
+<code class="docutils literal notranslate"><span class="pre">Find</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag</span></code> resolves that tag and
+<code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag's</span> <span class="pre">dependencies</span></code> compares its <code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code> with
+<code class="docutils literal notranslate"><span class="pre">main</span></code>’s, whose vendored requirements the build uses. Where either finds nothing
+to build, a manual run fails, and a scheduled or <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> bump stays green
+so the <code class="docutils literal notranslate"><span class="pre">main</span></code> run is not red:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 32.0%" />
+<col style="width: 38.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Found</p></th>
+<th class="head"><p>A manual run with <code class="docutils literal notranslate"><span class="pre">publish</span></code></p></th>
+<th class="head"><p>Any other publishing bump</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>no <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag for the version, as for a dev version</p></td>
+<td><p>fails with an <code class="docutils literal notranslate"><span class="pre">::error</span></code>, pushing nothing</p></td>
+<td><p>pushed, but neither tagged nor uploaded, with a <code class="docutils literal notranslate"><span class="pre">::notice</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>a tag naming other dependencies than <code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p>fails with an <code class="docutils literal notranslate"><span class="pre">::error</span></code> naming both sets, pushing nothing</p></td>
+<td><p>pushed, but neither tagged nor uploaded, with a <code class="docutils literal notranslate"><span class="pre">::warning</span></code> naming both
+sets; the report posts as <code class="docutils literal notranslate"><span class="pre">warning</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The report says which withheld the tag and upload. Otherwise the bump’s commit
+message names the tag, and <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>’s <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">out</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag's</span> <span class="pre">tree</span></code>
+switches from the bump to the tagged commit, keeping only the bump’s
+<code class="file docutils literal notranslate"><span class="pre">conda/</span></code> and <code class="file docutils literal notranslate"><span class="pre">util/</span></code> (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> says why).
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_publish_from_tag_2841.py</span></code> pins this. The
 <code class="docutils literal notranslate"><span class="pre">mode</span></code> job is the one place the input is read, and every step or job that
 publishes or names an environment requires its <code class="docutils literal notranslate"><span class="pre">publishes</span></code> output to be
 <code class="docutils literal notranslate"><span class="pre">'true'</span></code>:</p>
@@ -1049,8 +1088,9 @@ so where <code class="docutils literal notranslate"><span class="pre">Push</span
 checkout or during the push, the run stays
 green having published nothing, and says so in a warning and in its report
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>); the remedy is to dispatch Conda Update again with <code class="docutils literal notranslate"><span class="pre">publish</span></code>
-on <code class="docutils literal notranslate"><span class="pre">main</span></code>. Where another run already pushed the same build, that run tags and
-uploads it, and a second dispatch is needed only if it did not.
+on <code class="docutils literal notranslate"><span class="pre">main</span></code>, which builds the same tag’s tree. Where another run already pushed
+the same build, that run tags and uploads it, and a second dispatch is needed
+only if it did not.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_publish_dispatch_2060.py</span></code> pins this.</p>
 <p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects not only <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full
 suite, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>) but also <code class="docutils literal notranslate"><span class="pre">changelog</span></code> (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its
@@ -2381,7 +2421,10 @@ directory a change touches, when it moves imports or module state (see
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/conda_vendor.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Refresh</span> <span class="pre">the</span> <span class="pre">platform</span> <span class="pre">pins</span></code> and <code class="docutils literal notranslate"><span class="pre">Setup</span> <span class="pre">Conda</span> <span class="pre">Distribution</span></code> in
-<code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>; <code class="docutils literal notranslate"><span class="pre">Smoke-test</span> <span class="pre">the</span> <span class="pre">vendored</span> <span class="pre">packages</span></code>
+<code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>, and there
+<code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tag's</span> <span class="pre">dependencies</span></code> as
+<code class="docutils literal notranslate"><span class="pre">conda_vendor.py</span> <span class="pre">--same-dependencies</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2841">#2841</a>);
+<code class="docutils literal notranslate"><span class="pre">Smoke-test</span> <span class="pre">the</span> <span class="pre">vendored</span> <span class="pre">packages</span></code>
 in its <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as
 <code class="docutils literal notranslate"><span class="pre">conda_vendor.py</span> <span class="pre">--smoke</span></code>.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/conda_vendor.py</span> <span class="pre">--check</span></code>, which no workflow runs: whether

@@ -524,6 +524,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../contributing/releasing.html">Release Process</a></li>
@@ -1467,7 +1468,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">unused</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'unused'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">unused</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill_short_read</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'unused'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">),</span>
+                                           <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s1">'data'</span><span class="p">)</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">data</span>
         <span class="k">return</span> <span class="n">Schema_DestinationUnreachable</span><span class="p">(</span><span class="n">unused</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_octets</span><span class="p">(</span><span class="n">unused</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'unused octets'</span><span class="p">),</span>
                                              <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
@@ -1523,7 +1525,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">unused</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'unused'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">unused</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill_short_read</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'unused'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">),</span>
+                                           <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s1">'data'</span><span class="p">)</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">data</span>
         <span class="k">return</span> <span class="n">Schema_TimeExceeded</span><span class="p">(</span><span class="n">unused</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_octets</span><span class="p">(</span><span class="n">unused</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'unused octets'</span><span class="p">),</span>
                                    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>

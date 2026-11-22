@@ -524,6 +524,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/public-signatures.html">Public Signatures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -1076,6 +1077,9 @@
 <span class="sd">        bidirectional flow here rather than at teardown is what keeps the</span>
 <span class="sd">        acknowledgement that completes a close inside the flow it belongs to.</span>
 
+<span class="sd">        The flow's file is closed and its entry stored before the callbacks run,</span>
+<span class="sd">        so a callback that raises propagates and leaves the flow in the index.</span>
+
 <span class="sd">        """</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
         <span class="n">label</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">label</span>
@@ -1094,9 +1098,11 @@
             <span class="c1"># for its datagrams, and their own ``packet`` is parsed later still</span>
             <span class="n">packet</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Deferred</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span><span class="p">),</span>
         <span class="p">)</span>
+        <span class="c1"># NOTE: stored before the callbacks run, so one that raises cannot drop the flow</span>
+        <span class="c1"># from the index (#2827).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
             <span class="n">callback</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">index</span>
 
 <div class="viewcode-block" id="TCP.finish">
@@ -1112,8 +1118,8 @@
 <span class="sd">        Idempotent: it drains the buffer, so a second call finds nothing to do.</span>
 <span class="sd">        It also closes every output file still kept open, as</span>
 <span class="sd">        :meth:`TraceFlow.finish &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.finish&gt;`</span>
-<span class="sd">        does, even when a callback raises: the flows after it stay in the</span>
-<span class="sd">        buffer, unfinalised, for a later call.</span>
+<span class="sd">        does, even when a callback raises: the flow it was handed is finalised,</span>
+<span class="sd">        and the flows after it stay in the buffer, unfinalised, for a later call.</span>
 
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
