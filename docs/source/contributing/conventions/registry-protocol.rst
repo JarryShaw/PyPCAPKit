@@ -386,6 +386,15 @@ basis:
   :class:`~pcapkit.const.ipv4.tos_pre.ToSPrecedence` keeps its ``DATA`` casing
   (``Network_Control``).
 
+**A crawler keeps what** :meth:`~pcapkit.vendor.default.Vendor.safe_name` **would drop
+where dropping it merges distinct members.** That default strips any parenthetical, which
+would name every DHKEM of :class:`~pcapkit.const.tls.hpke_kem_id.HpkeKemId` ``DHKEM``,
+told apart only by its code, so its crawler keeps the text: ``DHKEM(X25519, HKDF-SHA256)``
+is ``DHKEM_X25519_HKDF_SHA256``. :class:`~pcapkit.const.tls.extension_type.ExtensionType`'s
+crawler keeps ``(deprecated)`` as a suffix on the same ground, since
+``connection_id_deprecated`` (53) would otherwise merge with ``connection_id`` (54).
+Ruled in review of :pr:`2873` (:issue:`2851`).
+
 And a folding override carries **only** the fold.
 :meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>` is
 the worked example: it lowers ``key``, forwards ``default`` verbatim and delegates to

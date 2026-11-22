@@ -42,6 +42,9 @@ from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.const.tls.ec_point_format import ECPointFormat as Enum_ECPointFormat
 from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
 from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
+from pcapkit.const.tls.hpke_aead_id import HpkeAeadId as Enum_HpkeAeadId
+from pcapkit.const.tls.hpke_kdf_id import HpkeKdfId as Enum_HpkeKdfId
+from pcapkit.const.tls.hpke_kem_id import HpkeKemId as Enum_HpkeKemId
 from pcapkit.const.tls.psk_key_exchange_mode import PskKeyExchangeMode as Enum_PskKeyExchangeMode
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import ConditionalField
@@ -452,9 +455,22 @@ def _read_hpke_cipher_suite(suite: 'Schema_HpkeSymmetricCipherSuite') -> 'Data_H
     return Data_HpkeSymmetricCipherSuite(kdf_id=suite.kdf_id, aead_id=suite.aead_id)
 
 
-def _make_hpke_cipher_suite(suite: 'Data_HpkeSymmetricCipherSuite') -> 'Schema_HpkeSymmetricCipherSuite':
-    """Make one ``HpkeSymmetricCipherSuite`` -- the inverse of :func:`_read_hpke_cipher_suite`."""
-    return Schema_HpkeSymmetricCipherSuite(kdf_id=suite.kdf_id, aead_id=suite.aead_id)
+def _make_hpke_cipher_suite(proto: 'SSL', suite: 'Data_HpkeSymmetricCipherSuite') -> 'Schema_HpkeSymmetricCipherSuite':  # pylint: disable=line-too-long
+    """Make one ``HpkeSymmetricCipherSuite`` -- the inverse of :func:`_read_hpke_cipher_suite`.
+
+    Each identifier is a member of its enumeration or an :class:`int` code.
+
+    Raises:
+        ProtocolError: If an identifier is not an :class:`int` that fits in
+            two octets.
+
+    """
+    return Schema_HpkeSymmetricCipherSuite(
+        kdf_id=proto._make_index(suite.kdf_id, Enum_HpkeKdfId, bits=16,  # pylint: disable=protected-access
+                                 name='encrypted_client_hello.kdf_id'),
+        aead_id=proto._make_index(suite.aead_id, Enum_HpkeAeadId, bits=16,  # pylint: disable=protected-access
+                                  name='encrypted_client_hello.aead_id'),
+    )
 
 
 def _read_ech_config(config: 'Schema_ECHConfig') -> 'Data_ECHConfig':
@@ -527,18 +543,26 @@ def _read_ech_config(config: 'Schema_ECHConfig') -> 'Data_ECHConfig':
 def _make_ech_config(proto: 'SSL', config: 'Data_ECHConfig') -> 'Schema_ECHConfig':
     """Make one ``ECHConfig`` -- the inverse of :func:`_read_ech_config`.
 
-    ``contents`` given as octets is written as it is, whatever the version.
+    ``contents`` given as octets is written as it is, whatever the version. The
+    HPKE identifiers are each a member of its enumeration or an :class:`int` code.
+
+    Raises:
+        ProtocolError: If an HPKE identifier is not an :class:`int` that fits
+            in two octets.
 
     """
     contents = config.contents
     if isinstance(contents, bytes):
         return Schema_ECHConfig(version=config.version, length=len(contents), contents=contents)
     key = contents.key_config
-    suites = [_make_hpke_cipher_suite(suite) for suite in key.cipher_suites]
+    suites = [_make_hpke_cipher_suite(proto, suite) for suite in key.cipher_suites]
     extensions = [Schema_ECHConfigExtension(type=ext.type, length=len(ext.data), data=ext.data)
                   for ext in contents.extensions]
     body = Schema_ECHConfigContents(
-        config_id=key.config_id, kem_id=key.kem_id, public_key_length=len(key.public_key),
+        config_id=key.config_id,
+        kem_id=proto._make_index(key.kem_id, Enum_HpkeKemId, bits=16,  # pylint: disable=protected-access
+                                 name='encrypted_client_hello.kem_id'),
+        public_key_length=len(key.public_key),
         public_key=key.public_key, cipher_suites_length=_items_length(proto, suites), cipher_suites=suites,
         maximum_name_length=contents.maximum_name_length, public_name_length=len(contents.public_name),
         public_name=contents.public_name, extensions_length=_items_length(proto, extensions),
@@ -2177,8 +2201,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         Raises:
             ProtocolError: If neither ``data`` nor ``msg_type`` names a
-                structure, the argument it needs is missing, or a confirmation
-                is not 8 octets.
+                structure, the argument it needs is missing, a confirmation
+                is not 8 octets, or an HPKE identifier, a member or an
+                :class:`int` code, does not fit in two octets.
 
         """
         if data is None:
@@ -2194,7 +2219,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         if isinstance(data, Data_ECHClientHelloOuter):
             suite = data.cipher_suite
             return Schema_ECHExtension(data=Schema_ECHClientHello(
-                type=_ECH_OUTER, cipher_suite=_make_hpke_cipher_suite(suite),
+                type=_ECH_OUTER, cipher_suite=_make_hpke_cipher_suite(self, suite),
                 config_id=data.config_id, enc_length=len(data.enc), enc=data.enc,
                 payload_length=len(data.payload), payload=data.payload))
         if isinstance(data, Data_ECHClientHelloInner):

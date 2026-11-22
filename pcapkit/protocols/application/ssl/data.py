@@ -22,6 +22,9 @@ if TYPE_CHECKING:
     from pcapkit.const.tls.ec_point_format import ECPointFormat as Enum_ECPointFormat
     from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
+    from pcapkit.const.tls.hpke_aead_id import HpkeAeadId as Enum_HpkeAeadId
+    from pcapkit.const.tls.hpke_kdf_id import HpkeKdfId as Enum_HpkeKdfId
+    from pcapkit.const.tls.hpke_kem_id import HpkeKemId as Enum_HpkeKemId
     from pcapkit.const.tls.psk_key_exchange_mode import \
         PskKeyExchangeMode as Enum_PskKeyExchangeMode
 
@@ -400,12 +403,12 @@ class HpkeSymmetricCipherSuite(Data):
     """Data model for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`)."""
 
     #: HPKE KDF identifier (:rfc:`9180#section-7.2`).
-    kdf_id: 'int'
+    kdf_id: 'Enum_HpkeKdfId'
     #: HPKE AEAD identifier (:rfc:`9180#section-7.3`).
-    aead_id: 'int'
+    aead_id: 'Enum_HpkeAeadId'
 
     if TYPE_CHECKING:
-        def __init__(self, kdf_id: 'int', aead_id: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, kdf_id: 'Enum_HpkeKdfId', aead_id: 'Enum_HpkeAeadId') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
@@ -467,14 +470,14 @@ class HpkeKeyConfig(Data):
     #: Identifier of the configuration.
     config_id: 'int'
     #: HPKE KEM identifier (:rfc:`9180#section-7.1`).
-    kem_id: 'int'
+    kem_id: 'Enum_HpkeKemId'
     #: HPKE public key.
     public_key: 'bytes'
     #: Cipher suites a client may encrypt with.
     cipher_suites: 'tuple[HpkeSymmetricCipherSuite, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, config_id: 'int', kem_id: 'int', public_key: 'bytes', cipher_suites: 'tuple[HpkeSymmetricCipherSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, config_id: 'int', kem_id: 'Enum_HpkeKemId', public_key: 'bytes', cipher_suites: 'tuple[HpkeSymmetricCipherSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final

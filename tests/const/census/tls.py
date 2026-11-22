@@ -9,5 +9,8 @@ REGISTRIES = {
     'pcapkit.const.tls.ec_point_format:ECPointFormat': 'int',
     'pcapkit.const.tls.extension_type:ExtensionType': 'int',
     'pcapkit.const.tls.handshake_type:HandshakeType': 'int',
+    'pcapkit.const.tls.hpke_aead_id:HpkeAeadId': 'int',
+    'pcapkit.const.tls.hpke_kdf_id:HpkeKdfId': 'int',
+    'pcapkit.const.tls.hpke_kem_id:HpkeKemId': 'int',
     'pcapkit.const.tls.psk_key_exchange_mode:PskKeyExchangeMode': 'int',
 }

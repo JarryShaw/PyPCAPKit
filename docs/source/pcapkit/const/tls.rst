@@ -25,6 +25,12 @@ Shared by the record-layer implementations under
      - TLS PskKeyExchangeMode Values [*]_
    * - :class:`TLS_CertificateCompressionAlgorithm <pcapkit.const.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm>`
      - TLS Certificate Compression Algorithm IDs [*]_
+   * - :class:`TLS_HpkeKemId <pcapkit.const.tls.hpke_kem_id.HpkeKemId>`
+     - HPKE KEM Identifiers [*]_
+   * - :class:`TLS_HpkeKdfId <pcapkit.const.tls.hpke_kdf_id.HpkeKdfId>`
+     - HPKE KDF Identifiers [*]_
+   * - :class:`TLS_HpkeAeadId <pcapkit.const.tls.hpke_aead_id.HpkeAeadId>`
+     - HPKE AEAD Identifiers [*]_
 
 .. versionadded:: 1.6.0
 
@@ -113,6 +119,42 @@ Generated from :class:`pcapkit.vendor.tls.certificate_compression_algorithm.Cert
    :undoc-members:
    :show-inheritance:
 
+HPKE KEM Identifiers
+====================
+
+.. module:: pcapkit.const.tls.hpke_kem_id
+
+Generated from :class:`pcapkit.vendor.tls.hpke_kem_id.HpkeKemId`.
+
+.. autoclass:: pcapkit.const.tls.hpke_kem_id.HpkeKemId
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HPKE KDF Identifiers
+====================
+
+.. module:: pcapkit.const.tls.hpke_kdf_id
+
+Generated from :class:`pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId`.
+
+.. autoclass:: pcapkit.const.tls.hpke_kdf_id.HpkeKdfId
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HPKE AEAD Identifiers
+=====================
+
+.. module:: pcapkit.const.tls.hpke_aead_id
+
+Generated from :class:`pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId`.
+
+.. autoclass:: pcapkit.const.tls.hpke_aead_id.HpkeAeadId
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5
@@ -122,3 +164,6 @@ Generated from :class:`pcapkit.vendor.tls.certificate_compression_algorithm.Cert
 .. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode
 .. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids
+.. [*] https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kem-ids
+.. [*] https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kdf-ids
+.. [*] https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-aead-ids
