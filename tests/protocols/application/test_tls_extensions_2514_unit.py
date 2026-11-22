@@ -521,18 +521,20 @@ class ExtensionRegistryTests(unittest.TestCase):
         from pcapkit.protocols.application.ssl.protocol import SSL
         from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.protocols.application.ssl.data import ProtocolNameList
+        from pcapkit.protocols.application.ssl.schema import NamedGroupList, UnknownExtension
         from pcapkit.utilities.warnings import RegistryWarning
 
         calls = []
 
-        def parser(ext_type: object, data: bytes, *, msg_type: object) -> object:
-            calls.append(('read', ext_type, msg_type))
-            return ProtocolNameList(protocol_name_list=(data,))
+        def parser(ext_type: object, schema: object, *, msg_type: object) -> object:
+            # The shipped schema still unpacks the octets (#2833).
+            calls.append(('read', ext_type, msg_type, type(schema)))
+            return ProtocolNameList(protocol_name_list=(bytes(schema),))  # type: ignore[call-overload]
 
         def constructor(ext_type: object, data: object = None, *, msg_type: object,
-                        **kwargs: object) -> bytes:  # pylint: disable=unused-argument
+                        **kwargs: object) -> object:  # pylint: disable=unused-argument
             calls.append(('make', ext_type, msg_type))
-            return data.protocol_name_list[0]  # type: ignore[attr-defined]
+            return UnknownExtension(data=data.protocol_name_list[0])  # type: ignore[attr-defined]
 
         shipped = dict(SSL.__extension__)
         try:
@@ -543,8 +545,8 @@ class ExtensionRegistryTests(unittest.TestCase):
             self.assertEqual(parsed.info.content[0].body.extensions[0].data,
                              ProtocolNameList(protocol_name_list=(GROUPS[4:],)))
             self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
-            for kind in ('read', 'make'):
-                self.assertIn((kind, ExtensionType.supported_groups, HandshakeType.client_hello), calls)
+            self.assertIn(('read', ExtensionType.supported_groups, HandshakeType.client_hello, NamedGroupList), calls)
+            self.assertIn(('make', ExtensionType.supported_groups, HandshakeType.client_hello), calls)
 
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', RegistryWarning)
@@ -564,6 +566,7 @@ class ExtensionRegistryTests(unittest.TestCase):
         from pcapkit.protocols.application.ssl.protocol import SSL
         from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.protocols.application.ssl.data import ExtensionData
+        from pcapkit.protocols.application.ssl.schema import UnknownExtension
         from pcapkit.utilities.exceptions import ProtocolError
 
         @info_final
@@ -572,15 +575,18 @@ class ExtensionRegistryTests(unittest.TestCase):
 
             mode: 'int'
 
-        def parser(ext_type: object, data: bytes, *, msg_type: object) -> object:  # pylint: disable=unused-argument
+        def parser(ext_type: object, schema: object, *, msg_type: object) -> object:  # pylint: disable=unused-argument
+            # No schema is registered, so the octets come as ``UnknownExtension`` (#2833).
+            self.assertIsInstance(schema, UnknownExtension)
+            data = schema.data  # type: ignore[attr-defined]
             if len(data) != 1:
                 raise ProtocolError('heartbeat: not one octet')
             return Heartbeat(mode=data[0])
 
         def constructor(ext_type: object, data: object = None, *, msg_type: object,
-                        mode: int = 1, **kwargs: object) -> bytes:  # pylint: disable=unused-argument
+                        mode: int = 1, **kwargs: object) -> object:  # pylint: disable=unused-argument
             self.assertEqual(msg_type, HandshakeType.client_hello)
-            return bytes([data.mode if data is not None else mode])  # type: ignore[attr-defined]
+            return UnknownExtension(data=bytes([data.mode if data is not None else mode]))  # type: ignore[attr-defined]
 
         wire = _client_hello(_ext(15, b'\x01'), _ext(15, b'\x00\x01'), VERSIONS)
         self.assertNotIn(ExtensionType.heartbeat, SSL.__extension__)

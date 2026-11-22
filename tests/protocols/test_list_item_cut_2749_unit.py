@@ -47,6 +47,16 @@ __tier__ = 'LATEST'
 #: Every list of schema items the sweep finds, as ``holder.field``, and its item schema.
 LISTS = {
     'application.httpv2:SettingsFrame.settings': 'application.httpv2:SettingPair',
+    'application.ssl:ECHConfigContents.cipher_suites': 'application.ssl:HpkeSymmetricCipherSuite',
+    'application.ssl:ECHConfigContents.extensions': 'application.ssl:ECHConfigExtension',
+    'application.ssl:ECHEncryptedExtensions.retry_configs': 'application.ssl:ECHConfig',
+    'application.ssl:KeyShareClientHello.client_shares': 'application.ssl:KeyShareEntry',
+    'application.ssl:OCSPStatusRequest.responder_id_list': 'application.ssl:Opaque16',
+    'application.ssl:OfferedPsks.binders': 'application.ssl:Opaque8',
+    'application.ssl:OfferedPsks.identities': 'application.ssl:PskIdentity',
+    'application.ssl:ProtocolNameList.protocol_name_list': 'application.ssl:Opaque8',
+    'application.ssl:ServerNameList.server_name_list': 'application.ssl:ServerName',
+    'application.ssl:SignedCertificateTimestampList.sct_list': 'application.ssl:Opaque16',
     'internet.hip:LocatorSetParameter.locators': 'internet.hip:Locator',
     'internet.icmpv6:MLDv2Report.records': 'internet.icmpv6:MulticastAddressRecord',
     'internet.igmpv3:Report.records': 'internet.igmpv3:GroupRecord',
@@ -61,6 +71,12 @@ LISTS = {
 REFUSED = {
     'internet.mh:CGAParameter': 'its pre_unpack refuses octets short of its fixed fields and '
                                 'public key, rather than read on past the option (#2684)',
+}
+
+#: Items read with a body in place of the minimal one, a lone length octet with no
+#: cut inside it, as ``(octets, why)``.
+BODIED = {
+    'application.ssl:Opaque8': (b'\x02ab', 'its minimal item is the one-octet length of an empty vector'),
 }
 
 #: The message every negative length warns with.
@@ -130,7 +146,8 @@ class ListItemCutTests(unittest.TestCase):
 
         for label, item in item_lists():
             _, raw, ctx = build(item.schema)
-            yield label_of(item.schema), item, raw, ctx
+            label = label_of(item.schema)
+            yield label, item, BODIED.get(label, (raw, ''))[0], ctx
 
     def assert_cut(self, parsed: 'Any', caught: 'list[str]', data: bytes, ctx: 'dict[str, Any]') -> None:
         """A cut ``parsed`` from ``data`` warned no negative length, recorded, and packs back."""

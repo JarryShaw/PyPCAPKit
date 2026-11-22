@@ -39,6 +39,12 @@ __tier__ = 'LATEST'
 
 #: Every list of plain values the sweep finds, as ``holder.field``.
 LISTS = frozenset({
+    'application.ssl:CertificateCompressionAlgorithms.algorithms',
+    'application.ssl:ECPointFormatList.ec_point_format_list',
+    'application.ssl:NamedGroupList.named_group_list',
+    'application.ssl:PskKeyExchangeModes.ke_modes',
+    'application.ssl:SignatureSchemeList.supported_signature_algorithms',
+    'application.ssl:SupportedVersionsClientHello.versions',
     'internet.hip:ACKParameter.update_id',
     'internet.hip:AckDataParameter.ack',
     'internet.hip:DHGroupListParameter.groups',

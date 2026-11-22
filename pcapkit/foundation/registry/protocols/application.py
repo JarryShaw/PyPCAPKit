@@ -25,6 +25,7 @@ from pcapkit.protocols.application.dns.protocol import DNS
 from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 from pcapkit.protocols.application.httpv2.schema import FrameType as Schema_HTTP_FrameType
 from pcapkit.protocols.application.ssl.protocol import SSL
+from pcapkit.protocols.application.ssl.schema import Extension as Schema_TLS_Extension
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
@@ -159,7 +160,8 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
 
 # NOTE: pcapkit.protocols.application.ssl.protocol.SSL.__extension__
 def register_tls_extension(code: 'TLS_ExtensionType',
-                           meth: 'str | tuple[TLS_ExtensionParser, TLS_ExtensionConstructor]') -> 'None':
+                           meth: 'str | tuple[TLS_ExtensionParser, TLS_ExtensionConstructor]', *,
+                           schema: 'Optional[Type[Schema_TLS_Extension]]' = None) -> 'None':
     """Register an extension parser.
 
     The function will register the given extension parser to the
@@ -174,6 +176,8 @@ def register_tls_extension(code: 'TLS_ExtensionType',
             parse and construct the ``extension_data``. A name names the
             ``_read_ext_*`` and ``_make_ext_*`` methods, and has to name an
             existing ``_read_ext_*`` one.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the ``extension_data``.
+            It should be a subclass of :class:`pcapkit.protocols.application.ssl.schema.Extension`.
 
     Raises:
         RegistryError: If ``code`` is not an
@@ -183,10 +187,18 @@ def register_tls_extension(code: 'TLS_ExtensionType',
 
     .. versionadded:: 1.6.0
 
+    .. versionchanged:: 1.7.0
+
+       Takes ``schema``. The parser is handed the ``extension_data`` unpacked
+       by that schema, and the constructor returns one, rather than octets
+       (:issue:`2833`).
+
     """
     _check_code(code, TLS_ExtensionType, SSL)  # type: ignore[type-abstract]
     if isinstance(meth, str) and not hasattr(SSL, f'_read_ext_{meth}'):
         raise RegistryError('method must be a valid TLS extension parser function')
 
     SSL.register_extension(code, meth)
+    if schema is not None:
+        Schema_TLS_Extension.register(code, schema)
     logger.debug('registered TLS extension parser: %s', code.name)
