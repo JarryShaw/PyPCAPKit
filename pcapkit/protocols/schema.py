@@ -586,7 +586,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
               :class:`~pcapkit.corekit.fields.collections.ListField` says of an
               item it counts. Fields running past ``length`` are then the cut
               the short read records, and do not warn that ``__length__`` fell
-              below zero (:issue:`2749`).
+              below zero (:issue:`2749`); past the cut it reads as zero, so a
+              field it sizes reads nothing (:issue:`2848`).
             * ``__data_present__`` -- that ``data`` holds the data that many
               octets in, and past them the zeros a
               :class:`~pcapkit.corekit.fields.collections.ListField` of schema
@@ -615,6 +616,11 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
            end of the data in, inside zeros filled out past it, is told where it
            ends (:issue:`2760`).
 
+        .. versionchanged:: 1.7.0
+
+           Past the cut in a schema whose ``length`` ends with the data, a field
+           sized by ``__length__`` reads nothing (:issue:`2848`).
+
         """
         # force cast arg type since decorator changed their signatures
         if TYPE_CHECKING:
@@ -635,6 +641,10 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
         self = cls.__new__(cls)
         for field in self.__fields__.values():
+            # NOTE: Past the cut nothing is left of a length that ends with the data, so a
+            # field sized by what is left reads none rather than a negative length (#2848).
+            if data_end and packet['__length__'] < 0 and '__short_read__' in packet:
+                packet['__length__'] = 0
             field = field(packet)
 
             # NOTE: ``Field.length`` recomputes struct.calcsize() on every read,

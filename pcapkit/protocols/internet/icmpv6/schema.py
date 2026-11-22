@@ -60,7 +60,10 @@ def icmpv6_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     schema = ICMPv6Type.registry[type]
     # NOTE: ``type``, ``code`` and ``checksum`` have already been deducted
     # from ``__length__``, so it is exactly the message body length.
-    return SchemaField(length=cast('int', pkt['__length__']), schema=schema)
+    # NOTE: On its own a message is given the octets captured, so its body's length ends
+    # with the data; inside a frame its lengths say where the message ends (#2848).
+    packet = {} if frame_depth.get() else {'__data_end__': True}
+    return SchemaField(length=cast('int', pkt['__length__']), schema=schema, packet=packet)
 
 
 def mldv2_query_present(pkt: 'dict[str, Any]') -> 'bool':
