@@ -494,12 +494,12 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.protocols.protocol import ProtocolBase
-        from pcapkit.utilities.exceptions import ProtocolError, RegistryError
+        from pcapkit.utilities.exceptions import RegistryError
 
         protocol_registry = ProtocolBase.__registry__
         UnitProtocol = self._unit_protocol()
         self._guard_registry(protocol_registry, 'UNITPROTOCOL')
-        raw_module = ('pcapkit.protocols.misc.raw.protocol', 'Raw')
+        raw_module = ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')
 
         class_routes = [
             (registry.register_linktype, LinkType.ETHERNET,
@@ -530,14 +530,14 @@ class ProtocolRegistryTests(unittest.TestCase):
                 for patch in patches:
                     patch.stop()
 
-            with self.subTest(func=f'{func.__name__}-string'):
+            with self.subTest(func=f'{func.__name__}-descriptor'):
                 patches = [mock.patch.object(target, method) for target, method in targets]
                 active = [patch.start() for patch in patches]
                 self.addCleanup(lambda patches=patches: [patch.stop() for patch in patches])
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    func(code, *raw_module)
+                    func(code, raw_module)
                 for register in active:
-                    self.assertIsInstance(register.call_args.args[1], ModuleDescriptor)
+                    self.assertIs(register.call_args.args[1], raw_module)
                 self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
                 for patch in patches:
                     patch.stop()
@@ -556,63 +556,61 @@ class ProtocolRegistryTests(unittest.TestCase):
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(AppType_TCP.TCP_3com_amp3, UnitProtocol,
-                                              TransportProtocol.udp)
+                                              transport=TransportProtocol.udp)
         tcp_register.assert_not_called()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        # NOTE: naming both transport protocols, one argument each, is the only way to
-        # reach both, since no member's ``proto`` is a composite.
+        # NOTE: a list naming both transport protocols is the only way to reach both,
+        # since no member's ``proto`` is a composite.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(AppType_TCP.TCP_3com_amp3, UnitProtocol,
-                                              TransportProtocol.tcp, TransportProtocol.udp)
+                                              transport=[TransportProtocol.tcp, TransportProtocol.udp])
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        # NOTE: ``class_`` is positional at the sibling position (ruled on #815): with a
-        # ``str`` module the class name is third and the transports follow.
+        # NOTE: a descriptor takes the transport by keyword as a class does (#2838).
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    registry.register_apptype(65000, raw_module[0], raw_module[1],
-                                              TransportProtocol.tcp)
+                    registry.register_apptype(65000, raw_module, transport=TransportProtocol.tcp)
         tcp_register.assert_called_once()
         udp_register.assert_not_called()
         self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
 
         with self.assertRaises(RegistryError):
-            registry.register_apptype(65001, UnitProtocol, TransportProtocol.dccp)
+            registry.register_apptype(65001, UnitProtocol, transport=TransportProtocol.dccp)
 
         # NOTE: a bare port number has no ``proto`` to fall back on, so omitting
         # the transport protocol is an error rather than a guess.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65004, UnitProtocol)
 
-        # NOTE: a composite is refused: one call registers one transport, and without
+        # NOTE: a composite is refused: each item names one transport, and without
         # an ``IntFlag`` base (#808) ``tcp | udp`` is a bare ``int``.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65005, UnitProtocol,
-                                      TransportProtocol.tcp | TransportProtocol.udp)
+                                      transport=TransportProtocol.tcp | TransportProtocol.udp)
 
         # NOTE: a ``str`` transport is coerced to the member of that name (ruled on
         # #815), reaching the same registry the member would.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    registry.register_apptype(65006, UnitProtocol, 'udp')
+                    registry.register_apptype(65006, UnitProtocol, transport='udp')
         tcp_register.assert_not_called()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        # NOTE: several ``str`` transports in one variadic call reach both
-        # registries, exactly like naming both members would.
+        # NOTE: several ``str`` transports in one list reach both registries,
+        # exactly like naming both members would.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    registry.register_apptype(65007, UnitProtocol, 'tcp', 'udp')
+                    registry.register_apptype(65007, UnitProtocol, transport=('tcp', 'udp'))
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
@@ -621,7 +619,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    registry.register_apptype(65008, UnitProtocol, 'tcp', TransportProtocol.udp)
+                    registry.register_apptype(65008, UnitProtocol, transport=['tcp', TransportProtocol.udp])
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
@@ -629,19 +627,19 @@ class ProtocolRegistryTests(unittest.TestCase):
         # NOTE: a name that matches no member raises, exactly as an unknown
         # member does above -- never a silent skip, never a minted default.
         with self.assertRaises(RegistryError):
-            registry.register_apptype(65009, UnitProtocol, 'bogus')
+            registry.register_apptype(65009, UnitProtocol, transport='bogus')
 
         # NOTE: refused like the composite member above; on an ``IntFlag`` base (#808)
         # aenum's getitem would parse ``'tcp|udp'`` into a composite and accept it.
         with self.assertRaises(RegistryError):
-            registry.register_apptype(65010, UnitProtocol, 'tcp|udp')
+            registry.register_apptype(65010, UnitProtocol, transport='tcp|udp')
 
         # NOTE: resolution is case-insensitive -- maintainer ruling on #815 --
         # so ``'TCP'`` and ``'Tcp'`` reach the same registry ``'tcp'`` does.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    registry.register_apptype(65013, UnitProtocol, 'TCP')
+                    registry.register_apptype(65013, UnitProtocol, transport='TCP')
         tcp_register.assert_called_once()
         udp_register.assert_not_called()
         register_protocol.assert_called_once_with(UnitProtocol)
@@ -649,7 +647,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    registry.register_apptype(65014, UnitProtocol, 'Tcp')
+                    registry.register_apptype(65014, UnitProtocol, transport='Tcp')
         tcp_register.assert_called_once()
         udp_register.assert_not_called()
         register_protocol.assert_called_once_with(UnitProtocol)
@@ -659,7 +657,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                    registry.register_apptype(65015, UnitProtocol, 'TCP', TransportProtocol.udp)
+                    registry.register_apptype(65015, UnitProtocol, transport=['TCP', TransportProtocol.udp])
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
@@ -667,83 +665,76 @@ class ProtocolRegistryTests(unittest.TestCase):
         # NOTE: case-insensitivity loosens neither refusal: ``'TCP|UDP'`` and ``'BOGUS'``
         # lowercase to no member name.
         with self.assertRaises(RegistryError):
-            registry.register_apptype(65016, UnitProtocol, 'TCP|UDP')
+            registry.register_apptype(65016, UnitProtocol, transport='TCP|UDP')
         with self.assertRaises(RegistryError):
-            registry.register_apptype(65017, UnitProtocol, 'BOGUS')
+            registry.register_apptype(65017, UnitProtocol, transport='BOGUS')
 
         # NOTE: a ``str`` and its member reach the registry identically, so the
         # resulting state cannot tell which form was passed.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register_str:
             with mock.patch.object(reg_protocol, 'register_protocol'):
-                registry.register_apptype(65011, UnitProtocol, 'tcp')
+                registry.register_apptype(65011, UnitProtocol, transport='tcp')
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register_member:
             with mock.patch.object(reg_protocol, 'register_protocol'):
-                registry.register_apptype(65011, UnitProtocol, TransportProtocol.tcp)
+                registry.register_apptype(65011, UnitProtocol, transport=TransportProtocol.tcp)
         self.assertEqual(tcp_register_str.call_args, tcp_register_member.call_args)
 
         # NOTE: neither a ``str`` nor a member raises before the registry loop, since
         # ``1`` (or ``True``) would resolve to TCP and leave a half-written registry.
-        for bad_transport in (1, True, None):
+        for bad_transport in (1, True, [None], [TransportProtocol.tcp, 1], {'tcp'}):
             with self.subTest(transport=bad_transport):
                 with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
                     with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                         with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                             with self.assertRaises(RegistryError):
-                                registry.register_apptype(65012, UnitProtocol, bad_transport)
+                                registry.register_apptype(65012, UnitProtocol, transport=bad_transport)  # type: ignore[arg-type]
                 tcp_register.assert_not_called()
                 udp_register.assert_not_called()
                 register_protocol.assert_not_called()
 
-        # NOTE: per #815, ``type(module)`` alone decides whether the third positional is a
-        # class or a transport; real registries show a silent drop that mocks would hide.
+        # NOTE: real registries show a silent drop that mocks would hide.
         self._guard_registry(reg_transport.TCP.__proto__, 65200)
         self._guard_registry(reg_transport.UDP.__proto__, 65200)
         with mock.patch.object(reg_protocol, 'register_protocol'):
-            registry.register_apptype(65200, UnitProtocol, TransportProtocol.udp)
+            registry.register_apptype(65200, UnitProtocol, transport=TransportProtocol.udp)
         self.assertNotIn(65200, reg_transport.TCP.__proto__)
         self.assertIs(reg_transport.UDP.__proto__[65200], UnitProtocol)
 
-        # NOTE: members after a class module keep call order (prepended, not appended):
-        # ``udp`` then ``tcp``, as naming only members would.
+        # NOTE: a list of members registers under each, ``udp`` then ``tcp``.
         self._guard_registry(reg_transport.TCP.__proto__, 65201)
         self._guard_registry(reg_transport.UDP.__proto__, 65201)
         with mock.patch.object(reg_protocol, 'register_protocol'):
-            registry.register_apptype(65201, UnitProtocol, TransportProtocol.udp, TransportProtocol.tcp)
+            registry.register_apptype(65201, UnitProtocol, transport=[TransportProtocol.udp, TransportProtocol.tcp])
         self.assertIs(reg_transport.TCP.__proto__[65201], UnitProtocol)
         self.assertIs(reg_transport.UDP.__proto__[65201], UnitProtocol)
 
-        # NOTE: a ``str`` transport after a class module reaches ``transport`` as a
-        # member does, then goes through ``str`` coercion.
+        # NOTE: a ``str`` transport reaches the registry a member does, through ``str`` coercion.
         self._guard_registry(reg_transport.TCP.__proto__, 65202)
         self._guard_registry(reg_transport.UDP.__proto__, 65202)
         with mock.patch.object(reg_protocol, 'register_protocol'):
-            registry.register_apptype(65202, UnitProtocol, 'udp')
+            registry.register_apptype(65202, UnitProtocol, transport='udp')
         self.assertNotIn(65202, reg_transport.TCP.__proto__)
         self.assertIs(reg_transport.UDP.__proto__[65202], UnitProtocol)
 
-        # NOTE: with a ``str`` module the third positional is ``class_``, resolved via
-        # ``ModuleDescriptor``; with no transport, the port's ``AppType`` member gives one.
+        # NOTE: with no transport, the port's ``AppType`` member gives one.
         self._guard_registry(reg_transport.TCP.__proto__, AppType_TCP.TCP_3exmp.port)
         self._guard_registry(reg_transport.UDP.__proto__, AppType_TCP.TCP_3exmp.port)
         with mock.patch.object(reg_protocol, 'register_protocol'):
-            registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module[0], raw_module[1])
+            registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module)
         self.assertEqual(reg_transport.TCP.__proto__[AppType_TCP.TCP_3exmp.port].__name__, 'Raw')
 
-        # NOTE: ``class_`` and a further transport combine: the class name stays in
-        # ``class_`` and the transport reaches ``transport`` from the fourth position.
         self._guard_registry(reg_transport.TCP.__proto__, 65203)
         self._guard_registry(reg_transport.UDP.__proto__, 65203)
         with mock.patch.object(reg_protocol, 'register_protocol'):
-            registry.register_apptype(65203, raw_module[0], raw_module[1], TransportProtocol.udp)
+            registry.register_apptype(65203, raw_module, transport=TransportProtocol.udp)
         self.assertNotIn(65203, reg_transport.TCP.__proto__)
         self.assertEqual(reg_transport.UDP.__proto__[65203].__name__, 'Raw')
 
-        # NOTE: with a ``str`` module a ``str`` third argument is always a class name:
-        # ``'tcp'`` fails as a missing class (#832's ProtocolError), never as a transport.
+        # NOTE: a third positional is refused outright (#2838), never read as a
+        # class name or a transport, and nothing is written.
         with mock.patch.object(reg_protocol, 'register_protocol'):
-            with self.assertRaises(ProtocolError) as caught:
-                registry.register_apptype(65204, raw_module[0], 'tcp', TransportProtocol.udp)
-        self.assertIn("'tcp'", str(caught.exception))
+            with self.assertRaises(TypeError):
+                registry.register_apptype(65204, raw_module, 'tcp')  # type: ignore[misc]
         self.assertNotIn(65204, reg_transport.TCP.__proto__)
         self.assertNotIn(65204, reg_transport.UDP.__proto__)
 
@@ -755,8 +746,8 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                registry.register_tcp(65002, *raw_module)
-        self.assertIsInstance(tcp_register.call_args.args[1], ModuleDescriptor)
+                registry.register_tcp(65002, raw_module)
+        self.assertIs(tcp_register.call_args.args[1], raw_module)
         self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
 
         with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
@@ -767,51 +758,49 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
             with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
-                registry.register_udp(65003, *raw_module)
-        self.assertIsInstance(udp_register.call_args.args[1], ModuleDescriptor)
+                registry.register_udp(65003, raw_module)
+        self.assertIs(udp_register.call_args.args[1], raw_module)
         self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
 
-    def test_register_apptype_omitted_class_name_reports_missing_argument(self) -> None:
-        """GitHub issues #832 and #833: an omitted ``class_`` must say so.
+    def test_register_apptype_refuses_a_module_name_string(self) -> None:
+        """#2838: a module name is not an entry; a descriptor names the class.
 
-        ``register_apptype(AppType_TCP.TCP_3exmp, raw_module_name)`` never
-        supplies ``class_`` at all -- it defaults to :data:`NULL` -- so this
-        is the omission the two issues describe together: with a :class:`str`
-        ``module`` and no ``class_``, the failure must name the *argument* as
-        missing rather than letting the sentinel reach :func:`getattr` and
-        come back as an attribute named ``'(null)'``.
+        Through 1.6 ``register_apptype(code, module_name)`` built a descriptor
+        from a ``class_`` that defaulted to :data:`NULL`, which is how GitHub
+        issues #832 and #833 arose. A :class:`str` is now refused with
+        :exc:`RegistryError` before anything is written.
 
         """
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
-        from pcapkit.utilities.exceptions import ProtocolError
+        from pcapkit.utilities.exceptions import RegistryError
 
         raw_module_name = 'pcapkit.protocols.misc.raw.protocol'
         port = AppType_TCP.TCP_3exmp.port
 
         self._guard_registry(reg_transport.TCP.__proto__, port)
-        with mock.patch.object(reg_protocol, 'register_protocol'):
-            with self.assertRaises(ProtocolError) as caught:
-                registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module_name)
-        message = str(caught.exception)
-        self.assertIn(raw_module_name, message)
-        self.assertNotIn('(null)', message)
+        before = dict(reg_transport.TCP.__proto__)
+        with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
+            for call in (lambda: registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module_name),
+                         lambda: registry.register_tcp(port, raw_module_name)):
+                with self.assertRaisesRegex(RegistryError, 'must be a class'):
+                    call()  # type: ignore[arg-type]
+        register_protocol.assert_not_called()
+        self.assertEqual(reg_transport.TCP.__proto__, before)
 
-    def test_register_apptype_explicit_null_string_is_a_class_name_not_the_sentinel(self) -> None:
-        """GitHub issue #833: ``class_='(null)'`` is data, not the sentinel.
+    def test_register_apptype_descriptor_with_a_null_string_name_is_a_class_name(self) -> None:
+        """GitHub issue #833: ``'(null)'`` in a descriptor is data, not the sentinel.
 
-        Were the sentinel a plain :class:`str`, an equal-but-distinct
-        ``'(null)'`` passed by a caller would be indistinguishable from the
-        default -- both compare equal, and which branch ran would depend on
-        identity/interning rather than intent. Passed explicitly here, it must
+        Passed in a :class:`~pcapkit.corekit.module.ModuleDescriptor`, it must
         be resolved as an ordinary (missing) class name, the same way any
         other wrong class name is, and the failure must name the module and
         the literal ``'(null)'`` that was looked up.
 
         """
         from pcapkit.const.reg.apptype import TransportProtocol
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
@@ -823,46 +812,45 @@ class ProtocolRegistryTests(unittest.TestCase):
         self._guard_registry(reg_transport.TCP.__proto__, port)
         with mock.patch.object(reg_protocol, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
-                registry.register_apptype(port, raw_module_name, '(null)', TransportProtocol.tcp)
+                registry.register_apptype(port, ModuleDescriptor(raw_module_name, '(null)'),
+                                          transport=TransportProtocol.tcp)
         self.assertIn(raw_module_name, str(caught.exception))
         self.assertIn("'(null)'", str(caught.exception))
 
-    def test_register_apptype_null_sentinel_still_means_absent_with_a_class_module(self) -> None:
-        """GitHub issue #833's own repro, run against the :data:`NULL` sentinel.
+    def test_register_apptype_transport_is_keyword_only_and_closed(self) -> None:
+        """#2838: ``transport`` is keyword-only, and ``class_`` is no keyword at all.
 
-        With a non-``str`` ``module``, the third positional is never
-        ``class_`` -- it is the first ``*transport`` element instead, per the
-        maintainer ruling in #815. :data:`NULL` passed there must still mean
-        "nothing was named" (falling through to "no transport protocol
-        given"), while the *string* ``'(null)'`` must be treated as an
-        ordinary, unrecognised transport name -- proving the two do not
-        collide, since :data:`NULL` is not a :class:`str`.
+        Its :data:`None` default means "the member's own ``proto``", so a bare
+        port with none names nothing, while the string ``'(null)'`` is an
+        ordinary, unrecognised transport name.
 
         """
-        from pcapkit.foundation.registry import protocols as registry
         from pcapkit.corekit.sentinels import NULL
+        from pcapkit.foundation.registry import protocols as registry
         from pcapkit.utilities.exceptions import RegistryError
 
         UnitProtocol = self._unit_protocol()
 
+        with self.assertRaises(TypeError):
+            registry.register_apptype(65210, UnitProtocol, class_=NULL)  # type: ignore[call-arg]
+
         with self.assertRaises(RegistryError) as caught_absent:
-            registry.register_apptype(65210, UnitProtocol, class_=NULL)
+            registry.register_apptype(65210, UnitProtocol, transport=None)
         self.assertIn('no transport protocol given', str(caught_absent.exception))
 
         with self.assertRaises(RegistryError) as caught_present:
-            registry.register_apptype(65211, UnitProtocol, class_='(null)')
+            registry.register_apptype(65211, UnitProtocol, transport='(null)')
         self.assertIn("unknown transport protocol: '(null)'", str(caught_present.exception))
 
     def test_register_tcp_bad_class_name_raises_protocolerror(self) -> None:
         """GitHub issue #832: the fix is family-wide, not one function.
 
-        :func:`register_apptype` is not the only ``register_*``
-        wrapper that builds a :class:`~pcapkit.corekit.module.ModuleDescriptor`
-        from a :class:`str` ``module`` -- :func:`register_tcp` is a sibling
-        that shares the same :attr:`ModuleDescriptor.klass` resolution, so it
-        must fail a bad class name the same way.
+        :func:`register_tcp` resolves a descriptor's class as
+        :func:`register_apptype` does, so it must fail a bad class name the
+        same way.
 
         """
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
@@ -874,7 +862,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         self._guard_registry(reg_transport.TCP.__proto__, port)
         with mock.patch.object(reg_protocol, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
-                registry.register_tcp(port, raw_module_name, 'NotAClass')
+                registry.register_tcp(port, ModuleDescriptor(raw_module_name, 'NotAClass'))
         message = str(caught.exception)
         self.assertIn(raw_module_name, message)
         self.assertIn("'NotAClass'", message)

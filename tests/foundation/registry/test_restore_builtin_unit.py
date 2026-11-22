@@ -133,6 +133,7 @@ class TestRestoreBuiltin(unittest.TestCase):
             self._assert_as_shipped(TraceFlow.__output__, saved[4])
 
     def test_restore_takes_the_shipped_descriptor(self) -> None:
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.engines.engine import Engine
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.registry import register_extractor_engine
@@ -147,7 +148,7 @@ class TestRestoreBuiltin(unittest.TestCase):
                 register_extractor_engine('scapy', MyEngine)
             # an equal descriptor, not the shipped object, still restores the shipped object
             with self.assertWarns(RegistryWarning):
-                register_extractor_engine('scapy', 'pcapkit.foundation.engines.scapy', 'Scapy')
+                register_extractor_engine('scapy', ModuleDescriptor('pcapkit.foundation.engines.scapy', 'Scapy'))
             self._assert_as_shipped(Extractor.__engine__, saved[0])
 
     def test_shipped_descriptor_is_matched_without_import(self) -> None:

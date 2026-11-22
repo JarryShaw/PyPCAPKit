@@ -1194,45 +1194,35 @@ class AppTypeSplitTests(unittest.TestCase):
         # ``register_apptype`` takes the transports one at a time and resolves each
         # against a mapping, so neither half of a fan-out may appear. The *shape*
         # is pinned below on the live signature instead of here: a literal
-        # ``*transport: 'TransportProtocol', class_: ...`` snippet breaks on every
-        # change to the annotation (such as the ``| str`` the #815 ruling asks
-        # for) even when the shape it exists to protect is the same at the
-        # source-text level it reads.
+        # annotation snippet breaks on every change to the annotation even when
+        # the shape it exists to protect is the same at the source-text level it
+        # reads.
         source = (root / 'pcapkit' / 'foundation' / 'registry' / 'protocols'
                   / 'transport.py').read_text(encoding='utf-8')
         self.assertNotIn('proto = code.proto', source)
         self.assertNotIn('if test not in proto:', source)
-        self.assertIn('transport = (code.proto,)', source)
+        self.assertIn('coerced.append(code.proto)', source)
         self.assertIn('for proto in transport:', source)
 
         # Its signature, checked on the live object rather than on the text, since
-        # the text above cannot show what the parameters bind to. ``class_`` is
-        # positional, at the sibling position ahead of ``*transport`` -- a
-        # further maintainer ruling on #815, over a keyword-only shape --
-        # consistent with ``register_tcp`` and its siblings.
+        # the text above cannot show what the parameters bind to. Since #2838 it
+        # takes the one entry ``Transport.register`` takes, as ``protocol``, and
+        # ``transport`` is keyword-only, so no third positional can change meaning
+        # with the type of the second, as ``class_`` did under the #815 ruling.
         from pcapkit.foundation.registry.protocols import register_apptype
 
         parameters = inspect.signature(register_apptype).parameters
         self.assertEqual([(name, parameter.kind.name) for name, parameter in parameters.items()],
-                         [('code', 'POSITIONAL_OR_KEYWORD'), ('module', 'POSITIONAL_OR_KEYWORD'),
-                          ('class_', 'POSITIONAL_OR_KEYWORD'), ('transport', 'VAR_POSITIONAL')])
+                         [('code', 'POSITIONAL_OR_KEYWORD'), ('protocol', 'POSITIONAL_OR_KEYWORD'),
+                          ('transport', 'KEYWORD_ONLY')])
 
-        # Pure ``bind()`` is purely positional: it cannot see what ``module`` *is*,
-        # so a third positional argument lands in ``class_`` regardless -- the very
-        # swallow a keyword-only shape would prevent. That the swallow does not
-        # happen is not a fact ``bind()`` can show, because the
-        # disambiguation runs in the function body, keyed on ``type(module)``, and
-        # only takes place once ``register_apptype`` executes.
         from pcapkit.const.reg.apptype import TransportProtocol
 
-        bound = inspect.signature(register_apptype).bind(80, object(), TransportProtocol.udp)
-        self.assertEqual(bound.arguments['class_'], TransportProtocol.udp)
-        self.assertNotIn('transport', bound.arguments)
+        with self.assertRaises(TypeError):
+            inspect.signature(register_apptype).bind(80, object(), TransportProtocol.udp)
 
-        # So the branch itself is checked by calling the live function,
-        # not by binding its signature: a class ``module`` sends the same third
-        # argument to the real ``TCP``/``UDP`` registry as ``transport``, and a
-        # ``str`` module leaves it in ``class_`` and registers the class it names.
+        # So the transport is checked by calling the live function: it reaches
+        # the real ``UDP`` registry by keyword.
         # ``tests/foundation/registry/test_protocols.py`` covers this branch and
         # its edge cases in full; this is the narrow claim that anchors it here.
         from unittest import mock
@@ -1245,7 +1235,7 @@ class AppTypeSplitTests(unittest.TestCase):
         previous = reg_transport.UDP.__proto__.get(65210, missing)
         try:
             with mock.patch.object(reg_protocol, 'register_protocol'):
-                register_apptype(65210, Raw, TransportProtocol.udp)
+                register_apptype(65210, Raw, transport=TransportProtocol.udp)
             self.assertIs(reg_transport.UDP.__proto__[65210], Raw)
         finally:
             if previous is missing:

@@ -2,12 +2,17 @@
 """Registry Helpers
 ======================
 
-.. module:: pcapkit.interface.registry
+.. module:: pcapkit.corekit.registry
 
-:mod:`pcapkit.interface.registry` contains the helpers the
+:mod:`pcapkit.corekit.registry` contains the helpers the
 registrars use to compare registry entries and to put back
 the entry a registry shipped with, so that an override of a
 built-in can be undone (:issue:`1363`, :issue:`1364`).
+
+.. versionadded:: 1.7.0
+
+   Moved here from ``pcapkit.interface.registry``, with no re-export
+   (:issue:`2838`).
 
 """
 import sys

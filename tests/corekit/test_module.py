@@ -154,9 +154,9 @@ exceptions.ProtocolError` rather than the bare stdlib :exc:`AttributeError`,
     def test_klass_raises_protocolerror_when_class_name_was_never_given(self) -> None:
         """An omitted ``class_`` must not be reported as an absent attribute.
 
-        A descriptor built with :data:`NULL` for its ``name`` -- what every
-        ``register_*`` wrapper does when a :class:`str` ``module`` is given
-        with no ``class_`` -- means the caller omitted a required argument,
+        A descriptor built with :data:`NULL` for its ``name`` -- what the
+        ``register_*`` wrappers built from a :class:`str` ``module`` given
+        with no ``class_``, until #2838 -- means the caller omitted a required argument,
         not that they asked for a class literally named ``'(null)'``. Saying
         so is the point of GitHub issues #832 and #833 together: the sentinel
         must never reach :func:`getattr`, so the failure never mentions

@@ -14,7 +14,7 @@ This module provides the registries of the transport layer protocols in
    this module's functions (:issue:`2578`).
 
 """
-from typing import TYPE_CHECKING, cast, overload
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.dccp.option import Option as DCCP_Option
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
@@ -27,8 +27,7 @@ from pcapkit.const.sctp.payload_protocol_identifier import \
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
 from pcapkit.const.tcp.option import Option as TCP_Option
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.sentinels import NULL
-from pcapkit.foundation.registry.protocols.protocol import _check_code, _register_name
+from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_meth, _register_name
 from pcapkit.protocols.transport.dccp.protocol import DCCP
 from pcapkit.protocols.transport.dccp.schema import Option as Schema_DCCP_Option
 from pcapkit.protocols.transport.sctp.protocol import SCTP
@@ -43,11 +42,10 @@ from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Optional, Sequence, Type
 
     from pcapkit.const.sctp.payload_protocol_identifier import \
         PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
-    from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.transport.dccp.protocol import \
         OptionConstructor as DCCP_OptionConstructor
@@ -83,24 +81,9 @@ logger = get_logger(__name__)
 ###############################################################################
 
 
-@overload
-def register_apptype(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *transport: 'TransportProtocol | str') -> 'None': ...
-@overload
-def register_apptype(code: 'Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *transport: 'TransportProtocol | str') -> 'None': ...
-@overload
-def register_apptype(code: 'int', module: 'str', class_: 'str', *transport: 'TransportProtocol | str') -> 'None': ...
-@overload
-def register_apptype(code: 'Enum_AppType', module: 'str', class_: 'str', *transport: 'TransportProtocol | str') -> 'None': ...
-
-
-def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                     class_: 'str | TransportProtocol | NullType' = NULL,
-                     *transport: 'TransportProtocol | str') -> 'None':
+def register_apptype(code: 'int | Enum_AppType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *,
+                     transport: 'TransportProtocol | str | Sequence[TransportProtocol | str] | None' = None) -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` and/or
@@ -108,27 +91,12 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
 
     Arguments:
         code: port number
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name, meaningful only when ``module`` is a :class:`str`.
-            Positional, at the same position as the sibling ``register_*``
-            functions -- but unlike them, a third positional argument here is
-            not always ``class_``: which parameter it binds to is decided by
-            ``type(module)`` alone, never by what the value looks like.
-            When ``module`` is **not** a :class:`str`, whatever is given here
-            is treated as the first ``*transport`` element instead --
-            prepended, so argument order is preserved -- and ``class_`` itself
-            stays unset; ``register_apptype(80, Unit, TransportProtocol.udp)``
-            therefore reaches ``transport`` rather than being silently
-            swallowed. This is not a heuristic on the value: with a
-            :class:`str` ``module``, a :class:`str` third argument is
-            **always** a class name -- ``register_apptype(80, 'a.b', 'tcp')``
-            registers a class literally named ``'tcp'`` -- and naming a
-            transport alongside a :class:`str` module takes the fourth
-            position onward instead.
-        *transport: transport protocols to register ``code`` under, named **one
-            at a time**, each as a :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
-            member or as that member's ``name`` (case-insensitively, e.g. ``'tcp'``,
+        transport: transport protocol to register ``code`` under, or a
+            :class:`list` or :class:`tuple` of several, each a
+            :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
+            member or that member's ``name`` (case-insensitively, e.g. ``'tcp'``,
             ``'TCP'`` or ``'Tcp'`` alike); the two forms are coerced to the same
             member and behave identically,
             including which error they raise. Where none is given and ``code`` is
@@ -146,16 +114,8 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             names no port-keyed registry; or if a ``str`` matches no
             :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` member's
             ``name``. A composite such as ``tcp | udp``, or its string form
-            ``'tcp|udp'``, names two and is refused for the same reason: one call
-            registers under one transport protocol.
-        pcapkit.utilities.exceptions.ProtocolError: Raised from
-            :attr:`ModuleDescriptor.klass <pcapkit.corekit.module.ModuleDescriptor.klass>`,
-            which the port-keyed registry resolves before storing the entry,
-            when ``module`` is a :class:`str` and either ``class_`` names no
-            attribute of it, or ``class_`` was never given at all -- the
-            latter distinguished from the former rather than reported as a
-            missing attribute named ``'(null)'``. See GitHub issues :issue:`832` and
-            :issue:`833`.
+            ``'tcp|udp'``, names two and is refused for the same reason: each
+            item names one transport protocol.
 
     Important:
         :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` is deliberately **not**
@@ -181,16 +141,22 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
        The keyword-only ``proto`` is replaced by ``*transport``, one transport
        protocol per argument, with no alias (:issue:`806`).
 
+    .. versionchanged:: 1.7.0
+
+       ``protocol`` replaces ``module`` and ``class_``, and the keyword-only
+       ``transport`` replaces ``*transport``, with no shim (:issue:`2838`).
+
     """
-    # NOTE: checked before ``*transport`` is resolved, so a bad ``code`` is reported first;
+    # NOTE: checked before ``transport`` is resolved, so a bad ``code`` is reported first;
     # TCP's and UDP's registries are keyed alike, so TCP names the check.
     _check_code(code, Enum_AppType, TCP, number=True)
 
-    # NOTE: a non-``str`` module means the third positional was a transport, never a class
-    # name, so it is prepended to ``transport``; a ``str`` ``class_`` is never sniffed.
-    if not isinstance(module, str) and class_ is not NULL:
-        transport = (cast('TransportProtocol | str', class_),) + transport
-        class_ = NULL
+    if transport is None:
+        transport = ()
+    elif isinstance(transport, (str, TransportProtocol)):
+        transport = (transport,)
+    elif not isinstance(transport, (list, tuple)):
+        raise RegistryError(f'unknown transport protocol: {transport!r}')
 
     # NOTE: coerce up front, by case-insensitive member name via ``__members__`` so a miss is a
     # ``RegistryError`` (#806, #808); a bare ``int`` is refused, or it would half-register the port.
@@ -206,65 +172,50 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         elif not isinstance(proto, TransportProtocol):
             raise RegistryError(f'unknown transport protocol: {proto!r}')
         coerced.append(proto)
-    transport = tuple(coerced)
 
     # NOTE: the member's ``proto`` names the one registry it lives in (#806), so
     # ``register_apptype(TCP.http, Dummy)`` does not displace the UDP port 80 handler.
-    if not transport:
+    if not coerced:
         if not isinstance(code, Enum_AppType):
             raise RegistryError(f'no transport protocol given for port {code}; name each '
                                 'transport protocol to register under')
-        transport = (code.proto,)
+        coerced.append(code.proto)
     if isinstance(code, Enum_AppType):
         code = code.port
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     registries = cast('dict[TransportProtocol, Type[ProtocolBase]]', {
         TransportProtocol.tcp: TCP,
         TransportProtocol.udp: UDP,
     })
     targets = []  # type: list[tuple[type, Any]]
-    for proto in transport:
+    for proto in coerced:
         # NOTE: a composite is not a key, so ``tcp | udp`` is rejected rather than
-        # registering under both; the varargs name them one at a time.
+        # registering under both; a list names them one at a time.
         cls = registries.get(proto)
         if cls is None:
             raise RegistryError(f'unknown transport protocol: {proto.name}')
 
-        cls.register(code, module)
+        cls.register(code, protocol)
         targets.append((cls, code))
         logger.debug('registered %s port: %s', proto.name, code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, *targets)
-
-
-@overload
-def register_tcp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_tcp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, *targets)
 
 
 # NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__proto__
-def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                 class_: 'str | NullType' = NULL) -> 'None':
+def register_tcp(code: 'int | Enum_AppType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` registry.
 
     Arguments:
         code: port number
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
@@ -276,16 +227,14 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     _check_code(code, Enum_AppType, TCP, number=True)
     if isinstance(code, Enum_AppType):
         code = code.port
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    TCP.register(code, module)
+    TCP.register(code, protocol)
     logger.debug('registered TCP port: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (TCP, code))
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (TCP, code))
 
 
 # NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__option__
@@ -309,10 +258,12 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.option.Option`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_mode_*`` method.
+            is a name with no matching ``_read_mode_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, TCP_Option, TCP)
+    _check_meth(meth, TCP)
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mode_{meth}'):
         raise RegistryError('method must be a TCP option parser function')
 
@@ -343,10 +294,12 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_mptcp_*`` method.
+            is a name with no matching ``_read_mptcp_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, TCP_MPTCPOption, TCP)
+    _check_meth(meth, TCP)
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mptcp_{meth}'):
         raise RegistryError('method must be a MPTCP option parser function')
 
@@ -356,29 +309,17 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
     logger.debug('registered MPTCP option parser: %s', code.name)
 
 
-@overload
-def register_udp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_udp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.protocols.transport.udp.protocol.UDP.__proto__
-def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                 class_: 'str | NullType' = NULL) -> 'None':
+def register_udp(code: 'int | Enum_AppType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.udp.protocol.UDP.__proto__` registry.
 
     Arguments:
         code: port number
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
@@ -390,32 +331,20 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     _check_code(code, Enum_AppType, UDP, number=True)
     if isinstance(code, Enum_AppType):
         code = code.port
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    UDP.register(code, module)
+    UDP.register(code, protocol)
     logger.debug('registered UDP port: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (UDP, code))
-
-
-@overload
-def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (UDP, code))
 
 
 # NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__
-def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                  class_: 'str | NullType' = NULL) -> 'None':
+def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier',
+                  protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__` registry.
@@ -423,9 +352,8 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
     Arguments:
         code: payload protocol identifier (PPID), as in
             :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Important:
         Unlike :func:`register_tcp` and :func:`register_udp`, ``code`` is a
@@ -442,16 +370,14 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
 
     """
     _check_code(code, Enum_PayloadProtocolIdentifier, SCTP, number=True)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    SCTP.register(code, module)
+    SCTP.register(code, protocol)
     logger.debug('registered SCTP payload protocol identifier: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (SCTP, code))
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (SCTP, code))
 
 
 # NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__
@@ -475,12 +401,14 @@ def register_sctp_chunk(code: 'SCTP_Chunk', meth: 'str | tuple[SCTP_ChunkParser,
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.chunk.Chunk`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_chunk_*`` method.
+            is a name with no matching ``_read_chunk_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.6.0
 
     """
     _check_code(code, SCTP_Chunk, SCTP)
+    _check_meth(meth, SCTP)
     if isinstance(meth, str) and not hasattr(SCTP, f'_read_chunk_{meth}'):
         raise RegistryError('method must be a valid SCTP chunk parser function')
 
@@ -512,12 +440,14 @@ def register_sctp_parameter(code: 'SCTP_Parameter',
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.parameter.Parameter`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_param_*`` method.
+            is a name with no matching ``_read_param_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.6.0
 
     """
     _check_code(code, SCTP_Parameter, SCTP)
+    _check_meth(meth, SCTP)
     if isinstance(meth, str) and not hasattr(SCTP, f'_read_param_{meth}'):
         raise RegistryError('method must be a valid SCTP chunk parameter parser function')
 
@@ -548,12 +478,14 @@ def register_sctp_cause(code: 'SCTP_CauseCode', meth: 'str | tuple[SCTP_CausePar
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.cause_code.CauseCode`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_cause_*`` method.
+            is a name with no matching ``_read_cause_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.6.0
 
     """
     _check_code(code, SCTP_CauseCode, SCTP)
+    _check_meth(meth, SCTP)
     if isinstance(meth, str) and not hasattr(SCTP, f'_read_cause_{meth}'):
         raise RegistryError('method must be a valid SCTP error cause parser function')
 
@@ -563,29 +495,18 @@ def register_sctp_cause(code: 'SCTP_CauseCode', meth: 'str | tuple[SCTP_CausePar
     logger.debug('registered SCTP error cause parser: %s', code.name)
 
 
-@overload
-def register_dccp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_dccp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__
-def register_dccp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                  class_: 'str | NullType' = NULL) -> 'None':
+def register_dccp(code: 'int | Enum_AppType',
+                  protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__` registry.
 
     Arguments:
         code: port number
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
@@ -599,16 +520,14 @@ def register_dccp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pr
     _check_code(code, Enum_AppType, DCCP, number=True)
     if isinstance(code, Enum_AppType):
         code = code.port
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    DCCP.register(code, module)
+    DCCP.register(code, protocol)
     logger.debug('registered DCCP port: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (DCCP, code))
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (DCCP, code))
 
 
 # NOTE: pcapkit.protocols.transport.dccp.protocol.DCCP.__option__
@@ -632,12 +551,14 @@ def register_dccp_option(code: 'DCCP_Option', meth: 'str | tuple[DCCP_OptionPars
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.dccp.option.Option`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_opt_*`` method.
+            is a name with no matching ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.6.0
 
     """
     _check_code(code, DCCP_Option, DCCP)
+    _check_meth(meth, DCCP)
     if isinstance(meth, str) and not hasattr(DCCP, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid DCCP option parser function')
 

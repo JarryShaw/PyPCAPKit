@@ -254,7 +254,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
                 self.assertEqual(version.from_data(parsed.info).data, raw)
 
     def test_register_arphrd_by_name_and_over_a_shipped_entry(self) -> None:
-        """The ``(module, class_)`` form, a warning naming the key, and a silent restore."""
+        """A module descriptor, a warning naming the key, and a silent restore."""
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import register_arphrd
@@ -265,7 +265,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         self._snapshot()
         shipped = LinuxSLL.__proto__[ARPHRD.FRAD]
         with self.assertWarnsRegex(RegistryWarning, r'^ARP hardware type '):
-            register_arphrd(ARPHRD.FRAD, 'pcapkit.protocols.misc.raw.protocol', 'Raw')
+            register_arphrd(ARPHRD.FRAD, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
         self.assertIs(LinuxSLL.__proto__[ARPHRD.FRAD], Raw)
 
         for version, header, alias in self._versions():
@@ -284,6 +284,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
     def test_register_frad_reaches_dispatch(self) -> None:
         """A registered NLPID dispatches, from FRAD alone and from a LinuxSLL frame."""
         from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import register_frad
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.link.frad.protocol import FRAD
@@ -306,11 +307,12 @@ class LinuxSLLRegistryTests(unittest.TestCase):
                                  f'{alias}:FRAD:IPv4:UDP')
 
         with self.assertWarnsRegex(RegistryWarning, r'^NLPID 129 already registered'):
-            register_frad(0x81, 'pcapkit.protocols.internet.ipv6.protocol', 'IPv6')
+            register_frad(0x81, ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'))
 
     def test_register_netlink_reaches_dispatch(self) -> None:
         """Netlink ships an empty registry; a registered message type dispatches."""
         from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import register_netlink
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.link.netlink.protocol import Netlink
@@ -333,7 +335,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
                                  f'{alias}:Netlink:IPv4:UDP')
 
         with self.assertWarnsRegex(RegistryWarning, r'^message type 3 already registered'):
-            register_netlink(3, 'pcapkit.protocols.internet.ipv6.protocol', 'IPv6')
+            register_netlink(3, ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'))
 
     def test_the_registrars_reject_a_code_of_the_wrong_kind(self) -> None:
         """Each refuses before writing anything, naming the registry that refused."""

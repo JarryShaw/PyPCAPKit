@@ -20,7 +20,7 @@ from pcapkit.const.dns.option import Option as DNS_Option
 from pcapkit.const.dns.rr_type import RRType as DNS_RRType
 from pcapkit.const.http.frame import Frame as HTTP_Frame
 from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
-from pcapkit.foundation.registry.protocols.protocol import _check_code
+from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_meth
 from pcapkit.protocols.application.dns.protocol import DNS
 from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 from pcapkit.protocols.application.httpv2.schema import FrameType as Schema_HTTP_FrameType
@@ -79,12 +79,14 @@ def register_dns_rdata(code: 'DNS_RRType', meth: 'str | tuple[DNS_RDataParser, D
         RegistryError: If ``code`` is not an
             :class:`~pcapkit.const.dns.rr_type.RRType` member, e.g. a member
             of another enum, or ``meth`` is a name with no matching
-            ``_read_rdata_*`` method.
+            ``_read_rdata_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.7.0
 
     """
     _check_code(code, DNS_RRType, DNS)
+    _check_meth(meth, DNS)
     if isinstance(meth, str) and not hasattr(DNS, f'_read_rdata_{meth}'):
         raise RegistryError('method must be a valid DNS RDATA parser function')
 
@@ -111,12 +113,14 @@ def register_dns_option(code: 'DNS_Option', meth: 'str | tuple[DNS_OptionParser,
         RegistryError: If ``code`` is not an
             :class:`~pcapkit.const.dns.option.Option` member, e.g. a member of
             another enum, or ``meth`` is a name with no matching
-            ``_read_opt_*`` method.
+            ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.7.0
 
     """
     _check_code(code, DNS_Option, DNS)
+    _check_meth(meth, DNS)
     if isinstance(meth, str) and not hasattr(DNS, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid DNS option parser function')
 
@@ -145,10 +149,12 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.http.frame.Frame`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_http_*`` method.
+            is a name with no matching ``_read_http_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, HTTP_Frame, HTTPv2)
+    _check_meth(meth, HTTPv2)
     if isinstance(meth, str) and not hasattr(HTTPv2, f'_read_http_{meth}'):
         raise RegistryError('method must be a frame parser function')
 
@@ -183,7 +189,8 @@ def register_tls_extension(code: 'TLS_ExtensionType',
         RegistryError: If ``code`` is not an
             :class:`~pcapkit.const.tls.extension_type.ExtensionType` member,
             e.g. a member of another enum, or ``meth`` is a name with no
-            matching ``_read_ext_*`` method.
+            matching ``_read_ext_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.6.0
 
@@ -195,6 +202,7 @@ def register_tls_extension(code: 'TLS_ExtensionType',
 
     """
     _check_code(code, TLS_ExtensionType, SSL)  # type: ignore[type-abstract]
+    _check_meth(meth, SSL)  # type: ignore[type-abstract]
     if isinstance(meth, str) and not hasattr(SSL, f'_read_ext_{meth}'):
         raise RegistryError('method must be a valid TLS extension parser function')
 

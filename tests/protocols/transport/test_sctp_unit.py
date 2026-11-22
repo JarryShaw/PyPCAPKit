@@ -1095,12 +1095,13 @@ class SCTPUnitTests(unittest.TestCase):
             self.assertEqual(warned.call_count, 0)
 
     def test_register_sctp_wrapper_writes_the_ppid_registry(self) -> None:
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry.protocols import register_sctp
         from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         with self._proto_registry():
-            register_sctp(4243, 'pcapkit.protocols.misc.raw.protocol', 'Raw')
+            register_sctp(4243, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
             self.assertIs(SCTP.__proto__[4243], Raw)
 
     ##########################################################################

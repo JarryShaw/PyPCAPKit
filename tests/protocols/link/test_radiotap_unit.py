@@ -344,6 +344,7 @@ class TestRadiotap(unittest.TestCase):
     def test_register_radiotap_reaches_dispatch(self) -> None:
         """A class registered under ``LinkType.IEEE802_11`` takes the frame."""
         from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import register_radiotap
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.protocols.misc.raw.protocol import Raw
@@ -362,7 +363,8 @@ class TestRadiotap(unittest.TestCase):
         self.assertEqual(parsed.payload.data, ACK)
 
         with self.assertWarnsRegex(RegistryWarning, r'^link type 105 already registered, overwriting '):
-            register_radiotap(LinkType.IEEE802_11, 'pcapkit.protocols.link.ieee802_11.protocol', 'IEEE802_11')
+            register_radiotap(LinkType.IEEE802_11,
+                              ModuleDescriptor('pcapkit.protocols.link.ieee802_11.protocol', 'IEEE802_11'))
         self.assertEqual(Radiotap(raw, len(raw)).protochain.chain, 'Radiotap:802.11:Raw')
 
     def test_register_radiotap_rejects_a_code_of_the_wrong_kind(self) -> None:

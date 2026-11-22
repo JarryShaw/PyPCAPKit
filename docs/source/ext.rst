@@ -787,12 +787,10 @@ datagrams or flows as they are produced.
 .. seealso::
 
    :mod:`pcapkit.foundation.registry.foundation` holds the callback registry
-   functions:
+   functions, each taking the name the class is registered by:
 
-   - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback`
-   - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback`
-   - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback`
-   - :func:`~pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback`
+   - :func:`~pcapkit.foundation.registry.foundation.register_reassembly_callback`
+   - :func:`~pcapkit.foundation.registry.foundation.register_traceflow_callback`
 
 A reassembly callback runs on every :ref:`submission <reassembly-submissions>` and
 takes one argument, the list of datagrams that submission produced. A flow tracing

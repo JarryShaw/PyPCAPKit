@@ -19,8 +19,8 @@ Each registrar runs in these variants, where they apply:
 ``override-same-name``
     the same, with a custom class named like the one it displaces;
 ``restore-by-name``
-    override, then restore by ``(module, class)`` strings, which build a
-    descriptor equal to the shipped one.
+    override, then restore by a descriptor built from the shipped entry's
+    ``(module, class)`` names, equal to the shipped one.
 
 and the comparison is split in two, so that two root causes cannot hide behind
 one another: ``dispatch`` covers the tables the registrar names -- the
@@ -30,7 +30,7 @@ the by-name registry the protocol registrars all funnel into.
 
 The scope is the public registrars in
 :data:`pcapkit.foundation.registry.__all__`. Of those, the callback registrars
-(``register_reassembly_*_callback`` and ``register_traceflow_tcp_callback``)
+(``register_reassembly_callback`` and ``register_traceflow_callback``)
 only append, and offer nothing to undo an append with, so they have no case
 here; nor does ``register_protocol_code``, which funnels into the same
 :meth:`ProtocolBase.register
@@ -184,8 +184,8 @@ class ModuleRegistrar(NamedTuple):
     source: 'str'
     #: The base a custom class must subclass, as a ``module:Class`` path.
     base: 'str'
-    #: Extra positional arguments after the module, e.g. ``'tcp'`` for apptype.
-    extra: 'tuple[str, ...]' = ()
+    #: Extra keyword arguments after the entry, e.g. ``transport='tcp'`` for apptype.
+    extra: 'tuple[tuple[str, str], ...]' = ()
 
 
 MODULE_REGISTRARS = (
@@ -211,7 +211,7 @@ MODULE_REGISTRARS = (
     ModuleRegistrar('register_tcp', 80, 'TCP', 'pcapkit.protocols.application.application:Application'),
     ModuleRegistrar('register_udp', 1701, 'UDP', 'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_apptype', 80, 'TCP',
-                    'pcapkit.protocols.application.application:Application', ('tcp',)),
+                    'pcapkit.protocols.application.application:Application', (('transport', 'tcp'),)),
     ModuleRegistrar('register_sctp',
                     'pcapkit.const.sctp.payload_protocol_identifier:PayloadProtocolIdentifier.'
                     'PayloadProtocolIdentifier_3GPP_NG_Application_Protocol', 'SCTP',
@@ -332,7 +332,6 @@ def _module_steps(registrar: 'ModuleRegistrar', variant: 'str') -> 'list[Callabl
     register = getattr(registry, registrar.name)
     code = _code(registrar.code)
     shipped = _shipped(registrar, code)
-    ext = ()  # type: tuple[Any, ...]
     kwargs = {}  # type: dict[str, Any]
     if registrar.source in ('output', 'trace-output'):
         shipped, extension = shipped
@@ -342,17 +341,17 @@ def _module_steps(registrar: 'ModuleRegistrar', variant: 'str') -> 'list[Callabl
     base = resolve(registrar.base)
     name = target.__name__ if variant == 'override-same-name' else 'RoundTripCustom'
     custom = type(name, (base,), {'__module__': __name__})
-    ext = registrar.extra
+    kwargs.update(registrar.extra)
 
-    def call(*args: 'Any') -> 'Callable[[], None]':
-        return lambda: register(code, *args, *ext, **kwargs)
+    def call(entry: 'Any') -> 'Callable[[], None]':
+        return lambda: register(code, entry, **kwargs)
 
     if variant == 'noop':
         return [call(shipped)]
     if variant == 'restore-by-name':
         module, klass = ((descriptor.module, descriptor.name) if descriptor is not None
                          else (target.__module__, target.__name__))
-        return [call(custom), call(module, klass)]
+        return [call(custom), call(ModuleDescriptor(module, klass))]
     return [call(custom), call(shipped)]
 
 
@@ -464,10 +463,8 @@ class TestRegistrySymmetry(harness.RoundTripBase):
         excused = {
             'register_protocol': 'covered by the register_protocol/HTTP case',
             'register_protocol_code': 'funnels into ProtocolBase.register, as register_tcp does',
-            'register_reassembly_ipv4_callback': 'append-only, nothing to undo with',
-            'register_reassembly_ipv6_callback': 'append-only, nothing to undo with',
-            'register_reassembly_tcp_callback': 'append-only, nothing to undo with',
-            'register_traceflow_tcp_callback': 'append-only, nothing to undo with',
+            'register_reassembly_callback': 'append-only, nothing to undo with',
+            'register_traceflow_callback': 'append-only, nothing to undo with',
             'register_dns_option': 'no schema argument; override and restore are in test_dns_unit',
             'register_dns_rdata': 'no schema argument; override and restore are in test_dns_unit',
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',

@@ -20,6 +20,12 @@ others build on. Every function a submodule exports is exported here as well.
    A package of per-layer submodules rather than a single module
    (:issue:`2578`).
 
+.. versionchanged:: 1.7.0
+
+   Each registrar takes the one entry its classmethod takes, under that
+   classmethod's parameter name, where it took ``module`` and ``class_``; one
+   taking ``meth`` refuses a pair that is not two callables (:issue:`2838`).
+
 """
 # Protocol Base Registries
 from pcapkit.foundation.registry.protocols.protocol import *

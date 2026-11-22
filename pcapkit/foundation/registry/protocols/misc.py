@@ -16,7 +16,7 @@ registries.
    this module's functions (:issue:`2578`).
 
 """
-from typing import TYPE_CHECKING, cast, overload
+from typing import TYPE_CHECKING
 
 from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
 from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
@@ -24,8 +24,7 @@ from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.sentinels import NULL
-from pcapkit.foundation.registry.protocols.protocol import _check_code, _register_name
+from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_meth, _register_name
 from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 from pcapkit.protocols.misc.pcapng.schema import BlockType as Schema_PCAPNG_BlockType
@@ -40,7 +39,6 @@ if TYPE_CHECKING:
     from typing import Optional, Type
 
     from pcapkit.const.reg.linktype import LinkType
-    from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.misc.pcapng.protocol import BlockConstructor as PCAPNG_BlockConstructor
     from pcapkit.protocols.misc.pcapng.protocol import BlockParser as PCAPNG_BlockParser
     from pcapkit.protocols.misc.pcapng.protocol import OptionConstructor as PCAPNG_OptionConstructor
@@ -70,19 +68,8 @@ logger = get_logger(__name__)
 ###############################################################################
 
 
-@overload
-def register_linktype(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_linktype(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
-
-
-def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                      class_: 'str | NullType' = NULL) -> 'None':
+def register_linktype(code: 'LinkType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     following registries:
@@ -92,9 +79,8 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     See Also:
         * :func:`pcapkit.foundation.registry.protocols.misc.register_pcap`
@@ -102,7 +88,7 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
-            member, e.g. a member of another enum, or ``module``
+            member, e.g. a member of another enum, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
@@ -110,105 +96,75 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
     # NOTE: Frame's and PCAP-NG's registries are keyed alike, so one key check
     # serves both and Frame names it.
     _check_code(code, Enum_LinkType, Frame)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    Frame.register(code, module)
-    PCAPNG.register(code, module)
+    Frame.register(code, protocol)
+    PCAPNG.register(code, protocol)
     logger.debug('registered linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (Frame, code), (PCAPNG, code))
-
-
-@overload
-def register_pcap(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_pcap(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (Frame, code), (PCAPNG, code))
 
 
 # NOTE: pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__
-def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                  class_: 'str | NullType' = NULL) -> 'None':
+def register_pcap(code: 'LinkType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__` registry.
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
-            member, e.g. a member of another enum, or ``module``
+            member, e.g. a member of another enum, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
     _check_code(code, Enum_LinkType, Frame)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    Frame.register(code, module)
+    Frame.register(code, protocol)
     logger.debug('registered PCAP linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (Frame, code))
-
-
-@overload
-def register_pcapng(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (Frame, code))
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__
-def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                    class_: 'str | NullType' = NULL) -> 'None':
+def register_pcapng(code: 'LinkType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__` registry.
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
-            member, e.g. a member of another enum, or ``module``
+            member, e.g. a member of another enum, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
     _check_code(code, Enum_LinkType, PCAPNG)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    PCAPNG.register(code, module)
+    PCAPNG.register(code, protocol)
     logger.debug('registered PCAP-NG linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (PCAPNG, code))
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (PCAPNG, code))
 
 
 ###############################################################################
@@ -237,10 +193,12 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.block_type.BlockType`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_block_*`` method.
+            is a name with no matching ``_read_block_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, PCAPNG_BlockType, PCAPNG)
+    _check_meth(meth, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_block_{meth}'):
         raise RegistryError('method must be a block parser function')
 
@@ -271,10 +229,12 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.option_type.OptionType`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_option_*`` method.
+            is a name with no matching ``_read_option_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, PCAPNG_OptionType, PCAPNG)
+    _check_meth(meth, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_option_{meth}'):
         raise RegistryError('method must be a option parser function')
 
@@ -305,10 +265,12 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.record_type.RecordType`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_record_*`` method.
+            is a name with no matching ``_read_record_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, PCAPNG_RecordType, PCAPNG)
+    _check_meth(meth, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_record_{meth}'):
         raise RegistryError('method must be a name resolution record parser function')
 
@@ -339,10 +301,12 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_secrets_*`` method.
+            is a name with no matching ``_read_secrets_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, PCAPNG_SecretsType, PCAPNG)
+    _check_meth(meth, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_secrets_{meth}'):
         raise RegistryError('method must be a decryption secrets parser function')
 

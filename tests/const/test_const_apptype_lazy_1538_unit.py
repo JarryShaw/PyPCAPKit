@@ -314,13 +314,14 @@ class LazyAppTypeContractTests(unittest.TestCase):
 
     def test_port_registered_before_first_use_dispatches_the_same(self) -> 'None':
         code = '''
+            from pcapkit.corekit.module import ModuleDescriptor
             from pcapkit.foundation.registry import register_tcp
             from pcapkit.protocols.transport.tcp.protocol import TCP
             if {lookup_first}:
                 import pcapkit.const.reg.apptype
                 pcapkit.const.reg.apptype.TCP
             at_register = loaded('tcp', 'udp')
-            register_tcp(54321, 'pcapkit.protocols.application.ftp.protocol', 'FTP')
+            register_tcp(54321, ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'))
             raw = TCP(srcport=40000, dstport=54321, payload=b'USER anonymous\\r\\n').data
             parsed = TCP(raw, len(raw))
             emit(at_register=at_register, raw=raw.hex(), chain=str(parsed.protochain),

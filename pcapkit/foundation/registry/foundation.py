@@ -12,27 +12,28 @@ This module provides the foundation registries for :mod:`pcapkit`.
    :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the
    string ``'(null)'`` (:issue:`833`).
 
+.. versionchanged:: 1.7.0
+
+   Each registrar takes the one entry its classmethod takes, under that
+   classmethod's parameter name, where it took ``module`` and ``class_``, and
+   :func:`register_reassembly_callback` and :func:`register_traceflow_callback`
+   replace the per-protocol callback registrars, with no shim (:issue:`2838`).
+
 """
-from typing import TYPE_CHECKING, cast, overload
+from typing import TYPE_CHECKING
 
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.sentinels import NULL
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
-from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
-from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.foundation.traceflow import TraceFlow
-from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
-    from typing import Type
+    from typing import Any, Optional, Type
 
     from dictdumper import Dumper
 
-    from pcapkit.corekit.sentinels import NullType
     from pcapkit.foundation.engines import Engine
     from pcapkit.foundation.engines.engine import Adapter
     from pcapkit.foundation.reassembly.reassembly import CallbackFn as Reasm_CallbackFn
@@ -45,9 +46,7 @@ __all__ = [
     'register_dumper',
     'register_extractor_dumper', 'register_traceflow_dumper',
 
-    'register_reassembly_ipv4_callback', 'register_reassembly_ipv6_callback',
-    'register_reassembly_tcp_callback',
-    'register_traceflow_tcp_callback',
+    'register_reassembly_callback', 'register_traceflow_callback',
 
     'register_extractor_reassembly', 'register_engine_reassembly', 'register_extractor_traceflow',
 ]
@@ -61,42 +60,32 @@ logger = get_logger(__name__)
 ###############################################################################
 
 
-@overload
-def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | Type[Engine]') -> 'None': ...
-@overload
-def register_extractor_engine(name: 'str', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.foundation.extraction.Extractor.__engine__
-def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | Type[Engine] | str',
-                              class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+def register_extractor_engine(name: 'str', engine: 'ModuleDescriptor[Engine] | Type[Engine]') -> 'None':
     r"""Register a new engine class.
-
-    Notes:
-        The fully qualified class name of the new engine class
-        should be ``{module}.{class_}``.
 
     The function will register the given engine class to the
     :data:`pcapkit.foundation.extraction.Extractor.__engine__` registry.
 
     Arguments:
         name: engine name
-        module: module name or module descriptor or an
+        engine: module descriptor or an
             :class:`~pcapkit.foundation.engines.engine.Engine` subclass (a class
             deriving only from :class:`~pcapkit.foundation.engines.engine.EngineBase`
             is refused: that is the base for pcapkit's own engines, unless it is
             the engine ``name`` shipped with, which restores it)
-        class\_: class name
 
     .. versionchanged:: 1.3.0
 
        The engine name, which was ``engine``, is ``name``, with no alias.
 
-    """
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[Engine]', ModuleDescriptor(module, class_))
+    .. versionchanged:: 1.7.0
 
-    Extractor.register_engine(name, module)
+       ``engine`` is the class, where ``module`` and ``class_`` named it
+       (:issue:`2838`).
+
+    """
+    Extractor.register_engine(name, engine)
     logger.debug('registered extractor engine: %s', name)
 
 
@@ -105,19 +94,9 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
 ###############################################################################
 
 
-@overload
-def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper]', *, ext: 'str') -> 'None': ...
-@overload
-def register_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') -> 'None': ...
-
-
-def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
-                    class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+def register_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dumper]', *,  # pylint: disable=redefined-builtin
+                    ext: 'str') -> 'None':
     r"""Register a new dumper class.
-
-    Notes:
-        The fully qualified class name of the new dumper class
-        should be ``{module}.{class_}``.
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__` and
@@ -125,9 +104,7 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
 
     Arguments:
         format: format name
-        module: module name or module descriptor or a
-            :class:`~dictdumper.dumper.Dumper` subclass
-        class\_: class name
+        dumper: module descriptor or a :class:`~dictdumper.dumper.Dumper` subclass
         ext: file extension
 
     See Also:
@@ -139,37 +116,22 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
        ``ext`` is keyword-only.
 
     """
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
-
-    Extractor.register_dumper(format, module, ext)
-    TraceFlow.register_dumper(format, module, ext)
+    Extractor.register_dumper(format, dumper, ext)
+    TraceFlow.register_dumper(format, dumper, ext)
     logger.debug('registered output format: %s', format)
 
 
-@overload
-def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper]', *, ext: 'str') -> 'None': ...
-@overload
-def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.foundation.extraction.Extractor.__output__
-def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
-                              class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+def register_extractor_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dumper]', *,  # pylint: disable=redefined-builtin
+                              ext: 'str') -> 'None':
     r"""Register a new dumper class.
-
-    Notes:
-        The fully qualified class name of the new dumper class
-        should be ``{module}.{class_}``.
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.
 
     Arguments:
         format: format name
-        module: module name or module descriptor or a
-            :class:`~dictdumper.dumper.Dumper` subclass
-        class\_: class name
+        dumper: module descriptor or a :class:`~dictdumper.dumper.Dumper` subclass
         ext: file extension
 
     .. versionchanged:: 1.3.0
@@ -177,36 +139,21 @@ def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
        ``ext`` is keyword-only.
 
     """
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
-
-    Extractor.register_dumper(format, module, ext)
+    Extractor.register_dumper(format, dumper, ext)
     logger.debug('registered extractor output dumper: %s', format)
 
 
-@overload
-def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper]', *, ext: 'str') -> 'None': ...
-@overload
-def register_traceflow_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__
-def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
-                              class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+def register_traceflow_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dumper]', *,  # pylint: disable=redefined-builtin
+                              ext: 'str') -> 'None':
     r"""Register a new dumper class.
-
-    Notes:
-        The fully qualified class name of the new dumper class
-        should be ``{module}.{class_}``.
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__` registry.
 
     Arguments:
         format: format name
-        module: module name or module descriptor or a
-            :class:`~dictdumper.dumper.Dumper` subclass
-        class\_: class name
+        dumper: module descriptor or a :class:`~dictdumper.dumper.Dumper` subclass
         ext: file extension
 
     .. versionchanged:: 1.3.0
@@ -214,10 +161,7 @@ def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
        ``ext`` is keyword-only.
 
     """
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
-
-    TraceFlow.register_dumper(format, module, ext)
+    TraceFlow.register_dumper(format, dumper, ext)
     logger.debug('registered traceflow output: %s', format)
 
 
@@ -226,68 +170,106 @@ def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
 ###############################################################################
 
 
-# NOTE: pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__
-def register_reassembly_ipv4_callback(callback: 'Reasm_CallbackFn') -> 'None':
-    """Register a new callback function.
-
-    The function will register the given callback function to the
-    :attr:`IPv4.__callback_fn__ <pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__>`
-    registry.
+def _registered_class(registry: 'dict[str, Any]', protocol: 'str', kind: 'str') -> 'Any':
+    """The class ``registry`` holds under the name ``protocol``, case-insensitively.
 
     Arguments:
-        callback: callback function
+        registry: :attr:`Extractor.__reassembly__
+            <pcapkit.foundation.extraction.Extractor.__reassembly__>` or
+            :attr:`Extractor.__traceflow__
+            <pcapkit.foundation.extraction.Extractor.__traceflow__>`
+        protocol: registered name, looked up lower-cased as the extractor does
+        kind: entry kind, for the error message
+
+    Raises:
+        RegistryError: If ``protocol`` is not a :class:`str`, or names no entry.
 
     """
-    IPv4_Reassembly.register(callback)
-    logger.debug('registered IPv4 reassembly callback: %r', callback)
+    if not isinstance(protocol, str):
+        raise RegistryError(f'protocol must be a registered {kind} name, not {protocol!r}')
+    entry = registry.get(protocol.lower())
+    if entry is None:
+        raise RegistryError(f'no {kind} is registered under {protocol!r}')
+    if isinstance(entry, ModuleDescriptor):
+        entry = entry.klass
+    return entry
 
 
-# NOTE: pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__
-def register_reassembly_ipv6_callback(callback: 'Reasm_CallbackFn') -> 'None':
-    """Register a new callback function.
+def _check_callback(callback: 'Any') -> 'None':
+    """Reject a ``callback`` that is not callable, before any list is written.
+
+    Raises:
+        RegistryError: If ``callback`` is not callable.
+
+    """
+    if not callable(callback):
+        raise RegistryError(f'callback must be callable, not {callback!r}')
+
+
+# NOTE: pcapkit.foundation.reassembly.reassembly.ReassemblyBase.__callback_fn__
+def register_reassembly_callback(protocol: 'str', callback: 'Reasm_CallbackFn', *,
+                                 index: 'Optional[int]' = None) -> 'None':
+    """Register a callback function of a reassembler.
 
     The function will register the given callback function to the
-    :attr:`IPv6.__callback_fn__ <pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__>`
-    registry.
+    ``__callback_fn__`` list of the reassembly class registered under ``protocol``
+    in :data:`pcapkit.foundation.extraction.Extractor.__reassembly__`, through its
+    :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.register`. It
+    reaches DTLS and a reassembler registered with
+    :func:`register_extractor_reassembly` as it reaches IPv4, IPv6 and TCP.
 
     Arguments:
-        callback: callback function
+        protocol: name the reassembler is registered by, case-insensitively,
+            such as ``'ipv4'`` or ``'dtls'``
+        callback: callback function, which will be called when reassembled
+            datagram is obtained, with the list of reassembled datagrams as its
+            only argument
+        index: index to be inserted in the callback list; by default, the
+            callback will be appended to the end of the list
+
+    Raises:
+        RegistryError: If ``protocol`` is not a :class:`str` or names no
+            registered reassembler, or if ``callback`` is not callable.
+
+    .. versionadded:: 1.7.0
 
     """
-    IPv6_Reassembly.register(callback)
-    logger.debug('registered IPv6 reassembly callback: %r', callback)
+    reassembly = _registered_class(Extractor.__reassembly__, protocol, 'reassembly')
+    _check_callback(callback)
+    reassembly.register(callback, index=index)
+    logger.debug('registered %s reassembly callback: %r', reassembly.__name__, callback)
 
 
-# NOTE: pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__
-def register_reassembly_tcp_callback(callback: 'Reasm_CallbackFn') -> 'None':
-    """Register a new callback function.
+# NOTE: pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__callback_fn__
+def register_traceflow_callback(protocol: 'str', callback: 'Trace_CallbackFn', *,
+                                index: 'Optional[int]' = None) -> 'None':
+    """Register a callback function of a flow tracer.
 
     The function will register the given callback function to the
-    :attr:`TCP.__callback_fn__ <pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__>`
-    registry.
+    ``__callback_fn__`` list of the flow tracing class registered under
+    ``protocol`` in :data:`pcapkit.foundation.extraction.Extractor.__traceflow__`,
+    through its
+    :meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase.register_callback`.
 
     Arguments:
-        callback: callback function
+        protocol: name the flow tracer is registered by, case-insensitively,
+            such as ``'tcp'``
+        callback: callback function, which will be called when a traced flow
+            is finalised, with the flow's index entry as its only argument
+        index: index to be inserted in the callback list; by default, the
+            callback will be appended to the end of the list
+
+    Raises:
+        RegistryError: If ``protocol`` is not a :class:`str` or names no
+            registered flow tracer, or if ``callback`` is not callable.
+
+    .. versionadded:: 1.7.0
 
     """
-    TCP_Reassembly.register(callback)
-    logger.debug('registered TCP reassembly callback: %r', callback)
-
-
-# NOTE: pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__
-def register_traceflow_tcp_callback(callback: 'Trace_CallbackFn') -> 'None':
-    """Register a new callback function.
-
-    The function will register the given callback function to the
-    :attr:`TCP.__callback_fn__ <pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__>`
-    registry.
-
-    Arguments:
-        callback: callback function
-
-    """
-    TCP_TraceFlow.register_callback(callback)
-    logger.debug('registered TCP flow tracing callback: %r', callback)
+    traceflow = _registered_class(Extractor.__traceflow__, protocol, 'traceflow')
+    _check_callback(callback)
+    traceflow.register_callback(callback, index=index)
+    logger.debug('registered %s flow tracing callback: %r', traceflow.__name__, callback)
 
 
 ###############################################################################
@@ -295,56 +277,31 @@ def register_traceflow_tcp_callback(callback: 'Trace_CallbackFn') -> 'None':
 ###############################################################################
 
 
-@overload
-def register_extractor_reassembly(protocol: 'str', module: 'ModuleDescriptor[Reassembly] | Type[Reassembly]') -> 'None': ...
-@overload
-def register_extractor_reassembly(protocol: 'str', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.foundation.extraction.Extractor.__reassembly__
-def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescriptor[Reassembly] | Type[Reassembly]',
-                                  class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+def register_extractor_reassembly(protocol: 'str',
+                                  reassembly: 'ModuleDescriptor[Reassembly] | Type[Reassembly]') -> 'None':
     r"""Register a new reassembly class.
-
-    Notes:
-        The fully qualified class name of the new reassembly class
-        should be ``{module}.{class_}``.
 
     The function will register the given reassembly class to the
     :data:`pcapkit.foundation.extraction.Extractor.__reassembly__` registry.
 
     Arguments:
         protocol: protocol name
-        module: module name or module descriptor or a
+        reassembly: module descriptor or a
             :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass (a class
             deriving only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
             is refused: that is the base for pcapkit's own classes, unless it is
             the class ``protocol`` shipped with, which restores it)
-        class\_: class name
 
     """
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[Reassembly]', ModuleDescriptor(module, class_))
-
-    Extractor.register_reassembly(protocol, module)
+    Extractor.register_reassembly(protocol, reassembly)
     logger.debug('registered extractor reassembly: %s', protocol)
-
-
-@overload
-def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str', module: 'ModuleDescriptor[Adapter] | Adapter') -> 'None': ...  # pylint: disable=line-too-long
-@overload
-def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str', module: 'str', class_: 'str') -> 'None': ...  # pylint: disable=line-too-long
 
 
 # NOTE: pcapkit.foundation.engines.engine.EngineBase.__reassembly__
 def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str',
-                               module: 'str | ModuleDescriptor[Adapter] | Adapter',
-                               class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+                               adapter: 'ModuleDescriptor[Adapter] | Adapter') -> 'None':
     r"""Register a new reassembly adapter of an engine.
-
-    Notes:
-        The fully qualified name of the new adapter should be
-        ``{module}.{class_}``.
 
     The function will register the given :mod:`pcapkit.toolkit` adapter to the
     :attr:`EngineBase.__reassembly__
@@ -360,8 +317,7 @@ def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str'
             :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` have no name, so
             take the class
         protocol: reassembly name
-        module: module name or module descriptor or the adapter itself
-        class\_: adapter name
+        adapter: module descriptor or the adapter itself
 
     Raises:
         RegistryError: If ``engine`` names no registered engine, or is not an
@@ -379,43 +335,26 @@ def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str'
         raise RegistryError(f'engine must be a registered engine name or an EngineBase subclass, '
                             f'not {engine!r}')
 
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[Adapter]', ModuleDescriptor(module, class_))
-
-    engine_cls.register_reassembly(protocol, module)
+    engine_cls.register_reassembly(protocol, adapter)
     logger.debug('registered %s engine reassembly: %s', engine_cls.name, protocol)
 
 
-@overload
-def register_extractor_traceflow(protocol: 'str', module: 'ModuleDescriptor[TraceFlow] | Type[TraceFlow]') -> 'None': ...
-@overload
-def register_extractor_traceflow(protocol: 'str', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.foundation.extraction.Extractor.__traceflow__
-def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescriptor[TraceFlow] | Type[TraceFlow]',
-                                 class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+def register_extractor_traceflow(protocol: 'str',
+                                 traceflow: 'ModuleDescriptor[TraceFlow] | Type[TraceFlow]') -> 'None':
     r"""Register a new flow tracing class.
-
-    Notes:
-        The fully qualified class name of the new flow tracing class
-        should be ``{module}.{class_}``.
 
     The function will register the given flow tracing class to the
     :data:`pcapkit.foundation.extraction.Extractor.__traceflow__` registry.
 
     Arguments:
         protocol: protocol name
-        module: module name or module descriptor or a
+        traceflow: module descriptor or a
             :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass (a class
             deriving only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
             is refused: that is the base for pcapkit's own classes, unless it is
             the class ``protocol`` shipped with, which restores it)
-        class\_: class name
 
     """
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[TraceFlow]', ModuleDescriptor(module, class_))
-
-    Extractor.register_traceflow(protocol, module)
+    Extractor.register_traceflow(protocol, traceflow)
     logger.debug('registered extractor flow tracing: %s', protocol)

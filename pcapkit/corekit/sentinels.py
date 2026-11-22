@@ -312,7 +312,7 @@ class Sentinel(ReduceToName, metaclass=SentinelMeta):
 
 @final
 class NullType(Sentinel):
-    """Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.
+    """Type of :data:`NULL`, the sentinel for a class name never given.
 
     A distinct class rather than a plain :class:`str` such as ``'(null)'``,
     so that ``is`` comparisons against it mean what they say: no
@@ -360,10 +360,9 @@ class NullType(Sentinel):
         return False
 
 
-#: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``
-#: helpers in :mod:`pcapkit.foundation.registry.protocols` and
-#: :mod:`pcapkit.foundation.registry.foundation`. Housed here with the
-#: package's other sentinels, per the module docstring above.
+#: NullType: Sentinel for the class name of a
+#: :class:`~pcapkit.corekit.module.ModuleDescriptor` built without one. Housed
+#: here with the package's other sentinels, per the module docstring above.
 NULL = NullType()
 
 

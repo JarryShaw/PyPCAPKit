@@ -28,6 +28,7 @@ from dictdumper.dumper import Dumper
 from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.io import PeekableStream, SeekableReader, can_seek
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.registry import restore_shipped, restore_shipped_dumper, same_entry
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines import _pcap_backend
 from pcapkit.foundation.engines.engine import Engine, EngineBase
@@ -39,7 +40,6 @@ from pcapkit.foundation.reassembly.reassembly import Reassembly, ReassemblyBase
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.foundation.traceflow.traceflow import TraceFlow, TraceFlowBase
-from pcapkit.interface.registry import restore_shipped, restore_shipped_dumper, same_entry
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           RegistryError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import get_logger
