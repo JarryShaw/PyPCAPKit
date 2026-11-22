@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Literal, Optional
 
     from pcapkit.foundation.extraction import Extractor
-    from pcapkit.protocols.misc.pcapng.data import PCAPNG as Data_PCAPNG
     from pcapkit.protocols.misc.pcapng.data import CustomBlock as Data_CustomBlock
     from pcapkit.protocols.misc.pcapng.data import \
         DecryptionSecretsBlock as Data_DecryptionSecretsBlock
@@ -206,8 +205,8 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         # where a PCAP-NG file declares them per interface, in blocks that follow.
         if not ext._flag_q and isinstance(ext._ofile, type) and issubclass(ext._ofile, PCAPIO):
             raise FormatError('PCAP-NG: PCAP output is not supported for a PCAP-NG input')
-        ext._open_output()
-        self._write_file(shb.info, name=f'Section Header {len(self._ctx_list)}')
+        ext._open_output(byteorder=self._ctx.section.byteorder)
+        self._write_file(shb, name=f'Section Header {len(self._ctx_list)}')
 
     def read_frame(self) -> 'P_PCAPNG':
         """Read frames.
@@ -251,23 +250,23 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 self._ctx_list.append(self._ctx)
                 block._ctx = self._ctx
 
-                self._write_file(block.info, name=f'Section Header {len(self._ctx_list)}')
+                self._write_file(block, name=f'Section Header {len(self._ctx_list)}')
 
             elif block.info.type == Enum_BlockType.Interface_Description_Block:
                 self._ctx.interfaces.append(cast('Data_InterfaceDescriptionBlock', block.info))
-                self._write_file(block.info, name=self._block_name('Interface Description'))
+                self._write_file(block, name=self._block_name('Interface Description'))
 
             elif block.info.type == Enum_BlockType.Name_Resolution_Block:
                 self._ctx.names.append(cast('Data_NameResolutionBlock', block.info))
-                self._write_file(block.info, name=self._block_name('Name Resolution'))
+                self._write_file(block, name=self._block_name('Name Resolution'))
 
             elif block.info.type == Enum_BlockType.systemd_Journal_Export_Block:
                 self._ctx.journals.append(cast('Data_SystemdJournalExportBlock', block.info))
-                self._write_file(block.info, name=self._block_name('systemd Journal Export'))
+                self._write_file(block, name=self._block_name('systemd Journal Export'))
 
             elif block.info.type == Enum_BlockType.Decryption_Secrets_Block:
                 self._ctx.secrets.append(cast('Data_DecryptionSecretsBlock', block.info))
-                self._write_file(block.info, name=self._block_name('Decryption Secrets'))
+                self._write_file(block, name=self._block_name('Decryption Secrets'))
 
             elif block.info.type == Enum_BlockType.Interface_Statistics_Block:
                 # NOTE: no interface ID check here: parsing an ISB already resolved its interface
@@ -275,12 +274,12 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 isb_info = cast('Data_InterfaceStatisticsBlock', block.info)
                 self._ctx.statistics.append(isb_info)
 
-                self._write_file(isb_info, name=self._block_name('Interface Statistics'))
+                self._write_file(block, name=self._block_name('Interface Statistics'))
 
             elif block.info.type in (Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files,
                                     Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files):
                 self._ctx.custom.append(cast('Data_CustomBlock', block.info))
-                self._write_file(block.info, name=self._block_name('Custom'))
+                self._write_file(block, name=self._block_name('Custom'))
 
             elif block.info.type == Enum_BlockType.Enhanced_Packet_Block:
                 # NOTE: as for the ISB above, the interface ID has already been
@@ -305,7 +304,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
             else:
                 self._ctx.unknown.append(cast('Data_UnknownBlock', block.info))
-                self._write_file(block.info, name=self._block_name('Unknown'))
+                self._write_file(block, name=self._block_name('Unknown'))
 
         # increment frame number
         ext._frnum += 1
@@ -314,7 +313,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         ext._vfunc(ext, block)
 
         # write output
-        self._write_file(block.info, name=f'Frame {ext._frnum}')
+        self._write_file(block, name=f'Frame {ext._frnum}')
 
         # record fragments
         if ext._flag_r:
@@ -358,12 +357,16 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         self._block_count[kind] += 1
         return f'{kind} {self._block_count[kind]}'
 
-    def _write_file(self, block: 'Data_PCAPNG', *, name: 'str') -> 'None':
+    def _write_file(self, block: 'P_PCAPNG', *, name: 'str') -> 'None':
         """Write the parsed block into output file.
 
         Args:
             block: The parsed block.
             name: The name of the block.
+
+        A PCAP-NG writer is handed the block itself, whose section names the
+        interface of a packet block, and any other writer its
+        :attr:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG.info`.
 
         """
         ext = self._extractor
@@ -372,10 +375,9 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         if ext._flag_f:
             ofile = ext._ofile(f'{ext._ofnm}/{name}.{ext._fext}')
-            ofile(block, name=name)
         else:
-            ext._ofile(block, name=name)
             ofile = ext._ofile
+        ofile(block if ofile.kind == 'pcapng' else block.info, name=name)
         ext._offmt = ofile.kind
 
     def _peek_block_type(self) -> 'Optional[int]':

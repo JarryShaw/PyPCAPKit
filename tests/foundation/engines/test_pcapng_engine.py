@@ -148,7 +148,7 @@ class PCAPNGEngineTests(unittest.TestCase):
         extractor, sink = make_extractor(_flag_f=True)
         engine = PCAPNG(extractor)
         engine._ctx = Context(block_info)
-        engine._write_file(block_info, name='Block')
+        engine._write_file(FakeBlock(block_info), name='Block')
         self.assertEqual(sink.paths[-1], 'out/Block.json')
         self.assertEqual(extractor._offmt, 'unit')
         self.assertEqual(engine._get_snaplen(), 0xFFFF_FFFF_FFFF_FFFF)
@@ -158,7 +158,7 @@ class PCAPNGEngineTests(unittest.TestCase):
 
         quiet, quiet_sink = make_extractor(_flag_q=True)
         quiet_engine = PCAPNG(quiet)
-        quiet_engine._write_file(block_info, name='Quiet')
+        quiet_engine._write_file(FakeBlock(block_info), name='Quiet')
         self.assertEqual(quiet_sink.records, [])
 
     def test_read_frame_walks_non_packet_blocks_then_enhanced_packet(self) -> None:

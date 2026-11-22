@@ -164,6 +164,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         {
             'pcap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
             'cap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
+            'pcapng': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPNGIO'), '.pcapng'),
             'plist': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
             'xml': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
             'json': (ModuleDescriptor('dictdumper', 'JSON'), '.json'),

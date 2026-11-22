@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 
     from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
     from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+    from pcapkit.protocols.misc.pcapng.data import \
+        InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, Packet
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
@@ -235,7 +237,8 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=frame.linktype,                      # data link type of the block's interface
             index=frame_info.number,                      # frame number
-            frame=block2frame(frame_info, nanosecond=nanosecond),
+            frame=block2frame(frame_info, nanosecond=nanosecond,
+                              interface=frame.section_context.interfaces[frame_info.interface_id]),
                                                           # extracted frame info
             syn=segment.syn,                              # TCP synchronise (SYN) flag
             fin=segment.fin,                              # TCP finish (FIN) flag
@@ -254,15 +257,23 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
     return None
 
 
-def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
+def block2frame(block: 'Packet', *, nanosecond: 'bool' = False,
+                interface: 'Optional[Data_InterfaceDescriptionBlock]' = None) -> 'Data_Frame':
     """Convert PCAP-NG block to PCAP frame.
 
     Args:
         block: PCAP-NG block.
         nanosecond: Whether to use nanosecond precision.
+        interface: The block's Interface Description Block, if known.
 
     Returns:
-        PCAP frame.
+        PCAP frame. Given ``interface``, it keeps that and the block's options
+        under the metadata keys ``__interface__`` and ``__options__``, which
+        :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` writes back.
+
+    .. versionchanged:: 1.7.0
+
+       Takes ``interface`` (:issue:`2835`).
 
     """
     ts_sec = int(block.timestamp_epoch)
@@ -284,4 +295,7 @@ def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
         cap_len=block.captured_len,
     )
     frame.__update__(packet=block.packet)
+    if interface is not None:
+        frame.__update__([('__interface__', interface),
+                          ('__options__', getattr(block, 'options_raw', getattr(block, 'options', None)))])
     return frame

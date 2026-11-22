@@ -55,9 +55,9 @@ def get_parser() -> 'ArgumentParser':
                               'report is written to.'))
     parser.add_argument('-f', '--format', action='store', metavar='format', dest='format',
                         help=('The format of the report: "json", "plist" (or "xml"), '
-                              '"tree" (or "text", "txt") or "pcap" (or "cap"). Takes '
-                              'precedence over `--json`, `--plist` and `--tree`. With '
-                              'no format option, "tree" is used.'))
+                              '"tree" (or "text", "txt"), "pcap" (or "cap") or "pcapng". '
+                              'Takes precedence over `--json`, `--plist` and `--tree`. '
+                              'With no format option, "tree" is used.'))
     parser.add_argument('-j', '--json', action='store_true', default=False,
                         help=('Write the report as JSON, as `--format json` does. '
                               'Ignored if `--format` is given.'))

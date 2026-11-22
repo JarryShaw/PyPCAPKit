@@ -34,6 +34,11 @@ class FrameInfo(Data):
 class Frame(Protocol):
     """Frame header of PCAP file."""
 
+    #: The interface and options of the PCAP-NG block
+    #: :func:`~pcapkit.toolkit.pcapng.block2frame` made the frame of, metadata
+    #: keys that ``repr`` and ``str`` leave out too.
+    __excluded__ = ['__interface__', '__options__']
+
     #: Metadata information.
     frame_info: 'FrameInfo'
     #: Timestamp instance.

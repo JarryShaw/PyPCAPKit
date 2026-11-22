@@ -5,6 +5,8 @@ GitHub issue #1202. For each capture in :file:`examples/captures/`:
 
 * ``format='pcap'`` writes a file byte-identical to its input. PCAP-NG input is
   left out, because PCAP output of it is refused by design.
+* ``format='pcapng'`` writes every packet of its input, which reads back with
+  its timestamp and original length (#2835).
 * ``json``, ``plist`` and ``tree`` each write the same bytes on a second run.
 * each of the three holds one section per record or block of the input, counted
   from the file itself rather than from the extractor, and in the same order;
@@ -135,6 +137,21 @@ class CaptureDumpTests(unittest.TestCase):
                 _, path = self.dump(name, 'pcap', f'{name}.out.pcap', store=False, extension=False)
                 with self.subTest(capture=name), open(path, 'rb') as file:
                     self.assertEqual(file.read(), (SAMPLE_ROOT / name).read_bytes())
+
+    def test_pcapng_output_reads_back_every_packet(self) -> None:
+        from pcapkit import extract
+
+        def records(extractor: 'Any') -> 'list[tuple[bytes, Any, int]]':
+            return [(info.packet, info.get('timestamp_epoch', info.get('time_epoch')),
+                     info.get('original_len', info.get('len'))) for info in (frame.info for frame in extractor.frame)]
+
+        with time_limit(SWEEP_TIMEOUT):
+            for name in captures():
+                extractor, path = self.dump(name, 'pcapng', f'{name}.out.pcapng', store=True, extension=False)
+                again = extract(fin=path, nofile=True, store=True)
+                self.addCleanup(close_extractor, again)
+                with self.subTest(capture=name):
+                    self.assertEqual(records(again), records(extractor))
 
     def assertDumpIsCompleteAndDeterministic(self, fmt: 'str') -> None:
         """Two runs agree byte for byte, with one section per record or block."""
