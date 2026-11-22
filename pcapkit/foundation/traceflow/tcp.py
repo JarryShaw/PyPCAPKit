@@ -491,6 +491,9 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         bidirectional flow here rather than at teardown is what keeps the
         acknowledgement that completes a close inside the flow it belongs to.
 
+        The flow's file is closed and its entry stored before the callbacks run,
+        so a callback that raises propagates and leaves the flow in the index.
+
         """
         buf = self._buffer.pop(bufid)
         label = buf.label
@@ -509,9 +512,11 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             # for its datagrams, and their own ``packet`` is parsed later still
             packet=None if buf.reassembly is None else Deferred(buf.reassembly),
         )
+        # NOTE: stored before the callbacks run, so one that raises cannot drop the flow
+        # from the index (#2827).
+        self._stream.append(index)
         for callback in self.__callback_fn__:
             callback(index)
-        self._stream.append(index)
         return index
 
     def finish(self) -> 'None':
@@ -525,8 +530,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         Idempotent: it drains the buffer, so a second call finds nothing to do.
         It also closes every output file still kept open, as
         :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlow.finish>`
-        does, even when a callback raises: the flows after it stay in the
-        buffer, unfinalised, for a later call.
+        does, even when a callback raises: the flow it was handed is finalised,
+        and the flows after it stay in the buffer, unfinalised, for a later call.
 
         """
         try:
