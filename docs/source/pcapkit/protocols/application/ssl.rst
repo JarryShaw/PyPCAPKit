@@ -45,6 +45,8 @@ accepting bytes that cannot be a genuine record.
    .. autoattribute:: __extension__
       :no-value:
 
+   .. autoattribute:: _dtls
+
    .. automethod:: id
    .. automethod:: register_extension
 
@@ -165,6 +167,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SupportedGroupsExtension
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.application.ssl.schema.ECPointFormatList
    :members:
    :show-inheritance:
@@ -177,7 +183,15 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.application.ssl.schema.SignatureAlgorithmsExtension
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.application.ssl.schema.ProtocolNameList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ALPNExtension
    :members:
    :show-inheritance:
 
@@ -298,6 +312,10 @@ Header Schemas
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.application.ssl.schema.ConnectionId
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.application.ssl.schema.ConnectionIdExtension
    :members:
    :show-inheritance:
 

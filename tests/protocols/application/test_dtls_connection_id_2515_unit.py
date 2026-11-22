@@ -190,11 +190,12 @@ class ConnectionIdExtensionTests(unittest.TestCase):
                 made = maker._make_tls_extensions([extension], msg_type=HandshakeType.client_hello)  # pylint: disable=protected-access
                 self.assertEqual(made.hex(), '00360003020102')
 
-    def test_a_tls_hello_carrying_the_extension_decodes_it_too(self) -> None:
-        """RFC 9146 section 10.2 makes it DTLS-only; TLS shares the decoder regardless."""
+    def test_a_tls_hello_carrying_the_extension_keeps_its_octets(self) -> None:
+        """RFC 9146 section 10.2 makes it DTLS-only, so a TLS hello has no structure for it (#2853)."""
         from pcapkit.const.tls.extension_type import ExtensionType
+        from pcapkit.const.tls.handshake_type import HandshakeType
         from pcapkit.protocols.application.tls.protocol import TLS
-        from pcapkit.protocols.application.ssl.data import ConnectionId
+        from pcapkit.utilities.exceptions import ProtocolError
 
         extensions = bytes.fromhex('0036000302abcd')
         body = (b'\x03\x03' + bytes(32) + b'\x00' + b'\x00\x02\x13\x01' + b'\x01\x00'
@@ -203,8 +204,12 @@ class ConnectionIdExtensionTests(unittest.TestCase):
         wire = b'\x16\x03\x03' + len(fragment).to_bytes(2, 'big') + fragment
         parsed = TLS(wire, len(wire))
         ext, = parsed.info.content[0].body.extensions
-        self.assertEqual((ext.type, ext.data), (ExtensionType.connection_id, ConnectionId(cid=b'\xab\xcd')))
+        self.assertEqual((ext.type, ext.data), (ExtensionType.connection_id, b'\x02\xab\xcd'))
         self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
+        for msg_type in (HandshakeType.client_hello, HandshakeType.server_hello):
+            with self.subTest(make=msg_type.name), self.assertRaises(ProtocolError):
+                parsed._make_tls_extensions([(ExtensionType.connection_id, {'cid': b'\xab\xcd'})],  # pylint: disable=protected-access
+                                            msg_type=msg_type)
 
     def test_handing_back_the_shipped_entry_is_a_silent_no_op(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType

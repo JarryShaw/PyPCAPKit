@@ -2,8 +2,10 @@
 """The ``tls-extension`` family: TLS handshake extensions.
 
 Each case is one extension in a ``ClientHello``, built from keyword arguments
-by the extension's ``_make_ext_*``. No capture is written: the ``tcp``
-envelope is addressed to port 80, which dispatches to HTTP rather than TLS.
+by the extension's ``_make_ext_*``: a DTLS one for a DTLS-only type, which a
+TLS record has no structure for (#2853), a TLS one otherwise. No capture is
+written: the ``tcp`` envelope is addressed to port 80, which dispatches to HTTP
+rather than TLS.
 
 A family module of :file:`examples/generators/options.py`, which loads it by
 path and binds ``generator`` to itself before this body runs (#2615).
@@ -63,17 +65,34 @@ def _tls_extension_overrides() -> 'dict[Any, dict[str, Any]]':
     }
 
 
+def _dtls_only() -> 'frozenset[Any]':
+    """The types the IANA registry marks DTLS-only (RFC 9146 section 10.2)."""
+    from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
+    return frozenset({Enum_ExtensionType.connection_id})
+
+
 def _tls_client_hello(extensions: 'Any') -> 'Any':
-    """A TLS record carrying one ``ClientHello`` with ``extensions``."""
+    """A record carrying one ``ClientHello`` with ``extensions``: DTLS's if one
+    of them is DTLS-only, TLS's otherwise."""
     from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
-    from pcapkit.protocols.application.tls.protocol import TLS
+    from pcapkit.protocols.application.dtls.data import DTLSHandshake
+    from pcapkit.protocols.application.dtls.protocol import DTLS
     from pcapkit.protocols.application.ssl.data import ClientHello, Handshake
+    from pcapkit.protocols.application.tls.protocol import TLS
 
+    msg_type = Enum_HandshakeType.client_hello
+    codes = {extension[0] if isinstance(extension, tuple) else extension.type for extension in extensions}
+    if codes & _dtls_only():
+        hello = ClientHello(version=0xFEFD, random=bytes(32), session_id=b'', cookie=b'',
+                            cipher_suites=(0x1301,), compression_methods=(0,), extensions=extensions)
+        return DTLS(content_type=Enum_ContentType.handshake, version=0xFEFD, content=(DTLSHandshake(
+            msg_type=msg_type, length=0, body=hello, message_seq=0, fragment_offset=0, fragment_length=0,
+            is_fragmented=False),))
     hello = ClientHello(version=0x0303, random=bytes(32), session_id=b'', cookie=None,
                         cipher_suites=(0x1301,), compression_methods=(0,), extensions=extensions)
     return TLS(content_type=Enum_ContentType.handshake, version=0x0303,
-               content=(Handshake(msg_type=Enum_HandshakeType.client_hello, length=0, body=hello),))
+               content=(Handshake(msg_type=msg_type, length=0, body=hello),))
 
 
 def _tls_extension_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
@@ -81,8 +100,11 @@ def _tls_extension_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _tls_parse(octets: 'bytes') -> 'Any':
+    from pcapkit.protocols.application.dtls.protocol import DTLS
     from pcapkit.protocols.application.tls.protocol import TLS
-    return TLS(octets, len(octets))
+
+    # NOTE: a DTLS record version's major octet is 0xFE (RFC 9147 section 4).
+    return (DTLS if octets[1] == 0xFE else TLS)(octets, len(octets))
 
 
 def _tls_extension_extract(parsed: 'Any') -> 'Any':
