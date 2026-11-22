@@ -113,6 +113,10 @@ Link Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_netlink
 
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_ppp
+
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_ppp_control
+
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_radiotap
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_radiotap_field

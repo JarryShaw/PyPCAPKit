@@ -91,6 +91,8 @@ EXPECTED = {
     'pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1': (LINKTYPE, 113),
     'pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2': (LINKTYPE, 276),
     'pcapkit.protocols.link.loopback.protocol.Loopback': (LINKTYPE, 0),
+    'pcapkit.protocols.link.ppp.protocol.PPP': (LINKTYPE, 9),
+    'pcapkit.protocols.link.pppoe.protocol.PPPoE': (LINKTYPE, 51),
     'pcapkit.protocols.link.radiotap.protocol.Radiotap': (LINKTYPE, 127),
     'pcapkit.protocols.link.s_tag.protocol.S_Tag': (ETHERTYPE, 0x88A8),
     'pcapkit.protocols.transport.dccp.protocol.DCCP': (TRANSTYPE, 33),

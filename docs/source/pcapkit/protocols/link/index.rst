@@ -32,6 +32,8 @@ Link Layer
    linux_sll2
    loopback
    netlink
+   ppp
+   pppoe
    radiotap
    vlan
    c_tag
@@ -39,7 +41,7 @@ Link Layer
 
 .. todo::
 
-   Implement DSL, EAPOL, FDDI, ISDN, NDP, PPP.
+   Implement DSL, EAPOL, FDDI, ISDN, LLC/SNAP.
 
 Protocol Registry
 -----------------

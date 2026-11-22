@@ -44,6 +44,8 @@ if TYPE_CHECKING:
     from pcapkit.const.mh import *
     from pcapkit.const.ngap import *
     from pcapkit.const.ospf import *
+    from pcapkit.const.ppp import *
+    from pcapkit.const.pppoe import *
     from pcapkit.const.radiotap import *
     from pcapkit.const.sctp import *
     from pcapkit.const.sslv2 import *
@@ -114,6 +116,10 @@ __all__ = [
     'NGAP_ProcedureCode', 'NGAP_ProtocolIE',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
+    # PPP
+    'PPP_Protocol',
+    # PPPoE
+    'PPPoE_Code', 'PPPoE_Tag',
     # Radiotap
     'Radiotap_FieldType', 'Radiotap_Flags', 'Radiotap_ChannelFlags', 'Radiotap_RXFlags',
     'Radiotap_TXFlags', 'Radiotap_MCSKnown', 'Radiotap_AMPDUFlags', 'Radiotap_VHTKnown',
@@ -143,5 +149,5 @@ __all__ = [
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
     'reg', 'pcapng', 'arp', 'dccp', 'dns', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
     'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'mh', 'ngap', 'ospf',
-    'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
+    'ppp', 'pppoe', 'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
 ))

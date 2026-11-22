@@ -494,6 +494,10 @@ UNRELATED = {
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
     'pcapkit/protocols/link/netlink/protocol.py': ((16,), 'the nlmsghdr fixed header length (16 '
                                           'octets), not a PCAP record header'),
+    'pcapkit/protocols/link/ppp/protocol.py': ((16,), 'the width of an uncompressed PPP Protocol field'),
+    'pcapkit/protocols/link/ppp/schema.py': ((16,), 'the bit offset and width of a PPP control packet '
+                                            'Length'),
+    'pcapkit/protocols/link/pppoe/protocol.py': ((6,), 'the PPPoE header length (RFC 2516 Section 4)'),
     'pcapkit/protocols/link/radiotap/protocol.py': ((65535,), "the max value of radiotap's own "
                                            '2-octet it_len field, not an IP total length'),
     'pcapkit/protocols/link/vlan/schema.py': ((12,), 'the 12-bit VLAN identifier'),

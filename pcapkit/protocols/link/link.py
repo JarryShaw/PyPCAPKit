@@ -14,6 +14,8 @@ which is a base class for link layer protocols, e.g.
 :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`,
 :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`,
 :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`,
+:class:`~pcapkit.protocols.link.ppp.protocol.PPP`,
+:class:`~pcapkit.protocols.link.pppoe.protocol.PPPoE`,
 :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` and
 :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
 
@@ -63,6 +65,12 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
          - :class:`pcapkit.protocols.internet.ipv6.protocol.IPv6`
        * - 0x8137
          - :class:`pcapkit.protocols.internet.ipx.protocol.IPX`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Point_to_Point_Protocol`
+         - :class:`pcapkit.protocols.link.ppp.protocol.PPP`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.PPP_over_Ethernet_Discovery_Stage`
+         - :class:`pcapkit.protocols.link.pppoe.protocol.PPPoE`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.PPP_over_Ethernet_Session_Stage`
+         - :class:`pcapkit.protocols.link.pppoe.protocol.PPPoE`
 
     """
 
@@ -95,6 +103,9 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol',  'IPX'),
 
             Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
+            Enum_EtherType.Point_to_Point_Protocol:             ModuleDescriptor('pcapkit.protocols.link.ppp.protocol',      'PPP'),
+            Enum_EtherType.PPP_over_Ethernet_Discovery_Stage:   ModuleDescriptor('pcapkit.protocols.link.pppoe.protocol',    'PPPoE'),
+            Enum_EtherType.PPP_over_Ethernet_Session_Stage:     ModuleDescriptor('pcapkit.protocols.link.pppoe.protocol',    'PPPoE'),
             Enum_EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier:
                 ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
         },

@@ -281,6 +281,12 @@ def _ethernet(ethertype: 'int', payload: 'bytes') -> 'bytes':
     return bytes(Ethernet(type=ethertype, payload=payload))
 
 
+def _ppp(payload: 'bytes', protocol: 'int' = 0x0021, acfc: 'bool' = False) -> 'bytes':
+    """A PPP frame carrying ``payload``, by default an IPv4 datagram."""
+    from pcapkit.protocols.link.ppp.protocol import PPP
+    return bytes(PPP(protocol=protocol, acfc=acfc, payload=payload))
+
+
 def _loopback(family: 'int', payload: 'bytes', byteorder: 'str' = 'little') -> 'bytes':
     """A BSD loopback header carrying ``payload``."""
     from pcapkit.protocols.link.loopback.protocol import Loopback

@@ -54,6 +54,7 @@ nibble reading ``2``. Its structure is described as below:
 from typing import TYPE_CHECKING
 
 from pcapkit.const.l2tp.type import Type as Enum_Type
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.link.l2tp.data import L2TP as Data_L2TP
 from pcapkit.protocols.link.l2tp.data import Flags as Data_Flags
@@ -87,6 +88,10 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
     The protocol is dispatched from :attr:`UDP.__proto__
     <pcapkit.protocols.transport.udp.protocol.UDP.__proto__>` at port 1701.
+    A data message's payload is a PPP frame, dispatched as :attr:`Link.__proto__
+    <pcapkit.protocols.link.link.Link.__proto__>` dispatches EtherType
+    ``0x880B``, and a control message's is kept as
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
     Only the :rfc:`2661` framing is read: :meth:`read` refuses a datagram whose
     version nibble is not ``2``, so a v3 datagram arriving on port 1701
@@ -114,6 +119,11 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
        arguments of :meth:`make`; resolve a name with
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
+
+    .. versionchanged:: 1.7.0
+
+       A data message's payload is dissected as PPP, where it was kept raw
+       (:issue:`2817`).
 
     Note:
         IANA protocol number 115 (``L2TP``) is deliberately left unbound. It
@@ -252,13 +262,10 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             ])
 
         length = schema.length if flags.len else (length or len(self))
-        # L2TP carries no next-protocol field -- the payload is a PPP frame,
-        # which pcapkit does not dissect -- so dispatch on the -1 sentinel, as
-        # ARP does, rather than on a code read off the wire. Passing the
-        # remaining length here would dispatch on it as if it were an EtherType,
-        # resolving to Raw only because a length rarely collides with a
-        # registered one.
-        return self._decode_next_layer(l2tp, -1, length - hdr_len)
+        # NOTE: A data message carries a PPP frame (RFC 2661 Section 3), dispatched as EtherType
+        # 0x880B is; a control message carries AVPs, kept raw by the -1 sentinel.
+        proto = Enum_EtherType.Point_to_Point_Protocol if flags.type == Enum_Type.Data else -1
+        return self._decode_next_layer(l2tp, proto, length - hdr_len)
 
     def make(self,
              version: 'Literal[2]' = 2,

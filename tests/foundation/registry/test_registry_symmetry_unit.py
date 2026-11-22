@@ -79,6 +79,7 @@ DISPATCH = {
     'Loopback': 'pcapkit.protocols.link.loopback.protocol:Loopback',
     'LinuxSLL': 'pcapkit.protocols.link.linux_sll.protocol:LinuxSLL',
     'FRAD': 'pcapkit.protocols.link.frad.protocol:FRAD',
+    'PPP': 'pcapkit.protocols.link.ppp.protocol:PPP',
     'Radiotap': 'pcapkit.protocols.link.radiotap.protocol:Radiotap',
     'Internet': 'pcapkit.protocols.internet.internet:Internet',
     'TCP': 'pcapkit.protocols.transport.tcp.protocol:TCP',
@@ -163,6 +164,9 @@ METHOD_REGISTRARS = (
     MethodRegistrar('register_radiotap_field', 'pcapkit.protocols.link.radiotap.protocol:Radiotap', '__field__',
                     'pcapkit.protocols.link.radiotap.schema:RadiotapField',
                     ('pcapkit.const.radiotap.field_type:FieldType.Channel',)),
+    MethodRegistrar('register_ppp_control', 'pcapkit.protocols.link.ppp.protocol:PPP', '__control__',
+                    'pcapkit.protocols.link.ppp.schema:ControlPacket',
+                    ('pcapkit.const.ppp.protocol:Protocol.Link_Control_Protocol',)),
 )
 
 
@@ -195,6 +199,8 @@ MODULE_REGISTRARS = (
     ModuleRegistrar('register_arphrd', 'pcapkit.const.linux.arphrd:ARPHRD.FRAD', 'LinuxSLL',
                     'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_frad', 0xCC, 'FRAD', 'pcapkit.protocols.internet.internet:Internet'),
+    ModuleRegistrar('register_ppp', 'pcapkit.const.ppp.protocol:Protocol.Internet_Protocol_version_4', 'PPP',
+                    'pcapkit.protocols.internet.internet:Internet'),
     ModuleRegistrar('register_radiotap', 'pcapkit.const.reg.linktype:LinkType.IEEE802_11', 'Radiotap',
                     'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_transtype', 'pcapkit.const.reg.transtype:TransType.TCP', 'Internet',

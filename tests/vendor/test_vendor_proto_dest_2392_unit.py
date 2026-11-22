@@ -64,6 +64,7 @@ EXPECTED = {
     'pcapkit.vendor.sctp.payload_protocol_identifier': (('pcapkit.protocols.transport.sctp.protocol',
                                                          'SCTP'),),
     'pcapkit.vendor.linux.arphrd': (('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),),
+    'pcapkit.vendor.ppp.protocol': (('pcapkit.protocols.link.ppp.protocol', 'PPP'),),
 }
 
 
