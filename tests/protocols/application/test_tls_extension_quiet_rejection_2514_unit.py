@@ -93,16 +93,17 @@ class QuietRejectionTests(unittest.TestCase):
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.foundation.registry.protocols import register_tls_extension
         from pcapkit.protocols.application.ssl.protocol import SSL
+        from pcapkit.protocols.application.ssl.schema import UnknownExtension
         from pcapkit.utilities import exceptions
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.logging import logger
 
-        def parser(ext_type: object, data: bytes, *, msg_type: object) -> bytes:  # pylint: disable=unused-argument
+        def parser(ext_type: object, schema: object, *, msg_type: object) -> bytes:  # pylint: disable=unused-argument
             raise ProtocolError('heartbeat: rejected')
 
         def constructor(ext_type: object, data: object = None, *, msg_type: object,  # pylint: disable=unused-argument
-                        **kwargs: object) -> bytes:
-            return b''
+                        **kwargs: object) -> object:
+            return UnknownExtension(data=b'')
 
         # The same error, constructed outside the parse, is loud.
         with capture(logger) as package, capture(exceptions.logger) as module:
