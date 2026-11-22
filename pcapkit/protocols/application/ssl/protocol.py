@@ -1468,8 +1468,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
            } ConnectionId;
 
         The extension is DTLS-only, in a ``ClientHello`` or ``ServerHello``
-        (:rfc:`9146#section-3`, :rfc:`9146#section-10.2`); DTLS 1.3 adds no
-        message for it (:rfc:`9147#section-9.1`).
+        (:rfc:`9146#section-3`, :rfc:`9146#section-10.2`), and DTLS 1.3 keeps it
+        in those two messages (:rfc:`9147#section-9.1`).
 
         Args:
             ext_type: Extension type.
