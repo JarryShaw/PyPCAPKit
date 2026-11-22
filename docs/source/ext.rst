@@ -764,19 +764,19 @@ A sketch of an IPv4 reassembly class, modelled on
        def reassembly(self, info: 'Packet') -> 'None':
            ...  # reassembly algorithm implementation
 
-           # NOTE: Once a buffer is complete, store its datagrams.
-           self._dtgram.extend(
-               self.submit(...)  # submit reassembled datagram
-           )
+           # NOTE: Once a buffer is complete, release it: ``_release`` submits
+           # it with ``store`` set and keeps its datagrams exactly once.
+           self._release(self._buffer.pop(info.bufid), bufid=info.bufid)
 
        # NOTE: Convert a complete ``Buffer`` into ``Datagram`` instances.
-       def submit(self, buf: 'Buffer', *, bufid: 'BufferID') -> 'list[Datagram]':
+       # ``expire()`` passes ``timeout`` as well, and stores what it returns.
+       def submit(self, buf: 'Buffer', *, bufid: 'BufferID', timeout: 'bool' = False,
+                  store: 'bool' = False) -> 'list[Datagram]':
            datagram = ...  # list of ``Datagram`` instances
 
-           # NOTE: Run the registered callbacks on the submission.
-           for callback in self.__callback_fn__:
-               callback(datagram)  # run callback functions
-           return datagram
+           # NOTE: Store the submission if asked, then run the registered
+           # callbacks on it, so one that raises cannot lose it.
+           return self._notify(datagram, store=store)
 
 Callback Functions
 ~~~~~~~~~~~~~~~~~~

@@ -138,6 +138,12 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         Arguments:
             info: :term:`info` record of packets to be reassembled
 
+        Note:
+            A callback raising on a message this fragment displaces propagates
+            before the fragment's own message is checked, so one it completes
+            stays buffered, where :attr:`datagram` still reports it, and its
+            callbacks do not run.
+
         """
         # clear cache
         self._flag_n = False
@@ -157,6 +163,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             self._buffer[BUFID] = buf
 
         frag = buf.msg.get(MSN)
+        displaced = None  # type: Optional[Fragment]
         # A fresh buffer for this MSN, or a disagreement with the one held
         # there: a different ``length`` or ``msg_type`` means this fragment
         # cannot belong to the message under construction. A reused 4-tuple
@@ -165,10 +172,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         # fragment of the displaced message whose length and msg_type match
         # the new one can still splice into it.
         if frag is None or frag.length != info.length or frag.msg_type != info.msg_type:
-            if frag is not None:
-                # The displaced partial is reported as PARTIAL rather than dropped.
-                self._dtgram.extend(self.submit(Buffer(msg={MSN: frag}, timestamp=buf.timestamp),
-                                                bufid=BUFID))
+            displaced = frag
             length = info.length
             frag = Fragment(
                 ind=[],
@@ -190,6 +194,13 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             frag.raw[FO:stop] = info.payload[:held]
             self._update_hole_descriptors(frag.hdl, FO, stop - 1)
 
+        # The displaced partial is reported as PARTIAL rather than dropped.
+        #
+        # NOTE: submitted once its slot holds this fragment's message, so a callback that raises
+        # leaves it stored and out of the buffer, never in both (#2856).
+        if displaced is not None:
+            self._release(Buffer(msg={MSN: displaced}, timestamp=buf.timestamp), bufid=BUFID)
+
         # the message is whole once no hole remains
         if not frag.hdl:
             del buf.msg[MSN]
@@ -197,13 +208,10 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
                 buf = self._buffer.pop(BUFID)
 
             datagram = self._datagram_from_fragment(frag, BUFID, MSN, Completion.COMPLETE)
-            self._dtgram.append(datagram)
             self._last = datagram
+            self._notify([datagram], store=True)
 
-            for callback in self.__callback_fn__:
-                callback([datagram])
-
-    def submit(self, buf: 'Buffer', *, bufid: 'BufferID', checked: 'bool' = False, timeout: 'bool' = False) -> 'list[Datagram[_AT]]':  # type: ignore[override] # pylint: disable=arguments-differ,unused-argument,line-too-long
+    def submit(self, buf: 'Buffer', *, bufid: 'BufferID', checked: 'bool' = False, timeout: 'bool' = False, store: 'bool' = False) -> 'list[Datagram[_AT]]':  # type: ignore[override] # pylint: disable=arguments-differ,unused-argument,line-too-long
         """Submit reassembled payload.
 
         Arguments:
@@ -215,6 +223,11 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             timeout: whether this buffer is being submitted because
                 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout
+            store: whether ``buf`` has left
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`
+                for good, so its messages join
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
+                before the callbacks run, and one that raises cannot lose them
 
         Returns:
             Every message still held in ``buf``, each reported
@@ -232,9 +245,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
                 completion = Completion.TIMEOUT if timeout else Completion.PARTIAL
             ret.append(self._datagram_from_fragment(frag, bufid, msn, completion))
 
-        for callback in self.__callback_fn__:
-            callback(ret)
-        return ret
+        return self._notify(ret, store=store)
 
     def _datagram_from_fragment(self, frag: 'Fragment', bufid: 'BufferID', message_seq: 'int',
                                 completion: 'Completion') -> 'Datagram[_AT]':

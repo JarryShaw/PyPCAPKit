@@ -55,6 +55,8 @@ follow :rfc:`791` and :rfc:`815`.
 
    .. automethod:: reassembly
    .. automethod:: submit
+   .. automethod:: _release
+   .. automethod:: _notify
    .. automethod:: expire
    .. automethod:: advance
    .. automethod:: fetch
