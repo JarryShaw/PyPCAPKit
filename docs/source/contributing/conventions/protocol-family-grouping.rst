@@ -234,7 +234,11 @@ A parse whose refusal a fallback absorbs without
 ``CaughtByCaller(ProtocolError)`` around it, as
 :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
 keeps a body that does not decode raw -- an application of :issue:`2588`'s rule rather
-than a ruling of its own.
+than a ruling of its own. :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+and :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
+keep a payload that does not parse as a ``Raw`` the same way, log any other error at
+:data:`logging.WARNING` as :func:`~pcapkit.corekit.decorators.beholder` does, and drop
+the failed parse's warnings as a replaced next layer's are dropped (:issue:`2862`).
 
 **The block spans the whole call to the next layer**, not the refusal alone. Every
 :exc:`~pcapkit.utilities.exceptions.ProtocolError` built while that call is on the

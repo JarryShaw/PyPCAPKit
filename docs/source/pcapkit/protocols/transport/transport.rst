@@ -10,6 +10,12 @@ which is a base class for transport layer protocols, e.g.
 :class:`~pcapkit.protocols.transport.udp.protocol.UDP` and
 :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`.
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.transport.transport.logger``, which nothing logged to once
+   :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
+   stopped (:issue:`2862`).
+
 .. autoclass:: pcapkit.protocols.transport.transport.Transport
    :no-members:
    :show-inheritance:

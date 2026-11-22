@@ -7,6 +7,7 @@ import unittest
 from unittest import mock
 
 from tests._support import install_fake_payload_protocols, isolate_modules
+from tests.utilities._harness import capture
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -198,11 +199,13 @@ class TransportUnitTests(unittest.TestCase):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
+                self.kwargs = kwargs
 
         class FakeNoPayload:
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
+                self.kwargs = kwargs
 
         class DummyTransport(Transport):
             __proto__ = collections.defaultdict(lambda: EOFProtocol, {80: EOFProtocol})
@@ -223,13 +226,17 @@ class TransportUnitTests(unittest.TestCase):
 
         install_fake_payload_protocols(self, FakeRaw, FakeNoPayload)
 
-        with mock.patch('pcapkit.protocols.transport.transport.logger.error') as logger_error:
+        from pcapkit.utilities.logging import logger
+
+        with capture(logger) as recorder:
             report = DummyTransport.analyze((80, 60000), b'data')
 
         self.assertIsInstance(report, FakeNoPayload)
         self.assertEqual(report.payload, b'data')
-        self.assertGreaterEqual(logger_error.call_count, 1)
-        self.assertEqual(logger_error.call_args_list[-1].args[0], 'truncated payload')
+        # NOTE: An error other than a refusal is logged at WARNING, as ``beholder`` logs it, and the
+        # fallback records the failure and the port (#2862).
+        self.assertEqual(recorder.messages, [('WARNING', 'truncated payload')])
+        self.assertEqual(report.kwargs, {'error': 'truncated payload', 'alias': 80})
 
     def test_analyze_uses_raw_after_non_struct_error(self) -> None:
         from pcapkit.protocols.transport.transport import Transport
@@ -242,11 +249,13 @@ class TransportUnitTests(unittest.TestCase):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
+                self.kwargs = kwargs
 
         class FakeNoPayload:
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
+                self.kwargs = kwargs
 
         class DummyTransport(Transport):
             __proto__ = collections.defaultdict(lambda: BrokenProtocol, {443: BrokenProtocol})
@@ -267,12 +276,17 @@ class TransportUnitTests(unittest.TestCase):
 
         install_fake_payload_protocols(self, FakeRaw, FakeNoPayload)
 
-        with mock.patch('pcapkit.protocols.transport.transport.logger.error') as logger_error:
+        from pcapkit.utilities.logging import logger
+
+        with capture(logger) as recorder:
             report = DummyTransport.analyze((443, 65000), b'body')
 
         self.assertIsInstance(report, FakeRaw)
         self.assertEqual(report.payload, b'body')
-        logger_error.assert_called_once()
+        # NOTE: An error other than a refusal is logged at WARNING, as ``beholder`` logs it, and the
+        # fallback records the failure and the port (#2862).
+        self.assertEqual(recorder.messages, [('WARNING', 'boom')])
+        self.assertEqual(report.kwargs, {'error': 'boom', 'alias': 443})
 
     def test_analyze_resolves_module_descriptor_protocol(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor

@@ -8,16 +8,20 @@
 :class:`~pcapkit.protocols.transport.transport.Transport`, the base class of the
 transport layer protocols.
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.transport.transport.logger``, which nothing logged to once
+   :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
+   stopped (:issue:`2862`).
+
 """
-import io
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
-from pcapkit.utilities.exceptions import ProtocolError, StructError, UnsupportedCall, stacklevel
-from pcapkit.utilities.logging import DEVMODE, get_logger
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -28,11 +32,6 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 
 __all__ = ['Transport']
-
-
-#: logging.Logger: Module-level logger, a child of the package-wide
-#: :data:`pcapkit.utilities.logging.logger`.
-logger = get_logger(__name__)
 
 
 class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
@@ -140,7 +139,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             instance. A payload that fails to parse is kept as
             :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
-            keeps one.
+            keeps one, its ``protocol`` the port looked up, as an :obj:`int`, as
+            a frame's fallback records the port :meth:`_decode_next_layer`
+            looked up.
 
         Important:
             The annotation names the **base** registry because every transport
@@ -180,30 +181,16 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
            The fallback holds the whole payload and the failure's message,
            rather than the octets the failed parse left unread (:issue:`2842`).
+           Its ``protocol`` is the port looked up, a refusal it absorbs is
+           quiet, any other error is logged at :data:`logging.WARNING` rather
+           than ``ERROR``, and the failed parse's warnings are dropped
+           (:issue:`2862`).
 
         """
         port = ports[0] if ports[0] in cls.__proto__ else ports[1]
-        protocol = cls._dispatch_family(cls._lookup_next_layer(
-            cls.__proto__, int(port) if isinstance(port, Enum_AppType) else port), payload, len(payload))
-
-        payload_io = io.BytesIO(payload)
-        try:
-            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
-        except Exception as exc:
-            if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort:skip
-            else:
-                from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # pylint: disable=import-outside-toplevel # isort:skip
-            # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
-
-            # log error
-            logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
-
-            # NOTE: Rewound and given ``error``, as ``Protocol.analyze``'s fallback is (#2842).
-            payload_io.seek(0)
-            kwargs['error'] = str(exc)
-            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
-        return report
+        code = int(port) if isinstance(port, Enum_AppType) else port
+        protocol = cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, code), payload, len(payload))
+        return cls._analyze_next_layer(protocol, payload, code, **kwargs)
 
     @classmethod
     def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':

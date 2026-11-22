@@ -108,6 +108,7 @@ The built-in families, those bases included, derive from
    .. automethod:: _import_next_layer
    .. automethod:: _empty_next_layer
    .. automethod:: _parse_next_layer
+   .. automethod:: _analyze_next_layer
    .. automethod:: _get_context
 
    .. autoattribute:: _data
@@ -362,6 +363,7 @@ Internal Definitions
                   _decode_next_layer
                   _import_next_layer
                   _parse_next_layer
+                  _analyze_next_layer
                   _get_context
                   __init__
                   __post_init__
@@ -396,7 +398,8 @@ Internal Definitions
       :meth:`~Protocol._lookup_registry`, :meth:`~Protocol._lookup_next_layer`,
       :meth:`~Protocol._decode_next_layer`,
       :meth:`~Protocol._import_next_layer`,
-      :meth:`~Protocol._parse_next_layer`, :meth:`~Protocol._get_context`,
+      :meth:`~Protocol._parse_next_layer`, :meth:`~Protocol._analyze_next_layer`,
+      :meth:`~Protocol._get_context`,
       :meth:`~Protocol.__init__`, :meth:`~Protocol.__post_init__`,
       :meth:`~Protocol.__repr__`, :meth:`~Protocol.__str__`,
       :meth:`~Protocol.__getitem__`, :meth:`~Protocol.__contains__`,
