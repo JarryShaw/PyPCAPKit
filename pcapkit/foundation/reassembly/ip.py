@@ -179,7 +179,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # ``TS``, so it is the moment to abandon whatever the deadline has now
         # passed for -- including, deliberately, buffers this fragment does not
         # belong to.
-        self._dtgram.extend(self.expire(TS))
+        self.expire(TS)
 
         # a datagram with fragment offset zero and MF clear is reported even
         # when its BUFID is already buffered, rather than dropped: isolated
@@ -196,9 +196,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 # :rfc:`791#section-3.2` flushes the buffer and then submits
                 # this datagram, so the flushed one is reported incomplete and
                 # this one goes on to a fresh buffer below
-                self._dtgram.extend(
-                    self.submit(self._buffer.pop(BUFID), bufid=BUFID)
-                )
+                self._release(self._buffer.pop(BUFID), bufid=BUFID)
 
         # the header of the fragment at offset zero is the reassembled datagram's
         header = b'' if FO else self._rectify_header(info.header, BUFID[3])
@@ -292,9 +290,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                     return
                 logger.debug('%s: abandoning buffer %s on frame %d, which overlaps '
                              'octets %d-%d', self.name, BUFID, info.num, other[0], other[1] - 1)
-                self._dtgram.extend(
-                    self.submit(self._buffer.pop(BUFID), bufid=BUFID, overlap=True)
-                )
+                self._release(self._buffer.pop(BUFID), bufid=BUFID, overlap=True)
                 return
             if span[1] > span[0]:
                 bisect.insort(buf.extent, span)
@@ -344,12 +340,10 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # an isolated datagram has no buffer to wait in, so it is submitted
         # whether or not it is complete
         if isolated:
-            self._dtgram.extend(self.submit(buf, bufid=BUFID))
+            self._release(buf, bufid=BUFID)
         # when datagram is reassembled in whole
         elif self._is_complete(buf):
-            self._dtgram.extend(
-                self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
-            )
+            self._release(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
 
     def _is_complete(self, buf: 'Buffer[_AT]') -> 'bool':
         """Tell whether a buffer holds its whole datagram.
@@ -491,7 +485,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
     def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
                checked: 'bool' = False, timeout: 'bool' = False,
-               overlap: 'bool' = False) -> 'list[Datagram[_AT]]':
+               overlap: 'bool' = False, store: 'bool' = False) -> 'list[Datagram[_AT]]':
         """Submit reassembled payload.
 
         Arguments:
@@ -510,6 +504,11 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 reported as :attr:`Completion.OVERLAP
                 <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`
                 and never as complete
+            store: whether ``buf`` has left
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`
+                for good, so its datagrams join
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
+                before the callbacks run, and one that raises cannot lose them
 
         Returns:
             Reassembled packets. Where the payload is one contiguous run, its
@@ -634,6 +633,4 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             )
             ret.append(packet)
 
-        for callback in self.__callback_fn__:
-            callback(ret)
-        return ret
+        return self._notify(ret, store=store)

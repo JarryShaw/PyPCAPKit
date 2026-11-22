@@ -183,7 +183,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         # This segment's arrival is the evidence that capture time has reached
         # ``TS``. Off by default for TCP -- see ``__timeout__`` -- in which case
         # this returns immediately.
-        self._dtgram.extend(self.expire(TS))
+        self.expire(TS)
 
         # Sequence number of the first octet of this segment's payload. A SYN
         # occupies a sequence number of its own (:rfc:`793`), so payload sent
@@ -195,9 +195,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         # when SYN is set, reset buffer of existing session
         if SYN and BUFID in self._buffer:
-            self._dtgram.extend(
-                self.submit(self._buffer.pop(BUFID), bufid=BUFID)
-            )
+            self._release(self._buffer.pop(BUFID), bufid=BUFID)
 
         # Read the sequence number modulo 2**32 relative to the end of the data
         # it most plausibly continues -- this ACK's own payload buffer, or else
@@ -228,7 +226,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                                    else (UNWRAPPED + info.len, fragment.isn - 1))
                     fragment.gap.extend(MISSING)
                     HDR, ANCHORED, PSN = old.hdr, True, UNWRAPPED
-                self._dtgram.extend(self.submit(old, bufid=BUFID))
+                self._release(old, bufid=BUFID)
             else:
                 SHIFT = UNWRAPPED - PSN
                 PSN = UNWRAPPED
@@ -322,9 +320,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         # accepts nothing sent before the RST that arrives after it. The buffer
         # is therefore submitted at once, as the receiver last saw it.
         if RST or self._stream_whole(BUFID):
-            self._dtgram.extend(
-                self.submit(self._buffer.pop(BUFID), bufid=BUFID)
-            )
+            self._release(self._buffer.pop(BUFID), bufid=BUFID)
 
     @staticmethod
     def _unwrap(seq: 'int', ref: 'int') -> 'int':
@@ -732,7 +728,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 TCP_Protocol._make_port(bufid[3], Enum_TransportProtocol.tcp))  # pylint: disable=protected-access
 
     def submit(self, buf: 'Buffer', *, bufid: 'BufferID',  # type: ignore[override] # pylint: disable=arguments-differ
-               timeout: 'bool' = False) -> 'list[Datagram]':
+               timeout: 'bool' = False, store: 'bool' = False) -> 'list[Datagram]':
         """Submit reassembled payload.
 
         Arguments:
@@ -741,6 +737,11 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             timeout: whether this buffer is being submitted because
                 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout
+            store: whether ``buf`` has left
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`
+                for good, so its datagrams join
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
+                before the callbacks run, and one that raises cannot lose them
 
         Returns:
             Reassembled :term:`packets <reasm.tcp.datagram>`. Where the payload
@@ -865,6 +866,4 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                     )
                     datagram.append(packet)
 
-        for callback in self.__callback_fn__:
-            callback(datagram)
-        return datagram
+        return self._notify(datagram, store=store)

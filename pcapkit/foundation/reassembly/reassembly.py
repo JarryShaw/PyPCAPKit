@@ -258,9 +258,71 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
             **kwargs: arbitrary keyword arguments; implementations accept
                 ``timeout``, set when the buffer is being submitted because
                 :meth:`expire` abandoned it rather than because it completed or
-                the capture ended
+                the capture ended, and ``store``, set when the buffer has left
+                :attr:`_buffer` for good, which they pass on to :meth:`_notify`
+
+        .. versionchanged:: 1.7.0
+
+           A custom ``submit`` must accept ``store`` and pass it on to
+           :meth:`_notify`, which stores the datagrams before the callbacks
+           run; :meth:`_release` stores what one dropping ``store`` returns,
+           after its callbacks. :meth:`expire` stores what it returns, so a
+           caller must not also extend :attr:`_dtgram` with it (:issue:`2856`).
 
         """
+
+    # submit a buffer that has left the buffers for good
+    def _release(self, buf: '_BT', **kwargs: 'Any') -> 'list[_DT]':
+        """Submit a buffer that has left :attr:`_buffer` for good, storing its
+        datagrams exactly once.
+
+        Arguments:
+            buf: buffer to submit
+            **kwargs: keyword arguments for :meth:`submit`, which is also
+                passed ``store``
+
+        Returns:
+            The datagrams :meth:`submit` returned, now in :attr:`_dtgram`.
+
+        A :meth:`submit` that passes ``store`` on to :meth:`_notify` has stored
+        them before its callbacks ran. One that drops ``store`` stored none,
+        so they are stored here, after its callbacks.
+
+        .. versionadded:: 1.7.0
+
+        """
+        size = len(self._dtgram)
+        datagrams = self.submit(buf, store=True, **kwargs)
+        # NOTE: compared by identity, so only the very datagrams ``submit`` returned count as
+        # stored, even when a callback appended after them.
+        stored = self._dtgram[size:size + len(datagrams)]
+        if len(stored) < len(datagrams) or any(kept is not datagram
+                                                for (kept, datagram) in zip(stored, datagrams)):
+            self._dtgram.extend(datagrams)
+        return datagrams
+
+    # run the callbacks on submitted datagrams
+    def _notify(self, datagrams: 'list[_DT]', *, store: 'bool' = False) -> 'list[_DT]':
+        """Run each callback on the datagrams :meth:`submit` built.
+
+        Arguments:
+            datagrams: datagrams to report
+            store: whether their buffer has left :attr:`_buffer` for good, so
+                they join :attr:`_dtgram` before the callbacks run, and one
+                that raises cannot lose them
+
+        Returns:
+            ``datagrams``, for :meth:`submit` to return.
+
+        .. versionadded:: 1.7.0
+
+        """
+        # NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).
+        if store:
+            self._dtgram.extend(datagrams)
+        for callback in self.__callback_fn__:
+            callback(datagrams)
+        return datagrams
 
     # abandon timed-out buffers
     def expire(self, timestamp: 'float') -> 'list[_DT]':
@@ -273,7 +335,8 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
         Returns:
             Datagrams of the buffers abandoned, reported with
-            :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`.
+            :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+            and already stored in :attr:`datagram`, through :meth:`_release`.
             Empty when nothing expired, which is the overwhelmingly common case.
 
         A buffer expires when more than :attr:`timeout` seconds separate
@@ -299,7 +362,10 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
            The :class:`~pcapkit.foundation.extraction.Extractor` advances the
            clock on every frame, where it advanced only on the packets a
-           reassembly object was fed (:issue:`2814`).
+           reassembly object was fed (:issue:`2814`). It stores what it returns,
+           where its caller stored it after the callbacks, so a callback that
+           raises cannot lose a datagram and a caller must not store one again
+           (:issue:`2856`).
 
         """
         if math.isinf(self._timeout) or not self._buffer:
@@ -324,7 +390,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
                          '(ICMP Time Exceeded owed: %s)', self.name, bufid,
                          timestamp - cast('Any', buffer).timestamp, self._timeout, owed_icmp)
 
-            ret.extend(self.submit(buffer, bufid=bufid, timeout=True))
+            ret.extend(self._release(buffer, bufid=bufid, timeout=True))
         return ret
 
     # advance the capture clock
@@ -343,10 +409,14 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         .. versionadded:: 1.7.0
 
         """
-        expired = self.expire(timestamp)
-        if expired:
-            self._dtgram.extend(expired)
-            self.__cached__.clear()
+        held = len(self._buffer)
+        try:
+            self.expire(timestamp)
+        finally:
+            # NOTE: in a ``finally``: a buffer that left was stored before its callbacks ran, so the
+            # caches are stale even when one of them raised (#2856).
+            if len(self._buffer) < held:
+                self.__cached__.clear()
 
     # fetch datagram
     def fetch(self) -> 'tuple[_DT, ...]':

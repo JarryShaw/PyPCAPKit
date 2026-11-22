@@ -90,7 +90,7 @@ What submits a buffer, and how its holes at that point pick the
        CO["COMPLETE"]
        TO["TIMEOUT"]
        PA["PARTIAL"]
-       CB["datagrams reported<br/>each \_\_callback\_fn\_\_ called with them"]
+       CB["datagrams stored, unless submitted for a read,<br/>then each \_\_callback\_fn\_\_ called with them"]
 
        trig --> SUB
        T1D --> CO
