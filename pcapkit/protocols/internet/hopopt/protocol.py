@@ -36,6 +36,7 @@ from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.extlen import ext_len_to_octets, octets_to_ext_len
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.protocols.internet.hopopt.data import HOPOPT as Data_HOPOPT
@@ -384,7 +385,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         hopopt = Data_HOPOPT(
             next=schema.next,
-            length=(schema.len + 1) * 8,
+            length=ext_len_to_octets(schema.len),
             options=self._read_hopopt_options(schema.len * 8 + 6),
         )
 
@@ -561,7 +562,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             'next': data.next,
             'options': data.options,
             'payload': cls._make_payload(data),
-            'len': data.length // 8 - 1 if data.get('__short_read__') is not None else None,
+            'len': octets_to_ext_len(data.length) if data.get('__short_read__') is not None else None,
         }
 
     def _read_hopopt_options(self, length: 'int') -> 'Option':

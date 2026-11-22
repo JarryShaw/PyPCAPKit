@@ -132,6 +132,7 @@ from typing import TYPE_CHECKING, Generic, cast, overload
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.extlen import ext_len_to_octets
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv6_ext.data import IPv6_Ext as Data_IPv6_Ext
 from pcapkit.protocols.internet.ipv6_ext.schema import IPv6_Ext as Schema_IPv6_Ext
@@ -464,7 +465,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             # RFC 6564 §4 (MUST): Hdr Ext Len is in 8-octet units, excluding
             # the first 8 octets. Also the best generic guess when ``alias``
             # named no known extension header.
-            nominal = (schema.len + 1) * 8
+            nominal = ext_len_to_octets(schema.len)
 
         if nominal > length:
             # Warns like the house convention but stops rather than clips; see

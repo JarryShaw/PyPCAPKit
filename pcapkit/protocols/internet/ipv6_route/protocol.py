@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.extlen import octets_to_ext_len
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
@@ -484,7 +485,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             'data': data,
             # NOTE: The parsed header length, passed through as ``Hdr Ext Len`` rather than
             # recomputed, so a truncated capture rebuilds with the length on the wire (#1457).
-            'hdr_ext_len': (data.length - 8) // 8,
+            'hdr_ext_len': octets_to_ext_len(data.length),
             'payload': cls._make_payload(data),
         }
 

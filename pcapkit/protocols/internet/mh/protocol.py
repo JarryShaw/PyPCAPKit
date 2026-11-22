@@ -89,6 +89,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.extlen import ext_len_to_octets, octets_to_ext_len
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
@@ -1569,9 +1570,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         # NOTE: A capture cut short rebuilds with the Header Len it declared, not one
         # worked out from the message, and its short read cuts the rest (#2669).
-        header_len = (len(data_val) + 6) // 8 - 1
+        header_len = octets_to_ext_len(len(data_val) + 6)
         if isinstance(data, Data_MH) and data.get('__short_read__') is not None:
-            header_len = data.length // 8 - 1
+            header_len = octets_to_ext_len(data.length)
 
         schema = Schema_MH(
             next=next_val,
@@ -1592,7 +1593,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
                 # NOTE: Over this header alone, whose Header Len is also the pseudo-header's
                 # length (RFC 6275 section 6.1.1); the payload is not covered.
-                length = (header_len + 1) * 8
+                length = ext_len_to_octets(header_len)
                 schema.chksum = compute_checksum(schema.pack()[:length],
                                                  prefix=_PSEUDO_HEADER.klass(pseudo, length))
         return schema
@@ -1779,7 +1780,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             :class:`~pcapkit.utilities.warnings.ProtocolWarning` says so.
 
             Appending is necessary rather than optional: ``length`` is
-            ``(len(data) + 6) // 8 - 1``, which floors, so leaving an opaque body
+            :func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len` of
+            ``len(data) + 6``, which floors, so leaving an opaque body
             short would emit 10, 12 or 14 octets while declaring 8, and a parser reads
             8 and misinterprets the remainder. Since the caller asked for a packet
             to be built and the shortfall is recoverable, completing it beats
@@ -1834,7 +1836,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_UnknownMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -1870,7 +1872,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_BindingRefreshRequestMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -1911,7 +1913,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_HomeTestInitMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -1953,7 +1955,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_CareofTestInitMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -1999,7 +2001,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_HomeTestMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2046,7 +2048,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_CareofTestMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2091,7 +2093,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_BindingUpdateMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2148,7 +2150,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_BindingAcknowledgementMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2202,7 +2204,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_BindingErrorMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2251,7 +2253,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_FastBindingUpdateMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2310,7 +2312,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_FastBindingAcknowledgmentMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2357,7 +2359,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_FastNeighborAdvertisementMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2402,7 +2404,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_ExperimentalMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2458,7 +2460,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         data = Data_HomeAgentSwitchMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2504,7 +2506,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_HeartbeatMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2552,7 +2554,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_HandoverInitiateMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2604,7 +2606,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_HandoverAcknowledgeMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2675,7 +2677,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_BindingRevocationMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2726,7 +2728,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_LocalizedRoutingInitiationMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2774,7 +2776,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_LocalizedRoutingAcknowledgmentMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2821,7 +2823,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_UpdateNotificationMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2865,7 +2867,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_UpdateNotificationAcknowledgementMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2929,7 +2931,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_FlowBindingMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -2975,7 +2977,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_SubscriptionQueryMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -3014,7 +3016,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         data = Data_SubscriptionResponseMessage(
             next=header.next,
-            length=self._mh_message_length(header.length),
+            length=ext_len_to_octets(header.length),
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
@@ -10410,30 +10412,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=len(data),
             data=data,
         )
-
-    @staticmethod
-    def _mh_message_length(header_len: 'int') -> 'int':
-        """Compute the total on-the-wire MH header length for a given ``Header Len``.
-
-        Per :rfc:`6275#section-6.1.1`, ``Header Len`` is *"the length of the
-        Mobility Header, in units of 8 octets, excluding the first 8
-        octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,
-        or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``
-        below reports this value as the parsed message's own ``.length``,
-        which :meth:`~pcapkit.protocols.internet.mh.protocol.MH.read` subtracts from the
-        outer packet length to find the next layer's length. It is the inverse
-        of :meth:`make`'s ``(len(data_val) + 6) // 8 - 1``. Do NOT drop the
-        ``+ 1``: the units either side of it differ (octets vs. 8-octet
-        units), and dropping the offset silently reinterprets the field.
-
-        Args:
-            header_len: raw ``Header Len`` field value, as read off the wire.
-
-        Returns:
-            Total length, in octets, of the on-the-wire MH header.
-
-        """
-        return (header_len + 1) * 8
 
     @staticmethod
     def _mh_option_length(schema_length: 'int') -> 'int':

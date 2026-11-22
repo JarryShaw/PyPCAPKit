@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.extlen import ext_len_to_octets
 
 __all__ = ['jumbo_payload_length']
 
@@ -50,7 +51,7 @@ def jumbo_payload_length(next: 'int', data: 'bytes') -> 'Optional[int]':  # pyli
     if next != Enum_TransType.HOPOPT or len(data) < 2:
         return None
 
-    end = min((data[1] + 1) * 8, len(data))
+    end = min(ext_len_to_octets(data[1]), len(data))
     ptr = 2
     while ptr < end:
         code = data[ptr]

@@ -13,6 +13,7 @@ origin. Please refer to :doc:`ip` for more information.
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.extlen import ext_len_to_octets
 from pcapkit.foundation.reassembly.ip import IP
 from pcapkit.protocols.internet.ipv6.protocol import IPV6_HEADER_LEN, IPV6_NEXT_HEADER_OFFSET
 from pcapkit.protocols.internet.ipv6.protocol import IPv6 as IPv6_Protocol
@@ -53,7 +54,7 @@ def _next_header_offset(header: 'bytes') -> 'int':
         if proto == Enum_TransType.AH:
             position += (header[position + 1] + 2) * 4
         else:
-            position += (header[position + 1] + 1) * 8
+            position += ext_len_to_octets(header[position + 1])
         proto = header[offset]
     return offset
 
