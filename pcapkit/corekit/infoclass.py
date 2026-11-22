@@ -42,6 +42,10 @@ KT = TypeVar('KT')
 VT = TypeVar('VT')
 ST = TypeVar('ST', bound='Type[Info]')
 
+#: The bookkeeping attributes :meth:`Info.__new__` gives every instance, which
+#: :attr:`Info.__keys__` does not list.
+_BOOKKEEPING = ('__map__', '__map_reverse__', '__multi__', '__keys__')
+
 
 class FinalisedState(EnumLookup, enum.IntEnum):
     """Finalised state.
@@ -130,7 +134,7 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     if cls is Info and cls.__dict__.get('__base_ready__'):
         return cls
 
-    temp = ['__map__', '__map_reverse__', '__multi__', '__builtin__', '__finalised__']
+    temp = [*_BOOKKEEPING, '__builtin__', '__finalised__']
     temp.extend(cls.__additional__)
     for obj in cls.mro():
         temp.extend(dir(obj))
@@ -298,6 +302,12 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
        the dumps only, and :attr:`__included__` the dunder keys that iterating
        an instance, ``len()`` and :meth:`to_dict` carry (:issue:`2003`).
 
+    .. versionchanged:: 1.7.0
+
+       Iterating an instance, ``repr``, ``str`` and :meth:`to_dict` follow the
+       order its fields were set in on every interpreter, where PyPy could
+       follow another instance's (:issue:`2829`).
+
     """
 
     if TYPE_CHECKING:
@@ -308,9 +318,14 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
         #: original names).
         __map_reverse__: 'dict[str, str]'
         #: Values of keys held more than once, i.e. every value but the first,
-        #: keyed by the (transformed) key that was last in :attr:`__dict__` when
-        #: each was added, so :meth:`to_dict` writes it right after that key.
+        #: keyed by the (transformed) key that was last in order when each was
+        #: added, so :meth:`to_dict` writes it right after that key.
         __multi__: 'dict[str, list[tuple[str, Any]]]'
+        #: The (transformed) keys :meth:`__update__` set, in the order first set,
+        #: which iteration, ``repr``, ``str`` and :meth:`to_dict` follow: PyPy
+        #: may list :attr:`~object.__dict__` in an earlier instance's order
+        #: (:issue:`2829`).
+        __keys__: 'tuple[str, ...]'
         #: List of builtin methods.
         __builtin__: 'set[str]'
 
@@ -406,11 +421,9 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
             cls = info_final(cls, _finalised=False)
         self = super().__new__(cls)
 
-        # NOTE: set on ``self`` so that ``__map__`` and ``__map_reverse__`` are
-        # not class variables shared by all instances.
-        super().__setattr__(self, '__map__', {})
-        super().__setattr__(self, '__map_reverse__', {})
-        super().__setattr__(self, '__multi__', {})
+        # NOTE: set on ``self``, so that the bookkeeping (:data:`_BOOKKEEPING`) is no class
+        # variable shared by all instances; in one write, as this runs per instance.
+        self.__dict__.update(__map__={}, __map_reverse__={}, __multi__={}, __keys__=())
 
         return self
 
@@ -439,6 +452,7 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
         # or :class:`OrderedMultiInfo`, so a finalised instance holds no mutable mapping (#1484).
 
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
+        fields = self.__dict__
 
         multi_iter = ()  # type: Iterable[tuple[str, Any]]
         if dict_ is None:
@@ -453,12 +467,15 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
 
         for (key, value) in multi_iter:
             new_key = f'_{__name__}{key}' if key in self.__builtin__ else key
-            if new_key in self.__dict__ and new_key not in self.__excluded__:
-                anchor = next(reversed(self.__dict__))
+            if new_key in fields and new_key not in self.__excluded__:
+                anchor = self.__ordered_keys()[-1]
                 self.__multi__.setdefault(anchor, []).append((new_key, _freeze(value)))
             else:
                 self.__update__({key: value})
 
+        # NOTE: A key new to ``__dict__`` joins :attr:`__keys__`; one replaced keeps its place,
+        # as in a :obj:`dict`.
+        added = []  # type: list[str]
         for (key, value) in data_iter:
             if self.__multi__:
                 # NOTE: A key replaced drops the values it held besides the first.
@@ -483,27 +500,35 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
 
             # if isinstance(key, str):
             #     key = re.sub(r'\W', '_', key)
-            self.__dict__[key] = _freeze(value)
+            if key not in fields:
+                added.append(key)
+            fields[key] = _freeze(value)
+
+        if added:
+            fields['__keys__'] = fields.get('__keys__', ()) + tuple(added)
 
     __init__ = __update__
 
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
-        for (key, value) in self.__dict__.items():
+        fields = self.__dict__
+        for key in self.__ordered_keys():
             if key in self.__excluded__:
                 continue
 
             out_key = self.__map_reverse__.get(key, key)
-            temp.append(f'{out_key}={value}')
+            temp.append(f'{out_key}={fields[key]}')
         args = ', '.join(temp)
         return f'{type(self).__name__}({args})'
 
     def __repr__(self) -> 'str':
         temp = []  # type: list[str]
-        for (key, value) in self.__dict__.items():
+        fields = self.__dict__
+        for key in self.__ordered_keys():
             if key in self.__excluded__:
                 continue
 
+            value = fields[key]
             out_key = self.__map_reverse__.get(key, key)
             # NOTE: a multi-mapping :class:`Info`, i.e. an option list, is
             # written out in full, as the multi-mapping it is.
@@ -517,10 +542,10 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
     def __len__(self) -> 'int':
         # NOTE: count exactly what :meth:`__iter__` yields, so ``__excluded__``
         # keys count and bookkeeping or unnamed dunder keys do not (#2003).
-        return sum(1 for key in self.__dict__ if not self.__hidden(key))
+        return sum(1 for key in self.__ordered_keys() if not self.__hidden(key))
 
     def __iter__(self) -> 'Iterator[str]':
-        for key in self.__dict__:
+        for key in self.__ordered_keys():
             if self.__hidden(key):
                 continue
             yield self.__map_reverse__.get(key, key)
@@ -545,10 +570,27 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
 
     def __items_multi(self) -> 'Iterator[tuple[str, VT]]':
         """Every ``(key, value)`` pair, with the transformed keys, in order."""
-        for (key, value) in self.__dict__.items():
+        fields = self.__dict__
+        for key in self.__ordered_keys():
             if not self.__hidden(key):
-                yield key, value
+                yield key, fields[key]
             yield from self.__multi__.get(key, ())
+
+    def __ordered_keys(self) -> 'tuple[str, ...]':
+        """Every key in :attr:`~object.__dict__`, in order.
+
+        The keys :attr:`__keys__` records come first, in the order it records
+        them. Any other, such as a bookkeeping attribute or a key a subclass or
+        an earlier release's pickle put there directly, follows in the order
+        ``__dict__`` lists it.
+
+        """
+        fields = self.__dict__
+        order = fields.get('__keys__', ())  # type: tuple[str, ...]
+        if len(fields) == len(order) + len(_BOOKKEEPING):
+            return order
+        recorded = set(order)
+        return order + tuple(key for key in fields if key not in recorded)
 
     def __hidden(self, key: 'str') -> 'bool':
         """Whether iteration, ``len()`` and :meth:`to_dict` leave ``key`` out.
