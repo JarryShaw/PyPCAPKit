@@ -15,9 +15,12 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
 from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
+from pcapkit.const.tls.hpke_aead_id import HpkeAeadId as Enum_HpkeAeadId
+from pcapkit.const.tls.hpke_kdf_id import HpkeKdfId as Enum_HpkeKdfId
+from pcapkit.const.tls.hpke_kem_id import HpkeKemId as Enum_HpkeKemId
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
-from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field, UInt32Field
+from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
 
@@ -702,12 +705,12 @@ class HpkeSymmetricCipherSuite(Schema):
     """Header schema for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`)."""
 
     #: ``HpkeKdfId``.
-    kdf_id: 'int' = UInt16Field()
+    kdf_id: 'Enum_HpkeKdfId' = EnumField(length=2, namespace=Enum_HpkeKdfId)
     #: ``HpkeAeadId``.
-    aead_id: 'int' = UInt16Field()
+    aead_id: 'Enum_HpkeAeadId' = EnumField(length=2, namespace=Enum_HpkeAeadId)
 
     if TYPE_CHECKING:
-        def __init__(self, kdf_id: 'int', aead_id: 'int') -> 'None': ...
+        def __init__(self, kdf_id: 'Enum_HpkeKdfId | int', aead_id: 'Enum_HpkeAeadId | int') -> 'None': ...
 
 
 def _ech_outer(pkt: 'dict[str, Any]') -> 'bool':
@@ -776,7 +779,7 @@ class ECHConfigContents(Schema):
     #: ``config_id`` of the ``HpkeKeyConfig``.
     config_id: 'int' = UInt8Field()
     #: ``HpkeKemId`` of the ``HpkeKeyConfig``.
-    kem_id: 'int' = UInt16Field()
+    kem_id: 'Enum_HpkeKemId' = EnumField(length=2, namespace=Enum_HpkeKemId)
     #: Length of :attr:`public_key`.
     public_key_length: 'int' = UInt16Field()
     #: ``HpkePublicKey`` of the ``HpkeKeyConfig``.
@@ -799,8 +802,8 @@ class ECHConfigContents(Schema):
                                                        item_type=_item(ECHConfigExtension))
 
     if TYPE_CHECKING:
-        def __init__(self, config_id: 'int', kem_id: 'int', public_key_length: 'int', public_key: 'bytes',
-                     cipher_suites_length: 'int', cipher_suites: 'list[HpkeSymmetricCipherSuite]',
+        def __init__(self, config_id: 'int', kem_id: 'Enum_HpkeKemId | int', public_key_length: 'int',
+                     public_key: 'bytes', cipher_suites_length: 'int', cipher_suites: 'list[HpkeSymmetricCipherSuite]',
                      maximum_name_length: 'int', public_name_length: 'int', public_name: 'bytes',
                      extensions_length: 'int', extensions: 'list[ECHConfigExtension]') -> 'None': ...
 

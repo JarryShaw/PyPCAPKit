@@ -27,6 +27,12 @@ enumerations include:
      - TLS PskKeyExchangeMode Values [*]_
    * - :class:`TLS_CertificateCompressionAlgorithm <pcapkit.const.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm>`
      - TLS Certificate Compression Algorithm IDs [*]_
+   * - :class:`TLS_HpkeKemId <pcapkit.const.tls.hpke_kem_id.HpkeKemId>`
+     - HPKE KEM Identifiers [*]_
+   * - :class:`TLS_HpkeKdfId <pcapkit.const.tls.hpke_kdf_id.HpkeKdfId>`
+     - HPKE KDF Identifiers [*]_
+   * - :class:`TLS_HpkeAeadId <pcapkit.const.tls.hpke_aead_id.HpkeAeadId>`
+     - HPKE AEAD Identifiers [*]_
 
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7
@@ -35,6 +41,9 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode
 .. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids
+.. [*] https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kem-ids
+.. [*] https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kdf-ids
+.. [*] https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-aead-ids
 
 """
 
@@ -51,11 +60,15 @@ if TYPE_CHECKING:
     from pcapkit.const.tls.ec_point_format import ECPointFormat as TLS_ECPointFormat
     from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
     from pcapkit.const.tls.handshake_type import HandshakeType as TLS_HandshakeType
+    from pcapkit.const.tls.hpke_aead_id import HpkeAeadId as TLS_HpkeAeadId
+    from pcapkit.const.tls.hpke_kdf_id import HpkeKdfId as TLS_HpkeKdfId
+    from pcapkit.const.tls.hpke_kem_id import HpkeKemId as TLS_HpkeKemId
     from pcapkit.const.tls.psk_key_exchange_mode import PskKeyExchangeMode as TLS_PskKeyExchangeMode
 
 __all__ = [
     'TLS_ContentType', 'TLS_HandshakeType', 'TLS_ExtensionType', 'TLS_ECPointFormat',
     'TLS_CertificateStatusType', 'TLS_PskKeyExchangeMode', 'TLS_CertificateCompressionAlgorithm',
+    'TLS_HpkeKemId', 'TLS_HpkeKdfId', 'TLS_HpkeAeadId',
 ]
 
 __getattr__, __dir__ = lazy_exports(__name__, globals(), {
@@ -66,4 +79,7 @@ __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'TLS_CertificateStatusType': ('certificate_status_type', 'CertificateStatusType'),
     'TLS_PskKeyExchangeMode': ('psk_key_exchange_mode', 'PskKeyExchangeMode'),
     'TLS_CertificateCompressionAlgorithm': ('certificate_compression_algorithm', 'CertificateCompressionAlgorithm'),
+    'TLS_HpkeKemId': ('hpke_kem_id', 'HpkeKemId'),
+    'TLS_HpkeKdfId': ('hpke_kdf_id', 'HpkeKdfId'),
+    'TLS_HpkeAeadId': ('hpke_aead_id', 'HpkeAeadId'),
 })

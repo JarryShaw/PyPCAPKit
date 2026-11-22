@@ -221,6 +221,7 @@ __all__ = [
     # TLS
     'TLS_ContentType', 'TLS_HandshakeType', 'TLS_ExtensionType',
     'TLS_ECPointFormat', 'TLS_CertificateStatusType', 'TLS_PskKeyExchangeMode', 'TLS_CertificateCompressionAlgorithm',
+    'TLS_HpkeKemId', 'TLS_HpkeKdfId', 'TLS_HpkeAeadId',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

@@ -219,6 +219,8 @@ class ExtensionValueTypeTests(unittest.TestCase):
             return [(ET.encrypted_client_hello, {'retry_configs': (D.ECHConfig(version=0xFE0D, contents=contents),)})]
 
         outer = {'cipher_suite': suite(kdf_id=1, aead_id=1)}
+        # NOTE: the HPKE identifiers are enumeration fields, which ``_make_index``
+        # refuses as ProtocolError (#2851); test_tls_hpke_registries_2851_unit pins that.
         for name, msg_type, extensions in (
                 ('KeyShareEntry.group', HT.client_hello, [(ET.key_share, {
                     'client_shares': (D.KeyShareEntry(group=None, key_exchange=b'k'),)})]),
@@ -234,17 +236,10 @@ class ExtensionValueTypeTests(unittest.TestCase):
                     type=ET.key_share, data=D.KeyShareHelloRetryRequest(selected_group=None))]),
                 ('selected_version', HT.server_hello, [D.Extension(
                     type=ET.supported_versions, data=D.SupportedVersionsServerHello(selected_version=None))]),
-                ('outer kdf_id', HT.client_hello, [(ET.encrypted_client_hello, {
-                    'cipher_suite': suite(kdf_id=None, aead_id=1)})]),
-                ('outer aead_id', HT.client_hello, [(ET.encrypted_client_hello, {
-                    'cipher_suite': suite(kdf_id=1, aead_id=None)})]),
                 ('outer config_id', HT.client_hello, [(ET.encrypted_client_hello, dict(outer, config_id=None))]),
                 ('ECHConfig.version', HT.encrypted_extensions, [(ET.encrypted_client_hello, {
                     'retry_configs': (D.ECHConfig(version=None, contents=b'x'),)})]),
                 ('HpkeKeyConfig.config_id', HT.encrypted_extensions, config(config_id=None)),
-                ('HpkeKeyConfig.kem_id', HT.encrypted_extensions, config(kem_id=None)),
-                ('HpkeKeyConfig suite kdf_id', HT.encrypted_extensions,
-                 config(cipher_suites=(suite(kdf_id=None, aead_id=1),))),
                 ('maximum_name_length', HT.encrypted_extensions, config(maximum_name_length=None)),
                 ('ECHConfigExtension.type', HT.encrypted_extensions,
                  config(extensions=(D.ECHConfigExtension(type=None, data=b'x'),))),
