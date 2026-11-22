@@ -43,7 +43,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(values['next'], TransType.UDP)
         self.assertEqual(values['type'], Packet.Binding_Refresh_Request)
         self.assertEqual(values['reserved'], 0x5a)
-        self.assertEqual(values['chksum'], b'\x12\x34')
+        self.assertEqual(values['checksum'], b'\x12\x34')
         self.assertIs(values['data'], data)
         self.assertIn('payload', values)
 
@@ -1410,7 +1410,7 @@ class MHUnitTests(unittest.TestCase):
 
         for name, packet_type, payload, expected in cases:
             with self.subTest(name):
-                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                raw = bytes(MH(next=TransType.UDP, checksum=b'\x12\x34',
                                type=packet_type, data=payload))
                 self.assertEqual(len(raw) % 8, 0)
 
@@ -1421,7 +1421,7 @@ class MHUnitTests(unittest.TestCase):
                     self.assertEqual(getattr(parsed, field), value, field)
 
                 rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
-                                   chksum=parsed.chksum, data=parsed))
+                                   checksum=parsed.chksum, data=parsed))
                 self.assertEqual(rebuilt, raw)
 
         with self.subTest('FBack, unassigned status raises on construction'):
@@ -1437,7 +1437,7 @@ class MHUnitTests(unittest.TestCase):
             from pcapkit.utilities.exceptions import EnumValueError
 
             with self.assertRaises(EnumValueError):
-                MH(next=TransType.UDP, chksum=b'\x12\x34',
+                MH(next=TransType.UDP, checksum=b'\x12\x34',
                    type=Packet.Fast_Binding_Acknowledgment,
                    data={'status': 77, 'key_mngt': False, 'seq': 1, 'lifetime': 4,
                          'options': [(acoa_type, {'address': '2001:db8:1::3'}),
@@ -1591,7 +1591,7 @@ class MHUnitTests(unittest.TestCase):
                 (FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid,
                  IPv6AddressPrefixCode.Old_Care_of_Address),
             ]:
-                fback_raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                fback_raw = bytes(MH(next=TransType.UDP, checksum=b'\x12\x34',
                                      type=Packet.Fast_Binding_Acknowledgment,
                                      data={'status': status, 'key_mngt': True, 'seq': 0x1234,
                                            'lifetime': 40,
@@ -1604,9 +1604,9 @@ class MHUnitTests(unittest.TestCase):
                 self.assertIsInstance(parsed.status, FastBindingAcknowledgmentStatus)
                 self.assertEqual(parsed.status, int(status))
                 self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
-                                          chksum=parsed.chksum, data=parsed)), fback_raw)
+                                          checksum=parsed.chksum, data=parsed)), fback_raw)
 
-                hi_raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                hi_raw = bytes(MH(next=TransType.UDP, checksum=b'\x12\x34',
                                   type=Packet.Handover_Initiate_Message,
                                   data={'seq': 0x0102, 'assign': True, 'buffer': True,
                                         'proxy': False, 'forward': False, 'code': 1,
@@ -1619,7 +1619,7 @@ class MHUnitTests(unittest.TestCase):
                 self.assertIsInstance(parsed.options[apfx_type].code, IPv6AddressPrefixCode)
                 self.assertEqual(parsed.options[apfx_type].code, int(code))
                 self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
-                                          chksum=parsed.chksum, data=parsed)), hi_raw)
+                                          checksum=parsed.chksum, data=parsed)), hi_raw)
 
     def test_mh_get_default_works_uniformly_through_the_inherited_method(self) -> None:
         """GitHub issue #935: ``get(key, default)`` is inherited, not overridden.
@@ -1790,7 +1790,7 @@ class MHUnitTests(unittest.TestCase):
                 return IPv4(io.BytesIO(raw), len(raw))
 
             fback_raw = bytearray(bytes(MH(
-                next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
+                next=TransType.UDP, checksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
                 data={'status': FastBindingAcknowledgmentStatus.Insufficient_resources,
                       'key_mngt': True, 'seq': 0x1234, 'lifetime': 40, 'options': []})))
             fback_raw[6] = 50  # unassigned FastBindingAcknowledgmentStatus byte
@@ -1799,7 +1799,7 @@ class MHUnitTests(unittest.TestCase):
             self.assertEqual(bytes(ip.payload), bytes(fback_raw))
 
             lra_raw = bytearray(bytes(MH(
-                next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Localized_Routing_Acknowledgment,
+                next=TransType.UDP, checksum=b'\x12\x34', type=Packet.Localized_Routing_Acknowledgment,
                 data={'seq': 4, 'unsolicited': True,
                       'status': LocalizedRoutingStatus.Localized_Routing_Not_Allowed,
                       'lifetime': 600})))
@@ -1847,7 +1847,7 @@ class MHUnitTests(unittest.TestCase):
         for flag, octets in [('ack', b'\x80\x00'), ('home', b'\x40\x00'),
                              ('lla_compat', b'\x20\x00'), ('key_mngt', b'\x10\x00')]:
             with self.subTest(flag):
-                raw = bytes(MH(next=TransType.UDP, chksum=b'\x00\x00',
+                raw = bytes(MH(next=TransType.UDP, checksum=b'\x00\x00',
                                type=Packet.Fast_Binding_Update,
                                data={'seq': 0, 'ack': False, 'home': False,
                                      'lla_compat': False, 'key_mngt': False,
@@ -1857,7 +1857,7 @@ class MHUnitTests(unittest.TestCase):
         # U|P|F of the HAck message, c.f. RFC 5949 section 6.1.2.
         for flag, octet in [('buffer', 0x80), ('proxy', 0x40), ('forward', 0x20)]:
             with self.subTest(flag):
-                raw = bytes(MH(next=TransType.UDP, chksum=b'\x00\x00',
+                raw = bytes(MH(next=TransType.UDP, checksum=b'\x00\x00',
                                type=Packet.Handover_Acknowledge_Message,
                                data={'seq': 0, 'buffer': False, 'proxy': False,
                                      'forward': False, flag: True, 'code': 0,
@@ -1909,7 +1909,7 @@ class MHUnitTests(unittest.TestCase):
                     expected,
                 )
                 self.assertEqual(bytes(MH(next=info.next, type=info.type,
-                                          chksum=info.chksum, data=info)), raw)
+                                          checksum=info.chksum, data=info)), raw)
 
     def test_mh_padding_option_schema_sizes_itself(self) -> None:
         """The padding option schema on its own, and the helper behind it.
@@ -1998,7 +1998,7 @@ class MHUnitTests(unittest.TestCase):
 
         for name, options, size in cases:
             with self.subTest(case=name):
-                built = MH(next=TransType.IPv6_NoNxt, type=brr, chksum=b'\x00\x00',
+                built = MH(next=TransType.IPv6_NoNxt, type=brr, checksum=b'\x00\x00',
                            data={'options': list(options)})
                 raw = bytes(built)
 
@@ -2010,7 +2010,7 @@ class MHUnitTests(unittest.TestCase):
                 parsed = MH(raw, extension=True).info
                 self.assertEqual(parsed.length, size)
                 self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
-                                          chksum=parsed.chksum, data=parsed)), raw)
+                                          checksum=parsed.chksum, data=parsed)), raw)
 
     def test_mh_opaque_message_body_is_padded_with_a_warning(self) -> None:
         """An opaque message body is padded to alignment, with a warning.
@@ -2054,7 +2054,7 @@ class MHUnitTests(unittest.TestCase):
 
         # and the whole header comes out 8-octet aligned when it can be padded
         raw = bytes(MH(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
-                       chksum=b'\x00\x00', data={'options': []}))
+                       checksum=b'\x00\x00', data={'options': []}))
         self.assertEqual(len(raw) % 8, 0)
 
     def test_mh_every_registered_code_has_both_handlers(self) -> None:
@@ -2567,7 +2567,7 @@ class MHUnitTests(unittest.TestCase):
 
         for code, args in cases.items():
             with self.subTest(option=code.name):
-                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
+                raw = bytes(MH(next=TransType.UDP, checksum=b'\x12\x34',
                                type=Packet.Binding_Refresh_Request,
                                data={'options': [(code, args)]}))
                 self.assertEqual(len(raw) % 8, 0)
@@ -2578,7 +2578,7 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(option.type, code)
 
                 rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
-                                   chksum=parsed.chksum, data=parsed))
+                                   checksum=parsed.chksum, data=parsed))
                 self.assertEqual(rebuilt, raw)
 
     def test_mh_message_types_round_trip_byte_for_byte(self) -> None:
@@ -2632,7 +2632,7 @@ class MHUnitTests(unittest.TestCase):
                 payload = dict(args)
                 payload['options'] = [(Option.Alternate_Care_of_Address, {'address': v6})]
 
-                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34', type=code,
+                raw = bytes(MH(next=TransType.UDP, checksum=b'\x12\x34', type=code,
                                data=payload))
                 self.assertEqual(len(raw) % 8, 0)
 
@@ -2642,15 +2642,15 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(parsed.length, len(raw))
 
                 rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
-                                   chksum=parsed.chksum, data=parsed))
+                                   checksum=parsed.chksum, data=parsed))
                 self.assertEqual(rebuilt, raw)
 
         for code, args in opaque.items():
             with self.subTest(message=code.name):
-                raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34', type=code, data=args))
+                raw = bytes(MH(next=TransType.UDP, checksum=b'\x12\x34', type=code, data=args))
                 parsed = MH(io.BytesIO(raw), len(raw), extension=True).info
                 rebuilt = bytes(MH(next=parsed.next, type=parsed.type,
-                                   chksum=parsed.chksum, data=parsed))
+                                   checksum=parsed.chksum, data=parsed))
                 self.assertEqual(rebuilt, raw)
 
     def test_mh_two_form_messages_switch_on_their_inner_type(self) -> None:
@@ -2674,7 +2674,7 @@ class MHUnitTests(unittest.TestCase):
 
         def build(packet_type, payload):
             payload = dict(payload, options=[])
-            raw = bytes(MH(next=TransType.UDP, chksum=b'\x00\x00',
+            raw = bytes(MH(next=TransType.UDP, checksum=b'\x00\x00',
                            type=packet_type, data=payload))
             return raw, MH(io.BytesIO(raw), len(raw), extension=True).info
 
@@ -2688,7 +2688,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertIsInstance(bri.code, RevocationTrigger)
         self.assertTrue(bri.proxy)
         self.assertEqual(
-            bytes(MH(next=bri.next, type=bri.type, chksum=bri.chksum, data=bri)), raw)
+            bytes(MH(next=bri.next, type=bri.type, checksum=bri.chksum, data=bri)), raw)
 
         # ... and an acknowledgement reads the same octet as a status code
         raw, bra = build(Packet.Binding_Revocation_Message,
@@ -2697,7 +2697,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(bra.code, RevocationStatusCode.Binding_Does_NOT_Exist)
         self.assertIsInstance(bra.code, RevocationStatusCode)
         self.assertEqual(
-            bytes(MH(next=bra.next, type=bra.type, chksum=bra.chksum, data=bra)), raw)
+            bytes(MH(next=bra.next, type=bra.type, checksum=bra.chksum, data=bra)), raw)
 
         # the flow binding message does the same, one registry apart
         raw, fbi = build(Packet.Flow_Binding_Message,
@@ -2708,7 +2708,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertIsInstance(fbi.code, FlowBindingIndicationTrigger)
         self.assertTrue(fbi.ack)
         self.assertEqual(
-            bytes(MH(next=fbi.next, type=fbi.type, chksum=fbi.chksum, data=fbi)), raw)
+            bytes(MH(next=fbi.next, type=fbi.type, checksum=fbi.chksum, data=fbi)), raw)
 
         raw, fba = build(Packet.Flow_Binding_Message,
                          {'fb_type': FlowBindingType.Acknowledgement,
@@ -2716,7 +2716,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(fba.code, FlowBindingACKStatus.Action_NOT_Authorized)
         self.assertIsInstance(fba.code, FlowBindingACKStatus)
         self.assertEqual(
-            bytes(MH(next=fba.next, type=fba.type, chksum=fba.chksum, data=fba)), raw)
+            bytes(MH(next=fba.next, type=fba.type, checksum=fba.chksum, data=fba)), raw)
 
     def test_mh_word_counted_option_lengths_are_not_octet_counts(self) -> None:
         """The two multicast options of :rfc:`7411` count 32-bit words.

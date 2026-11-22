@@ -137,7 +137,10 @@ class TCPChecksumTests(unittest.TestCase):
         # IPv6 walks a Mobility Header as an extension header, but it is the
         # pseudo-header's upper layer (RFC 6275 section 6.1.1), not the segment.
         segment = self.TCP(srcport=40000, dstport=80, checksum=b'\x00\x00').data
-        mh = bytes([6, 0, 0, 0, 0, 0, 0, 0])
+        # The header's own checksum is valid over its pseudo-header, so it warns of nothing (#2813).
+        mh_sum = wire.checksum(wire.IPV6_A + wire.IPV6_B + (8).to_bytes(4, 'big') + b'\x00\x00\x00\x87'
+                               + bytes([6, 0, 0, 0, 0, 0, 0, 0]))
+        mh = bytes([6, 0, 0, 0]) + mh_sum.to_bytes(2, 'big') + bytes(2)
         packet = (b'\x60\x00\x00\x00' + (len(mh) + len(segment)).to_bytes(2, 'big') + bytes([135, 64])
                   + wire.IPV6_A + wire.IPV6_B + mh + segment)
         layer, messages = self.parse(packet, self.IPv6)

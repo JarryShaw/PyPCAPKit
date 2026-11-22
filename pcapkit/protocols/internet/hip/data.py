@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from pcapkit.const.hip.suite import Suite
     from pcapkit.const.hip.transport import Transport
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
     from pcapkit.corekit.infoclass import OrderedMultiInfo
 
 __all__ = [
@@ -108,6 +109,10 @@ class HIP(Protocol):
        :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
        :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
+    .. versionchanged:: 1.7.0
+
+       New optional field ``checksum_status`` (:issue:`2813`).
+
     """
 
     #: Next header.
@@ -141,6 +146,10 @@ class HIP(Protocol):
     if TYPE_CHECKING:
         #: HIP parameters.
         parameters: 'OrderedMultiInfo[Enum_Parameter, Parameter]'
+        #: Outcome of verifying :attr:`chksum`, present only when
+        #: the enclosing IP layer verified it
+        #: under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`.
+        checksum_status: 'ChecksumStatus'
 
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', packet_fixed: 'int', version: 'int', reserved: 'int', version_fixed: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 

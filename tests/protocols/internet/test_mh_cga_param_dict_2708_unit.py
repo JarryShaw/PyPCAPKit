@@ -68,7 +68,7 @@ class TestMHCGAParamDict(unittest.TestCase):
         from pcapkit.protocols.internet.mh.data import CGAParameter
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        built = MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00', data={
+        built = MH(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00', data={
             'options': [(Option.CGA_Parameters, {'parameters': [CGAParameter(**_fields())]})],
         })
         parsed = MH(built.data)

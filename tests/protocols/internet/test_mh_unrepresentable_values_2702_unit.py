@@ -104,7 +104,7 @@ class TestMHUnrepresentableValues(unittest.TestCase):
         from pcapkit.const.mh.packet import Packet
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        return MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00',
+        return MH(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
                   data={'options': [(code, kwargs)]}).data
 
     def test_mobile_network_prefix_keeps_its_octets(self) -> None:

@@ -87,6 +87,7 @@ from pcapkit.const.mh.upa_status import \
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as Enum_UpdateNotificationReason
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.enum import EnumLookup
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
@@ -501,6 +502,7 @@ from pcapkit.protocols.internet.mh.schema import \
 from pcapkit.protocols.internet.mh.schema import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 from pcapkit.protocols.schema import Schema
+from pcapkit.utilities import config
 from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import (BaseError, CaughtByCaller, EnumValueError, ProtocolError,
                                           UnsupportedCall)
@@ -520,6 +522,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.mh.data import Option as Data_Option
     from pcapkit.protocols.internet.mh.schema import Option as Schema_Option
     from pcapkit.protocols.internet.mh.schema import Packet as Schema_Packet
+    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
@@ -546,6 +549,12 @@ if TYPE_CHECKING:
                                      KwArg(Any)], Schema_CGAExtension]
 
 __all__ = ['MH']
+
+#: The pseudo-header a checksum is computed and verified over in :class:`MH`,
+#: resolved there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_PSEUDO_HEADER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'pseudo_header')
 
 
 class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
@@ -1190,6 +1199,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
          (:issue:`2594`).
 
+    .. versionchanged:: 1.7.0
+
+       The checksum is verified and computed over the IPv6 pseudo-header
+       (:rfc:`6275#section-6.1.1`), as ICMPv6's is: the enclosing IPv6 layer
+       verifies it under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` and
+       records ``checksum_status``, and :meth:`make` computes one it is not
+       given under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`, taking
+       it as ``checksum`` rather than ``chksum`` (:issue:`2813`).
+
     """
 
     ##########################################################################
@@ -1324,6 +1342,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Enum_CGAExtension.Exp_FFFF: 'exp',
         },
     )  # type: DefaultDict[Enum_CGAExtension | int, str | tuple[ExtensionParser, ExtensionConstructor]]
+
+    #: Whether :meth:`make` left the checksum for the enclosing IPv6 layer to
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol`.
+    _checksum_pending = False
 
     ##########################################################################
     # Properties.
@@ -1469,9 +1491,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              type: 'Enum_Packet | int' = Enum_Packet.Binding_Refresh_Request,
              reserved: 'int' = 0,
-             chksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              data: 'bytes | Data_MH | Schema_Packet | dict[str, Any]' = b'\x00\x00',  # minimum length
              payload: 'ProtocolBase | Schema | bytes' = b'',
+             pseudo: 'Optional[IP_Pseudo]' = None,
              **kwargs: 'Any') -> 'Schema_MH':
         """Make (construct) packet data.
 
@@ -1479,9 +1502,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next: Next header type.
             type: Mobility Header type.
             reserved: Reserved octet after the MH type.
-            chksum: Checksum, two octets.
+            checksum: Checksum, two octets; if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on,
+                computed over an IPv6 ``pseudo`` (:rfc:`6275#section-6.1.1`),
+                or left to an IPv6 layer this header is the payload of; zero
+                otherwise.
             data: Message data.
             payload: Payload of next layer protocol.
+            pseudo: Pseudo-header of the enclosing IPv6 layer; its length is
+                replaced by this header's own.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -1493,7 +1522,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 :class:`~pcapkit.protocols.internet.mh.data.MH` data model or a
                 :class:`~pcapkit.protocols.internet.mh.schema.Packet` schema;
                 or if ``reserved``, or the header length of the message, does
-                not fit in one octet; if ``chksum`` is not two octets; or if
+                not fit in one octet; if ``checksum`` is not two octets; or if
                 ``next`` or ``type`` is a name, a :obj:`bool` or a code its
                 field cannot carry.
 
@@ -1501,6 +1530,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
            Takes ``reserved`` ahead of ``chksum`` (:issue:`1329`), which shifts
            every later positional argument.
+
+        .. versionchanged:: 1.7.0
+
+           Takes the checksum as ``checksum``, as
+           :class:`~pcapkit.protocols.internet.hip.protocol.HIP` does, rather
+           than ``chksum``, and computes it if left out, over ``pseudo`` or by
+           the enclosing IPv6 layer (:issue:`2813`).
 
         """
         next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
@@ -1537,15 +1573,29 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if isinstance(data, Data_MH) and data.get('__short_read__') is not None:
             header_len = data.length // 8 - 1
 
-        return Schema_MH(
+        schema = Schema_MH(
             next=next_val,
             length=self._make_uint(header_len, bits=8, name='header length'),
             type=type_val,
             reserved=self._make_uint(reserved, bits=8, name='reserved octet'),
-            chksum=self._make_octets(chksum, size=2, name='checksum'),
+            chksum=b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum'),
             data=data_val,
             payload=payload,
         )
+
+        self._checksum_pending = False
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            if pseudo is None:
+                self._checksum_pending = True
+            elif pseudo.version == 6:
+                from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+
+                # NOTE: Over this header alone, whose Header Len is also the pseudo-header's
+                # length (RFC 6275 section 6.1.1); the payload is not covered.
+                length = (header_len + 1) * 8
+                schema.chksum = compute_checksum(schema.pack()[:length],
+                                                 prefix=_PSEUDO_HEADER.klass(pseudo, length))
+        return schema
 
     @classmethod
     def register_message(cls, code: 'Enum_Packet', meth: 'str | tuple[PacketParser, PacketConstructor]') -> 'None':
@@ -1703,7 +1753,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             'next': data.next,
             'type': data.type,
             'reserved': data.reserved,
-            'chksum': data.chksum,
+            'checksum': data.chksum,
             'data': data,
             'payload': cls._make_payload(data),
         }
@@ -11751,3 +11801,25 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             extensions_list.append(data)
             total_length += data_len
         return extensions_list, total_length
+
+    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
+        """Verify the checksum over the pseudo-header of the enclosing IP layer.
+
+        That layer calls this once parsed, see
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`.
+        The checksum covers this header alone, and the pseudo-header carries its
+        length (:rfc:`6275#section-6.1.1`). The RFC defines it over IPv6 alone,
+        so an IPv4 pseudo-header gives none.
+
+        Args:
+            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
+
+        """
+        from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if pseudo is None or pseudo.version != 6:
+            status = ChecksumStatus.NO_PSEUDO_HEADER
+        else:
+            status = verify_checksum(self.alias, self._data, self._info.chksum, length=self.length,
+                                     prefix=_PSEUDO_HEADER.klass(pseudo, self.length))
+        self._info.__update__(checksum_status=status)

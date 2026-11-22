@@ -121,7 +121,7 @@ class TestMHHeaderLengthMutation(unittest.TestCase):
         from pcapkit.utilities.exceptions import BaseError
 
         for code in sorted(MH.__message__, key=int):
-            whole = MH(type=code, next=59, chksum=b'\x00\x00', data={}).data
+            whole = MH(type=code, next=59, checksum=b'\x00\x00', data={}).data
             options = MH(whole, len(whole)).info.get('options')
             for keep in range(6, len(whole)):
                 raw = whole[:keep]
@@ -149,7 +149,7 @@ class TestMHHeaderLengthMutation(unittest.TestCase):
         from pcapkit.utilities.exceptions import BaseError
 
         for code in sorted(MH.__message__, key=int):
-            whole = MH(type=code, next=59, chksum=b'\x00\x00', data={}).data
+            whole = MH(type=code, next=59, checksum=b'\x00\x00', data={}).data
             for pos, raw in _mutants(whole):
                 with self.subTest(type=code.name, pos=pos, raw=raw.hex()):
                     try:

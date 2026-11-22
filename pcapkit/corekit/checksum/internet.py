@@ -5,10 +5,11 @@
 .. module:: pcapkit.corekit.checksum.internet
 
 :mod:`pcapkit.corekit.checksum.internet` contains the one's-complement
-Internet checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP, ICMP, ICMPv6,
-IGMP, GRE and OSPF: :class:`ChecksumStatus`, the outcome a parse records, and
-the functions that compute and verify the checksum. It imports nothing from
-:mod:`pcapkit.protocols`, which builds on it (:issue:`2580`).
+Internet checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP, DCCP, ICMP,
+ICMPv6, IGMP, GRE, OSPF, MH and HIP: :class:`ChecksumStatus`, the outcome a
+parse records, and the functions that compute and verify the checksum. It
+imports nothing from :mod:`pcapkit.protocols`, which builds on it
+(:issue:`2580`).
 
 Verification is opt-in and computation opt-out, by
 :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` and

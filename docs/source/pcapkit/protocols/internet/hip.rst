@@ -156,6 +156,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_param_via_rvs
    .. automethod:: _make_param_relay_hmac
    .. automethod:: _make_hip_param_data
+   .. automethod:: _verify_pseudo_checksum
 
 Type Stubs
 ----------

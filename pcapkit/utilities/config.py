@@ -441,7 +441,7 @@ ZERO_PAD_BUDGET_RATIO = read_limit('ZERO_PAD_BUDGET_RATIO', 0x10, risk=(
 ###############################################################################
 
 #: bool: Whether parsing verifies the one's-complement checksums, of the IPv4
-#: header, TCP, UDP, DCCP, ICMP, ICMPv6, IGMP, GRE and OSPF,
+#: header, TCP, UDP, DCCP, ICMP, ICMPv6, IGMP, GRE, OSPF, MH and HIP,
 #: :envvar:`PCAPKIT_CHECKSUM_VERIFY`.
 #:
 #: Off by default, since checksumming every packet costs time on a large

@@ -56,6 +56,7 @@ from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_R
 from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
@@ -209,6 +210,7 @@ from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 from pcapkit.protocols.schema import Schema
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
@@ -223,6 +225,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.internet.hip.schema import Parameter as Schema_Parameter
+    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
 
     Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
@@ -232,6 +235,12 @@ if TYPE_CHECKING:
                                      NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
 
 __all__ = ['HIP']
+
+#: The pseudo-header a checksum is computed and verified over in :class:`HIP`,
+#: resolved there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_PSEUDO_HEADER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'pseudo_header')
 
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
@@ -460,6 +469,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
 
+    .. versionchanged:: 1.7.0
+
+       The checksum is verified and computed over the IPv4 or IPv6
+       pseudo-header (:rfc:`7401#section-5.1.1`), as TCP's is: the enclosing
+       IP layer verifies it under
+       :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` and records
+       ``checksum_status``, and :meth:`make` computes one it is not given under
+       :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` (:issue:`2813`).
+
     """
 
     ##########################################################################
@@ -525,6 +543,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Enum_Parameter.RELAY_HMAC:             'relay_hmac',              # [RFC 5770] 65520
         },
     )  # type: DefaultDict[Enum_Parameter | int, str | tuple[ParameterParser, ParameterConstructor]]
+
+    #: Whether :meth:`make` left the checksum for the enclosing IP layer to
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol`.
+    _checksum_pending = False
 
     ##########################################################################
     # Properties.
@@ -677,13 +699,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
              version: 'int' = 2,
              version_reserved: 'int' = 0,
              version_fixed: 'int' = 1,
-             checksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              controls_anonymous: 'bool' = False,
              controls_reserved: 'int' = 0,
              shit: 'int' = 0,
              rhit: 'int' = 0,
              parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter | int, Data_Parameter | dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             pseudo: 'Optional[IP_Pseudo]' = None,
              **kwargs: 'Any') -> 'Schema_HIP':
         """Make (construct) packet data.
 
@@ -697,13 +720,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 fixed low-order bit.
             version_fixed: The fixed low-order bit of the ``Version`` octet;
                 :rfc:`7401#section-5.1` prescribes ``1`` when sending.
-            checksum: Checksum.
+            checksum: Checksum; if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on,
+                computed over ``pseudo`` (:rfc:`7401#section-5.1.1`), or left
+                to an IP layer this header is the payload of; zero otherwise.
             controls_anonymous: If the sender is anonymous.
             controls_reserved: The 15 reserved high-order bits of ``Controls``.
             shit: Sender's host identity tag (HIT).
             rhit: Receiver's host identity tag (HIT).
             parameters: HIP parameters.
             payload: Payload.
+            pseudo: Pseudo-header of the enclosing IP layer; its length is
+                replaced by this header's own.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -725,6 +753,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            ``shit`` (:issue:`1328`), which shifts every later positional
            argument.
 
+        .. versionchanged:: 1.7.0
+
+           Computes the checksum if left out, over ``pseudo`` or by the
+           enclosing IP layer (:issue:`2813`).
+
         """
         next_value = self._make_index(next, Enum_TransType, bits=8, name='next header',
                                       alias=f'HIPv{version}')
@@ -741,7 +774,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             # counts the two 16-octet HITs, hence the minimum of 4.
             parameters_value, length = [], 4
 
-        return Schema_HIP(
+        schema = Schema_HIP(
             next=next_value,
             len=self._make_uint(length, bits=8, name='header length', alias=f'HIPv{version}'),
             pkt = {
@@ -756,7 +789,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 'reserved': self._make_uint(version_reserved, bits=3, name='version reserved bits',
                                             alias=f'HIPv{version}'),
             },
-            checksum=self._make_octets(checksum, size=2, name='checksum', alias=f'HIPv{version}'),
+            checksum=b'\x00\x00' if checksum is None else self._make_octets(
+                checksum, size=2, name='checksum', alias=f'HIPv{version}'),
             control = {
                 'reserved': self._make_uint(controls_reserved, bits=15,
                                             name='controls reserved bits', alias=f'HIPv{version}'),
@@ -767,6 +801,20 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param=parameters_value,
             payload=payload,
         )
+
+        self._checksum_pending = False
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            if pseudo is None:
+                self._checksum_pending = True
+            else:
+                from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+
+                # NOTE: Over this header alone, whose Header Length is also the pseudo-header's
+                # length (RFC 7401 section 5.1.1); the payload is not covered.
+                size = (length + 1) * 8
+                schema.checksum = compute_checksum(schema.pack()[:size],
+                                                   prefix=_PSEUDO_HEADER.klass(pseudo, size))
+        return schema
 
     @classmethod
     def register_parameter(cls, code: 'Enum_Parameter', meth: 'str | tuple[ParameterParser, ParameterConstructor]') -> 'None':
@@ -5695,3 +5743,24 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
                                 f'{id_len} octets cannot hold {identifier!r}')
         return id_len
+
+    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
+        """Verify the checksum over the pseudo-header of the enclosing IP layer.
+
+        That layer calls this once parsed, see
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`.
+        The checksum covers this header alone, and the pseudo-header, of IPv4
+        or IPv6, carries its length (:rfc:`7401#section-5.1.1`).
+
+        Args:
+            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
+
+        """
+        from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if pseudo is None:
+            status = ChecksumStatus.NO_PSEUDO_HEADER
+        else:
+            status = verify_checksum(self.alias, self._data, self._info.chksum, length=self.length,
+                                     prefix=_PSEUDO_HEADER.klass(pseudo, self.length))
+        self._info.__update__(checksum_status=status)

@@ -49,7 +49,7 @@ def _build(options: 'list[Any]') -> 'bytes':
     from pcapkit.const.mh.packet import Packet
     from pcapkit.protocols.internet.mh.protocol import MH
 
-    return MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00',
+    return MH(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00',
               data={'options': options}).data
 
 
