@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.corekit.schema holds the helpers shared across the schema layer: the functions the field classes, the header schemas, the protocols and the capture engines all call, one module per group. I..." />
 <meta name="description" content="pcapkit.corekit.schema holds the helpers shared across the schema layer: the functions the field classes, the header schemas, the protocols and the capture engines all call, one module per group. I..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Byte-Order Helpers" href="byteorder.html"><link rel="prev" title="Protocol Chain" href="../protochain.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Byte-Order Helpers" href="byteorder.html"><link rel="prev" title="Registry Helpers" href="../registry.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Schema Helpers - PyPCAPKit</title>
@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" checked="" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -595,6 +597,7 @@ from it load no other group: import each helper from its own module.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ipaddress.html">IP Address Conversion</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ipaddress.html#construction-helpers">Construction Helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ipaddress.html#internal-definitions">Internal Definitions</a></li>
@@ -621,14 +624,14 @@ from it load no other group: import each helper from its own module.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../protochain.html">
+          <a class="prev-page" href="../registry.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Protocol Chain</div>
+                <div class="title">Registry Helpers</div>
                 
               </div>
             </a>

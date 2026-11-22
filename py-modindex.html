@@ -203,7 +203,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -364,8 +363,10 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -384,6 +385,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1862,6 +1864,24 @@
   <tr class="cg-1">
     <td></td>
     <td>&#160;&#160;&#160;
+        <a href="pcapkit/const/tls.html#module-pcapkit.const.tls.hpke_aead_id"><code class="xref">pcapkit.const.tls.hpke_aead_id</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
+        <a href="pcapkit/const/tls.html#module-pcapkit.const.tls.hpke_kdf_id"><code class="xref">pcapkit.const.tls.hpke_kdf_id</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
+        <a href="pcapkit/const/tls.html#module-pcapkit.const.tls.hpke_kem_id"><code class="xref">pcapkit.const.tls.hpke_kem_id</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
         <a href="pcapkit/const/tls.html#module-pcapkit.const.tls.psk_key_exchange_mode"><code class="xref">pcapkit.const.tls.psk_key_exchange_mode</code></a></td><td>
     <em></em></td>
   </tr>
@@ -1994,6 +2014,12 @@
   <tr class="cg-1">
     <td></td>
     <td>&#160;&#160;&#160;
+        <a href="pcapkit/corekit/registry.html#module-pcapkit.corekit.registry"><code class="xref">pcapkit.corekit.registry</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
         <a href="pcapkit/corekit/schema/index.html#module-pcapkit.corekit.schema"><code class="xref">pcapkit.corekit.schema</code></a></td><td>
     <em></em></td>
   </tr>
@@ -2001,6 +2027,12 @@
     <td></td>
     <td>&#160;&#160;&#160;
         <a href="pcapkit/corekit/schema/byteorder.html#module-pcapkit.corekit.schema.byteorder"><code class="xref">pcapkit.corekit.schema.byteorder</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
+        <a href="pcapkit/corekit/schema/extlen.html#module-pcapkit.corekit.schema.extlen"><code class="xref">pcapkit.corekit.schema.extlen</code></a></td><td>
     <em></em></td>
   </tr>
   <tr class="cg-1">
@@ -2061,6 +2093,12 @@
     <td></td>
     <td>&#160;&#160;&#160;
         <a href="pcapkit/dumpkit/pcap.html#module-pcapkit.dumpkit.pcap"><code class="xref">pcapkit.dumpkit.pcap</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
+        <a href="pcapkit/dumpkit/pcapng.html#module-pcapkit.dumpkit.pcapng"><code class="xref">pcapkit.dumpkit.pcapng</code></a></td><td>
     <em></em></td>
   </tr>
   <tr class="cg-1">
@@ -2343,12 +2381,6 @@
     <td></td>
     <td>&#160;&#160;&#160;
         <a href="pcapkit/interface/misc.html#module-pcapkit.interface.misc"><code class="xref">pcapkit.interface.misc</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="pcapkit/interface/registry.html#module-pcapkit.interface.registry"><code class="xref">pcapkit.interface.registry</code></a></td><td>
     <em></em></td>
   </tr>
   <tr class="cg-1">
@@ -5223,6 +5255,24 @@
     <td></td>
     <td>&#160;&#160;&#160;
         <a href="pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.handshake_type"><code class="xref">pcapkit.vendor.tls.handshake_type</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
+        <a href="pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.hpke_aead_id"><code class="xref">pcapkit.vendor.tls.hpke_aead_id</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
+        <a href="pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.hpke_kdf_id"><code class="xref">pcapkit.vendor.tls.hpke_kdf_id</code></a></td><td>
+    <em></em></td>
+  </tr>
+  <tr class="cg-1">
+    <td></td>
+    <td>&#160;&#160;&#160;
+        <a href="pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.hpke_kem_id"><code class="xref">pcapkit.vendor.tls.hpke_kem_id</code></a></td><td>
     <em></em></td>
   </tr>
   <tr class="cg-1">

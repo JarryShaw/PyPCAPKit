@@ -12,6 +12,7 @@ Dump Utilities
 
    common
    pcap
+   pcapng
    null
 
 Every dumper class subclasses :class:`dictdumper.dumper.Dumper`, writing parsed
@@ -35,7 +36,7 @@ packet data to a formatted output file:
        A --> Tree & XML & JSON
 
        subgraph pcapkit [PyPCAPKit Dumpers]
-           DumperBase --> PCAPIO & NotImplementedIO
+           DumperBase --> PCAPIO & PCAPNGIO & NotImplementedIO
            DumperBase --> Dumper --> E([user customisation ...])
        end
        A --> DumperBase
@@ -53,6 +54,7 @@ packet data to a formatted output file:
        click DumperBase "common.html#pcapkit.dumpkit.common.DumperBase"
        click Dumper "common.html#pcapkit.dumpkit.common.Dumper"
        click PCAPIO "pcap.html#pcapkit.dumpkit.pcap.PCAPIO"
+       click PCAPNGIO "pcapng.html#pcapkit.dumpkit.pcapng.PCAPNGIO"
        click NotImplementedIO "null.html#pcapkit.dumpkit.null.NotImplementedIO"
 
 .. note::

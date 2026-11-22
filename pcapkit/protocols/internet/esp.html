@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -843,7 +845,8 @@ the alignment requirement is chosen when omitted. Only used
 when <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>.</p></li>
 <li><p><strong>icv</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Integrity check value. Ignored when <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> is
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, where it is computed instead.</p></li>
-<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload of current instance.</p></li>
+<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload of current instance, as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, a protocol
+or a schema, which is packed to its octets.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -863,6 +866,11 @@ when <code class="docutils literal notranslate"><span class="pre">encrypt</span>
     run without <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a>.</p>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>A protocol or schema <code class="docutils literal notranslate"><span class="pre">payload</span></code> without <code class="docutils literal notranslate"><span class="pre">icv</span></code> or <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> is
+packed to its octets, where it raised <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2860">#2860</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

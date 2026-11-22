@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -752,7 +754,7 @@ ever copied.</p>
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NullType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NullType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NullType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NullType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a></p>
-<p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">class_</span></code>/<code class="docutils literal notranslate"><span class="pre">module</span></code> sentinel.</p>
+<p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a>, the sentinel for a class name never given.</p>
 <p>A distinct class rather than a plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> such as <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code>,
 so that <code class="docutils literal notranslate"><span class="pre">is</span></code> comparisons against it mean what they say: no
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> a caller passes, including one that happens to spell
@@ -787,10 +789,9 @@ neither mints a new instance nor loses the old one.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NULL">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NULL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NULL</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NULL" title="Link to this definition">¶</a></dt>
-<dd><p>Sentinel for an omitted <code class="docutils literal notranslate"><span class="pre">class_</span></code> argument to the <code class="docutils literal notranslate"><span class="pre">register_*</span></code>
-helpers in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> and
-<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a>. Housed here with the
-package’s other sentinels, per the module docstring above.</p>
+<dd><p>Sentinel for the class name of a
+<a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> built without one. Housed
+here with the package’s other sentinels, per the module docstring above.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType">NullType</a></p>

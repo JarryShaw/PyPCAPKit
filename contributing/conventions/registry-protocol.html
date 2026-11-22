@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -939,6 +941,14 @@ changed is the project’s own (<a class="extlink-issue reference external" href
 <a class="reference internal" href="../../pcapkit/const/ipv4.html#pcapkit.const.ipv4.tos_pre.ToSPrecedence" title="pcapkit.const.ipv4.tos_pre.ToSPrecedence"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSPrecedence</span></code></a> keeps its <code class="docutils literal notranslate"><span class="pre">DATA</span></code> casing
 (<code class="docutils literal notranslate"><span class="pre">Network_Control</span></code>).</p></li>
 </ul>
+<p><strong>A crawler keeps what</strong> <a class="reference internal" href="../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.safe_name" title="pcapkit.vendor.default.Vendor.safe_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">safe_name()</span></code></a> <strong>would drop
+where dropping it merges distinct members.</strong> That default strips any parenthetical, which
+would name every DHKEM of <a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.hpke_kem_id.HpkeKemId" title="pcapkit.const.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">HpkeKemId</span></code></a> <code class="docutils literal notranslate"><span class="pre">DHKEM</span></code>,
+told apart only by its code, so its crawler keeps the text: <code class="docutils literal notranslate"><span class="pre">DHKEM(X25519,</span> <span class="pre">HKDF-SHA256)</span></code>
+is <code class="docutils literal notranslate"><span class="pre">DHKEM_X25519_HKDF_SHA256</span></code>. <a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionType</span></code></a>’s
+crawler keeps <code class="docutils literal notranslate"><span class="pre">(deprecated)</span></code> as a suffix on the same ground, since
+<code class="docutils literal notranslate"><span class="pre">connection_id_deprecated</span></code> (53) would otherwise merge with <code class="docutils literal notranslate"><span class="pre">connection_id</span></code> (54).
+Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2873">#2873</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2851">#2851</a>).</p>
 <p>And a folding override carries <strong>only</strong> the fold.
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.TransportProtocol.get" title="pcapkit.const.reg.apptype.apptype.TransportProtocol.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code></a> is
 the worked example: it lowers <code class="docutils literal notranslate"><span class="pre">key</span></code>, forwards <code class="docutils literal notranslate"><span class="pre">default</span></code> verbatim and delegates to
@@ -1339,12 +1349,27 @@ the map, tagged <code class="docutils literal notranslate"><span class="pre">#</
 classmethod and logs, and a bad argument writes nothing: <code class="docutils literal notranslate"><span class="pre">_check_code</span></code> checks
 the code against the map’s enum, or, with <code class="docutils literal notranslate"><span class="pre">kind=None</span></code>, as a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>
 where no enum keys the map; a parser named by string has to exist as a
-<code class="docutils literal notranslate"><span class="pre">_read_*</span></code> method; and a <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> entry has to be a
+<code class="docutils literal notranslate"><span class="pre">_read_*</span></code> method, and <code class="docutils literal notranslate"><span class="pre">_check_meth</span></code> refuses any other parser but a pair of
+two callables; and a <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> entry has to be a
 <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass or a descriptor naming
 one. A wrapper writing a <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> map also records the class’s name with
 <code class="docutils literal notranslate"><span class="pre">_register_name</span></code>, and one whose entries have a schema registry takes a
 keyword-only <code class="docutils literal notranslate"><span class="pre">schema</span></code>.</p></li>
 </ol>
+<p><strong>A wrapper takes the one entry its classmethod takes, under the classmethod’s
+parameter name</strong> – <code class="docutils literal notranslate"><span class="pre">protocol</span></code> for a <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> map, <code class="docutils literal notranslate"><span class="pre">meth</span></code> for a parser map,
+and <code class="docutils literal notranslate"><span class="pre">engine</span></code>, <code class="docutils literal notranslate"><span class="pre">dumper</span></code>, <code class="docutils literal notranslate"><span class="pre">reassembly</span></code>, <code class="docutils literal notranslate"><span class="pre">traceflow</span></code>, <code class="docutils literal notranslate"><span class="pre">adapter</span></code> or <code class="docutils literal notranslate"><span class="pre">callback</span></code>
+in <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">foundation</span></code></a> – never a module name and a class
+name to build a <a class="reference internal" href="../../pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> from, which the
+caller writes itself. Whatever follows the entry is keyword-only, as
+<a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_apptype" title="pcapkit.foundation.registry.protocols.transport.register_apptype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_apptype()</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">transport</span></code> is. Settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2834">#2834</a> and specified on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>, with no
+shim. A callback goes in through
+<a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_callback()</span></code></a> or
+<a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_callback" title="pcapkit.foundation.registry.foundation.register_traceflow_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_traceflow_callback()</span></code></a>, each
+taking the name its class is registered by in the extractor, so one function reaches
+every registered class. <code class="file docutils literal notranslate"><span class="pre">tests/foundation/registry/test_registry_wrapper_signatures_2838_unit.py</span></code>
+fails on a wrapper whose parameters are not its classmethod’s.</p>
 <p><strong>The wrappers are split by layer</strong>, one submodule of
 <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> per subpackage of
 <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> – <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols.link" title="pcapkit.foundation.registry.protocols.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">link</span></code></a>,
@@ -1356,7 +1381,7 @@ module per protocol, since a per-layer file is a size a reader can scan
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2578">#2578</a>). A wrapper goes in the submodule matching the subpackage of the
 class owning its map, so the PCAP and PCAP-NG frames’ registrars are in
 <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols.misc" title="pcapkit.foundation.registry.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">misc</span></code></a>. What they share – <code class="docutils literal notranslate"><span class="pre">_check_code</span></code>,
-<code class="docutils literal notranslate"><span class="pre">_register_name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">_check_meth</span></code>, <code class="docutils literal notranslate"><span class="pre">_register_name</span></code>,
 <a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol()</span></code></a> and
 <a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> – is
 in <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols.protocol" title="pcapkit.foundation.registry.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">protocol</span></code></a>, named after
@@ -1420,6 +1445,7 @@ shape for a parser map:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_sctp_chunk</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">SCTP_Chunk</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">SCTP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_chunk_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid SCTP chunk parser function'</span><span class="p">)</span>
 

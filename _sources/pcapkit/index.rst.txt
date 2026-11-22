@@ -86,9 +86,9 @@ Command Line Tool
                            absent. With `--files`, the directory each frame's
                            report is written to.
      -f, --format format   The format of the report: "json", "plist" (or "xml"),
-                           "tree" (or "text", "txt") or "pcap" (or "cap"). Takes
-                           precedence over `--json`, `--plist` and `--tree`. With
-                           no format option, "tree" is used.
+                           "tree" (or "text", "txt"), "pcap" (or "cap") or
+                           "pcapng". Takes precedence over `--json`, `--plist`
+                           and `--tree`. With no format option, "tree" is used.
      -j, --json            Write the report as JSON, as `--format json` does.
                            Ignored if `--format` is given.
      -p, --plist           Write the report as a macOS property list, as

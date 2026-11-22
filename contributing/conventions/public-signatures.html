@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -599,7 +601,9 @@ adding a parameter moves no other.</p></li>
 <code class="docutils literal notranslate"><span class="pre">register_callback(callback,</span> <span class="pre">*,</span> <span class="pre">index=None)</span></code>, under no second name; and
 <code class="docutils literal notranslate"><span class="pre">analyze</span></code> is the one spelling, for a keyword as for a method.</p></li>
 <li><p><strong>A wrapper mirrors the signature of what it wraps</strong> – a <a class="reference internal" href="../../pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a>
-function that of the class it builds – and a test pins the two equal.</p></li>
+function that of the class it builds, and a <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a>
+function that of the classmethod it calls (<a class="reference internal" href="registry-protocol.html#registry-protocol"><span class="std std-ref">The Registry Protocol</span></a>) – and a test
+pins the two equal.</p></li>
 <li><p><strong>A real default is written in the signature.</strong> <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> means off, never a
 default chosen out of sight.</p></li>
 <li><p><strong>A keyword set is closed.</strong> An unknown keyword is refused, never accepted and

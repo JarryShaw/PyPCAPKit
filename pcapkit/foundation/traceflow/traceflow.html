@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -756,6 +758,12 @@ of the list</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 </dl>
+<p>Every callback runs on each finalised flow, once its output file holds
+every frame the entry lists. One raising an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> does not
+stop the rest, and the first such error propagates once they have run.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>A callback that raises no longer stops the ones after it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2855">#2855</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

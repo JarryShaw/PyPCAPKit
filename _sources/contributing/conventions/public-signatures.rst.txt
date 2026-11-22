@@ -21,7 +21,9 @@ The Rules
    ``register_callback(callback, *, index=None)``, under no second name; and
    ``analyze`` is the one spelling, for a keyword as for a method.
 #. **A wrapper mirrors the signature of what it wraps** -- a :mod:`pcapkit.interface`
-   function that of the class it builds -- and a test pins the two equal.
+   function that of the class it builds, and a :mod:`pcapkit.foundation.registry`
+   function that of the classmethod it calls (:ref:`registry-protocol`) -- and a test
+   pins the two equal.
 #. **A real default is written in the signature.** :obj:`None` means off, never a
    default chosen out of sight.
 #. **A keyword set is closed.** An unknown keyword is refused, never accepted and

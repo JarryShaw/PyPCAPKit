@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -595,6 +597,8 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">DTLS_Packet</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_frag.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">InterfaceDescriptionBlock</span> <span class="k">as</span> <span class="n">Data_InterfaceDescriptionBlock</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span><span class="p">,</span> <span class="n">Packet</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'dtls_reassembly'</span><span class="p">,</span>
@@ -815,7 +819,8 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">linktype</span><span class="p">,</span>                      <span class="c1"># data link type of the block's interface</span>
             <span class="n">index</span><span class="o">=</span><span class="n">frame_info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>                      <span class="c1"># frame number</span>
-            <span class="n">frame</span><span class="o">=</span><span class="n">block2frame</span><span class="p">(</span><span class="n">frame_info</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">),</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">block2frame</span><span class="p">(</span><span class="n">frame_info</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
+                              <span class="n">interface</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">section_context</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">frame_info</span><span class="o">.</span><span class="n">interface_id</span><span class="p">]),</span>
                                                           <span class="c1"># extracted frame info</span>
             <span class="n">syn</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>                              <span class="c1"># TCP synchronise (SYN) flag</span>
             <span class="n">fin</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>                              <span class="c1"># TCP finish (FIN) flag</span>
@@ -837,15 +842,23 @@
 
 <div class="viewcode-block" id="block2frame">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcapng.block2frame">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">block2frame</span><span class="p">(</span><span class="n">block</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Frame'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">block2frame</span><span class="p">(</span><span class="n">block</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="n">interface</span><span class="p">:</span> <span class="s1">'Optional[Data_InterfaceDescriptionBlock]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Frame'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Convert PCAP-NG block to PCAP frame.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        block: PCAP-NG block.</span>
 <span class="sd">        nanosecond: Whether to use nanosecond precision.</span>
+<span class="sd">        interface: The block's Interface Description Block, if known.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        PCAP frame.</span>
+<span class="sd">        PCAP frame. Given ``interface``, it keeps that and the block's options</span>
+<span class="sd">        under the metadata keys ``__interface__`` and ``__options__``, which</span>
+<span class="sd">        :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` writes back.</span>
+
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       Takes ``interface`` (:issue:`2835`).</span>
 
 <span class="sd">    """</span>
     <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span><span class="p">)</span>
@@ -867,6 +880,9 @@
         <span class="n">cap_len</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">captured_len</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">frame</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">interface</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'__interface__'</span><span class="p">,</span> <span class="n">interface</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">'__options__'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options_raw'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)))])</span>
     <span class="k">return</span> <span class="n">frame</span></div>
 
 </pre></div>

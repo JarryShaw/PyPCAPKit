@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -590,25 +592,34 @@
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.content_type.ContentType" title="pcapkit.vendor.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_ContentType</span></code></a></p></td>
-<td><p>TLS/DTLS Content Types <a class="footnote-reference brackets" href="#id8" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS/DTLS Content Types <a class="footnote-reference brackets" href="#id11" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.handshake_type.HandshakeType" title="pcapkit.vendor.tls.handshake_type.HandshakeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HandshakeType</span></code></a></p></td>
-<td><p>TLS/DTLS HandshakeType <a class="footnote-reference brackets" href="#id9" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS/DTLS HandshakeType <a class="footnote-reference brackets" href="#id12" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.extension_type.ExtensionType" title="pcapkit.vendor.tls.extension_type.ExtensionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_ExtensionType</span></code></a></p></td>
-<td><p>TLS/DTLS ExtensionType Values <a class="footnote-reference brackets" href="#id10" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS/DTLS ExtensionType Values <a class="footnote-reference brackets" href="#id13" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.ec_point_format.ECPointFormat" title="pcapkit.vendor.tls.ec_point_format.ECPointFormat"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_ECPointFormat</span></code></a></p></td>
-<td><p>TLS EC Point Formats <a class="footnote-reference brackets" href="#id11" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS EC Point Formats <a class="footnote-reference brackets" href="#id14" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.certificate_status_type.CertificateStatusType" title="pcapkit.vendor.tls.certificate_status_type.CertificateStatusType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_CertificateStatusType</span></code></a></p></td>
-<td><p>TLS Certificate Status Types <a class="footnote-reference brackets" href="#id12" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS Certificate Status Types <a class="footnote-reference brackets" href="#id15" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.psk_key_exchange_mode.PskKeyExchangeMode" title="pcapkit.vendor.tls.psk_key_exchange_mode.PskKeyExchangeMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_PskKeyExchangeMode</span></code></a></p></td>
-<td><p>TLS PskKeyExchangeMode Values <a class="footnote-reference brackets" href="#id13" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS PskKeyExchangeMode Values <a class="footnote-reference brackets" href="#id16" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm" title="pcapkit.vendor.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_CertificateCompressionAlgorithm</span></code></a></p></td>
-<td><p>TLS Certificate Compression Algorithm IDs <a class="footnote-reference brackets" href="#id14" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>♠<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS Certificate Compression Algorithm IDs <a class="footnote-reference brackets" href="#id17" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>♠<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId" title="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HpkeKemId</span></code></a></p></td>
+<td><p>HPKE KEM Identifiers <a class="footnote-reference brackets" href="#id18" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>♥<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId" title="pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HpkeKdfId</span></code></a></p></td>
+<td><p>HPKE KDF Identifiers <a class="footnote-reference brackets" href="#id19" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>♦<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId" title="pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HpkeAeadId</span></code></a></p></td>
+<td><p>HPKE AEAD Identifiers <a class="footnote-reference brackets" href="#id20" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>♣<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -824,35 +835,134 @@
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.vendor.tls.hpke_kem_id">
+<span id="hpke-kem-identifiers"></span><h2>HPKE KEM Identifiers<a class="headerlink" href="#module-pcapkit.vendor.tls.hpke_kem_id" title="Link to this heading">¶</a></h2>
+<p>Generates <a class="reference internal" href="../const/tls.html#pcapkit.const.tls.hpke_kem_id.HpkeKemId" title="pcapkit.const.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tls.hpke_kem_id.HpkeKemId</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tls.hpke_kem_id.</span></span><span class="sig-name descname"><span class="pre">HpkeKemId</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tls/hpke_kem_id.html#HpkeKemId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>HPKE KEM Identifiers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hpke/hpke-kem-ids.csv'</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId.REFERENCE">
+<span class="sig-name descname"><span class="pre">REFERENCE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId.REFERENCE" title="Link to this definition">¶</a></dt>
+<dd><p>Column of the <code class="docutils literal notranslate"><span class="pre">Reference</span></code> cell.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.tls.hpke_kdf_id">
+<span id="hpke-kdf-identifiers"></span><h2>HPKE KDF Identifiers<a class="headerlink" href="#module-pcapkit.vendor.tls.hpke_kdf_id" title="Link to this heading">¶</a></h2>
+<p>Generates <a class="reference internal" href="../const/tls.html#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId" title="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tls.hpke_kdf_id.HpkeKdfId</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tls.hpke_kdf_id.</span></span><span class="sig-name descname"><span class="pre">HpkeKdfId</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tls/hpke_kdf_id.html#HpkeKdfId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId" title="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">HpkeKemId</span></code></a></p>
+<p>HPKE KDF Identifiers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hpke/hpke-kdf-ids.csv'</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId.REFERENCE">
+<span class="sig-name descname"><span class="pre">REFERENCE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId.REFERENCE" title="Link to this definition">¶</a></dt>
+<dd><p>Column of the <code class="docutils literal notranslate"><span class="pre">Reference</span></code> cell.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.tls.hpke_aead_id">
+<span id="hpke-aead-identifiers"></span><h2>HPKE AEAD Identifiers<a class="headerlink" href="#module-pcapkit.vendor.tls.hpke_aead_id" title="Link to this heading">¶</a></h2>
+<p>Generates <a class="reference internal" href="../const/tls.html#pcapkit.const.tls.hpke_aead_id.HpkeAeadId" title="pcapkit.const.tls.hpke_aead_id.HpkeAeadId"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tls.hpke_aead_id.HpkeAeadId</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tls.hpke_aead_id.</span></span><span class="sig-name descname"><span class="pre">HpkeAeadId</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tls/hpke_aead_id.html#HpkeAeadId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId" title="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">HpkeKemId</span></code></a></p>
+<p>HPKE AEAD Identifiers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hpke/hpke-aead-ids.csv'</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId.REFERENCE">
+<span class="sig-name descname"><span class="pre">REFERENCE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId.REFERENCE" title="Link to this definition">¶</a></dt>
+<dd><p>Column of the <code class="docutils literal notranslate"><span class="pre">Reference</span></code> cell.</p>
+</dd></dl>
+
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id8" role="doc-footnote">
+<aside class="footnote brackets" id="id11" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5</a></p>
 </aside>
-<aside class="footnote brackets" id="id9" role="doc-footnote">
+<aside class="footnote brackets" id="id12" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7</a></p>
 </aside>
-<aside class="footnote brackets" id="id10" role="doc-footnote">
+<aside class="footnote brackets" id="id13" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1">https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1</a></p>
 </aside>
-<aside class="footnote brackets" id="id11" role="doc-footnote">
+<aside class="footnote brackets" id="id14" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">§</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-9">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-9</a></p>
 </aside>
-<aside class="footnote brackets" id="id12" role="doc-footnote">
+<aside class="footnote brackets" id="id15" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">¶</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status">https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status</a></p>
 </aside>
-<aside class="footnote brackets" id="id13" role="doc-footnote">
+<aside class="footnote brackets" id="id16" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">#</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode</a></p>
 </aside>
-<aside class="footnote brackets" id="id14" role="doc-footnote">
+<aside class="footnote brackets" id="id17" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">♠</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids">https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids</a></p>
+</aside>
+<aside class="footnote brackets" id="id18" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">♥</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kem-ids">https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kem-ids</a></p>
+</aside>
+<aside class="footnote brackets" id="id19" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">♦</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kdf-ids">https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kdf-ids</a></p>
+</aside>
+<aside class="footnote brackets" id="id20" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">♣</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-aead-ids">https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-aead-ids</a></p>
 </aside>
 </aside>
 </section>
@@ -921,6 +1031,9 @@
 <li><a class="reference internal" href="#module-pcapkit.vendor.tls.certificate_status_type">TLS Certificate Status Types</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.tls.psk_key_exchange_mode">TLS PskKeyExchangeMode Values</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.tls.certificate_compression_algorithm">TLS Certificate Compression Algorithm IDs</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.tls.hpke_kem_id">HPKE KEM Identifiers</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.tls.hpke_kdf_id">HPKE KDF Identifiers</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.tls.hpke_aead_id">HPKE AEAD Identifiers</a></li>
 </ul>
 </li>
 </ul>

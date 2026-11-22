@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -590,25 +592,34 @@
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_ContentType</span></code></a></p></td>
-<td><p>TLS/DTLS Content Types <a class="footnote-reference brackets" href="#id8" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS/DTLS Content Types <a class="footnote-reference brackets" href="#id11" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HandshakeType</span></code></a></p></td>
-<td><p>TLS/DTLS HandshakeType <a class="footnote-reference brackets" href="#id9" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS/DTLS HandshakeType <a class="footnote-reference brackets" href="#id12" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_ExtensionType</span></code></a></p></td>
-<td><p>TLS/DTLS ExtensionType Values <a class="footnote-reference brackets" href="#id10" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS/DTLS ExtensionType Values <a class="footnote-reference brackets" href="#id13" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tls.ec_point_format.ECPointFormat" title="pcapkit.const.tls.ec_point_format.ECPointFormat"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_ECPointFormat</span></code></a></p></td>
-<td><p>TLS EC Point Formats <a class="footnote-reference brackets" href="#id11" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS EC Point Formats <a class="footnote-reference brackets" href="#id14" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tls.certificate_status_type.CertificateStatusType" title="pcapkit.const.tls.certificate_status_type.CertificateStatusType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_CertificateStatusType</span></code></a></p></td>
-<td><p>TLS Certificate Status Types <a class="footnote-reference brackets" href="#id12" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS Certificate Status Types <a class="footnote-reference brackets" href="#id15" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tls.psk_key_exchange_mode.PskKeyExchangeMode" title="pcapkit.const.tls.psk_key_exchange_mode.PskKeyExchangeMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_PskKeyExchangeMode</span></code></a></p></td>
-<td><p>TLS PskKeyExchangeMode Values <a class="footnote-reference brackets" href="#id13" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS PskKeyExchangeMode Values <a class="footnote-reference brackets" href="#id16" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm" title="pcapkit.const.tls.certificate_compression_algorithm.CertificateCompressionAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_CertificateCompressionAlgorithm</span></code></a></p></td>
-<td><p>TLS Certificate Compression Algorithm IDs <a class="footnote-reference brackets" href="#id14" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>♠<span class="fn-bracket">]</span></a></p></td>
+<td><p>TLS Certificate Compression Algorithm IDs <a class="footnote-reference brackets" href="#id17" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>♠<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId" title="pcapkit.const.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HpkeKemId</span></code></a></p></td>
+<td><p>HPKE KEM Identifiers <a class="footnote-reference brackets" href="#id18" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>♥<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId" title="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HpkeKdfId</span></code></a></p></td>
+<td><p>HPKE KDF Identifiers <a class="footnote-reference brackets" href="#id19" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>♦<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId" title="pcapkit.const.tls.hpke_aead_id.HpkeAeadId"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS_HpkeAeadId</span></code></a></p></td>
+<td><p>HPKE AEAD Identifiers <a class="footnote-reference brackets" href="#id20" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>♣<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -1740,35 +1751,376 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.const.tls.hpke_kem_id">
+<span id="hpke-kem-identifiers"></span><h2>HPKE KEM Identifiers<a class="headerlink" href="#module-pcapkit.const.tls.hpke_kem_id" title="Link to this heading">¶</a></h2>
+<p>Generated from <a class="reference internal" href="../vendor/tls.html#pcapkit.vendor.tls.hpke_kem_id.HpkeKemId" title="pcapkit.vendor.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.hpke_kem_id.HpkeKemId</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tls.hpke_kem_id.</span></span><span class="sig-name descname"><span class="pre">HpkeKemId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_kem_id.html#HpkeKemId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[HpkeKemId] HPKE KEM Identifiers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.Reserved_0x0000">
+<span class="sig-name descname"><span class="pre">Reserved_0x0000</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.Reserved_0x0000" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved [RFC-ietf-hpke-hpke-06]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_P_256_HKDF_SHA256">
+<span class="sig-name descname"><span class="pre">DHKEM_P_256_HKDF_SHA256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_P_256_HKDF_SHA256" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(P-256, HKDF-SHA256) [NISTCurves][<span class="target" id="index-141"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_P_384_HKDF_SHA384">
+<span class="sig-name descname"><span class="pre">DHKEM_P_384_HKDF_SHA384</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_P_384_HKDF_SHA384" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(P-384, HKDF-SHA384) [NISTCurves][<span class="target" id="index-142"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_P_521_HKDF_SHA512">
+<span class="sig-name descname"><span class="pre">DHKEM_P_521_HKDF_SHA512</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_P_521_HKDF_SHA512" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(P-521, HKDF-SHA512) [NISTCurves][<span class="target" id="index-143"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_CP_256_HKDF_SHA256">
+<span class="sig-name descname"><span class="pre">DHKEM_CP_256_HKDF_SHA256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_CP_256_HKDF_SHA256" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(CP-256, HKDF-SHA256)
+[NISTCurves][<span class="target" id="index-144"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6090.html"><strong>RFC 6090</strong></a>][draft-irtf-cfrg-dnhpke-01]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_CP_384_HKDF_SHA384">
+<span class="sig-name descname"><span class="pre">DHKEM_CP_384_HKDF_SHA384</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_CP_384_HKDF_SHA384" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(CP-384, HKDF-SHA384)
+[NISTCurves][<span class="target" id="index-145"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6090.html"><strong>RFC 6090</strong></a>][draft-irtf-cfrg-dnhpke-01]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_CP_521_HKDF_SHA512">
+<span class="sig-name descname"><span class="pre">DHKEM_CP_521_HKDF_SHA512</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_CP_521_HKDF_SHA512" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(CP-521, HKDF-SHA512)
+[NISTCurves][<span class="target" id="index-146"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6090.html"><strong>RFC 6090</strong></a>][draft-irtf-cfrg-dnhpke-01]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_secp256k1_HKDF_SHA256">
+<span class="sig-name descname"><span class="pre">DHKEM_secp256k1_HKDF_SHA256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_secp256k1_HKDF_SHA256" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(secp256k1, HKDF-SHA256) [Standards for Efficient Cryptography 2 (SEC
+2)][draft-wahby-cfrg-hpke-kem-secp256k1-01]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_X25519_HKDF_SHA256">
+<span class="sig-name descname"><span class="pre">DHKEM_X25519_HKDF_SHA256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_X25519_HKDF_SHA256" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(X25519, HKDF-SHA256) [<span class="target" id="index-147"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>][<span class="target" id="index-148"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7748.html"><strong>RFC 7748</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_X448_HKDF_SHA512">
+<span class="sig-name descname"><span class="pre">DHKEM_X448_HKDF_SHA512</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_X448_HKDF_SHA512" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(X448, HKDF-SHA512) [<span class="target" id="index-149"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>][<span class="target" id="index-150"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7748.html"><strong>RFC 7748</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_X25519_Elligator_HKDF_SHA256">
+<span class="sig-name descname"><span class="pre">DHKEM_X25519_Elligator_HKDF_SHA256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.DHKEM_X25519_Elligator_HKDF_SHA256" title="Link to this definition">¶</a></dt>
+<dd><p>DHKEM(X25519+Elligator, HKDF-SHA256) [<a class="reference external" href="https://lsd.gnunet.org/lsd0011/">https://lsd.gnunet.org/lsd0011/</a>]
+[draft-schanzen-hpke-elligator-kem-01]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.X25519Kyber768Draft00">
+<span class="sig-name descname"><span class="pre">X25519Kyber768Draft00</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">48</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.X25519Kyber768Draft00" title="Link to this definition">¶</a></dt>
+<dd><p>X25519Kyber768Draft00 [draft-westerbaan-cfrg-hpke-xyber768d00-02]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.ML_KEM_512">
+<span class="sig-name descname"><span class="pre">ML_KEM_512</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.ML_KEM_512" title="Link to this definition">¶</a></dt>
+<dd><p>ML-KEM-512 [draft-connolly-cfrg-hpke-mlkem-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.ML_KEM_768">
+<span class="sig-name descname"><span class="pre">ML_KEM_768</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.ML_KEM_768" title="Link to this definition">¶</a></dt>
+<dd><p>ML-KEM-768 [draft-connolly-cfrg-hpke-mlkem-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.ML_KEM_1024">
+<span class="sig-name descname"><span class="pre">ML_KEM_1024</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">66</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.ML_KEM_1024" title="Link to this definition">¶</a></dt>
+<dd><p>ML-KEM-1024 [draft-connolly-cfrg-hpke-mlkem-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.MLKEM768_P256">
+<span class="sig-name descname"><span class="pre">MLKEM768_P256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">80</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.MLKEM768_P256" title="Link to this definition">¶</a></dt>
+<dd><p>MLKEM768-P256 [draft-ietf-hpke-pq-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.MLKEM1024_P384">
+<span class="sig-name descname"><span class="pre">MLKEM1024_P384</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">81</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.MLKEM1024_P384" title="Link to this definition">¶</a></dt>
+<dd><p>MLKEM1024-P384 [draft-ietf-hpke-pq-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId.X_Wing">
+<span class="sig-name descname"><span class="pre">X_Wing</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25722</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId.X_Wing" title="Link to this definition">¶</a></dt>
+<dd><p>X-Wing [draft-connolly-cfrg-xwing-kem-06]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId._validate_value">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_kem_id.html#HpkeKemId._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId._validate_value" title="Link to this definition">¶</a></dt>
+<dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it passes the range check <a class="reference internal" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId._missing_" title="pcapkit.const.tls.hpke_kem_id.HpkeKemId._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
+with that check and the message it raises, so
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
+values <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the
+same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Value about to be looked up or minted.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check. A
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> caller is
+    unaffected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kem_id.HpkeKemId._missing_">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_kem_id.html#HpkeKemId._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId._missing_" title="Link to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.tls.hpke_kem_id.HpkeKemId" title="pcapkit.const.tls.hpke_kem_id.HpkeKemId"><code class="xref py py-class docutils literal notranslate"><span class="pre">HpkeKemId</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.const.tls.hpke_kdf_id">
+<span id="hpke-kdf-identifiers"></span><h2>HPKE KDF Identifiers<a class="headerlink" href="#module-pcapkit.const.tls.hpke_kdf_id" title="Link to this heading">¶</a></h2>
+<p>Generated from <a class="reference internal" href="../vendor/tls.html#pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId" title="pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.hpke_kdf_id.HpkeKdfId</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tls.hpke_kdf_id.</span></span><span class="sig-name descname"><span class="pre">HpkeKdfId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_kdf_id.html#HpkeKdfId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[HpkeKdfId] HPKE KDF Identifiers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.Reserved_0x0000">
+<span class="sig-name descname"><span class="pre">Reserved_0x0000</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.Reserved_0x0000" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved [RFC-ietf-hpke-hpke-06]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.HKDF_SHA256">
+<span class="sig-name descname"><span class="pre">HKDF_SHA256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.HKDF_SHA256" title="Link to this definition">¶</a></dt>
+<dd><p>HKDF-SHA256 [<span class="target" id="index-151"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.HKDF_SHA384">
+<span class="sig-name descname"><span class="pre">HKDF_SHA384</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.HKDF_SHA384" title="Link to this definition">¶</a></dt>
+<dd><p>HKDF-SHA384 [<span class="target" id="index-152"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.HKDF_SHA512">
+<span class="sig-name descname"><span class="pre">HKDF_SHA512</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.HKDF_SHA512" title="Link to this definition">¶</a></dt>
+<dd><p>HKDF-SHA512 [<span class="target" id="index-153"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5869.html"><strong>RFC 5869</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.SHAKE128">
+<span class="sig-name descname"><span class="pre">SHAKE128</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.SHAKE128" title="Link to this definition">¶</a></dt>
+<dd><p>SHAKE128 [draft-ietf-hpke-pq-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.SHAKE256">
+<span class="sig-name descname"><span class="pre">SHAKE256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.SHAKE256" title="Link to this definition">¶</a></dt>
+<dd><p>SHAKE256 [draft-ietf-hpke-pq-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.TurboSHAKE128">
+<span class="sig-name descname"><span class="pre">TurboSHAKE128</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.TurboSHAKE128" title="Link to this definition">¶</a></dt>
+<dd><p>TurboSHAKE128 [draft-ietf-hpke-pq-04]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.TurboSHAKE256">
+<span class="sig-name descname"><span class="pre">TurboSHAKE256</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId.TurboSHAKE256" title="Link to this definition">¶</a></dt>
+<dd><p>TurboSHAKE256 [draft-ietf-hpke-pq-04]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId._validate_value">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_kdf_id.html#HpkeKdfId._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId._validate_value" title="Link to this definition">¶</a></dt>
+<dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it passes the range check <a class="reference internal" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId._missing_" title="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
+with that check and the message it raises, so
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
+values <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the
+same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Value about to be looked up or minted.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check. A
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> caller is
+    unaffected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId._missing_">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_kdf_id.html#HpkeKdfId._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId._missing_" title="Link to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.tls.hpke_kdf_id.HpkeKdfId" title="pcapkit.const.tls.hpke_kdf_id.HpkeKdfId"><code class="xref py py-class docutils literal notranslate"><span class="pre">HpkeKdfId</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.const.tls.hpke_aead_id">
+<span id="hpke-aead-identifiers"></span><h2>HPKE AEAD Identifiers<a class="headerlink" href="#module-pcapkit.const.tls.hpke_aead_id" title="Link to this heading">¶</a></h2>
+<p>Generated from <a class="reference internal" href="../vendor/tls.html#pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId" title="pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.hpke_aead_id.HpkeAeadId</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tls.hpke_aead_id.</span></span><span class="sig-name descname"><span class="pre">HpkeAeadId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_aead_id.html#HpkeAeadId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[HpkeAeadId] HPKE AEAD Identifiers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId.Reserved_0x0000">
+<span class="sig-name descname"><span class="pre">Reserved_0x0000</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId.Reserved_0x0000" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved [RFC-ietf-hpke-hpke-06]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId.AES_128_GCM">
+<span class="sig-name descname"><span class="pre">AES_128_GCM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId.AES_128_GCM" title="Link to this definition">¶</a></dt>
+<dd><p>AES-128-GCM [GCM]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId.AES_256_GCM">
+<span class="sig-name descname"><span class="pre">AES_256_GCM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId.AES_256_GCM" title="Link to this definition">¶</a></dt>
+<dd><p>AES-256-GCM [GCM]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId.ChaCha20Poly1305">
+<span class="sig-name descname"><span class="pre">ChaCha20Poly1305</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId.ChaCha20Poly1305" title="Link to this definition">¶</a></dt>
+<dd><p>ChaCha20Poly1305 [<span class="target" id="index-154"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8439.html"><strong>RFC 8439</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId.Export_only">
+<span class="sig-name descname"><span class="pre">Export_only</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></span><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId.Export_only" title="Link to this definition">¶</a></dt>
+<dd><p>Export-only [RFC-ietf-hpke-hpke-06]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId._validate_value">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_aead_id.html#HpkeAeadId._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId._validate_value" title="Link to this definition">¶</a></dt>
+<dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it passes the range check <a class="reference internal" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId._missing_" title="pcapkit.const.tls.hpke_aead_id.HpkeAeadId._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
+with that check and the message it raises, so
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
+values <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the
+same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Value about to be looked up or minted.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check. A
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> caller is
+    unaffected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.tls.hpke_aead_id.HpkeAeadId._missing_">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/hpke_aead_id.html#HpkeAeadId._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId._missing_" title="Link to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.tls.hpke_aead_id.HpkeAeadId" title="pcapkit.const.tls.hpke_aead_id.HpkeAeadId"><code class="xref py py-class docutils literal notranslate"><span class="pre">HpkeAeadId</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id8" role="doc-footnote">
+<aside class="footnote brackets" id="id11" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5</a></p>
 </aside>
-<aside class="footnote brackets" id="id9" role="doc-footnote">
+<aside class="footnote brackets" id="id12" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7</a></p>
 </aside>
-<aside class="footnote brackets" id="id10" role="doc-footnote">
+<aside class="footnote brackets" id="id13" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1">https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1</a></p>
 </aside>
-<aside class="footnote brackets" id="id11" role="doc-footnote">
+<aside class="footnote brackets" id="id14" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">§</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-9">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-9</a></p>
 </aside>
-<aside class="footnote brackets" id="id12" role="doc-footnote">
+<aside class="footnote brackets" id="id15" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">¶</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status">https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#certificate-status</a></p>
 </aside>
-<aside class="footnote brackets" id="id13" role="doc-footnote">
+<aside class="footnote brackets" id="id16" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">#</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-pskkeyexchangemode</a></p>
 </aside>
-<aside class="footnote brackets" id="id14" role="doc-footnote">
+<aside class="footnote brackets" id="id17" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">♠</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids">https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-certificate-compression-algorithm-ids</a></p>
+</aside>
+<aside class="footnote brackets" id="id18" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">♥</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kem-ids">https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kem-ids</a></p>
+</aside>
+<aside class="footnote brackets" id="id19" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">♦</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kdf-ids">https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-kdf-ids</a></p>
+</aside>
+<aside class="footnote brackets" id="id20" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">♣</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-aead-ids">https://www.iana.org/assignments/hpke/hpke.xhtml#hpke-aead-ids</a></p>
 </aside>
 </aside>
 </section>
@@ -1837,6 +2189,9 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 <li><a class="reference internal" href="#module-pcapkit.const.tls.certificate_status_type">TLS Certificate Status Types</a></li>
 <li><a class="reference internal" href="#module-pcapkit.const.tls.psk_key_exchange_mode">TLS PskKeyExchangeMode Values</a></li>
 <li><a class="reference internal" href="#module-pcapkit.const.tls.certificate_compression_algorithm">TLS Certificate Compression Algorithm IDs</a></li>
+<li><a class="reference internal" href="#module-pcapkit.const.tls.hpke_kem_id">HPKE KEM Identifiers</a></li>
+<li><a class="reference internal" href="#module-pcapkit.const.tls.hpke_kdf_id">HPKE KDF Identifiers</a></li>
+<li><a class="reference internal" href="#module-pcapkit.const.tls.hpke_aead_id">HPKE AEAD Identifiers</a></li>
 </ul>
 </li>
 </ul>

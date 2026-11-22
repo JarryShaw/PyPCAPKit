@@ -75,6 +75,15 @@ takes stays a TLS layer with alias ``SSLv2``. So ``'SSL' in`` selects both TLS a
 DTLS layers, while ``'SSLv3' in`` and ``'SSLv2' in`` select no layer port 443 parsed;
 only ``frame.protochain`` matches those two, by alias.
 
+**A TLS extension decodes only where its RFC defines it**, ruled in review of
+:pr:`2874` (:issue:`2853`): in the handshake messages that RFC names, and in a DTLS
+record alone for a type the IANA registry marks DTLS-only, as ``connection_id``
+(:rfc:`9146#section-10.2`). Anywhere else its octets are kept, and ``make`` refuses
+to build it from keyword arguments. The shared decoders learn the record layer from
+:attr:`SSL._dtls <pcapkit.protocols.application.ssl.protocol.SSL._dtls>`, which
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS` sets, rather than by
+testing for their member.
+
 .. _protocol-family-dispatch:
 
 Dispatching Bases
@@ -225,7 +234,11 @@ A parse whose refusal a fallback absorbs without
 ``CaughtByCaller(ProtocolError)`` around it, as
 :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
 keeps a body that does not decode raw -- an application of :issue:`2588`'s rule rather
-than a ruling of its own.
+than a ruling of its own. :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+and :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
+keep a payload that does not parse as a ``Raw`` the same way, log any other error at
+:data:`logging.WARNING` as :func:`~pcapkit.corekit.decorators.beholder` does, and drop
+the failed parse's warnings as a replaced next layer's are dropped (:issue:`2862`).
 
 **The block spans the whole call to the next layer**, not the refusal alone. Every
 :exc:`~pcapkit.utilities.exceptions.ProtocolError` built while that call is on the

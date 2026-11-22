@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -698,6 +700,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.extlen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Data_IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Schema_IPv6_Ext</span>
@@ -1037,7 +1040,7 @@
             <span class="c1"># RFC 6564 §4 (MUST): Hdr Ext Len is in 8-octet units, excluding</span>
             <span class="c1"># the first 8 octets. Also the best generic guess when ``alias``</span>
             <span class="c1"># named no known extension header.</span>
-            <span class="n">nominal</span> <span class="o">=</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
+            <span class="n">nominal</span> <span class="o">=</span> <span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nominal</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="c1"># Warns like the house convention but stops rather than clips; see</span>

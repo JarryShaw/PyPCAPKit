@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -729,8 +731,9 @@ Fragment header behind an AH, Mobility, HIP or Shim6 header</p></td>
 <a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a>,
 <a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> and
 <a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
-<td><p>no PCAP output, since each frame reaches the writer as a
-plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> – <code class="docutils literal notranslate"><span class="pre">json</span></code> is written instead, with a
+<td><p>no PCAP or PCAP-NG output, since each frame reaches the
+writer as a plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> – <code class="docutils literal notranslate"><span class="pre">json</span></code> is written
+instead, with a
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.FormatWarning" title="pcapkit.utilities.warnings.FormatWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">FormatWarning</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a></p></td>

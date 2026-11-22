@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -689,6 +691,13 @@ pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
 calls, stays in <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#module-pcapkit.protocols.internet.ipv6.schema" title="pcapkit.protocols.internet.ipv6.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.schema</span></code></a>. The IPv6 option
 helpers in <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext.schema" title="pcapkit.protocols.internet.ipv6_ext.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.schema</span></code></a> belong to the HOPOPT
 and IPv6-Opts headers that share them, and stay there too.</p>
+<p><strong>A header’s length converts to and from a field counting 8-octet units not
+including the first 8 octets</strong> [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html#section-4"><strong>RFC 6564 Section 4</strong></a>] through
+<a class="reference internal" href="../../pcapkit/corekit/schema/extlen.html#module-pcapkit.corekit.schema.extlen" title="pcapkit.corekit.schema.extlen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.extlen</span></code></a>, MH’s and HIP’s included (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2854">#2854</a>).
+AH counts 4-octet units with a bias of 2 [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.2"><strong>RFC 4302 Section 2.2</strong></a>], so it keeps
+its own arithmetic. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_ext_len_arithmetic_2854_unit.py</span></code>
+fails on <code class="docutils literal notranslate"><span class="pre">(field</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">*</span> <span class="pre">8</span></code>, split across a call or not, or its inverse written
+out anywhere else in <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
 <p>The field modules and the protocols import these helpers, so a helper module imports
 neither, nor <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>, outside an <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> block. The
 package’s <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> imports none of its modules, so a field module loads only the

@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -655,6 +657,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.extlen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span><span class="p">,</span> <span class="n">octets_to_ext_len</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
@@ -2166,9 +2169,9 @@
 
         <span class="c1"># NOTE: A capture cut short rebuilds with the Header Len it declared, not one</span>
         <span class="c1"># worked out from the message, and its short read cuts the rest (#2669).</span>
-        <span class="n">header_len</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">header_len</span> <span class="o">=</span> <span class="n">octets_to_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_MH</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">header_len</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">header_len</span> <span class="o">=</span> <span class="n">octets_to_ext_len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
         <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_MH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>
@@ -2189,7 +2192,7 @@
 
                 <span class="c1"># NOTE: Over this header alone, whose Header Len is also the pseudo-header's</span>
                 <span class="c1"># length (RFC 6275 section 6.1.1); the payload is not covered.</span>
-                <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">header_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header_len</span><span class="p">)</span>
                 <span class="n">schema</span><span class="o">.</span><span class="n">chksum</span> <span class="o">=</span> <span class="n">compute_checksum</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">length</span><span class="p">],</span>
                                                  <span class="n">prefix</span><span class="o">=</span><span class="n">_PSEUDO_HEADER</span><span class="o">.</span><span class="n">klass</span><span class="p">(</span><span class="n">pseudo</span><span class="p">,</span> <span class="n">length</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">schema</span></div>
@@ -2398,7 +2401,8 @@
 <span class="sd">            :class:`~pcapkit.utilities.warnings.ProtocolWarning` says so.</span>
 
 <span class="sd">            Appending is necessary rather than optional: ``length`` is</span>
-<span class="sd">            ``(len(data) + 6) // 8 - 1``, which floors, so leaving an opaque body</span>
+<span class="sd">            :func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len` of</span>
+<span class="sd">            ``len(data) + 6``, which floors, so leaving an opaque body</span>
 <span class="sd">            short would emit 10, 12 or 14 octets while declaring 8, and a parser reads</span>
 <span class="sd">            8 and misinterprets the remainder. Since the caller asked for a packet</span>
 <span class="sd">            to be built and the shortfall is recoverable, completing it beats</span>
@@ -2455,7 +2459,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnknownMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2494,7 +2498,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingRefreshRequestMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2538,7 +2542,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeTestInitMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2583,7 +2587,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestInitMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2632,7 +2636,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeTestMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2682,7 +2686,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2730,7 +2734,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingUpdateMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2790,7 +2794,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingAcknowledgementMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2847,7 +2851,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingErrorMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2899,7 +2903,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastBindingUpdateMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -2961,7 +2965,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastBindingAcknowledgmentMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3011,7 +3015,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastNeighborAdvertisementMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3059,7 +3063,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ExperimentalMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3118,7 +3122,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeAgentSwitchMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3167,7 +3171,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HeartbeatMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3218,7 +3222,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoverInitiateMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3273,7 +3277,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoverAcknowledgeMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3347,7 +3351,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingRevocationMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3401,7 +3405,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LocalizedRoutingInitiationMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3452,7 +3456,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LocalizedRoutingAcknowledgmentMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3502,7 +3506,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UpdateNotificationMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3549,7 +3553,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UpdateNotificationAcknowledgementMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3616,7 +3620,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FlowBindingMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3665,7 +3669,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SubscriptionQueryMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -3707,7 +3711,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SubscriptionResponseMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
@@ -11623,30 +11627,6 @@
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_mh_message_length</span><span class="p">(</span><span class="n">header_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Compute the total on-the-wire MH header length for a given ``Header Len``.</span>
-
-<span class="sd">        Per :rfc:`6275#section-6.1.1`, ``Header Len`` is *"the length of the</span>
-<span class="sd">        Mobility Header, in units of 8 octets, excluding the first 8</span>
-<span class="sd">        octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,</span>
-<span class="sd">        or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``</span>
-<span class="sd">        below reports this value as the parsed message's own ``.length``,</span>
-<span class="sd">        which :meth:`~pcapkit.protocols.internet.mh.protocol.MH.read` subtracts from the</span>
-<span class="sd">        outer packet length to find the next layer's length. It is the inverse</span>
-<span class="sd">        of :meth:`make`'s ``(len(data_val) + 6) // 8 - 1``. Do NOT drop the</span>
-<span class="sd">        ``+ 1``: the units either side of it differ (octets vs. 8-octet</span>
-<span class="sd">        units), and dropping the offset silently reinterprets the field.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            header_len: raw ``Header Len`` field value, as read off the wire.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Total length, in octets, of the on-the-wire MH header.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">header_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_mh_option_length</span><span class="p">(</span><span class="n">schema_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>

@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -580,7 +582,7 @@
 <span class="sd">   this module's functions (:issue:`2578`).</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.linux.arphrd</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARPHRD</span> <span class="k">as</span> <span class="n">Enum_ARPHRD</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ppp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span> <span class="k">as</span> <span class="n">Enum_PPP_Protocol</span>
@@ -588,8 +590,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_register_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_check_meth</span><span class="p">,</span> <span class="n">_register_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.frad.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRAD</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.linux_sll.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinuxSLL</span>
@@ -606,7 +607,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ppp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControlConstructor</span> <span class="k">as</span> <span class="n">PPP_ControlConstructor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ppp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControlParser</span> <span class="k">as</span> <span class="n">PPP_ControlParser</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap.protocol</span><span class="w"> </span><span class="kn">import</span> \
@@ -631,78 +631,52 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <span class="c1"># NOTE: pcapkit.protocols.link.link.Link.__proto__</span>
 <div class="viewcode-block" id="register_ethertype">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_ethertype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                       <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.link.link.Link.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.ethertype.EtherType`</span>
-<span class="sd">            member, e.g. a member of another enum, or ``module``</span>
+<span class="sd">            member, e.g. a member of another enum, or ``protocol``</span>
 <span class="sd">            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            subclass.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_EtherType</span><span class="p">,</span> <span class="n">Link</span><span class="p">)</span>  <span class="c1"># type: ignore[type-abstract]</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Link</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Link</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered ethertype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Link</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">Link</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_loopback</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_loopback</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.link.loopback.protocol.Loopback.__proto__</span>
 <div class="viewcode-block" id="register_loopback">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_loopback">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_loopback</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                      <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_loopback</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.link.loopback.protocol.Loopback.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: BSD address family</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        Unlike :func:`register_ethertype`, ``code`` is an address family,</span>
@@ -712,42 +686,29 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is</span>
 <span class="sd">            not accepted, even though it is one), or is a member of an enum, or</span>
-<span class="sd">            ``module`` is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
+<span class="sd">            ``protocol`` is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            subclass.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Loopback</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Loopback</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Loopback</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered loopback address family: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Loopback</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">Loopback</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_arphrd</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_ARPHRD'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_arphrd</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_ARPHRD'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__</span>
 <div class="viewcode-block" id="register_arphrd">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_arphrd">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_arphrd</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_ARPHRD'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_arphrd</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_ARPHRD'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__` registry, so</span>
@@ -756,56 +717,41 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: ARP hardware type as in :class:`~pcapkit.const.linux.arphrd.ARPHRD`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.linux.arphrd.ARPHRD`</span>
-<span class="sd">            member, e.g. a member of another enum, or ``module``</span>
+<span class="sd">            member, e.g. a member of another enum, or ``protocol``</span>
 <span class="sd">            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            subclass.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_ARPHRD</span><span class="p">,</span> <span class="n">LinuxSLL</span><span class="p">)</span>  <span class="c1"># type: ignore[type-abstract]</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">LinuxSLL</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">LinuxSLL</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered ARPHRD protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">LinuxSLL</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">LinuxSLL</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_frad</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_frad</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.link.frad.protocol.FRAD.__proto__</span>
 <div class="viewcode-block" id="register_frad">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_frad">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_frad</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_frad</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.link.frad.protocol.FRAD.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: NLPID, after resolving the ``0x00`` pad ahead of a SNAP header</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is</span>
@@ -813,44 +759,30 @@
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">FRAD</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">FRAD</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">FRAD</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered FRAD NLPID: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">FRAD</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">FRAD</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_netlink</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_netlink</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.link.netlink.protocol.Netlink.__proto__</span>
 <div class="viewcode-block" id="register_netlink">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_netlink">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_netlink</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_netlink</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.link.netlink.protocol.Netlink.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: ``nlmsg_type`` of the dissected message</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is</span>
@@ -858,64 +790,48 @@
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Netlink</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Netlink</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Netlink</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered Netlink message type: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Netlink</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">Netlink</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ppp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_PPP_Protocol'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ppp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_PPP_Protocol'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.link.ppp.protocol.PPP.__proto__</span>
 <div class="viewcode-block" id="register_ppp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_ppp">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_ppp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_PPP_Protocol'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_ppp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_PPP_Protocol'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.link.ppp.protocol.PPP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: PPP protocol number as in :class:`~pcapkit.const.ppp.protocol.Protocol`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ppp.protocol.Protocol`</span>
-<span class="sd">            member, e.g. a member of another enum, or ``module`` is not a</span>
+<span class="sd">            member, e.g. a member of another enum, or ``protocol`` is not a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
 
 <span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_PPP_Protocol</span><span class="p">,</span> <span class="n">PPP</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">PPP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">PPP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered PPP protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">PPP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">PPP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -946,13 +862,14 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ppp.protocol.Protocol`</span>
 <span class="sd">            member, ``meth`` is a name with no matching ``_read_control_*``</span>
-<span class="sd">            method, or ``schema`` is not a</span>
+<span class="sd">            method or neither a name nor a pair of two callables, or ``schema`` is not a</span>
 <span class="sd">            :class:`~pcapkit.protocols.link.ppp.schema.ControlPacket` subclass.</span>
 
 <span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_PPP_Protocol</span><span class="p">,</span> <span class="n">PPP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">PPP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PPP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_control_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a PPP control packet parser function'</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_PPP_ControlPacket</span><span class="p">)):</span>
@@ -965,22 +882,11 @@
 
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_radiotap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_radiotap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <span class="c1"># NOTE: pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__</span>
 <div class="viewcode-block" id="register_radiotap">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_radiotap">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_radiotap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                      <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_radiotap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__` registry, keyed</span>
@@ -992,28 +898,25 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: link type as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">            member, e.g. a member of another enum, or ``module``</span>
+<span class="sd">            member, e.g. a member of another enum, or ``protocol``</span>
 <span class="sd">            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            subclass.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="p">,</span> <span class="n">Radiotap</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Radiotap</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Radiotap</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered radiotap link type: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Radiotap</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">Radiotap</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1048,12 +951,14 @@
 <span class="sd">        RegistryError: If ``code`` is not a</span>
 <span class="sd">            :class:`~pcapkit.const.radiotap.field_type.FieldType` member, e.g.</span>
 <span class="sd">            a member of another enum, or ``meth`` is a name with no matching</span>
-<span class="sd">            ``_read_field_*`` method.</span>
+<span class="sd">            ``_read_field_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Radiotap_FieldType</span><span class="p">,</span> <span class="n">Radiotap</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">Radiotap</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Radiotap</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_field_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a radiotap field parser function'</span><span class="p">)</span>
 

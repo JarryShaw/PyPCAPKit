@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -594,6 +596,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeekableStream</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">,</span> <span class="n">can_seek</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">restore_shipped</span><span class="p">,</span> <span class="n">restore_shipped_dumper</span><span class="p">,</span> <span class="n">same_entry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines</span><span class="w"> </span><span class="kn">import</span> <span class="n">_pcap_backend</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span><span class="p">,</span> <span class="n">EngineBase</span>
@@ -605,7 +608,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlow</span><span class="p">,</span> <span class="n">TraceFlowBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.interface.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">restore_shipped</span><span class="p">,</span> <span class="n">restore_shipped_dumper</span><span class="p">,</span> <span class="n">same_entry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CallableError</span><span class="p">,</span> <span class="n">FileNotFound</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">IterableError</span><span class="p">,</span>
                                           <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -635,7 +637,7 @@
     <span class="c1">#: &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__&gt;` -- both</span>
     <span class="c1">#: registries expose the same keys, so ``'cap'`` and the ``'txt'``/``'xml'``</span>
     <span class="c1">#: aliases are spellable for a type checker as they are accepted at runtime.</span>
-    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'text'</span><span class="p">,</span> <span class="s1">'txt'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">,</span> <span class="s1">'xml'</span><span class="p">]</span>
+    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'text'</span><span class="p">,</span> <span class="s1">'txt'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">,</span> <span class="s1">'xml'</span><span class="p">]</span>
     <span class="c1"># NOTE: deliberately duplicated verbatim in ``pcapkit.interface.misc``; update</span>
     <span class="c1"># both copies when a new engine lands.</span>
     <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span>
@@ -869,6 +871,7 @@
         <span class="p">{</span>
             <span class="s1">'pcap'</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.dumpkit'</span><span class="p">,</span> <span class="s1">'PCAPIO'</span><span class="p">),</span> <span class="s1">'.pcap'</span><span class="p">),</span>
             <span class="s1">'cap'</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.dumpkit'</span><span class="p">,</span> <span class="s1">'PCAPIO'</span><span class="p">),</span> <span class="s1">'.pcap'</span><span class="p">),</span>
+            <span class="s1">'pcapng'</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.dumpkit'</span><span class="p">,</span> <span class="s1">'PCAPNGIO'</span><span class="p">),</span> <span class="s1">'.pcapng'</span><span class="p">),</span>
             <span class="s1">'plist'</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'dictdumper'</span><span class="p">,</span> <span class="s1">'PLIST'</span><span class="p">),</span> <span class="s1">'.plist'</span><span class="p">),</span>
             <span class="s1">'xml'</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'dictdumper'</span><span class="p">,</span> <span class="s1">'PLIST'</span><span class="p">),</span> <span class="s1">'.plist'</span><span class="p">),</span>
             <span class="s1">'json'</span><span class="p">:</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'dictdumper'</span><span class="p">,</span> <span class="s1">'JSON'</span><span class="p">),</span> <span class="s1">'.json'</span><span class="p">),</span>
@@ -1737,7 +1740,9 @@
 <span class="sd">        engine passes the header's fields as ``protocol``, ``byteorder``,</span>
 <span class="sd">        ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:</span>
 <span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from</span>
-<span class="sd">        them, and the other writers ignore them. The PCAP-NG engine passes none.</span>
+<span class="sd">        them, :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` its section and interface</span>
+<span class="sd">        from those it takes, and the other writers ignore them. The PCAP-NG</span>
+<span class="sd">        engine passes its first section's ``byteorder``.</span>
 <span class="sd">        :meth:`run` calls it again, without arguments, after the engine has</span>
 <span class="sd">        started, for the engines that have no such step. Only the first call has</span>
 <span class="sd">        an effect.</span>
@@ -1907,15 +1912,15 @@
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:</span>
 
-<span class="sd">                * If using PCAP output for TCP flow tracing while the extraction engine is</span>
-<span class="sd">                  PyShark or PyPCAPFile.</span>
-<span class="sd">                * If using PCAP output while the extraction engine is a third-party</span>
-<span class="sd">                  one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.</span>
+<span class="sd">                * If using PCAP or PCAP-NG output for TCP flow tracing while the</span>
+<span class="sd">                  extraction engine is PyShark or PyPCAPFile.</span>
+<span class="sd">                * If using PCAP or PCAP-NG output while the extraction engine is a</span>
+<span class="sd">                  third-party one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.</span>
 <span class="sd">                * If output file format is not supported.</span>
 
 <span class="sd">                In each case the engine is the one that will actually run: a</span>
 <span class="sd">                requested engine that is unavailable falls back to the default</span>
-<span class="sd">                engine first, which supports PCAP output.</span>
+<span class="sd">                engine first, which supports both.</span>
 
 <span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the requested extraction</span>
 <span class="sd">                engine is not available: its dependency is not installed, its</span>
@@ -1944,9 +1949,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_select_engine</span><span class="p">()</span>
 
         <span class="c1"># NOTE: these engines' adapters hand the writer a plain :obj:`dict` with no record</span>
-        <span class="c1"># header, so the PCAP writer has nothing to write; the flow tracer gets the same fix below.</span>
+        <span class="c1"># header, so the PCAP and PCAP-NG writers have nothing to write; the tracer gets the same fix below.</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">)):</span>
+                <span class="ow">and</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">)):</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'format=</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">'; "</span>
                  <span class="s2">"using 'format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="nb">format</span> <span class="o">=</span> <span class="s1">'json'</span>
@@ -2021,10 +2026,10 @@
         <span class="k">if</span> <span class="n">trace</span><span class="p">:</span>
             <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="c1"># NOTE: these adapters report plain :obj:`dict` frames the PCAP dumper cannot serialise,</span>
+            <span class="c1"># NOTE: these adapters report plain :obj:`dict` frames no PCAP or PCAP-NG dumper can serialise,</span>
             <span class="c1"># and ``None`` means ``'pcap'`` (#406); DPKT and Scapy build frame records (#1507).</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
-                    <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
+                    <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'trace_format=</span><span class="si">{</span><span class="n">trace_format</span><span class="si">}</span><span class="s2">'; "</span>
                      <span class="s2">"using 'trace_format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">trace_format</span> <span class="o">=</span> <span class="s1">'json'</span>

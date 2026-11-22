@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -580,7 +582,7 @@
 <span class="sd">   this module's functions (:issue:`2578`).</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.dccp.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">DCCP_Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
@@ -593,8 +595,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.mp_tcp_option</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">TCP_MPTCPOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">TCP_Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_register_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_check_meth</span><span class="p">,</span> <span class="n">_register_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">DCCP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_DCCP_Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SCTP</span>
@@ -609,11 +610,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.payload_protocol_identifier</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">SCTP_PayloadProtocolIdentifier</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.protocol</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">DCCP_OptionConstructor</span>
@@ -649,26 +649,11 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <div class="viewcode-block" id="register_apptype">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_apptype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | TransportProtocol | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span>
-                     <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str | Sequence[TransportProtocol | str] | None'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` and/or</span>
@@ -676,27 +661,12 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name, meaningful only when ``module`` is a :class:`str`.</span>
-<span class="sd">            Positional, at the same position as the sibling ``register_*``</span>
-<span class="sd">            functions -- but unlike them, a third positional argument here is</span>
-<span class="sd">            not always ``class_``: which parameter it binds to is decided by</span>
-<span class="sd">            ``type(module)`` alone, never by what the value looks like.</span>
-<span class="sd">            When ``module`` is **not** a :class:`str`, whatever is given here</span>
-<span class="sd">            is treated as the first ``*transport`` element instead --</span>
-<span class="sd">            prepended, so argument order is preserved -- and ``class_`` itself</span>
-<span class="sd">            stays unset; ``register_apptype(80, Unit, TransportProtocol.udp)``</span>
-<span class="sd">            therefore reaches ``transport`` rather than being silently</span>
-<span class="sd">            swallowed. This is not a heuristic on the value: with a</span>
-<span class="sd">            :class:`str` ``module``, a :class:`str` third argument is</span>
-<span class="sd">            **always** a class name -- ``register_apptype(80, 'a.b', 'tcp')``</span>
-<span class="sd">            registers a class literally named ``'tcp'`` -- and naming a</span>
-<span class="sd">            transport alongside a :class:`str` module takes the fourth</span>
-<span class="sd">            position onward instead.</span>
-<span class="sd">        *transport: transport protocols to register ``code`` under, named **one</span>
-<span class="sd">            at a time**, each as a :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`</span>
-<span class="sd">            member or as that member's ``name`` (case-insensitively, e.g. ``'tcp'``,</span>
+<span class="sd">        transport: transport protocol to register ``code`` under, or a</span>
+<span class="sd">            :class:`list` or :class:`tuple` of several, each a</span>
+<span class="sd">            :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`</span>
+<span class="sd">            member or that member's ``name`` (case-insensitively, e.g. ``'tcp'``,</span>
 <span class="sd">            ``'TCP'`` or ``'Tcp'`` alike); the two forms are coerced to the same</span>
 <span class="sd">            member and behave identically,</span>
 <span class="sd">            including which error they raise. Where none is given and ``code`` is</span>
@@ -714,16 +684,8 @@
 <span class="sd">            names no port-keyed registry; or if a ``str`` matches no</span>
 <span class="sd">            :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` member's</span>
 <span class="sd">            ``name``. A composite such as ``tcp | udp``, or its string form</span>
-<span class="sd">            ``'tcp|udp'``, names two and is refused for the same reason: one call</span>
-<span class="sd">            registers under one transport protocol.</span>
-<span class="sd">        pcapkit.utilities.exceptions.ProtocolError: Raised from</span>
-<span class="sd">            :attr:`ModuleDescriptor.klass &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;`,</span>
-<span class="sd">            which the port-keyed registry resolves before storing the entry,</span>
-<span class="sd">            when ``module`` is a :class:`str` and either ``class_`` names no</span>
-<span class="sd">            attribute of it, or ``class_`` was never given at all -- the</span>
-<span class="sd">            latter distinguished from the former rather than reported as a</span>
-<span class="sd">            missing attribute named ``'(null)'``. See GitHub issues :issue:`832` and</span>
-<span class="sd">            :issue:`833`.</span>
+<span class="sd">            ``'tcp|udp'``, names two and is refused for the same reason: each</span>
+<span class="sd">            item names one transport protocol.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` is deliberately **not**</span>
@@ -749,16 +711,22 @@
 <span class="sd">       The keyword-only ``proto`` is replaced by ``*transport``, one transport</span>
 <span class="sd">       protocol per argument, with no alias (:issue:`806`).</span>
 
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       ``protocol`` replaces ``module`` and ``class_``, and the keyword-only</span>
+<span class="sd">       ``transport`` replaces ``*transport``, with no shim (:issue:`2838`).</span>
+
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: checked before ``*transport`` is resolved, so a bad ``code`` is reported first;</span>
+    <span class="c1"># NOTE: checked before ``transport`` is resolved, so a bad ``code`` is reported first;</span>
     <span class="c1"># TCP's and UDP's registries are keyed alike, so TCP names the check.</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">,</span> <span class="n">TCP</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: a non-``str`` module means the third positional was a transport, never a class</span>
-    <span class="c1"># name, so it is prepended to ``transport``; a ``str`` ``class_`` is never sniffed.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">class_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NULL</span><span class="p">:</span>
-        <span class="n">transport</span> <span class="o">=</span> <span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'TransportProtocol | str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">),)</span> <span class="o">+</span> <span class="n">transport</span>
-        <span class="n">class_</span> <span class="o">=</span> <span class="n">NULL</span>
+    <span class="k">if</span> <span class="n">transport</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">transport</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="p">)):</span>
+        <span class="n">transport</span> <span class="o">=</span> <span class="p">(</span><span class="n">transport</span><span class="p">,)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">transport</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
     <span class="c1"># NOTE: coerce up front, by case-insensitive member name via ``__members__`` so a miss is a</span>
     <span class="c1"># ``RegistryError`` (#806, #808); a bare ``int`` is refused, or it would half-register the port.</span>
@@ -774,68 +742,53 @@
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">coerced</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
-    <span class="n">transport</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">coerced</span><span class="p">)</span>
 
     <span class="c1"># NOTE: the member's ``proto`` names the one registry it lives in (#806), so</span>
     <span class="c1"># ``register_apptype(TCP.http, Dummy)`` does not displace the UDP port 80 handler.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">transport</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">coerced</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'no transport protocol given for port </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">; name each '</span>
                                 <span class="s1">'transport protocol to register under'</span><span class="p">)</span>
-        <span class="n">transport</span> <span class="o">=</span> <span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">proto</span><span class="p">,)</span>
+        <span class="n">coerced</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">proto</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
     <span class="n">registries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[TransportProtocol, Type[ProtocolBase]]'</span><span class="p">,</span> <span class="p">{</span>
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span> <span class="n">TCP</span><span class="p">,</span>
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span><span class="p">:</span> <span class="n">UDP</span><span class="p">,</span>
     <span class="p">})</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[type, Any]]</span>
-    <span class="k">for</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">transport</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">coerced</span><span class="p">:</span>
         <span class="c1"># NOTE: a composite is not a key, so ``tcp | udp`` is rejected rather than</span>
-        <span class="c1"># registering under both; the varargs name them one at a time.</span>
+        <span class="c1"># registering under both; a list names them one at a time.</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">registries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
         <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">)</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__proto__</span>
 <div class="viewcode-block" id="register_tcp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_tcp">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`</span>
@@ -847,16 +800,14 @@
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">,</span> <span class="n">TCP</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">TCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">TCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered TCP port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -883,10 +834,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.option.Option`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_mode_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_mode_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">TCP_Option</span><span class="p">,</span> <span class="n">TCP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">TCP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_mode_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a TCP option parser function'</span><span class="p">)</span>
 
@@ -920,10 +873,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_mptcp_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_mptcp_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">TCP_MPTCPOption</span><span class="p">,</span> <span class="n">TCP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">TCP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_mptcp_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a MPTCP option parser function'</span><span class="p">)</span>
 
@@ -934,31 +889,19 @@
 
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <span class="c1"># NOTE: pcapkit.protocols.transport.udp.protocol.UDP.__proto__</span>
 <div class="viewcode-block" id="register_udp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_udp">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.udp.protocol.UDP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`</span>
@@ -970,35 +913,23 @@
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">,</span> <span class="n">UDP</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">UDP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">UDP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered UDP port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">UDP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">UDP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__</span>
 <div class="viewcode-block" id="register_sctp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span>
+                  <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__` registry.</span>
@@ -1006,9 +937,8 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: payload protocol identifier (PPID), as in</span>
 <span class="sd">            :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        Unlike :func:`register_tcp` and :func:`register_udp`, ``code`` is a</span>
@@ -1025,16 +955,14 @@
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_PayloadProtocolIdentifier</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">SCTP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">SCTP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered SCTP payload protocol identifier: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">SCTP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">SCTP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1061,12 +989,14 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.chunk.Chunk`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_chunk_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_chunk_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">SCTP_Chunk</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">SCTP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_chunk_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid SCTP chunk parser function'</span><span class="p">)</span>
 
@@ -1101,12 +1031,14 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.parameter.Parameter`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_param_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_param_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">SCTP_Parameter</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">SCTP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid SCTP chunk parameter parser function'</span><span class="p">)</span>
 
@@ -1140,12 +1072,14 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.cause_code.CauseCode`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_cause_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_cause_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">SCTP_CauseCode</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">SCTP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">SCTP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_cause_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid SCTP error cause parser function'</span><span class="p">)</span>
 
@@ -1156,31 +1090,20 @@
 
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_dccp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_dccp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <span class="c1"># NOTE: pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__</span>
 <div class="viewcode-block" id="register_dccp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_dccp">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_dccp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_dccp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span>
+                  <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`</span>
@@ -1194,16 +1117,14 @@
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">,</span> <span class="n">DCCP</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">DCCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">DCCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered DCCP port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">DCCP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">DCCP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1230,12 +1151,14 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.dccp.option.Option`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_opt_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_opt_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">DCCP_Option</span><span class="p">,</span> <span class="n">DCCP</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">DCCP</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">DCCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid DCCP option parser function'</span><span class="p">)</span>
 

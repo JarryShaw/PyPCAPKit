@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -734,13 +736,74 @@ of the object – see <a class="reference internal" href="#pcapkit.foundation.re
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments; implementations accept
 <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, set when the buffer is being submitted because
 <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a> abandoned it rather than because it completed or
-the capture ended</p></li>
+the capture ended, and <code class="docutils literal notranslate"><span class="pre">store</span></code>, set when the buffer has left
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a> for good, which they pass on to <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._notify" title="pcapkit.foundation.reassembly.reassembly.Reassembly._notify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_notify()</span></code></a></p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_DT</span></code>]</span></p>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>A custom <code class="docutils literal notranslate"><span class="pre">submit</span></code> must accept <code class="docutils literal notranslate"><span class="pre">store</span></code> and pass it on to
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._notify" title="pcapkit.foundation.reassembly.reassembly.Reassembly._notify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_notify()</span></code></a>, which stores the datagrams before the callbacks
+run; <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._release" title="pcapkit.foundation.reassembly.reassembly.Reassembly._release"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_release()</span></code></a> stores what one dropping <code class="docutils literal notranslate"><span class="pre">store</span></code> returns,
+after its callbacks. <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a> stores what it returns, so a
+caller must not also extend <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a> with it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2856">#2856</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._release">
+<span class="sig-name descname"><span class="pre">_release</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._release" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a buffer that has left <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a> for good, storing its
+datagrams exactly once.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>buf</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_BT</span></code></span>) – buffer to submit</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – keyword arguments for <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a>, which is also
+passed <code class="docutils literal notranslate"><span class="pre">store</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_DT</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The datagrams <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> returned, now in <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a>.</p>
+</dd>
+</dl>
+<p>A <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> that passes <code class="docutils literal notranslate"><span class="pre">store</span></code> on to <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._notify" title="pcapkit.foundation.reassembly.reassembly.Reassembly._notify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_notify()</span></code></a> has stored
+them before its callbacks ran. One that drops <code class="docutils literal notranslate"><span class="pre">store</span></code> stored none,
+so they are stored here, after its callbacks.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._notify">
+<span class="sig-name descname"><span class="pre">_notify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datagrams</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._notify" title="Link to this definition">¶</a></dt>
+<dd><p>Run each callback on the datagrams <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> built.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datagrams</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_DT</span></code>]</span>) – datagrams to report</p></li>
+<li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether their buffer has left <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a> for good, so
+they join <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a> before the callbacks run, and one
+that raises cannot lose them</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_DT</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">datagrams</span></code>, for <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> to return.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -758,7 +821,8 @@ handed to <a class="reference internal" href="#pcapkit.foundation.reassembly.rea
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Datagrams of the buffers abandoned, reported with
-<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT" title="pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code></a>.
+<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT" title="pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code></a>
+and already stored in <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a>, through <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._release" title="pcapkit.foundation.reassembly.reassembly.Reassembly._release"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_release()</span></code></a>.
 Empty when nothing expired, which is the overwhelmingly common case.</p>
 </dd>
 </dl>
@@ -784,7 +848,10 @@ expires once any later frame passes its deadline.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.7.0: </span>The <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> advances the
 clock on every frame, where it advanced only on the packets a
-reassembly object was fed (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2814">#2814</a>).</p>
+reassembly object was fed (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2814">#2814</a>). It stores what it returns,
+where its caller stored it after the callbacks, so a callback that
+raises cannot lose a datagram and a caller must not store one again
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2856">#2856</a>).</p>
 </div>
 </dd></dl>
 

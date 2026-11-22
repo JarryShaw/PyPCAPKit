@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1514,21 +1516,15 @@ the write side. Dropping the <code class="docutils literal notranslate"><span cl
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_header_length">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.schema.</span></span><span class="sig-name descname"><span class="pre">ipv6_route_header_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdr_ext_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route/schema.html#ipv6_route_header_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_header_length" title="Link to this definition">¶</a></dt>
 <dd><p>Total length, in octets, of the on-the-wire IPv6-Route header for a given <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code>.</p>
-<p>This is the fixed 4 octets of <code class="docutils literal notranslate"><span class="pre">next</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code>/<code class="docutils literal notranslate"><span class="pre">type</span></code>/<code class="docutils literal notranslate"><span class="pre">seg_left</span></code>
-plus the type-specific data computed by <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length" title="pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_route_data_length()</span></code></a>,
-i.e. <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">(4</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">hdr_ext_len)</span></code> – a <em>different</em> quantity from
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length" title="pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_route_data_length()</span></code></a> itself (<code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">hdr_ext_len</span></code> here vs.
-<code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">hdr_ext_len</span></code> there), not a duplicate of it. It is what each
-<code class="docutils literal notranslate"><span class="pre">_read_data_type_*</span></code> in
-<a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_route.protocol" title="pcapkit.protocols.internet.ipv6_route.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_route.protocol</span></code></a> reports back as the parsed
-route data’s own <code class="docutils literal notranslate"><span class="pre">.length</span></code>, which
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read" title="pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> then
-subtracts from the outer packet length to find the next layer’s length.
-Its inverse is the <code class="docutils literal notranslate"><span class="pre">(length</span> <span class="pre">-</span> <span class="pre">8)</span> <span class="pre">//</span> <span class="pre">8</span></code> that
+<p>The fixed 4 octets and the type-specific data of <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length" title="pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_route_data_length()</span></code></a>
+together, which <a class="reference internal" href="../../corekit/schema/extlen.html#pcapkit.corekit.schema.extlen.ext_len_to_octets" title="pcapkit.corekit.schema.extlen.ext_len_to_octets"><code class="xref py py-func docutils literal notranslate"><span class="pre">ext_len_to_octets()</span></code></a> gives.
+Each <code class="docutils literal notranslate"><span class="pre">_read_data_type_*</span></code> in <a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_route.protocol" title="pcapkit.protocols.internet.ipv6_route.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_route.protocol</span></code></a>
+reports it as the parsed route data’s <code class="docutils literal notranslate"><span class="pre">.length</span></code>, which
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read" title="pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>
+subtracts from the outer packet length to find the next layer’s.
+<a class="reference internal" href="../../corekit/schema/extlen.html#pcapkit.corekit.schema.extlen.octets_to_ext_len" title="pcapkit.corekit.schema.extlen.octets_to_ext_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">octets_to_ext_len()</span></code></a> is its inverse, which
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data" title="pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_data()</span></code></a>
-passes back as <code class="docutils literal notranslate"><span class="pre">hdr_ext_len</span></code>;
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_hdr_ext_len" title="pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_hdr_ext_len"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_hdr_ext_len()</span></code></a>
-inverts <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length" title="pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_route_data_length()</span></code></a> instead.</p>
+passes back as <code class="docutils literal notranslate"><span class="pre">hdr_ext_len</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>hdr_ext_len</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – raw <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> field value, as read off the wire.</p>

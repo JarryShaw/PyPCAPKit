@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1183,7 +1185,8 @@
 <span class="sd">              :class:`~pcapkit.corekit.fields.collections.ListField` says of an</span>
 <span class="sd">              item it counts. Fields running past ``length`` are then the cut</span>
 <span class="sd">              the short read records, and do not warn that ``__length__`` fell</span>
-<span class="sd">              below zero (:issue:`2749`).</span>
+<span class="sd">              below zero (:issue:`2749`); past the cut it reads as zero, so a</span>
+<span class="sd">              field it sizes reads nothing (:issue:`2848`).</span>
 <span class="sd">            * ``__data_present__`` -- that ``data`` holds the data that many</span>
 <span class="sd">              octets in, and past them the zeros a</span>
 <span class="sd">              :class:`~pcapkit.corekit.fields.collections.ListField` of schema</span>
@@ -1212,6 +1215,11 @@
 <span class="sd">           end of the data in, inside zeros filled out past it, is told where it</span>
 <span class="sd">           ends (:issue:`2760`).</span>
 
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           Past the cut in a schema whose ``length`` ends with the data, a field</span>
+<span class="sd">           sized by ``__length__`` reads nothing (:issue:`2848`).</span>
+
 <span class="sd">        """</span>
         <span class="c1"># force cast arg type since decorator changed their signatures</span>
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1232,6 +1240,10 @@
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># NOTE: Past the cut nothing is left of a length that ends with the data, so a</span>
+            <span class="c1"># field sized by what is left reads none rather than a negative length (#2848).</span>
+            <span class="k">if</span> <span class="n">data_end</span> <span class="ow">and</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="c1"># NOTE: ``Field.length`` recomputes struct.calcsize() on every read,</span>

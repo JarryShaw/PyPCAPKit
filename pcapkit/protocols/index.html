@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1112,7 +1114,8 @@ left as zero from one read, and leave it to the short read.</p></li>
 <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> says of an
 item it counts. Fields running past <code class="docutils literal notranslate"><span class="pre">length</span></code> are then the cut
 the short read records, and do not warn that <code class="docutils literal notranslate"><span class="pre">__length__</span></code> fell
-below zero (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>).</p></li>
+below zero (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>); past the cut it reads as zero, so a
+field it sizes reads nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2848">#2848</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">__data_present__</span></code> – that <code class="docutils literal notranslate"><span class="pre">data</span></code> holds the data that many
 octets in, and past them the zeros a
 <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> of schema
@@ -1138,6 +1141,10 @@ items being its
 a negative length (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>), and the field a read crosses the
 end of the data in, inside zeros filled out past it, is told where it
 ends (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2760">#2760</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>Past the cut in a schema whose <code class="docutils literal notranslate"><span class="pre">length</span></code> ends with the data, a field
+sized by <code class="docutils literal notranslate"><span class="pre">__length__</span></code> reads nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2848">#2848</a>).</p>
 </div>
 </dd></dl>
 

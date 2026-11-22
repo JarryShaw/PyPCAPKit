@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -749,7 +751,7 @@
         <span class="c1"># ``TS``, so it is the moment to abandon whatever the deadline has now</span>
         <span class="c1"># passed for -- including, deliberately, buffers this fragment does not</span>
         <span class="c1"># belong to.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">TS</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">TS</span><span class="p">)</span>
 
         <span class="c1"># a datagram with fragment offset zero and MF clear is reported even</span>
         <span class="c1"># when its BUFID is already buffered, rather than dropped: isolated</span>
@@ -766,9 +768,7 @@
                 <span class="c1"># :rfc:`791#section-3.2` flushes the buffer and then submits</span>
                 <span class="c1"># this datagram, so the flushed one is reported incomplete and</span>
                 <span class="c1"># this one goes on to a fresh buffer below</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
 
         <span class="c1"># the header of the fragment at offset zero is the reassembled datagram's</span>
         <span class="n">header</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rectify_header</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
@@ -862,9 +862,7 @@
                     <span class="k">return</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: abandoning buffer </span><span class="si">%s</span><span class="s1"> on frame </span><span class="si">%d</span><span class="s1">, which overlaps '</span>
                              <span class="s1">'octets </span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1">'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">,</span> <span class="n">other</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">other</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">return</span>
             <span class="k">if</span> <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="n">bisect</span><span class="o">.</span><span class="n">insort</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="n">span</span><span class="p">)</span>
@@ -914,12 +912,10 @@
         <span class="c1"># an isolated datagram has no buffer to wait in, so it is submitted</span>
         <span class="c1"># whether or not it is complete</span>
         <span class="k">if</span> <span class="n">isolated</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
         <span class="c1"># when datagram is reassembled in whole</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_complete</span><span class="p">(</span><span class="n">buf</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
@@ -1070,7 +1066,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.submit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, _AT, int, TransType]'</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
                <span class="n">checked</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-               <span class="n">overlap</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram[_AT]]'</span><span class="p">:</span>
+               <span class="n">overlap</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram[_AT]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1089,6 +1085,11 @@
 <span class="sd">                reported as :attr:`Completion.OVERLAP</span>
 <span class="sd">                &lt;pcapkit.foundation.reassembly.data.data.Completion.OVERLAP&gt;`</span>
 <span class="sd">                and never as complete</span>
+<span class="sd">            store: whether ``buf`` has left</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`</span>
+<span class="sd">                for good, so its datagrams join</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`</span>
+<span class="sd">                before the callbacks run, and one that raises cannot lose them</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Reassembled packets. Where the payload is one contiguous run, its</span>
@@ -1213,9 +1214,7 @@
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

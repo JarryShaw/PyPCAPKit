@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1047,22 +1049,28 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 <h3>Auxiliary Functions<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcapng.block2frame">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcapng.</span></span><span class="sig-name descname"><span class="pre">block2frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcapng.html#block2frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcapng.block2frame" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcapng.</span></span><span class="sig-name descname"><span class="pre">block2frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcapng.html#block2frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcapng.block2frame" title="Link to this definition">¶</a></dt>
 <dd><p>Convert PCAP-NG block to PCAP frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>block</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.data.EnhancedPacketBlock" title="pcapkit.protocols.misc.pcapng.data.EnhancedPacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnhancedPacketBlock</span></code></a> | <a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.data.SimplePacketBlock" title="pcapkit.protocols.misc.pcapng.data.SimplePacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimplePacketBlock</span></code></a> | <a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.data.PacketBlock" title="pcapkit.protocols.misc.pcapng.data.PacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">PacketBlock</span></code></a></span>) – PCAP-NG block.</p></li>
 <li><p><strong>nanosecond</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to use nanosecond precision.</p></li>
+<li><p><strong>interface</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.data.InterfaceDescriptionBlock" title="pcapkit.protocols.misc.pcapng.data.InterfaceDescriptionBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterfaceDescriptionBlock</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – The block’s Interface Description Block, if known.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.Frame" title="pcapkit.protocols.misc.pcap.frame.data.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>PCAP frame.</p>
+<dd class="field-odd"><p>PCAP frame. Given <code class="docutils literal notranslate"><span class="pre">interface</span></code>, it keeps that and the block’s options
+under the metadata keys <code class="docutils literal notranslate"><span class="pre">__interface__</span></code> and <code class="docutils literal notranslate"><span class="pre">__options__</span></code>, which
+<a class="reference internal" href="../dumpkit/pcapng.html#pcapkit.dumpkit.pcapng.PCAPNGIO" title="pcapkit.dumpkit.pcapng.PCAPNGIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGIO</span></code></a> writes back.</p>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>Takes <code class="docutils literal notranslate"><span class="pre">interface</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2835">#2835</a>).</p>
+</div>
 </dd></dl>
 
 </section>

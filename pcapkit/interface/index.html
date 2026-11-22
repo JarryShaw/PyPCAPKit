@@ -211,7 +211,6 @@
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">User Interface</a><input aria-label="Toggle navigation of User Interface" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -599,12 +601,14 @@ simplify the use of <a class="reference internal" href="../index.html#module-pca
 <li class="toctree-l2"><a class="reference internal" href="misc.html#data-models">Data Models</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="registry.html">Registry Helpers</a></li>
 </ul>
 </div>
-<p><a class="reference internal" href="core.html#module-pcapkit.interface.core" title="pcapkit.interface.core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.core</span></code></a> defines the core functions and constants,
-<a class="reference internal" href="misc.html#module-pcapkit.interface.misc" title="pcapkit.interface.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.misc</span></code></a> the auxiliary ones, and
-<a class="reference internal" href="registry.html#module-pcapkit.interface.registry" title="pcapkit.interface.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.registry</span></code></a> the helpers the registrars share.</p>
+<p><a class="reference internal" href="core.html#module-pcapkit.interface.core" title="pcapkit.interface.core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.core</span></code></a> defines the core functions and constants, and
+<a class="reference internal" href="misc.html#module-pcapkit.interface.misc" title="pcapkit.interface.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.misc</span></code></a> the auxiliary ones.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.interface.registry</span></code>, whose helpers moved to
+<a class="reference internal" href="../corekit/registry.html#module-pcapkit.corekit.registry" title="pcapkit.corekit.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.registry</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>).</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>To ask for another interface, open an issue on GitHub, or submit a pull
@@ -663,13 +667,6 @@ request.</p>
 </tr>
 <tr class="row-odd"><td><p>Miscellaneous</p></td>
 <td colspan="2"><p><a class="reference internal" href="misc.html#pcapkit.interface.misc.follow_tcp_stream" title="pcapkit.interface.misc.follow_tcp_stream"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.misc.follow_tcp_stream()</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td rowspan="3"><p>Registry Helpers</p></td>
-<td colspan="2"><p><a class="reference internal" href="registry.html#pcapkit.interface.registry.same_entry" title="pcapkit.interface.registry.same_entry"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.registry.same_entry()</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td colspan="2"><p><a class="reference internal" href="registry.html#pcapkit.interface.registry.restore_shipped" title="pcapkit.interface.registry.restore_shipped"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.registry.restore_shipped()</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td colspan="2"><p><a class="reference internal" href="registry.html#pcapkit.interface.registry.restore_shipped_dumper" title="pcapkit.interface.registry.restore_shipped_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.registry.restore_shipped_dumper()</span></code></a></p></td>
 </tr>
 </tbody>
 </table>

@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -629,13 +631,16 @@ mappings</p></td>
 <tr class="row-even"><td><p><a class="reference internal" href="protochain.html#module-pcapkit.corekit.protochain" title="pcapkit.corekit.protochain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">protochain</span></code></a></p></td>
 <td><p>the protocol collection <a class="reference internal" href="protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="registry.html#module-pcapkit.corekit.registry" title="pcapkit.corekit.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">registry</span></code></a></p></td>
+<td><p>the helpers registrars compare and restore registry entries with</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a></p></td>
 <td><p>helpers shared across the schema layer</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sentinels</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sentinels</span></code></a></p></td>
 <td><p>the shared sentinels</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="version.html#module-pcapkit.corekit.version" title="pcapkit.corekit.version"><code class="xref py py-mod docutils literal notranslate"><span class="pre">version</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="version.html#module-pcapkit.corekit.version" title="pcapkit.corekit.version"><code class="xref py py-mod docutils literal notranslate"><span class="pre">version</span></code></a></p></td>
 <td><p>the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>-like <a class="reference internal" href="version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">VersionInfo</span></code></a></p></td>
 </tr>
 </tbody>
@@ -681,8 +686,10 @@ mappings</p></td>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="packet.html">Deferred Packet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="protochain.html">Protocol Chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registry.html">Registry Helpers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schema/index.html">Schema Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l2"><a class="reference internal" href="schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="schema/padding.html">Padding Arithmetic</a></li>

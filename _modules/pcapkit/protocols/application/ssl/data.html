@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -588,6 +590,9 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.ec_point_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">ECPointFormat</span> <span class="k">as</span> <span class="n">Enum_ECPointFormat</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.extension_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionType</span> <span class="k">as</span> <span class="n">Enum_ExtensionType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span> <span class="k">as</span> <span class="n">Enum_HandshakeType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_aead_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeAeadId</span> <span class="k">as</span> <span class="n">Enum_HpkeAeadId</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_kdf_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeKdfId</span> <span class="k">as</span> <span class="n">Enum_HpkeKdfId</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_kem_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeKemId</span> <span class="k">as</span> <span class="n">Enum_HpkeKemId</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.psk_key_exchange_mode</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">PskKeyExchangeMode</span> <span class="k">as</span> <span class="n">Enum_PskKeyExchangeMode</span>
 
@@ -1052,12 +1057,12 @@
 <span class="w">    </span><span class="sd">"""Data model for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`)."""</span>
 
     <span class="c1">#: HPKE KDF identifier (:rfc:`9180#section-7.2`).</span>
-    <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKdfId'</span>
     <span class="c1">#: HPKE AEAD identifier (:rfc:`9180#section-7.3`).</span>
-    <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeAeadId'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKdfId'</span><span class="p">,</span> <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeAeadId'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
 
@@ -1134,14 +1139,14 @@
     <span class="c1">#: Identifier of the configuration.</span>
     <span class="n">config_id</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: HPKE KEM identifier (:rfc:`9180#section-7.1`).</span>
-    <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKemId'</span>
     <span class="c1">#: HPKE public key.</span>
     <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Cipher suites a client may encrypt with.</span>
     <span class="n">cipher_suites</span><span class="p">:</span> <span class="s1">'tuple[HpkeSymmetricCipherSuite, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cipher_suites</span><span class="p">:</span> <span class="s1">'tuple[HpkeSymmetricCipherSuite, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKemId'</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cipher_suites</span><span class="p">:</span> <span class="s1">'tuple[HpkeSymmetricCipherSuite, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
 

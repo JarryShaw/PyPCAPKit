@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1754,7 +1756,9 @@
 <span class="sd">        """</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">payload</span>
+        <span class="c1"># NOTE: The packed octets, not the field's value, which ``make`` leaves a</span>
+        <span class="c1"># protocol or schema payload as (#2860).</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
         <span class="n">spi</span><span class="p">,</span> <span class="n">seq</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">spi</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">seq</span>
         <span class="n">total</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
@@ -1883,7 +1887,8 @@
 <span class="sd">                when ``encrypt`` is :data:`True`.</span>
 <span class="sd">            icv: Integrity check value. Ignored when ``encrypt`` is</span>
 <span class="sd">                :data:`True`, where it is computed instead.</span>
-<span class="sd">            payload: Payload of current instance.</span>
+<span class="sd">            payload: Payload of current instance, as :obj:`bytes`, a protocol</span>
+<span class="sd">                or a schema, which is packed to its octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -1897,6 +1902,12 @@
 <span class="sd">                satisfy the algorithm's alignment requirement, or if</span>
 <span class="sd">                :meth:`SecurityAssociation.encrypt` rejects ``iv`` or cannot</span>
 <span class="sd">                run without |cryptography|_.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           A protocol or schema ``payload`` without ``icv`` or ``encrypt`` is</span>
+<span class="sd">           packed to its octets, where it raised :exc:`TypeError`</span>
+<span class="sd">           (:issue:`2860`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">encrypt</span><span class="p">:</span>

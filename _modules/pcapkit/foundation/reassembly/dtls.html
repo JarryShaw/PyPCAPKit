@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -708,6 +710,12 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: :term:`info` record of packets to be reassembled</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            A callback raising on a message this fragment displaces propagates</span>
+<span class="sd">            before the fragment's own message is checked, so one it completes</span>
+<span class="sd">            stays buffered, where :attr:`datagram` still reports it, and its</span>
+<span class="sd">            callbacks do not run.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
@@ -727,6 +735,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span>
 
         <span class="n">frag</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">MSN</span><span class="p">)</span>
+        <span class="n">displaced</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Fragment]</span>
         <span class="c1"># A fresh buffer for this MSN, or a disagreement with the one held</span>
         <span class="c1"># there: a different ``length`` or ``msg_type`` means this fragment</span>
         <span class="c1"># cannot belong to the message under construction. A reused 4-tuple</span>
@@ -735,10 +744,7 @@
         <span class="c1"># fragment of the displaced message whose length and msg_type match</span>
         <span class="c1"># the new one can still splice into it.</span>
         <span class="k">if</span> <span class="n">frag</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">frag</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="n">info</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">frag</span><span class="o">.</span><span class="n">msg_type</span> <span class="o">!=</span> <span class="n">info</span><span class="o">.</span><span class="n">msg_type</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">frag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># The displaced partial is reported as PARTIAL rather than dropped.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">Buffer</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="p">{</span><span class="n">MSN</span><span class="p">:</span> <span class="n">frag</span><span class="p">},</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">timestamp</span><span class="p">),</span>
-                                                <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">))</span>
+            <span class="n">displaced</span> <span class="o">=</span> <span class="n">frag</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">length</span>
             <span class="n">frag</span> <span class="o">=</span> <span class="n">Fragment</span><span class="p">(</span>
                 <span class="n">ind</span><span class="o">=</span><span class="p">[],</span>
@@ -760,6 +766,13 @@
             <span class="n">frag</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">FO</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[:</span><span class="n">held</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_hole_descriptors</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">hdl</span><span class="p">,</span> <span class="n">FO</span><span class="p">,</span> <span class="n">stop</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
+        <span class="c1"># The displaced partial is reported as PARTIAL rather than dropped.</span>
+        <span class="c1">#</span>
+        <span class="c1"># NOTE: submitted once its slot holds this fragment's message, so a callback that raises</span>
+        <span class="c1"># leaves it stored and out of the buffer, never in both (#2856).</span>
+        <span class="k">if</span> <span class="n">displaced</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="n">Buffer</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="p">{</span><span class="n">MSN</span><span class="p">:</span> <span class="n">displaced</span><span class="p">},</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
+
         <span class="c1"># the message is whole once no hole remains</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">frag</span><span class="o">.</span><span class="n">hdl</span><span class="p">:</span>
             <span class="k">del</span> <span class="n">buf</span><span class="o">.</span><span class="n">msg</span><span class="p">[</span><span class="n">MSN</span><span class="p">]</span>
@@ -767,16 +780,13 @@
                 <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
 
             <span class="n">datagram</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datagram_from_fragment</span><span class="p">(</span><span class="n">frag</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">,</span> <span class="n">MSN</span><span class="p">,</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datagram</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="n">datagram</span>
-
-            <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-                <span class="n">callback</span><span class="p">([</span><span class="n">datagram</span><span class="p">])</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">([</span><span class="n">datagram</span><span class="p">],</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DTLS.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">checked</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram[_AT]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,unused-argument,line-too-long</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">checked</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram[_AT]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,unused-argument,line-too-long</span>
 <span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
@@ -788,6 +798,11 @@
 <span class="sd">            timeout: whether this buffer is being submitted because</span>
 <span class="sd">                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`</span>
 <span class="sd">                abandoned it under the reassembly timeout</span>
+<span class="sd">            store: whether ``buf`` has left</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`</span>
+<span class="sd">                for good, so its messages join</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`</span>
+<span class="sd">                before the callbacks run, and one that raises cannot lose them</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Every message still held in ``buf``, each reported</span>
@@ -805,9 +820,7 @@
                 <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">TIMEOUT</span> <span class="k">if</span> <span class="n">timeout</span> <span class="k">else</span> <span class="n">Completion</span><span class="o">.</span><span class="n">PARTIAL</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_datagram_from_fragment</span><span class="p">(</span><span class="n">frag</span><span class="p">,</span> <span class="n">bufid</span><span class="p">,</span> <span class="n">msn</span><span class="p">,</span> <span class="n">completion</span><span class="p">))</span>
 
-        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DTLS._datagram_from_fragment">

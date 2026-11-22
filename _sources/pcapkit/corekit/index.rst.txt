@@ -37,6 +37,8 @@ Core Utilities
        ``packet`` parsed on first read
    * - :mod:`~pcapkit.corekit.protochain`
      - the protocol collection :class:`~pcapkit.corekit.protochain.ProtoChain`
+   * - :mod:`~pcapkit.corekit.registry`
+     - the helpers registrars compare and restore registry entries with
    * - :mod:`~pcapkit.corekit.schema`
      - helpers shared across the schema layer
    * - :mod:`~pcapkit.corekit.sentinels`
@@ -58,6 +60,7 @@ Core Utilities
    multidict
    packet
    protochain
+   registry
    schema/index
    sentinels
    version

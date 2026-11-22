@@ -5,11 +5,11 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:title" content="Registry Helpers" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/interface/registry.html" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/registry.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.interface.registry holds the helpers the registrars use to compare registry entries and to put back the entry a registry shipped with, so that an override of a built-in can be undone (#1363..." />
-<meta name="description" content="pcapkit.interface.registry holds the helpers the registrars use to compare registry entries and to put back the entry a registry shipped with, so that an override of a built-in can be undone (#1363..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Library Foundation" href="../foundation/index.html"><link rel="prev" title="Auxiliary Interface" href="misc.html">
+<meta property="og:description" content="pcapkit.corekit.registry holds the helpers the registrars use to compare registry entries and to put back the entry a registry shipped with, so that an override of a built-in can be undone (#1363,#..." />
+<meta name="description" content="pcapkit.corekit.registry holds the helpers the registrars use to compare registry entries and to put back the entry a registry shipped with, so that an override of a built-in can be undone (#1363,#..." />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Schema Helpers" href="schema/index.html"><link rel="prev" title="Protocol Chain" href="protochain.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Registry Helpers - PyPCAPKit</title>
@@ -208,10 +208,9 @@
   <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="core.html">Core Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Registry Helpers</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -349,39 +348,41 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/inspect.html">Abstract Classes</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/field.html">Base Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/numbers.html">Numerical Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/strings.html">Text Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/ipaddress.html">IP Address Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/collections.html">Container Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="fields/field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fields/numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fields/strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fields/ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fields/collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/checksum/internet.html">Internet Checksum</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="checksum/internet.html">Internet Checksum</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/context.html">Parsing Context</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/decorators.html">Decorator Functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/enum.html">Enumeration Base</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">I/O Objects</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/module.html">Module Descriptor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/shortread.html">Short-Read Replay</a></li>
+<li class="toctree-l3"><a class="reference internal" href="context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="enum.html">Enumeration Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="io.html">I/O Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="module.html">Module Descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="packet.html">Deferred Packet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Registry Helpers</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schema/extlen.html">Extension-Header Length</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schema/ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schema/jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schema/padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="schema/shortread.html">Short-Read Replay</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/sentinels.html">Sentinel Objects</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sentinels.html">Sentinel Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="version.html">Version Info</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -558,12 +560,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/interface/registry.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/registry.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/interface/registry.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/registry.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -580,9 +582,9 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-pcapkit.interface.registry">
-<span id="registry-helpers"></span><h1>Registry Helpers<a class="headerlink" href="#module-pcapkit.interface.registry" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.interface.registry" title="pcapkit.interface.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.registry</span></code></a> holds the helpers the registrars use to
+          <section id="module-pcapkit.corekit.registry">
+<span id="registry-helpers"></span><h1>Registry Helpers<a class="headerlink" href="#module-pcapkit.corekit.registry" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.corekit.registry" title="pcapkit.corekit.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.registry</span></code></a> holds the helpers the registrars use to
 compare registry entries and to put back the entry a registry shipped with, so
 that an override of a built-in can be undone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1363">#1363</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1364">#1364</a>).
 They back the registrars of <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> –
@@ -592,8 +594,12 @@ They back the registrars of <a class="reference internal" href="../foundation/ex
 <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor.register_dumper" title="pcapkit.foundation.extraction.Extractor.register_dumper"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_dumper()</span></code></a> – and
 <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.register_dumper</span></code></a>,
 which the functions in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> call in turn.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.interface.registry</span></code>, with no re-export
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>).</p>
+</div>
 <p>A registry entry is a class or a
-<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming one; an
+<a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming one; an
 <code class="docutils literal notranslate"><span class="pre">__output__</span></code> entry is a <code class="docutils literal notranslate"><span class="pre">(dumper,</span> <span class="pre">ext)</span></code> pair whose <code class="docutils literal notranslate"><span class="pre">dumper</span></code>
 is such an entry.</p>
 <p>What a registrar does with the entry it is handed:</p>
@@ -613,13 +619,13 @@ is such an entry.</p>
     OTHER --&gt;|no| STORE2[&quot;store the class&quot;]
     WARN2 --&gt; STORE2
 
-    click SHIPPED &quot;registry.html#pcapkit.interface.registry.same_entry&quot;
-    click RESTORE &quot;registry.html#pcapkit.interface.registry.restore_shipped&quot;
+    click SHIPPED &quot;registry.html#pcapkit.corekit.registry.same_entry&quot;
+    click RESTORE &quot;registry.html#pcapkit.corekit.registry.restore_shipped&quot;
     </pre><dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.interface.registry.same_entry">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.registry.</span></span><span class="sig-name descname"><span class="pre">same_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/interface/registry.html#same_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.interface.registry.same_entry" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.registry.same_entry">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.registry.</span></span><span class="sig-name descname"><span class="pre">same_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/registry.html#same_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.registry.same_entry" title="Link to this definition">¶</a></dt>
 <dd><p>Tell whether two registry entries name the same class.</p>
-<p>An entry is a class or a <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>.
+<p>An entry is a class or a <a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>.
 Two descriptors are the same entry when they are equal, and a descriptor
 and a class are when the descriptor names that class. The class is looked
 up in <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> rather than imported: a class someone holds has
@@ -645,14 +651,14 @@ they are the same object.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.interface.registry.restore_shipped">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.registry.</span></span><span class="sig-name descname"><span class="pre">restore_shipped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shipped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/interface/registry.html#restore_shipped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.interface.registry.restore_shipped" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.registry.restore_shipped">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.registry.</span></span><span class="sig-name descname"><span class="pre">restore_shipped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shipped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/registry.html#restore_shipped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.registry.restore_shipped" title="Link to this definition">¶</a></dt>
 <dd><p>Put the entry <code class="docutils literal notranslate"><span class="pre">registry</span></code> shipped with back under <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p>
 <p>The public registrars call this when handed the built-in that shipped under
 <code class="docutils literal notranslate"><span class="pre">key</span></code>, so an override can be undone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1363">#1363</a>). It stores the shipped
 object itself, a descriptor if a descriptor shipped, and it is a silent
 no-op when the incumbent already names the shipped class, as decided by
-<a class="reference internal" href="#pcapkit.interface.registry.same_entry" title="pcapkit.interface.registry.same_entry"><code class="xref py py-func docutils literal notranslate"><span class="pre">same_entry()</span></code></a>.</p>
+<a class="reference internal" href="#pcapkit.corekit.registry.same_entry" title="pcapkit.corekit.registry.same_entry"><code class="xref py py-func docutils literal notranslate"><span class="pre">same_entry()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -670,10 +676,10 @@ is overwritten.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.interface.registry.restore_shipped_dumper">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.interface.registry.</span></span><span class="sig-name descname"><span class="pre">restore_shipped_dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shipped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/interface/registry.html#restore_shipped_dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.interface.registry.restore_shipped_dumper" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.registry.restore_shipped_dumper">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.registry.</span></span><span class="sig-name descname"><span class="pre">restore_shipped_dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shipped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/registry.html#restore_shipped_dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.registry.restore_shipped_dumper" title="Link to this definition">¶</a></dt>
 <dd><p>Put the dumper <code class="docutils literal notranslate"><span class="pre">registry</span></code> shipped with back under <code class="docutils literal notranslate"><span class="pre">format</span></code>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">__output__</span></code> counterpart of <a class="reference internal" href="#pcapkit.interface.registry.restore_shipped" title="pcapkit.interface.registry.restore_shipped"><code class="xref py py-func docutils literal notranslate"><span class="pre">restore_shipped()</span></code></a>: an entry is a
+<p>The <code class="docutils literal notranslate"><span class="pre">__output__</span></code> counterpart of <a class="reference internal" href="#pcapkit.corekit.registry.restore_shipped" title="pcapkit.corekit.registry.restore_shipped"><code class="xref py py-func docutils literal notranslate"><span class="pre">restore_shipped()</span></code></a>: an entry is a
 <code class="docutils literal notranslate"><span class="pre">(dumper,</span> <span class="pre">ext)</span></code> pair, so the shipped pair itself is stored when <code class="docutils literal notranslate"><span class="pre">ext</span></code>
 matches it, and the shipped dumper with the new <code class="docutils literal notranslate"><span class="pre">ext</span></code> otherwise. A
 re-registration that only changes <code class="docutils literal notranslate"><span class="pre">ext</span></code> stays silent, as the dumper
@@ -703,23 +709,23 @@ it is overwritten.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../foundation/index.html">
+          <a class="next-page" href="schema/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Library Foundation</div>
+                <div class="title">Schema Helpers</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="misc.html">
+          <a class="prev-page" href="protochain.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Auxiliary Interface</div>
+                <div class="title">Protocol Chain</div>
                 
               </div>
             </a>

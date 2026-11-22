@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -732,15 +734,15 @@
 
 <span class="sd">        The flow's output file is kept open for its next frame, as</span>
 <span class="sd">        :meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlow._write`</span>
-<span class="sd">        describes, unless :meth:`trace` has just finalised the flow.</span>
+<span class="sd">        describes, unless the frame ends the flow. Such a frame is written</span>
+<span class="sd">        before the flow is finalised, so its callbacks find every frame its index</span>
+<span class="sd">        entry lists in the file.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># fetch flow label</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="c1"># dump files</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
-                    <span class="n">hold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">make_bufid</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">)</span></div>
+        <span class="n">bufid</span><span class="p">,</span> <span class="n">ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">bufid</span><span class="p">]</span><span class="o">.</span><span class="n">fpout</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">hold</span><span class="o">=</span><span class="ow">not</span> <span class="n">ends</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ends</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TCP.make_bufid">
@@ -822,6 +824,25 @@
 <span class="sd">            :meth:`_unique_label`.</span>
 
 <span class="sd">        """</span>
+        <span class="n">bufid</span><span class="p">,</span> <span class="n">ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">bufid</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ends</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buffer</span><span class="o">.</span><span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">buffer</span><span class="o">.</span><span class="n">label</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[BufferID, bool]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Record a packet in its flow, opening the flow or superseding an ended one.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            packet: a flow packet (:term:`trace.tcp.packet`)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The flow's buffer ID, and whether the packet ends the flow, which</span>
+<span class="sd">            :meth:`trace` then finalises at once and :meth:`dump` once the frame</span>
+<span class="sd">            is written (:issue:`2855`).</span>
+
+<span class="sd">        """</span>
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -887,8 +908,6 @@
             <span class="n">buffer</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">buffer</span><span class="o">.</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">buffer</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_segment</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
-        <span class="n">fpout</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">fpout</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">label</span>
 
         <span class="c1"># A *unidirectional* flow is one direction, and a direction is over when</span>
         <span class="c1"># its FIN goes out -- so that mode closes on FIN.</span>
@@ -907,12 +926,7 @@
         <span class="c1"># the flow keeps accepting the packets that still belong to it. What</span>
         <span class="c1"># finalises the flow is proof that no more can come -- a new connection's</span>
         <span class="c1"># SYN on the same endpoints, handled above, or the end of the capture.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bidir</span> <span class="ow">and</span> <span class="n">FIN</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
-
-        <span class="c1"># return label or output object</span>
-        <span class="k">return</span> <span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">label</span></div>
-
+        <span class="k">return</span> <span class="n">BUFID</span><span class="p">,</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bidir</span> <span class="ow">and</span> <span class="n">FIN</span>
 
 <div class="viewcode-block" id="TCP._unique_label">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP._unique_label">[docs]</a>
@@ -1079,6 +1093,8 @@
 
 <span class="sd">        The flow's file is closed and its entry stored before the callbacks run,</span>
 <span class="sd">        so a callback that raises propagates and leaves the flow in the index.</span>
+<span class="sd">        One raising an :exc:`Exception` does not stop the callbacks after it: the</span>
+<span class="sd">        first such error is re-raised once all have run, and a later one logged.</span>
 
 <span class="sd">        """</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
@@ -1101,8 +1117,19 @@
         <span class="c1"># NOTE: stored before the callbacks run, so one that raises cannot drop the flow</span>
         <span class="c1"># from the index (#2827).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Exception]</span>
         <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">callback</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+                <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="n">exc</span>
+                    <span class="k">continue</span>
+                <span class="c1"># NOTE: logged rather than raised, so it cannot replace the first error (#2855).</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow </span><span class="si">%s</span><span class="s1"> callback </span><span class="si">%r</span><span class="s1"> raised after an earlier one'</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span>
+                             <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span>
         <span class="k">return</span> <span class="n">index</span>
 
 <div class="viewcode-block" id="TCP.finish">

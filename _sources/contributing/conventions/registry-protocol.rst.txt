@@ -386,6 +386,15 @@ basis:
   :class:`~pcapkit.const.ipv4.tos_pre.ToSPrecedence` keeps its ``DATA`` casing
   (``Network_Control``).
 
+**A crawler keeps what** :meth:`~pcapkit.vendor.default.Vendor.safe_name` **would drop
+where dropping it merges distinct members.** That default strips any parenthetical, which
+would name every DHKEM of :class:`~pcapkit.const.tls.hpke_kem_id.HpkeKemId` ``DHKEM``,
+told apart only by its code, so its crawler keeps the text: ``DHKEM(X25519, HKDF-SHA256)``
+is ``DHKEM_X25519_HKDF_SHA256``. :class:`~pcapkit.const.tls.extension_type.ExtensionType`'s
+crawler keeps ``(deprecated)`` as a suffix on the same ground, since
+``connection_id_deprecated`` (53) would otherwise merge with ``connection_id`` (54).
+Ruled in review of :pr:`2873` (:issue:`2851`).
+
 And a folding override carries **only** the fold.
 :meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>` is
 the worked example: it lowers ``key``, forwards ``default`` verbatim and delegates to
@@ -777,11 +786,27 @@ established ones carry. A map's registration comes in two parts:
    classmethod and logs, and a bad argument writes nothing: ``_check_code`` checks
    the code against the map's enum, or, with ``kind=None``, as a bare :class:`int`
    where no enum keys the map; a parser named by string has to exist as a
-   ``_read_*`` method; and a ``__proto__`` entry has to be a
+   ``_read_*`` method, and ``_check_meth`` refuses any other parser but a pair of
+   two callables; and a ``__proto__`` entry has to be a
    :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass or a descriptor naming
    one. A wrapper writing a ``__proto__`` map also records the class's name with
    ``_register_name``, and one whose entries have a schema registry takes a
    keyword-only ``schema``.
+
+**A wrapper takes the one entry its classmethod takes, under the classmethod's
+parameter name** -- ``protocol`` for a ``__proto__`` map, ``meth`` for a parser map,
+and ``engine``, ``dumper``, ``reassembly``, ``traceflow``, ``adapter`` or ``callback``
+in :mod:`~pcapkit.foundation.registry.foundation` -- never a module name and a class
+name to build a :class:`~pcapkit.corekit.module.ModuleDescriptor` from, which the
+caller writes itself. Whatever follows the entry is keyword-only, as
+:func:`~pcapkit.foundation.registry.protocols.transport.register_apptype`'s
+``transport`` is. Settled on :issue:`2834` and specified on :issue:`2838`, with no
+shim. A callback goes in through
+:func:`~pcapkit.foundation.registry.foundation.register_reassembly_callback` or
+:func:`~pcapkit.foundation.registry.foundation.register_traceflow_callback`, each
+taking the name its class is registered by in the extractor, so one function reaches
+every registered class. :file:`tests/foundation/registry/test_registry_wrapper_signatures_2838_unit.py`
+fails on a wrapper whose parameters are not its classmethod's.
 
 **The wrappers are split by layer**, one submodule of
 :mod:`pcapkit.foundation.registry.protocols` per subpackage of
@@ -794,7 +819,7 @@ module per protocol, since a per-layer file is a size a reader can scan
 (:issue:`2578`). A wrapper goes in the submodule matching the subpackage of the
 class owning its map, so the PCAP and PCAP-NG frames' registrars are in
 :mod:`~pcapkit.foundation.registry.protocols.misc`. What they share -- ``_check_code``,
-``_register_name``,
+``_check_meth``, ``_register_name``,
 :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol` and
 :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` -- is
 in :mod:`~pcapkit.foundation.registry.protocols.protocol`, named after
@@ -864,6 +889,7 @@ shape for a parser map:
    # NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__
    def register_sctp_chunk(code, meth, *, schema=None):
        _check_code(code, SCTP_Chunk, SCTP)
+       _check_meth(meth, SCTP)
        if isinstance(meth, str) and not hasattr(SCTP, f'_read_chunk_{meth}'):
            raise RegistryError('method must be a valid SCTP chunk parser function')
 

@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -588,6 +590,11 @@ which is a base class for transport layer protocols, e.g.
 <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>,
 <a class="reference internal" href="udp.html#pcapkit.protocols.transport.udp.protocol.UDP" title="pcapkit.protocols.transport.udp.protocol.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> and
 <a class="reference internal" href="sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.transport.logger</span></code>, which nothing logged to once
+<a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a>
+stopped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>).</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.transport.Transport">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.transport.</span></span><span class="sig-name descname"><span class="pre">Transport</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><span class="pre">Data</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ST</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><span class="pre">Schema</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/transport.html#Transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport" title="Link to this definition">¶</a></dt>
@@ -696,7 +703,9 @@ off a parsed header, resolved the same way.</p></li>
 <dd class="field-odd"><p>Parsed payload as a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>
 instance. A payload that fails to parse is kept as
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a>
-keeps one.</p>
+keeps one, its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> the port looked up, as an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, as
+a frame’s fallback records the port <a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>
+looked up.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -727,7 +736,11 @@ over the same named ports a parsed header carries (<a class="extlink-issue refer
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.7.0: </span>The fallback holds the whole payload and the failure’s message,
-rather than the octets the failed parse left unread (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2842">#2842</a>).</p>
+rather than the octets the failed parse left unread (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2842">#2842</a>).
+Its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is the port looked up, a refusal it absorbs is
+quiet, any other error is logged at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> rather
+than <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>, and the failed parse’s warnings are dropped
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>).</p>
 </div>
 </dd></dl>
 

@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -578,6 +580,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.extlen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ext_len_to_octets</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
@@ -649,21 +652,15 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv6_route_header_length</span><span class="p">(</span><span class="n">hdr_ext_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Total length, in octets, of the on-the-wire IPv6-Route header for a given ``Hdr Ext Len``.</span>
 
-<span class="sd">    This is the fixed 4 octets of ``next``/``length``/``type``/``seg_left``</span>
-<span class="sd">    plus the type-specific data computed by :func:`ipv6_route_data_length`,</span>
-<span class="sd">    i.e. ``4 + (4 + 8 * hdr_ext_len)`` -- a *different* quantity from</span>
-<span class="sd">    :func:`ipv6_route_data_length` itself (``8 + 8 * hdr_ext_len`` here vs.</span>
-<span class="sd">    ``4 + 8 * hdr_ext_len`` there), not a duplicate of it. It is what each</span>
-<span class="sd">    ``_read_data_type_*`` in</span>
-<span class="sd">    :mod:`pcapkit.protocols.internet.ipv6_route.protocol` reports back as the parsed</span>
-<span class="sd">    route data's own ``.length``, which</span>
-<span class="sd">    :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read` then</span>
-<span class="sd">    subtracts from the outer packet length to find the next layer's length.</span>
-<span class="sd">    Its inverse is the ``(length - 8) // 8`` that</span>
+<span class="sd">    The fixed 4 octets and the type-specific data of :func:`ipv6_route_data_length`</span>
+<span class="sd">    together, which :func:`~pcapkit.corekit.schema.extlen.ext_len_to_octets` gives.</span>
+<span class="sd">    Each ``_read_data_type_*`` in :mod:`pcapkit.protocols.internet.ipv6_route.protocol`</span>
+<span class="sd">    reports it as the parsed route data's ``.length``, which</span>
+<span class="sd">    :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.read`</span>
+<span class="sd">    subtracts from the outer packet length to find the next layer's.</span>
+<span class="sd">    :func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len` is its inverse, which</span>
 <span class="sd">    :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data`</span>
-<span class="sd">    passes back as ``hdr_ext_len``;</span>
-<span class="sd">    :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_hdr_ext_len`</span>
-<span class="sd">    inverts :func:`ipv6_route_data_length` instead.</span>
+<span class="sd">    passes back as ``hdr_ext_len``.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.</span>
@@ -672,7 +669,7 @@
 <span class="sd">        Total length, in octets, of the on-the-wire IPv6-Route header.</span>
 
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">ipv6_route_data_length</span><span class="p">(</span><span class="n">hdr_ext_len</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">ext_len_to_octets</span><span class="p">(</span><span class="n">hdr_ext_len</span><span class="p">)</span></div>
 
 
 

@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -595,6 +597,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Routing</span> <span class="k">as</span> <span class="n">Enum_Routing</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.extlen</span><span class="w"> </span><span class="kn">import</span> <span class="n">octets_to_ext_len</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
@@ -1072,7 +1075,7 @@
             <span class="s1">'data'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
             <span class="c1"># NOTE: The parsed header length, passed through as ``Hdr Ext Len`` rather than</span>
             <span class="c1"># recomputed, so a truncated capture rebuilds with the length on the wire (#1457).</span>
-            <span class="s1">'hdr_ext_len'</span><span class="p">:</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">'hdr_ext_len'</span><span class="p">:</span> <span class="n">octets_to_ext_len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 

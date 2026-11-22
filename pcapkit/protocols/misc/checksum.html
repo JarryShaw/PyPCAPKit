@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1060,7 +1062,8 @@ of IPv4, and for IPv6 also the Mobility Header or HIP its walk ends at
 an extension header. Each is verified if it defines
 <code class="docutils literal notranslate"><span class="pre">_verify_pseudo_checksum</span></code>, against the
 <a class="reference internal" href="#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a> of <code class="docutils literal notranslate"><span class="pre">ip</span></code>,
-or against <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if that cannot be derived or names another protocol.</p>
+or quietly against <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if that cannot be derived or names another
+protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ip</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../internet/ipv4.html#pcapkit.protocols.internet.ipv4.protocol.IPv4" title="pcapkit.protocols.internet.ipv4.protocol.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> | <a class="reference internal" href="../internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span>) – Parsed IPv4 or IPv6 layer.</p>
@@ -1068,7 +1071,8 @@ or against <a class="reference external" href="https://docs.python.org/3/builtin
 </dl>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.7.0: </span>Verifies a Mobility Header or HIP that IPv6 walks as an extension
-header (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2813">#2813</a>).</p>
+header (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2813">#2813</a>). Where the pseudo-header cannot be derived, the
+refusal logs nothing and installs no exception hook (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2859">#2859</a>).</p>
 </div>
 </dd></dl>
 

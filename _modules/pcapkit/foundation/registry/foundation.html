@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -578,27 +580,28 @@
 <span class="sd">   :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the</span>
 <span class="sd">   string ``'(null)'`` (:issue:`833`).</span>
 
+<span class="sd">.. versionchanged:: 1.7.0</span>
+
+<span class="sd">   Each registrar takes the one entry its classmethod takes, under that</span>
+<span class="sd">   classmethod's parameter name, where it took ``module`` and ``class_``, and</span>
+<span class="sd">   :func:`register_reassembly_callback` and :func:`register_traceflow_callback`</span>
+<span class="sd">   replace the per-protocol callback registrars, with no shim (:issue:`2838`).</span>
+
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">IPv4_Reassembly</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">IPv6_Reassembly</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlow</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_TraceFlow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallbackFn</span> <span class="k">as</span> <span class="n">Reasm_CallbackFn</span>
@@ -611,9 +614,7 @@
     <span class="s1">'register_dumper'</span><span class="p">,</span>
     <span class="s1">'register_extractor_dumper'</span><span class="p">,</span> <span class="s1">'register_traceflow_dumper'</span><span class="p">,</span>
 
-    <span class="s1">'register_reassembly_ipv4_callback'</span><span class="p">,</span> <span class="s1">'register_reassembly_ipv6_callback'</span><span class="p">,</span>
-    <span class="s1">'register_reassembly_tcp_callback'</span><span class="p">,</span>
-    <span class="s1">'register_traceflow_tcp_callback'</span><span class="p">,</span>
+    <span class="s1">'register_reassembly_callback'</span><span class="p">,</span> <span class="s1">'register_traceflow_callback'</span><span class="p">,</span>
 
     <span class="s1">'register_extractor_reassembly'</span><span class="p">,</span> <span class="s1">'register_engine_reassembly'</span><span class="p">,</span> <span class="s1">'register_extractor_traceflow'</span><span class="p">,</span>
 <span class="p">]</span>
@@ -627,44 +628,34 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_engine</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Engine] | Type[Engine]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_engine</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <span class="c1"># NOTE: pcapkit.foundation.extraction.Extractor.__engine__</span>
 <div class="viewcode-block" id="register_extractor_engine">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_engine">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_engine</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Engine] | Type[Engine] | str'</span><span class="p">,</span>
-                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_engine</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Engine] | Type[Engine]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new engine class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new engine class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given engine class to the</span>
 <span class="sd">    :data:`pcapkit.foundation.extraction.Extractor.__engine__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        name: engine name</span>
-<span class="sd">        module: module name or module descriptor or an</span>
+<span class="sd">        engine: module descriptor or an</span>
 <span class="sd">            :class:`~pcapkit.foundation.engines.engine.Engine` subclass (a class</span>
 <span class="sd">            deriving only from :class:`~pcapkit.foundation.engines.engine.EngineBase`</span>
 <span class="sd">            is refused: that is the base for pcapkit's own engines, unless it is</span>
 <span class="sd">            the engine ``name`` shipped with, which restores it)</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    .. versionchanged:: 1.3.0</span>
 
 <span class="sd">       The engine name, which was ``engine``, is ``name``, with no alias.</span>
 
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Engine]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+<span class="sd">    .. versionchanged:: 1.7.0</span>
 
-    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_engine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+<span class="sd">       ``engine`` is the class, where ``module`` and ``class_`` named it</span>
+<span class="sd">       (:issue:`2838`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_engine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered extractor engine: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 
@@ -674,21 +665,11 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <div class="viewcode-block" id="register_dumper">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_dumper">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
-                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                    <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new dumper class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new dumper class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given dumper class to the</span>
 <span class="sd">    :data:`pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__` and</span>
@@ -696,9 +677,7 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        format: format name</span>
-<span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~dictdumper.dumper.Dumper` subclass</span>
-<span class="sd">        class\_: class name</span>
+<span class="sd">        dumper: module descriptor or a :class:`~dictdumper.dumper.Dumper` subclass</span>
 <span class="sd">        ext: file extension</span>
 
 <span class="sd">    See Also:</span>
@@ -710,40 +689,25 @@
 <span class="sd">       ``ext`` is keyword-only.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Dumper]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
-
-    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
-    <span class="n">TraceFlow</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">TraceFlow</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered output format: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.foundation.extraction.Extractor.__output__</span>
 <div class="viewcode-block" id="register_extractor_dumper">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_dumper">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
-                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                              <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new dumper class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new dumper class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given dumper class to the</span>
 <span class="sd">    :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        format: format name</span>
-<span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~dictdumper.dumper.Dumper` subclass</span>
-<span class="sd">        class\_: class name</span>
+<span class="sd">        dumper: module descriptor or a :class:`~dictdumper.dumper.Dumper` subclass</span>
 <span class="sd">        ext: file extension</span>
 
 <span class="sd">    .. versionchanged:: 1.3.0</span>
@@ -751,39 +715,24 @@
 <span class="sd">       ``ext`` is keyword-only.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Dumper]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
-
-    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered extractor output dumper: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__</span>
 <div class="viewcode-block" id="register_traceflow_dumper">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_dumper">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
-                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                              <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new dumper class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new dumper class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given dumper class to the</span>
 <span class="sd">    :data:`pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        format: format name</span>
-<span class="sd">        module: module name or module descriptor or a</span>
-<span class="sd">            :class:`~dictdumper.dumper.Dumper` subclass</span>
-<span class="sd">        class\_: class name</span>
+<span class="sd">        dumper: module descriptor or a :class:`~dictdumper.dumper.Dumper` subclass</span>
 <span class="sd">        ext: file extension</span>
 
 <span class="sd">    .. versionchanged:: 1.3.0</span>
@@ -791,10 +740,7 @@
 <span class="sd">       ``ext`` is keyword-only.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Dumper]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
-
-    <span class="n">TraceFlow</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">TraceFlow</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered traceflow output: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div>
 
 
@@ -804,79 +750,111 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="c1"># NOTE: pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__</span>
-<div class="viewcode-block" id="register_reassembly_ipv4_callback">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_reassembly_ipv4_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Reasm_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
-
-<span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`IPv4.__callback_fn__ &lt;pcapkit.foundation.reassembly.ipv4.IPv4.__callback_fn__&gt;`</span>
-<span class="sd">    registry.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_registered_class</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The class ``registry`` holds under the name ``protocol``, case-insensitively.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        callback: callback function</span>
+<span class="sd">        registry: :attr:`Extractor.__reassembly__</span>
+<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__reassembly__&gt;` or</span>
+<span class="sd">            :attr:`Extractor.__traceflow__</span>
+<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__traceflow__&gt;`</span>
+<span class="sd">        protocol: registered name, looked up lower-cased as the extractor does</span>
+<span class="sd">        kind: entry kind, for the error message</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If ``protocol`` is not a :class:`str`, or names no entry.</span>
 
 <span class="sd">    """</span>
-    <span class="n">IPv4_Reassembly</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered IPv4 reassembly callback: </span><span class="si">%r</span><span class="s1">'</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a registered </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> name, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'no </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> is registered under </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">klass</span>
+    <span class="k">return</span> <span class="n">entry</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject a ``callback`` that is not callable, before any list is written.</span>
 
-<span class="c1"># NOTE: pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__</span>
-<div class="viewcode-block" id="register_reassembly_ipv6_callback">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_reassembly_ipv6_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Reasm_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If ``callback`` is not callable.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">callback</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'callback must be callable, not </span><span class="si">{</span><span class="n">callback</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<span class="c1"># NOTE: pcapkit.foundation.reassembly.reassembly.ReassemblyBase.__callback_fn__</span>
+<div class="viewcode-block" id="register_reassembly_callback">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_callback">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_reassembly_callback</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="s1">'Reasm_CallbackFn'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                 <span class="n">index</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a callback function of a reassembler.</span>
 
 <span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`IPv6.__callback_fn__ &lt;pcapkit.foundation.reassembly.ipv6.IPv6.__callback_fn__&gt;`</span>
-<span class="sd">    registry.</span>
+<span class="sd">    ``__callback_fn__`` list of the reassembly class registered under ``protocol``</span>
+<span class="sd">    in :data:`pcapkit.foundation.extraction.Extractor.__reassembly__`, through its</span>
+<span class="sd">    :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.register`. It</span>
+<span class="sd">    reaches DTLS and a reassembler registered with</span>
+<span class="sd">    :func:`register_extractor_reassembly` as it reaches IPv4, IPv6 and TCP.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        callback: callback function</span>
+<span class="sd">        protocol: name the reassembler is registered by, case-insensitively,</span>
+<span class="sd">            such as ``'ipv4'`` or ``'dtls'``</span>
+<span class="sd">        callback: callback function, which will be called when reassembled</span>
+<span class="sd">            datagram is obtained, with the list of reassembled datagrams as its</span>
+<span class="sd">            only argument</span>
+<span class="sd">        index: index to be inserted in the callback list; by default, the</span>
+<span class="sd">            callback will be appended to the end of the list</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If ``protocol`` is not a :class:`str` or names no</span>
+<span class="sd">            registered reassembler, or if ``callback`` is not callable.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
-    <span class="n">IPv6_Reassembly</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered IPv6 reassembly callback: </span><span class="si">%r</span><span class="s1">'</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span></div>
+    <span class="n">reassembly</span> <span class="o">=</span> <span class="n">_registered_class</span><span class="p">(</span><span class="n">Extractor</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="s1">'reassembly'</span><span class="p">)</span>
+    <span class="n">_check_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">reassembly</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> reassembly callback: </span><span class="si">%r</span><span class="s1">'</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span></div>
 
 
 
-<span class="c1"># NOTE: pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__</span>
-<div class="viewcode-block" id="register_reassembly_tcp_callback">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_reassembly_tcp_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Reasm_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
+<span class="c1"># NOTE: pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__callback_fn__</span>
+<div class="viewcode-block" id="register_traceflow_callback">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_callback">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_callback</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="s1">'Trace_CallbackFn'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">index</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a callback function of a flow tracer.</span>
 
 <span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`TCP.__callback_fn__ &lt;pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__&gt;`</span>
-<span class="sd">    registry.</span>
+<span class="sd">    ``__callback_fn__`` list of the flow tracing class registered under</span>
+<span class="sd">    ``protocol`` in :data:`pcapkit.foundation.extraction.Extractor.__traceflow__`,</span>
+<span class="sd">    through its</span>
+<span class="sd">    :meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase.register_callback`.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        callback: callback function</span>
+<span class="sd">        protocol: name the flow tracer is registered by, case-insensitively,</span>
+<span class="sd">            such as ``'tcp'``</span>
+<span class="sd">        callback: callback function, which will be called when a traced flow</span>
+<span class="sd">            is finalised, with the flow's index entry as its only argument</span>
+<span class="sd">        index: index to be inserted in the callback list; by default, the</span>
+<span class="sd">            callback will be appended to the end of the list</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If ``protocol`` is not a :class:`str` or names no</span>
+<span class="sd">            registered flow tracer, or if ``callback`` is not callable.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
-    <span class="n">TCP_Reassembly</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered TCP reassembly callback: </span><span class="si">%r</span><span class="s1">'</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span></div>
-
-
-
-<span class="c1"># NOTE: pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__</span>
-<div class="viewcode-block" id="register_traceflow_tcp_callback">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_tcp_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="s1">'Trace_CallbackFn'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Register a new callback function.</span>
-
-<span class="sd">    The function will register the given callback function to the</span>
-<span class="sd">    :attr:`TCP.__callback_fn__ &lt;pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__&gt;`</span>
-<span class="sd">    registry.</span>
-
-<span class="sd">    Arguments:</span>
-<span class="sd">        callback: callback function</span>
-
-<span class="sd">    """</span>
-    <span class="n">TCP_TraceFlow</span><span class="o">.</span><span class="n">register_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered TCP flow tracing callback: </span><span class="si">%r</span><span class="s1">'</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span></div>
+    <span class="n">traceflow</span> <span class="o">=</span> <span class="n">_registered_class</span><span class="p">(</span><span class="n">Extractor</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="s1">'traceflow'</span><span class="p">)</span>
+    <span class="n">_check_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+    <span class="n">traceflow</span><span class="o">.</span><span class="n">register_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> flow tracing callback: </span><span class="si">%r</span><span class="s1">'</span><span class="p">,</span> <span class="n">traceflow</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span></div>
 
 
 
@@ -885,61 +863,36 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Reassembly] | Type[Reassembly]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <span class="c1"># NOTE: pcapkit.foundation.extraction.Extractor.__reassembly__</span>
 <div class="viewcode-block" id="register_extractor_reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Reassembly] | Type[Reassembly]'</span><span class="p">,</span>
-                                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span>
+                                  <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Reassembly] | Type[Reassembly]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new reassembly class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new reassembly class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given reassembly class to the</span>
 <span class="sd">    :data:`pcapkit.foundation.extraction.Extractor.__reassembly__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol name</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        reassembly: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass (a class</span>
 <span class="sd">            deriving only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`</span>
 <span class="sd">            is refused: that is the base for pcapkit's own classes, unless it is</span>
 <span class="sd">            the class ``protocol`` shipped with, which restores it)</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Reassembly]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
-
-    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered extractor reassembly: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_engine_reassembly</span><span class="p">(</span><span class="n">engine</span><span class="p">:</span> <span class="s1">'str | Type[EngineBase]'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Adapter] | Adapter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_engine_reassembly</span><span class="p">(</span><span class="n">engine</span><span class="p">:</span> <span class="s1">'str | Type[EngineBase]'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long</span>
 
 
 <span class="c1"># NOTE: pcapkit.foundation.engines.engine.EngineBase.__reassembly__</span>
 <div class="viewcode-block" id="register_engine_reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_engine_reassembly">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_engine_reassembly</span><span class="p">(</span><span class="n">engine</span><span class="p">:</span> <span class="s1">'str | Type[EngineBase]'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span>
-                               <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Adapter] | Adapter'</span><span class="p">,</span>
-                               <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                               <span class="n">adapter</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Adapter] | Adapter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new reassembly adapter of an engine.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified name of the new adapter should be</span>
-<span class="sd">        ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given :mod:`pcapkit.toolkit` adapter to the</span>
 <span class="sd">    :attr:`EngineBase.__reassembly__</span>
@@ -955,8 +908,7 @@
 <span class="sd">            :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` have no name, so</span>
 <span class="sd">            take the class</span>
 <span class="sd">        protocol: reassembly name</span>
-<span class="sd">        module: module name or module descriptor or the adapter itself</span>
-<span class="sd">        class\_: adapter name</span>
+<span class="sd">        adapter: module descriptor or the adapter itself</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``engine`` names no registered engine, or is not an</span>
@@ -974,48 +926,31 @@
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be a registered engine name or an EngineBase subclass, '</span>
                             <span class="sa">f</span><span class="s1">'not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[Adapter]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
-
-    <span class="n">engine_cls</span><span class="o">.</span><span class="n">register_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">engine_cls</span><span class="o">.</span><span class="n">register_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> engine reassembly: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">engine_cls</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[TraceFlow] | Type[TraceFlow]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.foundation.extraction.Extractor.__traceflow__</span>
 <div class="viewcode-block" id="register_extractor_traceflow">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_traceflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[TraceFlow] | Type[TraceFlow]'</span><span class="p">,</span>
-                                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span>
+                                 <span class="n">traceflow</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[TraceFlow] | Type[TraceFlow]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new flow tracing class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new flow tracing class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given flow tracing class to the</span>
 <span class="sd">    :data:`pcapkit.foundation.extraction.Extractor.__traceflow__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol name</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        traceflow: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass (a class</span>
 <span class="sd">            deriving only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`</span>
 <span class="sd">            is refused: that is the base for pcapkit's own classes, unless it is</span>
 <span class="sd">            the class ``protocol`` shipped with, which restores it)</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[TraceFlow]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
-
-    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Extractor</span><span class="o">.</span><span class="n">register_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered extractor flow tracing: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span></div>
 
 </pre></div>

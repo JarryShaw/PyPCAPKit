@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -602,6 +604,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.parse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
@@ -623,10 +626,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.chardet</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholding</span><span class="p">,</span> <span class="n">frame_depth</span><span class="p">,</span> <span class="n">rebuilding</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">ProtocolNotFound</span><span class="p">,</span>
-                                          <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span>
-                                          <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">CaughtByCaller</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span>
+                                          <span class="n">ProtocolNotFound</span><span class="p">,</span> <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
+                                          <span class="n">StructError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">isabstract</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span>
                                         <span class="n">hold_warnings</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
@@ -642,6 +646,10 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Protocol'</span><span class="p">,</span> <span class="s1">'ProtocolBase'</span><span class="p">]</span>
+
+<span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
+<span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">_PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Data'</span><span class="p">)</span>
 <span class="n">_ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema'</span><span class="p">)</span>
@@ -1736,37 +1744,24 @@
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            instance. A payload that fails to parse is kept as</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` holding all of it,</span>
-<span class="sd">            its ``error`` the failure's message, or as</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after</span>
-<span class="sd">            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
+<span class="sd">            its ``error`` the failure's message and its ``protocol`` ``proto``,</span>
+<span class="sd">            or as :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`</span>
+<span class="sd">            after an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
+<span class="sd">            A refusal it absorbs is quiet, any other error is logged at</span>
+<span class="sd">            :data:`logging.WARNING`, and the failed parse's warnings are dropped,</span>
+<span class="sd">            as :meth:`_analyze_next_layer` describes.</span>
 
 <span class="sd">        .. versionchanged:: 1.7.0</span>
 
 <span class="sd">           The fallback holds the whole payload and the failure's message,</span>
 <span class="sd">           rather than the octets the failed parse left unread (:issue:`2842`).</span>
+<span class="sd">           Its ``protocol`` is ``proto``, a refusal it absorbs is quiet, any</span>
+<span class="sd">           other error is logged at :data:`logging.WARNING`, and the failed</span>
+<span class="sd">           parse's warnings are dropped (:issue:`2862`).</span>
 
 <span class="sd">        """</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
-
-        <span class="n">payload_io</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">StructError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
-            <span class="c1"># error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]</span>
-
-            <span class="c1"># log error</span>
-            <span class="c1">#logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())</span>
-
-            <span class="c1"># NOTE: Rewound, as the failed parse read the stream, and given the failure as ``error``,</span>
-            <span class="c1"># as ``beholder`` gives a frame's fallback (#2842).</span>
-            <span class="n">payload_io</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">'error'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-            <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
-        <span class="k">return</span> <span class="n">report</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProtocolBase.register">
@@ -3749,6 +3744,81 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">next_</span></div>
+
+
+<div class="viewcode-block" id="ProtocolBase._analyze_next_layer">
+<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase._analyze_next_layer">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_analyze_next_layer</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Parse a payload :meth:`analyze` dispatched, or keep it as raw octets if it fails.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            klass: protocol class the payload was dispatched to</span>
+<span class="sd">            payload: payload to parse</span>
+<span class="sd">            code: code the payload was dispatched on, the fallback's ``alias``</span>
+<span class="sd">                unless ``kwargs`` gives one</span>
+<span class="sd">            **kwargs: keyword arguments for ``klass``'s constructor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Instance of ``klass``. A payload that fails to parse is kept as</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` holding all of it,</span>
+<span class="sd">            its ``error`` the failure's message and its ``protocol`` ``code``,</span>
+<span class="sd">            as a frame's fallback is, or as</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after</span>
+<span class="sd">            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The parse runs on trial, as under</span>
+<span class="sd">            :func:`~pcapkit.corekit.decorators.beholder`. A</span>
+<span class="sd">            :exc:`~pcapkit.utilities.exceptions.ProtocolError` built during it is</span>
+<span class="sd">            quiet, so the refusal the fallback records logs nothing and installs no</span>
+<span class="sd">            exception hook (:issue:`2588`). Any other error is as loud as it was</span>
+<span class="sd">            constructed, and is logged here at :data:`logging.WARNING` as well, as</span>
+<span class="sd">            :func:`~pcapkit.corekit.decorators.beholder` logs it, with its traceback</span>
+<span class="sd">            in verbose mode. A parse that raises is dropped with its warnings</span>
+<span class="sd">            (:issue:`2308`), and a parse kept reports its own after those of the</span>
+<span class="sd">            layers it carries, as a frame's layer does. The fallback is built after</span>
+<span class="sd">            the trial ends, so an error it raises is loud.</span>
+
+<span class="sd">        """</span>
+        <span class="n">payload_io</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">eof</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">''</span>
+        <span class="c1"># NOTE: ``beholding`` as well, so a trial block inside the parse, as TLS's, drops its</span>
+        <span class="c1"># warnings on a raise rather than reporting them past this one (#2308).</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">beholding</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">hold_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">klass</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">eof</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">StructError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="c1"># NOTE: Keyed on the class, as ``beholder`` keys it: a refusal is quiet (#2588), and</span>
+            <span class="c1"># any other error, a quiet end-of-file StructError included, is logged at WARNING.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">DEVMODE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+                <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">'The following error occurred while parsing the packet:'</span><span class="p">)</span>
+                    <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">beholding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">eof</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # pylint: disable=import-outside-toplevel # isort: skip</span>
+
+        <span class="c1"># NOTE: Rewound, as the failed parse read the stream; ``error`` and ``alias`` as</span>
+        <span class="c1"># ``beholder`` gives a frame's fallback (#2842, #2862).</span>
+        <span class="n">payload_io</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'alias'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">'error'</span><span class="p">]</span> <span class="o">=</span> <span class="n">error</span>
+        <span class="k">return</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_term_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

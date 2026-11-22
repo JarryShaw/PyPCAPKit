@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -795,14 +797,20 @@ every layer’s <code class="docutils literal notranslate"><span class="pre">reg
 <dd class="field-odd"><p>Parsed payload as a <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>
 instance. A payload that fails to parse is kept as
 <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> holding all of it,
-its <code class="docutils literal notranslate"><span class="pre">error</span></code> the failure’s message, or as
-<a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> after
-an end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.</p>
+its <code class="docutils literal notranslate"><span class="pre">error</span></code> the failure’s message and its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> <code class="docutils literal notranslate"><span class="pre">proto</span></code>,
+or as <a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>
+after an end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.
+A refusal it absorbs is quiet, any other error is logged at
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a>, and the failed parse’s warnings are dropped,
+as <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._analyze_next_layer" title="pcapkit.protocols.protocol.Protocol._analyze_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_analyze_next_layer()</span></code></a> describes.</p>
 </dd>
 </dl>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.7.0: </span>The fallback holds the whole payload and the failure’s message,
-rather than the octets the failed parse left unread (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2842">#2842</a>).</p>
+rather than the octets the failed parse left unread (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2842">#2842</a>).
+Its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is <code class="docutils literal notranslate"><span class="pre">proto</span></code>, a refusal it absorbs is quiet, any
+other error is logged at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a>, and the failed
+parse’s warnings are dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>).</p>
 </div>
 </dd></dl>
 
@@ -2151,6 +2159,48 @@ it and the rest of the frame are kept as
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._analyze_next_layer">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_analyze_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">klass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._analyze_next_layer" title="Link to this definition">¶</a></dt>
+<dd><p>Parse a payload <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code></a> dispatched, or keep it as raw octets if it fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>klass</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – protocol class the payload was dispatched to</p></li>
+<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – payload to parse</p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – code the payload was dispatched on, the fallback’s <code class="docutils literal notranslate"><span class="pre">alias</span></code>
+unless <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> gives one</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – keyword arguments for <code class="docutils literal notranslate"><span class="pre">klass</span></code>’s constructor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Instance of <code class="docutils literal notranslate"><span class="pre">klass</span></code>. A payload that fails to parse is kept as
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> holding all of it,
+its <code class="docutils literal notranslate"><span class="pre">error</span></code> the failure’s message and its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> <code class="docutils literal notranslate"><span class="pre">code</span></code>,
+as a frame’s fallback is, or as
+<a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> after
+an end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The parse runs on trial, as under
+<a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>. A
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> built during it is
+quiet, so the refusal the fallback records logs nothing and installs no
+exception hook (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2588">#2588</a>). Any other error is as loud as it was
+constructed, and is logged here at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> as well, as
+<a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> logs it, with its traceback
+in verbose mode. A parse that raises is dropped with its warnings
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>), and a parse kept reports its own after those of the
+layers it carries, as a frame’s layer does. The fallback is built after
+the trial ends, so an error it raises is loud.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._get_context">
 <span class="sig-name descname"><span class="pre">_get_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._get_context" title="Link to this definition">¶</a></dt>
 <dd><p>Get the caller supplied context for this protocol, if any.</p>
@@ -3030,6 +3080,8 @@ documented under it above; each group below links to its entries.</p>
 <span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._import_next_layer" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._parse_next_layer">
 <span class="sig-name descname"><span class="pre">_parse_next_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._parse_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._parse_next_layer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._analyze_next_layer">
+<span class="sig-name descname"><span class="pre">_analyze_next_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._analyze_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._analyze_next_layer" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._get_context">
 <span class="sig-name descname"><span class="pre">_get_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._get_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._get_context" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__init__">
@@ -3070,7 +3122,8 @@ documented under it above; each group below links to its entries.</p>
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_lookup_registry()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_lookup_next_layer()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._get_context" title="pcapkit.protocols.protocol.Protocol._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_get_context()</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._analyze_next_layer" title="pcapkit.protocols.protocol.Protocol._analyze_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_analyze_next_layer()</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._get_context" title="pcapkit.protocols.protocol.Protocol._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_get_context()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__repr__" title="pcapkit.protocols.protocol.Protocol.__repr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__str__" title="pcapkit.protocols.protocol.Protocol.__str__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__getitem__" title="pcapkit.protocols.protocol.Protocol.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__contains__" title="pcapkit.protocols.protocol.Protocol.__contains__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__contains__()</span></code></a>,

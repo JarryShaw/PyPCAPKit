@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -586,7 +588,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.dns.rr_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">RRType</span> <span class="k">as</span> <span class="n">DNS_RRType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">HTTP_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.extension_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionType</span> <span class="k">as</span> <span class="n">TLS_ExtensionType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_check_meth</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dns.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">DNS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span> <span class="k">as</span> <span class="n">Schema_HTTP_FrameType</span>
@@ -647,12 +649,14 @@
 <span class="sd">        RegistryError: If ``code`` is not an</span>
 <span class="sd">            :class:`~pcapkit.const.dns.rr_type.RRType` member, e.g. a member</span>
 <span class="sd">            of another enum, or ``meth`` is a name with no matching</span>
-<span class="sd">            ``_read_rdata_*`` method.</span>
+<span class="sd">            ``_read_rdata_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">DNS_RRType</span><span class="p">,</span> <span class="n">DNS</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">DNS</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">DNS</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_rdata_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid DNS RDATA parser function'</span><span class="p">)</span>
 
@@ -682,12 +686,14 @@
 <span class="sd">        RegistryError: If ``code`` is not an</span>
 <span class="sd">            :class:`~pcapkit.const.dns.option.Option` member, e.g. a member of</span>
 <span class="sd">            another enum, or ``meth`` is a name with no matching</span>
-<span class="sd">            ``_read_opt_*`` method.</span>
+<span class="sd">            ``_read_opt_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">DNS_Option</span><span class="p">,</span> <span class="n">DNS</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">DNS</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">DNS</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid DNS option parser function'</span><span class="p">)</span>
 
@@ -719,10 +725,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.http.frame.Frame`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_http_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_http_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">HTTP_Frame</span><span class="p">,</span> <span class="n">HTTPv2</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">HTTPv2</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HTTPv2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_http_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a frame parser function'</span><span class="p">)</span>
 
@@ -760,7 +768,8 @@
 <span class="sd">        RegistryError: If ``code`` is not an</span>
 <span class="sd">            :class:`~pcapkit.const.tls.extension_type.ExtensionType` member,</span>
 <span class="sd">            e.g. a member of another enum, or ``meth`` is a name with no</span>
-<span class="sd">            matching ``_read_ext_*`` method.</span>
+<span class="sd">            matching ``_read_ext_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 
@@ -772,6 +781,7 @@
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">TLS_ExtensionType</span><span class="p">,</span> <span class="n">SSL</span><span class="p">)</span>  <span class="c1"># type: ignore[type-abstract]</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">SSL</span><span class="p">)</span>  <span class="c1"># type: ignore[type-abstract]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">SSL</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_ext_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a valid TLS extension parser function'</span><span class="p">)</span>
 

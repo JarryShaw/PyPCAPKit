@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -574,16 +576,20 @@
 <span class="sd">:class:`~pcapkit.protocols.transport.transport.Transport`, the base class of the</span>
 <span class="sd">transport layer protocols.</span>
 
+<span class="sd">.. versionremoved:: 1.7.0</span>
+
+<span class="sd">   ``pcapkit.protocols.transport.transport.logger``, which nothing logged to once</span>
+<span class="sd">   :meth:`Transport.analyze &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;`</span>
+<span class="sd">   stopped (:issue:`2862`).</span>
+
 <span class="sd">"""</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">keep_short_read</span><span class="p">,</span> <span class="n">replay_short_read</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">,</span> <span class="n">ProtocolBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -594,11 +600,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportProtocol</span> <span class="k">as</span> <span class="n">Enum_TransportProtocol</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Transport'</span><span class="p">]</span>
-
-
-<span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
-<span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Transport">
@@ -713,7 +714,9 @@
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            instance. A payload that fails to parse is kept as</span>
 <span class="sd">            :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`</span>
-<span class="sd">            keeps one.</span>
+<span class="sd">            keeps one, its ``protocol`` the port looked up, as an :obj:`int`, as</span>
+<span class="sd">            a frame's fallback records the port :meth:`_decode_next_layer`</span>
+<span class="sd">            looked up.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            The annotation names the **base** registry because every transport</span>
@@ -753,30 +756,16 @@
 
 <span class="sd">           The fallback holds the whole payload and the failure's message,</span>
 <span class="sd">           rather than the octets the failed parse left unread (:issue:`2842`).</span>
+<span class="sd">           Its ``protocol`` is the port looked up, a refusal it absorbs is</span>
+<span class="sd">           quiet, any other error is logged at :data:`logging.WARNING` rather</span>
+<span class="sd">           than ``ERROR``, and the failed parse's warnings are dropped</span>
+<span class="sd">           (:issue:`2862`).</span>
 
 <span class="sd">        """</span>
         <span class="n">port</span> <span class="o">=</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span> <span class="k">else</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">)</span> <span class="k">else</span> <span class="n">port</span><span class="p">),</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
-
-        <span class="n">payload_io</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">StructError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
-            <span class="c1"># error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]</span>
-
-            <span class="c1"># log error</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">DEVMODE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-
-            <span class="c1"># NOTE: Rewound and given ``error``, as ``Protocol.analyze``'s fallback is (#2842).</span>
-            <span class="n">payload_io</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">'error'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-            <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
-        <span class="k">return</span> <span class="n">report</span></div>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">)</span> <span class="k">else</span> <span class="n">port</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Transport.from_data">

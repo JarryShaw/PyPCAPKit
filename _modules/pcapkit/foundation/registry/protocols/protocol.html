@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1089,6 +1091,32 @@
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: code must be </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s1">, not a member of '</span>
                             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: code must be </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s1">, not </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject a ``meth`` that is neither a method name nor a pair of callables.</span>
+
+<span class="sd">    Each registrar taking a ``meth`` calls this beside :func:`_check_code`,</span>
+<span class="sd">    before touching any registry, so a ``meth`` that would fail only at parse or</span>
+<span class="sd">    build time leaves every registry as it was (:issue:`2838`). A name is</span>
+<span class="sd">    checked against the ``_read_*`` methods by the registrar itself.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        meth: Method name, or ``(parser, constructor)`` pair, handed to the registrar.</span>
+<span class="sd">        target: Protocol class whose registry ``meth`` is destined for, named in</span>
+<span class="sd">            the error message as :func:`_check_code` names it.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If ``meth`` is not a :class:`str`, nor a :class:`tuple`</span>
+<span class="sd">            of two callables.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">meth</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">callable</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">meth</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: meth must be a method name or a (parser, constructor) '</span>
+                        <span class="sa">f</span><span class="s1">'pair of callables, not </span><span class="si">{</span><span class="n">meth</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>

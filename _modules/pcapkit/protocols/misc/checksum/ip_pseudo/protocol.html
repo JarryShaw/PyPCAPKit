@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1346,7 +1348,8 @@
 <span class="sd">    an extension header. Each is verified if it defines</span>
 <span class="sd">    ``_verify_pseudo_checksum``, against the</span>
 <span class="sd">    :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo` of ``ip``,</span>
-<span class="sd">    or against :data:`None` if that cannot be derived or names another protocol.</span>
+<span class="sd">    or quietly against :data:`None` if that cannot be derived or names another</span>
+<span class="sd">    protocol.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        ip: Parsed IPv4 or IPv6 layer.</span>
@@ -1354,7 +1357,8 @@
 <span class="sd">    .. versionchanged:: 1.7.0</span>
 
 <span class="sd">       Verifies a Mobility Header or HIP that IPv6 walks as an extension</span>
-<span class="sd">       header (:issue:`2813`).</span>
+<span class="sd">       header (:issue:`2813`). Where the pseudo-header cannot be derived, the</span>
+<span class="sd">       refusal logs nothing and installs no exception hook (:issue:`2859`).</span>
 
 <span class="sd">    """</span>
     <span class="n">ah</span> <span class="o">=</span> <span class="n">_AH</span><span class="o">.</span><span class="n">klass</span>
@@ -1378,8 +1382,10 @@
             <span class="k">continue</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">derived</span><span class="p">:</span>
             <span class="n">derived</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># NOTE: Quietly, as the refusal is recorded as NO_PSEUDO_HEADER (#2859).</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">pseudo</span> <span class="o">=</span> <span class="n">IP_Pseudo</span><span class="p">(</span><span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">):</span>
+                    <span class="n">pseudo</span> <span class="o">=</span> <span class="n">IP_Pseudo</span><span class="p">(</span><span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">):</span>
                 <span class="n">pseudo</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">verify</span><span class="p">(</span><span class="n">pseudo</span> <span class="k">if</span> <span class="n">pseudo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pseudo</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">layer</span><span class="o">.</span><span class="fm">__index__</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span></div>

@@ -211,7 +211,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -372,8 +371,10 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -392,6 +393,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -1254,15 +1256,19 @@ dumpers. A new output format is a dumper subclass.</p>
 <td><p><a class="reference internal" href="pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.dumpkit.pcap.PCAPIO</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">.pcap</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>XML (<code class="docutils literal notranslate"><span class="pre">xml</span></code>/<code class="docutils literal notranslate"><span class="pre">plist</span></code>)</p></td>
+<tr class="row-even"><td><p>PCAP-NG (<code class="docutils literal notranslate"><span class="pre">pcapng</span></code>)</p></td>
+<td><p><a class="reference internal" href="pcapkit/dumpkit/pcapng.html#pcapkit.dumpkit.pcapng.PCAPNGIO" title="pcapkit.dumpkit.pcapng.PCAPNGIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.dumpkit.pcapng.PCAPNGIO</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.pcapng</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>XML (<code class="docutils literal notranslate"><span class="pre">xml</span></code>/<code class="docutils literal notranslate"><span class="pre">plist</span></code>)</p></td>
 <td><p><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.plist.html#dictdumper.plist.PLIST" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.plist.PLIST</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">.plist</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>JSON (<code class="docutils literal notranslate"><span class="pre">json</span></code>)</p></td>
+<tr class="row-even"><td><p>JSON (<code class="docutils literal notranslate"><span class="pre">json</span></code>)</p></td>
 <td><p><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.json.html#dictdumper.json.JSON" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.json.JSON</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">.json</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>Text (<code class="docutils literal notranslate"><span class="pre">txt</span></code>/<code class="docutils literal notranslate"><span class="pre">text</span></code>/<code class="docutils literal notranslate"><span class="pre">tree</span></code>)</p></td>
+<tr class="row-odd"><td><p>Text (<code class="docutils literal notranslate"><span class="pre">txt</span></code>/<code class="docutils literal notranslate"><span class="pre">text</span></code>/<code class="docutils literal notranslate"><span class="pre">tree</span></code>)</p></td>
 <td><p><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.tree.html#dictdumper.tree.Tree" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.tree.Tree</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">.txt</span></code></p></td>
 </tr>
@@ -1437,19 +1443,19 @@ document the classes and their algorithms.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="o">...</span>  <span class="c1"># reassembly algorithm implementation</span>
 
-        <span class="c1"># NOTE: Once a buffer is complete, store its datagrams.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># submit reassembled datagram</span>
-        <span class="p">)</span>
+        <span class="c1"># NOTE: Once a buffer is complete, release it: ``_release`` submits</span>
+        <span class="c1"># it with ``store`` set and keeps its datagrams exactly once.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">bufid</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">bufid</span><span class="p">)</span>
 
     <span class="c1"># NOTE: Convert a complete ``Buffer`` into ``Datagram`` instances.</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>
+    <span class="c1"># ``expire()`` passes ``timeout`` as well, and stores what it returns.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+               <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>
         <span class="n">datagram</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># list of ``Datagram`` instances</span>
 
-        <span class="c1"># NOTE: Run the registered callbacks on the submission.</span>
-        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">datagram</span><span class="p">)</span>  <span class="c1"># run callback functions</span>
-        <span class="k">return</span> <span class="n">datagram</span>
+        <span class="c1"># NOTE: Store the submission if asked, then run the registered</span>
+        <span class="c1"># callbacks on it, so one that raises cannot lose it.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">datagram</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -1460,12 +1466,10 @@ datagrams or flows as they are produced.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a> holds the callback registry
-functions:</p>
+functions, each taking the name the class is registered by:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_ipv4_callback()</span></code></a></p></li>
-<li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_ipv6_callback()</span></code></a></p></li>
-<li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_tcp_callback()</span></code></a></p></li>
-<li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback" title="pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_traceflow_tcp_callback()</span></code></a></p></li>
+<li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_reassembly_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_callback()</span></code></a></p></li>
+<li><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_callback" title="pcapkit.foundation.registry.foundation.register_traceflow_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_traceflow_callback()</span></code></a></p></li>
 </ul>
 </div>
 <p>A reassembly callback runs on every <a class="reference internal" href="pcapkit/foundation/reassembly/index.html#reassembly-submissions"><span class="std std-ref">submission</span></a> and

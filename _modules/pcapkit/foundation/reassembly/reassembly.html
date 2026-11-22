@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -829,9 +831,71 @@
 <span class="sd">            **kwargs: arbitrary keyword arguments; implementations accept</span>
 <span class="sd">                ``timeout``, set when the buffer is being submitted because</span>
 <span class="sd">                :meth:`expire` abandoned it rather than because it completed or</span>
-<span class="sd">                the capture ended</span>
+<span class="sd">                the capture ended, and ``store``, set when the buffer has left</span>
+<span class="sd">                :attr:`_buffer` for good, which they pass on to :meth:`_notify`</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           A custom ``submit`` must accept ``store`` and pass it on to</span>
+<span class="sd">           :meth:`_notify`, which stores the datagrams before the callbacks</span>
+<span class="sd">           run; :meth:`_release` stores what one dropping ``store`` returns,</span>
+<span class="sd">           after its callbacks. :meth:`expire` stores what it returns, so a</span>
+<span class="sd">           caller must not also extend :attr:`_dtgram` with it (:issue:`2856`).</span>
 
 <span class="sd">        """</span>
+
+    <span class="c1"># submit a buffer that has left the buffers for good</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'_BT'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Submit a buffer that has left :attr:`_buffer` for good, storing its</span>
+<span class="sd">        datagrams exactly once.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf: buffer to submit</span>
+<span class="sd">            **kwargs: keyword arguments for :meth:`submit`, which is also</span>
+<span class="sd">                passed ``store``</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The datagrams :meth:`submit` returned, now in :attr:`_dtgram`.</span>
+
+<span class="sd">        A :meth:`submit` that passes ``store`` on to :meth:`_notify` has stored</span>
+<span class="sd">        them before its callbacks ran. One that drops ``store`` stored none,</span>
+<span class="sd">        so they are stored here, after its callbacks.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
+        <span class="n">datagrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># NOTE: compared by identity, so only the very datagrams ``submit`` returned count as</span>
+        <span class="c1"># stored, even when a callback appended after them.</span>
+        <span class="n">stored</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">[</span><span class="n">size</span><span class="p">:</span><span class="n">size</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stored</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">kept</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">datagram</span>
+                                                <span class="k">for</span> <span class="p">(</span><span class="n">kept</span><span class="p">,</span> <span class="n">datagram</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">stored</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">datagrams</span>
+
+    <span class="c1"># run the callbacks on submitted datagrams</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">:</span> <span class="s1">'list[_DT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run each callback on the datagrams :meth:`submit` built.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            datagrams: datagrams to report</span>
+<span class="sd">            store: whether their buffer has left :attr:`_buffer` for good, so</span>
+<span class="sd">                they join :attr:`_dtgram` before the callbacks run, and one</span>
+<span class="sd">                that raises cannot lose them</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``datagrams``, for :meth:`submit` to return.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).</span>
+        <span class="k">if</span> <span class="n">store</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
+            <span class="n">callback</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">datagrams</span>
 
     <span class="c1"># abandon timed-out buffers</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
@@ -844,7 +908,8 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Datagrams of the buffers abandoned, reported with</span>
-<span class="sd">            :attr:`Completion.TIMEOUT &lt;pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT&gt;`.</span>
+<span class="sd">            :attr:`Completion.TIMEOUT &lt;pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT&gt;`</span>
+<span class="sd">            and already stored in :attr:`datagram`, through :meth:`_release`.</span>
 <span class="sd">            Empty when nothing expired, which is the overwhelmingly common case.</span>
 
 <span class="sd">        A buffer expires when more than :attr:`timeout` seconds separate</span>
@@ -870,7 +935,10 @@
 
 <span class="sd">           The :class:`~pcapkit.foundation.extraction.Extractor` advances the</span>
 <span class="sd">           clock on every frame, where it advanced only on the packets a</span>
-<span class="sd">           reassembly object was fed (:issue:`2814`).</span>
+<span class="sd">           reassembly object was fed (:issue:`2814`). It stores what it returns,</span>
+<span class="sd">           where its caller stored it after the callbacks, so a callback that</span>
+<span class="sd">           raises cannot lose a datagram and a caller must not store one again</span>
+<span class="sd">           (:issue:`2856`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
@@ -895,7 +963,7 @@
                          <span class="s1">'(ICMP Time Exceeded owed: </span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">bufid</span><span class="p">,</span>
                          <span class="n">timestamp</span> <span class="o">-</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Any'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">,</span> <span class="n">owed_icmp</span><span class="p">)</span>
 
-            <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">bufid</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">bufid</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># advance the capture clock</span>
@@ -914,10 +982,14 @@
 <span class="sd">        .. versionadded:: 1.7.0</span>
 
 <span class="sd">        """</span>
-        <span class="n">expired</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">expired</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">expired</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">held</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># NOTE: in a ``finally``: a buffer that left was stored before its callbacks ran, so the</span>
+            <span class="c1"># caches are stale even when one of them raised (#2856).</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">held</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
     <span class="c1"># fetch datagram</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[_DT, ...]'</span><span class="p">:</span>

@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -573,7 +575,8 @@
 <span class="sd">:class:`~pcapkit.const.tls.extension_type.ExtensionType`. A layout that</span>
 <span class="sd">differs by handshake message holds it in :attr:`~ServerNameExtension.data`,</span>
 <span class="sd">chosen by the message the extension is read in: the schema of that message's</span>
-<span class="sd">structure, or the raw octets in one its RFC defines no structure for.</span>
+<span class="sd">structure, or the raw octets in one its RFC defines no structure for, as in a</span>
+<span class="sd">TLS record for a DTLS-only type.</span>
 
 <span class="sd">"""</span>
 
@@ -581,9 +584,12 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.extension_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionType</span> <span class="k">as</span> <span class="n">Enum_ExtensionType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span> <span class="k">as</span> <span class="n">Enum_HandshakeType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_aead_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeAeadId</span> <span class="k">as</span> <span class="n">Enum_HpkeAeadId</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_kdf_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeKdfId</span> <span class="k">as</span> <span class="n">Enum_HpkeKdfId</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_kem_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeKemId</span> <span class="k">as</span> <span class="n">Enum_HpkeKemId</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
@@ -591,8 +597,8 @@
     <span class="s1">'Extension'</span><span class="p">,</span> <span class="s1">'UnknownExtension'</span><span class="p">,</span> <span class="s1">'Empty'</span><span class="p">,</span> <span class="s1">'Opaque8'</span><span class="p">,</span> <span class="s1">'Opaque16'</span><span class="p">,</span>
     <span class="s1">'ServerName'</span><span class="p">,</span> <span class="s1">'ServerNameList'</span><span class="p">,</span> <span class="s1">'ServerNameExtension'</span><span class="p">,</span>
     <span class="s1">'OCSPStatusRequest'</span><span class="p">,</span> <span class="s1">'CertificateStatusRequest'</span><span class="p">,</span> <span class="s1">'StatusRequestExtension'</span><span class="p">,</span>
-    <span class="s1">'NamedGroupList'</span><span class="p">,</span> <span class="s1">'ECPointFormatList'</span><span class="p">,</span> <span class="s1">'ECPointFormatsExtension'</span><span class="p">,</span>
-    <span class="s1">'SignatureSchemeList'</span><span class="p">,</span> <span class="s1">'ProtocolNameList'</span><span class="p">,</span>
+    <span class="s1">'NamedGroupList'</span><span class="p">,</span> <span class="s1">'SupportedGroupsExtension'</span><span class="p">,</span> <span class="s1">'ECPointFormatList'</span><span class="p">,</span> <span class="s1">'ECPointFormatsExtension'</span><span class="p">,</span>
+    <span class="s1">'SignatureSchemeList'</span><span class="p">,</span> <span class="s1">'SignatureAlgorithmsExtension'</span><span class="p">,</span> <span class="s1">'ProtocolNameList'</span><span class="p">,</span> <span class="s1">'ALPNExtension'</span><span class="p">,</span>
     <span class="s1">'SignedCertificateTimestampList'</span><span class="p">,</span> <span class="s1">'SignedCertificateTimestampExtension'</span><span class="p">,</span>
     <span class="s1">'Padding'</span><span class="p">,</span> <span class="s1">'PaddingExtension'</span><span class="p">,</span> <span class="s1">'ExtendedMainSecretExtension'</span><span class="p">,</span>
     <span class="s1">'CertificateCompressionAlgorithms'</span><span class="p">,</span> <span class="s1">'CompressCertificateExtension'</span><span class="p">,</span>
@@ -604,7 +610,7 @@
     <span class="s1">'Cookie'</span><span class="p">,</span> <span class="s1">'CookieExtension'</span><span class="p">,</span> <span class="s1">'PskKeyExchangeModes'</span><span class="p">,</span> <span class="s1">'PskKeyExchangeModesExtension'</span><span class="p">,</span>
     <span class="s1">'PostHandshakeAuthExtension'</span><span class="p">,</span>
     <span class="s1">'KeyShareEntry'</span><span class="p">,</span> <span class="s1">'KeyShareClientHello'</span><span class="p">,</span> <span class="s1">'KeyShareHelloRetryRequest'</span><span class="p">,</span> <span class="s1">'KeyShareServerHello'</span><span class="p">,</span>
-    <span class="s1">'KeyShareExtension'</span><span class="p">,</span> <span class="s1">'ConnectionId'</span><span class="p">,</span>
+    <span class="s1">'KeyShareExtension'</span><span class="p">,</span> <span class="s1">'ConnectionId'</span><span class="p">,</span> <span class="s1">'ConnectionIdExtension'</span><span class="p">,</span>
     <span class="s1">'HpkeSymmetricCipherSuite'</span><span class="p">,</span> <span class="s1">'ECHClientHello'</span><span class="p">,</span> <span class="s1">'ECHHelloRetryRequest'</span><span class="p">,</span> <span class="s1">'ECHConfigExtension'</span><span class="p">,</span>
     <span class="s1">'ECHConfigContents'</span><span class="p">,</span> <span class="s1">'ECHConfig'</span><span class="p">,</span> <span class="s1">'ECHEncryptedExtensions'</span><span class="p">,</span> <span class="s1">'ECHExtension'</span><span class="p">,</span>
     <span class="s1">'RenegotiationInfo'</span><span class="p">,</span> <span class="s1">'RenegotiationInfoExtension'</span><span class="p">,</span>
@@ -635,20 +641,23 @@
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="p">{</span><span class="s1">'__data_end__'</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_structure</span><span class="p">(</span><span class="o">*</span><span class="n">messages</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType | int'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[Schema]'</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_structure</span><span class="p">(</span><span class="o">*</span><span class="n">messages</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType | int'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[Schema]'</span><span class="p">,</span> <span class="n">dtls_only</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                <span class="o">**</span><span class="n">others</span><span class="p">:</span> <span class="s1">'Type[Schema]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], FieldBase]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Select the structure of an ``extension_data`` by its handshake message.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        *messages: Messages carrying ``schema``.</span>
 <span class="sd">        schema: Structure of the extension in ``messages``.</span>
+<span class="sd">        dtls_only: Whether only a DTLS record carries a structure, as for a</span>
+<span class="sd">            type the IANA registry marks DTLS-only (:rfc:`9146#section-10.1`).</span>
 <span class="sd">        **others: Structures of the extension in other messages, by</span>
 <span class="sd">            :class:`~pcapkit.const.tls.handshake_type.HandshakeType` name.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A :class:`~pcapkit.corekit.fields.misc.SwitchField` selector. It packs a</span>
 <span class="sd">        value by its own type; it reads the structure of the message named by</span>
-<span class="sd">        the ``__msg_type__`` key, and the raw octets in any other message.</span>
+<span class="sd">        the ``__msg_type__`` key, and the raw octets in any other message, or</span>
+<span class="sd">        for ``dtls_only`` where the ``__dtls__`` key is false.</span>
 
 <span class="sd">    """</span>
     <span class="n">table</span> <span class="o">=</span> <span class="p">{</span><span class="nb">int</span><span class="p">(</span><span class="n">message</span><span class="p">):</span> <span class="n">schema</span> <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">}</span>
@@ -661,7 +670,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="n">layout</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__msg_type__'</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
-        <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">dtls_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__dtls__'</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">layout</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="p">{</span><span class="s1">'__data_end__'</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">selector</span>
@@ -764,37 +773,18 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_server_name_list</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FieldBase'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Select the ``server_name`` structure: the list, or the empty octets.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: Packet data.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        A field packing a value by its own type, or reading the list unless</span>
-<span class="sd">        there are no octets.</span>
-
-<span class="sd">    """</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">ServerNameList</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="p">{</span><span class="s1">'__data_end__'</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
-
-
 <div class="viewcode-block" id="ServerNameExtension">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ServerNameExtension">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ServerNameExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">server_name</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for ``server_name``: a ``ServerNameList``, or the empty</span>
-<span class="sd">    octets of a ``ServerHello`` and an ``EncryptedExtensions``."""</span>
+<span class="w">    </span><span class="sd">"""Header schema for ``server_name`` (:rfc:`6066#section-3`)."""</span>
 
-    <span class="c1">#: The list, or the empty octets.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'ServerNameList | bytes'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">_server_name_list</span><span class="p">(</span><span class="n">pkt</span><span class="p">))</span>
+    <span class="c1">#: A ``ServerNameList`` in a ``ClientHello``, empty in a ``ServerHello`` or ``EncryptedExtensions``.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'ServerNameList | Empty | bytes'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">_structure</span><span class="p">(</span>
+        <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">ServerNameList</span><span class="p">,</span> <span class="n">server_hello</span><span class="o">=</span><span class="n">Empty</span><span class="p">,</span> <span class="n">encrypted_extensions</span><span class="o">=</span><span class="n">Empty</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'ServerNameList | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'ServerNameList | Empty | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -857,8 +847,8 @@
 <div class="viewcode-block" id="NamedGroupList">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.NamedGroupList">[docs]</a>
 <span class="nd">@schema_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NamedGroupList</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">supported_groups</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for ``supported_groups``, a ``NamedGroupList`` (:rfc:`9846#section-4.3.7`)."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NamedGroupList</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for a ``NamedGroupList`` (:rfc:`9846#section-4.3.7`)."""</span>
 
     <span class="c1">#: Length of :attr:`named_group_list`.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -867,6 +857,21 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">named_group_list</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="SupportedGroupsExtension">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SupportedGroupsExtension">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SupportedGroupsExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">supported_groups</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for ``supported_groups``."""</span>
+
+    <span class="c1">#: A ``NamedGroupList`` in a ``ClientHello`` or ``EncryptedExtensions``.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'NamedGroupList | bytes'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">_structure</span><span class="p">(</span>
+        <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">encrypted_extensions</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">NamedGroupList</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'NamedGroupList | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -904,8 +909,8 @@
 <div class="viewcode-block" id="SignatureSchemeList">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignatureSchemeList">[docs]</a>
 <span class="nd">@schema_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SignatureSchemeList</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">signature_algorithms</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for ``signature_algorithms``, a ``SignatureSchemeList`` (:rfc:`9846#section-4.3.3`)."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SignatureSchemeList</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for a ``SignatureSchemeList`` (:rfc:`9846#section-4.3.3`)."""</span>
 
     <span class="c1">#: Length of :attr:`supported_signature_algorithms`.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -918,12 +923,26 @@
 
 
 
+<div class="viewcode-block" id="SignatureAlgorithmsExtension">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.SignatureAlgorithmsExtension">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SignatureAlgorithmsExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">signature_algorithms</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for ``signature_algorithms``."""</span>
+
+    <span class="c1">#: A ``SignatureSchemeList`` in a ``ClientHello`` or ``CertificateRequest``.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'SignatureSchemeList | bytes'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">_structure</span><span class="p">(</span>
+        <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">certificate_request</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">SignatureSchemeList</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'SignatureSchemeList | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
 <div class="viewcode-block" id="ProtocolNameList">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ProtocolNameList">[docs]</a>
 <span class="nd">@schema_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ProtocolNameList</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">application_layer_protocol_negotiation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for ``application_layer_protocol_negotiation``, a</span>
-<span class="sd">    ``ProtocolNameList`` (:rfc:`7301#section-3.1`)."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProtocolNameList</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for a ``ProtocolNameList`` (:rfc:`7301#section-3.1`)."""</span>
 
     <span class="c1">#: Length of :attr:`protocol_name_list`.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -932,6 +951,22 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">protocol_name_list</span><span class="p">:</span> <span class="s1">'list[Opaque8]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="ALPNExtension">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ALPNExtension">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ALPNExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">application_layer_protocol_negotiation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for ``application_layer_protocol_negotiation``."""</span>
+
+    <span class="c1">#: A ``ProtocolNameList`` in a ``ClientHello``, ``ServerHello`` or ``EncryptedExtensions``.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolNameList | bytes'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">_structure</span><span class="p">(</span>
+        <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">server_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">encrypted_extensions</span><span class="p">,</span>
+        <span class="n">schema</span><span class="o">=</span><span class="n">ProtocolNameList</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'ProtocolNameList | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1388,8 +1423,8 @@
 <div class="viewcode-block" id="ConnectionId">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ConnectionId">[docs]</a>
 <span class="nd">@schema_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ConnectionId</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">connection_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for ``connection_id``, a ``ConnectionId`` (:rfc:`9146#section-3`)."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConnectionId</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for a ``ConnectionId`` (:rfc:`9146#section-3`)."""</span>
 
     <span class="c1">#: Length of :attr:`cid`.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
@@ -1401,6 +1436,21 @@
 
 
 
+<div class="viewcode-block" id="ConnectionIdExtension">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.ConnectionIdExtension">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConnectionIdExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">connection_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for ``connection_id``."""</span>
+
+    <span class="c1">#: A ``ConnectionId`` in a DTLS ``ClientHello`` or ``ServerHello``.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'ConnectionId | bytes'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">_structure</span><span class="p">(</span>
+        <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">server_hello</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">ConnectionId</span><span class="p">,</span> <span class="n">dtls_only</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'ConnectionId | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
 <div class="viewcode-block" id="HpkeSymmetricCipherSuite">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.schema.HpkeSymmetricCipherSuite">[docs]</a>
 <span class="nd">@schema_final</span>
@@ -1408,12 +1458,12 @@
 <span class="w">    </span><span class="sd">"""Header schema for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`)."""</span>
 
     <span class="c1">#: ``HpkeKdfId``.</span>
-    <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKdfId'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HpkeKdfId</span><span class="p">)</span>
     <span class="c1">#: ``HpkeAeadId``.</span>
-    <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeAeadId'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HpkeAeadId</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKdfId | int'</span><span class="p">,</span> <span class="n">aead_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeAeadId | int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1494,7 +1544,7 @@
     <span class="c1">#: ``config_id`` of the ``HpkeKeyConfig``.</span>
     <span class="n">config_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: ``HpkeKemId`` of the ``HpkeKeyConfig``.</span>
-    <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKemId'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HpkeKemId</span><span class="p">)</span>
     <span class="c1">#: Length of :attr:`public_key`.</span>
     <span class="n">public_key_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: ``HpkePublicKey`` of the ``HpkeKeyConfig``.</span>
@@ -1517,8 +1567,8 @@
                                                        <span class="n">item_type</span><span class="o">=</span><span class="n">_item</span><span class="p">(</span><span class="n">ECHConfigExtension</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_key_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">cipher_suites_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cipher_suites</span><span class="p">:</span> <span class="s1">'list[HpkeSymmetricCipherSuite]'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">kem_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKemId | int'</span><span class="p">,</span> <span class="n">public_key_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cipher_suites_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cipher_suites</span><span class="p">:</span> <span class="s1">'list[HpkeSymmetricCipherSuite]'</span><span class="p">,</span>
                      <span class="n">maximum_name_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_name_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_name</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">extensions_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">extensions</span><span class="p">:</span> <span class="s1">'list[ECHConfigExtension]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 

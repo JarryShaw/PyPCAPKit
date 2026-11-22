@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -608,6 +610,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.ec_point_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">ECPointFormat</span> <span class="k">as</span> <span class="n">Enum_ECPointFormat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.extension_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionType</span> <span class="k">as</span> <span class="n">Enum_ExtensionType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span> <span class="k">as</span> <span class="n">Enum_HandshakeType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_aead_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeAeadId</span> <span class="k">as</span> <span class="n">Enum_HpkeAeadId</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_kdf_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeKdfId</span> <span class="k">as</span> <span class="n">Enum_HpkeKdfId</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.hpke_kem_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">HpkeKemId</span> <span class="k">as</span> <span class="n">Enum_HpkeKemId</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.psk_key_exchange_mode</span><span class="w"> </span><span class="kn">import</span> <span class="n">PskKeyExchangeMode</span> <span class="k">as</span> <span class="n">Enum_PskKeyExchangeMode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span>
@@ -667,6 +672,7 @@
     <span class="n">SupportedVersionsClientHello</span> <span class="k">as</span> <span class="n">Data_SupportedVersionsClientHello</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.data</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">SupportedVersionsServerHello</span> <span class="k">as</span> <span class="n">Data_SupportedVersionsServerHello</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALPNExtension</span> <span class="k">as</span> <span class="n">Schema_ALPNExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">CertificateCompressionAlgorithms</span> <span class="k">as</span> <span class="n">Schema_CertificateCompressionAlgorithms</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
@@ -674,6 +680,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">CompressCertificateExtension</span> <span class="k">as</span> <span class="n">Schema_CompressCertificateExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConnectionId</span> <span class="k">as</span> <span class="n">Schema_ConnectionId</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">ConnectionIdExtension</span> <span class="k">as</span> <span class="n">Schema_ConnectionIdExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cookie</span> <span class="k">as</span> <span class="n">Schema_Cookie</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">CookieExtension</span> <span class="k">as</span> <span class="n">Schema_CookieExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EarlyDataExtension</span> <span class="k">as</span> <span class="n">Schema_EarlyDataExtension</span>
@@ -736,6 +744,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">SessionTicketExtension</span> <span class="k">as</span> <span class="n">Schema_SessionTicketExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">SignatureAlgorithmsExtension</span> <span class="k">as</span> <span class="n">Schema_SignatureAlgorithmsExtension</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">SignatureSchemeList</span> <span class="k">as</span> <span class="n">Schema_SignatureSchemeList</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">SignedCertificateTimestampExtension</span> <span class="k">as</span> <span class="n">Schema_SignedCertificateTimestampExtension</span>
@@ -743,6 +753,8 @@
     <span class="n">SignedCertificateTimestampList</span> <span class="k">as</span> <span class="n">Schema_SignedCertificateTimestampList</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">StatusRequestExtension</span> <span class="k">as</span> <span class="n">Schema_StatusRequestExtension</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">SupportedGroupsExtension</span> <span class="k">as</span> <span class="n">Schema_SupportedGroupsExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">SupportedVersionsClientHello</span> <span class="k">as</span> <span class="n">Schema_SupportedVersionsClientHello</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.schema</span><span class="w"> </span><span class="kn">import</span> \
@@ -1018,9 +1030,22 @@
     <span class="k">return</span> <span class="n">Data_HpkeSymmetricCipherSuite</span><span class="p">(</span><span class="n">kdf_id</span><span class="o">=</span><span class="n">suite</span><span class="o">.</span><span class="n">kdf_id</span><span class="p">,</span> <span class="n">aead_id</span><span class="o">=</span><span class="n">suite</span><span class="o">.</span><span class="n">aead_id</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_make_hpke_cipher_suite</span><span class="p">(</span><span class="n">suite</span><span class="p">:</span> <span class="s1">'Data_HpkeSymmetricCipherSuite'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HpkeSymmetricCipherSuite'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Make one ``HpkeSymmetricCipherSuite`` -- the inverse of :func:`_read_hpke_cipher_suite`."""</span>
-    <span class="k">return</span> <span class="n">Schema_HpkeSymmetricCipherSuite</span><span class="p">(</span><span class="n">kdf_id</span><span class="o">=</span><span class="n">suite</span><span class="o">.</span><span class="n">kdf_id</span><span class="p">,</span> <span class="n">aead_id</span><span class="o">=</span><span class="n">suite</span><span class="o">.</span><span class="n">aead_id</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_hpke_cipher_suite</span><span class="p">(</span><span class="n">proto</span><span class="p">:</span> <span class="s1">'SSL'</span><span class="p">,</span> <span class="n">suite</span><span class="p">:</span> <span class="s1">'Data_HpkeSymmetricCipherSuite'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HpkeSymmetricCipherSuite'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
+<span class="w">    </span><span class="sd">"""Make one ``HpkeSymmetricCipherSuite`` -- the inverse of :func:`_read_hpke_cipher_suite`.</span>
+
+<span class="sd">    Each identifier is a member of its enumeration or an :class:`int` code.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If an identifier is not an :class:`int` that fits in</span>
+<span class="sd">            two octets.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">Schema_HpkeSymmetricCipherSuite</span><span class="p">(</span>
+        <span class="n">kdf_id</span><span class="o">=</span><span class="n">proto</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">suite</span><span class="o">.</span><span class="n">kdf_id</span><span class="p">,</span> <span class="n">Enum_HpkeKdfId</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>  <span class="c1"># pylint: disable=protected-access</span>
+                                 <span class="n">name</span><span class="o">=</span><span class="s1">'encrypted_client_hello.kdf_id'</span><span class="p">),</span>
+        <span class="n">aead_id</span><span class="o">=</span><span class="n">proto</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">suite</span><span class="o">.</span><span class="n">aead_id</span><span class="p">,</span> <span class="n">Enum_HpkeAeadId</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>  <span class="c1"># pylint: disable=protected-access</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="s1">'encrypted_client_hello.aead_id'</span><span class="p">),</span>
+    <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_read_ech_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="s1">'Schema_ECHConfig'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ECHConfig'</span><span class="p">:</span>
@@ -1093,18 +1118,26 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_make_ech_config</span><span class="p">(</span><span class="n">proto</span><span class="p">:</span> <span class="s1">'SSL'</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="s1">'Data_ECHConfig'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ECHConfig'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make one ``ECHConfig`` -- the inverse of :func:`_read_ech_config`.</span>
 
-<span class="sd">    ``contents`` given as octets is written as it is, whatever the version.</span>
+<span class="sd">    ``contents`` given as octets is written as it is, whatever the version. The</span>
+<span class="sd">    HPKE identifiers are each a member of its enumeration or an :class:`int` code.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If an HPKE identifier is not an :class:`int` that fits</span>
+<span class="sd">            in two octets.</span>
 
 <span class="sd">    """</span>
     <span class="n">contents</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">contents</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Schema_ECHConfig</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">contents</span><span class="p">),</span> <span class="n">contents</span><span class="o">=</span><span class="n">contents</span><span class="p">)</span>
     <span class="n">key</span> <span class="o">=</span> <span class="n">contents</span><span class="o">.</span><span class="n">key_config</span>
-    <span class="n">suites</span> <span class="o">=</span> <span class="p">[</span><span class="n">_make_hpke_cipher_suite</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span> <span class="k">for</span> <span class="n">suite</span> <span class="ow">in</span> <span class="n">key</span><span class="o">.</span><span class="n">cipher_suites</span><span class="p">]</span>
+    <span class="n">suites</span> <span class="o">=</span> <span class="p">[</span><span class="n">_make_hpke_cipher_suite</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">suite</span><span class="p">)</span> <span class="k">for</span> <span class="n">suite</span> <span class="ow">in</span> <span class="n">key</span><span class="o">.</span><span class="n">cipher_suites</span><span class="p">]</span>
     <span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">Schema_ECHConfigExtension</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
                   <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">contents</span><span class="o">.</span><span class="n">extensions</span><span class="p">]</span>
     <span class="n">body</span> <span class="o">=</span> <span class="n">Schema_ECHConfigContents</span><span class="p">(</span>
-        <span class="n">config_id</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">config_id</span><span class="p">,</span> <span class="n">kem_id</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">kem_id</span><span class="p">,</span> <span class="n">public_key_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">),</span>
+        <span class="n">config_id</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">config_id</span><span class="p">,</span>
+        <span class="n">kem_id</span><span class="o">=</span><span class="n">proto</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">kem_id</span><span class="p">,</span> <span class="n">Enum_HpkeKemId</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>  <span class="c1"># pylint: disable=protected-access</span>
+                                 <span class="n">name</span><span class="o">=</span><span class="s1">'encrypted_client_hello.kem_id'</span><span class="p">),</span>
+        <span class="n">public_key_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">),</span>
         <span class="n">public_key</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">,</span> <span class="n">cipher_suites_length</span><span class="o">=</span><span class="n">_items_length</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">suites</span><span class="p">),</span> <span class="n">cipher_suites</span><span class="o">=</span><span class="n">suites</span><span class="p">,</span>
         <span class="n">maximum_name_length</span><span class="o">=</span><span class="n">contents</span><span class="o">.</span><span class="n">maximum_name_length</span><span class="p">,</span> <span class="n">public_name_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">contents</span><span class="o">.</span><span class="n">public_name</span><span class="p">),</span>
         <span class="n">public_name</span><span class="o">=</span><span class="n">contents</span><span class="o">.</span><span class="n">public_name</span><span class="p">,</span> <span class="n">extensions_length</span><span class="o">=</span><span class="n">_items_length</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">extensions</span><span class="p">),</span>
@@ -1160,8 +1193,9 @@
 <span class="sd">    - Datagram TLS, DTLS 1.0 through DTLS 1.3</span>
 <span class="sd">      (:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`) [:rfc:`4347`, :rfc:`6347`, :rfc:`9147`]</span>
 
-<span class="sd">    The ``extension_data`` of these extensions decodes, in ``ClientHello``,</span>
-<span class="sd">    ``ServerHello``, ``HelloRetryRequest`` and ``EncryptedExtensions``:</span>
+<span class="sd">    These extensions decode, each only in the handshake messages its RFC</span>
+<span class="sd">    defines it in, and ``connection_id`` only in a DTLS record</span>
+<span class="sd">    (:rfc:`9146#section-10.2`):</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -1297,6 +1331,11 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_ExtensionType | int, str | tuple[ExtensionParser, ExtensionConstructor]]</span>
 
+    <span class="c1">#: Whether the records are DTLS's, which alone carry a DTLS-only extension</span>
+    <span class="c1">#: (:rfc:`9146#section-10.2`); :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`</span>
+    <span class="c1">#: sets it.</span>
+    <span class="n">_dtls</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># type: bool</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
@@ -1379,7 +1418,7 @@
 <div class="viewcode-block" id="SSL._read_ext_server_name">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_server_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_server_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ServerNameExtension'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                              <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ServerNameList | bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                              <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ServerNameList | Data_Empty | bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read a ``server_name`` extension.</span>
 
 <span class="sd">        Structure of ``ServerNameList`` [:rfc:`6066#section-3`]:</span>
@@ -1403,14 +1442,17 @@
 <span class="sd">               ServerName server_name_list&lt;1..2^16-1&gt;</span>
 <span class="sd">           } ServerNameList;</span>
 
+<span class="sd">        A ``ServerHello`` or ``EncryptedExtensions`` carries the extension empty.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            ext_type: Extension type.</span>
 <span class="sd">            schema: Parsed ``extension_data`` schema.</span>
 <span class="sd">            msg_type: Handshake message carrying the extension.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The decoded list; or the octets when empty, as a ``ServerHello``'s</span>
-<span class="sd">            and an ``EncryptedExtensions``' are.</span>
+<span class="sd">            The decoded list for a ``ClientHello``, an empty structure for a</span>
+<span class="sd">            ``ServerHello`` or ``EncryptedExtensions``, or the octets for a</span>
+<span class="sd">            message the structure does not cover.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If a name is of a type other than ``host_name``,</span>
@@ -1420,6 +1462,8 @@
         <span class="n">body</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">body</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">Schema_ServerNameList</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Data_Empty</span><span class="p">()</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Data_ServerName]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">server_name_list</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">name_type</span> <span class="o">!=</span> <span class="n">_HOST_NAME</span><span class="p">:</span>
@@ -1490,8 +1534,8 @@
 
 <div class="viewcode-block" id="SSL._read_ext_supported_groups">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_supported_groups">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_supported_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_NamedGroupList'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                   <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_NamedGroupList'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_supported_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SupportedGroupsExtension'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
+                                   <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_NamedGroupList | bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read a ``supported_groups`` extension.</span>
 
 <span class="sd">        Structure of ``NamedGroupList`` [:rfc:`9846#section-4.3.7`]:</span>
@@ -1508,10 +1552,14 @@
 <span class="sd">            msg_type: Handshake message carrying the extension.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The decoded list.</span>
+<span class="sd">            The decoded list in a ``ClientHello`` or ``EncryptedExtensions``, where the</span>
+<span class="sd">            extension is defined; or the octets in any other message.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">Data_NamedGroupList</span><span class="p">(</span><span class="n">named_group_list</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">named_group_list</span><span class="p">))</span></div>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">body</span>
+        <span class="k">return</span> <span class="n">Data_NamedGroupList</span><span class="p">(</span><span class="n">named_group_list</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">named_group_list</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SSL._read_ext_ec_point_formats">
@@ -1552,8 +1600,8 @@
 
 <div class="viewcode-block" id="SSL._read_ext_signature_algorithms">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_signature_algorithms">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_signature_algorithms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SignatureSchemeList'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SignatureSchemeList'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_signature_algorithms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SignatureAlgorithmsExtension'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
+                                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SignatureSchemeList | bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read a ``signature_algorithms`` extension.</span>
 
 <span class="sd">        Structure of ``SignatureSchemeList`` [:rfc:`9846#section-4.3.3`]:</span>
@@ -1570,16 +1618,20 @@
 <span class="sd">            msg_type: Handshake message carrying the extension.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The decoded list.</span>
+<span class="sd">            The decoded list in a ``ClientHello`` or ``CertificateRequest``, where the</span>
+<span class="sd">            extension is defined; or the octets in any other message.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">Data_SignatureSchemeList</span><span class="p">(</span><span class="n">supported_signature_algorithms</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">supported_signature_algorithms</span><span class="p">))</span></div>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">body</span>
+        <span class="k">return</span> <span class="n">Data_SignatureSchemeList</span><span class="p">(</span><span class="n">supported_signature_algorithms</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">supported_signature_algorithms</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SSL._read_ext_alpn">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_alpn">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_alpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ProtocolNameList'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ProtocolNameList'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_alpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ALPNExtension'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ProtocolNameList | bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read an ``application_layer_protocol_negotiation`` extension.</span>
 
 <span class="sd">        Structure of ``ProtocolNameList`` [:rfc:`7301#section-3.1`]:</span>
@@ -1592,16 +1644,24 @@
 <span class="sd">               ProtocolName protocol_name_list&lt;2..2^16-1&gt;</span>
 <span class="sd">           } ProtocolNameList;</span>
 
+<span class="sd">        A server sends it in a ``ServerHello``, or in TLS 1.3 an</span>
+<span class="sd">        ``EncryptedExtensions`` (:rfc:`9846#section-4.3`), naming one protocol.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            ext_type: Extension type.</span>
 <span class="sd">            schema: Parsed ``extension_data`` schema.</span>
 <span class="sd">            msg_type: Handshake message carrying the extension.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The decoded list.</span>
+<span class="sd">            The decoded list in a ``ClientHello``, ``ServerHello`` or</span>
+<span class="sd">            ``EncryptedExtensions``, where the extension is defined; or the</span>
+<span class="sd">            octets in any other message.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">Data_ProtocolNameList</span><span class="p">(</span><span class="n">protocol_name_list</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">protocol_name_list</span><span class="p">))</span></div>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">body</span>
+        <span class="k">return</span> <span class="n">Data_ProtocolNameList</span><span class="p">(</span><span class="n">protocol_name_list</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">protocol_name_list</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SSL._read_ext_signed_certificate_timestamp">
@@ -2033,8 +2093,8 @@
 
 <div class="viewcode-block" id="SSL._read_ext_connection_id">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_connection_id">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_connection_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ConnectionId'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ConnectionId'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ext_connection_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ConnectionIdExtension'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                                <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ConnectionId | bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read a ``connection_id`` extension.</span>
 
 <span class="sd">        Structure of ``ConnectionId`` [:rfc:`9146#section-3`]:</span>
@@ -2045,8 +2105,9 @@
 <span class="sd">               opaque cid&lt;0..2^8-1&gt;;</span>
 <span class="sd">           } ConnectionId;</span>
 
-<span class="sd">        The extension is DTLS-only (:rfc:`9146#section-10.2`). A TLS hello</span>
-<span class="sd">        carrying it does not conform, and it decodes all the same.</span>
+<span class="sd">        The extension is DTLS-only, in a ``ClientHello`` or ``ServerHello``</span>
+<span class="sd">        (:rfc:`9146#section-3`, :rfc:`9146#section-10.2`), and DTLS 1.3 keeps it</span>
+<span class="sd">        in those two messages (:rfc:`9147#section-9.1`).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            ext_type: Extension type.</span>
@@ -2054,10 +2115,15 @@
 <span class="sd">            msg_type: Handshake message carrying the extension.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The decoded connection ID.</span>
+<span class="sd">            The decoded connection ID in a DTLS ``ClientHello`` or</span>
+<span class="sd">            ``ServerHello``, where the extension is defined; or the octets in</span>
+<span class="sd">            any other message, and in a TLS record.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">Data_ConnectionId</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span></div>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">body</span>
+        <span class="k">return</span> <span class="n">Data_ConnectionId</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">body</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SSL._read_ext_ech">
@@ -2186,27 +2252,43 @@
 
 <div class="viewcode-block" id="SSL._make_ext_server_name">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_server_name">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_server_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data_ServerNameList]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                              <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_server_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                              <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data_ServerNameList | Data_Empty]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                              <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>
                               <span class="n">server_name_list</span><span class="p">:</span> <span class="s1">'Iterable[Data_ServerName]'</span> <span class="o">=</span> <span class="p">(),</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ServerNameExtension'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make a ``server_name`` extension.</span>
+
+<span class="sd">        ``data`` decides the structure when given, ``msg_type`` otherwise.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            ext_type: Extension type.</span>
 <span class="sd">            data: Decoded ``extension_data``.</span>
 <span class="sd">            msg_type: Handshake message carrying the extension.</span>
-<span class="sd">            server_name_list: Server names, if ``data`` is not given.</span>
+<span class="sd">            server_name_list: Server names for a ``ClientHello``, if ``data``</span>
+<span class="sd">                is not given.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed ``extension_data`` schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If neither ``data`` nor ``msg_type`` names a structure.</span>
+
 <span class="sd">        """</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">Schema_ServerName</span><span class="p">(</span><span class="n">name_type</span><span class="o">=</span><span class="n">name</span><span class="o">.</span><span class="n">name_type</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">server_name_list</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">server_name_list</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">Schema_ServerNameExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_ServerNameList</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">_items_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span>
-                                                                     <span class="n">server_name_list</span><span class="o">=</span><span class="n">names</span><span class="p">))</span></div>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">msg_type</span> <span class="o">==</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ServerNameList</span><span class="p">(</span><span class="n">server_name_list</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">server_name_list</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">server_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">encrypted_extensions</span><span class="p">):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">Data_Empty</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_ServerNameList</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">Schema_ServerName</span><span class="p">(</span><span class="n">name_type</span><span class="o">=</span><span class="n">name</span><span class="o">.</span><span class="n">name_type</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">server_name_list</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">Schema_ServerNameExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_ServerNameList</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">_items_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span>
+                                                                         <span class="n">server_name_list</span><span class="o">=</span><span class="n">names</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_Empty</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Schema_ServerNameExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_Empty</span><span class="p">())</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Extension </span><span class="si">{</span><span class="n">ext_type</span><span class="si">}</span><span class="s1">] no server_name structure for </span><span class="si">{</span><span class="n">msg_type</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SSL._make_ext_status_request">
@@ -2269,8 +2351,8 @@
 <div class="viewcode-block" id="SSL._make_ext_supported_groups">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_supported_groups">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_supported_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data_NamedGroupList]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
-                                   <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                   <span class="n">named_group_list</span><span class="p">:</span> <span class="s1">'Iterable[int]'</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_NamedGroupList'</span><span class="p">:</span>
+                                   <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span> <span class="n">named_group_list</span><span class="p">:</span> <span class="s1">'Iterable[int]'</span> <span class="o">=</span> <span class="p">(),</span>
+                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SupportedGroupsExtension'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make a ``supported_groups`` extension.</span>
 
 <span class="sd">        Args:</span>
@@ -2283,9 +2365,17 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed ``extension_data`` schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is not given for a message other than a</span>
+<span class="sd">                ``ClientHello`` or ``EncryptedExtensions``.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">msg_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">encrypted_extensions</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Extension </span><span class="si">{</span><span class="n">ext_type</span><span class="si">}</span><span class="s1">] no supported_groups structure '</span>
+                                <span class="sa">f</span><span class="s1">'for </span><span class="si">{</span><span class="n">msg_type</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">named_group_list</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">named_group_list</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Schema_NamedGroupList</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">),</span> <span class="n">named_group_list</span><span class="o">=</span><span class="n">groups</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Schema_SupportedGroupsExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_NamedGroupList</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">),</span>
+                                                                          <span class="n">named_group_list</span><span class="o">=</span><span class="n">groups</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SSL._make_ext_ec_point_formats">
@@ -2325,9 +2415,9 @@
 <div class="viewcode-block" id="SSL._make_ext_signature_algorithms">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_signature_algorithms">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_signature_algorithms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data_SignatureSchemeList]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
-                                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>
                                        <span class="n">supported_signature_algorithms</span><span class="p">:</span> <span class="s1">'Iterable[int]'</span> <span class="o">=</span> <span class="p">(),</span>
-                                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SignatureSchemeList'</span><span class="p">:</span>
+                                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SignatureAlgorithmsExtension'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make a ``signature_algorithms`` extension.</span>
 
 <span class="sd">        Args:</span>
@@ -2341,16 +2431,24 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed ``extension_data`` schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is not given for a message other than a</span>
+<span class="sd">                ``ClientHello`` or ``CertificateRequest``.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">msg_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">certificate_request</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Extension </span><span class="si">{</span><span class="n">ext_type</span><span class="si">}</span><span class="s1">] no signature_algorithms structure '</span>
+                                <span class="sa">f</span><span class="s1">'for </span><span class="si">{</span><span class="n">msg_type</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">schemes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">supported_signature_algorithms</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">supported_signature_algorithms</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Schema_SignatureSchemeList</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">schemes</span><span class="p">),</span> <span class="n">supported_signature_algorithms</span><span class="o">=</span><span class="n">schemes</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Schema_SignatureAlgorithmsExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_SignatureSchemeList</span><span class="p">(</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">schemes</span><span class="p">),</span> <span class="n">supported_signature_algorithms</span><span class="o">=</span><span class="n">schemes</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SSL._make_ext_alpn">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_alpn">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_alpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data_ProtocolNameList]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                       <span class="n">protocol_name_list</span><span class="p">:</span> <span class="s1">'Iterable[bytes]'</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ProtocolNameList'</span><span class="p">:</span>
+                       <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>
+                       <span class="n">protocol_name_list</span><span class="p">:</span> <span class="s1">'Iterable[bytes]'</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ALPNExtension'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make an ``application_layer_protocol_negotiation`` extension.</span>
 
 <span class="sd">        Args:</span>
@@ -2364,10 +2462,20 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed ``extension_data`` schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is not given for a message other than a</span>
+<span class="sd">                ``ClientHello``, ``ServerHello`` or ``EncryptedExtensions``.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">msg_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span>
+                                             <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">server_hello</span><span class="p">,</span>
+                                             <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">encrypted_extensions</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Extension </span><span class="si">{</span><span class="n">ext_type</span><span class="si">}</span><span class="s1">] no application_layer_protocol_negotiation '</span>
+                                <span class="sa">f</span><span class="s1">'structure for </span><span class="si">{</span><span class="n">msg_type</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">_make_opaque</span><span class="p">(</span><span class="n">Schema_Opaque8</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                  <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">protocol_name_list</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">protocol_name_list</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">Schema_ProtocolNameList</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">_items_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span> <span class="n">protocol_name_list</span><span class="o">=</span><span class="n">names</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Schema_ALPNExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_ProtocolNameList</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">_items_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">),</span>
+                                                                 <span class="n">protocol_name_list</span><span class="o">=</span><span class="n">names</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SSL._make_ext_signed_certificate_timestamp">
@@ -2831,8 +2939,8 @@
 <div class="viewcode-block" id="SSL._make_ext_connection_id">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_connection_id">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_connection_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext_type</span><span class="p">:</span> <span class="s1">'Enum_ExtensionType'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data_ConnectionId]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                <span class="n">cid</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ConnectionId'</span><span class="p">:</span>
+                                <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span>
+                                <span class="n">cid</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ConnectionIdExtension'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make a ``connection_id`` extension.</span>
 
 <span class="sd">        Args:</span>
@@ -2845,9 +2953,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed ``extension_data`` schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is not given for a TLS record, or for a</span>
+<span class="sd">                message other than a ``ClientHello`` or ``ServerHello``.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtls</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Extension </span><span class="si">{</span><span class="n">ext_type</span><span class="si">}</span><span class="s1">] no connection_id structure outside DTLS'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">msg_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">,</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">server_hello</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Extension </span><span class="si">{</span><span class="n">ext_type</span><span class="si">}</span><span class="s1">] no connection_id structure '</span>
+                                <span class="sa">f</span><span class="s1">'for </span><span class="si">{</span><span class="n">msg_type</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cid</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cid</span>
-        <span class="k">return</span> <span class="n">Schema_ConnectionId</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">cid</span><span class="o">=</span><span class="n">value</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Schema_ConnectionIdExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_ConnectionId</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">cid</span><span class="o">=</span><span class="n">value</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SSL._make_ext_ech">
@@ -2885,8 +3002,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If neither ``data`` nor ``msg_type`` names a</span>
-<span class="sd">                structure, the argument it needs is missing, or a confirmation</span>
-<span class="sd">                is not 8 octets.</span>
+<span class="sd">                structure, the argument it needs is missing, a confirmation</span>
+<span class="sd">                is not 8 octets, or an HPKE identifier, a member or an</span>
+<span class="sd">                :class:`int` code, does not fit in two octets.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2902,7 +3020,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_ECHClientHelloOuter</span><span class="p">):</span>
             <span class="n">suite</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cipher_suite</span>
             <span class="k">return</span> <span class="n">Schema_ECHExtension</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Schema_ECHClientHello</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">_ECH_OUTER</span><span class="p">,</span> <span class="n">cipher_suite</span><span class="o">=</span><span class="n">_make_hpke_cipher_suite</span><span class="p">(</span><span class="n">suite</span><span class="p">),</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">_ECH_OUTER</span><span class="p">,</span> <span class="n">cipher_suite</span><span class="o">=</span><span class="n">_make_hpke_cipher_suite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suite</span><span class="p">),</span>
                 <span class="n">config_id</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">config_id</span><span class="p">,</span> <span class="n">enc_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">enc</span><span class="p">),</span> <span class="n">enc</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">enc</span><span class="p">,</span>
                 <span class="n">payload_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span> <span class="n">payload</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_ECHClientHelloInner</span><span class="p">):</span>
@@ -3546,7 +3664,8 @@
 <span class="sd">            ext_type: Extension type.</span>
 <span class="sd">            data: ``extension_data`` octets.</span>
 <span class="sd">            msg_type: Handshake message carrying the extension, which the</span>
-<span class="sd">                schema reads as ``__msg_type__``.</span>
+<span class="sd">                schema reads as ``__msg_type__``, as it reads :attr:`_dtls`</span>
+<span class="sd">                as ``__dtls__``.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The schema :class:`~pcapkit.protocols.application.ssl.schema.Extension`</span>
@@ -3561,7 +3680,8 @@
         <span class="n">layout</span> <span class="o">=</span> <span class="n">Schema_Extension</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ext_type</span><span class="p">]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="n">FieldValueError</span><span class="p">):</span>
-                <span class="n">schema</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="p">{</span><span class="s1">'__msg_type__'</span><span class="p">:</span> <span class="n">msg_type</span><span class="p">,</span> <span class="s1">'__data_end__'</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+                <span class="n">schema</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="p">{</span><span class="s1">'__msg_type__'</span><span class="p">:</span> <span class="n">msg_type</span><span class="p">,</span> <span class="s1">'__dtls__'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtls</span><span class="p">,</span>
+                                                         <span class="s1">'__data_end__'</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
         <span class="k">except</span> <span class="n">FieldValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid format: [Extension </span><span class="si">{</span><span class="n">ext_type</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_read_whole</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>

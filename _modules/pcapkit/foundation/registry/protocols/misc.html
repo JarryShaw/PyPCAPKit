@@ -204,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -365,8 +364,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/registry.html">Registry Helpers</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/extlen.html">Extension-Header Length</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
@@ -385,6 +386,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcapng.html">PCAP-NG Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
@@ -582,7 +584,7 @@
 <span class="sd">   this module's functions (:issue:`2578`).</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.block_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">PCAPNG_BlockType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.option_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionType</span> <span class="k">as</span> <span class="n">PCAPNG_OptionType</span>
@@ -590,8 +592,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.secrets_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecretsType</span> <span class="k">as</span> <span class="n">PCAPNG_SecretsType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_register_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_check_meth</span><span class="p">,</span> <span class="n">_register_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_BlockType</span>
@@ -606,7 +607,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_BlockConstructor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockParser</span> <span class="k">as</span> <span class="n">PCAPNG_BlockParser</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_OptionConstructor</span>
@@ -636,21 +636,10 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-
-
 <div class="viewcode-block" id="register_linktype">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_linktype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                      <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    following registries:</span>
@@ -660,9 +649,8 @@
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * :func:`pcapkit.foundation.registry.protocols.misc.register_pcap`</span>
@@ -670,7 +658,7 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">            member, e.g. a member of another enum, or ``module``</span>
+<span class="sd">            member, e.g. a member of another enum, or ``protocol``</span>
 <span class="sd">            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            subclass.</span>
 
@@ -678,111 +666,81 @@
     <span class="c1"># NOTE: Frame's and PCAP-NG's registries are keyed alike, so one key check</span>
     <span class="c1"># serves both and Frame names it.</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="p">,</span> <span class="n">Frame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered linktype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__</span>
 <div class="viewcode-block" id="register_pcap">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcap">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">            member, e.g. a member of another enum, or ``module``</span>
+<span class="sd">            member, e.g. a member of another enum, or ``protocol``</span>
 <span class="sd">            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            subclass.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="p">,</span> <span class="n">Frame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered PCAP linktype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__</span>
 <div class="viewcode-block" id="register_pcapng">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The fully qualified class name of the new protocol class</span>
-<span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">        module: module name or module descriptor or a</span>
+<span class="sd">        protocol: module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
-<span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`</span>
-<span class="sd">            member, e.g. a member of another enum, or ``module``</span>
+<span class="sd">            member, e.g. a member of another enum, or ``protocol``</span>
 <span class="sd">            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            subclass.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+    <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered PCAP-NG linktype protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -814,10 +772,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.block_type.BlockType`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_block_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_block_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">PCAPNG_BlockType</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_block_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a block parser function'</span><span class="p">)</span>
 
@@ -851,10 +811,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.option_type.OptionType`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_option_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_option_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">PCAPNG_OptionType</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_option_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a option parser function'</span><span class="p">)</span>
 
@@ -888,10 +850,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.record_type.RecordType`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_record_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_record_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">PCAPNG_RecordType</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_record_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a name resolution record parser function'</span><span class="p">)</span>
 
@@ -925,10 +889,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`</span>
 <span class="sd">            member, e.g. a member of another enum, or ``meth``</span>
-<span class="sd">            is a name with no matching ``_read_secrets_*`` method.</span>
+<span class="sd">            is a name with no matching ``_read_secrets_*`` method, or neither a name</span>
+<span class="sd">            nor a pair of two callables.</span>
 
 <span class="sd">    """</span>
     <span class="n">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">PCAPNG_SecretsType</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
+    <span class="n">_check_meth</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'_read_secrets_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">'method must be a decryption secrets parser function'</span><span class="p">)</span>
 

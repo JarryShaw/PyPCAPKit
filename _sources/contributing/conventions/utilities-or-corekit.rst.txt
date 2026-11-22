@@ -126,6 +126,14 @@ calls, stays in :mod:`pcapkit.protocols.internet.ipv6.schema`. The IPv6 option
 helpers in :mod:`pcapkit.protocols.internet.ipv6_ext.schema` belong to the HOPOPT
 and IPv6-Opts headers that share them, and stay there too.
 
+**A header's length converts to and from a field counting 8-octet units not
+including the first 8 octets** [:rfc:`6564#section-4`] through
+:mod:`pcapkit.corekit.schema.extlen`, MH's and HIP's included (:issue:`2854`).
+AH counts 4-octet units with a bias of 2 [:rfc:`4302#section-2.2`], so it keeps
+its own arithmetic. :file:`tests/project/test_ext_len_arithmetic_2854_unit.py`
+fails on ``(field + 1) * 8``, split across a call or not, or its inverse written
+out anywhere else in :mod:`pcapkit`.
+
 The field modules and the protocols import these helpers, so a helper module imports
 neither, nor :mod:`pcapkit.foundation`, outside an ``if TYPE_CHECKING:`` block. The
 package's ``__init__.py`` imports none of its modules, so a field module loads only the
