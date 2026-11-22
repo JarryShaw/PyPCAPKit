@@ -1125,7 +1125,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
-            instance.
+            instance. A payload that fails to parse is kept as
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` holding all of it,
+            its ``error`` the failure's message, or as
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after
+            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
+
+        .. versionchanged:: 1.7.0
+
+           The fallback holds the whole payload and the failure's message,
+           rather than the octets the failed parse left unread (:issue:`2842`).
 
         """
         protocol = cls._lookup_next_layer(cls.__proto__, proto)
@@ -1143,6 +1152,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             # log error
             #logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
 
+            # NOTE: Rewound, as the failed parse read the stream, and given the failure as ``error``,
+            # as ``beholder`` gives a frame's fallback (#2842).
+            payload_io.seek(0)
+            kwargs['error'] = str(exc)
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         return report
 
