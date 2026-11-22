@@ -170,9 +170,9 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def make_extractor(self, **overrides):
+        from pcapkit.foundation.reassembly import ReassemblyManager
+
         sink = OutputSink()
-        reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock(),
-                                  dtls=mock.Mock())
         trace = types.SimpleNamespace(tcp=mock.Mock())
         values = {
             '_ifile': io.BytesIO(b'capture'),
@@ -192,17 +192,24 @@ class PyPCAPFileEngineTests(unittest.TestCase):
             '_ipv6': False,
             '_tcp': False,
             '_dtls': False,
-            '_reasm': reasm,
             '_trace': trace,
             '_frame': [],
             '_frnum': 0,
             '_exlyr': 'none',
             '_exptl': 'null',
+            '_exnam': 'pypcapfile',
             '_exctx': {},
             '_vfunc': mock.Mock(),
             'magic_number': PCAP_MAGIC,
         }
         values.update(overrides)
+        # NOTE: ``_reasm`` holds the mocks the flags enable, as the Extractor builds it (#2814);
+        # ``_mocks`` keeps all of them, so a test can check a disabled one was never fed.
+        names = ('ipv4', 'ipv6', 'tcp', 'dtls')
+        mocks = types.SimpleNamespace(**{name: mock.Mock() for name in names})
+        values['_mocks'] = mocks
+        values['_reasm'] = ReassemblyManager((name, getattr(mocks, name)) for name in names
+                                             if values[f'_{name}'])
         return types.SimpleNamespace(**values), sink
 
     def engine(self, extractor, savefile=None, decoder=FakeDecoded):
@@ -292,19 +299,18 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         extractor, _ = self.make_extractor(_flag_r=True, _ipv4=True, _ipv6=True, _tcp=True)
         ipv4, tcp = extractor._reasm.ipv4, extractor._reasm.tcp
         engine = self.engine(extractor)
-        with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
+        with mock.patch('pcapkit.foundation.engines.engine.warn') as warn:
             engine.run()
 
         messages = [call.args[0] for call in warn.call_args_list
                     if call.args[1] is AttributeWarning]
-        self.assertTrue(any('IPv6 reassembly' in message for message in messages), messages)
+        self.assertTrue(any("'ipv6=True' will be ignored" in message for message in messages),
+                        messages)
 
         self.assertTrue(extractor._flag_r)
-        self.assertFalse(extractor._ipv6)
-        self.assertTrue(extractor._ipv4)
+        self.assertEqual(list(extractor._reasm), ['ipv4', 'tcp'])
         self.assertIs(extractor._reasm.ipv4, ipv4)
         self.assertIs(extractor._reasm.tcp, tcp)
-        self.assertIsNone(extractor._reasm.ipv6)
 
     def test_run_disables_dtls_reassembly_but_keeps_the_rest(self) -> None:
         from pcapkit.utilities.warnings import AttributeWarning
@@ -312,7 +318,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         extractor, _ = self.make_extractor(_flag_r=True, _ipv4=True, _tcp=True, _dtls=True)
         ipv4, tcp = extractor._reasm.ipv4, extractor._reasm.tcp
         engine = self.engine(extractor)
-        with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
+        with mock.patch('pcapkit.foundation.engines.engine.warn') as warn:
             engine.run()
 
         messages = [call.args[0] for call in warn.call_args_list
@@ -320,8 +326,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages),
                         messages)
         self.assertTrue(extractor._flag_r)
-        self.assertFalse(extractor._dtls)
-        self.assertIsNone(extractor._reasm.dtls)
+        self.assertEqual(list(extractor._reasm), ['ipv4', 'tcp'])
         self.assertIs(extractor._reasm.ipv4, ipv4)
         self.assertIs(extractor._reasm.tcp, tcp)
 
@@ -569,7 +574,8 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
     def prepared(self, packets=None, decoder=FakeDecoded, **overrides):
         if packets is None:
-            packets = [FakePacket(types.SimpleNamespace(ns_resolution=False),
+            # NOTE: a list, as a real record's header is a pointer, read at ``[0]`` (#2814).
+            packets = [FakePacket([types.SimpleNamespace(ns_resolution=False)],
                                   1, 500000, 7, 7, HEXLIFIED_FRAME)]
         extractor, sink = self.make_extractor(**overrides)
         engine = self.engine(extractor, decoder=decoder)
@@ -699,11 +705,11 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
         v4.assert_called_once_with(frame, count=1)
         trace.assert_called_once_with(frame, data_link=engine.dlink, count=1)
-        extractor._reasm.ipv4.assert_called_once_with('ipv4')
-        extractor._reasm.tcp.assert_called_once_with('tcp')
+        extractor._mocks.ipv4.assert_called_once_with('ipv4')
+        extractor._mocks.tcp.assert_called_once_with('tcp')
         extractor._trace.tcp.assert_called_once_with('trace')
         # IPv6 is unreachable for this engine, so it must never be consulted
-        extractor._reasm.ipv6.assert_not_called()
+        extractor._mocks.ipv6.assert_not_called()
         self.assertEqual(extractor._frame, [])
 
     def test_read_frame_skips_reassembly_and_tracing_when_adapters_decline(self) -> None:
@@ -714,8 +720,8 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                 with mock.patch('pcapkit.toolkit.pypcapfile.tcp_traceflow', return_value=None):
                     engine.read_frame()
 
-        extractor._reasm.ipv4.assert_not_called()
-        extractor._reasm.tcp.assert_not_called()
+        extractor._mocks.ipv4.assert_not_called()
+        extractor._mocks.tcp.assert_not_called()
         extractor._trace.tcp.assert_not_called()
 
     def test_read_frame_ignores_reassembly_and_tracing_when_flags_are_off(self) -> None:
@@ -726,8 +732,26 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                 with mock.patch('pcapkit.toolkit.pypcapfile.tcp_traceflow', return_value='unused'):
                     engine.read_frame()
 
-        extractor._reasm.ipv4.assert_not_called()
+        extractor._mocks.ipv4.assert_not_called()
         extractor._trace.tcp.assert_not_called()
+
+    def test_read_frame_feeds_a_registered_reassembler(self) -> None:
+        # #2814: any reassembler with an adapter here is fed, clocked to the frame first
+        from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
+        from pcapkit.foundation.reassembly import ReassemblyManager
+
+        adapter = mock.Mock(return_value='dummy')
+        PyPCAPFile.register_reassembly('dummy', adapter)
+        self.addCleanup(PyPCAPFile.__reassembly__.pop, 'dummy')
+
+        extractor, _, engine = self.prepared(_flag_q=True, _flag_r=True, _flag_d=False)
+        dummy = mock.Mock()
+        extractor._reasm = ReassemblyManager(dummy=dummy)
+        frame = engine.read_frame()
+
+        adapter.assert_called_once_with(frame, count=1)
+        dummy.advance.assert_called_once_with(1.5)
+        dummy.assert_called_once_with('dummy')
 
     def test_read_frame_ignores_protocols_that_were_not_requested(self) -> None:
         extractor, _, engine = self.prepared(_flag_q=True, _flag_r=True, _flag_t=True,
@@ -737,8 +761,8 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                 with mock.patch('pcapkit.toolkit.pypcapfile.tcp_traceflow', return_value='unused'):
                     engine.read_frame()
 
-        extractor._reasm.ipv4.assert_not_called()
-        extractor._reasm.tcp.assert_not_called()
+        extractor._mocks.ipv4.assert_not_called()
+        extractor._mocks.tcp.assert_not_called()
         extractor._trace.tcp.assert_not_called()
 
 

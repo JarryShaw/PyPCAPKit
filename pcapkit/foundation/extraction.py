@@ -15,6 +15,7 @@ them.
 import collections
 import functools
 import importlib
+import inspect
 import io
 import os
 import sys
@@ -58,10 +59,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.context import ProtocolContext
-    from pcapkit.foundation.reassembly.dtls import DTLS as DTLS_Reassembly
-    from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
-    from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
-    from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
     from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
     from pcapkit.protocols.misc.pcap.frame.protocol import Frame
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
@@ -166,6 +163,12 @@ class Extractor(Generic[_P]):
        ``dtls`` is inserted after ``tcp``, so a positional argument from
        ``buffer_size`` onwards moves one place along.
 
+    .. versionchanged:: 1.7.0
+
+       ``reasm_protocols`` is appended, enabling any registered reassembler by
+       name, and each enabled one is fed every frame's timestamp
+       (:issue:`2814`).
+
     """
     if TYPE_CHECKING:
         #: Input file name.
@@ -234,23 +237,16 @@ class Extractor(Generic[_P]):
         #: Frame records.
         _frame: 'list[Packet]'
 
-        #: Frame record for reassembly.
+        #: The enabled reassemblers, each fed every frame. An engine drops one it
+        #: has no adapter for at startup.
         _reasm: 'ReassemblyManager'
         #: Frame record for flow tracing.
         _trace: 'TraceFlowManager'
 
-        #: IPv4 flag. It indicates if the IPv4 reassembly and/or flow tracing
-        #: is enabled.
-        _ipv4: 'bool'
-        #: IPv6 flag. It indicates if the IPv6 reassembly and/or flow tracing
-        #: is enabled.
-        _ipv6: 'bool'
-        #: TCP flag. It indicates if the TCP reassembly and/or flow tracing
-        #: is enabled.
+        #: TCP flag. It indicates if TCP flow tracing is enabled, and TCP
+        #: reassembly with it, which
+        #: :attr:`~pcapkit.foundation.extraction.Extractor._reasm` holds.
         _tcp: 'bool'
-        #: DTLS flag. It indicates if the DTLS handshake-message reassembly is
-        #: enabled.
-        _dtls: 'bool'
 
         #: Extract til protocol.
         _exptl: 'Protocols'
@@ -426,6 +422,10 @@ class Extractor(Generic[_P]):
         * ``tcp`` -- tuple of TCP payload fragment (:term:`reasm.tcp.datagram`)
         * ``dtls`` -- tuple of DTLS handshake message (:term:`reasm.dtls.datagram`)
 
+        Each is :data:`None` when its reassembly is disabled, and every other
+        enabled reassembler adds the tuple of its datagrams, under the name it is
+        registered by.
+
         Raises:
             UnsupportedCall: If :attr:`self._flag_r <pcapkit.foundation.extraction.Extractor._flag_r>`
                 is :data:`False`, as reassembly is disabled.
@@ -435,15 +435,14 @@ class Extractor(Generic[_P]):
            Raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when
            reassembly is disabled, where 1.1.0 built the record regardless.
 
+        .. versionchanged:: 1.7.0
+
+           Carries every enabled reassembler, not only the built-ins
+           (:issue:`2814`).
+
         """
         if self._flag_r:
-            data = ReassemblyData(
-                ipv4=tuple(self._reasm.ipv4.datagram) if self._ipv4 else None,
-                ipv6=tuple(self._reasm.ipv6.datagram) if self._ipv6 else None,
-                tcp=tuple(self._reasm.tcp.datagram) if self._tcp else None,
-                dtls=tuple(self._reasm.dtls.datagram) if self._dtls else None,
-            )
-            return data
+            return ReassemblyData(**{name: tuple(reasm.datagram) for (name, reasm) in self._reasm.items()})
         raise UnsupportedCall("'Extractor(reassembly=False)' object has no attribute 'reassembly'")
 
     @property
@@ -721,6 +720,49 @@ class Extractor(Generic[_P]):
         if incumbent is not None and incumbent is not reassembly:
             warn(f'reassembly {protocol} already registered, overwriting', RegistryWarning)
         cls.__reassembly__[protocol] = reassembly
+
+    @classmethod
+    def make_reassembly(cls, protocol: 'str', *, strict: 'bool' = True, store: 'bool' = True,
+                        timeout: 'Optional[float]' = None) -> 'ReassemblyBase':
+        """Make the reassembly registered under a protocol name.
+
+        Every caller reaches a reassembler through this:
+        :class:`~pcapkit.foundation.extraction.Extractor` for each one it
+        enables, and :func:`~pcapkit.interface.core.reassemble`.
+
+        Arguments:
+            protocol: protocol name, matched lower-cased, as
+                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
+                registers under
+            strict: if set strict flag for reassembly
+            store: if store reassembled datagrams
+            timeout: reassembly timeout in seconds, on the capture's own clock;
+                :data:`None` selects the protocol's own default. A reassembly
+                whose constructor takes no ``timeout``, as DTLS's does not, is
+                made without one
+
+        Returns:
+            The reassembly instance.
+
+        Raises:
+            FormatError: If no reassembly is registered under ``protocol``.
+
+        .. versionadded:: 1.7.0
+
+        """
+        name = protocol.lower()
+        reasm_cls = cls.__reassembly__.get(name)
+        if reasm_cls is None:
+            raise FormatError(f'unsupported reassembly protocol: {protocol!r}')
+        if isinstance(reasm_cls, ModuleDescriptor):
+            reasm_cls = reasm_cls.klass
+            cls.__reassembly__[name] = reasm_cls  # update mapping upon import
+
+        params = inspect.signature(reasm_cls.__init__).parameters.values()
+        options = {'strict': strict, 'store': store}  # type: dict[str, Any]
+        if any(param.name == 'timeout' or param.kind is param.VAR_KEYWORD for param in params):
+            options['timeout'] = timeout
+        return reasm_cls(**options)
 
     @classmethod
     def register_traceflow(cls, protocol: 'str', traceflow: 'ModuleDescriptor[TraceFlow] | Type[TraceFlow]') -> 'None':
@@ -1171,7 +1213,8 @@ class Extractor(Generic[_P]):
                  dtls: 'bool' = False,                                                                                          # reassembly settings # pylint: disable=line-too-long
                  buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
                  no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
-                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None) -> 'None':  # context settings # pylint: disable=line-too-long
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # context settings # pylint: disable=line-too-long
+                 reasm_protocols: 'Optional[Iterable[str]]' = None) -> 'None':                                                 # reassembly settings # pylint: disable=line-too-long
         """Initialise PCAP Reader.
 
         Args:
@@ -1250,6 +1293,11 @@ class Extractor(Generic[_P]):
                 with :mod:`pcapkit`'s own protocol implementations; the third
                 party engines ignore it.
 
+            reasm_protocols: names of further reassemblers to enable (must be used
+                with ``reassembly=True``), each as registered in
+                :attr:`__reassembly__`, as ``'ipv4'``, ``'ipv6'``, ``'tcp'`` and
+                ``'dtls'`` are
+
         Warns:
             pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:
 
@@ -1274,6 +1322,7 @@ class Extractor(Generic[_P]):
             UnsupportedCall: If ``fin`` is a stream without a :obj:`str` ``name``
                 and the engine that will run -- Scapy, PyShark, PyPCAP or
                 pcap-ct -- opens its input by path.
+            FormatError: If ``reasm_protocols`` names no registered reassembler.
 
         """
         if fin is None:
@@ -1344,61 +1393,24 @@ class Extractor(Generic[_P]):
         self._frnum = 0   # frame number
         self._frame = []  # frame record
 
-        self._ipv4 = ipv4 or ip  # IPv4 Reassembly
-        self._ipv6 = ipv6 or ip  # IPv6 Reassembly
-        self._tcp = tcp          # TCP Reassembly
-        self._dtls = dtls        # DTLS Reassembly
+        self._tcp = tcp  # TCP reassembly and flow tracing
 
         self._exptl = protocol or 'null'                              # extract til protocol
         self._exlyr = cast('Layers', (layer or 'none').lower())       # extract til layer
         self._exctx = ContextRegistry.make(context)                   # caller supplied context
 
+        # NOTE: the flags name the built-ins; every reassembler, built-in or not, is made by name.
+        reasm_names = [name for (name, flag) in (('ipv4', ipv4 or ip), ('ipv6', ipv6 or ip),
+                                                 ('tcp', tcp), ('dtls', dtls)) if flag]
+        reasm_names.extend(name.lower() for name in reasm_protocols or ())
+        reasm_objs = {}  # type: dict[str, ReassemblyBase]
         if reassembly:
-            reasm_obj_ipv4 = reasm_obj_ipv6 = reasm_obj_tcp = reasm_obj_dtls = None
-
-            if self._ipv4:
-                logger.debug('IPv4 reassembly enabled')
-
-                reasm_cls_ipv4 = self.__reassembly__['ipv4']
-                if isinstance(reasm_cls_ipv4, ModuleDescriptor):
-                    reasm_cls_ipv4 = reasm_cls_ipv4.klass
-                    self.__reassembly__['ipv4'] = reasm_cls_ipv4  # update mapping upon import
-                reasm_obj_ipv4 = cast('IPv4_Reassembly', reasm_cls_ipv4(strict=reasm_strict, store=reasm_store,
-                                                                       timeout=reasm_timeout))
-            if self._ipv6:
-                logger.debug('IPv6 reassembly enabled')
-
-                reasm_cls_ipv6 = self.__reassembly__['ipv6']
-                if isinstance(reasm_cls_ipv6, ModuleDescriptor):
-                    reasm_cls_ipv6 = reasm_cls_ipv6.klass
-                    self.__reassembly__['ipv6'] = reasm_cls_ipv6  # update mapping upon import
-                reasm_obj_ipv6 = cast('IPv6_Reassembly', reasm_cls_ipv6(strict=reasm_strict, store=reasm_store,
-                                                                       timeout=reasm_timeout))
-            if self._tcp:
-                logger.debug('TCP reassembly enabled')
-
-                reasm_cls_tcp = self.__reassembly__['tcp']
-                if isinstance(reasm_cls_tcp, ModuleDescriptor):
-                    reasm_cls_tcp = reasm_cls_tcp.klass
-                    self.__reassembly__['tcp'] = reasm_cls_tcp  # update mapping upon import
-                reasm_obj_tcp = cast('TCP_Reassembly', reasm_cls_tcp(strict=reasm_strict, store=reasm_store,
-                                                                    timeout=reasm_timeout))
-            if self._dtls:
-                logger.debug('DTLS reassembly enabled')
-
-                reasm_cls_dtls = self.__reassembly__['dtls']
-                if isinstance(reasm_cls_dtls, ModuleDescriptor):
-                    reasm_cls_dtls = reasm_cls_dtls.klass
-                    self.__reassembly__['dtls'] = reasm_cls_dtls  # update mapping upon import
-                # NOTE: no ``timeout``: the RFC gives DTLS handshake reassembly none.
-                reasm_obj_dtls = cast('DTLS_Reassembly', reasm_cls_dtls(strict=reasm_strict, store=reasm_store))
-
-            self._reasm = ReassemblyManager(
-                ipv4=reasm_obj_ipv4,
-                ipv6=reasm_obj_ipv6,
-                tcp=reasm_obj_tcp,
-                dtls=reasm_obj_dtls,
-            )
+            for name in reasm_names:
+                if name not in reasm_objs:
+                    logger.debug('%s reassembly enabled', name)
+                    reasm_objs[name] = self.make_reassembly(name, strict=reasm_strict, store=reasm_store,
+                                                            timeout=reasm_timeout)
+        self._reasm = ReassemblyManager(reasm_objs)
 
         if trace:
             trace_obj_tcp = None

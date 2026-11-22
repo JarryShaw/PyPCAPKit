@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 from pcapkit.protocols.misc.pcapng.schema import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
                                                   GENERIC_BLOCK_MINIMUM)
@@ -28,7 +28,7 @@ from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 __all__ = ['DPKT', 'PCAPNGReader']
 
 if TYPE_CHECKING:
-    from typing import IO, Iterator, Literal, Optional, Protocol, Type, Union
+    from typing import IO, Any, Callable, Iterator, Literal, Optional, Protocol, Type, Union
 
     from dpkt.dpkt import Packet as DPKTPacket
     from dpkt.ethernet import Ethernet as DPKTEthernet
@@ -445,6 +445,15 @@ class DPKT(EngineBase['DPKTPacket']):
     #: Engine module name.
     __engine_module__ = 'dpkt'
 
+    #: Reassembly adapters, each called as ``adapter(packet, timestamp, count=n)``
+    #: on the DPKT packet, its capture timestamp and its frame number. There is
+    #: no DTLS adapter, as DTLS reassembly reads :mod:`pcapkit`'s own DTLS layer.
+    __reassembly__ = {
+        'ipv4': ModuleDescriptor('pcapkit.toolkit.dpkt', 'ipv4_reassembly'),
+        'ipv6': ModuleDescriptor('pcapkit.toolkit.dpkt', 'ipv6_reassembly'),
+        'tcp': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_reassembly'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -478,8 +487,9 @@ class DPKT(EngineBase['DPKTPacket']):
                 is provided as the DPKT engine does not support such operations;
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the DPKT engine does not parse with :mod:`pcapkit`'s own
-                protocol implementations; or if DTLS reassembly is enabled, for the
-                same reason.
+                protocol implementations; or if a reassembler with no adapter in
+                :attr:`__reassembly__` is enabled, as DTLS's is not, for the same
+                reason.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
@@ -502,13 +512,7 @@ class DPKT(EngineBase['DPKTPacket']):
                  "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        if ext._flag_r and ext._dtls:
-            ext._dtls = False
-            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=ext._reasm.ipv6,
-                                           tcp=ext._reasm.tcp, dtls=None)
-            warn("'Extractor(engine=dpkt)' object does not support DTLS reassembly, "
-                 "which reads pcapkit's own DTLS layer; so 'dtls=True' will be ignored",
-                 AttributeWarning, stacklevel=stacklevel())
+        self._setup_reassembly()
 
         # setup verbose handler, unless the caller gave one of their own (#1874)
         if ext._vfunc_default:
@@ -543,9 +547,8 @@ class DPKT(EngineBase['DPKTPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.dpkt import (attach_buffer, attach_timestamp, ipv4_reassembly,
-                                          ipv6_reassembly, packet2dict, tcp_reassembly,
-                                          tcp_traceflow)
+        from pcapkit.toolkit.dpkt import (_capture_time, attach_buffer, attach_timestamp,
+                                          packet2dict, tcp_traceflow)
         ext = self._extractor
 
         reader = self._extmp
@@ -591,18 +594,7 @@ class DPKT(EngineBase['DPKTPacket']):
 
         # record fragments
         if ext._flag_r:
-            if ext._ipv4:
-                data_ipv4 = ipv4_reassembly(packet, timestamp, count=ext._frnum)
-                if data_ipv4 is not None:
-                    ext._reasm.ipv4(data_ipv4)
-            if ext._ipv6:
-                data_ipv6 = ipv6_reassembly(packet, timestamp, count=ext._frnum)
-                if data_ipv6 is not None:
-                    ext._reasm.ipv6(data_ipv6)
-            if ext._tcp:
-                data_tcp = tcp_reassembly(packet, timestamp, count=ext._frnum)
-                if data_tcp is not None:
-                    ext._reasm.tcp(data_tcp)
+            self._reassemble(_capture_time(timestamp), packet, timestamp, count=ext._frnum)
 
         # trace flows
         if ext._flag_t:

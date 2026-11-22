@@ -17,12 +17,14 @@ from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import NULL
+from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
 from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
+from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
@@ -32,6 +34,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.sentinels import NullType
     from pcapkit.foundation.engines import Engine
+    from pcapkit.foundation.engines.engine import Adapter
     from pcapkit.foundation.reassembly.reassembly import CallbackFn as Reasm_CallbackFn
     from pcapkit.foundation.reassembly.reassembly import Reassembly
     from pcapkit.foundation.traceflow.traceflow import CallbackFn as Trace_CallbackFn
@@ -46,7 +49,7 @@ __all__ = [
     'register_reassembly_tcp_callback',
     'register_traceflow_tcp_callback',
 
-    'register_extractor_reassembly', 'register_extractor_traceflow',
+    'register_extractor_reassembly', 'register_engine_reassembly', 'register_extractor_traceflow',
 ]
 
 #: logging.Logger: Module-level logger, a child of the package-wide
@@ -325,6 +328,62 @@ def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescript
 
     Extractor.register_reassembly(protocol, module)
     logger.debug('registered extractor reassembly: %s', protocol)
+
+
+@overload
+def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str', module: 'ModuleDescriptor[Adapter] | Adapter') -> 'None': ...  # pylint: disable=line-too-long
+@overload
+def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str', module: 'str', class_: 'str') -> 'None': ...  # pylint: disable=line-too-long
+
+
+# NOTE: pcapkit.foundation.engines.engine.EngineBase.__reassembly__
+def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str',
+                               module: 'str | ModuleDescriptor[Adapter] | Adapter',
+                               class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+    r"""Register a new reassembly adapter of an engine.
+
+    Notes:
+        The fully qualified name of the new adapter should be
+        ``{module}.{class_}``.
+
+    The function will register the given :mod:`pcapkit.toolkit` adapter to the
+    :attr:`EngineBase.__reassembly__
+    <pcapkit.foundation.engines.engine.EngineBase.__reassembly__>` registry of
+    ``engine``, which then feeds the reassembler registered under ``protocol``
+    from its frames.
+
+    Arguments:
+        engine: engine name, as registered in
+            :data:`pcapkit.foundation.extraction.Extractor.__engine__`, or an
+            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass;
+            :class:`~pcapkit.foundation.engines.pcap.PCAP` and
+            :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` have no name, so
+            take the class
+        protocol: reassembly name
+        module: module name or module descriptor or the adapter itself
+        class\_: adapter name
+
+    Raises:
+        RegistryError: If ``engine`` names no registered engine, or is not an
+            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
+
+    .. versionadded:: 1.7.0
+
+    """
+    engine_cls = engine  # type: ModuleDescriptor[EngineBase] | Type[EngineBase] | str | None
+    if isinstance(engine, str):
+        engine_cls = Extractor.__engine__.get(engine.lower())
+        if isinstance(engine_cls, ModuleDescriptor):
+            engine_cls = engine_cls.klass
+    if not isinstance(engine_cls, type) or not issubclass(engine_cls, EngineBase):
+        raise RegistryError(f'engine must be a registered engine name or an EngineBase subclass, '
+                            f'not {engine!r}')
+
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[Adapter]', ModuleDescriptor(module, class_))
+
+    engine_cls.register_reassembly(protocol, module)
+    logger.debug('registered %s engine reassembly: %s', engine_cls.name, protocol)
 
 
 @overload

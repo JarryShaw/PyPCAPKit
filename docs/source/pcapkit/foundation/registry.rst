@@ -52,6 +52,8 @@ Extractor Registries
 
 .. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_reassembly
 
+.. autofunction:: pcapkit.foundation.registry.foundation.register_engine_reassembly
+
 .. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_traceflow
 
 Protocol Registries

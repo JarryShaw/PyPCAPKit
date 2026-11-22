@@ -11,15 +11,22 @@ all engine support functionality.
 import abc
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.foundation.reassembly import ReassemblyManager
+from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall, stacklevel
+from pcapkit.utilities.warnings import AttributeWarning, RegistryWarning, warn
 
 __all__ = ['Engine']
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Callable, Optional, Type
 
-    from pcapkit.corekit.module import ModuleDescriptor
     from pcapkit.foundation.extraction import Extractor
+
+    #: A :mod:`pcapkit.toolkit` reassembly adapter. Called on a frame with the
+    #: arguments its engine passes, it returns the reassembler's input record, a
+    #: tuple of them, or :data:`None`.
+    Adapter = Callable[..., Any]
 
 _T = TypeVar('_T')
 
@@ -96,6 +103,20 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         __engine_module__: 'str'
 
     ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Reassembly adapters. For each reassembler this engine supports, under the
+    #: name it is registered by in :attr:`Extractor.__reassembly__
+    #: <pcapkit.foundation.extraction.Extractor.__reassembly__>`, the
+    #: :mod:`pcapkit.toolkit` function that makes its input from a frame. An
+    #: enabled reassembler with no entry is disabled at startup, with a warning,
+    #: and an engine with none supports no reassembly.
+    #:
+    #: .. versionadded:: 1.7.0
+    __reassembly__ = {}  # type: dict[str, ModuleDescriptor[Adapter] | Adapter]
+
+    ##########################################################################
     # Properties.
     ##########################################################################
 
@@ -162,6 +183,105 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
 
         """
         return None
+
+    ##########################################################################
+    # Reassembly.
+    ##########################################################################
+
+    @classmethod
+    def register_reassembly(cls, protocol: 'str', adapter: 'ModuleDescriptor[Adapter] | Adapter') -> 'None':
+        """Register the adapter feeding a reassembler from this engine's frames.
+
+        Arguments:
+            protocol: name the reassembler is registered by in
+                :attr:`Extractor.__reassembly__
+                <pcapkit.foundation.extraction.Extractor.__reassembly__>`,
+                lower-cased
+            adapter: module descriptor or callable, taking a frame as this
+                engine's own adapters do
+
+        Raises:
+            RegistryError: If ``adapter`` is neither a module descriptor nor
+                callable.
+
+        Warns:
+            RegistryWarning: If a different adapter is already registered under
+                ``protocol``; it is overwritten.
+
+        The entry is written on ``cls`` alone, so a subclass registering one
+        leaves the engine it derives from as it was.
+
+        .. versionadded:: 1.7.0
+
+        """
+        if not isinstance(adapter, ModuleDescriptor) and not callable(adapter):
+            raise RegistryError(f'adapter must be a module descriptor or callable, not {adapter!r}')
+        if '__reassembly__' not in cls.__dict__:
+            cls.__reassembly__ = dict(cls.__reassembly__)
+        name = protocol.lower()
+        incumbent = cls.__reassembly__.get(name)
+        if incumbent is not None and incumbent != adapter:
+            warn(f'{cls.__name__}: reassembly adapter {name} already registered, overwriting',
+                 RegistryWarning, stacklevel=stacklevel())
+        cls.__reassembly__[name] = adapter
+
+    def _setup_reassembly(self) -> 'None':
+        """Disable each enabled reassembler this engine has no adapter for.
+
+        Warns:
+            AttributeWarning: For each reassembler disabled; once, naming them
+                all, if this engine supports no reassembly, which then stays off.
+
+        """
+        ext = self._extractor
+        if not ext._flag_r or not ext._reasm:
+            return
+
+        adapters = self.__reassembly__
+        if not adapters:
+            ignored = ', '.join(f"'{name}=True'" for name in ext._reasm)
+            ext._flag_r = False
+            ext._reasm = ReassemblyManager()
+            warn(f"'Extractor(engine={ext._exnam})' object does not support reassembly; "
+                 f'so {ignored} will be ignored', AttributeWarning, stacklevel=stacklevel())
+            return
+
+        unsupported = [name for name in ext._reasm if name not in adapters]
+        if unsupported:
+            for name in unsupported:
+                warn(f"'Extractor(engine={ext._exnam})' object does not support {ext._reasm[name].name} "
+                     f"reassembly; so '{name}=True' will be ignored", AttributeWarning,
+                     stacklevel=stacklevel())
+            ext._reasm = ReassemblyManager((name, reasm) for (name, reasm) in ext._reasm.items()
+                                           if name in adapters)
+
+    def _reassemble(self, timestamp: 'float', *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Feed a frame to every enabled reassembler.
+
+        Arguments:
+            timestamp: capture timestamp of the frame, in seconds since the Unix
+                epoch
+            *args: the frame, as this engine's adapters take it
+            **kwargs: as this engine's adapters take them
+
+        Each reassembler's clock is first advanced to ``timestamp``, so a buffer
+        expires once the capture passes its deadline whether or not the frame is
+        its protocol's. The adapter's record, or each of a tuple of them, is then
+        fed in.
+
+        """
+        adapters = self.__reassembly__
+        for (name, reasm) in self._extractor._reasm.items():
+            reasm.advance(timestamp)
+
+            adapter = adapters[name]
+            if isinstance(adapter, ModuleDescriptor):
+                adapter = adapter.klass
+            data = adapter(*args, **kwargs)
+            if data is None:
+                continue
+            for packet in (data if isinstance(data, tuple) else (data,)):
+                reasm(packet)
 
     ##########################################################################
     # Data models.

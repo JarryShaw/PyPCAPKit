@@ -43,6 +43,7 @@ The `Scapy`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
+   .. autoattribute:: __reassembly__
 
    .. automethod:: __init__
    .. automethod:: run
@@ -78,6 +79,7 @@ The `DPKT`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
+   .. autoattribute:: __reassembly__
 
    .. automethod:: run
    .. automethod:: read_frame
@@ -413,6 +415,7 @@ The `PyPCAPFile`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
+   .. autoattribute:: __reassembly__
    .. autoattribute:: LAYERS
    .. autoattribute:: PYTHON_CEILING
 

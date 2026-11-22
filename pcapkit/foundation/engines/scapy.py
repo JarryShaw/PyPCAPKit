@@ -35,9 +35,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 import struct
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
 from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 from pcapkit.protocols.misc.pcapng.schema import DEFAULT_RESOLUTION
@@ -48,7 +48,7 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['Scapy']
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator, Protocol, Type
+    from typing import Any, Callable, Iterator, Protocol, Type
 
     from scapy.packet import Packet as ScapyPacket
     from scapy.plist import PacketList
@@ -300,6 +300,15 @@ class Scapy(EngineBase['ScapyPacket']):
     #: Engine module name.
     __engine_module__ = 'scapy'
 
+    #: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the
+    #: Scapy packet and its frame number. There is no DTLS adapter, as DTLS
+    #: reassembly reads :mod:`pcapkit`'s own DTLS layer.
+    __reassembly__ = {
+        'ipv4': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv4_reassembly'),
+        'ipv6': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv6_reassembly'),
+        'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_reassembly'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -342,8 +351,9 @@ class Scapy(EngineBase['ScapyPacket']):
                 is provided as the Scapy engine does not support such operations;
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the Scapy engine does not parse with :mod:`pcapkit`'s own
-                protocol implementations; or if DTLS reassembly is enabled, for the
-                same reason.
+                protocol implementations; or if a reassembler with no adapter in
+                :attr:`__reassembly__` is enabled, as DTLS's is not, for the same
+                reason.
 
         """
         ext = self._extractor
@@ -359,13 +369,7 @@ class Scapy(EngineBase['ScapyPacket']):
                  "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        if ext._flag_r and ext._dtls:
-            ext._dtls = False
-            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=ext._reasm.ipv6,
-                                           tcp=ext._reasm.tcp, dtls=None)
-            warn("'Extractor(engine=scapy)' object does not support DTLS reassembly, "
-                 "which reads pcapkit's own DTLS layer; so 'dtls=True' will be ignored",
-                 AttributeWarning, stacklevel=stacklevel())
+        self._setup_reassembly()
 
         # setup verbose handler, unless the caller gave one of their own (#1874)
         if ext._vfunc_default:
@@ -398,8 +402,7 @@ class Scapy(EngineBase['ScapyPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2dict,
-                                           tcp_reassembly, tcp_traceflow)
+        from pcapkit.toolkit.scapy import packet2dict, tcp_traceflow
         ext = self._extractor
 
         # fetch Scapy packet
@@ -421,18 +424,7 @@ class Scapy(EngineBase['ScapyPacket']):
 
         # record fragments
         if ext._flag_r:
-            if ext._ipv4:
-                data_ipv4 = ipv4_reassembly(packet, count=ext._frnum)
-                if data_ipv4 is not None:
-                    ext._reasm.ipv4(data_ipv4)
-            if ext._ipv6:
-                data_ipv6 = ipv6_reassembly(packet, count=ext._frnum)
-                if data_ipv6 is not None:
-                    ext._reasm.ipv6(data_ipv6)
-            if ext._tcp:
-                data_tcp = tcp_reassembly(packet, count=ext._frnum)
-                if data_tcp is not None:
-                    ext._reasm.tcp(data_tcp)
+            self._reassemble(float(packet.time), packet, count=ext._frnum)
 
         # trace flows
         if ext._flag_t:

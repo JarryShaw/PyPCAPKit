@@ -24,7 +24,7 @@ from pcapkit.utilities.logging import get_logger
 __all__ = ['PCAP']
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Callable
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.corekit.version import VersionInfo
@@ -33,12 +33,10 @@ if TYPE_CHECKING:
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
-#: The toolkit functions :meth:`PCAP.read_frame` hands each frame to, resolved
-#: there rather than imported, so their first import holds
-#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
-_TOOLKIT = tuple(ModuleDescriptor('pcapkit.toolkit.pcap', name) for name in (
-    'dtls_reassembly', 'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
-))  # type: tuple[ModuleDescriptor[Any], ...]
+#: The flow tracing adapter :meth:`PCAP.read_frame` hands each frame to, resolved
+#: there rather than imported, as :attr:`PCAP.__reassembly__`'s are, so its first
+#: import holds :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_TOOLKIT = ModuleDescriptor('pcapkit.toolkit.pcap', 'tcp_traceflow')  # type: ModuleDescriptor[Any]
 
 
 class PCAP(EngineBase[Frame]):
@@ -73,6 +71,15 @@ class PCAP(EngineBase[Frame]):
 
     #: Engine module name.
     __engine_module__ = 'pcapkit.protocols.misc.pcap'
+
+    #: Reassembly adapters, each called on the
+    #: :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` alone.
+    __reassembly__ = {
+        'ipv4': ModuleDescriptor('pcapkit.toolkit.pcap', 'ipv4_reassembly'),
+        'ipv6': ModuleDescriptor('pcapkit.toolkit.pcap', 'ipv6_reassembly'),
+        'tcp': ModuleDescriptor('pcapkit.toolkit.pcap', 'tcp_reassembly'),
+        'dtls': ModuleDescriptor('pcapkit.toolkit.pcap', 'dtls_reassembly'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
     # Properties.
@@ -125,6 +132,7 @@ class PCAP(EngineBase[Frame]):
         """
         # pylint: disable=attribute-defined-outside-init,protected-access
         ext = self._extractor
+        self._setup_reassembly()
 
         self._gbhdr = Header(ext._ifile)
         self._vinfo = self._gbhdr.version
@@ -157,7 +165,7 @@ class PCAP(EngineBase[Frame]):
         - extract frames and each layer of packets;
         - make :class:`~pcapkit.corekit.infoclass.Info` object out of frame properties;
         - write to output file with corresponding dumper;
-        - reassemble IP and/or TCP datagram, and/or DTLS handshake message;
+        - feed every enabled reassembler;
         - trace TCP flows if any;
         - record frame :class:`~pcapkit.corekit.infoclass.Info` object to frame storage.
 
@@ -165,8 +173,7 @@ class PCAP(EngineBase[Frame]):
             Parsed frame instance.
 
         """
-        dtls_reassembly, ipv4_reassembly, ipv6_reassembly, tcp_reassembly, tcp_traceflow = (
-            descriptor.klass for descriptor in _TOOLKIT)
+        tcp_traceflow = _TOOLKIT.klass
         ext = self._extractor
 
         # read frame header
@@ -193,23 +200,7 @@ class PCAP(EngineBase[Frame]):
 
         # record fragments
         if ext._flag_r:
-            if ext._ipv4:
-                data_ipv4 = ipv4_reassembly(frame)
-                if data_ipv4 is not None:
-                    ext._reasm.ipv4(data_ipv4)
-            if ext._ipv6:
-                data_ipv6 = ipv6_reassembly(frame)
-                if data_ipv6 is not None:
-                    ext._reasm.ipv6(data_ipv6)
-            if ext._tcp:
-                data_tcp = tcp_reassembly(frame)
-                if data_tcp is not None:
-                    ext._reasm.tcp(data_tcp)
-            if ext._dtls:
-                data_dtls = dtls_reassembly(frame)
-                if data_dtls is not None:
-                    for packet_dtls in data_dtls:
-                        ext._reasm.dtls(packet_dtls)
+            self._reassemble(float(frame.info.time_epoch), frame)
 
         # trace flows
         if ext._flag_t:

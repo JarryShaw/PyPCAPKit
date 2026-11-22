@@ -148,6 +148,46 @@ class FoundationRegistryTests(unittest.TestCase):
                                                   'TCP_TraceFlow')
         self.assertIsInstance(register.call_args.args[1], registry.ModuleDescriptor)
 
+    def test_engine_reassembly_wrapper(self) -> None:
+        """#2814: the wrapper writes an engine's ``__reassembly__``, found by name or class."""
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.engines.dpkt import DPKT
+        from pcapkit.foundation.engines.pcap import PCAP
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.registry import register_engine_reassembly
+        from pcapkit.utilities.exceptions import RegistryError
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        def adapter(frame: object) -> None:
+            return None
+
+        with mock.patch.dict(DPKT.__reassembly__), mock.patch.dict(PCAP.__reassembly__):
+            shipped = DPKT.__reassembly__['ipv4']
+
+            # by registered engine name, case-folded, as a (module, name) pair
+            register_engine_reassembly('DPKT', 'unit-2814', 'pcapkit.toolkit.dpkt', 'tcp_reassembly')
+            self.assertEqual(DPKT.__reassembly__['unit-2814'],
+                             ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_reassembly'))
+
+            # by class, as the nameless default-engine readers are given, and as a callable
+            register_engine_reassembly(PCAP, 'unit-2814', adapter)
+            self.assertIs(PCAP.__reassembly__['unit-2814'], adapter)
+
+            # an override is undone by handing back the shipped entry by name
+            with self.assertWarns(RegistryWarning):
+                register_engine_reassembly('dpkt', 'ipv4', adapter)
+            register_engine_reassembly('dpkt', 'ipv4', shipped.module, shipped.name)
+            self.assertEqual(DPKT.__reassembly__['ipv4'], shipped)
+
+            before = dict(DPKT.__reassembly__)
+            for engine in ('no-such-engine', 'default', Extractor, 'dpkt-not'):
+                with self.subTest(engine=engine):
+                    with self.assertRaisesRegex(RegistryError, 'registered engine name or an EngineBase'):
+                        register_engine_reassembly(engine, 'unit-2814-bad', adapter)  # type: ignore[arg-type]
+            with self.assertRaises(RegistryError):
+                register_engine_reassembly('dpkt', 'unit-2814-bad', 42)  # type: ignore[arg-type]
+            self.assertEqual(DPKT.__reassembly__, before)
+
     def test_registration_accepts_pcapkit_own_builtin_classes(self) -> None:
         """The built-ins pass the internal ``issubclass`` gate, and non-subclasses still fail.
 

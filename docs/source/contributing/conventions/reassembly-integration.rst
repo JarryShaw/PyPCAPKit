@@ -61,8 +61,8 @@ Parse Ownership
 
    flowchart TD
        ENG["pcapkit.foundation.engines<br/>an already-parsed frame"]
-       TK["a pcapkit.toolkit.&lt;engine&gt; extraction function<br/>e.g. toolkit.pcap.dtls\_reassembly"]
-       RE["the reassembly instance the Extractor holds<br/>IPv4, IPv6, TCP, DTLS"]
+       TK["the pcapkit.toolkit.&lt;engine&gt; adapter the engine's<br/>\_\_reassembly\_\_ names, e.g. toolkit.pcap.dtls\_reassembly"]
+       RE["each enabled reassembler the Extractor holds,<br/>by its registered name, advanced to the frame's timestamp"]
        DEF["Deferred: a datagram's packet,<br/>parsed on first read"]
        AN["pcapkit.foundation.analysis<br/>ip\_datagram, tcp\_datagram, dtls\_handshake<br/>public wrappers, no parsing"]
        subgraph protocols ["pcapkit.protocols"]
@@ -90,17 +90,27 @@ Compliance, Measured
 ``pcapkit.toolkit.<engine>`` extraction function on an already-parsed frame and feeds
 the result to the reassembly instance the
 :class:`~pcapkit.foundation.extraction.Extractor` holds; for DTLS that function is
-:func:`pcapkit.toolkit.pcap.dtls_reassembly` (:issue:`2496`).
+:func:`pcapkit.toolkit.pcap.dtls_reassembly` (:issue:`2496`). Every enabled
+reassembler is reached by the name it is registered under in
+:attr:`Extractor.__reassembly__ <pcapkit.foundation.extraction.Extractor.__reassembly__>`,
+through :meth:`Extractor.make_reassembly
+<pcapkit.foundation.extraction.Extractor.make_reassembly>` and the engine's adapter for
+that name, and each is advanced to every frame's timestamp before the frame is fed
+(:issue:`2814`).
 :meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake>`
 and :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
 are the parser methods the rule allows.
 
-**No engine meets point 2.** No :mod:`pcapkit.toolkit` helper declares which output
-engines support a reassembly engine. Each engine backend settles it ad hoc: by defining
-the extraction functions, by defining them to raise
-:exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, or by disabling reassembly, as
-:mod:`pcapkit.foundation.engines.pyshark` does. DTLS defines them for the default
-engine and is disabled on every other.
+**Point 2 holds through the engines, not through one** :mod:`pcapkit.toolkit`
+**helper.** Each engine's :attr:`EngineBase.__reassembly__
+<pcapkit.foundation.engines.engine.EngineBase.__reassembly__>` maps every reassembler it
+supports to the toolkit adapter that feeds it, written by
+:meth:`EngineBase.register_reassembly
+<pcapkit.foundation.engines.engine.EngineBase.register_reassembly>`, so the maps together
+declare which engines support a reassembler. An enabled reassembler with no entry is
+disabled with an :class:`~pcapkit.utilities.warnings.AttributeWarning`, and an engine
+with no entries at all, as :mod:`pcapkit.foundation.engines.pyshark`, disables
+reassembly (:issue:`2814`). DTLS has entries on the default engine alone.
 
 **Point 3 holds for every engine.**
 :func:`~pcapkit.foundation.analysis.ip.ip_datagram` parses a reassembled IPv4 or IPv6

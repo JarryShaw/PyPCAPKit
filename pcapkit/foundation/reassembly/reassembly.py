@@ -285,16 +285,21 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         deadline.
 
         Note:
-            The clock only advances when *this* reassembly object is fed, since
-            a packet handed to it is the only evidence an offline parser has that
-            capture time has moved on. For TCP that is every segment, for IPv4
-            every frame whose **DF** flag is clear, and for IPv6 only the
-            fragments, so an IPv6 buffer that stalls and is followed by no
-            further IPv6 fragment is reported as
+            The clock is the capture's timestamps, the only evidence an offline
+            parser has that time has moved on. Fed by hand, a reassembly object
+            sees only the packets handed to it, so a buffer followed by none is
+            reported as
             :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.data.Completion.PARTIAL>`
-            at the end of the capture. That is the honest answer: the capture
-            never shows that the deadline passed. A caller with an outside
-            source of time may call this method itself to advance the clock.
+            at the end of the capture. The
+            :class:`~pcapkit.foundation.extraction.Extractor` calls
+            :meth:`advance` with every frame's timestamp, so there a buffer
+            expires once any later frame passes its deadline.
+
+        .. versionchanged:: 1.7.0
+
+           The :class:`~pcapkit.foundation.extraction.Extractor` advances the
+           clock on every frame, where it advanced only on the packets a
+           reassembly object was fed (:issue:`2814`).
 
         """
         if math.isinf(self._timeout) or not self._buffer:
@@ -321,6 +326,27 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
             ret.extend(self.submit(buffer, bufid=bufid, timeout=True))
         return ret
+
+    # advance the capture clock
+    def advance(self, timestamp: 'float') -> 'None':
+        """Advance the capture clock, keeping what it times out.
+
+        Arguments:
+            timestamp: Capture timestamp of the current frame, in seconds since
+                the Unix epoch.
+
+        The datagrams :meth:`expire` abandons at ``timestamp`` join
+        :attr:`datagram`. The :class:`~pcapkit.foundation.extraction.Extractor`
+        calls this with every frame's timestamp, before the frame is fed, so the
+        clock does not wait on this protocol's own traffic.
+
+        .. versionadded:: 1.7.0
+
+        """
+        expired = self.expire(timestamp)
+        if expired:
+            self._dtgram.extend(expired)
+            self.__cached__.clear()
 
     # fetch datagram
     def fetch(self) -> 'tuple[_DT, ...]':
@@ -527,6 +553,15 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
         .. code-block:: python
 
            Extractor.register_reassembly('my_mixin', MyMixin)
+
+        An engine feeds a registered reassembly through the
+        :mod:`pcapkit.toolkit` adapter it holds for that name, and an
+        :class:`~pcapkit.foundation.extraction.Extractor` enables it by name:
+
+        .. code-block:: python
+
+           PCAP.register_reassembly('my_protocol', my_adapter)
+           Extractor('in.pcap', reassembly=True, reasm_protocols=['my_protocol'])
 
     Arguments:
         strict: if :data:`True`, report a datagram that is not completely

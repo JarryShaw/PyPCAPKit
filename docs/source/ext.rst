@@ -478,6 +478,7 @@ A sketch of a new engine on :mod:`scapy`, modelled on
 
    from typing import TYPE_CHECKING
 
+   from pcapkit.corekit.module import ModuleDescriptor  # import lazy reference
    from pcapkit.foundation.engines.engine import Engine  # import base class
 
    if TYPE_CHECKING:
@@ -493,6 +494,14 @@ A sketch of a new engine on :mod:`scapy`, modelled on
        __engine_name__ = 'Scapy'  # friendly name of the engine
        __engine_module__ = 'scapy'  # module name that the engine is based on
 
+       # NOTE: The toolkit adapter for each reassembler this engine supports, keyed
+       # by the name the reassembler is registered under; any other is disabled.
+       __reassembly__ = {
+           'ipv4': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv4_reassembly'),
+           'ipv6': ModuleDescriptor('pcapkit.toolkit.scapy', 'ipv6_reassembly'),
+           'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_reassembly'),
+       }
+
        def __init__(self, extractor: 'Extractor') -> 'None':
            # NOTE: Imported here, not at module level, so the engine's
            # library stays an optional dependency.
@@ -507,6 +516,7 @@ A sketch of a new engine on :mod:`scapy`, modelled on
        # over its packets in ``self._extmp``.
        def run(self) -> 'None':
            ext = self._extractor  # get extractor instance
+           self._setup_reassembly()  # drop enabled reassemblers with no adapter, warning
 
            # NOTE: Replace the verbose handler only for ``verbose=True``; a
            # callable ``verbose=`` is the user's own, already in ``ext._vfunc``.
@@ -529,8 +539,7 @@ A sketch of a new engine on :mod:`scapy`, modelled on
        # NOTE: Return the next packet from ``self._extmp``, handling its
        # verbose output, file output, reassembly and flow tracing.
        def read_frame(self) -> 'Packet':
-           from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2dict,
-                                              tcp_reassembly, tcp_traceflow)  # import utility functions
+           from pcapkit.toolkit.scapy import packet2dict, tcp_traceflow  # import utility functions
            ext = self._extractor  # get extractor instance
 
            packet = next(self._extmp)  # get next packet from the iterator
@@ -551,21 +560,10 @@ A sketch of a new engine on :mod:`scapy`, modelled on
                else:
                    ext._ofile(info, name=frnum)
 
-           # NOTE: Each toolkit helper converts the packet to its reassembly's
-           # format, or gives None for a packet it does not apply to.
+           # NOTE: Advance every enabled reassembler to the packet's timestamp, then
+           # feed it what its ``__reassembly__`` adapter makes of the packet, if anything.
            if ext._flag_r:
-               if ext._ipv4:
-                   data_ipv4 = ipv4_reassembly(packet, count=ext._frnum)
-                   if data_ipv4 is not None:
-                       ext._reasm.ipv4(data_ipv4)
-               if ext._ipv6:
-                   data_ipv6 = ipv6_reassembly(packet, count=ext._frnum)
-                   if data_ipv6 is not None:
-                       ext._reasm.ipv6(data_ipv6)
-               if ext._tcp:
-                   data_tcp = tcp_reassembly(packet, count=ext._frnum)
-                   if data_tcp is not None:
-                       ext._reasm.tcp(data_tcp)
+               self._reassemble(float(packet.time), packet, count=ext._frnum)
 
            # NOTE: Flow tracing, likewise.
            if ext._flag_t:

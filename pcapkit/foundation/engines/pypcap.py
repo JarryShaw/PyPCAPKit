@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines import _pcap_backend
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.utilities.exceptions import FormatError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
@@ -297,13 +296,8 @@ class PyPCAP(EngineBase['RawFrame']):
                                   f'but {ext._ifnm!r} is not one; libpcap opens savefiles '
                                   'by name and cannot read an in-memory stream')
 
-        if ext._flag_r and (ext._ipv4 or ext._ipv6 or ext._tcp or ext._dtls):
-            ext._flag_r = False
-            ext._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None, dtls=None)
-            warn("'Extractor(engine=pypcap)' object does not support reassembly; "
-                 f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}', 'tcp={ext._tcp}' and "
-                 f"'dtls={ext._dtls}' will be ignored",
-                 AttributeWarning, stacklevel=stacklevel())
+        # NOTE: no entry in ``__reassembly__``, so this disables reassembly with a warning.
+        self._setup_reassembly()
 
         if ext._flag_t and ext._tcp:
             ext._flag_t = False

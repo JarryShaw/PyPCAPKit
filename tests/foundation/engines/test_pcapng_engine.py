@@ -106,6 +106,8 @@ class PCAPNGEngineTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _info(self, block_type, **kwargs) -> FakeInfo:
+        # NOTE: a packet block's timestamp is what the engine advances each reassembler to (#2814).
+        kwargs.setdefault('timestamp_epoch', 0)
         return FakeInfo(type=block_type, **kwargs)
 
     def _section(self, **kwargs) -> FakeInfo:
@@ -202,9 +204,9 @@ class PCAPNGEngineTests(unittest.TestCase):
         self.assertEqual(len(engine._ctx.statistics), 1)
         self.assertEqual(len(engine._ctx.custom), 1)
         self.assertEqual(len(engine._ctx.unknown), 1)
-        extractor._reasm.ipv4.assert_called_once_with('ipv4')
-        extractor._reasm.ipv6.assert_called_once_with('ipv6')
-        extractor._reasm.tcp.assert_called_once_with('tcp')
+        extractor._mocks.ipv4.assert_called_once_with('ipv4')
+        extractor._mocks.ipv6.assert_called_once_with('ipv6')
+        extractor._mocks.tcp.assert_called_once_with('tcp')
         extractor._trace.tcp.assert_called_once_with('trace')
         self.assertEqual(extractor._frame, [block])
 
@@ -243,9 +245,9 @@ class PCAPNGEngineTests(unittest.TestCase):
                     with mock.patch('pcapkit.toolkit.pcapng.tcp_reassembly', return_value=None):
                         with mock.patch('pcapkit.toolkit.pcapng.tcp_traceflow', return_value=None):
                             self.assertIs(engine.read_frame(), block)
-        extractor._reasm.ipv4.assert_not_called()
-        extractor._reasm.ipv6.assert_not_called()
-        extractor._reasm.tcp.assert_not_called()
+        extractor._mocks.ipv4.assert_not_called()
+        extractor._mocks.ipv6.assert_not_called()
+        extractor._mocks.tcp.assert_not_called()
         extractor._trace.tcp.assert_not_called()
 
         no_protocols, _ = make_extractor(_flag_q=True, _flag_r=True, _flag_t=True,
@@ -262,7 +264,7 @@ class PCAPNGEngineTests(unittest.TestCase):
                     with mock.patch('pcapkit.toolkit.pcapng.tcp_reassembly', return_value='unused'):
                         with mock.patch('pcapkit.toolkit.pcapng.tcp_traceflow', return_value='unused'):
                             self.assertIs(engine.read_frame(), block)
-        no_protocols._reasm.ipv4.assert_not_called()
+        no_protocols._mocks.ipv4.assert_not_called()
         no_protocols._trace.tcp.assert_not_called()
 
     def test_read_frame_rejects_invalid_interface_contexts(self) -> None:

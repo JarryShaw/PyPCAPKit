@@ -12,7 +12,6 @@ import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
@@ -249,14 +248,8 @@ class PyShark(EngineBase['PySharkPacket']):
                  "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        if ext._flag_r and (ext._ipv4 or ext._ipv6 or ext._tcp or ext._dtls):
-            ext._flag_r = False
-            logger.debug('pyshark: reassembly unsupported, disabling it')
-            ext._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None, dtls=None)
-            warn("'Extractor(engine=pyshark)' object does not support reassembly; "
-                 f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}', 'tcp={ext._tcp}' and "
-                 f"'dtls={ext._dtls}' will be ignored",
-                 AttributeWarning, stacklevel=stacklevel())
+        # NOTE: no entry in ``__reassembly__``, so this disables reassembly with a warning.
+        self._setup_reassembly()
 
         # setup verbose handler, unless the caller gave one of their own
         # (#1874); a packet always has a frame layer, since read_frame skips

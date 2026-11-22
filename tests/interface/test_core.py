@@ -103,13 +103,6 @@ class InterfaceCoreTests(unittest.TestCase):
 
         foundation_extraction = types.ModuleType('pcapkit.foundation.extraction')
 
-        class Extractor:
-            def __init__(self, **kwargs):
-                self.kwargs = kwargs
-
-        foundation_extraction.Extractor = Extractor
-        sys.modules['pcapkit.foundation.extraction'] = foundation_extraction
-
         def make_reassembly(name):
             class Reassembly:
                 def __init__(self, strict=False, timeout=None):
@@ -117,6 +110,22 @@ class InterfaceCoreTests(unittest.TestCase):
                     self.timeout = timeout
             Reassembly.__name__ = name
             return Reassembly
+
+        class Extractor:
+            # NOTE: ``reassemble`` reaches every reassembler through this one lookup (#2814).
+            __reassembly__ = {name.lower(): make_reassembly(name) for name in ('IPv4', 'IPv6', 'TCP')}
+
+            def __init__(self, **kwargs):
+                self.kwargs = kwargs
+
+            @classmethod
+            def make_reassembly(cls, protocol, *, strict=True, store=True, timeout=None):
+                if protocol.lower() not in cls.__reassembly__:
+                    raise sys.modules['pcapkit.utilities.exceptions'].FormatError(protocol)
+                return cls.__reassembly__[protocol.lower()](strict=strict, timeout=timeout)
+
+        foundation_extraction.Extractor = Extractor
+        sys.modules['pcapkit.foundation.extraction'] = foundation_extraction
 
         def make_trace(name):
             class TraceFlow:
@@ -126,9 +135,6 @@ class InterfaceCoreTests(unittest.TestCase):
             return TraceFlow
 
         for module_name, attr_name, klass in [
-            ('pcapkit.foundation.reassembly.ipv4', 'IPv4', make_reassembly('IPv4')),
-            ('pcapkit.foundation.reassembly.ipv6', 'IPv6', make_reassembly('IPv6')),
-            ('pcapkit.foundation.reassembly.tcp', 'TCP', make_reassembly('TCP')),
             ('pcapkit.foundation.traceflow.tcp', 'TCP', make_trace('TCP')),
         ]:
             module = types.ModuleType(module_name)
