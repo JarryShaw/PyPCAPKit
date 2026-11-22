@@ -65,6 +65,10 @@ _COMPUTE_UPPER: 'ModuleDescriptor[Any]' = \
     ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'compute_upper')
 _VERIFY_UPPER: 'ModuleDescriptor[Any]' = \
     ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'verify_upper')
+#: The extension header base whose lengths :meth:`IPv6.make` checks, resolved
+#: there for the same reason.
+_IPV6_EXT: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.internet.ipv6_ext.protocol', 'IPv6_Ext')
 
 #: Length of the fixed IPv6 header, i.e. the offset of the first extension
 #: header, :rfc:`8200#section-3`. The one home of this value (:issue:`1739`); it
@@ -282,6 +286,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         computed under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`, see
         :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper`.
 
+        An extension header ``payload`` chains as a layer, as far as a
+        receiver's walk reaches, must be a multiple of 8 octets long
+        (:rfc:`8200#section-4`), unless its class clears
+        :attr:`IPv6_Ext._ipv6_aligned
+        <pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._ipv6_aligned>`.
+        A chain given as octets is written as is, as :meth:`_make_data`
+        rebuilds a captured one.
+
         Args:
             traffic_class: Traffic class.
             flow_label: Flow label.
@@ -303,7 +315,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         Raises:
             ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member
-                or code that does not fit in one octet.
+                or code that does not fit in one octet, or an extension header
+                chained as a layer is not a multiple of 8 octets long.
 
         .. versionchanged:: 1.5.0
 
@@ -312,11 +325,26 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         .. versionchanged:: 1.7.0
 
-           Computes the pending checksum of an upper layer past extension
-           headers too (:issue:`2824`).
+           * Computes the pending checksum of an upper layer past extension
+             headers too (:issue:`2824`).
+           * Refuses an extension header that is not a multiple of 8 octets
+             long (:issue:`2886`).
 
         """
         next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
+
+        # NOTE: RFC 8200 s4 makes each extension header a multiple of 8 octets; the walk is
+        # the receiver's, over the layers given, as in compute_upper (#2886).
+        layer, code, ext = payload, next_val, _IPV6_EXT.klass  # type: Any, Any, Any
+        while isinstance(layer, ext) and layer._ipv6_aligned:  # pylint: disable=protected-access
+            try:
+                Enum_ExtensionHeader(code)
+            except ValueError:
+                break
+            if layer.length % 8:
+                raise ProtocolError(f'{self.alias}: invalid {layer.alias} header length: '
+                                    f'must be a multiple of 8 octets, not {layer.length}')
+            code, layer = getattr(layer.info, 'next', None), getattr(layer.__header__, 'payload', None)
 
         # NOTE: Written as given, so a truncated capture keeps its declared length (#1155);
         # otherwise computed, or zero for an oversize payload or a jumbogram (#1687).

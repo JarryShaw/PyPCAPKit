@@ -1016,6 +1016,11 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
 
     """
 
+    #: ESP's octets run to the end of the packet, padded to 4 octets
+    #: (:rfc:`4303#section-2.4`), so :rfc:`8200#section-4`'s 8-octet length
+    #: does not bind it (:issue:`2886`).
+    _ipv6_aligned = False
+
     ##########################################################################
     # Properties.
     ##########################################################################

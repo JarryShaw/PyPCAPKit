@@ -46,7 +46,8 @@ class AH(Schema):
     spi: 'int' = UInt32Field()
     #: Sequence number field.
     seq: 'int' = UInt32Field()
-    #: Integrity check value.
+    #: Integrity check value, with the padding :rfc:`4302#section-2.6` aligns
+    #: the header with.
     icv: 'bytes' = BytesField(length=lambda pkt: (pkt['len'] + 2) * 4 - AH_HEADER_LEN)
     #: Payload.
     payload: 'bytes' = PayloadField()

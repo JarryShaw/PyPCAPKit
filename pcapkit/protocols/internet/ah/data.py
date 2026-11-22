@@ -32,7 +32,8 @@ class AH(Protocol):
     spi: 'int'
     #: Sequence number field.
     seq: 'int'
-    #: Integrity check value.
+    #: Integrity check value, with the padding :rfc:`4302#section-2.6` aligns
+    #: the header with.
     icv: 'bytes'
 
     if TYPE_CHECKING:

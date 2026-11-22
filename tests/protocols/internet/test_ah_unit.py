@@ -31,6 +31,7 @@ class AHUnitTests(unittest.TestCase):
             spi=0x12345678,
             seq=7,
             icv=b'auth',
+            length=16,
             __next_type__=None,
         )
         proto = object.__new__(AH)
@@ -43,6 +44,7 @@ class AHUnitTests(unittest.TestCase):
         self.assertEqual(values['spi'], 0x12345678)
         self.assertEqual(values['seq'], 7)
         self.assertEqual(values['icv'], b'auth')
+        self.assertEqual(values['payload_length'], 2)
         self.assertIn('payload', values)
 
     def test_ah_make_builds_schema_with_payload_length(self) -> None:
