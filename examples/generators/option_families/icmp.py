@@ -33,6 +33,14 @@ ICMPV6_QUOTED = (bytes.fromhex('6000000000081140') + bytes(15) + b'\x01' + bytes
 #: which cannot tell a swapped ``id`` and ``seq``, or a dropped ``data``, apart.
 ICMP_ECHO = {'id': 0x1234, 'seq': 0x5678, 'data': b'ping'}
 
+#: The multicast address an MLD message names, the all-MLDv2-routers group, and
+#: a source address [:rfc:`9777#section-5`].
+MLD_GROUP = 'ff02::16'
+MLD_SOURCE = '2001:db8::1'
+
+#: An MLDv1 Report or Done [:rfc:`2710#section-3`], whose defaults are all zero.
+MLDV1 = {'max_resp_delay': 0x1234, 'multicast_address': MLD_GROUP}
+
 
 def _icmpv4_registry() -> 'Any':
     from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
@@ -90,6 +98,17 @@ def _icmpv6_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Type.Parameter_Problem: {'pointer': 6, 'data': ICMPV6_QUOTED},
         Enum_Type.Echo_Request: dict(ICMP_ECHO),
         Enum_Type.Echo_Reply: dict(ICMP_ECHO),
+        # An MLDv2 Query, which an MLDv1 one is the first 24 octets of; no field
+        # picks the version type 130 is shared by.
+        Enum_Type.Multicast_Listener_Query: {
+            'version': 2, 'max_resp_code': 0x8123, 'multicast_address': MLD_GROUP,
+            'flags': 0x5, 's_flag': True, 'qrv': 2, 'qqic': 0x7D, 'sources': [MLD_SOURCE],
+        },
+        Enum_Type.Multicast_Listener_Report: dict(MLDV1),
+        Enum_Type.Multicast_Listener_Done: dict(MLDV1),
+        Enum_Type.Version_2_Multicast_Listener_Report: {'flags': 0x8000, 'records': [{
+            'record_type': 4, 'multicast_address': MLD_GROUP, 'sources': [MLD_SOURCE], 'aux_data': b'AUX!',
+        }]},
     }
 
 

@@ -25,14 +25,14 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.utilities.contextvars import frame_length
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, TypeVar
+    from typing import Any, Iterable, Optional, TypeVar
 
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
     _PB = TypeVar('_PB', bound=ProtocolBase)
 
-__all__ = ['keep_short_read', 'replay_short_read']
+__all__ = ['keep_short_read', 'replay_short_read', 'hoist_short_read']
 
 
 def keep_short_read(protocol: 'ProtocolBase', length: 'Optional[int]' = None) -> 'None':
@@ -148,3 +148,26 @@ def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
     protocol.__cached__.pop('__len__', None)
     protocol._info.__update__({'__short_read__': record})
     return protocol
+
+
+def hoist_short_read(schema: 'Schema', name: 'str', parts: 'Iterable[Optional[Schema]]') -> 'None':
+    """Record on ``schema`` a short read only the schemas in its field ``name`` recorded.
+
+    Args:
+        schema: The header just parsed.
+        name: Its field holding ``parts``.
+        parts: The schemas read in that field, :data:`None` for one absent.
+
+    Each of ``parts`` must read to the end of the data, so a field there that reads
+    short has reached it, and the record names ``name`` with every octet of it
+    read. Elsewhere a nested record need not mean that: hoisting one in
+    :func:`keep_short_read` marks a complete TCP segment with a malformed MPTCP DSS
+    option as cut (:issue:`2660`). IGMPv3 and ICMPv6 hoist the record of a message
+    body counting records the data ends before.
+
+    .. versionadded:: 1.7.0
+
+    """
+    if '__short_read__' not in schema.__dict__ and any(
+            part is not None and '__short_read__' in part.__dict__ for part in parts):
+        schema.__dict__['__short_read__'] = (name, len(schema.__buffer__[name]))

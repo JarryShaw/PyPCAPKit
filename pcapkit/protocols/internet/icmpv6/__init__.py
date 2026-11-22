@@ -22,6 +22,13 @@ from pcapkit.protocols.internet.icmpv6.schema import \
 from pcapkit.protocols.internet.icmpv6.schema import Echo as Schema_Echo
 from pcapkit.protocols.internet.icmpv6.schema import ICMPv6 as Schema_ICMPv6
 from pcapkit.protocols.internet.icmpv6.schema import ICMPv6Type as Schema_ICMPv6Type
+from pcapkit.protocols.internet.icmpv6.schema import MLDQuery as Schema_MLDQuery
+from pcapkit.protocols.internet.icmpv6.schema import MLDv1 as Schema_MLDv1
+from pcapkit.protocols.internet.icmpv6.schema import \
+    MLDv2QueryExtension as Schema_MLDv2QueryExtension
+from pcapkit.protocols.internet.icmpv6.schema import MLDv2Report as Schema_MLDv2Report
+from pcapkit.protocols.internet.icmpv6.schema import \
+    MulticastAddressRecord as Schema_MulticastAddressRecord
 from pcapkit.protocols.internet.icmpv6.schema import PacketTooBig as Schema_PacketTooBig
 from pcapkit.protocols.internet.icmpv6.schema import ParameterProblem as Schema_ParameterProblem
 from pcapkit.protocols.internet.icmpv6.schema import TimeExceeded as Schema_TimeExceeded
@@ -32,6 +39,11 @@ from pcapkit.protocols.internet.icmpv6.data import \
     DestinationUnreachable as Data_DestinationUnreachable
 from pcapkit.protocols.internet.icmpv6.data import Echo as Data_Echo
 from pcapkit.protocols.internet.icmpv6.data import ICMPv6 as Data_ICMPv6
+from pcapkit.protocols.internet.icmpv6.data import MLDv1 as Data_MLDv1
+from pcapkit.protocols.internet.icmpv6.data import MLDv2Query as Data_MLDv2Query
+from pcapkit.protocols.internet.icmpv6.data import MLDv2Report as Data_MLDv2Report
+from pcapkit.protocols.internet.icmpv6.data import \
+    MulticastAddressRecord as Data_MulticastAddressRecord
 from pcapkit.protocols.internet.icmpv6.data import PacketTooBig as Data_PacketTooBig
 from pcapkit.protocols.internet.icmpv6.data import ParameterProblem as Data_ParameterProblem
 from pcapkit.protocols.internet.icmpv6.data import TimeExceeded as Data_TimeExceeded

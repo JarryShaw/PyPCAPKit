@@ -55,8 +55,15 @@ ICMPV4 = {
     12: ('ParameterProblem', b'\x08' + bytes(3) + QUOTED4),  # Pointer, 3 unused
 }
 
+#: The MLD group ff02::16 and the source 2001:db8::1.
+MLD_GROUP = bytes.fromhex('ff02' + '0' * 24 + '0016')
+MLD_SOURCE = bytes.fromhex('20010db8' + '0' * 22 + '01')
+#: An MLDv1 Report or Done: Maximum Response Delay, Reserved, then the group (#2812).
+MLDV1 = bytes.fromhex('1234' '0000') + MLD_GROUP
+
 #: ICMPv6 type -> the data model it parses into, and its body after the 4-octet
-#: header (:rfc:`4443#section-3`, :rfc:`4443#section-4`).
+#: header (:rfc:`4443#section-3`, :rfc:`4443#section-4`, :rfc:`2710#section-3`,
+#: :rfc:`9777#section-5`).
 ICMPV6 = {
     1: ('DestinationUnreachable', bytes(4) + QUOTED6),        # 4 unused octets
     2: ('PacketTooBig', (1280).to_bytes(4, 'big') + QUOTED6),  # 32-bit MTU
@@ -64,6 +71,14 @@ ICMPV6 = {
     4: ('ParameterProblem', (6).to_bytes(4, 'big') + QUOTED6),  # 32-bit Pointer
     128: ('Echo', ECHO),                                      # Echo Request
     129: ('Echo', ECHO),                                      # Echo Reply
+    # Maximum Response Code, Reserved, group, Flags|S|QRV, QQIC, one source.
+    130: ('MLDv2Query', bytes.fromhex('8123' '0000') + MLD_GROUP + bytes.fromhex('5a' '7d' '0001')
+          + MLD_SOURCE),
+    131: ('MLDv1', MLDV1),                                     # Multicast Listener Report
+    132: ('MLDv1', MLDV1),                                     # Multicast Listener Done
+    # Flags, one record: type 4, one word of aux data, one source.
+    143: ('MLDv2Report', bytes.fromhex('8000' '0001' '04' '01' '0001') + MLD_GROUP + MLD_SOURCE
+          + b'AUX!'),
 }
 
 #: Family label -> (protocol module and class, data module, expected table).

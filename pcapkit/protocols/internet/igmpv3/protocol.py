@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
 from pcapkit.const.igmp.type import Type as Enum_Type
+from pcapkit.corekit.schema.shortread import hoist_short_read
 from pcapkit.protocols.internet.igmp.protocol import IGMP as IGMPBase
 from pcapkit.protocols.internet.igmpv3.data import GroupRecord as Data_GroupRecord
 from pcapkit.protocols.internet.igmpv3.data import IGMPv3 as Data_IGMPv3
@@ -76,89 +77,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema import Schema
 
 __all__ = ['IGMPv3']
-
-
-def _decode_resp_code(code: 'int') -> 'int':
-    """Decode a Max Resp Code/QQIC octet into its real value.
-
-    Per :rfc:`3376#section-4.1.1` (:attr:`~pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time`)
-    and :rfc:`3376#section-4.1.7` (:attr:`~pcapkit.protocols.internet.igmpv3.data.Query.qqi`)
-    alike:
-
-    * if ``code < 128``, the value is ``code`` itself;
-    * otherwise ``code`` is a floating-point value ``1 exp(3) mant(4)``, and
-      the value is ``(mant | 0x10) << (exp + 3)``.
-
-    Args:
-        code: the raw octet.
-
-    Returns:
-        The decoded value.
-
-    """
-    if code < 128:
-        return code
-    exp = (code >> 4) & 0x07
-    mant = code & 0x0F
-    return (mant | 0x10) << (exp + 3)
-
-
-def _encode_resp_code(value: 'int') -> 'int':
-    """Encode a value into a Max Resp Code/QQIC octet.
-
-    The reverse of :func:`_decode_resp_code`. A value below 128 round-trips
-    exactly. At or above it, this picks the smallest exponent whose mantissa
-    fits 4 bits, which round-trips exactly for any value that formula can
-    represent and otherwise floors to the nearest one it can (the same
-    lossy-above-127 trade-off :rfc:`3376#section-4.1.1` itself makes) --
-    mirroring how :meth:`HIP._make_puzzle_lifetime
-    <pcapkit.protocols.internet.hip.protocol.HIP._make_puzzle_lifetime>` encodes its
-    own exponential field.
-
-    Args:
-        value: the value to encode, in the same units as :func:`_decode_resp_code`
-            returns.
-
-    Returns:
-        The raw octet.
-
-    """
-    if value < 0:
-        raise ProtocolError(f'IGMPv3: invalid Max Resp Time/QQI value: {value!r}')
-    if value < 128:
-        return value
-
-    exp = 0
-    mant_full = value >> 3
-    while mant_full > 31 and exp < 7:
-        exp += 1
-        mant_full = value >> (exp + 3)
-    mant_full = min(mant_full, 31)
-
-    mant = mant_full & 0x0F
-    return 0x80 | (exp << 4) | mant
-
-
-def _keep_body_short_read(schema: 'Schema_IGMPv3') -> 'None':
-    """Record on ``schema`` a short read only the schemas in its body recorded (:issue:`2660`).
-
-    Every schema in the body reads to the end of the data, so a field there that
-    reads short has reached it. Elsewhere a nested record need not mean that:
-    hoisting one in :func:`~pcapkit.corekit.schema.shortread.keep_short_read` marks
-    a complete TCP segment with a malformed MPTCP DSS option as cut.
-
-    Args:
-        schema: The header just parsed.
-
-    """
-    body = schema.body
-    if isinstance(body, Schema_Query):
-        parts = (body, body.ext)  # type: tuple[Optional[Schema], ...]
-    else:
-        parts = (body, *body.records)
-    if '__short_read__' not in schema.__dict__ and any(
-            part is not None and '__short_read__' in part.__dict__ for part in parts):
-        schema.__dict__['__short_read__'] = ('body', len(schema.__buffer__['body']))
 
 
 class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
@@ -255,8 +173,8 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             s_flag = bool(ext.flags['s_flag'])
             qrv = ext.flags['qrv']
             qqic = ext.qqic
-            qqi = _decode_resp_code(qqic)
-            max_resp_time = _decode_resp_code(body.max_resp_code)
+            qqi = self._read_float_code(qqic, bits=8)
+            max_resp_time = self._read_float_code(body.max_resp_code, bits=8)
             sources = tuple(ext.sources)
             trailing = ext.get_payload()
 
@@ -301,7 +219,12 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         else:  # pragma: no cover
             raise ProtocolError(f'{self.alias}: unsupported message type: {schema.type!r}')
 
-        _keep_body_short_read(schema)
+        if isinstance(body, Schema_Query):
+            parts = (body, body.ext)  # type: tuple[Optional[Schema], ...]
+        else:
+            parts = (body, *body.records)
+        # NOTE: Every schema in the body reads to the end of the data (#2660).
+        hoist_short_read(schema, 'body', parts)
         self._verify_checksum(igmp, body.checksum, length)
         return self._decode_next_layer(igmp, None, len(trailing))
 
@@ -336,7 +259,8 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             type: Message type.
             max_resp_code: Max response code, as transmitted on the wire. When
                 not given, derived from ``max_resp_time`` via
-                :func:`_encode_resp_code`; only meaningful for a Query.
+                :meth:`~pcapkit.protocols.protocol.ProtocolBase._make_float_code`;
+                only meaningful for a Query.
             max_resp_time: Max response time, in units of 1/10 second: an
                 :obj:`int` from 0 to 255 (not a :obj:`bool`), else
                 :exc:`ProtocolError`. Ignored when ``max_resp_code`` is given.
@@ -357,8 +281,9 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             qrv: Querier's Robustness Variable (:rfc:`3376#section-4.1.6`);
                 only meaningful for a Query.
             qqic: Querier's Query Interval Code, as transmitted on the wire;
-                derived from ``qqi`` via :func:`_encode_resp_code` when not
-                given; only meaningful for a Query.
+                derived from ``qqi`` via
+                :meth:`~pcapkit.protocols.protocol.ProtocolBase._make_float_code`
+                when not given; only meaningful for a Query.
             qqi: Querier's Query Interval, in seconds; ignored when ``qqic``
                 is given; only meaningful for a Query.
             sources: Source addresses being queried
@@ -391,11 +316,12 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         Raises:
             ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
                 or code outside 0 to 255, or is neither a Query nor a Report;
-                if ``max_resp_time`` is not an :obj:`int` from 0 to 255; if
-                ``num_group_records`` is not an :obj:`int` from the length of
-                ``records`` to 65535, or ``num_sources`` one from the length of
-                ``sources``; if ``checksum`` or ``reserved_2`` is not
-                two octets; or if a record's ``record_type`` is refused, see
+                if ``max_resp_time`` is not an :obj:`int` from 0 to 255, or
+                ``qqi`` a non-negative :obj:`int`; if ``num_group_records`` is
+                not an :obj:`int` from the length of ``records`` to 65535, or
+                ``num_sources`` one from the length of ``sources``; if
+                ``checksum`` or ``reserved_2`` is not two octets; or if a
+                record's ``record_type`` is refused, see
                 :meth:`_make_group_record`.
 
         """
@@ -429,7 +355,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             )
         elif type_value == Enum_Type.IGMP_Membership_Query:
             if qqic is None:
-                qqic = _encode_resp_code(0 if qqi is None else qqi)
+                qqic = self._make_float_code(0 if qqi is None else qqi, bits=8, name='qqi')
             source_list = [] if sources is None else list(sources)
             if num_sources is None:
                 num_sources = len(source_list)
@@ -445,7 +371,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             )
 
             if max_resp_code is None:
-                max_resp_code = _encode_resp_code(max_resp_time)
+                max_resp_code = self._make_float_code(max_resp_time, bits=8, name='max_resp_time')
 
             schema = Schema_IGMPv3(
                 type=type_value,
