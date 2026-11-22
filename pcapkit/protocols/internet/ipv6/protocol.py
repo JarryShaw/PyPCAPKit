@@ -52,18 +52,17 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
 __all__ = ['IPv6']
 
-#: The pseudo-header :meth:`IPv6.make` computes a payload's checksum over, and the
-#: check :meth:`IPv6.__post_init__` runs on the upper layer, resolved there rather
-#: than imported, so their first import holds
+#: What computes the upper layer's pending checksum in :meth:`IPv6.make`, and what
+#: verifies it in :meth:`IPv6.__post_init__`, resolved there rather than
+#: imported, so their first import holds
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
-_IP_PSEUDO: 'ModuleDescriptor[IP_Pseudo]' = \
-    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'IP_Pseudo')
+_COMPUTE_UPPER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'compute_upper')
 _VERIFY_UPPER: 'ModuleDescriptor[Any]' = \
     ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'verify_upper')
 
@@ -278,6 +277,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
              **kwargs: 'Any') -> 'Schema_IPv6':
         """Make (construct) packet data.
 
+        An upper layer whose ``make()`` left its checksum pending, as the
+        payload or past the extension headers it is constructed with, gets it
+        computed under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`, see
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper`.
+
         Args:
             traffic_class: Traffic class.
             flow_label: Flow label.
@@ -306,6 +310,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
            Takes ``payload_length`` ahead of ``payload`` (:issue:`1155`), which
            shifts a positional ``payload``.
 
+        .. versionchanged:: 1.7.0
+
+           Computes the pending checksum of an upper layer past extension
+           headers too (:issue:`2824`).
+
         """
         next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
 
@@ -331,17 +340,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             trailer=trailer,
         )
 
-        # NOTE: A payload that left its checksum out gets it over this header's
-        # pseudo-header; see pcapkit.protocols.misc.checksum.ip_pseudo.protocol (#2471).
-        if (config.CHECKSUM_COMPUTE and getattr(payload, '_checksum_pending', False)
-                and cast('ProtocolBase', payload).__index__() == next_val):
-            IP_Pseudo = _IP_PSEUDO.klass  # pylint: disable=invalid-name
-
-            # NOTE: The payload follows this header directly, so no extension
-            # header moves an address; it puts its own length in the pseudo-header.
-            pseudo = IP_Pseudo(src=src, dst=dst, protocol=next_val, upper_length=0)
-            upper = cast('ProtocolBase', payload)
-            schema.payload = upper.from_data(upper.info, checksum=None, pseudo=pseudo).data
+        # NOTE: An upper layer that left its checksum out, here or past extension headers,
+        # gets it over this header's pseudo-header (#2471, #2824).
+        if config.CHECKSUM_COMPUTE:
+            computed = _COMPUTE_UPPER.klass(schema)
+            if computed is not None:
+                schema.payload = computed
         return schema
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv6':
