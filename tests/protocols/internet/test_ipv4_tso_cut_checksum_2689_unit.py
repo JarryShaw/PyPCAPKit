@@ -137,7 +137,7 @@ class TSOCutChecksumTests(unittest.TestCase):
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', True), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            first = self.pcapkit.extract(fin=io.BytesIO(capture), nofile=True).frame[0]
+            first = self.pcapkit.extract(fin=io.BytesIO(capture)).frame[0]
         return first, [str(item.message) for item in caught
                        if issubclass(item.category, self.ChecksumWarning)]
 

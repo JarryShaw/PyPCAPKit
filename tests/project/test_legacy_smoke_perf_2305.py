@@ -79,6 +79,8 @@ class _Demo(unittest.TestCase):
 class TestEveryEngineIsBenchmarked(_Demo):
 
     def test_each_engine_is_benchmarked_into_its_own_report(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         extract = self.run_demo(lambda engine, fin: None)
         self.assertEqual([name for name, _, _ in self.benched], list(ENGINES))
         self.assertEqual(self.reports, [])
@@ -86,8 +88,8 @@ class TestEveryEngineIsBenchmarked(_Demo):
             with self.subTest(engine=name):
                 extract.reset_mock()
                 func(*args)
-                extract.assert_called_once_with(fin='../captures/in.pcap', fout=f'../captures/engines/{name}.txt',
-                                                format='tree', engine=name)
+                dump = DumpOptions(fout=f'../captures/engines/{name}.txt', format='tree')
+                extract.assert_called_once_with(fin='../captures/in.pcap', dump=dump, engine=name)
 
 
 class TestASkippedEngineIsReported(_Demo):

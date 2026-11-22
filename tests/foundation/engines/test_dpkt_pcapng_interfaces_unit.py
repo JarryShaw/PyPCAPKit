@@ -117,7 +117,7 @@ class TestDPKTPCAPNGInterfaces(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            return pcapkit.extract(fin=self.path, engine=engine, nofile=True, store=True)
+            return pcapkit.extract(fin=self.path, engine=engine, store=True)
 
     def test_reader_resolves_each_packets_interface(self) -> None:
         from pcapkit.foundation.engines.dpkt import PCAPNGReader
@@ -216,7 +216,7 @@ class TestDPKTSimplePacketBlock(unittest.TestCase):
         self._write(self.CAPTURE)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            dpkt = pcapkit.extract(fin=self.path, engine='dpkt', nofile=True, store=True)
+            dpkt = pcapkit.extract(fin=self.path, engine='dpkt', store=True)
 
         # the SPB, between the two EPBs, is dated at the epoch
         self.assertEqual([(float(packet2timestamp(frame)), packet2bytes(frame))
@@ -237,16 +237,18 @@ class TestDPKTSimplePacketBlock(unittest.TestCase):
         # #1520 and #1548 at once: on a LINKTYPE_IPV4 interface, an SPB is read
         # as a bare IP packet, which the flow tracer has to find too
         import pcapkit
+        from pcapkit.foundation.options import TraceFlowOptions
 
         self._write(_shb('<') + _idb('<', 228) + _spb('<', IPV4_TCP) + _epb('<', 0, IPV4_TCP))
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = pcapkit.extract(fin=self.path, engine='dpkt', nofile=True, tcp=True,
-                                        trace=True, trace_format='pcap', trace_byteorder='little',
-                                        trace_fout=os.path.join(self._tmp.name, 'dpkt'))
+            extractor = pcapkit.extract(fin=self.path, engine='dpkt',
+                                        traceflow=TraceFlowOptions(protocols=['tcp'],
+                                                                   fout=os.path.join(self._tmp.name, 'dpkt'),
+                                                                   format='pcap', byteorder='little'))
         self.addCleanup(close_extractor, extractor)
         flows = []
-        for flow in extractor.trace.tcp:
+        for flow in extractor.traceflow.tcp:
             with open(flow.fpout, 'rb') as file:
                 flows.append((flow.label, tuple(flow.index), file.read()))
 

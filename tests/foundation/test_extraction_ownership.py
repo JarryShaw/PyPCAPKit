@@ -178,7 +178,7 @@ class ExtractorClosesWhatItOpens(unittest.TestCase):
 
         recorder = _OpenRecorder(capture)
         with mock.patch.object(builtins, 'open', recorder):
-            extractor = pcapkit.extract(fin=capture, nofile=True, store=False)
+            extractor = pcapkit.extract(fin=capture, store=False)
 
         self.assertTrue(recorder.handles,
                         'Extractor did not open the capture at all, so this test '
@@ -219,8 +219,7 @@ class ExtractorClosesWhatItOpens(unittest.TestCase):
 
         recorder = _OpenRecorder(capture)
         with mock.patch.object(builtins, 'open', recorder):
-            extractor = pcapkit.extract(fin=capture, nofile=True, store=False,
-                                        auto=False)
+            extractor = pcapkit.extract(fin=capture, store=False, auto=False)
             next(extractor)          # one frame of six, then walk away
             extractor()              # and a second, through the call form
 
@@ -256,7 +255,7 @@ class ExtractorClosesWhatItOpens(unittest.TestCase):
         import pcapkit
 
         capture = sample_path('in.pcap')
-        extractor = pcapkit.extract(fin=capture, nofile=True, store=False)
+        extractor = pcapkit.extract(fin=capture, store=False)
         self.assertTrue(extractor._ifile.closed)
 
         extractor._cleanup()  # must not raise
@@ -281,7 +280,7 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
 
         capture = sample_path('in.pcap')
         with open(capture, 'rb') as handle:
-            extractor = pcapkit.extract(fin=handle, nofile=True, store=False)
+            extractor = pcapkit.extract(fin=handle, store=False)
 
             with self.subTest(check='handle not closed'):
                 self.assertFalse(handle.closed,
@@ -321,7 +320,7 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
         # the first record, which is why the rest of the suite only ever drives one
         # with ``Extractor.run`` patched out.
         stream = io.BufferedReader(_NonSeekableRaw(payload))
-        extractor = pcapkit.extract(fin=stream, nofile=True, store=False)
+        extractor = pcapkit.extract(fin=stream, store=False)
 
         self.assertIsInstance(extractor._ifile, SeekableReader,
                               'a non-seekable input should have been wrapped, '
@@ -354,7 +353,7 @@ class ContextExitFollowsOwnership(unittest.TestCase):
         import pcapkit
 
         with open(sample_path('in.pcap'), 'rb') as handle:
-            with pcapkit.extract(fin=handle, nofile=True, store=False):
+            with pcapkit.extract(fin=handle, store=False):
                 pass
 
             with self.subTest(check='handle not closed'):
@@ -378,8 +377,7 @@ class ContextExitFollowsOwnership(unittest.TestCase):
         # bare non-seekable ``BytesIO`` will not do.
         stream = io.BufferedReader(_NonSeekableRaw(payload))
         self.addCleanup(stream.close)
-        with pcapkit.extract(fin=stream, nofile=True, store=False,
-                             auto=False) as extractor:
+        with pcapkit.extract(fin=stream, store=False, auto=False) as extractor:
             next(extractor)
 
         self.assertIsInstance(extractor._ifile, SeekableReader,
@@ -403,8 +401,7 @@ class ContextExitFollowsOwnership(unittest.TestCase):
         """
         import pcapkit
 
-        with pcapkit.extract(fin=sample_path('in.pcap'), nofile=True, store=False,
-                             auto=False) as extractor:
+        with pcapkit.extract(fin=sample_path('in.pcap'), store=False, auto=False) as extractor:
             next(extractor)
             self.assertFalse(extractor._flag_e,
                              '_cleanup ran inside the block, so this test no '
@@ -439,8 +436,7 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
 
         import pcapkit
 
-        extractor = pcapkit.extract(fin=sample_path('in.pcap'), nofile=True,
-                                    store=False, auto=False)
+        extractor = pcapkit.extract(fin=sample_path('in.pcap'), store=False, auto=False)
         next(extractor)
 
         finalizer = extractor._finalizer
@@ -471,8 +467,7 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
         recorder = _OpenRecorder(capture)
         with mock.patch.object(Extractor, '__del__', lambda self: None):
             with mock.patch.object(builtins, 'open', recorder):
-                extractor = pcapkit.extract(fin=capture, nofile=True, store=False,
-                                            auto=False)
+                extractor = pcapkit.extract(fin=capture, store=False, auto=False)
                 next(extractor)
             self.assertEqual(recorder.still_open, 1)
 
@@ -563,13 +558,12 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
 
         capture = sample_path('in.pcap')
         with self.subTest(route='_cleanup at end of file'):
-            extractor = pcapkit.extract(fin=capture, nofile=True, store=False)
+            extractor = pcapkit.extract(fin=capture, store=False)
             self.assertTrue(extractor._ifile.closed)
             self.assertFalse(extractor._finalizer.alive)
 
         with self.subTest(route='context manager exit'):
-            with pcapkit.extract(fin=capture, nofile=True, store=False,
-                                 auto=False) as extractor:
+            with pcapkit.extract(fin=capture, store=False, auto=False) as extractor:
                 next(extractor)
                 self.assertTrue(extractor._finalizer.alive)
             self.assertTrue(extractor._ifile.closed)
@@ -582,8 +576,7 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
 
         with open(sample_path('in.pcap'), 'rb') as handle:
             with mock.patch.object(Extractor, '__del__', lambda self: None):
-                extractor = pcapkit.extract(fin=handle, nofile=True, store=False,
-                                            auto=False)
+                extractor = pcapkit.extract(fin=handle, store=False, auto=False)
                 next(extractor)
                 self.assertIsNone(extractor._finalizer)
 
@@ -603,8 +596,7 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
         stream = io.BufferedReader(_NonSeekableRaw(payload))
         self.addCleanup(stream.close)
 
-        extractor = pcapkit.extract(fin=stream, nofile=True, store=False,
-                                    auto=False)
+        extractor = pcapkit.extract(fin=stream, store=False, auto=False)
         next(extractor)
         self.assertIsInstance(extractor._ifile, SeekableReader)
         self.assertTrue(extractor._finalizer.alive)

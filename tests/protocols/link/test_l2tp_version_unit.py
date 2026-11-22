@@ -109,8 +109,7 @@ class L2TPVersionTests(unittest.TestCase):
         """Extract synthesised ``frames`` and return the frame list."""
         import pcapkit
 
-        extraction = pcapkit.extract(fin=make_pcap(self, *frames), nofile=True,
-                                     store=True)
+        extraction = pcapkit.extract(fin=make_pcap(self, *frames), store=True)
         self.addCleanup(close_extractor, extraction)
         return extraction.frame
 

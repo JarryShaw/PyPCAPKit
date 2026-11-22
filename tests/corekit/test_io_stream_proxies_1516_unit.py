@@ -111,7 +111,7 @@ class TestPeekableStream(unittest.TestCase):
 
         with open(sample_path('in.pcap'), 'rb') as file:
             raw = io.BytesIO(file.read())
-        extractor = Extractor(fin=raw, nofile=True, auto=False)
+        extractor = Extractor(fin=raw, auto=False)
         self.assertIs(type(extractor._ifile), PeekableStream)  # pylint: disable=protected-access
         self.assertIs(extractor._ifile._stream, raw)  # type: ignore[attr-defined] # pylint: disable=protected-access
 

@@ -303,7 +303,7 @@ class PyPCAP(EngineBase['RawFrame']):
             ext._flag_t = False
             ext._trace = TraceFlowManager(tcp=None)
             warn("'Extractor(engine=pypcap)' object does not support flow tracing; "
-                 f"so 'tcp={ext._tcp}' will be ignored", AttributeWarning, stacklevel=stacklevel())
+                 "so traceflow=['tcp'] will be ignored", AttributeWarning, stacklevel=stacklevel())
 
         # NOTE: ``promisc=False`` is defensive: should ``pcap_open_offline`` fail, the constructor
         # falls back to a live device, which must not request promiscuous mode.

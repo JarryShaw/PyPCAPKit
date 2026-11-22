@@ -31,12 +31,13 @@ from tests._support import purge_modules, reimport_once_per_class, sample_path
 THISZONE, SIGFIGS, SNAPLEN = -3600, 7, 1514
 
 
-def _extract(fin: str, fout: str, **kwargs):
+def _extract(fin: str, fout: str, *, files: bool = False):
+    from pcapkit.foundation.options import DumpOptions
     from pcapkit.interface import extract
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        return extract(fin=fin, fout=fout, nofile=False, format='pcap', **kwargs)
+        return extract(fin=fin, dump=DumpOptions(fout=fout, format='pcap', files=files))
 
 
 def _read(path: str) -> bytes:

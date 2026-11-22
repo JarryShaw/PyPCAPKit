@@ -48,7 +48,7 @@ with the cause and falls back to `pcapkit`'s own parser.
 
 ```python
 >>> import pcapkit
->>> extraction = pcapkit.extract('in.pcap', nofile=True)
+>>> extraction = pcapkit.extract('in.pcap')
 >>> len(extraction.frame)
 6
 >>> frame = extraction.frame[0]
@@ -62,14 +62,17 @@ IPv6Address('fe80::a6:87f9:2793:16ee')
 
 The output is from the committed `examples/captures/in.pcap`.
 
-Reassembly, TCP flow tracing and the engine are keyword arguments to the same call:
+Reassembly, TCP flow tracing, the engine and the output are keyword arguments to the
+same call; nothing is written unless `dump` asks for it:
 
 ```python
->>> scapy = pcapkit.extract('in.pcap', nofile=True, engine='scapy')
->>> reasm = pcapkit.extract('in.pcap', nofile=True, reassembly=True, ipv6=True)
->>> flows = pcapkit.extract('in.pcap', nofile=True, trace=True, tcp=True)
->>> len(flows.trace.tcp)
+>>> from pcapkit import DumpOptions
+>>> scapy = pcapkit.extract('in.pcap', engine='scapy')
+>>> reasm = pcapkit.extract('in.pcap', reassembly=['ipv6'])
+>>> flows = pcapkit.extract('in.pcap', traceflow=['tcp'])
+>>> len(flows.traceflow.tcp)
 2
+>>> report = pcapkit.extract('in.pcap', dump=DumpOptions(fout='out.json', format='json'))
 ```
 
 More examples, including the command line interface, are in

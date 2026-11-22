@@ -35,8 +35,7 @@ class GeneratedPcapRuntimeTests(unittest.TestCase):
                 / Raw(b'tcp-body'),
             ])
 
-            extractor = extract(fin=str(pcap_file), fout='/tmp/pypcapkit-generated',
-                                format='tree', store=True, nofile=True)
+            extractor = extract(fin=str(pcap_file), store=True)
             self.addCleanup(close_extractor, extractor)
 
             self.assertEqual(extractor.length, 2)
@@ -93,8 +92,7 @@ class GeneratedPcapRuntimeTests(unittest.TestCase):
                 / Raw(b'vlan'),
             ])
 
-            extractor = extract(fin=str(pcap_file), fout='/tmp/pypcapkit-generated-link',
-                                format='tree', store=True, nofile=True)
+            extractor = extract(fin=str(pcap_file), store=True)
             self.addCleanup(close_extractor, extractor)
 
             self.assertEqual(extractor.length, 2)

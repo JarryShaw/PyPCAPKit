@@ -169,8 +169,7 @@ class ShortReadRebuildTests(unittest.TestCase):
         """Message ``label`` read from a capture that holds all but ``cut`` octets of its frame."""
         proto, msg, _, name = CAPTURED[label]
         whole = wire.ethernet(wire.ipv4(msg, proto=proto), 0x0800)
-        frame, messages = self.parse(lambda: self.pcapkit.extract(
-            fin=io.BytesIO(pcap(whole[:len(whole) - cut], len(whole))), nofile=True).frame[0])
+        frame, messages = self.parse(lambda: self.pcapkit.extract(fin=io.BytesIO(pcap(whole[:len(whole) - cut], len(whole)))).frame[0])
         return frame[name], messages
 
     def assertRebuildsAsParsed(self, layer: 'Any') -> 'None':  # pylint: disable=invalid-name

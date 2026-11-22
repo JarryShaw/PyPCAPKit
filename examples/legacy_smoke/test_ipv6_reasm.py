@@ -8,8 +8,8 @@ import pcapkit
 os.system('> ../captures/out')  # nosec: B605 B607
 
 extraction = pcapkit.extract(
-    fin='../captures/ipv6.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
-    store=False, ipv6=True, verbose=True, reasm_strict=True, nofile=True, reassembly=True,
+    '../captures/ipv6.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
+    store=False, verbose=True, reassembly=['ipv6'],
 )
 # pprint.pprint(extraction.frame)
 

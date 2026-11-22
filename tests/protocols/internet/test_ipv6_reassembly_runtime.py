@@ -79,8 +79,7 @@ class IPv6ReassemblyRuntimeTests(unittest.TestCase):
         import pcapkit
 
         capture = write_pcap(self.tmp_path / 'synthetic.pcap', frames)
-        extractor = pcapkit.extract(fin=capture, nofile=True, store=False,
-                                    ipv6=True, reassembly=True, reasm_strict=True)
+        extractor = pcapkit.extract(fin=capture, store=False, reassembly=['ipv6'])
         self.addCleanup(close_extractor, extractor)
         return list(extractor.reassembly.ipv6)
 

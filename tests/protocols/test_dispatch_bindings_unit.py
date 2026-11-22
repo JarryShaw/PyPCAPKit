@@ -104,9 +104,8 @@ class DispatchBindingTests(unittest.TestCase):
         """Extract synthesised ``frames`` and return the frame list."""
         import pcapkit
 
-        extraction = pcapkit.extract(fin=make_pcap(self, *frames), nofile=True,
-                                     store=True, ip=True, tcp=True,
-                                     reassembly=True)
+        extraction = pcapkit.extract(fin=make_pcap(self, *frames), store=True,
+                                     reassembly=['ipv4', 'ipv6', 'tcp'])
         self.addCleanup(close_extractor, extraction)
         return extraction.frame
 

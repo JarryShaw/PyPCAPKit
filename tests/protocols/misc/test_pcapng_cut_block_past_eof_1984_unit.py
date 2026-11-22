@@ -77,8 +77,7 @@ class TestPCAPNGCutBlockPastEOF(PCAPNGTestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extraction = pcapkit.extract(fin=io.BytesIO(data), nofile=True, store=True,
-                                         engine='default')
+            extraction = pcapkit.extract(fin=io.BytesIO(data), store=True, engine='default')
         return ([bytes(frame.info.packet) for frame in extraction.frame],
                 [str(item.message) for item in caught])
 

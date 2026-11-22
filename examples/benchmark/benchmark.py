@@ -312,7 +312,7 @@ def _loader_failure(engine: 'str') -> 'Optional[str]':
 def _extract(engine: 'str', capture: 'str') -> 'Extractor':
     """One extraction, with the arguments the legacy timing script used.
 
-    ``store=False`` and ``nofile=True`` keep the measurement on parsing rather
+    ``store=False`` and no ``dump`` keep the measurement on parsing rather
     than on accumulating frames in memory or serialising them to disk.
 
     Args:
@@ -325,7 +325,7 @@ def _extract(engine: 'str', capture: 'str') -> 'Extractor':
     """
     import pcapkit  # pylint: disable=import-outside-toplevel
 
-    return pcapkit.extract(fin=capture, store=False, nofile=True, verbose=False,
+    return pcapkit.extract(fin=capture, store=False, verbose=False,
                            engine=engine)  # type: ignore[arg-type]
 
 

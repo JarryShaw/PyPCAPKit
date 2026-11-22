@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """``no_eof`` has to stop eventually -- #620.
 
-Without the fix, ``extract(..., no_eof=True)`` never returns. End of stream is
-detected correctly, and ``ExtractionWarning: EOF reached`` fires, but every loop
-that handles it reads
+Without the fix, ``extract(..., stream=StreamOptions(no_eof=True))`` never
+returns. End of stream is detected correctly, and ``ExtractionWarning: EOF
+reached`` fires, but every loop that handles it reads
 
 .. code-block:: python
 
@@ -21,7 +21,7 @@ that is over.
 
 Measured without the fix, which these tests reproduce:
 
-* ``extract(in.pcap, nofile=True)`` returns with 6 frames; adding
+* ``extract(in.pcap)`` returns with 6 frames; adding
   ``no_eof=True`` never returns, and ``faulthandler`` killed it at 10s with the
   stack in ``pcapkit/protocols/protocol.py`` ``__init__``.
 * The input's position at end of stream is *constant*: eight consecutive ends of
@@ -164,9 +164,10 @@ import sys, warnings
 sys.path.insert(0, {root!r})
 warnings.simplefilter('ignore')
 import pcapkit
+from pcapkit.foundation.options import StreamOptions
 assert pcapkit.__file__.startswith({root!r}), 'wrong tree: ' + pcapkit.__file__
 print('TREE ' + pcapkit.__file__, flush=True)
-pcapkit.extract(fin={capture!r}, nofile=True, store=False)
+pcapkit.extract(fin={capture!r}, store=False)
 print({ready!r}, flush=True)
 """
 
@@ -379,7 +380,7 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
     """
 
     def test_auto_extraction_with_no_eof_returns(self) -> None:
-        """``extract(..., no_eof=True)`` returns, with the same frames as without.
+        """``extract(..., stream=StreamOptions(no_eof=True))`` returns the frames it does without.
 
         The control matters as much as the subject: a fix that terminated by
         losing frames would beat the deadline and still be wrong, so the child
@@ -388,11 +389,11 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
         """
         output = self.run_bounded(f"""
             {self.CAPTURE}
-            control = pcapkit.extract(fin=capture, nofile=True, store=True)
+            control = pcapkit.extract(fin=capture, store=True)
             assert len(control.frame) == 6, len(control.frame)
 
-            subject = pcapkit.extract(fin=capture, nofile=True, store=True,
-                                      no_eof=True)
+            subject = pcapkit.extract(fin=capture, store=True,
+                                      stream=StreamOptions(no_eof=True))
             numbers = [frame.info.number for frame in subject.frame]
             assert numbers == [frame.info.number for frame in control.frame], numbers
             assert subject._flag_e, 'the EOF flag should have been set'
@@ -405,8 +406,8 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
         """Iterating an ``auto=False``, ``no_eof=True`` extractor ends."""
         output = self.run_bounded(f"""
             {self.CAPTURE}
-            extractor = pcapkit.extract(fin=capture, nofile=True, store=False,
-                                        auto=False, no_eof=True)
+            extractor = pcapkit.extract(fin=capture, store=False,
+                                        auto=False, stream=StreamOptions(no_eof=True))
             numbers = [frame.info.number for frame in extractor]
             assert numbers == [1, 2, 3, 4, 5, 6], numbers
             print('frames ' + repr(numbers), flush=True)
@@ -431,8 +432,8 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
         """
         self.run_bounded(f"""
             {self.CAPTURE}
-            extractor = pcapkit.extract(fin=capture, nofile=True, store=False,
-                                        auto=False, no_eof=True)
+            extractor = pcapkit.extract(fin=capture, store=False,
+                                        auto=False, stream=StreamOptions(no_eof=True))
             for _ in range(6):
                 extractor()
 
@@ -482,8 +483,8 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
             with open(capture, 'rb') as source:
                 payload = source.read()
 
-            extractor = pcapkit.extract(fin=io.BufferedReader(NonSeekableRaw(payload)),
-                                        nofile=True, store=True, no_eof=True)
+            extractor = pcapkit.extract(fin=io.BufferedReader(NonSeekableRaw(payload)), store=True,
+                                        stream=StreamOptions(no_eof=True))
             assert len(extractor.frame) == 6, len(extractor.frame)
             print({SENTINEL!r}, flush=True)
         """)
@@ -565,8 +566,8 @@ class NoEOFOverAGrowingFileStopsAtWhatIsThere(ChildBoundedTestCase):
 
                 extraction.warn = append_at_the_second_end_of_stream
 
-                extractor = pcapkit.extract(fin=path, nofile=True, store=False,
-                                            auto=False, no_eof=True)
+                extractor = pcapkit.extract(fin=path, store=False,
+                                            auto=False, stream=StreamOptions(no_eof=True))
                 numbers = [next(extractor).info.number for _ in range(5)]
                 assert not sizes, 'end of stream before five frames: ' + repr(sizes)
 

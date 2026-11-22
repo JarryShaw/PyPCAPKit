@@ -336,8 +336,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         import pcapkit
         from pcapkit.const.reg.linktype import LinkType
 
-        extraction = pcapkit.extract(fin=make_pcap(self, LinkType.IPV4, ipv4(89, ospf_hello())),
-                                     nofile=True, store=True, engine='pcapkit', **kwargs)
+        extraction = pcapkit.extract(fin=make_pcap(self, LinkType.IPV4, ipv4(89, ospf_hello())), store=True, engine='pcapkit', **kwargs)
         self.addCleanup(extraction.__del__)
         return extraction.frame[0]
 
@@ -392,8 +391,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
             with self.subTest(layer=layer):
                 kwargs = {} if layer is None else {'layer': layer}
                 extraction = pcapkit.extract(
-                    fin=make_pcap(self, LinkType.ETHERNET, frame_bytes),
-                    nofile=True, store=True, engine='pcapkit', **kwargs)
+                    fin=make_pcap(self, LinkType.ETHERNET, frame_bytes), store=True, engine='pcapkit', **kwargs)
                 self.addCleanup(extraction.__del__)
                 self.assertEqual(str(extraction.frame[0].protochain), chain)
 
@@ -406,8 +404,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         path = make_pcap(self, LinkType.IPV4, ipv4(6, tcp(50000, 20, b'binary-file-contents')))
         for layer in ('application', FTP_DATA):
             with self.subTest(layer=layer):
-                extraction = pcapkit.extract(fin=path, nofile=True, store=True,
-                                             engine='pcapkit', layer=layer)
+                extraction = pcapkit.extract(fin=path, store=True, engine='pcapkit', layer=layer)
                 self.addCleanup(extraction.__del__)
                 frame = extraction.frame[0]
                 self.assertEqual(str(frame.protochain), 'IPv4:TCP:FTP_DATA')

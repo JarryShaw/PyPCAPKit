@@ -125,8 +125,10 @@ class TestConstructorClosesEngine(unittest.TestCase):
 
     def trace_kwargs(self) -> 'dict[str, Any]':
         """Arguments enabling TCP flow tracing, writing under the test's own directory."""
-        return {'trace': True, 'tcp': True, 'trace_format': 'json',
-                'trace_fout': str(self.path.parent / 'trace')}
+        from pcapkit.foundation.options import TraceFlowOptions  # pylint: disable=import-outside-toplevel
+
+        return {'traceflow': TraceFlowOptions(protocols=['tcp'], format='json',
+                                              fout=str(self.path.parent / 'trace'))}
 
     def extract(self, fail_in: 'str', close_raises: 'bool' = False, **kwargs: 'Any'
                 ) -> 'tuple[BaseException, BaseException, list[str], list[io.BufferedReader]]':
@@ -144,7 +146,7 @@ class TestConstructorClosesEngine(unittest.TestCase):
                 mock.patch.object(extraction, 'open', recording_open, create=True), \
                 warnings.catch_warnings(), self.assertRaises(FormatError) as caught:
             warnings.simplefilter('ignore')
-            extraction.Extractor(fin=str(self.path), nofile=True, **kwargs)
+            extraction.Extractor(fin=str(self.path), **kwargs)
         return original, caught.exception, calls, handles
 
     def test_a_raising_run_closes_the_engine_and_keeps_its_error(self) -> None:
@@ -190,7 +192,7 @@ class TestConstructorClosesEngine(unittest.TestCase):
                 mock.patch.object(extraction, 'open', recording_open, create=True), \
                 warnings.catch_warnings(), self.assertRaises(FormatError) as caught:
             warnings.simplefilter('ignore')
-            extraction.Extractor(fin=str(self.path), nofile=True, **self.trace_kwargs())
+            extraction.Extractor(fin=str(self.path), **self.trace_kwargs())
 
         self.assertIn('unknown file format', str(caught.exception))
         self.assertEqual(spy.call_count, 1)
@@ -233,7 +235,7 @@ class TestConstructorClosesEngine(unittest.TestCase):
                         mock.patch.object(extraction, 'open', recording_open, create=True), \
                         warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    extractor: Any = extraction.Extractor(fin=str(self.path), nofile=True, auto=False,
+                    extractor: Any = extraction.Extractor(fin=str(self.path), auto=False,
                                                           **self.trace_kwargs())
                     if close_raises:
                         # ``__exit__`` lets the close's error out.

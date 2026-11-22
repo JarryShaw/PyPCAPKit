@@ -93,8 +93,7 @@ if spec['capture']:
                           for name in ('DTLS', 'FTP', 'FTP_DATA', 'HTTP', 'TLS', 'L2TPv2')],
         'compute': lambda: IPv4(src='10.0.0.1', dst='10.0.0.2', protocol=17,
                                 payload=UDP(srcport=1, dstport=2, payload=b'ab')),
-        'extract': lambda: pcapkit.extract(fin=spec['capture'], nofile=True, reassembly=True,
-                                           verbose=False),
+        'extract': lambda: pcapkit.extract(fin=spec['capture'], verbose=False),
     }
 
 jobs = [('attr',) + tuple(target) for target in spec['names']]

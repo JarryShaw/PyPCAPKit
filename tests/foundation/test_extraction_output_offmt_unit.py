@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Regression tests for three :class:`~pcapkit.foundation.extraction.Extractor` defects -- #1095.
 
-* :attr:`Extractor.output` on a ``nofile=True`` extractor named the wrong
+* :attr:`Extractor.output` on an extractor with no ``dump`` named the wrong
   attribute, ``format``, in its :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`.
 * :meth:`Extractor.make_name` subscripted the ``__output__`` defaultdict, so an
   unknown format was inserted into the registry before
@@ -21,6 +21,7 @@ import unittest
 import warnings
 
 from pcapkit.foundation.extraction import Extractor
+from pcapkit.foundation.options import DumpOptions
 from pcapkit.interface import extract
 from pcapkit.utilities.exceptions import FormatError, UnsupportedCall
 from tests._support import sample_path
@@ -31,15 +32,15 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 class OutputMessageTests(unittest.TestCase):
     """:attr:`Extractor.output` names itself when output is disabled."""
 
-    def test_nofile_output_names_output(self) -> None:
+    def test_undumped_output_names_output(self) -> None:
         """The :exc:`UnsupportedCall` message names ``output``, not ``format``."""
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=sample_path('in.pcap'), nofile=True)
+            extractor = extract(fin=sample_path('in.pcap'))
         with self.assertRaises(UnsupportedCall) as ctx:
             extractor.output  # pylint: disable=pointless-statement
         self.assertEqual(str(ctx.exception),
-                         "'Extractor(nofile=True)' object has no attribute 'output'")
+                         "'Extractor(dump=None)' object has no attribute 'output'")
 
 
 class MakeNameRegistryTests(unittest.TestCase):
@@ -50,7 +51,7 @@ class MakeNameRegistryTests(unittest.TestCase):
         before = set(Extractor.__output__)
         self.assertNotIn('bogus-1095', before)
         with self.assertRaises(FormatError):
-            Extractor.make_name(sample_path('in.pcap'), None, 'bogus-1095', nofile=False)
+            Extractor.make_name(sample_path('in.pcap'), DumpOptions(fout='out', format='bogus-1095'))
         self.assertEqual(set(Extractor.__output__), before)
 
 
@@ -62,8 +63,9 @@ class ScapyFormatTests(unittest.TestCase):
         """:attr:`Extractor.format` reads back the requested format."""
         with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=sample_path('in.pcap'), fout=os.path.join(tmp, 'out'),
-                                engine='scapy', format='json', nofile=False)
+            extractor = extract(fin=sample_path('in.pcap'),
+                                dump=DumpOptions(fout=os.path.join(tmp, 'out'), format='json'),
+                                engine='scapy')
             self.assertEqual(extractor.format, 'json')
 
 

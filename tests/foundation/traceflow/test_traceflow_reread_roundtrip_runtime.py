@@ -55,6 +55,7 @@ def _record(frame: 'object') -> 'tuple[decimal.Decimal, int, int, bytes]':
 def run_capture(name: 'str') -> 'Outcome':
     """Trace one capture to PCAP and read every flow back."""
     from pcapkit import extract
+    from pcapkit.foundation.options import TraceFlowOptions
 
     path = sample_path(name)
     with open(path, 'rb') as file:
@@ -69,15 +70,15 @@ def run_capture(name: 'str') -> 'Outcome':
     with warnings.catch_warnings(), tempfile.TemporaryDirectory() as tracedir:
         warnings.simplefilter('ignore')
         try:
-            extractor = extract(fin=path, nofile=True, store=True, trace=True, tcp=True,
-                                trace_fout=tracedir, trace_format='pcap',
-                                trace_byteorder=order, trace_nanosecond=nsec)
+            extractor = extract(fin=path, store=True,
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=tracedir, format='pcap',
+                                                           byteorder=order, nanosecond=nsec))
         except Exception as exc:  # pylint: disable=broad-except
             return Outcome('ERROR', f'{type(exc).__name__}: {exc}')
         close_extractor(extractor)
         frames = {frame.info.number: frame for frame in extractor.frame}
         scale = decimal.Decimal(10) ** (9 if nsec else 6)
-        for flow in extractor.trace.tcp:
+        for flow in extractor.traceflow.tcp:
             with open(flow.fpout, 'rb') as file:
                 written = read_pcap(file.read())
             if (written.byteorder, written.nanosecond) != (order, nsec):

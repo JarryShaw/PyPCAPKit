@@ -304,7 +304,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
         messages = [call.args[0] for call in warn.call_args_list
                     if call.args[1] is AttributeWarning]
-        self.assertTrue(any("'ipv6=True' will be ignored" in message for message in messages),
+        self.assertTrue(any("reassembly; so 'ipv6' will be ignored" in message for message in messages),
                         messages)
 
         self.assertTrue(extractor._flag_r)
@@ -323,7 +323,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
         messages = [call.args[0] for call in warn.call_args_list
                     if call.args[1] is AttributeWarning]
-        self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages),
+        self.assertTrue(any("reassembly; so 'dtls' will be ignored" in message for message in messages),
                         messages)
         self.assertTrue(extractor._flag_r)
         self.assertEqual(list(extractor._reasm), ['ipv4', 'tcp'])

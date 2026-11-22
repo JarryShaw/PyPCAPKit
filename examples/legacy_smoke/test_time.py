@@ -38,7 +38,7 @@ for engine in ENGINES:
         # backwards under an NTP adjustment, which would give a negative delta.
         now = time.perf_counter_ns()
 
-        extraction = pcapkit.extract(fin='../captures/in.pcap', store=False, nofile=True, verbose=False, engine=engine)  # type: ignore[arg-type]
+        extraction = pcapkit.extract(fin='../captures/in.pcap', store=False, verbose=False, engine=engine)  # type: ignore[arg-type]
 
         delta = time.perf_counter_ns() - now
         # print(f'[{engine}] No. {index:>3d}: {extraction.length} packets extracted in {delta} seconds.')

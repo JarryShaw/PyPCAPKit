@@ -2,7 +2,7 @@
 """A PCAP dumper writes each record's fraction in its own file's resolution. C.f. #1500.
 
 :class:`~pcapkit.dumpkit.pcap.PCAPIO` wrote a frame's ``ts_usec`` unscaled, so a
-microsecond capture traced with ``trace_nanosecond=True`` -- or a nanosecond one
+microsecond capture traced with ``nanosecond=True`` -- or a nanosecond one
 traced without it -- wrote every fraction 1000 times off. A frame converted from
 PCAP-NG (:func:`~pcapkit.toolkit.pcapng.block2frame`) carries its interface's
 resolution and was written the same way.
@@ -81,7 +81,7 @@ class TestPCAPTraceResolution(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=io.BytesIO(data), nofile=True, store=True)
+            extractor = extract(fin=io.BytesIO(data), store=True)
         close_extractor(extractor)
         return list(extractor.frame)
 
@@ -148,6 +148,7 @@ class TestPCAPTraceResolution(unittest.TestCase):
     def test_a_trace_reads_back_as_its_source_frames(self) -> None:
         """#1500: a flow traced at either resolution re-reads as its frames' timestamps."""
         from pcapkit import extract
+        from pcapkit.foundation.options import TraceFlowOptions
 
         for container, build in (('pcap', pcap), ('pcapng', pcapng)):
             for in_nsec in (False, True):
@@ -159,11 +160,11 @@ class TestPCAPTraceResolution(unittest.TestCase):
                         tracedir = tempfile.mkdtemp(dir=self.tmpdir.name)
                         with warnings.catch_warnings():
                             warnings.simplefilter('ignore')
-                            extractor = extract(fin=io.BytesIO(data), nofile=True, store=False,
-                                                trace=True, tcp=True, trace_fout=tracedir,
-                                                trace_format='pcap', trace_nanosecond=out_nsec)
+                            extractor = extract(fin=io.BytesIO(data), store=False,
+                                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=tracedir,
+                                                                           format='pcap', nanosecond=out_nsec))
                         close_extractor(extractor)
-                        flows = list(extractor.trace.tcp)
+                        flows = list(extractor.traceflow.tcp)
                         self.assertEqual([list(flow.index) for flow in flows],
                                          [list(range(1, len(records) + 1))])
                         self.check(flows[0].fpout, records, in_nsec, out_nsec)

@@ -67,9 +67,11 @@ class DeferredPacketTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _datagram(self, write: 'Any', records: 'list[bytes]', **kwargs: 'Any') -> 'Any':
+    def _datagram(self, write: 'Any', records: 'list[bytes]', *, strict: 'bool' = True) -> 'Any':
+        from pcapkit.foundation.options import ReassemblyOptions
+
         extractor = _extract(self, write([_frame(record) for record in records]),
-                             reassembly=True, dtls=True, **kwargs)
+                             reassembly=ReassemblyOptions(protocols=['dtls'], strict=strict))
         datagram, = extractor.reassembly.dtls
         return datagram
 
@@ -120,7 +122,7 @@ class DeferredPacketTests(unittest.TestCase):
         for container, write in CONTAINERS:
             for strict in (True, False):
                 with self.subTest(container=container, strict=strict):
-                    datagram = self._datagram(write, INCOMPLETE, reasm_strict=strict)
+                    datagram = self._datagram(write, INCOMPLETE, strict=strict)
                     self.assertEqual(datagram.completed.name, 'PARTIAL')
                     self.assertIsInstance(datagram.body, tuple if strict else bytes)
                     self.assertIsNone(_held(datagram))
@@ -152,7 +154,7 @@ class ProtocolTypeTests(unittest.TestCase):
         for container, write in CONTAINERS:
             with self.subTest(container=container):
                 extractor = _extract(self, write([_frame(record) for record in COMPLETE]),
-                                     reassembly=True, dtls=True)
+                                     reassembly=['dtls'])
                 engine = type(extractor._reasm.dtls)
                 self.assertIs(vars(engine).get('__protocol_type__'), DTLS)
                 self.assertIs(engine.protocol, DTLS)
@@ -165,7 +167,7 @@ class ProtocolTypeTests(unittest.TestCase):
         for container, write in CONTAINERS:
             with self.subTest(container=container):
                 extractor = _extract(self, write([_frame(record) for record in COMPLETE]),
-                                     reassembly=True, ip=True, tcp=True, dtls=True)
+                                     reassembly=['ipv4', 'ipv6', 'tcp', 'dtls'])
                 with mock.patch.dict(ProtocolBase.__registry__):
                     for name in ('IPV4', 'TCP', 'DTLS'):
                         del ProtocolBase.__registry__[name]

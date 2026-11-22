@@ -54,8 +54,7 @@ class TestDPKTRawAndLoopback(unittest.TestCase):
             file.write(_pcap(linktype, records))
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            return pcapkit.extract(fin=path, engine=engine, nofile=True, store=True,
-                                   reassembly=True, ip=True)
+            return pcapkit.extract(fin=path, engine=engine, store=True, reassembly=['ipv4', 'ipv6'])
 
     def test_frames_parse_into_their_network_layer(self) -> None:
         import dpkt

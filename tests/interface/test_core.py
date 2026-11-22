@@ -115,7 +115,8 @@ class InterfaceCoreTests(unittest.TestCase):
             # NOTE: ``reassemble`` reaches every reassembler through this one lookup (#2814).
             __reassembly__ = {name.lower(): make_reassembly(name) for name in ('IPv4', 'IPv6', 'TCP')}
 
-            def __init__(self, **kwargs):
+            def __init__(self, fin, **kwargs):
+                self.fin = fin
                 self.kwargs = kwargs
 
             @classmethod
@@ -126,6 +127,12 @@ class InterfaceCoreTests(unittest.TestCase):
 
         foundation_extraction.Extractor = Extractor
         sys.modules['pcapkit.foundation.extraction'] = foundation_extraction
+
+        # NOTE: the options classes ``pcapkit.interface`` re-exports (#2836).
+        foundation_options = types.ModuleType('pcapkit.foundation.options')
+        for name in ('DumpOptions', 'ReassemblyOptions', 'TraceFlowOptions', 'StreamOptions'):
+            setattr(foundation_options, name, type(name, (), {}))
+        sys.modules['pcapkit.foundation.options'] = foundation_options
 
         def make_trace(name):
             class TraceFlow:
@@ -158,17 +165,23 @@ class InterfaceCoreTests(unittest.TestCase):
 
         return load_module('pcapkit.interface.core', 'pcapkit/interface/core.py'), ProtocolBase
 
-    def test_extract_converts_protocol_type_layer(self) -> None:
+    def test_extract_forwards_each_parameter_as_given(self) -> None:
+        # ``extract`` takes exactly ``Extractor``'s parameters (#2836) and passes
+        # each on by name; ``Extractor`` reads a protocol class given as ``layer``.
+        import inspect
+
         module, ProtocolBase = self._load_module()
 
         class DemoProtocol(ProtocolBase):
             __layer__ = 'internet'
 
-        extractor = module.extract(fin=sample_path('in.pcap'), layer=DemoProtocol, store=False)
-        self.assertEqual(extractor.kwargs['layer'], 'internet')
+        extractor = module.extract(sample_path('in.pcap'), layer=DemoProtocol, store=False)
+        self.assertEqual(extractor.fin, sample_path('in.pcap'))
+        self.assertIs(extractor.kwargs['layer'], DemoProtocol)
         self.assertFalse(extractor.kwargs['store'])
+        self.assertEqual(set(extractor.kwargs), set(inspect.signature(module.extract).parameters) - {'fin'})
 
-        extractor = module.extract(fin=sample_path('in.pcap'), layer='link', store=True)
+        extractor = module.extract(sample_path('in.pcap'), layer='link', store=True)
         self.assertEqual(extractor.kwargs['layer'], 'link')
         self.assertTrue(extractor.kwargs['store'])
 
@@ -288,8 +301,7 @@ class EngineConstantTests(unittest.TestCase):
             # An engine that cannot run warns and falls back; the caller asserts on
             # which engine ran, so the warning itself is noise here.
             warnings.simplefilter('ignore')
-            return pcapkit.extract(fin=sample_path('in.pcap'), engine=engine,
-                                   store=True, nofile=True)
+            return pcapkit.extract(fin=sample_path('in.pcap'), engine=engine, store=True)
 
     def _assert_selects(self, constant: str) -> None:
         from pcapkit.interface import core

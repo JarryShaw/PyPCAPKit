@@ -18,6 +18,7 @@ import unittest
 import warnings
 
 from pcapkit.interface import extract
+from pcapkit.foundation.options import DumpOptions
 from tests._support import sample_path
 from tests.foundation.engines.test_pcapng_engine import PCAPNGWriter
 
@@ -70,14 +71,14 @@ def dumped(path: str) -> tuple[list[str], list[str]]:
     with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings():
         warnings.simplefilter('ignore')
         out = os.path.join(tmp, 'out.json')
-        extract(fin=path, fout=out, format='json', store=False, extension=False,
+        extract(fin=path, dump=DumpOptions(fout=out, format='json', extension=False), store=False,
                 engine='pcapkit')
         with open(out, encoding='utf-8') as file:
             keys = [key for key, _ in json.load(file, object_pairs_hook=lambda pairs: pairs)]
 
         folder = os.path.join(tmp, 'blocks')
-        extract(fin=path, fout=folder, format='json', store=False, extension=False,
-                files=True, engine='pcapkit')
+        extract(fin=path, dump=DumpOptions(fout=folder, format='json', files=True, extension=False),
+                store=False, engine='pcapkit')
         files = sorted(os.listdir(folder))
     return keys, files
 

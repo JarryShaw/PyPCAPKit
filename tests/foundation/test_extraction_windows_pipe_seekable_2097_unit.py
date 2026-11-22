@@ -81,7 +81,7 @@ class TestPipeClaimingToSeek(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = pcapkit.extract(fin=fin, nofile=True)
+            extractor = pcapkit.extract(fin=fin)
         return [bytes(frame) for frame in extractor.frame]  # type: ignore[attr-defined]
 
     def by_pipe(self, data: 'bytes', buffered: 'bool') -> 'list[bytes]':
@@ -124,11 +124,11 @@ class TestPipeClaimingToSeek(unittest.TestCase):
             path.write_bytes(data)
             with open(path, 'rb') as file, warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                extractor = pcapkit.extract(fin=file, nofile=True)
+                extractor = pcapkit.extract(fin=file)
                 self.assertIs(extractor._ifile, file)  # pylint: disable=protected-access
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                extractor = pcapkit.extract(fin=io.BytesIO(data), nofile=True)
+                extractor = pcapkit.extract(fin=io.BytesIO(data))
             self.assertNotIsInstance(extractor._ifile, SeekableReader)  # pylint: disable=protected-access
             self.assertEqual(len(extractor.frame), 3)  # type: ignore[attr-defined]
 

@@ -35,10 +35,11 @@ def _current(module: str, name: str):
     return getattr(importlib.import_module(module), name)
 
 
-def _extract(fin: str, fout: str, **kwargs):
+def _extract(fin: str, fout: str, *, format: str, files: bool = False, **kwargs):  # pylint: disable=redefined-builtin
+    dump = _current('pcapkit.foundation.extraction', 'DumpOptions')(fout=fout, format=format, files=files)
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        return _current('pcapkit.interface', 'extract')(fin=fin, fout=fout, nofile=False, **kwargs)
+        return _current('pcapkit.interface', 'extract')(fin=fin, dump=dump, **kwargs)
 
 
 def _read(path: str) -> bytes:
@@ -99,10 +100,11 @@ class ThirdPartyEngineTests(unittest.TestCase):
     def _check(self, engine: str) -> None:
         extract = _current('pcapkit.interface', 'extract')
         with tempfile.TemporaryDirectory() as tmp:
+            dump = _current('pcapkit.foundation.extraction', 'DumpOptions')(fout=os.path.join(tmp, 'out'),
+                                                                            format='pcap')
             with self.assertWarnsRegex(_current('pcapkit.utilities.warnings', 'FormatWarning'),
-                                       "does not support 'format=pcap'"):
-                extractor = extract(fin=sample_path('in.pcap'), fout=os.path.join(tmp, 'out'),
-                                    format='pcap', engine=engine, nofile=False)
+                                       "does not support output format 'pcap'"):
+                extractor = extract(fin=sample_path('in.pcap'), dump=dump, engine=engine)
             self.assertEqual(extractor.format, 'json')
             with open(extractor.output, encoding='utf-8') as file:
                 self.assertEqual(list(json.load(file))[0], 'Global Header')

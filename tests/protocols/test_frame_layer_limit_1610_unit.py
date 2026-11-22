@@ -305,8 +305,7 @@ class FrameLayerLimitTests(unittest.TestCase):
                                  for number, count in enumerate(lengths))
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=io.BytesIO(data), nofile=True, engine='default',
-                                reassembly=True, tcp=True)
+            extractor = extract(fin=io.BytesIO(data), engine='default', reassembly=['tcp'])
         close_extractor(extractor)
         self.assertEqual(['TCP' in frame for frame in extractor.frame], [True, False, True, False, True])
         self.assertEqual(sorted(datagram.index[0] for datagram in extractor.reassembly.tcp), [1, 3, 5])

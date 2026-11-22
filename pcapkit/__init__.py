@@ -65,6 +65,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # Interface Functions
+    'DumpOptions', 'ReassemblyOptions',                     # Extraction Options
+    'TraceFlowOptions', 'StreamOptions',                    # Extraction Options
 
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros

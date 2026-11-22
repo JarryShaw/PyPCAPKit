@@ -350,7 +350,7 @@ class PCAPNGSectionRuleTests(unittest.TestCase):
         try:
             with os.fdopen(handle, 'wb') as file:
                 file.write(bytes(capture))
-            return extract(fin=path, store=True, nofile=True)
+            return extract(fin=path, store=True)
         finally:
             os.unlink(path)
 

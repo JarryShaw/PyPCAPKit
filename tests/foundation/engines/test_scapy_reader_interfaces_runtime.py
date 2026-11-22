@@ -123,7 +123,7 @@ class ScapyReaderInterfaceTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=fin, engine=engine, nofile=True, **kwargs)
+            extractor = extract(fin=fin, engine=engine, **kwargs)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
@@ -136,17 +136,22 @@ class ScapyReaderInterfaceTests(unittest.TestCase):
 
     def _assert_traces_agree(self, fin: 'str') -> 'list[tuple[str, tuple, bytes]]':
         """Trace both engines as PCAP and as JSON; return the default engine's PCAP flows."""
+
+        from pcapkit.foundation.options import TraceFlowOptions
+
         result = []  # type: list[tuple[str, tuple, bytes]]
         for trace_format in ('pcap', 'json'):
             for nanosecond in (False, True):
                 with self.subTest(trace_format=trace_format, nanosecond=nanosecond):
                     flows = {}
                     for engine in ('default', 'scapy'):
-                        extractor = self._extract(fin, engine, tcp=True, trace=True, trace_format=trace_format,
-                                                  trace_fout=tempfile.mkdtemp(dir=self.tmp),
-                                                  trace_nanosecond=nanosecond)
+                        extractor = self._extract(fin, engine,
+                                                  traceflow=TraceFlowOptions(protocols=['tcp'],
+                                                                             fout=tempfile.mkdtemp(dir=self.tmp),
+                                                                             format=trace_format,
+                                                                             nanosecond=nanosecond))
                         flows[engine] = []
-                        for flow in extractor.trace.tcp:
+                        for flow in extractor.traceflow.tcp:
                             with open(flow.fpout, 'rb') as file:
                                 flows[engine].append((flow.label, tuple(flow.index), file.read()))
                     self.assertEqual([index for _, index, _ in flows['default']], FLOWS)
@@ -248,6 +253,8 @@ class ScapyReaderInterfaceTests(unittest.TestCase):
 
     def test_a_raw_ipv4_pcap_traces_by_its_link_type(self) -> None:
         # #1517, in a PCAP: the global header's link type, for its IPv4 frames only
+        from pcapkit.foundation.options import TraceFlowOptions
+
         with open(sample_path('tcp.pcap'), 'rb') as file:
             header = file.read(24)
         out = [header[:20] + struct.pack('<I', IPV4)]
@@ -258,10 +265,11 @@ class ScapyReaderInterfaceTests(unittest.TestCase):
 
         flows = {}
         for engine in ('default', 'scapy'):
-            extractor = self._extract(fin, engine, tcp=True, trace=True, trace_format='pcap',
-                                      trace_fout=tempfile.mkdtemp(dir=self.tmp))
+            extractor = self._extract(fin, engine,
+                                      traceflow=TraceFlowOptions(protocols=['tcp'],
+                                                                 fout=tempfile.mkdtemp(dir=self.tmp), format='pcap'))
             flows[engine] = []
-            for flow in extractor.trace.tcp:
+            for flow in extractor.traceflow.tcp:
                 with open(flow.fpout, 'rb') as file:
                     flows[engine].append((flow.label, tuple(flow.index), file.read()))
         self.assertEqual([index for _, index, _ in flows['default']], [(1, 2, 3, 4)])

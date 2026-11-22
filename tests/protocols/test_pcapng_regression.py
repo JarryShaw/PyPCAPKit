@@ -39,19 +39,19 @@ class PcapngRegressionTests(unittest.TestCase):
     def test_dhcp_pcapng_extracts_successfully(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('dhcp.pcapng'), fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('dhcp.pcapng'), store=True)
         self.assertGreater(extractor.length, 0)
 
     def test_dhcp_big_endian_pcapng_extracts_successfully(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('dhcp_big_endian.pcapng'), fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('dhcp_big_endian.pcapng'), store=True)
         self.assertGreater(extractor.length, 0)
 
     def test_dhcp_little_endian_pcapng_extracts_successfully(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('dhcp_little_endian.pcapng'), fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('dhcp_little_endian.pcapng'), store=True)
         self.assertGreater(extractor.length, 0)
 
     def test_additional_pcapng_samples_extract_successfully(self) -> None:
@@ -64,7 +64,7 @@ class PcapngRegressionTests(unittest.TestCase):
         )
         for sample in samples:
             with self.subTest(sample=sample):
-                extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=True, nofile=True)
+                extractor = extract(fin=sample_path(sample), store=True)
                 self.assertGreater(extractor.length, 0)
 
 
@@ -218,7 +218,7 @@ class PcapngPayloadOctetsTests(unittest.TestCase):
             # The obsolete Packet Block warns twice by design, and a capture ending
             # at its last block warns ``EOF reached``; neither is under test here.
             warnings.simplefilter('ignore')
-            extractor = extract(fin=path, store=True, nofile=True)
+            extractor = extract(fin=path, store=True)
         self.addCleanup(close_extractor, extractor)
         return extractor
 

@@ -170,7 +170,7 @@ class DPKTReassemblyRawBytesTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = pcapkit.extract(fin=path, nofile=True, store=True, engine=engine)
+            extractor = pcapkit.extract(fin=path, store=True, engine=engine)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
@@ -441,8 +441,8 @@ class DPKTVLANStackTests(unittest.TestCase):
                 self.addCleanup(os.remove, path)
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    extractor = pcapkit.extract(fin=path, nofile=True, store=True, engine='dpkt',
-                                                reassembly=True, ipv4=True, tcp=True)
+                    extractor = pcapkit.extract(fin=path, store=True, engine='dpkt',
+                                                reassembly=['ipv4', 'tcp'])
                 self.addCleanup(close_extractor, extractor)
                 self.assertEqual(len(extractor.frame), 2)
                 tagged = extractor.frame[0]

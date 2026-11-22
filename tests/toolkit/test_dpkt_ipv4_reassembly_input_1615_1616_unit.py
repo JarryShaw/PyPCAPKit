@@ -72,7 +72,7 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]') -> 'dict[s
         with open(path, 'wb') as file:
             file.write(wire.pcap([(1, number, octets) for number, octets in enumerate(frames)]))
         warnings.simplefilter('ignore')
-        extractor = extract(fin=path, nofile=True, engine=engine, reassembly=True, ipv4=True)
+        extractor = extract(fin=path, engine=engine, reassembly=['ipv4'])
         try:
             if extractor._exnam != engine:  # pylint: disable=protected-access
                 test.skipTest(f'{engine} did not run')

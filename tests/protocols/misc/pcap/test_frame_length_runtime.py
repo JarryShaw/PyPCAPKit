@@ -183,7 +183,7 @@ class PcapFrameLengthRuntimeTests(unittest.TestCase):
         path = sample_path(name)
         with open(path, 'rb') as stream:
             raw = stream.read()
-        return raw, list(extract(fin=path, store=True, nofile=True).frame)
+        return raw, list(extract(fin=path, store=True).frame)
 
     def test_the_fixture_really_holds_a_truncated_frame(self) -> None:
         """The premise every other test here rests on.
@@ -295,7 +295,7 @@ class PcapngFrameLengthRuntimeTests(unittest.TestCase):
         with open(path, 'rb') as stream:
             raw = stream.read()
 
-        blocks = [frame.info for frame in extract(fin=path, store=True, nofile=True).frame
+        blocks = [frame.info for frame in extract(fin=path, store=True).frame
                   if hasattr(frame.info, 'captured_len')]
         return raw, blocks
 
@@ -373,11 +373,9 @@ class ReadersAgreeRuntimeTests(unittest.TestCase):
         from pcapkit.toolkit.pcapng import block2frame
 
         pcap = [frame.info for frame
-                in extract(fin=sample_path('big_endian.pcap'),
-                           store=True, nofile=True).frame]
+                in extract(fin=sample_path('big_endian.pcap'), store=True).frame]
         pcapng = [block2frame(frame.info) for frame
-                  in extract(fin=sample_path('test.pcapng'),
-                             store=True, nofile=True).frame
+                  in extract(fin=sample_path('test.pcapng'), store=True).frame
                   if hasattr(frame.info, 'captured_len')]
 
         truncated = [frame for frame in pcap + pcapng if frame.len != frame.cap_len]

@@ -970,6 +970,7 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_extract_end_to_end_with_context(self) -> None:
         import pcapkit
+        from pcapkit.foundation.options import DumpOptions
         from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
@@ -980,7 +981,7 @@ class ESPProtocolTests(unittest.TestCase):
         sa = SecurityAssociation(spi=0x8765, encryption=Cipher.AES_CBC,
                                  encryption_key=CASE7_KEY,
                                  destination='192.168.123.200')
-        extraction = pcapkit.extract(fin=path, fout=output, format='tree',
+        extraction = pcapkit.extract(fin=path, dump=DumpOptions(fout=output, format='tree'),
                                      context=ESPContext(sa))
         try:
             frame = extraction.frame[0]
@@ -1000,7 +1001,7 @@ class ESPProtocolTests(unittest.TestCase):
         self.assertNotIn('encryption_key', text)
 
         # without the context, the same capture still extracts
-        extraction = pcapkit.extract(fin=path, nofile=True)
+        extraction = pcapkit.extract(fin=path)
         try:
             frame = extraction.frame[0]
             self.assertEqual(str(frame.protochain), 'Ethernet:IPv4:ESP:Raw')

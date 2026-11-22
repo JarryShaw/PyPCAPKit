@@ -42,6 +42,7 @@ import pathlib
 import re
 import sys
 import types
+import typing
 import unittest
 from unittest import mock
 
@@ -153,20 +154,35 @@ class CLIMainTests(unittest.TestCase):
 
         extraction_module = types.ModuleType('pcapkit.foundation.extraction')
 
+        class Options:
+            def __init__(self, **kwargs):
+                self.__dict__.update(kwargs)
+
         class Extractor:
+            PCAP_EXT = ['.pcap', '.cap', '.pcapng']
             created = []
 
-            def __init__(self, **kwargs):
-                self.kwargs = kwargs
-                self.input = kwargs['fin']
-                self.output = kwargs['fout']
+            def __init__(self, fin, **kwargs):
+                # the ``dump`` and ``stream`` settings are read back by field name
+                self.kwargs = dict(kwargs, fin=fin)
+                for options in (kwargs.get('dump'), kwargs.get('stream')):
+                    if options is not None:
+                        self.kwargs.update(vars(options))
+                self.input = fin
+                self.output = self.kwargs['fout']
                 type(self).created.append(self)
 
             def __iter__(self):
                 return iter([1, 2])
 
         extraction_module.Extractor = Extractor
+        extraction_module.Layers = typing.Literal['link', 'internet', 'transport', 'application', 'none']
         sys.modules['pcapkit.foundation.extraction'] = extraction_module
+
+        options_module = types.ModuleType('pcapkit.foundation.options')
+        options_module.DumpOptions = type('DumpOptions', (Options,), {})
+        options_module.StreamOptions = type('StreamOptions', (Options,), {})
+        sys.modules['pcapkit.foundation.options'] = options_module
 
         interface_module = types.ModuleType('pcapkit.interface')
         interface_module.JSON = 'JSON'
@@ -222,7 +238,7 @@ class CLIMainTests(unittest.TestCase):
         and read "The name of input pcap file", so ``--help`` said ``-o`` named
         the file being *read*. It also said the extension is always appended,
         but :func:`~pcapkit.__main__.main` forwards ``-a``/``--auto-extension``
-        as ``Extractor(extension=...)``, which is off by default.
+        as ``DumpOptions(extension=...)``, which is off by default.
 
         """
         emoji = types.SimpleNamespace(emojize=lambda text: text)
@@ -236,7 +252,7 @@ class CLIMainTests(unittest.TestCase):
         text = action.help.lower()
         self.assertIn('output', text)
         self.assertNotIn('input', text)
-        # ``Extractor.__init__`` substitutes "out" for an omitted ``fout``.
+        # ``main`` substitutes "out" for an omitted ``fout``.
         self.assertIn('"out"', text)
         # The extension depends on ``-a``, and ``-F`` makes ``fout`` a directory.
         self.assertIn('--auto-extension', text)
@@ -246,10 +262,9 @@ class CLIMainTests(unittest.TestCase):
         """``input-file-name``'s help appends ``.pcap`` only under ``-a``.
 
         Issue #1796: the help said ".pcap" is always appended when omitted, but
-        :meth:`~pcapkit.foundation.extraction.Extractor.make_name` appends it
-        only with ``extension=True`` -- ``-a`` -- and then unless the name
-        already ends in one of ``Extractor.PCAP_EXT``. Without ``-a``,
-        ``pcapkit-cli in`` fails with ``FileNotFound`` for ``in``.
+        :func:`~pcapkit.__main__.main` appends it only under ``-a``, and then
+        unless the name already ends in one of ``Extractor.PCAP_EXT``. Without
+        ``-a``, ``pcapkit-cli in`` fails with ``FileNotFound`` for ``in``.
 
         """
         emoji = types.SimpleNamespace(emojize=lambda text: text)
@@ -269,11 +284,10 @@ class CLIMainTests(unittest.TestCase):
     def test_auto_extension_help_covers_input_and_output(self) -> None:
         """``-a``'s help names the input extension as well as the output one.
 
-        Issue #1796: the help mentioned only the output file, but ``-a`` is
-        forwarded as ``Extractor(extension=...)``, which
-        :meth:`~pcapkit.foundation.extraction.Extractor.make_name` applies to
-        the input name too -- and not to ``fout`` under ``-F``, where it is a
-        directory.
+        Issue #1796: the help mentioned only the output file, but ``-a`` names
+        the input too, as :func:`~pcapkit.__main__.main` appends ``.pcap`` to it,
+        and :meth:`~pcapkit.foundation.extraction.Extractor.make_name` does not
+        apply it to ``fout`` under ``-F``, where it is a directory.
 
         """
         emoji = types.SimpleNamespace(emojize=lambda text: text)
@@ -348,8 +362,7 @@ class CLIMainTests(unittest.TestCase):
         which include ``pcap``, a :mod:`pcapkit.dumpkit` writer, and it said
         nothing of ``-j``/``-p``/``-t``, which :func:`~pcapkit.__main__.main`
         consults only when ``--format`` is not given. With no format option at
-        all ``main`` forwards :data:`None`, and ``Extractor.__init__``
-        substitutes ``tree``.
+        all ``main`` forwards ``tree``.
 
         """
         emoji = types.SimpleNamespace(emojize=lambda text: text)
@@ -479,7 +492,27 @@ class CLIMainTests(unittest.TestCase):
         self.assertEqual(created.kwargs['format'], 'TREE')
         output = fake_stdout.getvalue()
         self.assertIn("[*] Loading file 'capture.pcap'", output)
-        self.assertIn('[*] Report file stored in None', output)
+        self.assertIn("[*] Report file stored in 'out'", output)
+
+    def test_auto_extension_appends_pcap_to_the_input_name(self) -> None:
+        """``-a`` names the input as before, since ``Extractor`` opens ``fin`` as named.
+
+        Issue #2836 stopped ``Extractor`` appending ``.pcap`` to ``fin``, so
+        :func:`~pcapkit.__main__.main` appends it, under ``-a`` alone and unless
+        the name already ends in one of ``Extractor.PCAP_EXT``.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, extractor_cls, _ = self._load_cli_module(emoji_module=emoji)
+
+        for argv, fin in ((['capture', '-a'], 'capture.pcap'), (['capture.cap', '-a'], 'capture.cap'),
+                          (['capture.pcapng', '-a'], 'capture.pcapng'), (['capture'], 'capture')):
+            with self.subTest(argv=argv), mock.patch.object(sys, 'argv', ['pcapkit-cli', *argv]):
+                self.assertEqual(module.main(), 0)
+                created = extractor_cls.created[-1]
+                self.assertEqual(created.kwargs['fin'], fin)
+                self.assertEqual(created.kwargs['extension'], '-a' in argv)
+                self.assertEqual((created.kwargs['fout'], created.kwargs['format']), ('out', 'TREE'))
 
 
 if __name__ == '__main__':

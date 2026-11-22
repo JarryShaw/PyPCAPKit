@@ -156,7 +156,7 @@ class ExtractorTests(unittest.TestCase):
         self.assertEqual(extractor.reassembly.ipv6, ('ipv6',))
         self.assertEqual(extractor.reassembly.tcp, ('tcp',))
         self.assertEqual(extractor.reassembly.dtls, ('dtls',))
-        self.assertEqual(extractor.trace.tcp, ('trace',))
+        self.assertEqual(extractor.traceflow.tcp, ('trace',))
         self.assertIs(extractor.engine, extractor._exeng)
         self.assertEqual(extractor.magic_number, b'fake')
 
@@ -164,7 +164,7 @@ class ExtractorTests(unittest.TestCase):
         extractor._reasm = ReassemblyManager()
         self.assertIsNone(extractor.reassembly.ipv4)
         self.assertIsNone(extractor.reassembly.dtls)
-        self.assertIsNone(extractor.trace.tcp)
+        self.assertIsNone(extractor.traceflow.tcp)
 
         unsupported = object.__new__(Extractor)
         unsupported._flag_q = True
@@ -180,7 +180,7 @@ class ExtractorTests(unittest.TestCase):
         with self.assertRaises(UnsupportedCall):
             _ = unsupported.reassembly
         with self.assertRaises(UnsupportedCall):
-            _ = unsupported.trace
+            _ = unsupported.traceflow
 
     def test_declared_engine_type_is_satisfied_by_the_built_in_engines(self) -> None:
         """``_exeng``, ``engine`` and ``record_header`` must name a type the engine holds.
@@ -668,6 +668,7 @@ class ExtractorTests(unittest.TestCase):
 
     def test_import_test_and_make_name_paths(self) -> None:
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import DumpOptions
         from pcapkit.utilities.exceptions import FileNotFound, FormatError
 
         self.assertIsNotNone(Extractor.import_test('io'))
@@ -691,34 +692,32 @@ class ExtractorTests(unittest.TestCase):
             # ``Frame 1..json`` on disk. The output filename below keeps exactly
             # one dot, which is the other half of the same contract.
             self.assertEqual(
-                Extractor.make_name(str(capture), str(temp / 'out'), 'json'),
+                Extractor.make_name(str(capture), DumpOptions(fout=str(temp / 'out'), format='json')),
                 (str(capture), str(temp / 'out.json'), 'json', 'json', False),
             )
             self.assertEqual(
-                Extractor.make_name(str(capture.with_suffix('')), str(temp / 'raw.out'),
-                                    'tree', extension=False),
+                Extractor.make_name(str(no_ext_capture),
+                                    DumpOptions(fout=str(temp / 'raw.out'), extension=False)),
                 (str(no_ext_capture), str(temp / 'raw.out'), 'tree', 'txt', False),
             )
             self.assertEqual(
-                Extractor.make_name(str(capture), str(temp / 'frames'), 'json', files=True),
+                Extractor.make_name(str(capture), DumpOptions(fout=str(temp / 'frames'), format='json',
+                                                              files=True)),
                 (str(capture), str(temp / 'frames'), 'json', 'json', True),
             )
-            self.assertEqual(
-                Extractor.make_name(str(capture), str(temp / 'ignored'), 'json', nofile=True),
-                (str(capture), None, 'json', None, False),
-            )
+            self.assertEqual(Extractor.make_name(str(capture)), (str(capture), None, None, None, False))
 
             # An extension already on ``fout`` is recognised and not appended
             # twice -- the comparison is against ``f'.{ext}'`` since ``ext``
             # is bare, and getting that wrong would give ``out.json.json``.
             self.assertEqual(
-                Extractor.make_name(str(capture), str(temp / 'kept.json'), 'json')[1],
+                Extractor.make_name(str(capture), DumpOptions(fout=str(temp / 'kept.json'), format='json'))[1],
                 str(temp / 'kept.json'),
             )
             # Every registered format, so a newly registered dumper spelling its
             # extension either way cannot reintroduce the doubled dot.
             for fmt in ('pcap', 'cap', 'plist', 'xml', 'json', 'tree', 'text', 'txt'):
-                ext = Extractor.make_name(str(capture), str(temp / f'all-{fmt}'), fmt)[3]
+                ext = Extractor.make_name(str(capture), DumpOptions(fout=str(temp / f'all-{fmt}'), format=fmt))[3]
                 with self.subTest(format=fmt):
                     self.assertIsNotNone(ext)
                     self.assertFalse(ext.startswith('.'))
@@ -726,14 +725,14 @@ class ExtractorTests(unittest.TestCase):
 
             stream = io.BytesIO(b'capture')
             stream.name = str(capture)
-            self.assertEqual(Extractor.make_name(stream, str(temp / 'out'), 'json')[0],
-                             str(capture))
+            self.assertEqual(Extractor.make_name(stream)[0], str(capture))
 
+            # ``fin`` is opened as named: no ``.pcap`` is tried after it.
             with self.assertRaises(FileNotFound):
-                Extractor.make_name(str(temp / 'missing'), str(temp / 'out'), 'json',
-                                    extension=False)
+                Extractor.make_name(str(capture.with_suffix('.pcapng')))
             with self.assertRaises(FormatError):
-                Extractor.make_name(str(capture), str(temp / 'out'), 'unknown-unit-format')
+                Extractor.make_name(str(capture), DumpOptions(fout=str(temp / 'out'),
+                                                              format='unknown-unit-format'))
 
     def test_run_selects_registered_default_and_error_engines(self) -> None:
         from pcapkit.foundation.extraction import Extractor
@@ -970,14 +969,15 @@ class ExtractorTests(unittest.TestCase):
 
     def test_constructor_initialises_without_running_when_patched(self) -> None:
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import DumpOptions
 
         with tempfile.TemporaryDirectory() as tempdir:
             capture = pathlib.Path(tempdir) / 'sample.pcap'
             capture.write_bytes(b'\xa1\xb2\xc3\xd4payload')
             with mock.patch.object(Extractor, 'run') as run:
-                extractor = Extractor(str(capture), str(pathlib.Path(tempdir) / 'out'),
-                                      format='json', auto=False, verbose=True, ip=True,
-                                      tcp=True, reassembly=False, trace=False)
+                extractor = Extractor(str(capture),
+                                      dump=DumpOptions(fout=str(pathlib.Path(tempdir) / 'out'), format='json'),
+                                      auto=False, verbose=True)
             # closed inside the ``with``: Windows cannot delete a file still open (#2101)
             extractor._ifile.close()
         run.assert_called_once()
@@ -985,9 +985,9 @@ class ExtractorTests(unittest.TestCase):
         self.assertTrue(extractor._flag_v)
         # ``verbose=True`` asks for the default printer, which an engine may replace (#1874)
         self.assertTrue(extractor._vfunc_default)
-        # ``reassembly=False`` makes no reassembler, whatever the flags name (#2814)
+        # no ``reassembly`` and no ``trace``, so neither a reassembler nor a tracer
         self.assertFalse(extractor._reasm)
-        self.assertTrue(extractor._tcp)
+        self.assertFalse(extractor._tcp)
         self.assertEqual(extractor.magic_number, b'\xa1\xb2\xc3\xd4')
 
     def test_auto_mode_call_raises_the_class_the_docstring_names(self) -> None:
@@ -1008,8 +1008,7 @@ class ExtractorTests(unittest.TestCase):
             capture = pathlib.Path(tempdir) / 'sample.pcap'
             capture.write_bytes(b'\xa1\xb2\xc3\xd4payload')
             with mock.patch.object(Extractor, 'run'):
-                extractor = Extractor(str(capture), str(pathlib.Path(tempdir) / 'out'),
-                                      format='json', auto=True, nofile=True)
+                extractor = Extractor(str(capture), auto=True)
             # closed inside the ``with``: Windows cannot delete a file still open (#2101)
             extractor._ifile.close()
 
@@ -1020,6 +1019,7 @@ class ExtractorTests(unittest.TestCase):
 
     def test_constructor_configuration_branches_with_run_patched(self) -> None:
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import DumpOptions, TraceFlowOptions
 
         with tempfile.TemporaryDirectory() as tempdir:
             temp = pathlib.Path(tempdir)
@@ -1027,10 +1027,7 @@ class ExtractorTests(unittest.TestCase):
             capture.write_bytes(b'\xa1\xb2\xc3\xd4payload')
 
             with mock.patch.object(Extractor, 'run') as run:
-                with mock.patch.object(Extractor, 'make_name',
-                                       return_value=(str(capture), str(temp / 'out.json'),
-                                                     'json', 'json', False)):
-                    defaulted = Extractor()
+                defaulted = Extractor(str(capture))
             run.assert_called_once()
             self.assertEqual(defaulted._ifnm, str(capture))
             self.assertFalse(defaulted._flag_v)
@@ -1040,8 +1037,7 @@ class ExtractorTests(unittest.TestCase):
             verbose_handler = mock.Mock()
             stream = NamedBufferedReader(b'\xa1\xb2\xc3\xd4payload', str(capture))
             with mock.patch.object(Extractor, 'run'):
-                streamed = Extractor(stream, str(temp / 'stream-out'), format='json',
-                                     auto=False, verbose=verbose_handler, nofile=True)
+                streamed = Extractor(stream, auto=False, verbose=verbose_handler)
             self.assertFalse(streamed._flag_s)
             self.assertTrue(streamed._flag_v)
             self.assertIs(streamed._vfunc, verbose_handler)
@@ -1053,16 +1049,16 @@ class ExtractorTests(unittest.TestCase):
             nonseekable = NonSeekableBytesIO(b'\xa1\xb2\xc3\xd4payload')
             nonseekable.name = str(capture)
             with mock.patch.object(Extractor, 'run'):
-                wrapped = Extractor(nonseekable, str(temp / 'wrapped-out'), format='json',
-                                    auto=False, nofile=True)
+                wrapped = Extractor(nonseekable, auto=False)
             self.assertEqual(type(wrapped._ifile).__name__, 'SeekableReader')
             wrapped._ifile.close()
 
             with mock.patch.object(Extractor, 'run'):
-                traced = Extractor(str(capture), str(temp / 'trace-out'), format='json',
-                                   auto=False, reassembly=True, ip=True, tcp=True,
-                                   trace=True, trace_fout=str(temp / 'flows'),
-                                   trace_format='json')
+                traced = Extractor(str(capture),
+                                   dump=DumpOptions(fout=str(temp / 'trace-out'), format='json'),
+                                   auto=False, reassembly=['ipv4', 'ipv6', 'tcp'],
+                                   traceflow=TraceFlowOptions(protocols=['tcp'], fout=str(temp / 'flows'),
+                                                              format='json'))
             self.assertIsNotNone(traced._reasm.ipv4)
             self.assertIsNotNone(traced._reasm.ipv6)
             self.assertIsNotNone(traced._reasm.tcp)
@@ -1071,11 +1067,11 @@ class ExtractorTests(unittest.TestCase):
 
             with mock.patch.object(Extractor, 'run'):
                 with mock.patch('pcapkit.foundation.extraction.warn') as warn:
-                    pyshark_trace = Extractor(str(capture), str(temp / 'pyshark-out'),
-                                              format='json', auto=False, engine='pyshark',
-                                              trace=True, tcp=True,
-                                              trace_fout=str(temp / 'pyshark-flows'),
-                                              trace_format='pcap')
+                    pyshark_trace = Extractor(str(capture),
+                                              dump=DumpOptions(fout=str(temp / 'pyshark-out'), format='json'),
+                                              auto=False, engine='pyshark',
+                                              traceflow=TraceFlowOptions(protocols=['tcp'], format='pcap',
+                                                                         fout=str(temp / 'pyshark-flows')))
             warn.assert_called_once()
             pyshark_trace._ifile.close()
 
@@ -1084,13 +1080,14 @@ class ExtractorTests(unittest.TestCase):
                                        return_value=(str(capture), str(temp / 'unknown'),
                                                      'unknown-unit-format', None, False)):
                     with mock.patch('pcapkit.foundation.extraction.warn') as warn:
-                        unknown_output = Extractor(str(capture), str(temp / 'unknown'),
-                                                   format='json', auto=False)
+                        unknown_output = Extractor(str(capture),
+                                                   dump=DumpOptions(fout=str(temp / 'unknown'), format='json'),
+                                                   auto=False)
             warn.assert_called_once()
             self.assertTrue(hasattr(unknown_output, '_ofile'))
             unknown_output._ifile.close()
 
-    def _traced(self, temp: pathlib.Path, tag: str, **kwargs: object):
+    def _traced(self, temp: pathlib.Path, tag: str, *, engine: str = 'default', **trace: object):
         """An ``Extractor`` built for tracing, with ``run`` patched out.
 
         Nothing is extracted, so no engine needs to be installed -- the format
@@ -1105,14 +1102,14 @@ class ExtractorTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import TraceFlowOptions
 
         with mock.patch.object(Extractor, 'run'), \
                 mock.patch.object(Extractor, '_select_engine', return_value=None):
             with mock.patch('pcapkit.foundation.extraction.warn') as warn:
-                extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{tag}'),
-                                      format='json', auto=False, nofile=True, trace=True,
-                                      tcp=True, trace_fout=str(temp / f'flows-{tag}'),
-                                      **kwargs)  # type: ignore[arg-type]
+                extractor = Extractor(str(temp / 'sample.pcap'), engine=engine, auto=False,  # type: ignore[arg-type]
+                                      traceflow=TraceFlowOptions(protocols=['tcp'], fout=str(temp / f'flows-{tag}'),
+                                                                 **trace))  # type: ignore[arg-type]
         extractor._ifile.close()
         return extractor, warn
 
@@ -1124,9 +1121,9 @@ class ExtractorTests(unittest.TestCase):
         # frame record from the captured octets instead (#1507), so their 'pcap' is
         # kept, silently.
         #
-        # ``None`` is asserted alongside 'pcap' and 'cap' because TraceFlow.__init__
-        # substitutes 'pcap' for it, so an unset format routes to the same dumper.
-        # The chosen dumper is read off the tracer's own file extension rather than
+        # An unset format is asserted alongside 'pcap' and 'cap', as 'pcap' is its
+        # default, so it routes to the same dumper. The chosen dumper is read off
+        # the tracer's own file extension rather than
         # inferred from the warning: '.pcap' there means the crash is still reachable
         # however loudly the constructor complained.
         with tempfile.TemporaryDirectory() as tempdir:
@@ -1134,11 +1131,11 @@ class ExtractorTests(unittest.TestCase):
             (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
 
             for engine in ('dpkt', 'scapy', 'pyshark', 'pypcapfile'):
-                for trace_format in ('pcap', 'cap', None):
-                    with self.subTest(engine=engine, trace_format=trace_format):
-                        tag = f'{engine}-{trace_format}'
-                        traced, warn = self._traced(temp, tag, engine=engine,
-                                                    trace_format=trace_format)
+                for trace in ({'format': 'pcap'}, {'format': 'cap'}, {}):
+                    trace_format = trace.get('format', 'pcap')
+                    with self.subTest(engine=engine, trace=trace):
+                        tag = f'{engine}-{trace.get("format")}'
+                        traced, warn = self._traced(temp, tag, engine=engine, **trace)
 
                         if engine in ('dpkt', 'scapy'):
                             self.assertEqual(traced._trace.tcp._fdpext, '.pcap')
@@ -1148,7 +1145,7 @@ class ExtractorTests(unittest.TestCase):
                         warn.assert_called_once()
                         message = warn.call_args.args[0]
                         self.assertIn(f'engine={engine}', message)
-                        self.assertIn(f'trace_format={trace_format}', message)
+                        self.assertIn(f'flow tracing format {trace_format!r}', message)
 
     def test_a_dict_capable_trace_format_is_left_alone(self) -> None:
         # Only the formats that route to the PCAP dumper are substituted. A format
@@ -1162,7 +1159,7 @@ class ExtractorTests(unittest.TestCase):
                                             ('plist', '.plist')):
                 with self.subTest(trace_format=trace_format):
                     traced, warn = self._traced(temp, f'dpkt-{trace_format}', engine='dpkt',
-                                                trace_format=trace_format)
+                                                format=trace_format)
 
                     self.assertEqual(traced._trace.tcp._fdpext, extension)
                     warn.assert_not_called()
@@ -1175,10 +1172,10 @@ class ExtractorTests(unittest.TestCase):
             temp = pathlib.Path(tempdir)
             (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
 
-            for trace_format, extension in (('pcap', '.pcap'), (None, '.pcap'), ('pcapng', '.pcapng')):
-                with self.subTest(trace_format=trace_format):
-                    traced, warn = self._traced(temp, f'default-{trace_format}',
-                                                trace_format=trace_format)
+            for trace, extension in (({'format': 'pcap'}, '.pcap'), ({}, '.pcap'),
+                                     ({'format': 'pcapng'}, '.pcapng')):
+                with self.subTest(trace=trace):
+                    traced, warn = self._traced(temp, f'default-{trace.get("format")}', **trace)
 
                     self.assertEqual(traced._trace.tcp._fdpext, extension)
                     warn.assert_not_called()
@@ -1236,8 +1233,8 @@ class ExtractorTests(unittest.TestCase):
                 (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
 
                 for engine in sorted(set(Extractor.__engine__) | {'default', 'pcapkit'}):
-                    _, warn = self._traced(temp, f'doc-{engine}', engine=engine, trace_format=fmt)
-                    if self._warned(warn, f"'trace_format={fmt}'"):
+                    _, warn = self._traced(temp, f'doc-{engine}', engine=engine, format=fmt)
+                    if self._warned(warn, f'flow tracing format {fmt!r}'):
                         warned.add(engine)
 
             with self.subTest(trace_format=fmt):
@@ -1249,6 +1246,7 @@ class ExtractorTests(unittest.TestCase):
         # third-party engines whose ``format='pcap'`` is replaced has to match the
         # guard that replaces it.
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import DumpOptions
 
         documented = self._warns_bullet_engines('If using PCAP or PCAP-NG output while', 'i.e. ')
         for fmt in ('pcap', 'pcapng'):
@@ -1261,12 +1259,12 @@ class ExtractorTests(unittest.TestCase):
                     with mock.patch.object(Extractor, 'run'), \
                             mock.patch.object(Extractor, '_select_engine', return_value=None), \
                             mock.patch('pcapkit.foundation.extraction.warn') as warn:
-                        extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{engine}'),
-                                              format=fmt, engine=engine, auto=False,
-                                              nofile=True)  # type: ignore[arg-type]
+                        extractor = Extractor(str(temp / 'sample.pcap'),
+                                              dump=DumpOptions(fout=str(temp / f'out-{engine}'), format=fmt),
+                                              engine=engine, auto=False)  # type: ignore[arg-type]
                     # closed inside the ``with``: Windows cannot delete a file still open (#2101)
                     extractor._ifile.close()
-                    if self._warned(warn, f"'format={fmt}'"):
+                    if self._warned(warn, f"output format {fmt!r}"):
                         warned.add(engine)
 
             with self.subTest(format=fmt):
@@ -1287,9 +1285,9 @@ class DictFrameTraceEndToEndTests(unittest.TestCase):
 
     What makes this reachable is that the tracer is fed: the dumper runs
     only once a flow has been recorded, so the capture has to hold real TCP frames
-    and both ``trace=True`` and ``tcp=True`` have to be set. ``nofile=True`` is
-    orthogonal -- it suppresses the *frame* output, not the trace output, so it
-    neither causes nor prevents the crash.
+    and ``trace`` has to name ``'tcp'``. ``dump`` is orthogonal -- it governs the
+    *frame* output, not the trace output, so it neither causes nor prevents the
+    crash.
 
     Only DPKT is exercised here; both engines' traced files are byte-compared with
     the default engine's in :mod:`tests.toolkit.test_engine_pcap_trace_runtime`.
@@ -1301,24 +1299,23 @@ class DictFrameTraceEndToEndTests(unittest.TestCase):
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
     def test_dpkt_traced_extraction_writes_pcap_flows(self) -> None:
         import pcapkit
+        from pcapkit.foundation.options import TraceFlowOptions
 
-        for trace_format in ('pcap', 'cap', None):
-            with self.subTest(trace_format=trace_format):
+        for trace in ({'format': 'pcap'}, {'format': 'cap'}, {}):
+            with self.subTest(trace=trace):
                 with tempfile.TemporaryDirectory() as tempdir:
                     flows = pathlib.Path(tempdir) / 'flows'
 
                     with warnings.catch_warnings(record=True) as caught:
                         warnings.simplefilter('always')
-                        extraction = pcapkit.extract(
-                            fin=sample_path('in.pcap'), engine='dpkt', store=True,
-                            nofile=True, tcp=True, trace=True, trace_fout=str(flows),
-                            trace_format=trace_format,
-                        )
+                        extraction = pcapkit.extract(fin=sample_path('in.pcap'), engine='dpkt', store=True,
+                                                     traceflow=TraceFlowOptions(protocols=['tcp'], fout=str(flows),
+                                                                                **trace))
 
                     # The engine that ran is the one asked for -- a fallback to the
                     # default engine would not exercise the DPKT adapter at all.
                     self.assertEqual(type(extraction.engine).__engine_name__, 'DPKT')
-                    self.assertTrue(extraction.trace.tcp,
+                    self.assertTrue(extraction.traceflow.tcp,
                                     'no TCP flow was traced, so the dumper never ran '
                                     'and this test proves nothing')
 

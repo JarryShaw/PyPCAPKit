@@ -80,7 +80,7 @@ class FrameRecord(Info):
     attributes the mapping does not show, it carries what the PCAP trace dumper
     reads of a frame -- :meth:`PCAPIO._append_value
     <pcapkit.dumpkit.pcap.PCAPIO._append_value>` takes ``packet``,
-    ``frame_info`` and ``time_epoch`` -- so ``trace_format='pcap'`` writes the
+    ``frame_info`` and ``time_epoch`` -- so a ``'pcap'`` trace writes the
     frame's record too (:issue:`1507`). A key of the mapping and an attribute
     of the same name stay apart: ``record['packet']`` is the engine's, and
     ``record.packet`` the frame's captured octets.

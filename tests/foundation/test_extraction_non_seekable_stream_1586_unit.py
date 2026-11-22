@@ -201,13 +201,15 @@ class TestNonSeekableStream(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.tmp_path = pathlib.Path(tmp.name)
 
-    def extract(self, fin: 'object', **kwargs: 'object') -> 'tuple[list[bytes], set[tuple[str, str]]]':
+    def extract(self, fin: 'object', *, no_eof: 'bool' = False,
+                **kwargs: 'object') -> 'tuple[list[bytes], set[tuple[str, str]]]':
         """The frames' octets, and the warnings raised on the way."""
         import pcapkit  # pylint: disable=import-outside-toplevel
+        from pcapkit.foundation.options import StreamOptions  # pylint: disable=import-outside-toplevel
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extractor = pcapkit.extract(fin=fin, nofile=True, **kwargs)
+            extractor = pcapkit.extract(fin=fin, stream=StreamOptions(no_eof=no_eof), **kwargs)
         return ([bytes(frame) for frame in extractor.frame],  # type: ignore[attr-defined]
                 {(w.category.__name__, str(w.message)) for w in caught})
 
@@ -296,6 +298,7 @@ class TestNonSeekableStream(unittest.TestCase):
 
         """
         import pcapkit  # pylint: disable=import-outside-toplevel
+        from pcapkit.foundation.options import StreamOptions  # pylint: disable=import-outside-toplevel
 
         received = threading.Event()
         resumed = threading.Event()
@@ -313,7 +316,8 @@ class TestNonSeekableStream(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             with os.fdopen(read_fd, 'rb', buffering=0) as stream:
-                extractor = pcapkit.extract(fin=stream, nofile=True, auto=False, no_eof=True)
+                extractor = pcapkit.extract(fin=stream, auto=False,
+                                            stream=StreamOptions(no_eof=True))
                 frames = [bytes(next(extractor))]
                 early = not resumed.is_set()
                 received.set()

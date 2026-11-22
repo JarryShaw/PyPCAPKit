@@ -32,11 +32,13 @@ except ImportError:
     sys.exit(0)
 
 from pcapkit import extract  # noqa: E402  # pylint: disable=wrong-import-position
+from pcapkit.foundation.options import DumpOptions  # noqa: E402  # pylint: disable=wrong-import-position
 
 
 def bench(engine: 'str') -> 'None':
-    extract(fin='../captures/in.pcap', fout=f'../captures/engines/{engine}.txt',
-            format='tree', engine=engine)
+    extract(fin='../captures/in.pcap',
+            dump=DumpOptions(fout=f'../captures/engines/{engine}.txt', format='tree'),
+            engine=engine)
 
 
 runner = pyperf.Runner()

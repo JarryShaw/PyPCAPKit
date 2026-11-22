@@ -102,7 +102,7 @@ class CallbackOrderTests(unittest.TestCase):
         capture = pcap([(SECOND + number, 0, frame) for number, frame in enumerate(_frames())])
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=io.BytesIO(capture), nofile=True, store=True)
+            extractor = extract(fin=io.BytesIO(capture), store=True)
         close_extractor(extractor)
         return [tcp_traceflow(frame, data_link=LinkType.ETHERNET) for frame in extractor.frame]
 

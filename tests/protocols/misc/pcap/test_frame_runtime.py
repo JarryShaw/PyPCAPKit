@@ -18,7 +18,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
     def test_frame_exposes_expected_public_metadata(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('in.pcap'), store=True)
         frame = extractor.frame[0]
 
         self.assertEqual(frame.name, 'Frame 1')
@@ -35,7 +35,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
     def test_frame_packet_and_payload_walk_protocol_stack(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('arp.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('arp.pcap'), store=True)
         frame = extractor.frame[0]
 
         self.assertEqual(type(frame.packet).__name__, 'Packet')
@@ -46,7 +46,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
     def test_frame_info_records_protocol_summary(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('arp.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('arp.pcap'), store=True)
         frame = extractor.frame[0]
 
         self.assertEqual(frame.info.protocols, 'Ethernet:ARP:Raw')
@@ -82,7 +82,7 @@ class PcapFrameRuntimeTests(unittest.TestCase):
             offset += 16 + incl_len
         self.assertEqual(records, [(24, 76), (100, 76)])
 
-        extractor = extract(fin=path, store=True, nofile=True)
+        extractor = extract(fin=path, store=True)
         self.assertEqual(len(extractor.frame), len(records))
 
         for frame, (start, total) in zip(extractor.frame, records):

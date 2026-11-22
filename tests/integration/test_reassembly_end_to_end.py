@@ -43,8 +43,7 @@ class TCPReassemblyTests(EndToEndTestCase):
     """TCP payload reassembly over :file:`test.pcap`."""
 
     def reassemble(self) -> 'dict':
-        extractor = self.extract(fin=sample_path('test.pcap'), nofile=True, store=False,
-                                 tcp=True, reassembly=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('test.pcap'), store=False, reassembly=['tcp'])
         self.assertEqual(extractor.length, 34)
         return by_direction(extractor.reassembly.tcp)
 
@@ -105,21 +104,22 @@ class TCPReassemblyTests(EndToEndTestCase):
         self.assertTrue(response.payload.startswith(b'HTTP/1.1 204 No Content\r\n'))
 
     def test_reassembly_is_refused_when_it_was_not_requested(self) -> None:
-        # This is the trap ``examples/legacy_smoke/test_analyse.py`` falls into:
-        # it asks for ``tcp=True`` but never for ``reassembly=True``.
+        # The trap ``examples/legacy_smoke/test_analyse.py`` fell into: reading the
+        # record of a reassembly it never asked for.
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        extractor = self.extract(fin=sample_path('test.pcap'), nofile=True, store=False,
-                                 tcp=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('test.pcap'), store=False)
 
         with self.assertRaises(UnsupportedCall):
             extractor.reassembly  # pylint: disable=pointless-statement
 
     def test_datagrams_are_not_retained_when_storage_is_disabled(self) -> None:
+        from pcapkit.foundation.options import ReassemblyOptions
+
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        extractor = self.extract(fin=sample_path('test.pcap'), nofile=True, store=False,
-                                 tcp=True, reassembly=True, reasm_store=False)
+        extractor = self.extract(fin=sample_path('test.pcap'), store=False,
+                                 reassembly=ReassemblyOptions(protocols=['tcp'], store=False))
 
         with self.assertRaises(UnsupportedCall):
             extractor.reassembly.tcp  # pylint: disable=pointless-statement
@@ -136,8 +136,7 @@ class ApplicationLayerAnalysisTests(EndToEndTestCase):
     """
 
     def analyse(self) -> 'dict':
-        extractor = self.extract(fin=sample_path('http6.cap'), nofile=True, store=False,
-                                 tcp=True, reassembly=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('http6.cap'), store=False, reassembly=['tcp'])
         self.assertEqual(extractor.length, 26)
         return by_direction(extractor.reassembly.tcp)
 
@@ -200,8 +199,7 @@ class IPv4ReassemblyTests(EndToEndTestCase):
     """
 
     def test_each_unfragmented_datagram_is_submitted_whole(self) -> None:
-        extractor = self.extract(fin=sample_path('ipv4.pcap'), nofile=True, store=True,
-                                 ipv4=True, reassembly=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('ipv4.pcap'), store=True, reassembly=['ipv4'])
         datagrams = extractor.reassembly.ipv4
 
         self.assertEqual(extractor.length, 4)
@@ -221,15 +219,13 @@ class IPv4ReassemblyTests(EndToEndTestCase):
                 self.assertEqual(len(datagram.payload), 1836)
 
     def test_datagram_identifications_are_distinct_and_consecutive(self) -> None:
-        extractor = self.extract(fin=sample_path('ipv4.pcap'), nofile=True, store=False,
-                                 ipv4=True, reassembly=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('ipv4.pcap'), store=False, reassembly=['ipv4'])
 
         self.assertEqual([datagram.id.id for datagram in extractor.reassembly.ipv4],
                          [31232, 31233, 31234, 31235])
 
     def test_reassembled_datagram_analyses_as_udp(self) -> None:
-        extractor = self.extract(fin=sample_path('ipv4.pcap'), nofile=True, store=False,
-                                 ipv4=True, reassembly=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('ipv4.pcap'), store=False, reassembly=['ipv4'])
         datagram = extractor.reassembly.ipv4[0]
 
         self.assertEqual(type(datagram.packet).__name__, 'UDP')
@@ -248,8 +244,7 @@ class IPv6FragmentReassemblyTests(EndToEndTestCase):
     """
 
     def reassemble(self) -> 'tuple':
-        extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True, store=False,
-                                 ipv6=True, reassembly=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('ipv6.pcap'), store=False, reassembly=['ipv6'])
         self.assertEqual(extractor.length, 16)
         return extractor.reassembly.ipv6
 
@@ -306,8 +301,7 @@ class IPv6FragmentPayloadTests(EndToEndTestCase):
         value, so the identification is asserted here.
 
         """
-        extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True, store=True,
-                                 ipv6=True, reassembly=True, reasm_strict=True)
+        extractor = self.extract(fin=sample_path('ipv6.pcap'), store=True, reassembly=['ipv6'])
         datagram = extractor.reassembly.ipv6[0]
 
         fragments = [

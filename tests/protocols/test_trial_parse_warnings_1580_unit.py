@@ -136,7 +136,7 @@ class TestTrialParseWarnings(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extractor = Extractor(NamedBuffer(octets, name), nofile=True, store=True)
+            extractor = Extractor(NamedBuffer(octets, name), store=True)
         return extractor, caught
 
     def test_cut_packet_blocks_warn_nothing(self) -> None:
@@ -494,7 +494,7 @@ class TestTrialParseWarnings(unittest.TestCase):
             snapshot = warnings.filters[:]
 
             _unrelated_warning.emit()
-            Extractor(NamedBuffer(octets, 'truncated.pcapng'), nofile=True, store=True)  # dropped
+            Extractor(NamedBuffer(octets, 'truncated.pcapng'), store=True)  # dropped
             Ethernet(SHIM6_CUT)  # held and kept
             _unrelated_warning.emit()
 

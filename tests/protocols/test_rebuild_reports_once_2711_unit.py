@@ -130,7 +130,7 @@ class RebuildReportsOnceTests(unittest.TestCase):
                 frame, messages = self.parse(lambda: self.Ethernet(data, len(data)))  # pylint: disable=cell-var-from-loop
                 yield label, f'octets, cut {cut}', frame, messages
                 frame, messages = self.parse(lambda: self.pcapkit.extract(  # pylint: disable=cell-var-from-loop
-                    fin=io.BytesIO(pcap(data, len(whole))), nofile=True).frame[0].payload)
+                    fin=io.BytesIO(pcap(data, len(whole)))).frame[0].payload)
                 yield label, f'savefile, cut {cut}', frame, messages
 
     def assertRebuildsWithin(self, frame: 'Any', parsed: 'list[str]') -> 'None':  # pylint: disable=invalid-name

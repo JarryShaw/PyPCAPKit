@@ -17,7 +17,7 @@ class UDPRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str, *, store: bool = True, auto: bool = True):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=store, nofile=True, auto=auto)
+        extractor = extract(fin=sample_path(sample), store=store, auto=auto)
         self.addCleanup(close_extractor, extractor)
         return extractor
 

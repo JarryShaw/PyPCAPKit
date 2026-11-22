@@ -246,8 +246,7 @@ def _extract_first(data: 'bytes', suffix: 'str') -> 'Any':
         with open(path, 'wb') as file:
             file.write(data)
 
-        with pcapkit.extract(fin=path, nofile=True, store=True, ip=True, tcp=True,
-                             reassembly=False) as extraction:
+        with pcapkit.extract(fin=path, store=True) as extraction:
             return extraction.frame[0]
 
 

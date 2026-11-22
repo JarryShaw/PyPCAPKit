@@ -71,6 +71,8 @@ class TestEngineFallbackKeepsPCAPOutput(unittest.TestCase):
         return extractor, [w.message for w in caught]
 
     def test_pcap_output_is_kept_and_byte_exact(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         from pcapkit.foundation.engines.pcap import PCAP
         from pcapkit.utilities.warnings import EngineWarning, FormatWarning
 
@@ -80,8 +82,10 @@ class TestEngineFallbackKeepsPCAPOutput(unittest.TestCase):
                 for fmt in ('pcap', 'cap'):
                     with self.subTest(engine=name, how=how, format=fmt), \
                             tempfile.TemporaryDirectory() as tmp, self._unavailable(name, how):
-                        extractor, caught = self._extract(fin=fin, fout=os.path.join(tmp, 'out'),
-                                                          format=fmt, engine=name)
+                        extractor, caught = self._extract(fin=fin,
+                                                          dump=DumpOptions(fout=os.path.join(tmp, 'out'),
+                                                                           format=fmt),
+                                                          engine=name)
                         self.assertIsInstance(extractor.engine, PCAP)
                         self.assertEqual(extractor.format, 'pcap')
                         self.assertEqual(os.listdir(tmp), ['out.pcap'])
@@ -93,29 +97,37 @@ class TestEngineFallbackKeepsPCAPOutput(unittest.TestCase):
                         self.assertIn('using default engine instead', engine_warnings[0])
 
     def test_unknown_engine_keeps_pcap_output(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         from pcapkit.utilities.warnings import EngineWarning
 
         fin = sample_path('in.pcap')
         with tempfile.TemporaryDirectory() as tmp:
-            extractor, caught = self._extract(fin=fin, fout=os.path.join(tmp, 'out'),
-                                              format='pcap', engine='no-such-engine')
+            extractor, caught = self._extract(fin=fin,
+                                              dump=DumpOptions(fout=os.path.join(tmp, 'out'), format='pcap'),
+                                              engine='no-such-engine')
             self.assertEqual(extractor.format, 'pcap')
             self.assertEqual(_read(os.path.join(tmp, 'out.pcap')), _read(fin))
         self.assertEqual([str(m) for m in caught if isinstance(m, EngineWarning)],
                          ["unsupported extraction engine: 'no-such-engine'; using default engine instead"])
 
     def test_trace_format_is_kept(self) -> None:
+        from pcapkit.foundation.options import DumpOptions, TraceFlowOptions
+
         from pcapkit.utilities.warnings import FormatWarning
 
         fin = sample_path('in.pcap')
         for name in ('dpkt', 'scapy', 'pyshark', 'pypcapfile'):
             with self.subTest(engine=name), tempfile.TemporaryDirectory() as tmp, \
                     self._unavailable(name, 'unsupported'):
-                extractor, caught = self._extract(fin=fin, fout=os.path.join(tmp, 'out'),
-                                                  format='json', engine=name, trace=True, tcp=True,
-                                                  trace_fout=os.path.join(tmp, 'trace'))
+                extractor, caught = self._extract(fin=fin,
+                                                  dump=DumpOptions(fout=os.path.join(tmp, 'out'),
+                                                                   format='json'),
+                                                  engine=name,
+                                                  traceflow=TraceFlowOptions(protocols=['tcp'],
+                                                                             fout=os.path.join(tmp, 'trace')))
                 self.assertEqual([m for m in caught if isinstance(m, FormatWarning)], [])
-                flows = extractor.trace.tcp
+                flows = extractor.traceflow.tcp
                 self.assertTrue(flows)
                 for flow in flows:
                     self.assertTrue(flow.fpout.endswith('.pcap'), flow.fpout)
@@ -123,18 +135,21 @@ class TestEngineFallbackKeepsPCAPOutput(unittest.TestCase):
     def test_available_third_party_engine_still_falls_back_to_json(self) -> None:
         # The other half of the contract: an engine that really runs still
         # falls back to JSON, and its warning names that engine.
+        from pcapkit.foundation.options import DumpOptions
+
         from pcapkit.utilities.warnings import FormatWarning
 
         if importlib.util.find_spec('dpkt') is None:
             self.skipTest('dpkt not installed')
         with tempfile.TemporaryDirectory() as tmp:
             extractor, caught = self._extract(fin=sample_path('in.pcap'),
-                                              fout=os.path.join(tmp, 'out'), format='pcap', engine='DPKT')
+                                              dump=DumpOptions(fout=os.path.join(tmp, 'out'), format='pcap'),
+                                              engine='DPKT')
             self.assertEqual(extractor.format, 'json')
             self.assertEqual(os.listdir(tmp), ['out.json'])
         self.assertEqual([str(m) for m in caught if isinstance(m, FormatWarning)],
-                         ["'Extractor(engine=dpkt)' does not support 'format=pcap'; "
-                          "using 'format=\"json\"' instead"])
+                         ["'Extractor(engine=dpkt)' does not support output format 'pcap'; "
+                          "using 'json' instead"])
 
 
 if __name__ == '__main__':

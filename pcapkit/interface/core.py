@@ -8,7 +8,6 @@
 macros, which wrap the classes of :mod:`pcapkit.foundation`.
 
 """
-import io
 import sys
 from typing import TYPE_CHECKING
 
@@ -23,7 +22,9 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.context import ContextRegistry, ProtocolContext
-    from pcapkit.foundation.extraction import Engines, Formats, Layers, Protocols, VerboseHandler
+    from pcapkit.foundation.extraction import Engines, Layers, Protocols, VerboseHandler
+    from pcapkit.foundation.options import (DumpOptions, ReassemblyOptions, StreamOptions,
+                                            TraceFlowOptions)
     from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
     from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
@@ -61,82 +62,28 @@ PCAP_CT = 'pcap_ct'
 PyPCAPFile = 'pypcapfile'
 
 
-def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,     # basic settings # pylint: disable=redefined-builtin
-            auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
-            files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
-            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers] | Type[ProtocolBase]' = None,                         # extraction settings # pylint: disable=line-too-long
-            protocol: 'Optional[Protocols]' = None,                                                                        # extraction settings # pylint: disable=line-too-long
-            reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
-            reasm_timeout: 'Optional[float]' = None,                                                                       # reassembly settings # pylint: disable=line-too-long
-            trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
-            trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
-            trace_bidirectional: 'bool' = True, trace_analyse: 'bool' = False,                                            # trace settings # pylint: disable=line-too-long
-            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
-            dtls: 'bool' = False,                                                                                          # reassembly settings # pylint: disable=line-too-long
-            buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
-            no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
-            context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # context settings # pylint: disable=line-too-long
-            reasm_protocols: 'Optional[Iterable[str]]' = None) -> 'Extractor':                                              # reassembly settings # pylint: disable=line-too-long
+def extract(fin: 'str | IO[bytes]', *,
+            dump: 'Optional[DumpOptions]' = None,
+            engine: 'Engines' = 'default',
+            layer: 'Optional[Layers | Type[ProtocolBase]]' = None,
+            protocol: 'Optional[Protocols]' = None,
+            context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+            reassembly: 'Optional[ReassemblyOptions | Iterable[str]]' = None,
+            traceflow: 'Optional[TraceFlowOptions | Iterable[str]]' = None,
+            stream: 'Optional[StreamOptions]' = None,
+            auto: 'bool' = True, store: 'bool' = True,
+            verbose: 'bool | VerboseHandler' = False) -> 'Extractor':
     """Extract a PCAP file.
 
     Arguments:
-        fin: file name to be read or a binary IO object;
+        fin: file name to be read, as named, or a binary IO object;
             if the file does not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`
-        fout: file name to be written
-        format: file format of output
-
-        auto: if automatically run till EOF
-        extension: if check and append extensions to output file
-        store: if store extracted packet info
-
-        files: if split each frame into different files
-        nofile: if no output file is to be dumped
-        verbose: a :obj:`bool` value or a function that takes the
-            :class:`~pcapkit.foundation.extraction.Extractor`
-            instance and current parsed frame (depends on engine selected) as
-            parameters to print verbose output information
-
+        dump: output settings, a
+            :class:`~pcapkit.foundation.options.DumpOptions`; :data:`None`
+            writes no output
         engine: extraction engine to be used
-        layer: extract til which layer
+        layer: extract til which layer, by name or as a protocol class
         protocol: extract til which protocol
-
-        reassembly: if perform reassembly
-        reasm_strict: if set strict flag for reassembly
-        reasm_store: if store reassembled datagrams
-        reasm_timeout: reassembly timeout in seconds, on the capture's own
-            clock; :data:`None` selects each protocol's default (60 seconds for
-            IPv4 and IPv6, disabled for TCP); DTLS reassembly takes none
-
-        trace: if trace TCP traffic flows
-        trace_fout: path name for flow tracer if necessary
-        trace_format: output file format of flow tracer
-        trace_byteorder: output file byte order
-        trace_nanosecond: output nanosecond-resolution file flag
-        trace_bidirectional: whether both halves of a conversation are traced as
-            one flow, which is the default
-        trace_analyse: whether each traced flow reassembles its application
-            layer, so that its ``packet`` can be read; off by default
-
-        ip: if record data for IPv4 & IPv6 reassembly (must be used with ``reassembly=True``)
-        ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)
-        ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)
-        tcp: if perform TCP reassembly and/or flow tracing
-            (must be used with ``reassembly=True`` or ``trace=True``)
-        dtls: if perform DTLS handshake-message reassembly (must be used with
-            ``reassembly=True``); the default engine alone supports it
-
-        buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
-        buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
-        buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
-
-        no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,
-            which is what a live capture on a pipe or on standard input wants,
-            since a read there blocks until the writer produces more or closes.
-            Retrying stops as soon as one retry finds nothing new, so an
-            exhausted input finishes rather than spinning; on a *seekable*
-            input, where nothing blocks, that means a file still being appended
-            to ends at the data present when the extraction reached it
-
         context: caller supplied parsing context for protocols that need
             information not carried on the wire, keyed by protocol index ID --
             cf. :mod:`pcapkit.corekit.context`. The motivating case is
@@ -149,11 +96,27 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                 ...                          encryption_key=key)
                 >>> extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))
 
-        reasm_protocols: names of further reassemblers to enable (must be used
-            with ``reassembly=True``), each as registered in
+        reassembly: reassembly settings, a
+            :class:`~pcapkit.foundation.options.ReassemblyOptions`, or the
+            names of the reassemblers to enable, each as registered in
             :attr:`Extractor.__reassembly__
-            <pcapkit.foundation.extraction.Extractor.__reassembly__>`, as
-            ``'ipv4'``, ``'ipv6'``, ``'tcp'`` and ``'dtls'`` are
+            <pcapkit.foundation.extraction.Extractor.__reassembly__>`;
+            :data:`None`, or no names, reassembles nothing
+        traceflow: flow tracing settings, a
+            :class:`~pcapkit.foundation.options.TraceFlowOptions`, or the names
+            of the flow tracers to enable, each as registered in
+            :attr:`Extractor.__traceflow__
+            <pcapkit.foundation.extraction.Extractor.__traceflow__>`;
+            :data:`None`, or no names, traces nothing
+        stream: input stream settings, a
+            :class:`~pcapkit.foundation.options.StreamOptions`; :data:`None`
+            takes their defaults
+        auto: if automatically run till EOF
+        store: if store extracted packet info
+        verbose: a :obj:`bool` value or a function that takes the
+            :class:`~pcapkit.foundation.extraction.Extractor`
+            instance and current parsed frame (depends on engine selected) as
+            parameters to print verbose output information
 
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
@@ -179,24 +142,14 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
 
     .. versionchanged:: 1.7.0
 
-       ``reasm_protocols`` is appended (:issue:`2814`).
+       Takes exactly the parameters of
+       :class:`~pcapkit.foundation.extraction.Extractor`, whose 1.7.0 note
+       lists what is grouped and what is removed (:issue:`2836`).
 
     """
-    if isinstance(layer, type) and issubclass(layer, ProtocolBase):
-        layer = (layer.__layer__ or 'none').lower()  # type: ignore[assignment]
-
-    return Extractor(fin=fin, fout=fout, format=format,
-                     store=store, files=files, nofile=nofile,
-                     auto=auto, verbose=verbose, extension=extension,
-                     engine=engine, layer=layer, protocol=protocol,  # type: ignore[arg-type]
-                     ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, dtls=dtls,
-                     reassembly=reassembly, reasm_store=reasm_store, reasm_strict=reasm_strict,
-                     reasm_timeout=reasm_timeout,
-                     trace=trace, trace_fout=trace_fout, trace_format=trace_format,
-                     trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond,
-                     trace_bidirectional=trace_bidirectional, trace_analyse=trace_analyse,
-                     buffer_size=buffer_size, buffer_path=buffer_path, buffer_save=buffer_save,
-                     no_eof=no_eof, context=context, reasm_protocols=reasm_protocols)
+    return Extractor(fin, dump=dump, engine=engine, layer=layer, protocol=protocol, context=context,
+                     reassembly=reassembly, traceflow=traceflow, stream=stream, auto=auto, store=store,
+                     verbose=verbose)
 
 
 def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,

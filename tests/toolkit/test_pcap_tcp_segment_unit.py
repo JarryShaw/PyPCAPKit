@@ -147,10 +147,9 @@ class TCPSegmentAdapterTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=io.BytesIO(capture), nofile=True, store=True, tcp=True,
-                                trace=True, **kwargs)
+            extractor = extract(fin=io.BytesIO(capture), store=True, traceflow=['tcp'], **kwargs)
         self.addCleanup(close_extractor, extractor)
-        flows = [tuple(flow.index) for flow in extractor.trace.tcp]
+        flows = [tuple(flow.index) for flow in extractor.traceflow.tcp]
         frame = extractor.frame[-1]
         if capture[:4] == b'\x0a\x0d\x0d\x0a':
             return flows, toolkit_pcapng.tcp_traceflow(frame), toolkit_pcapng.tcp_reassembly(frame)

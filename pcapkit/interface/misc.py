@@ -8,7 +8,6 @@
 functions and their data models.
 
 """
-import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.corekit.infoclass import Info, info_final
@@ -18,8 +17,9 @@ from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile as PyPCAPFile_Engine
 from pcapkit.foundation.engines.scapy import Scapy as Scapy_Engine
 from pcapkit.foundation.extraction import Extractor
+from pcapkit.foundation.options import TraceFlowOptions
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
-from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import EngineWarning, warn
 
 if TYPE_CHECKING:
@@ -35,13 +35,6 @@ if TYPE_CHECKING:
     #: open ``...`` parameter list, which lets both call shapes type-check.
     ReassemblyAdapter = Callable[..., 'Optional[TCP_Data]']
 
-    ByteOrder = Literal['little', 'big']
-    #: Every output format key shipped in
-    #: :attr:`Extractor.__output__ <pcapkit.foundation.extraction.Extractor.__output__>`
-    #: and :attr:`TraceFlow.__output__
-    #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>`, aliases
-    #: included (``'cap'``, ``'xml'``, ``'text'``, ``'txt'``).
-    Formats = Literal['pcap', 'cap', 'pcapng', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;
     # each copy needs updating when a new engine lands.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
@@ -69,36 +62,32 @@ class Stream(Info):
         def __init__(self, filename: 'Optional[str]', packets: 'tuple[Packet, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
-def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extractor options
-                      extension: 'bool' = True, engine: 'Optional[Engines]' = None,
-                      fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,  # TraceFlow options # pylint: disable=redefined-builtin
-                      byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False,
-                      trace_bidirectional: 'bool' = True,
-                      trace_analyse: 'bool' = False) -> 'tuple[Stream, ...]':
+def follow_tcp_stream(fin: 'str', *, verbose: 'bool' = False,           # Extractor options
+                      engine: 'Optional[Engines]' = None,
+                      traceflow: 'Optional[TraceFlowOptions]' = None) -> 'tuple[Stream, ...]':  # TraceFlow options
     """Follow TCP streams.
 
     Arguments:
-        fin: file name to be read; if the file does not exist, raise
+        fin: file name to be read, as named; if the file does not exist, raise
             :exc:`~pcapkit.utilities.exceptions.FileNotFound`
-        extension: if check and append extensions to output file
         verbose: if print verbose output information
         engine: extraction engine to be used
-
-        fout: path name for flow tracer if necessary
-        format: output file format of flow tracer
-        byteorder: output file byte order
-        nanosecond: output nanosecond-resolution file flag
-        trace_bidirectional: whether both directions of a conversation are
-            followed as one stream, which is the default; :data:`False` gives
-            one stream per direction
-        trace_analyse: whether each traced flow reassembles its application
-            layer, so that :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can be read off
-            :attr:`Extractor.trace <pcapkit.foundation.extraction.Extractor.trace>`.
-            Off by default; the returned ``conversations`` come from the TCP
-            reassembly this function always runs.
+        traceflow: flow tracing settings, whose
+            :attr:`~pcapkit.foundation.options.TraceFlowOptions.protocols` name
+            ``'tcp'``; :data:`None` takes their defaults. With
+            :attr:`~pcapkit.foundation.options.TraceFlowOptions.analyze`,
+            :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can be read off
+            :attr:`Extractor.traceflow <pcapkit.foundation.extraction.Extractor.traceflow>`;
+            the returned ``conversations`` come from the TCP reassembly this
+            function always runs. With
+            :attr:`~pcapkit.foundation.options.TraceFlowOptions.bidirectional`,
+            the default, a stream holds both directions of a conversation.
 
     Returns:
         Tuple of extracted TCP streams.
+
+    Raises:
+        FormatError: If ``traceflow`` does not name ``'tcp'``.
 
     .. versionchanged:: 1.5.0
 
@@ -106,7 +95,19 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
        stream holds both directions of a conversation; 1.4.x returned one
        stream per direction.
 
+    .. versionchanged:: 1.7.0
+
+       ``traceflow`` replaces ``fout``, ``format``, ``byteorder``, ``nanosecond``,
+       ``trace_bidirectional`` and ``trace_analyse``, with no alias, and every
+       parameter after ``fin`` is keyword-only. ``fin`` is required and opened
+       as named, so ``extension`` is removed (:issue:`2836`).
+
     """
+    if traceflow is None:
+        traceflow = TraceFlowOptions(protocols=['tcp'])
+    elif 'tcp' not in traceflow.protocols:
+        raise FormatError(f'follow_tcp_stream traces TCP, but traceflow names {list(traceflow.protocols)!r}')
+
     # NOTE: PyShark has no TCP reassembly adapter, and PyPCAP and PCAP_CT disable
     # TCP flow tracing, so none of them can follow a stream.
     if engine is not None and engine.lower() in ('pyshark', 'pypcap', 'pcap_ct'):
@@ -114,13 +115,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
              EngineWarning, stacklevel=stacklevel())
         engine = None
 
-    extraction = Extractor(fin=fin, fout=None, format=None, auto=True, extension=extension,
-                           store=True, files=False, nofile=True, verbose=verbose, engine=engine,
-                           layer=None, protocol=None, ip=False, ipv4=False, ipv6=False, tcp=True,
-                           reassembly=False, trace=True, trace_fout=fout, trace_format=format,
-                           trace_byteorder=byteorder, trace_nanosecond=nanosecond,
-                           trace_bidirectional=trace_bidirectional,
-                           trace_analyse=trace_analyse)  # type: ignore[var-annotated]
+    extraction = Extractor(fin, verbose=verbose, engine=engine or 'default',
+                           traceflow=traceflow)  # type: ignore[var-annotated]
 
     # NOTE: dispatch on the engine instance with ``isinstance`` (#399), so a subclass
     # of a built-in engine reaches its adapter; only third-party adapters take ``count``.
@@ -158,7 +154,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
 
     streams = []  # type: list[Stream]
     frames = extraction.frame
-    for stream in extraction.trace.tcp:
+    for stream in extraction.traceflow.tcp:
         reassembly = TCP_Reassembly(strict=False)
 
         packets = []  # type: list[Packet]

@@ -91,14 +91,16 @@ class TestPCAPTraceTruncatedRecord(unittest.TestCase):
     def trace(self, data: 'bytes') -> 'bytes':
         """The PCAP file of the one TCP flow traced from ``data``."""
         from pcapkit import extract
+        from pcapkit.foundation.options import TraceFlowOptions
 
         tracedir = tempfile.mkdtemp(dir=self.tmpdir.name)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=io.BytesIO(data), nofile=True, store=False, trace=True, tcp=True,
-                                trace_fout=tracedir, trace_format='pcap', trace_byteorder='little')
+            extractor = extract(fin=io.BytesIO(data), store=False,
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=tracedir, format='pcap',
+                                                           byteorder='little'))
         close_extractor(extractor)
-        flows = list(extractor.trace.tcp)
+        flows = list(extractor.traceflow.tcp)
         self.assertEqual([list(flow.index) for flow in flows], [[1, 2, 3]])
         with open(flows[0].fpout, 'rb') as file:
             return file.read()

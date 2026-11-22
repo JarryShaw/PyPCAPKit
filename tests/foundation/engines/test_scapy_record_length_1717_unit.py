@@ -98,7 +98,7 @@ class ScapyRecordLengthTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=fin, engine='scapy', nofile=True, store=True)
+            extractor = extract(fin=fin, engine='scapy', store=True)
         self.addCleanup(close_extractor, extractor)
         frames = []  # type: list[tuple[bytes, int | None]]
         for packet in extractor.frame:

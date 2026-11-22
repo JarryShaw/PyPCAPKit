@@ -38,8 +38,7 @@ class FrameIterationTests(EndToEndTestCase):
     """``auto=False``, i.e. the caller drives the extraction."""
 
     def test_manual_iteration_yields_every_frame_once_and_in_order(self) -> None:
-        extractor = self.extract(fin=sample_path('http6.cap'), nofile=True, store=False,
-                                 auto=False)
+        extractor = self.extract(fin=sample_path('http6.cap'), store=False, auto=False)
 
         numbers = [frame.info.number for frame in extractor]
 
@@ -49,8 +48,7 @@ class FrameIterationTests(EndToEndTestCase):
     def test_protocol_membership_finds_the_http_frames(self) -> None:
         import pcapkit
 
-        extractor = self.extract(fin=sample_path('http6.cap'), nofile=True, store=False,
-                                 auto=False)
+        extractor = self.extract(fin=sample_path('http6.cap'), store=False, auto=False)
 
         found = {}
         for frame in extractor:
@@ -63,14 +61,13 @@ class FrameIterationTests(EndToEndTestCase):
     def test_membership_is_false_for_a_protocol_the_capture_lacks(self) -> None:
         import pcapkit
 
-        extractor = self.extract(fin=sample_path('http6.cap'), nofile=True, store=True)
+        extractor = self.extract(fin=sample_path('http6.cap'), store=True)
 
         self.assertFalse(any(pcapkit.UDP in frame for frame in extractor.frame))
         self.assertTrue(all(pcapkit.TCP in frame for frame in extractor.frame))
 
     def test_call_form_walks_the_same_frames_as_the_iterator(self) -> None:
-        extractor = self.extract(fin=sample_path('arp.pcap'), nofile=True, store=False,
-                                 auto=False)
+        extractor = self.extract(fin=sample_path('arp.pcap'), store=False, auto=False)
 
         first = next(extractor)
         second = extractor()
@@ -145,7 +142,7 @@ class ExtractionLimitTests(EndToEndTestCase):
         """
         for limit in ({'layer': 'internet'}, {'layer': 'transport'}, {'protocol': 'TCP'}):
             with self.subTest(**limit):
-                extractor = self.extract(fin=sample_path('http6.cap'), nofile=True,
+                extractor = self.extract(fin=sample_path('http6.cap'),
                                          store=True, **limit)
                 chain = str(extractor.frame[3].protochain)
 
@@ -165,7 +162,7 @@ class ExtractionLimitTests(EndToEndTestCase):
         for limit in ({}, {'layer': 'none'}, {'protocol': 'null'},
                       {'layer': None, 'protocol': None}):
             with self.subTest(**limit):
-                extractor = self.extract(fin=sample_path('http6.cap'), nofile=True,
+                extractor = self.extract(fin=sample_path('http6.cap'),
                                          store=True, **limit)
                 frame = extractor.frame[3]
 
@@ -189,8 +186,7 @@ class ExtractionLimitTests(EndToEndTestCase):
 
         for layer, expected in self.STOPS.items():
             with self.subTest(layer=layer):
-                extractor = self.extract(fin=sample_path('http6.cap'), nofile=True,
-                                         store=True, layer=layer)
+                extractor = self.extract(fin=sample_path('http6.cap'), store=True, layer=layer)
                 walked = stack(extractor.frame[3])
 
                 self.assertEqual([type(protocol).__name__ for protocol in walked[:-1]],
@@ -207,9 +203,8 @@ class ExtractionLimitTests(EndToEndTestCase):
         byte, and they are the same octets the unlimited parse consumed.
 
         """
-        full = self.extract(fin=sample_path('http6.cap'), nofile=True, store=True)
-        stopped = self.extract(fin=sample_path('http6.cap'), nofile=True, store=True,
-                               layer='internet')
+        full = self.extract(fin=sample_path('http6.cap'), store=True)
+        stopped = self.extract(fin=sample_path('http6.cap'), store=True, layer='internet')
 
         tcp_onwards = bytes(stack(full.frame[3])[2])
         raw = stack(stopped.frame[3])[-1]
@@ -229,8 +224,8 @@ class ExtractionLimitTests(EndToEndTestCase):
 
         for protocol in ('TCP', 'tcp', pcapkit.TCP):
             with self.subTest(protocol=protocol):
-                extractor = self.extract(fin=sample_path('http6.cap'), nofile=True,
-                                         store=True, protocol=protocol)
+                extractor = self.extract(fin=sample_path('http6.cap'), store=True,
+                                         protocol=protocol)
                 walked = stack(extractor.frame[3])
 
                 self.assertEqual([type(item).__name__ for item in walked],
@@ -243,8 +238,7 @@ class ExtractionLimitTests(EndToEndTestCase):
         import pcapkit
         from pcapkit.protocols.misc.raw.protocol import Raw
 
-        extractor = self.extract(fin=sample_path('http6.cap'), nofile=True, store=True,
-                                 protocol='IPv6')
+        extractor = self.extract(fin=sample_path('http6.cap'), store=True, protocol='IPv6')
         walked = stack(extractor.frame[3])
 
         self.assertEqual([type(item).__name__ for item in walked],
@@ -262,8 +256,7 @@ class ExtractionLimitTests(EndToEndTestCase):
         """
         import pcapkit
 
-        extractor = self.extract(fin=sample_path('http6.cap'), nofile=True, store=True,
-                                 layer='internet')
+        extractor = self.extract(fin=sample_path('http6.cap'), store=True, layer='internet')
 
         self.assertEqual(len(extractor.frame), 26)
         self.assertFalse(any(pcapkit.HTTP in frame for frame in extractor.frame))
@@ -281,7 +274,7 @@ class ExtractionLimitTests(EndToEndTestCase):
         """
         chains = {}
         for limit in ({}, {'layer': 'link'}, {'layer': 'internet'}):
-            extractor = self.extract(fin=sample_path('test.pcapng'), nofile=True,
+            extractor = self.extract(fin=sample_path('test.pcapng'),
                                      store=True, **limit)
             chains[tuple(sorted(limit.items()))] = [
                 str(frame.protochain) for frame in extractor.frame

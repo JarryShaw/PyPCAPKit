@@ -64,7 +64,7 @@ class TestConstructorRaises(unittest.TestCase):
 
         with warnings.catch_warnings(), self.assertRaises(FormatError) as caught:
             warnings.simplefilter('ignore')
-            pcapkit.extract(fin=fin, nofile=True, **kwargs)
+            pcapkit.extract(fin=fin, **kwargs)
         return caught.exception
 
     def opened_by_path(self, data: 'bytes') -> 'tuple[list[io.BufferedReader], BaseException]':
@@ -102,8 +102,10 @@ class TestConstructorRaises(unittest.TestCase):
             self.extract(file)
             self.assertFalse(file.closed)
 
+        from pcapkit.foundation.options import StreamOptions  # pylint: disable=import-outside-toplevel
+
         stream = Unseekable(SHB + EPB)
-        self.extract(stream, buffer_save=True)
+        self.extract(stream, stream=StreamOptions(buffer_save=True))
         self.assertFalse(stream.closed)
 
 

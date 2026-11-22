@@ -44,10 +44,10 @@ class TestUnnamedStream(unittest.TestCase):
         import pcapkit  # pylint: disable=import-outside-toplevel
 
         path = sample_path(capture)
-        expected = len(pcapkit.extract(fin=path, nofile=True).frame)
+        expected = len(pcapkit.extract(fin=path).frame)
         with open(path, 'rb') as file:
             stream = io.BytesIO(file.read())
-        return expected, pcapkit.extract(fin=stream, nofile=True), stream
+        return expected, pcapkit.extract(fin=stream), stream
 
     def test_pcap_from_bytesio(self) -> None:
         expected, extractor, stream = self._frames('in.pcap')
@@ -64,12 +64,14 @@ class TestUnnamedStream(unittest.TestCase):
 
     def test_output_name_comes_from_fout(self) -> None:
         import pcapkit  # pylint: disable=import-outside-toplevel
+        from pcapkit.foundation.options import DumpOptions  # pylint: disable=import-outside-toplevel
 
         with open(sample_path('in.pcap'), 'rb') as file:
             data = file.read()
         with tempfile.TemporaryDirectory() as tmp:
             fout = os.path.join(tmp, 'out')
-            extractor = pcapkit.extract(fin=io.BytesIO(data), fout=fout, format='json')
+            extractor = pcapkit.extract(fin=io.BytesIO(data),
+                                        dump=DumpOptions(fout=fout, format='json'))
             self.assertEqual(extractor.output, f'{fout}.json')
             self.assertTrue(os.path.isfile(f'{fout}.json'))
 
@@ -80,17 +82,17 @@ class TestUnnamedStream(unittest.TestCase):
         path = sample_path('in.pcap')
         with open(os.open(path, os.O_RDONLY), 'rb') as stream:
             self.assertIsInstance(stream.name, int)
-            extractor = pcapkit.extract(fin=stream, nofile=True)
+            extractor = pcapkit.extract(fin=stream)
             self.assertEqual(extractor.input, '<BufferedReader>')
-            self.assertEqual(len(extractor.frame), len(pcapkit.extract(fin=path, nofile=True).frame))
+            self.assertEqual(len(extractor.frame), len(pcapkit.extract(fin=path).frame))
 
     def test_make_name_labels_by_name_or_type(self) -> None:
         from pcapkit.foundation.extraction import Extractor  # pylint: disable=import-outside-toplevel
 
         stream = io.BytesIO()
-        self.assertEqual(Extractor.make_name(stream, nofile=True)[0], '<BytesIO>')
+        self.assertEqual(Extractor.make_name(stream)[0], '<BytesIO>')
         stream.name = 'capture.pcap'  # type: ignore[attr-defined]
-        self.assertEqual(Extractor.make_name(stream, nofile=True)[0], 'capture.pcap')
+        self.assertEqual(Extractor.make_name(stream)[0], 'capture.pcap')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'pcapkit runtime dependencies are not installed')
@@ -115,7 +117,7 @@ class TestPathEngines(unittest.TestCase):
 
         stream = io.BytesIO(self._data())
         with self.assertRaises(UnsupportedCall) as caught:
-            pcapkit.extract(fin=stream, nofile=True, engine=engine)  # type: ignore[arg-type]
+            pcapkit.extract(fin=stream, engine=engine)  # type: ignore[arg-type]
         self.assertIn(f"'Extractor(engine={engine})' requires a file on disk", str(caught.exception))
         self.assertIn('BytesIO', str(caught.exception))
         self.assertFalse(stream.closed, 'the caller owns the stream (#610)')
@@ -139,16 +141,16 @@ class TestPathEngines(unittest.TestCase):
 
         path = sample_path('in.pcap')
         with mock.patch.object(Extractor, 'run'), open(path, 'rb') as stream:
-            extractor = Extractor(fin=stream, nofile=True, engine='scapy')
+            extractor = Extractor(fin=stream, engine='scapy')
             self.assertEqual(extractor.input, path)
 
     @unittest.skipUnless(importlib.util.find_spec('dpkt') is not None, 'dpkt is not installed')
     def test_dpkt_reads_unnamed_stream(self) -> None:
         import pcapkit  # pylint: disable=import-outside-toplevel
 
-        expected = len(pcapkit.extract(fin=sample_path('in.pcap'), nofile=True, engine='dpkt').frame)
+        expected = len(pcapkit.extract(fin=sample_path('in.pcap'), engine='dpkt').frame)
         stream = io.BytesIO(self._data())
-        extractor = pcapkit.extract(fin=stream, nofile=True, engine='dpkt')
+        extractor = pcapkit.extract(fin=stream, engine='dpkt')
         self.assertEqual(extractor._exnam, 'dpkt')  # pylint: disable=protected-access
         self.assertGreater(expected, 0)
         self.assertEqual(len(extractor.frame), expected)

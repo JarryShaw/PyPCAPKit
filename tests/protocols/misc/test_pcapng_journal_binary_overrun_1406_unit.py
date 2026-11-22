@@ -72,7 +72,7 @@ class TestPCAPNGJournalBinaryOverrun(PCAPNGTestCase):
         good = _journal(b'MESSAGE=hello\n')
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = Extractor(NamedBuffer(shb + idb + bad + good), nofile=True, store=True)
+            extractor = Extractor(NamedBuffer(shb + idb + bad + good), store=True)
             journals = extractor.engine._ctx_list[0].journals
             self.assertEqual(len(journals), 2)
             self.assertEqual(journals[0].data, ())

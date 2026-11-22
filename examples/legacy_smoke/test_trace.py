@@ -3,8 +3,9 @@
 import pprint
 
 import pcapkit
+from pcapkit.foundation.options import TraceFlowOptions
 
-trace = pcapkit.extract(fin='../captures/http.pcap', nofile=True, verbose=True,
-                        engine=pcapkit.PCAPKit, tcp=True,  # type: ignore[arg-type]
-                        trace=True, trace_format='json', trace_fout='../captures/trace')
-pprint.pprint(trace.trace)
+trace = pcapkit.extract('../captures/http.pcap', verbose=True,
+                        engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
+                        traceflow=TraceFlowOptions(protocols=['tcp'], format='json', fout='../captures/trace'))
+pprint.pprint(trace.traceflow)

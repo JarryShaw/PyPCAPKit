@@ -59,8 +59,7 @@ class TestDPKTParseError(unittest.TestCase):
 
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
-                    ext = pcapkit.extract(fin=path, engine='dpkt', nofile=True,
-                                          store=True, ip=True, ipv6=True)
+                    ext = pcapkit.extract(fin=path, engine='dpkt', store=True)
 
                 self.assertEqual(ext.length, 1)
                 self.assertEqual(bytes(ext.frame[0]), frame)
@@ -73,6 +72,7 @@ class TestDPKTParseError(unittest.TestCase):
         # AttributeError ends the extraction there (#1662). Such a frame maps to
         # no fields, then the next frame is read.
         import pcapkit
+        from pcapkit.foundation.options import DumpOptions
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.dpkt import packet2dict
 
@@ -84,7 +84,8 @@ class TestDPKTParseError(unittest.TestCase):
                 file.write(struct.pack('<IIII', 2, 0, len(frame), len(frame)) + frame)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                ext = pcapkit.extract(fin=path, fout=os.path.join(tmp, 'out'), format='json',
+                ext = pcapkit.extract(fin=path,
+                                      dump=DumpOptions(fout=os.path.join(tmp, 'out'), format='json'),
                                       engine='dpkt', store=True)
             try:
                 self.assertEqual(ext.length, 2)

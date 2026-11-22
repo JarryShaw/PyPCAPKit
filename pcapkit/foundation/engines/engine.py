@@ -239,18 +239,18 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
 
         adapters = self.__reassembly__
         if not adapters:
-            ignored = ', '.join(f"'{name}=True'" for name in ext._reasm)
+            ignored = list(ext._reasm)
             ext._flag_r = False
             ext._reasm = ReassemblyManager()
             warn(f"'Extractor(engine={ext._exnam})' object does not support reassembly; "
-                 f'so {ignored} will be ignored', AttributeWarning, stacklevel=stacklevel())
+                 f'so reassembly={ignored!r} will be ignored', AttributeWarning, stacklevel=stacklevel())
             return
 
         unsupported = [name for name in ext._reasm if name not in adapters]
         if unsupported:
             for name in unsupported:
                 warn(f"'Extractor(engine={ext._exnam})' object does not support {ext._reasm[name].name} "
-                     f"reassembly; so '{name}=True' will be ignored", AttributeWarning,
+                     f'reassembly; so {name!r} will be ignored', AttributeWarning,
                      stacklevel=stacklevel())
             ext._reasm = ReassemblyManager((name, reasm) for (name, reasm) in ext._reasm.items()
                                            if name in adapters)

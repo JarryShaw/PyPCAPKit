@@ -80,8 +80,7 @@ class TestProbeOnce(unittest.TestCase):
                                   return_value=installed) as scan, \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extraction = pcapkit.extract(fin=sample_path('in.pcap'), engine=engine,
-                                         store=True, nofile=True)
+            extraction = pcapkit.extract(fin=sample_path('in.pcap'), engine=engine, store=True)
         return extraction, scan.call_count, [str(w.message) for w in caught]
 
     def test_one_extraction_probes_once(self) -> None:

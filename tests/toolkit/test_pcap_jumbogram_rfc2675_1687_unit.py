@@ -149,6 +149,7 @@ def read(test: unittest.TestCase, linktype: int) -> 'dict[str, set[int]]':
 
     """
     from pcapkit import extract
+    from pcapkit.foundation.options import TraceFlowOptions
     from pcapkit.foundation.reassembly.ipv4 import IPv4
     from pcapkit.foundation.reassembly.ipv6 import IPv6
     from pcapkit.foundation.reassembly.tcp import TCP
@@ -178,8 +179,9 @@ def read(test: unittest.TestCase, linktype: int) -> 'dict[str, set[int]]':
         with open(path, 'wb') as file:
             file.write(capture)
         warnings.simplefilter('ignore')
-        extractor = extract(fin=path, nofile=True, engine='default', reassembly=True, ipv4=True, ipv6=True,
-                            tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+        extractor = extract(fin=path, engine='default', reassembly=['ipv4', 'ipv6', 'tcp'],
+                            traceflow=TraceFlowOptions(protocols=['tcp'], fout=os.path.join(tmp, 'trace'),
+                                                       format='json'))
         try:
             test.assertEqual(extractor._exnam, 'default')  # pylint: disable=protected-access
         finally:

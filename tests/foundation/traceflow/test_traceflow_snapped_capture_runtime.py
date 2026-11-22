@@ -115,20 +115,23 @@ class SnappedCaptureTraceTests(unittest.TestCase):
             fin = io.BytesIO(data)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=fin, nofile=True, engine=engine, tcp=True, **kwargs)
+            extractor = extract(fin=fin, engine=engine, **kwargs)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
-    def _flows(self, container: 'str', engine: 'str' = 'default', **kwargs: 'Any') -> 'list[tuple]':
-        extractor = self._extract(container, engine, trace=True, **kwargs)
+    def _flows(self, container: 'str', engine: 'str' = 'default', **trace: 'Any') -> 'list[tuple]':
+        from pcapkit.foundation.options import TraceFlowOptions
+
+        extractor = self._extract(container, engine, traceflow=TraceFlowOptions(protocols=['tcp'], fout=self.tmp,
+                                                                                **trace))
         return [(tuple(flow.index), tuple(flow.forward), tuple(flow.reverse), flow.label)
-                for flow in extractor.trace.tcp]
+                for flow in extractor.traceflow.tcp]
 
     def test_the_default_engine_traces_every_frame(self) -> None:
         for container in CONTAINERS:
             for bidirectional, expected in ((True, FLOWS), (False, UNIDIRECTIONAL)):
                 with self.subTest(container=container, bidirectional=bidirectional):
-                    flows = self._flows(container, trace_bidirectional=bidirectional)
+                    flows = self._flows(container, bidirectional=bidirectional)
                     self.assertEqual([flow[:3] for flow in flows], expected)
 
     @unittest.skipUnless(ENGINES, 'neither dpkt nor scapy installed')
@@ -137,14 +140,17 @@ class SnappedCaptureTraceTests(unittest.TestCase):
             for bidirectional, expected in ((True, FLOWS), (False, UNIDIRECTIONAL)):
                 for engine in ENGINES:
                     with self.subTest(container=container, bidirectional=bidirectional, engine=engine):
-                        flows = self._flows(container, engine, trace_bidirectional=bidirectional)
+                        flows = self._flows(container, engine, bidirectional=bidirectional)
                         self.assertEqual([flow[:3] for flow in flows], expected)
 
     def _trace_files(self, container: 'str', engine: 'str' = 'default') -> 'dict[str, bytes]':
+        from pcapkit.foundation.options import TraceFlowOptions
+
         fout = tempfile.mkdtemp(dir=self.tmp)
-        extractor = self._extract(container, engine, trace=True, trace_fout=fout, trace_format='pcap')
+        extractor = self._extract(container, engine, traceflow=TraceFlowOptions(protocols=['tcp'], fout=fout,
+                                                                                format='pcap'))
         files = {}
-        for flow in extractor.trace.tcp:
+        for flow in extractor.traceflow.tcp:
             with open(flow.fpout, 'rb') as file:
                 files[flow.label] = file.read()
         return files
@@ -168,7 +174,7 @@ class SnappedCaptureTraceTests(unittest.TestCase):
         self._assert_traced_records('dpkt')
 
     def _datagrams(self, container: 'str', engine: 'str' = 'default') -> 'list[tuple]':
-        extractor = self._extract(container, engine, reassembly=True, reasm_store=True)
+        extractor = self._extract(container, engine, reassembly=['tcp'])
         return [(tuple(datagram.index), bytes(datagram.payload)) for datagram in extractor.reassembly.tcp]
 
     def test_reassembly_takes_every_frame(self) -> None:

@@ -98,16 +98,18 @@ class TraceOpenFileTests(unittest.TestCase):
     def extract(self, fmt: 'str', limit: 'int') -> 'tuple[str, list[tuple[str, Any]], Any]':
         """Trace :func:`_capture` at ``limit``: the output directory, the opens, and the tracer."""
         from pcapkit import extract
+        from pcapkit.foundation.options import TraceFlowOptions
 
         root = tempfile.mkdtemp(dir=self.tmpdir.name)
         # NOTE: ``create``, so the tree without #2815 runs, and fails on what it opens.
         with self.opened(root) as handles, warnings.catch_warnings(), \
                 mock.patch.object(self.config, 'TRACE_OPEN_FILE_LIMIT', limit, create=True):
             warnings.simplefilter('ignore')
-            extractor = extract(fin=io.BytesIO(_capture()), nofile=True, store=False, trace=True,
-                                tcp=True, trace_fout=root, trace_format=fmt, trace_byteorder='little')
+            extractor = extract(fin=io.BytesIO(_capture()), store=False,
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=root, format=fmt,
+                                                           byteorder='little'))
         close_extractor(extractor)
-        self.assertEqual(len(extractor.trace.tcp), 3)
+        self.assertEqual(len(extractor.traceflow.tcp), 3)
         return root, handles, extractor._trace.tcp
 
     def test_each_flow_opens_its_file_once_while_it_fits(self) -> None:

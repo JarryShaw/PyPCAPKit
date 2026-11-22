@@ -128,7 +128,7 @@ class ScapyPCAPNGSectionTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=fin, engine=engine, nofile=True, **kwargs)
+            extractor = extract(fin=fin, engine=engine, **kwargs)
         self.addCleanup(close_extractor, extractor)
         return extractor
 
@@ -151,16 +151,19 @@ class ScapyPCAPNGSectionTests(unittest.TestCase):
                                   for linktype, resolution, stamp in expected])
 
     def test_traced_pcap_matches_the_default_engine_byte_for_byte(self) -> None:
+        from pcapkit.foundation.options import TraceFlowOptions
+
         for case, (fin, _) in self.captures.items():
             for nanosecond in (False, True):
                 with self.subTest(case=case, nanosecond=nanosecond):
                     flows = {}
                     for engine in ('default', 'scapy'):
-                        extractor = self._extract(fin, engine, tcp=True, trace=True, trace_format='pcap',
-                                                  trace_fout=tempfile.mkdtemp(dir=self.tmp),
-                                                  trace_nanosecond=nanosecond)
+                        extractor = self._extract(fin, engine,
+                                                  traceflow=TraceFlowOptions(protocols=['tcp'],
+                                                                             fout=tempfile.mkdtemp(dir=self.tmp),
+                                                                             format='pcap', nanosecond=nanosecond))
                         flows[engine] = []
-                        for flow in extractor.trace.tcp:
+                        for flow in extractor.traceflow.tcp:
                             with open(flow.fpout, 'rb') as file:
                                 flows[engine].append((flow.label, tuple(flow.index), file.read()))
 

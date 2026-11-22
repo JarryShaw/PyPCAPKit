@@ -79,7 +79,7 @@ class ExportComparisonTests(unittest.TestCase):
         from pcapkit import extract
 
         for name in CAPTURES:
-            extractor = extract(fin=str(SAMPLE_ROOT / name), store=True, nofile=True)
+            extractor = extract(fin=str(SAMPLE_ROOT / name), store=True)
             self.addCleanup(close_extractor, extractor)
             for number, frame in enumerate(extractor.frame, start=1):
                 yield f'{name}#{number}', frame

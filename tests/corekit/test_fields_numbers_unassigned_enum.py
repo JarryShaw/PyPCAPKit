@@ -388,7 +388,7 @@ class UnassignedBlockTypeExtractionTests(unittest.TestCase):
         """
         from pcapkit.foundation.extraction import Extractor
 
-        extractor = Extractor(path, nofile=True, store=True)
+        extractor = Extractor(path, store=True)
         try:
             return [str(frame.protochain) for frame in extractor.frame]
         finally:

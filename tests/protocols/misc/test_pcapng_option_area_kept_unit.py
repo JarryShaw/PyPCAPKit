@@ -119,7 +119,7 @@ class TestPCAPNGOptionAreaKept(PCAPNGTestCase):
                 file.write(capture)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                extractor = Extractor(fin=path, nofile=True, store=True)
+                extractor = Extractor(fin=path, store=True)
         self.assertEqual(len(extractor.frame), 2)
         self.assertEqual(extractor.frame[0].info.options_raw, OVER_ALL)
 

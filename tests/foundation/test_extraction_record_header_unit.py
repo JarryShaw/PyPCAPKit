@@ -28,6 +28,7 @@ import unittest
 import warnings
 from unittest import mock
 
+from pcapkit.foundation.options import DumpOptions
 from pcapkit.interface import extract
 from tests._support import sample_path
 
@@ -39,8 +40,8 @@ def _run(fin: str, engine: str, tmp: str, **kwargs):
     """Extract ``fin`` to JSON under ``tmp``, returning the extractor and its records."""
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        extractor = extract(fin=fin, fout=os.path.join(tmp, 'out'), engine=engine,
-                            format='json', nofile=False, **kwargs)
+        extractor = extract(fin=fin, dump=DumpOptions(fout=os.path.join(tmp, 'out'), format='json'),
+                            engine=engine, **kwargs)
     with open(extractor.output, encoding='utf-8') as file:
         return extractor, json.load(file)
 
@@ -82,8 +83,9 @@ class _HeaderStepCases:
     def test_split_output_writes_a_global_header_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=sample_path('in.pcap'), fout=os.path.join(tmp, 'out'),
-                                engine=self.engine, format='json', files=True, nofile=False)
+            extractor = extract(fin=sample_path('in.pcap'),
+                                dump=DumpOptions(fout=os.path.join(tmp, 'out'), format='json', files=True),
+                                engine=self.engine)
             self.assertEqual(extractor.format, 'json')
             self.assertIn('Global Header.json', os.listdir(os.path.join(tmp, 'out')))
 

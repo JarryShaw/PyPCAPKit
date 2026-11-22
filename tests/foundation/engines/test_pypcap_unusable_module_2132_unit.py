@@ -52,7 +52,7 @@ result = {
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter('always')
     try:
-        extractor = pcapkit.extract(fin=capture, engine=engine, nofile=True)
+        extractor = pcapkit.extract(fin=capture, engine=engine)
     except BaseException as exc:
         result['error'] = f'{type(exc).__name__}: {exc}'
     else:

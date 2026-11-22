@@ -57,8 +57,8 @@ def ethernet_frames(name: str) -> 'list[bytes]':
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        extraction = pcapkit.extract(fin=sample_path(name), nofile=True, store=True,
-                                     engine='default', verbose=False)
+        extraction = pcapkit.extract(fin=sample_path(name), store=True, engine='default',
+                                     verbose=False)
     return [frame.info.packet for frame in extraction.frame]
 
 

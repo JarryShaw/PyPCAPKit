@@ -40,8 +40,7 @@ class HeaderTruncatedPayloadTests(unittest.TestCase):
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.protocols.misc.raw.protocol import Raw
 
-        extractor = extract(fin=sample_path('test.pcapng'), fout='/tmp/out', format='tree',
-                            store=True, nofile=True)
+        extractor = extract(fin=sample_path('test.pcapng'), store=True)
         self.addCleanup(close_extractor, extractor)
         parsed = list(extractor.frame)[2][Ethernet]
 

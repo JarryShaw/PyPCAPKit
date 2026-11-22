@@ -144,11 +144,13 @@ class PCAPNGIOTestCase(unittest.TestCase):
 
     def read(self, path: 'str') -> 'list[Any]':
         """The frames of ``path``, each its :attr:`info`."""
-        return [frame.info for frame in self.extract(fin=path, nofile=True, store=True).frame]
+        return [frame.info for frame in self.extract(fin=path, store=True).frame]
 
     def dump(self, data: 'bytes', name: 'str' = 'in.pcapng', **kwargs: 'Any') -> 'tuple[Any, bytes]':
         """Extract ``data`` as PCAP-NG; the extractor and the octets written."""
-        extractor = self.extract(fin=self.path(name, data), fout=self.path('out'), format='pcapng',
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=self.path(name, data), dump=DumpOptions(fout=self.path('out'), format='pcapng'),
                                  store=True, **kwargs)
         with open(extractor.output, 'rb') as file:
             return extractor, file.read()
@@ -279,9 +281,12 @@ class PCAPNGRoundTripTests(PCAPNGIOTestCase):
                          + epb(order, 0, 42, b'pb!', 4, flags))
 
     def test_split_output_writes_a_capture_per_block(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         source, _ = self.capture('<')
-        extractor = self.extract(fin=self.path('in.pcapng', source), fout=self.path('split'),
-                                 format='pcapng', files=True, store=True)
+        extractor = self.extract(fin=self.path('in.pcapng', source),
+                                 dump=DumpOptions(fout=self.path('split'), format='pcapng', files=True),
+                                 store=True)
 
         for frame in extractor.frame:
             path = os.path.join(extractor.output, f'Frame {frame.info.number}.pcapng')
@@ -301,11 +306,13 @@ class PCAPNGRoundTripTests(PCAPNGIOTestCase):
             else:
                 source += epb(order, 0, 10 ** 6 + number, ETHER + tcp(forward, seq, ack, flags, payload),
                               opts=options(order, (OPT_COMMENT, b'#%d' % number)))
-        extractor = self.extract(fin=self.path('flow.pcapng', source), nofile=True, store=True, tcp=True,
-                                 trace=True, trace_format='pcapng', trace_fout=self.path('flows'),
-                                 trace_byteorder='little')
+        from pcapkit.foundation.options import TraceFlowOptions
 
-        (flow,) = extractor.trace.tcp
+        extractor = self.extract(fin=self.path('flow.pcapng', source), store=True,
+                                 traceflow=TraceFlowOptions(protocols=['tcp'], format='pcapng', fout=self.path('flows'),
+                                                            byteorder='little'))
+
+        (flow,) = extractor.traceflow.tcp
         self.assertEqual(list(flow.index), list(range(1, len(EXCHANGE) + 1)))
         with open(flow.fpout, 'rb') as file:
             written = file.read()
@@ -318,6 +325,8 @@ class PCAPInputTests(PCAPNGIOTestCase):
     """PCAP in, PCAP-NG out, and parsed again."""
 
     def test_pcap_frames_come_back(self) -> None:
+        from pcapkit.foundation.options import TraceFlowOptions
+
         for magic, order, resolution in ((0xA1B2C3D4, '<', 10 ** 6), (0xA1B23C4D, '>', 10 ** 9)):
             with self.subTest(order=order, resolution=resolution):
                 packets = [ETHER + tcp(*step) for step in EXCHANGE]
@@ -325,9 +334,9 @@ class PCAPInputTests(PCAPNGIOTestCase):
                 for number, packet in enumerate(packets):
                     source += struct.pack(f'{order}IIII', 100 + number, 999 * number, len(packet), len(packet) + 1)
                     source += packet
-                extractor, written = self.dump(source, name='in.pcap', trace=True, tcp=True,
-                                               trace_format='pcapng', trace_fout=self.path('flows'),
-                                               trace_nanosecond=resolution > 10 ** 6)
+                trace = TraceFlowOptions(protocols=['tcp'], format='pcapng', fout=self.path('flows'),
+                                         nanosecond=resolution > 10 ** 6)
+                extractor, written = self.dump(source, name='in.pcap', traceflow=trace)
 
                 opts = options(order, (IF_TSRESOL, b'\x09')) if resolution > 10 ** 6 else b''
                 self.assertEqual(written[:28], shb(order))
@@ -339,7 +348,7 @@ class PCAPInputTests(PCAPNGIOTestCase):
                                  [frame.info.time_epoch for frame in extractor.frame])
                 self.assertEqual([info.original_len for info in again], [len(packet) + 1 for packet in packets])
 
-                (flow,) = extractor.trace.tcp
+                (flow,) = extractor.traceflow.tcp
                 self.assertEqual([info.packet for info in self.read(flow.fpout)], packets)
 
 
@@ -355,7 +364,7 @@ class FormatRegistrationTests(PCAPNGIOTestCase):
         members = getattr(node.value.slice, 'value', node.value.slice)  # type: ignore[attr-defined]
         return {element.value for element in members.elts}
 
-    def test_both_registries_and_both_literals_name_it(self) -> None:
+    def test_both_registries_and_the_literal_name_it(self) -> None:
         from pcapkit.dumpkit import PCAPNGIO
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.traceflow.traceflow import TraceFlow
@@ -364,9 +373,9 @@ class FormatRegistrationTests(PCAPNGIOTestCase):
             dumper, ext = registry['pcapng']
             self.assertIs(getattr(dumper, 'klass', dumper), PCAPNGIO)
             self.assertEqual(ext, '.pcapng')
-        for path in ('pcapkit/foundation/extraction.py', 'pcapkit/interface/misc.py'):
-            with self.subTest(path=path):
-                self.assertEqual(self.literal(path), set(Extractor._shipped_output))  # pylint: disable=protected-access
+        # ``pcapkit.interface.misc`` dropped its copy, as ``follow_tcp_stream`` takes ``TraceFlowOptions`` (#2836)
+        self.assertEqual(self.literal('pcapkit/foundation/extraction.py'),
+                         set(Extractor._shipped_output))  # pylint: disable=protected-access
         self.assertEqual(set(Extractor._shipped_output), set(TraceFlow._shipped_output))  # pylint: disable=protected-access
 
 

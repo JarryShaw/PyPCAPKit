@@ -147,15 +147,13 @@ class IPv6AdapterParityTests(EndToEndTestCase):
         packets = {}  # type: dict[str, list]
 
         # the committed capture, through the default engine
-        extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True, store=True,
-                                 ipv6=True, reassembly=True)
+        extractor = self.extract(fin=sample_path('ipv6.pcap'), store=True, reassembly=['ipv6'])
         packets['pcap'] = [data for frame in extractor.frame
                            if (data := pcap_toolkit.ipv6_reassembly(frame)) is not None]
 
         # the same frames as PCAP-NG, so the two formats meet on the same octets
         pcapng = write_pcapng(self.tmp_path / 'ipv6.pcapng', frames)
-        extractor = self.extract(fin=pcapng, nofile=True, store=True,
-                                 ipv6=True, reassembly=True)
+        extractor = self.extract(fin=pcapng, store=True, reassembly=['ipv6'])
         packets['pcapng'] = [data for block in extractor.frame
                              if (data := pcapng_toolkit.ipv6_reassembly(block)) is not None]
 
@@ -262,9 +260,8 @@ class IPv6DatagramHeaderTests(EndToEndTestCase):
     def test_no_engine_advertises_a_fragment_header_on_the_datagram(self) -> None:
         for engine in self.engines():
             with self.subTest(engine=engine):
-                extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True,
-                                         store=False, ipv6=True, reassembly=True,
-                                         reasm_strict=True, engine=engine)
+                extractor = self.extract(fin=sample_path('ipv6.pcap'), store=False,
+                                         reassembly=['ipv6'], engine=engine)
                 datagram, = extractor.reassembly.ipv6
 
                 self.assertTrue(datagram.completed)
@@ -291,9 +288,8 @@ class IPv6DatagramHeaderTests(EndToEndTestCase):
         self.assertEqual(len(captured), sum(length for _, length in FRAGMENTS))
         for engine in self.engines():
             with self.subTest(engine=engine):
-                extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True,
-                                         store=False, ipv6=True, reassembly=True,
-                                         reasm_strict=True, engine=engine)
+                extractor = self.extract(fin=sample_path('ipv6.pcap'), store=False,
+                                         reassembly=['ipv6'], engine=engine)
                 datagram, = extractor.reassembly.ipv6
                 payload = bytes(datagram.payload)
                 self.assertEqual(len(payload), 4778)

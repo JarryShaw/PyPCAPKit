@@ -83,9 +83,7 @@ class NewEngineParityTests(unittest.TestCase):
         from pcapkit.utilities.warnings import EngineWarning
 
         with mock.patch('pcapkit.foundation.extraction.warn') as warn:
-            extractor = extract(fin=sample_path(capture), fout='/tmp/parity-out',
-                                format='tree', store=True, nofile=True, engine=engine,
-                                **kwargs)
+            extractor = extract(fin=sample_path(capture), store=True, engine=engine, **kwargs)
         self.addCleanup(close_extractor, extractor)
 
         engines = [call.args[0] for call in warn.call_args_list
@@ -130,22 +128,21 @@ class NewEngineParityTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed')
     def test_pypcapfile_reports_no_ipv6_reassembly(self) -> None:
-        engine = self.extract('pypcapfile', 'ipv6.pcap', reassembly=True, ip=True)
+        engine = self.extract('pypcapfile', 'ipv6.pcap', reassembly=['ipv4', 'ipv6'])
         self.assertIsNone(engine.reassembly.ipv6)
         # ...whereas the default engine does reassemble it
-        base = self.extract('default', 'ipv6.pcap', reassembly=True, ip=True)
+        base = self.extract('default', 'ipv6.pcap', reassembly=['ipv4', 'ipv6'])
         self.assertTrue(base.reassembly.ipv6)
 
     @unittest.skipUnless(HAS_PYPCAP, 'pypcap not installed')
     def test_pypcap_reports_neither_reassembly_nor_flow_tracing(self) -> None:
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        engine = self.extract('pypcap', 'tcp.pcap', reassembly=True, ip=True, tcp=True,
-                              trace=True)
+        engine = self.extract('pypcap', 'tcp.pcap', reassembly=['ipv4', 'ipv6', 'tcp'], traceflow=['tcp'])
         with self.assertRaises(UnsupportedCall):
             engine.reassembly  # pylint: disable=pointless-statement
         with self.assertRaises(UnsupportedCall):
-            engine.trace  # pylint: disable=pointless-statement
+            engine.traceflow  # pylint: disable=pointless-statement
 
     ##########################################################################
     # PCAP-NG.

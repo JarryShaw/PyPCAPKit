@@ -891,6 +891,7 @@ def read_trace(test: unittest.TestCase, frames: 'list[bytes]') -> 'dict[str, Any
 
     """
     from pcapkit import extract
+    from pcapkit.foundation.options import TraceFlowOptions
     from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
     engine = 'pyshark'
@@ -912,12 +913,13 @@ def read_trace(test: unittest.TestCase, frames: 'list[bytes]') -> 'dict[str, Any
             path = os.path.join(tmp, 'capture.pcap')
             with open(path, 'wb') as file:
                 file.write(wire.pcap([(1, number, octets) for number, octets in enumerate(frames)]))
-            extractor = extract(fin=path, nofile=True, engine=engine, tcp=True, trace=True,
-                                trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+            extractor = extract(fin=path, engine=engine,
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=os.path.join(tmp, 'trace'),
+                                                           format='json'))
             try:
                 if extractor._exnam != engine:  # pylint: disable=protected-access
                     test.skipTest(f'{engine} did not run')
-                flows = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
+                flows = [(flow.label, tuple(flow.index)) for flow in extractor.traceflow.tcp]
             finally:
                 close_extractor(extractor)
         return {'trace': seen, 'flows': flows}

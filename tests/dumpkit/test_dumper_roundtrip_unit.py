@@ -112,6 +112,7 @@ class TestDumperRoundTrip(unittest.TestCase):
     def test_pcap_output_keeps_the_input_version(self) -> None:
         """#1255: the output global header carries the input's version."""
         from pcapkit import extract
+        from pcapkit.foundation.options import DumpOptions
 
         for version in ((2, 2), (2, 3), (2, 4)):
             with self.subTest(version=version):
@@ -121,7 +122,8 @@ class TestDumperRoundTrip(unittest.TestCase):
                     file.write(pcap_file(*version))
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    extract(fin=src, fout=dst, format='pcap', store=False, extension=False)
+                    extract(fin=src, dump=DumpOptions(fout=dst, format='pcap', extension=False),
+                            store=False)
                 with open(dst, 'rb') as file:
                     self.assertEqual(file.read(), pcap_file(*version))
 

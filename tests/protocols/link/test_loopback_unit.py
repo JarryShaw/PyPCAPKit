@@ -172,7 +172,7 @@ class TestLoopback(unittest.TestCase):
                 file.write(octets)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                return pcapkit.extract(fin=path, nofile=True, store=True, reassembly=True, ip=True)
+                return pcapkit.extract(fin=path, store=True, reassembly=['ipv4', 'ipv6'])
 
     def _assert_capture(self, linktype: int, records: 'list[tuple[bytes, str]]', ipv4: int) -> 'list':
         """Extract ``records`` under ``linktype`` in both formats; check chains and rebuilds."""

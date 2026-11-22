@@ -138,12 +138,12 @@ class RegisteredReassemblerTestCase(unittest.TestCase):
         engine.register_reassembly(NAME, adapter)
         self.addCleanup(engine.__reassembly__.pop, NAME)
 
-    def _extract(self, path: str, engine: str, **kwargs: 'Any') -> 'Any':
+    def _extract(self, path: str, engine: str, reassembly: 'Any') -> 'Any':
         from pcapkit.foundation.extraction import Extractor
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extractor = Extractor(fin=path, nofile=True, engine=engine, reassembly=True, **kwargs)
+            extractor = Extractor(path, engine=engine, reassembly=reassembly)
         return extractor, [str(warning.message) for warning in caught]
 
 
@@ -189,7 +189,7 @@ class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
 
         for (engine, suffix, klass) in self._engines():
             with self.subTest(engine=engine, capture=suffix):
-                extractor, messages = self._extract(captures[suffix], engine, reasm_protocols=[NAME])
+                extractor, messages = self._extract(captures[suffix], engine, [NAME])
                 self.assertEqual(type(extractor.engine).__name__, klass, messages)
 
                 dummy = extractor._reasm[NAME]
@@ -203,12 +203,14 @@ class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
                 self.assertFalse([message for message in messages if 'reassembly' in message], messages)
 
     def test_extractor_options_reach_the_dummy(self) -> None:
+        from pcapkit.foundation.options import ReassemblyOptions
+
         self._dummy()
         self._register_adapters()
         path = self._capture(pcap([(TIMES[0], ipv4_udp())]), '.pcap')
         # a name given twice, in either case, is made once
-        extractor, _ = self._extract(path, 'default', reasm_protocols=['DUMMY', NAME], reasm_strict=False,
-                                     reasm_store=True, reasm_timeout=5.0)
+        extractor, _ = self._extract(path, 'default', ReassemblyOptions(protocols=['DUMMY', NAME], strict=False,
+                                                                        store=True, timeout=5.0))
         self.assertEqual(list(extractor._reasm), [NAME])
         self.assertEqual(extractor._reasm[NAME].options, {'strict': False, 'store': True, 'timeout': 5.0})
         self.assertEqual(extractor._reasm[NAME].timeout, 5.0)
@@ -220,10 +222,10 @@ class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
         # adapted on DPKT alone, so the default engine has nothing to feed it with
         self._adapt(DPKT, lambda packet, timestamp, *, count: None)
         path = self._capture(pcap([(TIMES[0], ipv4_udp())]), '.pcap')
-        extractor, messages = self._extract(path, 'default', tcp=True, reasm_protocols=[NAME])
+        extractor, messages = self._extract(path, 'default', ['tcp', NAME])
 
         self.assertIn("'Extractor(engine=default)' object does not support Dummy reassembly; "
-                      "so 'dummy=True' will be ignored", messages)
+                      "so 'dummy' will be ignored", messages)
         self.assertEqual(list(extractor._reasm), ['tcp'])
         self.assertNotIn(NAME, extractor.reassembly)
         self.assertEqual(extractor.reassembly.tcp, ())
@@ -239,11 +241,11 @@ class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
         path = self._capture(pcap([(TIMES[0], ipv4_udp())]), '.pcap')
         if Extractor.import_test('pyshark', name='PyShark') is None:
             self.skipTest('PyShark unusable here')
-        extractor, messages = self._extract(path, 'pyshark', reasm_protocols=[NAME])
+        extractor, messages = self._extract(path, 'pyshark', [NAME])
         if type(extractor.engine).__name__ != 'PyShark':
             self.skipTest('PyShark fell back to the default engine')
 
-        self.assertTrue(any("does not support reassembly; so 'dummy=True' will be ignored" in message
+        self.assertTrue(any("does not support reassembly; so reassembly=['dummy'] will be ignored" in message
                             for message in messages), messages)
         self.assertFalse(extractor._reasm)
         with self.assertRaises(UnsupportedCall):
@@ -269,7 +271,7 @@ class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
         with self.assertWarns(AttributeWarning) as caught:
             Bare(extractor).run()
         self.assertEqual(str(caught.warning), "'Extractor(engine=bare)' object does not support "
-                                              "reassembly; so 'dummy=True', 'tcp=True' will be ignored")
+                                              "reassembly; so reassembly=['dummy', 'tcp'] will be ignored")
         self.assertFalse(extractor._flag_r)
         self.assertFalse(extractor._reasm)
 
@@ -278,7 +280,7 @@ class DummyFedOnEveryEngineTests(RegisteredReassemblerTestCase):
 
         path = self._capture(pcap([(TIMES[0], ipv4_udp())]), '.pcap')
         with self.assertRaises(FormatError):
-            self._extract(path, 'default', reasm_protocols=['no-such-reassembly'])
+            self._extract(path, 'default', ['no-such-reassembly'])
 
 
 class FrameClockTests(RegisteredReassemblerTestCase):
@@ -289,7 +291,7 @@ class FrameClockTests(RegisteredReassemblerTestCase):
 
         frames = [(TIMES[0], ipv6_first_fragment()), (TIMES[0] + gap, ipv4_udp())]
         path = self._capture(pcap(frames), '.pcap')
-        extractor, messages = self._extract(path, engine, ipv6=True)
+        extractor, messages = self._extract(path, engine, ['ipv6'])
         datagrams = extractor.reassembly.ipv6
         self.assertEqual(len(datagrams), 1, messages)
         self.assertEqual(datagrams[0].index, (1,))

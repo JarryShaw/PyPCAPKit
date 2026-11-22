@@ -264,12 +264,13 @@ class TSOTraceTests(unittest.TestCase):
 
     def _extract(self, fin: 'str', engine: 'str') -> 'Any':
         from pcapkit import extract
+        from pcapkit.foundation.options import TraceFlowOptions
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=fin, nofile=True, engine=engine, tcp=True, trace=True,
-                                reassembly=True, trace_fout=tempfile.mkdtemp(dir=self.tmp),
-                                trace_format='json')
+            extractor = extract(fin=fin, engine=engine, reassembly=['tcp'],
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=tempfile.mkdtemp(dir=self.tmp),
+                                                           format='json'))
         self.addCleanup(close_extractor, extractor)
         return extractor
 
@@ -279,7 +280,7 @@ class TSOTraceTests(unittest.TestCase):
             for engine in ('default',) + ENGINES:
                 with self.subTest(engine=engine, checksum='fixed' if fix_checksum else 'stale'):
                     extractor = self._extract(fin, engine)
-                    self.assertEqual([tuple(flow.index) for flow in extractor.trace.tcp], FLOWS)
+                    self.assertEqual([tuple(flow.index) for flow in extractor.traceflow.tcp], FLOWS)
                     self.assertEqual([tuple(datagram.index) for datagram in extractor.reassembly.tcp],
                                      DATAGRAMS)
 

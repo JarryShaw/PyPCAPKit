@@ -144,6 +144,7 @@ class MHTimestampInfoTests(unittest.TestCase):
 
     def test_the_dumpers_key_each_by_field(self) -> None:
         from pcapkit import extract
+        from pcapkit.foundation.options import DumpOptions
 
         with tempfile.TemporaryDirectory() as tmpdir:
             src = os.path.join(tmpdir, 'in.pcap')
@@ -151,8 +152,9 @@ class MHTimestampInfoTests(unittest.TestCase):
                 file.write(capture())
             dumps = {}
             for fmt in ('json', 'plist'):
-                extractor = extract(fin=src, fout=os.path.join(tmpdir, f'out-{fmt}'),
-                                    format=fmt, store=False)
+                extractor = extract(fin=src,
+                                    dump=DumpOptions(fout=os.path.join(tmpdir, f'out-{fmt}'), format=fmt),
+                                    store=False)
                 with open(extractor.output, 'rb') as file:
                     dumps[fmt] = file.read()
 

@@ -124,7 +124,7 @@ def _extract(test: 'unittest.TestCase', capture: bytes, **kwargs: 'Any') -> 'Any
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        extractor = extract(fin=io.BytesIO(capture), nofile=True, store=True, **kwargs)
+        extractor = extract(fin=io.BytesIO(capture), store=True, **kwargs)
     test.addCleanup(close_extractor, extractor)
     return extractor
 
@@ -466,7 +466,7 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
 
 
 class TestDTLSExtractorReassembly(unittest.TestCase):
-    """``Extractor(reassembly=True, dtls=True)`` over real frames, and
+    """``Extractor(fin, reassembly=['dtls'])`` over real frames, and
     :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` over what it reassembles."""
 
     def setUp(self) -> None:
@@ -489,8 +489,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         records = self._records(1, body, _split(body, (len(body) // 2,)))
         for container, write in (('pcap', _pcap), ('pcapng', _pcapng)):
             with self.subTest(container=container):
-                extractor = _extract(self, write([_frame(r) for r in records]),
-                                     reassembly=True, dtls=True)
+                extractor = _extract(self, write([_frame(r) for r in records]), reassembly=['dtls'])
 
                 # the frames themselves keep each fragment's raw octets
                 for frame in extractor.frame:
@@ -517,7 +516,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         frags = _split(body, (third, 2 * third))
         # delivered out of order: [2, 0, 1]
         records = self._records(2, body, [frags[2], frags[0], frags[1]], message_seq=9)
-        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=['dtls'])
 
         datagram, = extractor.reassembly.dtls
         self.assertEqual(datagram.body, body)
@@ -536,7 +535,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         rec_a = self._records(1, body_a, _split(body_a, (half,)))
         rec_b = self._records(1, body_b, _split(body_b, (half,)))
         frames = [_frame(rec_a[0]), _frame(rec_b[0], other), _frame(rec_a[1]), _frame(rec_b[1], other)]
-        extractor = _extract(self, _pcap(frames), reassembly=True, dtls=True)
+        extractor = _extract(self, _pcap(frames), reassembly=['dtls'])
 
         cookies = {d.id.sport: dtls_handshake(d).body.cookie for d in extractor.reassembly.dtls}
         self.assertEqual(cookies, {1234: b'\x0a' * 4, 4321: b'\x0b' * 4})
@@ -547,7 +546,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         stays raw bytes and feeds nothing."""
         ciphertext = b'\xa3\x5d\x12\xee' * 12
         extractor = _extract(self, _pcap([_frame(_dtls_record(22, ciphertext, epoch=1, seq=7))]),
-                             reassembly=True, dtls=True)
+                             reassembly=['dtls'])
         self.assertEqual(extractor.frame[0]['DTLS'].info.content, ciphertext)
         self.assertEqual(extractor.reassembly.dtls, ())
 
@@ -559,7 +558,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
 
         body = _client_hello_body(cookie=b'\xab\xcd\xef\x01')
         records = self._records(1, body, _split(body, (len(body) // 2,)))
-        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=['dtls'])
 
         self.assertTrue(extractor.reassembly.dtls[0].completed)
         for frame, record in zip(extractor.frame, records):
@@ -577,8 +576,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
                                                    fragment_length=5, total_length=length), seq=2)
         record2 = _dtls_record(22, _dtls_handshake(11, second, message_seq=3, fragment_offset=5,
                                                    fragment_length=10, total_length=length), seq=3)
-        extractor = _extract(self, _pcap([_frame(record1), _frame(record2)]),
-                             reassembly=True, dtls=True)
+        extractor = _extract(self, _pcap([_frame(record1), _frame(record2)]), reassembly=['dtls'])
 
         datagram, = extractor.reassembly.dtls
         self.assertTrue(datagram.completed)
@@ -597,7 +595,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         # far too short to be a genuine ClientHello, but in bounds for the reassembler
         body = b'\x01\x02\x03\x04\x05'
         records = self._records(1, body, _split(body, (3,)), message_seq=1)
-        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=['dtls'])
 
         datagram, = extractor.reassembly.dtls
         self.assertTrue(datagram.completed)
@@ -615,7 +613,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
             _dtls_record(22, _dtls_handshake(1, whole, message_seq=0, fragment_offset=0,
                                              fragment_length=len(whole)), seq=4),
         ]
-        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=['dtls'])
         self.assertEqual(extractor.reassembly.dtls, ())
 
     def test_frames_are_the_same_with_and_without_reassembly(self) -> None:
@@ -623,7 +621,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         body = _client_hello_body(cookie=b'\xab\xcd\xef\x01')
         capture = _pcap([_frame(r) for r in self._records(1, body, _split(body, (len(body) // 2,)))])
         plain = _extract(self, capture)
-        reassembled = _extract(self, capture, reassembly=True, dtls=True)
+        reassembled = _extract(self, capture, reassembly=['dtls'])
         self.assertEqual([f['DTLS'].info for f in plain.frame],
                          [f['DTLS'].info for f in reassembled.frame])
 
@@ -648,7 +646,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         third = len(body) // 3
         frags = _split(body, (third, 2 * third))
         records = self._records(2, body, [frags[0], frags[2]], message_seq=1)  # fragment 1 lost
-        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=['dtls'])
 
         for frame in extractor.frame:
             self.assertIsInstance(frame['DTLS'].info.content[0].body, bytes)
