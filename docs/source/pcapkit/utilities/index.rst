@@ -13,8 +13,9 @@ built with, and imports nothing from :mod:`pcapkit` outside itself (see
 * a compatibility layer, timestamp conversion and pickle reductions;
 * the :mod:`context variables <pcapkit.utilities.contextvars>` its modules
   share, :mod:`lazy imports <pcapkit.utilities.importlib>` for a package's
-  exports, and an :mod:`abstract-class check <pcapkit.utilities.inspect>` that
-  reads no interpreter flag;
+  exports, an :mod:`abstract-class check <pcapkit.utilities.inspect>` that
+  reads no interpreter flag, and a :mod:`callback runner
+  <pcapkit.utilities.callbacks>` that a raising callback does not stop;
 * wrappers around third-party libraries.
 
 .. toctree::
@@ -30,6 +31,7 @@ built with, and imports nothing from :mod:`pcapkit` outside itself (see
    contextvars
    importlib
    inspect
+   callbacks
 
 Version Compatibility
 =====================

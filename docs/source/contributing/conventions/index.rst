@@ -35,7 +35,8 @@ House Conventions
      outside its own protocol lives, and what reads a capture cut;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
-     :mod:`pcapkit.foundation.analysis`;
+     :mod:`pcapkit.foundation.analysis`, and how its callbacks and those of
+     :mod:`pcapkit.foundation.traceflow` run;
    * :ref:`const-vendor-pairing` -- :mod:`pcapkit.const`, the
      :mod:`pcapkit.vendor` crawler each module needs, and how a package of it
      imports its modules;

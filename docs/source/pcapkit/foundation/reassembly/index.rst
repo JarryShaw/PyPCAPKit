@@ -78,7 +78,7 @@ What submits a buffer, and how its holes at that point pick the
            T4["a DTLS fragment whose length or type disagrees<br/>with the message held under its message\_seq"]
            T5["an IPv6 fragment overlapping another,<br/>not an exact duplicate: overlap=True"]
            T6["Reassembly.expire, as the Extractor advances<br/>every reassembler to each frame's timestamp:<br/>the timeout passed since a buffer's<br/>first fragment, timeout=True"]
-           T7[".datagram or fetch() read<br/>while buffers are outstanding"]
+           T7[".datagram or fetch() read outside a callback<br/>while buffers are outstanding"]
            T1 ~~~ T2 ~~~ T3 ~~~ T4 ~~~ T5 ~~~ T6 ~~~ T7
        end
        T1D["DTLS: a message whole"]

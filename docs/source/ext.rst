@@ -800,6 +800,11 @@ callback runs as each flow is finalised and takes that flow's
 :class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Each should return
 :obj:`None`; any return value is ignored.
 
+Every callback runs, of either kind: the first :exc:`Exception` one raises
+propagates once the last has run. A reassembly callback reading
+:attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.datagram` gets the
+datagrams stored so far, without the outstanding buffers.
+
 A reassembly callback can discard datagrams by modifying its list in place, but
 prefer not to: if the result itself is wrong for your purpose, subclass the
 class and change its algorithm instead.
