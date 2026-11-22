@@ -110,6 +110,7 @@ __all__ = [
     'register_tcp_option', 'register_tcp_mp_option',
     'register_sctp_chunk', 'register_sctp_parameter', 'register_sctp_cause',
     'register_dccp_option',
+    'register_dns_rdata', 'register_dns_option',
     'register_http_frame',
     'register_tls_extension',
     'register_pcapng_block', 'register_pcapng_option', 'register_pcapng_secrets',
@@ -143,7 +144,7 @@ __all__ = [
                                                             # IPv6 Extension Header
     'IP_Pseudo',                                            # IP Pseudo-Header
     'DCCP', 'TCP', 'UDP', 'SCTP',                           # Transport Layer
-    'FTP', 'FTP_DATA',                                      # Application Layer
+    'DNS', 'FTP', 'FTP_DATA',                               # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
     'Schema', 'schema',                                     # Protocol Schema

@@ -23,10 +23,15 @@ generator = globals()['generator']  # type: Any
 #: accepts it rather than degrading it to :class:`Raw`.
 _TLS_RECORD = b'\x17\x03\x03\x00\x00'
 
+#: A DNS query for the root's A record behind the TCP length field, whose
+#: 17 octets count the header and the question (RFC 1035 section 4.2.2).
+_DNS_MESSAGE = bytes.fromhex('0011' '0001 0100 0001 0000 0000 0000' '00 0001 0001')
+
 #: The payload each registered port is probed with.
 _PORT_PAYLOAD = {
     20: b'binary-file-contents',
     21: b'USER anonymous\r\n',
+    53: _DNS_MESSAGE,
     80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
     443: _TLS_RECORD,
     8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
@@ -56,6 +61,7 @@ FAMILIES = (
 PINNED_TARGETS = {
     'tcp/20': ('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
     'tcp/21': ('pcapkit.protocols.application.ftp.protocol', 'FTP'),
+    'tcp/53': ('pcapkit.protocols.application.dns.protocol', 'DNS'),
     # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``;
     # it dispatches to HTTPv1 or HTTPv2 (#2524).
     'tcp/80': ('pcapkit.protocols.application.http.protocol', 'HTTP'),

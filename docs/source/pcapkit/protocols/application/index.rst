@@ -11,6 +11,7 @@ protocol's layer is decided by function rather than encapsulation; see
    :maxdepth: 1
 
    application
+   dns
    http
    httpv1
    httpv2
@@ -28,7 +29,7 @@ protocol's layer is decided by function rather than encapsulation; see
 
 .. todo::
 
-   Implement BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP, ONC:RPC,
+   Implement BGP, DHCP, DHCPv6, IMAP, LDAP, MQTT, NNTP, NTP, ONC:RPC,
    POP, RIP, RTP, SIP, SMTP, SNMP, SSH, TELNET, XMPP.
 
 Protocol Registry

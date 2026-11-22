@@ -22,12 +22,16 @@ generator = globals()['generator']  # type: Any
 #: 1, zero-length fragment.
 _DTLS_RECORD = b'\x17\xfe\xfd\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
 
+#: The DNS query the ``tcp`` family probes port 53 with, without its length field.
+_DNS_MESSAGE = bytes.fromhex('0001 0100 0001 0000 0000 0000' '00 0001 0001')
+
 #: An L2TPv2 data message with every optional field absent, matching
 #: :func:`tests.protocols.test_dispatch_bindings_unit.l2tp_data`.
 _L2TP_DATA = struct.pack('!HHH', 0x0002, 0x1234, 0x5678) + b'\xff\x03\x00\x21PPP'
 
 #: The payload each registered port is probed with.
 _PORT_PAYLOAD = {
+    53: _DNS_MESSAGE,
     80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
     1701: _L2TP_DATA,
     5684: _DTLS_RECORD,
@@ -56,6 +60,7 @@ FAMILIES = (
 #: The class each case of :data:`FAMILIES` is pinned to, as
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
+    'udp/53': ('pcapkit.protocols.application.dns.protocol', 'DNS'),
     'udp/80': ('pcapkit.protocols.application.http.protocol', 'HTTP'),
     'udp/1701': ('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
     'udp/5684': ('pcapkit.protocols.application.dtls.protocol', 'DTLS'),

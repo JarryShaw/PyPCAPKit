@@ -16,9 +16,12 @@ This module provides the registries of the application layer protocols in
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.const.dns.option import Option as DNS_Option
+from pcapkit.const.dns.rr_type import RRType as DNS_RRType
 from pcapkit.const.http.frame import Frame as HTTP_Frame
 from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
 from pcapkit.foundation.registry.protocols.protocol import _check_code
+from pcapkit.protocols.application.dns.protocol import DNS
 from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 from pcapkit.protocols.application.httpv2.schema import FrameType as Schema_HTTP_FrameType
 from pcapkit.protocols.application.ssl.protocol import SSL
@@ -28,6 +31,11 @@ from pcapkit.utilities.logging import get_logger
 if TYPE_CHECKING:
     from typing import Optional, Type
 
+    from pcapkit.protocols.application.dns.protocol import \
+        OptionConstructor as DNS_OptionConstructor
+    from pcapkit.protocols.application.dns.protocol import OptionParser as DNS_OptionParser
+    from pcapkit.protocols.application.dns.protocol import RDataConstructor as DNS_RDataConstructor
+    from pcapkit.protocols.application.dns.protocol import RDataParser as DNS_RDataParser
     from pcapkit.protocols.application.httpv2.protocol import \
         FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2.protocol import FrameParser as HTTP_FrameParser
@@ -36,6 +44,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.ssl.protocol import ExtensionParser as TLS_ExtensionParser
 
 __all__ = [
+    'register_dns_rdata', 'register_dns_option',
     'register_http_frame',
     'register_tls_extension',
 ]
@@ -48,6 +57,70 @@ logger = get_logger(__name__)
 ###############################################################################
 # Application Layer Registries
 ###############################################################################
+
+
+# NOTE: pcapkit.protocols.application.dns.protocol.DNS.__rdata__
+def register_dns_rdata(code: 'DNS_RRType', meth: 'str | tuple[DNS_RDataParser, DNS_RDataConstructor]') -> 'None':
+    """Register an RDATA parser.
+
+    The function will register the given RDATA parser to the
+    :data:`pcapkit.protocols.application.dns.protocol.DNS.__rdata__` registry.
+
+    Args:
+        code: :class:`DNS <pcapkit.protocols.application.dns.protocol.DNS>` RR type
+            as in :class:`~pcapkit.const.dns.rr_type.RRType`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the RDATA. A name names the ``_read_rdata_*``
+            and ``_make_rdata_*`` methods, and has to name an existing
+            ``_read_rdata_*`` one.
+
+    Raises:
+        RegistryError: If ``code`` is not an
+            :class:`~pcapkit.const.dns.rr_type.RRType` member, e.g. a member
+            of another enum, or ``meth`` is a name with no matching
+            ``_read_rdata_*`` method.
+
+    .. versionadded:: 1.7.0
+
+    """
+    _check_code(code, DNS_RRType, DNS)
+    if isinstance(meth, str) and not hasattr(DNS, f'_read_rdata_{meth}'):
+        raise RegistryError('method must be a valid DNS RDATA parser function')
+
+    DNS.register_rdata(code, meth)
+    logger.debug('registered DNS RDATA parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.application.dns.protocol.DNS.__option__
+def register_dns_option(code: 'DNS_Option', meth: 'str | tuple[DNS_OptionParser, DNS_OptionConstructor]') -> 'None':
+    """Register an EDNS(0) option parser.
+
+    The function will register the given option parser to the
+    :data:`pcapkit.protocols.application.dns.protocol.DNS.__option__` registry.
+
+    Args:
+        code: :class:`DNS <pcapkit.protocols.application.dns.protocol.DNS>` EDNS(0)
+            option code as in :class:`~pcapkit.const.dns.option.Option`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the OPTION-DATA. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name an
+            existing ``_read_opt_*`` one.
+
+    Raises:
+        RegistryError: If ``code`` is not an
+            :class:`~pcapkit.const.dns.option.Option` member, e.g. a member of
+            another enum, or ``meth`` is a name with no matching
+            ``_read_opt_*`` method.
+
+    .. versionadded:: 1.7.0
+
+    """
+    _check_code(code, DNS_Option, DNS)
+    if isinstance(meth, str) and not hasattr(DNS, f'_read_opt_{meth}'):
+        raise RegistryError('method must be a valid DNS option parser function')
+
+    DNS.register_option(code, meth)
+    logger.debug('registered DNS option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.application.httpv2.protocol.HTTPv2.__frame__

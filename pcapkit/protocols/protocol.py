@@ -577,6 +577,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'TCP': ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
         'UDP': ModuleDescriptor('pcapkit.protocols.transport.udp.protocol', 'UDP'),
         # Application Layer
+        'DNS': ModuleDescriptor('pcapkit.protocols.application.dns.protocol', 'DNS'),
         'DRARP': ModuleDescriptor('pcapkit.protocols.application.drarp.protocol', 'DRARP'),
         'DTLS': ModuleDescriptor('pcapkit.protocols.application.dtls.protocol', 'DTLS'),
         'FTP': ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'),

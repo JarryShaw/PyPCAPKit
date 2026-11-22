@@ -416,6 +416,11 @@ NOT_A_COPY = {
 UNRELATED = {
     'pcapkit/foundation/engines/pypcapfile.py': ((12,), 'the Python 3.12 version ceiling of '
                                                  'PyPCAPFile, not a length'),
+    'pcapkit/protocols/application/dns/protocol.py': ((6, 16, 20, 24, 32, 40),
+                                                     'DNS RDATA, EDNS(0) option and OPT TTL field '
+                                                     'sizes, offsets and shifts'),
+    'pcapkit/protocols/application/dns/schema.py': ((6, 9, 12), 'the DNS header length, a label '
+                                                   'type shift and header flag bit positions'),
     'pcapkit/protocols/application/http/protocol.py': ((6, 9, 12), 'the length of an HTTP/1 version '
                                               'token, and HTTP/2 frame types and flag masks'),
     'pcapkit/protocols/application/httpv2/protocol.py': ((6, 9), 'HTTP/2 frame header and setting sizes'),

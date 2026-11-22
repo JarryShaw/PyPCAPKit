@@ -459,6 +459,8 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_reassembly_ipv6_callback': 'append-only, nothing to undo with',
             'register_reassembly_tcp_callback': 'append-only, nothing to undo with',
             'register_traceflow_tcp_callback': 'append-only, nothing to undo with',
+            'register_dns_option': 'no schema argument; override and restore are in test_dns_unit',
+            'register_dns_rdata': 'no schema argument; override and restore are in test_dns_unit',
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
             'register_tls_extension': 'no schema argument; override and restore are in test_tls_extensions_2514_unit',
             'register_ipx': 'IPX.__proto__ ships no entry, so an override has nothing to be restored to',

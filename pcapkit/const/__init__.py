@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     # per protocol
     from pcapkit.const.arp import *
     from pcapkit.const.dccp import *
+    from pcapkit.const.dns import *
     from pcapkit.const.esp import *
     from pcapkit.const.ftp import *
     from pcapkit.const.hip import *
@@ -58,6 +59,8 @@ __all__ = [
     # DCCP
     'DCCP_PacketType', 'DCCP_ResetCode', 'DCCP_Option', 'DCCP_Feature',
     'DCCP_AckVectorState', 'DCCP_DropCode',
+    # DNS
+    'DNS_RRClass', 'DNS_RRType', 'DNS_Opcode', 'DNS_RCode', 'DNS_Option',
     # ESP
     'ESP_Cipher', 'ESP_Integrity',
     # FTP
@@ -138,7 +141,7 @@ __all__ = [
 # NOTE: the subpackages whose ``__all__`` this package re-exports, which the
 # type checkers star-import above.
 __getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
-    'reg', 'pcapng', 'arp', 'dccp', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
+    'reg', 'pcapng', 'arp', 'dccp', 'dns', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
     'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'mh', 'ngap', 'ospf',
     'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
 ))
