@@ -1124,7 +1124,9 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         """
         schema = self.__header__
 
-        data = schema.payload
+        # NOTE: The packed octets, not the field's value, which ``make`` leaves a
+        # protocol or schema payload as (#2860).
+        data = schema.get_payload()
         spi, seq = schema.spi, schema.seq
         total = 8 + len(data)
 
@@ -1250,7 +1252,8 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
                 when ``encrypt`` is :data:`True`.
             icv: Integrity check value. Ignored when ``encrypt`` is
                 :data:`True`, where it is computed instead.
-            payload: Payload of current instance.
+            payload: Payload of current instance, as :obj:`bytes`, a protocol
+                or a schema, which is packed to its octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -1264,6 +1267,12 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
                 satisfy the algorithm's alignment requirement, or if
                 :meth:`SecurityAssociation.encrypt` rejects ``iv`` or cannot
                 run without |cryptography|_.
+
+        .. versionchanged:: 1.7.0
+
+           A protocol or schema ``payload`` without ``icv`` or ``encrypt`` is
+           packed to its octets, where it raised :exc:`TypeError`
+           (:issue:`2860`).
 
         """
         if not encrypt:
