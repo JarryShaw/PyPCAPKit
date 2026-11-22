@@ -1,0 +1,1635 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="PPP Constant Enumerations" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/ppp.html" />
+<meta property="og:site_name" content="PyPCAPKit" />
+<meta property="og:description" content=",, PPP_Protocol, PPP DLL Protocol Numbers*,,,, PPP DLL Protocol Numbers: Generated from pcapkit.vendor.ppp.protocol.Protocol. Footnotes*, https://www.iana.org/assignments/ppp-numbers/ppp-numbers.xh..." />
+<meta name="description" content=",, PPP_Protocol, PPP DLL Protocol Numbers*,,,, PPP DLL Protocol Numbers: Generated from pcapkit.vendor.ppp.protocol.Protocol. Footnotes*, https://www.iana.org/assignments/ppp-numbers/ppp-numbers.xh..." />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="PPPoE Constant Enumerations" href="pppoe.html"><link rel="prev" title="Linux-Specific Constant Enumerations" href="linux.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>PPP Constant Enumerations - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">PyPCAPKit</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../interface/registry.html">Registry Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/reassembly.html">Reassembly Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ip.html">IP Reassembly Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/traceflow.html">Flow Tracing Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/registry.html">Registry Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Link Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP - Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/inarp.html">InARP - Inverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/gre.html">GRE - Generic Routing Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/ieee802_11.html">IEEE 802.11 - Wireless LAN MAC Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/internet.html">Internet Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol Version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol Version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/icmp.html">ICMP - Internet Control Message Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/icmpv4.html">ICMPv4 - Internet Control Message Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/icmpv6.html">ICMPv6 - Internet Control Message Protocol for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol Version 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Transport Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/dccp.html">DCCP - Datagram Congestion Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Application Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/dns.html">DNS - Domain Name System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/no_payload.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/checksum.html">Checksums</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/pickle.html">Pickle Reductions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/inspect.html">Abstract Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/misc.html">Miscellaneous Fields</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/checksum/internet.html">Internet Checksum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/decorators.html">Decorator Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/enum.html">Enumeration Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">I/O Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/module.html">Module Descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/packet.html">Deferred Packet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/schema/shortread.html">Short-Read Replay</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/sentinels.html">Sentinel Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="icmpv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dns.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/icmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/icmpv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/dns.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../engines.html">Engine Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.5.html">1.3.5 – 2024-11-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.4.html">1.3.4 – 2024-11-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.3.html">1.3.3 – 2024-11-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.1.html">1.3.1 – 2023-12-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.3.0.html">1.3.0 – 2023-10-04</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.2.html">1.2.2 – 2023-09-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.1.html">1.2.1 – 2023-08-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.2.0.html">1.2.0 – 2023-08-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.1.1.html">1.1.1 – 2023-08-15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.1.0.html">1.1.0 – 2023-07-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.3.html">1.0.3 – 2023-06-29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.2.html">1.0.2 – 2023-06-05</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.1.html">1.0.1 – 2023-05-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.0.0.html">1.0.0 – 2023-05-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.3.html">0.16.3 – 2022-10-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.2.html">0.16.2 – 2022-08-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.1.html">0.16.1 – 2022-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.16.0.html">0.16.0 – 2022-05-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.5.html">0.15.5 – 2020-10-11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.4.html">0.15.4 – 2020-08-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.3.html">0.15.3 – 2020-08-17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.2.html">0.15.2 – 2020-06-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.1.html">0.15.1 – 2020-06-18</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.15.0.html">0.15.0 – 2020-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.5.html">0.14.5 – 2019-10-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.4.html">0.14.4 – 2019-09-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.3.html">0.14.3 – 2019-08-08</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.2.html">0.14.2 – 2019-03-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.1.html">0.14.1 – 2019-03-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.14.0.html">0.14.0 – 2019-03-02</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.3.html">0.13.3 – 2019-02-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.2.html">0.13.2 – 2019-01-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.1.html">0.13.1 – 2019-01-23</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/0.13.0.html">0.13.0 – 2018-12-08</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/testing.html">Testing</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/process.html">Running the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/workflows.html">GitHub Actions Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/maintenance.html">Maintenance Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/pep.html">Help Wanted</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/const/ppp.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/const/ppp.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-pcapkit.const.ppp">
+<span id="ppp-constant-enumerations"></span><h1><a class="reference internal" href="../protocols/link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP" title="pcapkit.protocols.link.ppp.protocol.PPP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code></a> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ppp" title="Link to this heading">¶</a></h1>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.ppp.protocol.Protocol" title="pcapkit.const.ppp.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP_Protocol</span></code></a></p></td>
+<td><p>PPP DLL Protocol Numbers <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="module-pcapkit.const.ppp.protocol">
+<span id="ppp-dll-protocol-numbers"></span><h2>PPP DLL Protocol Numbers<a class="headerlink" href="#module-pcapkit.const.ppp.protocol" title="Link to this heading">¶</a></h2>
+<p>Generated from <a class="reference internal" href="../vendor/ppp.html#pcapkit.vendor.ppp.protocol.Protocol" title="pcapkit.vendor.ppp.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ppp.protocol.Protocol</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ppp.protocol.</span></span><span class="sig-name descname"><span class="pre">Protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ppp/protocol.html#Protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Protocol] PPP DLL Protocol Numbers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Padding_Protocol">
+<span class="sig-name descname"><span class="pre">Padding_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Padding_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Padding Protocol [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.ROHC_small_CID">
+<span class="sig-name descname"><span class="pre">ROHC_small_CID</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.ROHC_small_CID" title="Link to this definition">¶</a></dt>
+<dd><p>ROHC small-CID [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3095.html"><strong>RFC 3095</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.ROHC_large_CID">
+<span class="sig-name descname"><span class="pre">ROHC_large_CID</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.ROHC_large_CID" title="Link to this definition">¶</a></dt>
+<dd><p>ROHC large-CID [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3095.html"><strong>RFC 3095</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Internet_Protocol_version_4">
+<span class="sig-name descname"><span class="pre">Internet_Protocol_version_4</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Internet_Protocol_version_4" title="Link to this definition">¶</a></dt>
+<dd><p>Internet Protocol version 4 [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1332.html"><strong>RFC 1332</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.OSI_Network_Layer">
+<span class="sig-name descname"><span class="pre">OSI_Network_Layer</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">35</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.OSI_Network_Layer" title="Link to this definition">¶</a></dt>
+<dd><p>OSI Network Layer [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1377.html"><strong>RFC 1377</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Xerox_NS_IDP">
+<span class="sig-name descname"><span class="pre">Xerox_NS_IDP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">37</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Xerox_NS_IDP" title="Link to this definition">¶</a></dt>
+<dd><p>Xerox NS IDP [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1764.html"><strong>RFC 1764</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.DECnet_Phase_IV">
+<span class="sig-name descname"><span class="pre">DECnet_Phase_IV</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">39</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.DECnet_Phase_IV" title="Link to this definition">¶</a></dt>
+<dd><p>DECnet Phase IV [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1762.html"><strong>RFC 1762</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Appletalk">
+<span class="sig-name descname"><span class="pre">Appletalk</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">41</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Appletalk" title="Link to this definition">¶</a></dt>
+<dd><p>Appletalk [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1378.html"><strong>RFC 1378</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Novell_IPX">
+<span class="sig-name descname"><span class="pre">Novell_IPX</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Novell_IPX" title="Link to this definition">¶</a></dt>
+<dd><p>Novell IPX [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1552.html"><strong>RFC 1552</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Van_Jacobson_Compressed_TCP_IP">
+<span class="sig-name descname"><span class="pre">Van_Jacobson_Compressed_TCP_IP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">45</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Van_Jacobson_Compressed_TCP_IP" title="Link to this definition">¶</a></dt>
+<dd><p>Van Jacobson Compressed TCP/IP [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1332.html"><strong>RFC 1332</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Van_Jacobson_Uncompressed_TCP_IP">
+<span class="sig-name descname"><span class="pre">Van_Jacobson_Uncompressed_TCP_IP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">47</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Van_Jacobson_Uncompressed_TCP_IP" title="Link to this definition">¶</a></dt>
+<dd><p>Van Jacobson Uncompressed TCP/IP [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1332.html"><strong>RFC 1332</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Bridging_PDU">
+<span class="sig-name descname"><span class="pre">Bridging_PDU</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Bridging_PDU" title="Link to this definition">¶</a></dt>
+<dd><p>Bridging PDU [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3518.html"><strong>RFC 3518</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Stream_Protocol">
+<span class="sig-name descname"><span class="pre">Stream_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Stream_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Stream Protocol (ST-II)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Banyan_Vines">
+<span class="sig-name descname"><span class="pre">Banyan_Vines</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">53</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Banyan_Vines" title="Link to this definition">¶</a></dt>
+<dd><p>Banyan Vines [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1763.html"><strong>RFC 1763</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Unassigned_0x0037">
+<span class="sig-name descname"><span class="pre">Unassigned_0x0037</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">55</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Unassigned_0x0037" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.AppleTalk_EDDP">
+<span class="sig-name descname"><span class="pre">AppleTalk_EDDP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.AppleTalk_EDDP" title="Link to this definition">¶</a></dt>
+<dd><p>AppleTalk EDDP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.AppleTalk_SmartBuffered">
+<span class="sig-name descname"><span class="pre">AppleTalk_SmartBuffered</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">59</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.AppleTalk_SmartBuffered" title="Link to this definition">¶</a></dt>
+<dd><p>AppleTalk SmartBuffered</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Multi_Link">
+<span class="sig-name descname"><span class="pre">Multi_Link</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">61</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Multi_Link" title="Link to this definition">¶</a></dt>
+<dd><p>Multi-Link [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1990.html"><strong>RFC 1990</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.NETBIOS_Framing">
+<span class="sig-name descname"><span class="pre">NETBIOS_Framing</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">63</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.NETBIOS_Framing" title="Link to this definition">¶</a></dt>
+<dd><p>NETBIOS Framing [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2097.html"><strong>RFC 2097</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Cisco_Systems">
+<span class="sig-name descname"><span class="pre">Cisco_Systems</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Cisco_Systems" title="Link to this definition">¶</a></dt>
+<dd><p>Cisco Systems</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Ascom_Timeplex_0x0043">
+<span class="sig-name descname"><span class="pre">Ascom_Timeplex_0x0043</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">67</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Ascom_Timeplex_0x0043" title="Link to this definition">¶</a></dt>
+<dd><p>Ascom Timeplex</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Fujitsu_Link_Backup_and_Load_Balancing">
+<span class="sig-name descname"><span class="pre">Fujitsu_Link_Backup_and_Load_Balancing</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">69</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Fujitsu_Link_Backup_and_Load_Balancing" title="Link to this definition">¶</a></dt>
+<dd><p>Fujitsu Link Backup and Load Balancing (LBLB)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.DCA_Remote_Lan">
+<span class="sig-name descname"><span class="pre">DCA_Remote_Lan</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">71</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.DCA_Remote_Lan" title="Link to this definition">¶</a></dt>
+<dd><p>DCA Remote Lan</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Serial_Data_Transport_Protocol">
+<span class="sig-name descname"><span class="pre">Serial_Data_Transport_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">73</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Serial_Data_Transport_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Serial Data Transport Protocol (PPP-SDTP) [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1963.html"><strong>RFC 1963</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.SNA_over_802_2">
+<span class="sig-name descname"><span class="pre">SNA_over_802_2</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">75</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.SNA_over_802_2" title="Link to this definition">¶</a></dt>
+<dd><p>SNA over 802.2 [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2043.html"><strong>RFC 2043</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.SNA">
+<span class="sig-name descname"><span class="pre">SNA</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">77</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.SNA" title="Link to this definition">¶</a></dt>
+<dd><p>SNA [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2043.html"><strong>RFC 2043</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.IPv6_Header_Compression">
+<span class="sig-name descname"><span class="pre">IPv6_Header_Compression</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">79</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.IPv6_Header_Compression" title="Link to this definition">¶</a></dt>
+<dd><p>IPv6 Header Compression</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.KNX_Bridging_Data">
+<span class="sig-name descname"><span class="pre">KNX_Bridging_Data</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">81</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.KNX_Bridging_Data" title="Link to this definition">¶</a></dt>
+<dd><p>KNX Bridging Data [ianp knxunix knx co]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Encryption">
+<span class="sig-name descname"><span class="pre">Encryption</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">83</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Encryption" title="Link to this definition">¶</a></dt>
+<dd><p>Encryption [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1968.html"><strong>RFC 1968</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Individual_Link_Encryption">
+<span class="sig-name descname"><span class="pre">Individual_Link_Encryption</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">85</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Individual_Link_Encryption" title="Link to this definition">¶</a></dt>
+<dd><p>Individual Link Encryption [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1968.html"><strong>RFC 1968</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Internet_Protocol_version_6">
+<span class="sig-name descname"><span class="pre">Internet_Protocol_version_6</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">87</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Internet_Protocol_version_6" title="Link to this definition">¶</a></dt>
+<dd><p>Internet Protocol version 6 [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5072.html"><strong>RFC 5072</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.PPP_Muxing">
+<span class="sig-name descname"><span class="pre">PPP_Muxing</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">89</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.PPP_Muxing" title="Link to this definition">¶</a></dt>
+<dd><p>PPP Muxing [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3153.html"><strong>RFC 3153</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Network_Protocol">
+<span class="sig-name descname"><span class="pre">Vendor_Specific_Network_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">91</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Network_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Vendor-Specific Network Protocol (VSNP) [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3772.html"><strong>RFC 3772</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.TRILL_Network_Protocol">
+<span class="sig-name descname"><span class="pre">TRILL_Network_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">93</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.TRILL_Network_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>TRILL Network Protocol (TNP) [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6361.html"><strong>RFC 6361</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Full_Header">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Full_Header</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">97</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Full_Header" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Full Header [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_TCP">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Compressed_TCP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">99</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_TCP" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Compressed TCP [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_Non_TCP">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Compressed_Non_TCP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">101</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_Non_TCP" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Compressed Non TCP [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_UDP_8">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Compressed_UDP_8</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">103</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_UDP_8" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Compressed UDP 8 [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_RTP_8">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Compressed_RTP_8</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">105</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_RTP_8" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Compressed RTP 8 [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Stampede_Bridging">
+<span class="sig-name descname"><span class="pre">Stampede_Bridging</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">111</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Stampede_Bridging" title="Link to this definition">¶</a></dt>
+<dd><p>Stampede Bridging</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x0071">
+<span class="sig-name descname"><span class="pre">Reserved_0x0071</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">113</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x0071" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved [Karl Fox]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.MP_Protocol">
+<span class="sig-name descname"><span class="pre">MP_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">115</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.MP_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>MP+ Protocol [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1934.html"><strong>RFC 1934</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x007D">
+<span class="sig-name descname"><span class="pre">Reserved_0x007D</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">125</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x007D" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved (Control Escape) [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x007F">
+<span class="sig-name descname"><span class="pre">Reserved_0x007F</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">127</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x007F" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved (compression inefficient) [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1662.html"><strong>RFC 1662</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Unassigned_0x0081">
+<span class="sig-name descname"><span class="pre">Unassigned_0x0081</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">129</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Unassigned_0x0081" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Unassigned_0x0083">
+<span class="sig-name descname"><span class="pre">Unassigned_0x0083</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">131</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Unassigned_0x0083" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.NTCITS_IPI">
+<span class="sig-name descname"><span class="pre">NTCITS_IPI</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">193</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.NTCITS_IPI" title="Link to this definition">¶</a></dt>
+<dd><p>NTCITS IPI [Alan Ungar]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x00CF">
+<span class="sig-name descname"><span class="pre">Reserved_0x00CF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">207</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x00CF" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved (PPP NLPID) [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Single_link_compression_in_multilink">
+<span class="sig-name descname"><span class="pre">Single_link_compression_in_multilink</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">251</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Single_link_compression_in_multilink" title="Link to this definition">¶</a></dt>
+<dd><p>Single link compression in multilink [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1962.html"><strong>RFC 1962</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Compressed_datagram">
+<span class="sig-name descname"><span class="pre">Compressed_datagram</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Compressed_datagram" title="Link to this definition">¶</a></dt>
+<dd><p>Compressed datagram [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1962.html"><strong>RFC 1962</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x00FF">
+<span class="sig-name descname"><span class="pre">Reserved_0x00FF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">255</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x00FF" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved (compression inefficient) [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Protocol_802_1d_Hello_Packets">
+<span class="sig-name descname"><span class="pre">Protocol_802_1d_Hello_Packets</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">513</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Protocol_802_1d_Hello_Packets" title="Link to this definition">¶</a></dt>
+<dd><p>802.1d Hello Packets [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3518.html"><strong>RFC 3518</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.IBM_Source_Routing_BPDU">
+<span class="sig-name descname"><span class="pre">IBM_Source_Routing_BPDU</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">515</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.IBM_Source_Routing_BPDU" title="Link to this definition">¶</a></dt>
+<dd><p>IBM Source Routing BPDU [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3518.html"><strong>RFC 3518</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.DEC_LANBridge100_Spanning_Tree">
+<span class="sig-name descname"><span class="pre">DEC_LANBridge100_Spanning_Tree</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">517</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.DEC_LANBridge100_Spanning_Tree" title="Link to this definition">¶</a></dt>
+<dd><p>DEC LANBridge100 Spanning Tree [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3518.html"><strong>RFC 3518</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Cisco_Discovery_Protocol">
+<span class="sig-name descname"><span class="pre">Cisco_Discovery_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">519</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Cisco_Discovery_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Cisco Discovery Protocol [Arun Sastry]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Netcs_Twin_Routing_0x0209">
+<span class="sig-name descname"><span class="pre">Netcs_Twin_Routing_0x0209</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">521</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Netcs_Twin_Routing_0x0209" title="Link to this definition">¶</a></dt>
+<dd><p>Netcs Twin Routing [Oliver Korfmacher]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.STP_Scheduled_Transfer_Protocol">
+<span class="sig-name descname"><span class="pre">STP_Scheduled_Transfer_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">523</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.STP_Scheduled_Transfer_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>STP - Scheduled Transfer Protocol [Ben Segal]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.EDP_Extreme_Discovery_Protocol">
+<span class="sig-name descname"><span class="pre">EDP_Extreme_Discovery_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">525</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.EDP_Extreme_Discovery_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>EDP - Extreme Discovery Protocol [Don Grosser]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Optical_Supervisory_Channel_Protocol_0x0211">
+<span class="sig-name descname"><span class="pre">Optical_Supervisory_Channel_Protocol_0x0211</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">529</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Optical_Supervisory_Channel_Protocol_0x0211" title="Link to this definition">¶</a></dt>
+<dd><p>Optical Supervisory Channel Protocol (OSCP) [Sharat C Prasad]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Optical_Supervisory_Channel_Protocol_0x0213">
+<span class="sig-name descname"><span class="pre">Optical_Supervisory_Channel_Protocol_0x0213</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">531</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Optical_Supervisory_Channel_Protocol_0x0213" title="Link to this definition">¶</a></dt>
+<dd><p>Optical Supervisory Channel Protocol (OSCP) [Sharat C Prasad]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Luxcom">
+<span class="sig-name descname"><span class="pre">Luxcom</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">561</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Luxcom" title="Link to this definition">¶</a></dt>
+<dd><p>Luxcom</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Sigma_Network_Systems">
+<span class="sig-name descname"><span class="pre">Sigma_Network_Systems</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">563</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Sigma_Network_Systems" title="Link to this definition">¶</a></dt>
+<dd><p>Sigma Network Systems</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Apple_Client_Server_Protocol">
+<span class="sig-name descname"><span class="pre">Apple_Client_Server_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">565</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Apple_Client_Server_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Apple Client Server Protocol [Howard Ridenour]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.MPLS_Unicast">
+<span class="sig-name descname"><span class="pre">MPLS_Unicast</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">641</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.MPLS_Unicast" title="Link to this definition">¶</a></dt>
+<dd><p>MPLS Unicast [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3032.html"><strong>RFC 3032</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.MPLS_Multicast">
+<span class="sig-name descname"><span class="pre">MPLS_Multicast</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">643</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.MPLS_Multicast" title="Link to this definition">¶</a></dt>
+<dd><p>MPLS Multicast [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3032.html"><strong>RFC 3032</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.IEEE_p1284_4_standard_data_packets">
+<span class="sig-name descname"><span class="pre">IEEE_p1284_4_standard_data_packets</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">645</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.IEEE_p1284_4_standard_data_packets" title="Link to this definition">¶</a></dt>
+<dd><p>IEEE p1284.4 standard - data packets [Brian Batchelder]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.ETSI_TETRA_Network_Protocol_Type_1">
+<span class="sig-name descname"><span class="pre">ETSI_TETRA_Network_Protocol_Type_1</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">647</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.ETSI_TETRA_Network_Protocol_Type_1" title="Link to this definition">¶</a></dt>
+<dd><p>ETSI TETRA Network Protocol Type 1 [Seppo Nieminen]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Multichannel_Flow_Treatment_Protocol_0x0289">
+<span class="sig-name descname"><span class="pre">Multichannel_Flow_Treatment_Protocol_0x0289</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">649</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Multichannel_Flow_Treatment_Protocol_0x0289" title="Link to this definition">¶</a></dt>
+<dd><p>Multichannel Flow Treatment Protocol [Pete McCann]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_TCP_No_Delta">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Compressed_TCP_No_Delta</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8291</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_TCP_No_Delta" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Compressed TCP No Delta [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Context_State">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Context_State</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8293</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Context_State" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Context State [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_UDP_16">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Compressed_UDP_16</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8295</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_UDP_16" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Compressed UDP 16 [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_RTP_16">
+<span class="sig-name descname"><span class="pre">RTP_IPHC_Compressed_RTP_16</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8297</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RTP_IPHC_Compressed_RTP_16" title="Link to this definition">¶</a></dt>
+<dd><p>RTP IPHC Compressed RTP 16 [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3544.html"><strong>RFC 3544</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Cray_Communications_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Cray_Communications_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16385</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Cray_Communications_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Cray Communications Control Protocol [Erling B Stage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.CDPD_Mobile_Network_Registration_Protocol">
+<span class="sig-name descname"><span class="pre">CDPD_Mobile_Network_Registration_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16387</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.CDPD_Mobile_Network_Registration_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>CDPD Mobile Network Registration Protocol [Frank Quick]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Expand_accelerator_protocol">
+<span class="sig-name descname"><span class="pre">Expand_accelerator_protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16389</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Expand_accelerator_protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Expand accelerator protocol [Ilan Rachmani]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.ODSICP_NCP">
+<span class="sig-name descname"><span class="pre">ODSICP_NCP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16391</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.ODSICP_NCP" title="Link to this definition">¶</a></dt>
+<dd><p>ODSICP NCP [K Arvind]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.DOCSIS_DLL">
+<span class="sig-name descname"><span class="pre">DOCSIS_DLL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16393</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.DOCSIS_DLL" title="Link to this definition">¶</a></dt>
+<dd><p>DOCSIS DLL [Jason Gaedtke]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Cetacean_Network_Detection_Protocol">
+<span class="sig-name descname"><span class="pre">Cetacean_Network_Detection_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16395</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Cetacean_Network_Detection_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Cetacean Network Detection Protocol [Curtis A Siller Jr]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Stacker_LZS">
+<span class="sig-name descname"><span class="pre">Stacker_LZS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16417</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Stacker_LZS" title="Link to this definition">¶</a></dt>
+<dd><p>Stacker LZS [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1974.html"><strong>RFC 1974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RefTek_Protocol">
+<span class="sig-name descname"><span class="pre">RefTek_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16419</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RefTek_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>RefTek Protocol [Robert Banfill]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Fibre_Channel">
+<span class="sig-name descname"><span class="pre">Fibre_Channel</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16421</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Fibre_Channel" title="Link to this definition">¶</a></dt>
+<dd><p>Fibre Channel [Murali Rajagopal]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.OpenDOF">
+<span class="sig-name descname"><span class="pre">OpenDOF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16423</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.OpenDOF" title="Link to this definition">¶</a></dt>
+<dd><p>OpenDOF [Bryant Eastham]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Protocol">
+<span class="sig-name descname"><span class="pre">Vendor_Specific_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16475</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Vendor-Specific Protocol (VSP) [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3772.html"><strong>RFC 3772</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.TRILL_Link_State_Protocol">
+<span class="sig-name descname"><span class="pre">TRILL_Link_State_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16477</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.TRILL_Link_State_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>TRILL Link State Protocol (TLSP) [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6361.html"><strong>RFC 6361</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Internet_Protocol_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Internet_Protocol_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32801</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Internet_Protocol_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Internet Protocol Control Protocol [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1332.html"><strong>RFC 1332</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.OSI_Network_Layer_Control_Protocol">
+<span class="sig-name descname"><span class="pre">OSI_Network_Layer_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32803</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.OSI_Network_Layer_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>OSI Network Layer Control Protocol [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1377.html"><strong>RFC 1377</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Xerox_NS_IDP_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Xerox_NS_IDP_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32805</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Xerox_NS_IDP_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Xerox NS IDP Control Protocol [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1764.html"><strong>RFC 1764</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.DECnet_Phase_IV_Control_Protocol">
+<span class="sig-name descname"><span class="pre">DECnet_Phase_IV_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32807</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.DECnet_Phase_IV_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>DECnet Phase IV Control Protocol [<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1762.html"><strong>RFC 1762</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Appletalk_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Appletalk_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32809</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Appletalk_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Appletalk Control Protocol [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1378.html"><strong>RFC 1378</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Novell_IPX_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Novell_IPX_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32811</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Novell_IPX_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Novell IPX Control Protocol [<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1552.html"><strong>RFC 1552</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x802D">
+<span class="sig-name descname"><span class="pre">Reserved_0x802D</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32813</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x802D" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x802F">
+<span class="sig-name descname"><span class="pre">Reserved_0x802F</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32815</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x802F" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Bridging_NCP">
+<span class="sig-name descname"><span class="pre">Bridging_NCP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32817</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Bridging_NCP" title="Link to this definition">¶</a></dt>
+<dd><p>Bridging NCP [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3518.html"><strong>RFC 3518</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Stream_Protocol_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Stream_Protocol_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32819</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Stream_Protocol_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Stream Protocol Control Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Banyan_Vines_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Banyan_Vines_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32821</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Banyan_Vines_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Banyan Vines Control Protocol [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1763.html"><strong>RFC 1763</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Unassigned_0x8037">
+<span class="sig-name descname"><span class="pre">Unassigned_0x8037</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32823</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Unassigned_0x8037" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x8039">
+<span class="sig-name descname"><span class="pre">Reserved_0x8039</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32825</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x8039" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x803B">
+<span class="sig-name descname"><span class="pre">Reserved_0x803B</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32827</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x803B" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Multi_Link_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Multi_Link_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32829</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Multi_Link_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Multi-Link Control Protocol [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1990.html"><strong>RFC 1990</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.NETBIOS_Framing_Control_Protocol">
+<span class="sig-name descname"><span class="pre">NETBIOS_Framing_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32831</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.NETBIOS_Framing_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>NETBIOS Framing Control Protocol [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2097.html"><strong>RFC 2097</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Cisco_Systems_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Cisco_Systems_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32833</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Cisco_Systems_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Cisco Systems Control Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Ascom_Timeplex_0x8043">
+<span class="sig-name descname"><span class="pre">Ascom_Timeplex_0x8043</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32835</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Ascom_Timeplex_0x8043" title="Link to this definition">¶</a></dt>
+<dd><p>Ascom Timeplex</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Fujitsu_LBLB_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Fujitsu_LBLB_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32837</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Fujitsu_LBLB_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Fujitsu LBLB Control Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.DCA_Remote_Lan_Network_Control_Protocol">
+<span class="sig-name descname"><span class="pre">DCA_Remote_Lan_Network_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32839</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.DCA_Remote_Lan_Network_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>DCA Remote Lan Network Control Protocol (RLNCP)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Serial_Data_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Serial_Data_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32841</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Serial_Data_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Serial Data Control Protocol (PPP-SDCP) [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1963.html"><strong>RFC 1963</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.SNA_over_802_2_Control_Protocol">
+<span class="sig-name descname"><span class="pre">SNA_over_802_2_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32843</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.SNA_over_802_2_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>SNA over 802.2 Control Protocol [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2043.html"><strong>RFC 2043</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.SNA_Control_Protocol">
+<span class="sig-name descname"><span class="pre">SNA_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32845</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.SNA_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>SNA Control Protocol [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2043.html"><strong>RFC 2043</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.IP6_Header_Compression_Control_Protocol">
+<span class="sig-name descname"><span class="pre">IP6_Header_Compression_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32847</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.IP6_Header_Compression_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>IP6 Header Compression Control Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.KNX_Bridging_Control_Protocol">
+<span class="sig-name descname"><span class="pre">KNX_Bridging_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32849</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.KNX_Bridging_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>KNX Bridging Control Protocol [ianp knxunix knx co]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Encryption_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Encryption_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32851</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Encryption_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Encryption Control Protocol [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1968.html"><strong>RFC 1968</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Individual_Link_Encryption_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Individual_Link_Encryption_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32853</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Individual_Link_Encryption_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Individual Link Encryption Control Protocol [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1968.html"><strong>RFC 1968</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.IPv6_Control_Protocol">
+<span class="sig-name descname"><span class="pre">IPv6_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32855</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.IPv6_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>IPv6 Control Protocol [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5072.html"><strong>RFC 5072</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.PPP_Muxing_Control_Protocol">
+<span class="sig-name descname"><span class="pre">PPP_Muxing_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32857</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.PPP_Muxing_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>PPP Muxing Control Protocol [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3153.html"><strong>RFC 3153</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Network_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Vendor_Specific_Network_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32859</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Network_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Vendor-Specific Network Control Protocol (VSNCP) [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3772.html"><strong>RFC 3772</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.TRILL_Network_Control_Protocol">
+<span class="sig-name descname"><span class="pre">TRILL_Network_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32861</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.TRILL_Network_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>TRILL Network Control Protocol (TNCP) [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6361.html"><strong>RFC 6361</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Stampede_Bridging_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Stampede_Bridging_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32879</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Stampede_Bridging_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Stampede Bridging Control Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.MP_Control_Protocol">
+<span class="sig-name descname"><span class="pre">MP_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32883</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.MP_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>MP+ Control Protocol [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1934.html"><strong>RFC 1934</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Reserved_0x8071">
+<span class="sig-name descname"><span class="pre">Reserved_0x8071</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32881</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Reserved_0x8071" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved [Karl Fox]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Not_Used_reserved_0x807D">
+<span class="sig-name descname"><span class="pre">Not_Used_reserved_0x807D</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32893</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Not_Used_reserved_0x807D" title="Link to this definition">¶</a></dt>
+<dd><p>Not Used - reserved [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Unassigned_0x8081">
+<span class="sig-name descname"><span class="pre">Unassigned_0x8081</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32897</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Unassigned_0x8081" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Unassigned_0x8083">
+<span class="sig-name descname"><span class="pre">Unassigned_0x8083</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32899</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Unassigned_0x8083" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.NTCITS_IPI_Control_Protocol">
+<span class="sig-name descname"><span class="pre">NTCITS_IPI_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32961</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.NTCITS_IPI_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>NTCITS IPI Control Protocol [Alan Ungar]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Not_Used_reserved_0x80CF">
+<span class="sig-name descname"><span class="pre">Not_Used_reserved_0x80CF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32975</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Not_Used_reserved_0x80CF" title="Link to this definition">¶</a></dt>
+<dd><p>Not Used - reserved [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.single_link_compression_in_multilink_control">
+<span class="sig-name descname"><span class="pre">single_link_compression_in_multilink_control</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33019</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.single_link_compression_in_multilink_control" title="Link to this definition">¶</a></dt>
+<dd><p>single link compression in multilink control [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1962.html"><strong>RFC 1962</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Compression_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Compression_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33021</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Compression_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Compression Control Protocol [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1962.html"><strong>RFC 1962</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Not_Used_reserved_0x80FF">
+<span class="sig-name descname"><span class="pre">Not_Used_reserved_0x80FF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33023</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Not_Used_reserved_0x80FF" title="Link to this definition">¶</a></dt>
+<dd><p>Not Used - reserved [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Cisco_Discovery_Protocol_Control">
+<span class="sig-name descname"><span class="pre">Cisco_Discovery_Protocol_Control</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33287</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Cisco_Discovery_Protocol_Control" title="Link to this definition">¶</a></dt>
+<dd><p>Cisco Discovery Protocol Control [Arun Sastry]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Netcs_Twin_Routing_0x8209">
+<span class="sig-name descname"><span class="pre">Netcs_Twin_Routing_0x8209</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33289</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Netcs_Twin_Routing_0x8209" title="Link to this definition">¶</a></dt>
+<dd><p>Netcs Twin Routing [Oliver Korfmacher]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.STP_Control_Protocol">
+<span class="sig-name descname"><span class="pre">STP_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33291</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.STP_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>STP - Control Protocol [Ben Segal]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.EDPCP_Extreme_Discovery_Protocol_Ctrl_Prtcl">
+<span class="sig-name descname"><span class="pre">EDPCP_Extreme_Discovery_Protocol_Ctrl_Prtcl</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33293</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.EDPCP_Extreme_Discovery_Protocol_Ctrl_Prtcl" title="Link to this definition">¶</a></dt>
+<dd><p>EDPCP - Extreme Discovery Protocol Ctrl Prtcl [Don Grosser]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Apple_Client_Server_Protocol_Control">
+<span class="sig-name descname"><span class="pre">Apple_Client_Server_Protocol_Control</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33333</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Apple_Client_Server_Protocol_Control" title="Link to this definition">¶</a></dt>
+<dd><p>Apple Client Server Protocol Control [Howard Ridenour]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.MPLSCP">
+<span class="sig-name descname"><span class="pre">MPLSCP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33409</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.MPLSCP" title="Link to this definition">¶</a></dt>
+<dd><p>MPLSCP [<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3032.html"><strong>RFC 3032</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.IEEE_p1284_4_standard_Protocol_Control">
+<span class="sig-name descname"><span class="pre">IEEE_p1284_4_standard_Protocol_Control</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33413</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.IEEE_p1284_4_standard_Protocol_Control" title="Link to this definition">¶</a></dt>
+<dd><p>IEEE p1284.4 standard - Protocol Control [Brian Batchelder]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.ETSI_TETRA_TNP1_Control_Protocol">
+<span class="sig-name descname"><span class="pre">ETSI_TETRA_TNP1_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33415</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.ETSI_TETRA_TNP1_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>ETSI TETRA TNP1 Control Protocol [Seppo Nieminen]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Multichannel_Flow_Treatment_Protocol_0x8289">
+<span class="sig-name descname"><span class="pre">Multichannel_Flow_Treatment_Protocol_0x8289</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33417</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Multichannel_Flow_Treatment_Protocol_0x8289" title="Link to this definition">¶</a></dt>
+<dd><p>Multichannel Flow Treatment Protocol [Pete McCann]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Link_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Link_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49185</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Link_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Link Control Protocol [<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Password_Authentication_Protocol">
+<span class="sig-name descname"><span class="pre">Password_Authentication_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49187</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Password_Authentication_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Password Authentication Protocol [<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Link_Quality_Report">
+<span class="sig-name descname"><span class="pre">Link_Quality_Report</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49189</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Link_Quality_Report" title="Link to this definition">¶</a></dt>
+<dd><p>Link Quality Report [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Shiva_Password_Authentication_Protocol">
+<span class="sig-name descname"><span class="pre">Shiva_Password_Authentication_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49191</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Shiva_Password_Authentication_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Shiva Password Authentication Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.CallBack_Control_Protocol">
+<span class="sig-name descname"><span class="pre">CallBack_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49193</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.CallBack_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>CallBack Control Protocol (CBCP)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.BACP_Bandwidth_Allocation_Control_Protocol">
+<span class="sig-name descname"><span class="pre">BACP_Bandwidth_Allocation_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49195</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.BACP_Bandwidth_Allocation_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>BACP Bandwidth Allocation Control Protocol [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2125.html"><strong>RFC 2125</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.BAP">
+<span class="sig-name descname"><span class="pre">BAP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49197</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.BAP" title="Link to this definition">¶</a></dt>
+<dd><p>BAP [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2125.html"><strong>RFC 2125</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Authentication_Protocol">
+<span class="sig-name descname"><span class="pre">Vendor_Specific_Authentication_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49243</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Vendor_Specific_Authentication_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Vendor-Specific Authentication Protocol (VSAP) [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3772.html"><strong>RFC 3772</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Container_Control_Protocol">
+<span class="sig-name descname"><span class="pre">Container_Control_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49281</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Container_Control_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Container Control Protocol [Ken funk com]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Challenge_Handshake_Authentication_Protocol">
+<span class="sig-name descname"><span class="pre">Challenge_Handshake_Authentication_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49699</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Challenge_Handshake_Authentication_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Challenge Handshake Authentication Protocol [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.RSA_Authentication_Protocol">
+<span class="sig-name descname"><span class="pre">RSA_Authentication_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49701</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.RSA_Authentication_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>RSA Authentication Protocol [Badari Narayana]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Extensible_Authentication_Protocol">
+<span class="sig-name descname"><span class="pre">Extensible_Authentication_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49703</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Extensible_Authentication_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Extensible Authentication Protocol [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3748.html"><strong>RFC 3748</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Mitsubishi_Security_Info_Exch_Ptcl">
+<span class="sig-name descname"><span class="pre">Mitsubishi_Security_Info_Exch_Ptcl</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49705</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Mitsubishi_Security_Info_Exch_Ptcl" title="Link to this definition">¶</a></dt>
+<dd><p>Mitsubishi Security Info Exch Ptcl (SIEP) [Shoichiro Seno]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Stampede_Bridging_Authorization_Protocol">
+<span class="sig-name descname"><span class="pre">Stampede_Bridging_Authorization_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49775</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Stampede_Bridging_Authorization_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Stampede Bridging Authorization Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Proprietary_Authentication_Protocol_0xC281">
+<span class="sig-name descname"><span class="pre">Proprietary_Authentication_Protocol_0xC281</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49793</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Proprietary_Authentication_Protocol_0xC281" title="Link to this definition">¶</a></dt>
+<dd><p>Proprietary Authentication Protocol [Ken funk com]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Proprietary_Authentication_Protocol_0xC283">
+<span class="sig-name descname"><span class="pre">Proprietary_Authentication_Protocol_0xC283</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49795</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Proprietary_Authentication_Protocol_0xC283" title="Link to this definition">¶</a></dt>
+<dd><p>Proprietary Authentication Protocol [Wayne Tackabury]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol.Proprietary_Node_ID_Authentication_Protocol">
+<span class="sig-name descname"><span class="pre">Proprietary_Node_ID_Authentication_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50305</span></span><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol.Proprietary_Node_ID_Authentication_Protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Proprietary Node ID Authentication Protocol [Ken funk com]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol._validate_value">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ppp/protocol.html#Protocol._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol._validate_value" title="Link to this definition">¶</a></dt>
+<dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it passes the range check <a class="reference internal" href="#pcapkit.const.ppp.protocol.Protocol._missing_" title="pcapkit.const.ppp.protocol.Protocol._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
+with that check and the message it raises, so
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
+values <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the
+same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Value about to be looked up or minted.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check. A
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> caller is
+    unaffected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ppp.protocol.Protocol._missing_">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ppp/protocol.html#Protocol._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ppp.protocol.Protocol._missing_" title="Link to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ppp.protocol.Protocol" title="pcapkit.const.ppp.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2">https://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2</a></p>
+</aside>
+</aside>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="pppoe.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="linux.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Linux-Specific Constant Enumerations</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2026, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a><ul>
+<li><a class="reference internal" href="#module-pcapkit.const.ppp.protocol">PPP DLL Protocol Numbers</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=469f8872"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

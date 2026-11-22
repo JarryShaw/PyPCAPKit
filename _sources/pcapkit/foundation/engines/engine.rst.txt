@@ -56,6 +56,11 @@ every extraction engine.
 
    .. automethod:: unsupported_reason
 
+   .. autoattribute:: __reassembly__
+   .. automethod:: register_reassembly
+   .. automethod:: _setup_reassembly
+   .. automethod:: _reassemble
+
    .. automethod:: run
    .. automethod:: read_frame
    .. automethod:: close

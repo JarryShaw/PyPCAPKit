@@ -14,5 +14,8 @@ PCAP Dumper
 
    .. automethod:: __init__
 
+   .. automethod:: open
+   .. automethod:: close
+
    .. automethod:: _append_value
    .. automethod:: _make_timestamp

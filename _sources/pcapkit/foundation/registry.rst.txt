@@ -52,6 +52,8 @@ Extractor Registries
 
 .. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_reassembly
 
+.. autofunction:: pcapkit.foundation.registry.foundation.register_engine_reassembly
+
 .. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_traceflow
 
 Protocol Registries
@@ -112,6 +114,10 @@ Link Layer Registries
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_frad
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_netlink
+
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_ppp
+
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_ppp_control
 
 .. autofunction:: pcapkit.foundation.registry.protocols.link.register_radiotap
 
@@ -175,6 +181,10 @@ Application Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. module:: pcapkit.foundation.registry.protocols.application
+
+.. autofunction:: pcapkit.foundation.registry.protocols.application.register_dns_rdata
+
+.. autofunction:: pcapkit.foundation.registry.protocols.application.register_dns_option
 
 .. autofunction:: pcapkit.foundation.registry.protocols.application.register_http_frame
 

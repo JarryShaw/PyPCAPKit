@@ -113,6 +113,8 @@ An extraction runs in this order; a third-party engine implements its own
    .. automethod:: register_reassembly
    .. automethod:: register_traceflow
 
+   .. automethod:: make_reassembly
+
    .. automethod:: run
 
    .. automethod:: import_test
@@ -159,8 +161,6 @@ An extraction runs in this order; a third-party engine implements its own
    .. autoattribute:: _frame
    .. autoattribute:: _reasm
    .. autoattribute:: _trace
-   .. autoattribute:: _ipv4
-   .. autoattribute:: _ipv6
    .. autoattribute:: _tcp
 
    .. autoattribute:: _eof_mark

@@ -281,6 +281,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _seconds
    .. automethod:: _make_lcmp_suboption
    .. automethod:: _make_cga_extensions
+   .. automethod:: _verify_pseudo_checksum
 
 Auxiliary Data
 --------------

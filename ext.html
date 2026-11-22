@@ -265,6 +265,8 @@
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
@@ -307,6 +309,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/application.html">Application Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/dns.html">DNS - Domain Name System</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
@@ -398,6 +401,8 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
@@ -412,6 +417,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/const/dns.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
@@ -428,6 +434,8 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
@@ -442,6 +450,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/dns.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
@@ -767,7 +776,7 @@ that reads it, and is keyed by that protocol’s own code for its payload:</p>
     subgraph TR [&quot;Transport layer tables&quot;]
         direction TB
         TU[&quot;TCP.\_\_proto\_\_ and UDP.\_\_proto\_\_&lt;br/&gt;keyed by port&lt;br/&gt;register\_tcp, register\_udp,&lt;br/&gt;register\_apptype for either or both&quot;]
-        SC[&quot;SCTP.\_\_proto\_\_&lt;br/&gt;keyed by the DATA chunk's PPID&lt;br/&gt;register\_sctp&quot;]
+        SC[&quot;SCTP.\_\_proto\_\_&lt;br/&gt;keyed by the DATA or I-DATA&lt;br/&gt;chunk's PPID&lt;br/&gt;register\_sctp&quot;]
         DC[&quot;DCCP.\_\_proto\_\_&lt;br/&gt;keyed by port&lt;br/&gt;register\_dccp&quot;]
         TU ~~~ SC ~~~ DC
     end
@@ -997,8 +1006,15 @@ errors; use the registry functions in
 <td><p><a class="reference internal" href="pcapkit/protocols/transport/dccp.html#pcapkit.protocols.transport.dccp.protocol.DCCP.__option__" title="pcapkit.protocols.transport.dccp.protocol.DCCP.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DCCP.__option__</span></code></a></p></td>
 <td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_dccp_option" title="pcapkit.foundation.registry.protocols.transport.register_dccp_option"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_dccp_option()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td rowspan="2"><p>Application Layer</p></td>
-<td><p><a class="reference internal" href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a></p></td>
+<tr class="row-even"><td rowspan="4"><p>Application Layer</p></td>
+<td rowspan="2"><p><a class="reference internal" href="pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.protocol.DNS" title="pcapkit.protocols.application.dns.protocol.DNS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code></a></p></td>
+<td><p><a class="reference internal" href="pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.protocol.DNS.__rdata__" title="pcapkit.protocols.application.dns.protocol.DNS.__rdata__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DNS.__rdata__</span></code></a></p></td>
+<td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.application.register_dns_rdata" title="pcapkit.foundation.registry.protocols.application.register_dns_rdata"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_dns_rdata()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pcapkit/protocols/application/dns.html#pcapkit.protocols.application.dns.protocol.DNS.__option__" title="pcapkit.protocols.application.dns.protocol.DNS.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DNS.__option__</span></code></a></p></td>
+<td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.application.register_dns_option" title="pcapkit.foundation.registry.protocols.application.register_dns_option"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_dns_option()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a></p></td>
 <td><p><a class="reference internal" href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2.__frame__" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2.__frame__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HTTPv2.__frame__</span></code></a></p></td>
 <td><p><a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.application.register_http_frame" title="pcapkit.foundation.registry.protocols.application.register_http_frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_http_frame()</span></code></a></p></td>
 </tr>
@@ -1111,6 +1127,7 @@ interface, both installing a top-level <a class="reference internal" href="pcapk
 <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.scapy" title="pcapkit.foundation.engines.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.scapy</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>  <span class="c1"># import lazy reference</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span>  <span class="c1"># import base class</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1126,6 +1143,14 @@ interface, both installing a top-level <a class="reference internal" href="pcapk
     <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">'Scapy'</span>  <span class="c1"># friendly name of the engine</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'scapy'</span>  <span class="c1"># module name that the engine is based on</span>
 
+    <span class="c1"># NOTE: The toolkit adapter for each reassembler this engine supports, keyed</span>
+    <span class="c1"># by the name the reassembler is registered under; any other is disabled.</span>
+    <span class="n">__reassembly__</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'ipv4'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.toolkit.scapy'</span><span class="p">,</span> <span class="s1">'ipv4_reassembly'</span><span class="p">),</span>
+        <span class="s1">'ipv6'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.toolkit.scapy'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">),</span>
+        <span class="s1">'tcp'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.toolkit.scapy'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">),</span>
+    <span class="p">}</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">'Extractor'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="c1"># NOTE: Imported here, not at module level, so the engine's</span>
         <span class="c1"># library stays an optional dependency.</span>
@@ -1140,6 +1165,7 @@ interface, both installing a top-level <a class="reference internal" href="pcapk
     <span class="c1"># over its packets in ``self._extmp``.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>  <span class="c1"># get extractor instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_reassembly</span><span class="p">()</span>  <span class="c1"># drop enabled reassemblers with no adapter, warning</span>
 
         <span class="c1"># NOTE: Replace the verbose handler only for ``verbose=True``; a</span>
         <span class="c1"># callable ``verbose=`` is the user's own, already in ``ext._vfunc``.</span>
@@ -1162,8 +1188,7 @@ interface, both installing a top-level <a class="reference internal" href="pcapk
     <span class="c1"># NOTE: Return the next packet from ``self._extmp``, handling its</span>
     <span class="c1"># verbose output, file output, reassembly and flow tracing.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Packet'</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
-                                           <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>  <span class="c1"># import utility functions</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_traceflow</span>  <span class="c1"># import utility functions</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>  <span class="c1"># get extractor instance</span>
 
         <span class="n">packet</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span><span class="p">)</span>  <span class="c1"># get next packet from the iterator</span>
@@ -1184,21 +1209,10 @@ interface, both installing a top-level <a class="reference internal" href="pcapk
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: Each toolkit helper converts the packet to its reassembly's</span>
-        <span class="c1"># format, or gives None for a packet it does not apply to.</span>
+        <span class="c1"># NOTE: Advance every enabled reassembler to the packet's timestamp, then</span>
+        <span class="c1"># feed it what its ``__reassembly__`` adapter makes of the packet, if anything.</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ipv4</span><span class="p">:</span>
-                <span class="n">data_ipv4</span> <span class="o">=</span> <span class="n">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">data_ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">ipv4</span><span class="p">(</span><span class="n">data_ipv4</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ipv6</span><span class="p">:</span>
-                <span class="n">data_ipv6</span> <span class="o">=</span> <span class="n">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">data_ipv6</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">ipv6</span><span class="p">(</span><span class="n">data_ipv6</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
-                <span class="n">data_tcp</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">data_tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">tcp</span><span class="p">(</span><span class="n">data_tcp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reassemble</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">time</span><span class="p">),</span> <span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
 
         <span class="c1"># NOTE: Flow tracing, likewise.</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
@@ -1307,6 +1321,11 @@ whose full implementation is <a class="reference internal" href="pcapkit/dumpkit
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># increment frame number counter</span>
 </pre></div>
 </div>
+<p>A flow tracer keeps a dumper’s file open between frames through
+<a class="reference internal" href="pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase.open" title="pcapkit.dumpkit.common.DumperBase.open"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open()</span></code></a> and
+<a class="reference internal" href="pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase.close" title="pcapkit.dumpkit.common.DumperBase.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a>. A dumper overriding
+<code class="docutils literal notranslate"><span class="pre">__call__</span></code>, as this one does, implements the pair as
+<a class="reference internal" href="pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a> does, or reopens its file for each frame.</p>
 </section>
 </section>
 <section id="reassembly-and-flow-tracing">

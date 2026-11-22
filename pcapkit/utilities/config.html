@@ -265,6 +265,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/ppp.html">PPP - Point-to-Point Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/pppoe.html">PPPoE - PPP over Ethernet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
@@ -307,6 +309,7 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Application Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/dns.html">DNS - Domain Name System</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
@@ -398,6 +401,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
@@ -412,6 +417,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/dns.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
@@ -428,6 +434,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ppp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/pppoe.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
@@ -442,6 +450,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/dns.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNS</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
@@ -642,28 +651,34 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>a large or endless object graph is dumped without bound</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-13"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-13"></span><a class="reference internal" href="#envvar-PCAPKIT_TRACE_OPEN_FILE_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_TRACE_OPEN_FILE_LIMIT</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">64</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
+<td><p>each open flow file holds a file descriptor, so many flows at once can
+exhaust the process limit (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2815">#2815</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="target" id="index-14"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1024</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>the cache retains every bytestring it was asked about</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-14"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-15"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1048576</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">1</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>a bogus record length allocates that much in one read</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-15"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">262144</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to lift the ceiling and the running budget</p></td>
 <td><p>a hostile capture’s declared length is zero-filled in memory
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/554">#554</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-17"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">65536</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to disable the running budget</p></td>
 <td><p>lying lengths amplify into memory without being charged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-17"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-18"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to lift the running budget</p></td>
 <td><p>as above, per octet actually read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>)</p></td>
@@ -705,6 +720,16 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 </dd></dl>
 
 <dl class="std envvar">
+<dt class="sig sig-object std" id="envvar-PCAPKIT_TRACE_OPEN_FILE_LIMIT">
+<span class="sig-name descname"><span class="pre">PCAPKIT_TRACE_OPEN_FILE_LIMIT</span></span><a class="headerlink" href="#envvar-PCAPKIT_TRACE_OPEN_FILE_LIMIT" title="Link to this definition">¶</a></dt>
+<dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT" title="pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">TRACE_OPEN_FILE_LIMIT</span></code></a>. <code class="docutils literal notranslate"><span class="pre">0</span></code> reopens a
+flow’s file for each frame.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_DETECT_CACHE_SIZE">
 <span class="sig-name descname"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></span><a class="headerlink" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE" title="Link to this definition">¶</a></dt>
 <dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.DETECT_CACHE_SIZE" title="pcapkit.utilities.config.DETECT_CACHE_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DETECT_CACHE_SIZE</span></code></a>. Read once, when
@@ -739,7 +764,7 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 <dt class="sig sig-object py" id="pcapkit.utilities.config.FRAME_LAYER_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">FRAME_LAYER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></span><a class="headerlink" href="#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Most layers dissected in one frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>),
-<span class="target" id="index-18"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a>.</p>
+<span class="target" id="index-19"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a>.</p>
 <p>A layer is one entry of the frame’s protocol chain, counted from the first
 layer the frame record carries, usually its link layer; a protocol
 constructed from its own octets is not counted itself, so the count starts at
@@ -770,7 +795,7 @@ does the end of a chain of extension headers, which
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">EXTENSION_HEADER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Most IPv6 extension headers dissected in one chain, i.e. one after
 another with no other layer between them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>),
-<span class="target" id="index-19"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a>.</p>
+<span class="target" id="index-20"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a>.</p>
 <p>The walk stops there, and what follows the last of them is kept as
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>. That holds whether the
@@ -780,7 +805,7 @@ layer such as IPv4, where each header dissects the next one itself
 (<a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>). Behind
 IPv4, the <code class="docutils literal notranslate"><span class="pre">scapy</span></code> toolkit steps over at most this many in the octets to find
 TCP; the third-party engines are otherwise best effort here (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1687">#1687</a>).</p>
-<p><span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
+<p><span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
 Destination Options header at most twice, so no compliant chain gets close.
 Without the bound, a chain dissected header by header stops wherever
 Python’s recursion limit falls, which depends on the interpreter. Each
@@ -802,7 +827,7 @@ stops where parsing it did, and warns once too (<a class="extlink-issue referenc
 <dt class="sig sig-object py" id="pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">IPV6_TCP_WARNED_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>How many captures the <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> engine remembers having warned
-about for TCP over IPv6, <span class="target" id="index-21"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a>.</p>
+about for TCP over IPv6, <span class="target" id="index-22"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a>.</p>
 <p>Each one pins a packet of its own in memory, so the memory is bounded and the
 oldest is forgotten first. Up to this many captures read at the same time
 warn exactly once each.</p>
@@ -822,16 +847,16 @@ warn exactly once each.</p>
 <dd><p>Widest gap, in octets, that
 <a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a>
 zero-fills to merge a segment into the payload buffer it is read against,
-<span class="target" id="index-22"></span><a class="reference internal" href="#envvar-PCAPKIT_TCP_GAP_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_TCP_GAP_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> always merges.</p>
+<span class="target" id="index-23"></span><a class="reference internal" href="#envvar-PCAPKIT_TCP_GAP_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_TCP_GAP_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> always merges.</p>
 <p>This is a safety limit, not a reassembly rule: no RFC calls for one
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>). A segment can only legitimately open a gap as wide as the
-data in flight, which the receive window bounds. <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a> allows windows
+data in flight, which the receive window bounds. <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a> allows windows
 up to <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">30</span></code>, but zero-filling a gap that wide costs 1 GiB, and real
 windows are far smaller – Linux’s default <code class="docutils literal notranslate"><span class="pre">net.ipv4.tcp_rmem</span></code> ceiling is
 6 MiB – so the default of 16 MiB clears them with room to spare. Past it,
 the stream is split rather than padded, as <a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a> describes.</p>
 <p>At <code class="docutils literal notranslate"><span class="pre">-1</span></code> only the sequence space bounds the gap: a sequence number is read
-within <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">31</span></code> of the data buffered (<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4"><strong>RFC 9293 Section 3.4</strong></a>), so one
+within <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">31</span></code> of the data buffered (<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4"><strong>RFC 9293 Section 3.4</strong></a>), so one
 segment can have up to 2 GiB zero-filled.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.tcp.TCP.__window__</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>).</p>
@@ -849,7 +874,7 @@ segment can have up to 2 GiB zero-filled.</p>
 <dd><p>Most objects the <code class="docutils literal notranslate"><span class="pre">_append_fallback</span></code> method of a dumper
 <a class="reference internal" href="../dumpkit/common.html#pcapkit.dumpkit.common.make_dumper" title="pcapkit.dumpkit.common.make_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_dumper()</span></code></a> builds
 expands for one top-level object, counting an object once per time it is met,
-<span class="target" id="index-25"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> expands without bound.</p>
+<span class="target" id="index-26"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> expands without bound.</p>
 <p>Measured over the <code class="docutils literal notranslate"><span class="pre">foundation</span></code>, <code class="docutils literal notranslate"><span class="pre">dumpkit</span></code> and <code class="docutils literal notranslate"><span class="pre">interface</span></code> test legs, no
 fallback object expands into more than 7, so the default leaves three orders
 of magnitude of room.</p>
@@ -864,10 +889,32 @@ of magnitude of room.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">TRACE_OPEN_FILE_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></span><a class="headerlink" href="#pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT" title="Link to this definition">¶</a></dt>
+<dd><p>Most flow output files a flow tracer keeps open at once,
+<span class="target" id="index-27"></span><a class="reference internal" href="#envvar-PCAPKIT_TRACE_OPEN_FILE_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_TRACE_OPEN_FILE_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">0</span></code> opens a flow’s file for each
+frame, and <code class="docutils literal notranslate"><span class="pre">-1</span></code> keeps every flow’s file open until the flow is finalised.</p>
+<p>Keeping the file open saves reopening it per frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2815">#2815</a>). Past
+the limit, the file written least recently is closed, and reopened on its
+flow’s next frame; see <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow._write" title="pcapkit.foundation.traceflow.traceflow.TraceFlow._write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow._write</span></code></a>.</p>
+<p>Each open file holds a file descriptor. The tightest common ceiling on those
+is macOS’s default soft limit of 256 per process, and the default leaves
+three quarters of it to the rest of the process.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.utilities.config.DETECT_CACHE_SIZE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">DETECT_CACHE_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></span><a class="headerlink" href="#pcapkit.utilities.config.DETECT_CACHE_SIZE" title="Link to this definition">¶</a></dt>
 <dd><p>How many distinct bytestrings <a class="reference internal" href="chardet.html#pcapkit.utilities.chardet.detect" title="pcapkit.utilities.chardet.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a>
-remembers, <span class="target" id="index-26"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> leaves the cache
+remembers, <span class="target" id="index-28"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> leaves the cache
 unbounded.</p>
 <p>Unlike the other limits, this one is read once, when
 <a class="reference internal" href="chardet.html#module-pcapkit.utilities.chardet" title="pcapkit.utilities.chardet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.chardet</span></code></a> is imported, as the size of its
@@ -886,7 +933,7 @@ unbounded.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.config.READ_CHUNK">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">READ_CHUNK</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1048576</span></span><a class="headerlink" href="#pcapkit.utilities.config.READ_CHUNK" title="Link to this definition">¶</a></dt>
 <dd><p>Most octets <a class="reference internal" href="../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> asks of its
-stream in one read, <span class="target" id="index-27"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> asks for the whole
+stream in one read, <span class="target" id="index-29"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> asks for the whole
 read at once.</p>
 <p>A read allocates what it asks for up front, so a record’s bogus length is read
 in pieces.</p>
@@ -929,7 +976,7 @@ no fixed-width field ever legitimately is – gets refused.</p>
 <p>A ceiling on one field says nothing about how many fields a parse may pad,
 which is what <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL" title="pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_SHORTFALL</span></code></a> and
 <a class="reference internal" href="#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZERO_PAD_BUDGET_RATIO</span></code></a> below are for. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>.</p>
-<p>Set with <span class="target" id="index-28"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the ceiling, and
+<p>Set with <span class="target" id="index-30"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the ceiling, and
 lifts the running budget of <a class="reference internal" href="#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZERO_PAD_BUDGET_RATIO</span></code></a> with it, since the
 ceiling is the one-off term of that budget’s allowance.</p>
 <div class="versionadded">
@@ -981,7 +1028,7 @@ amplification lives – and legitimately that is a once-per-file event, since
 only the last block of a truncated capture is cut short. So the band gets the
 running budget below, whose one-off term already covers any single such event
 outright.</p>
-<p>Set with <span class="target" id="index-29"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> disables the running
+<p>Set with <span class="target" id="index-31"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> disables the running
 budget: every shortfall within <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> is then padded
 without being charged to it.</p>
 <div class="versionadded">
@@ -1017,7 +1064,7 @@ can want, while bounding the sum for a file whose blocks all lie.</p>
 <p>It bounds the zero-fill of a cut list of schema items as well, from its first
 octet and with no one-off allowance, since each item filled is a schema object
 rather than a zero octet; see <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.unpack" title="pcapkit.corekit.fields.collections.ListField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ListField.unpack</span></code></a>.</p>
-<p>Set with <span class="target" id="index-30"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the running
+<p>Set with <span class="target" id="index-32"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the running
 budget; <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> still bounds each field.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
@@ -1049,11 +1096,11 @@ and a bad value warns and falls back to the default.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><span class="target" id="index-31"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-33"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a></p></td>
 <td><p>off</p></td>
 <td><p>parsing verifies each checksum and records the outcome</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-32"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-34"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a></p></td>
 <td><p>on</p></td>
 <td><p>construction computes a checksum the caller leaves out</p></td>
 </tr>
@@ -1076,8 +1123,8 @@ and a bad value warns and falls back to the default.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.config.CHECKSUM_VERIFY">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">CHECKSUM_VERIFY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.utilities.config.CHECKSUM_VERIFY" title="Link to this definition">¶</a></dt>
 <dd><p>Whether parsing verifies the one’s-complement checksums, of the IPv4
-header, TCP, UDP, DCCP, ICMP, ICMPv6, IGMP, GRE and OSPF,
-<span class="target" id="index-33"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a>.</p>
+header, TCP, UDP, DCCP, ICMP, ICMPv6, IGMP, GRE, OSPF, MH and HIP,
+<span class="target" id="index-35"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a>.</p>
 <p>Off by default, since checksumming every packet costs time on a large
 capture (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2471">#2471</a>). When on, each records a
 <a class="reference internal" href="../corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus" title="pcapkit.corekit.checksum.internet.ChecksumStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChecksumStatus</span></code></a> as
@@ -1097,7 +1144,7 @@ capture (<a class="extlink-issue reference external" href="https://github.com/Ja
 <dt class="sig sig-object py" id="pcapkit.utilities.config.CHECKSUM_COMPUTE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">CHECKSUM_COMPUTE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#pcapkit.utilities.config.CHECKSUM_COMPUTE" title="Link to this definition">¶</a></dt>
 <dd><p>Whether construction computes a checksum the caller leaves out, for
-the protocols <a class="reference internal" href="#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a> names, <span class="target" id="index-34"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a>.</p>
+the protocols <a class="reference internal" href="#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a> names, <span class="target" id="index-36"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a>.</p>
 <p>On by default (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2471">#2471</a>). A checksum given explicitly, as
 <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> gives the parsed one,
 is written as given either way. Off, a checksum left out is zero.</p>
