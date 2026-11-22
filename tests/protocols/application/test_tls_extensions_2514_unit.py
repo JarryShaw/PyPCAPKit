@@ -136,6 +136,7 @@ class ExtensionDecodingTests(unittest.TestCase):
         self.assertEqual(key_share.data, KeyShareClientHello(client_shares=()))
 
     def test_server_hello_extensions(self) -> None:
+        from pcapkit.protocols.application.ssl.data import Empty
         from pcapkit.protocols.application.ssl.data import KeyShareEntry
         from pcapkit.protocols.application.ssl.data import KeyShareServerHello
         from pcapkit.protocols.application.ssl.data import ProtocolNameList
@@ -147,7 +148,7 @@ class ExtensionDecodingTests(unittest.TestCase):
         self.assertEqual(versions.data, SupportedVersionsServerHello(selected_version=0x0304))
         self.assertEqual(key_share.data, KeyShareServerHello(
             server_share=KeyShareEntry(group=0x001D, key_exchange=b'\xaa' * 32)))
-        self.assertEqual(sni.data, b'')
+        self.assertEqual(sni.data, Empty())  # RFC 6066 section 3 (#2852)
         self.assertEqual(alpn.data, ProtocolNameList(protocol_name_list=(b'h2',)))
 
     def test_hello_retry_request_extensions(self) -> None:
@@ -171,6 +172,7 @@ class ExtensionDecodingTests(unittest.TestCase):
 
     def test_encrypted_extensions(self) -> None:
         from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import Empty
         from pcapkit.protocols.application.ssl.data import EncryptedExtensions
         from pcapkit.protocols.application.ssl.data import NamedGroupList
         from pcapkit.protocols.application.ssl.data import ProtocolNameList
@@ -179,7 +181,7 @@ class ExtensionDecodingTests(unittest.TestCase):
         body = TLS(wire, len(wire)).info.content[0].body
         self.assertIsInstance(body, EncryptedExtensions)
         sni, groups, alpn = self._extensions(wire)
-        self.assertEqual(sni.data, b'')
+        self.assertEqual(sni.data, Empty())  # RFC 6066 section 3 (#2852)
         self.assertEqual(groups.data, NamedGroupList(named_group_list=(0x001D, 0x0017)))
         self.assertEqual(alpn.data, ProtocolNameList(protocol_name_list=(b'h2',)))
 
@@ -521,7 +523,7 @@ class ExtensionRegistryTests(unittest.TestCase):
         from pcapkit.protocols.application.ssl.protocol import SSL
         from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.protocols.application.ssl.data import ProtocolNameList
-        from pcapkit.protocols.application.ssl.schema import NamedGroupList, UnknownExtension
+        from pcapkit.protocols.application.ssl.schema import SupportedGroupsExtension, UnknownExtension
         from pcapkit.utilities.warnings import RegistryWarning
 
         calls = []
@@ -545,7 +547,8 @@ class ExtensionRegistryTests(unittest.TestCase):
             self.assertEqual(parsed.info.content[0].body.extensions[0].data,
                              ProtocolNameList(protocol_name_list=(GROUPS[4:],)))
             self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
-            self.assertIn(('read', ExtensionType.supported_groups, HandshakeType.client_hello, NamedGroupList), calls)
+            self.assertIn(('read', ExtensionType.supported_groups, HandshakeType.client_hello,
+                           SupportedGroupsExtension), calls)
             self.assertIn(('make', ExtensionType.supported_groups, HandshakeType.client_hello), calls)
 
             with warnings.catch_warnings():

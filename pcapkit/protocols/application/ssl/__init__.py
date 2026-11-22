@@ -17,6 +17,7 @@ Its schema and data classes are importable as ``Schema_*`` and ``Data_*``.
 from pcapkit.protocols.application.ssl.protocol import SSL
 
 # Header Schemas
+from pcapkit.protocols.application.ssl.schema import ALPNExtension as Schema_ALPNExtension
 from pcapkit.protocols.application.ssl.schema import \
     CertificateCompressionAlgorithms as Schema_CertificateCompressionAlgorithms
 from pcapkit.protocols.application.ssl.schema import \
@@ -24,6 +25,8 @@ from pcapkit.protocols.application.ssl.schema import \
 from pcapkit.protocols.application.ssl.schema import \
     CompressCertificateExtension as Schema_CompressCertificateExtension
 from pcapkit.protocols.application.ssl.schema import ConnectionId as Schema_ConnectionId
+from pcapkit.protocols.application.ssl.schema import \
+    ConnectionIdExtension as Schema_ConnectionIdExtension
 from pcapkit.protocols.application.ssl.schema import Cookie as Schema_Cookie
 from pcapkit.protocols.application.ssl.schema import CookieExtension as Schema_CookieExtension
 from pcapkit.protocols.application.ssl.schema import EarlyDataExtension as Schema_EarlyDataExtension
@@ -86,6 +89,8 @@ from pcapkit.protocols.application.ssl.schema import SessionTicket as Schema_Ses
 from pcapkit.protocols.application.ssl.schema import \
     SessionTicketExtension as Schema_SessionTicketExtension
 from pcapkit.protocols.application.ssl.schema import \
+    SignatureAlgorithmsExtension as Schema_SignatureAlgorithmsExtension
+from pcapkit.protocols.application.ssl.schema import \
     SignatureSchemeList as Schema_SignatureSchemeList
 from pcapkit.protocols.application.ssl.schema import \
     SignedCertificateTimestampExtension as Schema_SignedCertificateTimestampExtension
@@ -93,6 +98,8 @@ from pcapkit.protocols.application.ssl.schema import \
     SignedCertificateTimestampList as Schema_SignedCertificateTimestampList
 from pcapkit.protocols.application.ssl.schema import \
     StatusRequestExtension as Schema_StatusRequestExtension
+from pcapkit.protocols.application.ssl.schema import \
+    SupportedGroupsExtension as Schema_SupportedGroupsExtension
 from pcapkit.protocols.application.ssl.schema import \
     SupportedVersionsClientHello as Schema_SupportedVersionsClientHello
 from pcapkit.protocols.application.ssl.schema import \

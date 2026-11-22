@@ -196,9 +196,12 @@ class ExtensionValueTypeTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _make(self, msg_type: object, extensions: 'list[object]') -> bytes:
+    def _make(self, msg_type: object, extensions: 'list[object]', *, dtls: bool = False) -> bytes:
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.protocols.application.tls.protocol import TLS
 
+        if dtls:  # a DTLS-only type has no structure in a TLS record (#2853)
+            return object.__new__(DTLS)._make_tls_extensions(extensions, msg_type=msg_type)  # type: ignore[arg-type]  # pylint: disable=protected-access
         wire = _client_hello()
         return TLS(wire, len(wire))._make_tls_extensions(extensions, msg_type=msg_type)  # type: ignore[arg-type]  # pylint: disable=protected-access
 
@@ -265,7 +268,6 @@ class ExtensionValueTypeTests(unittest.TestCase):
                 ('cookie tuple', HT.client_hello, ET.cookie, {'cookie': ('a',)}),
                 ('cookie list', HT.client_hello, ET.cookie, {'cookie': [1, 2]}),
                 ('cookie dict', HT.client_hello, ET.cookie, {'cookie': {'a': 1}}),
-                ('cid', HT.client_hello, ET.connection_id, {'cid': 'ab'}),
                 ('renegotiated_connection', HT.client_hello, ET.renegotiation_info,
                  {'renegotiated_connection': {'a': 1}}),
                 ('a ProtocolName', HT.client_hello, ET.application_layer_protocol_negotiation,
@@ -283,6 +285,8 @@ class ExtensionValueTypeTests(unittest.TestCase):
         ):
             with self.subTest(field=name), self.assertRaises(TypeError):
                 self._make(msg_type, [(code, kwargs)])
+        with self.subTest(field='cid'), self.assertRaises(TypeError):
+            self._make(HT.client_hello, [(ET.connection_id, {'cid': 'ab'})], dtls=True)
 
     def test_a_bytes_like_octet_field_still_builds(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType as ET

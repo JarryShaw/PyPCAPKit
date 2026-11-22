@@ -443,6 +443,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
     #: Tier :meth:`read` identified, e.g. ``'DTLS 1.2'``; ``'DTLS'`` until then.
     _alias = 'DTLS'  # type: Literal["DTLS", "DTLS 1.0", "DTLS 1.2", "DTLS 1.3"]
+    #: The records are DTLS's, so a DTLS-only extension decodes (:rfc:`9146#section-10.2`).
+    _dtls = True
 
     ##########################################################################
     # Properties.

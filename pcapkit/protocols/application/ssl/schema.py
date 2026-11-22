@@ -7,7 +7,8 @@
 :class:`~pcapkit.const.tls.extension_type.ExtensionType`. A layout that
 differs by handshake message holds it in :attr:`~ServerNameExtension.data`,
 chosen by the message the extension is read in: the schema of that message's
-structure, or the raw octets in one its RFC defines no structure for.
+structure, or the raw octets in one its RFC defines no structure for, as in a
+TLS record for a DTLS-only type.
 
 """
 
@@ -25,8 +26,8 @@ __all__ = [
     'Extension', 'UnknownExtension', 'Empty', 'Opaque8', 'Opaque16',
     'ServerName', 'ServerNameList', 'ServerNameExtension',
     'OCSPStatusRequest', 'CertificateStatusRequest', 'StatusRequestExtension',
-    'NamedGroupList', 'ECPointFormatList', 'ECPointFormatsExtension',
-    'SignatureSchemeList', 'ProtocolNameList',
+    'NamedGroupList', 'SupportedGroupsExtension', 'ECPointFormatList', 'ECPointFormatsExtension',
+    'SignatureSchemeList', 'SignatureAlgorithmsExtension', 'ProtocolNameList', 'ALPNExtension',
     'SignedCertificateTimestampList', 'SignedCertificateTimestampExtension',
     'Padding', 'PaddingExtension', 'ExtendedMainSecretExtension',
     'CertificateCompressionAlgorithms', 'CompressCertificateExtension',
@@ -38,7 +39,7 @@ __all__ = [
     'Cookie', 'CookieExtension', 'PskKeyExchangeModes', 'PskKeyExchangeModesExtension',
     'PostHandshakeAuthExtension',
     'KeyShareEntry', 'KeyShareClientHello', 'KeyShareHelloRetryRequest', 'KeyShareServerHello',
-    'KeyShareExtension', 'ConnectionId',
+    'KeyShareExtension', 'ConnectionId', 'ConnectionIdExtension',
     'HpkeSymmetricCipherSuite', 'ECHClientHello', 'ECHHelloRetryRequest', 'ECHConfigExtension',
     'ECHConfigContents', 'ECHConfig', 'ECHEncryptedExtensions', 'ECHExtension',
     'RenegotiationInfo', 'RenegotiationInfoExtension',
@@ -69,20 +70,23 @@ def _item(schema: 'Type[Schema]') -> 'SchemaField':
     return SchemaField(schema=schema, packet={'__data_end__': True})
 
 
-def _structure(*messages: 'Enum_HandshakeType | int', schema: 'Type[Schema]',
+def _structure(*messages: 'Enum_HandshakeType | int', schema: 'Type[Schema]', dtls_only: 'bool' = False,
                **others: 'Type[Schema]') -> 'Callable[[dict[str, Any]], FieldBase]':
     """Select the structure of an ``extension_data`` by its handshake message.
 
     Args:
         *messages: Messages carrying ``schema``.
         schema: Structure of the extension in ``messages``.
+        dtls_only: Whether only a DTLS record carries a structure, as for a
+            type the IANA registry marks DTLS-only (:rfc:`9146#section-10.1`).
         **others: Structures of the extension in other messages, by
             :class:`~pcapkit.const.tls.handshake_type.HandshakeType` name.
 
     Returns:
         A :class:`~pcapkit.corekit.fields.misc.SwitchField` selector. It packs a
         value by its own type; it reads the structure of the message named by
-        the ``__msg_type__`` key, and the raw octets in any other message.
+        the ``__msg_type__`` key, and the raw octets in any other message, or
+        for ``dtls_only`` where the ``__dtls__`` key is false.
 
     """
     table = {int(message): schema for message in messages}
@@ -95,7 +99,7 @@ def _structure(*messages: 'Enum_HandshakeType | int', schema: 'Type[Schema]',
         if isinstance(value, bytes):
             return BytesField(length=len(value))
         layout = table.get(int(pkt.get('__msg_type__', -1)))
-        if layout is None:
+        if layout is None or (dtls_only and not pkt.get('__dtls__')):
             return BytesField(length=pkt['__length__'])
         return SchemaField(length=pkt['__length__'], schema=layout, packet={'__data_end__': True})
     return selector
@@ -177,35 +181,16 @@ class ServerNameList(Schema):
         def __init__(self, length: 'int', server_name_list: 'list[ServerName]') -> 'None': ...
 
 
-def _server_name_list(pkt: 'dict[str, Any]') -> 'FieldBase':
-    """Select the ``server_name`` structure: the list, or the empty octets.
-
-    Args:
-        pkt: Packet data.
-
-    Returns:
-        A field packing a value by its own type, or reading the list unless
-        there are no octets.
-
-    """
-    value = pkt.get('data')
-    if isinstance(value, bytes):
-        return BytesField(length=len(value))
-    if value is None and pkt['__length__'] == 0:
-        return BytesField(length=0)
-    return SchemaField(length=pkt['__length__'], schema=ServerNameList, packet={'__data_end__': True})
-
-
 @schema_final
 class ServerNameExtension(Extension, code=Enum_ExtensionType.server_name):
-    """Header schema for ``server_name``: a ``ServerNameList``, or the empty
-    octets of a ``ServerHello`` and an ``EncryptedExtensions``."""
+    """Header schema for ``server_name`` (:rfc:`6066#section-3`)."""
 
-    #: The list, or the empty octets.
-    data: 'ServerNameList | bytes' = SwitchField(selector=lambda pkt: _server_name_list(pkt))
+    #: A ``ServerNameList`` in a ``ClientHello``, empty in a ``ServerHello`` or ``EncryptedExtensions``.
+    data: 'ServerNameList | Empty | bytes' = SwitchField(selector=_structure(
+        Enum_HandshakeType.client_hello, schema=ServerNameList, server_hello=Empty, encrypted_extensions=Empty))
 
     if TYPE_CHECKING:
-        def __init__(self, data: 'ServerNameList | bytes') -> 'None': ...
+        def __init__(self, data: 'ServerNameList | Empty | bytes') -> 'None': ...
 
 
 @schema_final
@@ -256,8 +241,8 @@ class StatusRequestExtension(Extension, code=Enum_ExtensionType.status_request):
 
 
 @schema_final
-class NamedGroupList(Extension, code=Enum_ExtensionType.supported_groups):
-    """Header schema for ``supported_groups``, a ``NamedGroupList`` (:rfc:`9846#section-4.3.7`)."""
+class NamedGroupList(Schema):
+    """Header schema for a ``NamedGroupList`` (:rfc:`9846#section-4.3.7`)."""
 
     #: Length of :attr:`named_group_list`.
     length: 'int' = UInt16Field()
@@ -266,6 +251,18 @@ class NamedGroupList(Extension, code=Enum_ExtensionType.supported_groups):
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', named_group_list: 'list[int]') -> 'None': ...
+
+
+@schema_final
+class SupportedGroupsExtension(Extension, code=Enum_ExtensionType.supported_groups):
+    """Header schema for ``supported_groups``."""
+
+    #: A ``NamedGroupList`` in a ``ClientHello`` or ``EncryptedExtensions``.
+    data: 'NamedGroupList | bytes' = SwitchField(selector=_structure(
+        Enum_HandshakeType.client_hello, Enum_HandshakeType.encrypted_extensions, schema=NamedGroupList))
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'NamedGroupList | bytes') -> 'None': ...
 
 
 @schema_final
@@ -294,8 +291,8 @@ class ECPointFormatsExtension(Extension, code=Enum_ExtensionType.ec_point_format
 
 
 @schema_final
-class SignatureSchemeList(Extension, code=Enum_ExtensionType.signature_algorithms):
-    """Header schema for ``signature_algorithms``, a ``SignatureSchemeList`` (:rfc:`9846#section-4.3.3`)."""
+class SignatureSchemeList(Schema):
+    """Header schema for a ``SignatureSchemeList`` (:rfc:`9846#section-4.3.3`)."""
 
     #: Length of :attr:`supported_signature_algorithms`.
     length: 'int' = UInt16Field()
@@ -308,9 +305,20 @@ class SignatureSchemeList(Extension, code=Enum_ExtensionType.signature_algorithm
 
 
 @schema_final
-class ProtocolNameList(Extension, code=Enum_ExtensionType.application_layer_protocol_negotiation):
-    """Header schema for ``application_layer_protocol_negotiation``, a
-    ``ProtocolNameList`` (:rfc:`7301#section-3.1`)."""
+class SignatureAlgorithmsExtension(Extension, code=Enum_ExtensionType.signature_algorithms):
+    """Header schema for ``signature_algorithms``."""
+
+    #: A ``SignatureSchemeList`` in a ``ClientHello`` or ``CertificateRequest``.
+    data: 'SignatureSchemeList | bytes' = SwitchField(selector=_structure(
+        Enum_HandshakeType.client_hello, Enum_HandshakeType.certificate_request, schema=SignatureSchemeList))
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'SignatureSchemeList | bytes') -> 'None': ...
+
+
+@schema_final
+class ProtocolNameList(Schema):
+    """Header schema for a ``ProtocolNameList`` (:rfc:`7301#section-3.1`)."""
 
     #: Length of :attr:`protocol_name_list`.
     length: 'int' = UInt16Field()
@@ -319,6 +327,19 @@ class ProtocolNameList(Extension, code=Enum_ExtensionType.application_layer_prot
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', protocol_name_list: 'list[Opaque8]') -> 'None': ...
+
+
+@schema_final
+class ALPNExtension(Extension, code=Enum_ExtensionType.application_layer_protocol_negotiation):
+    """Header schema for ``application_layer_protocol_negotiation``."""
+
+    #: A ``ProtocolNameList`` in a ``ClientHello``, ``ServerHello`` or ``EncryptedExtensions``.
+    data: 'ProtocolNameList | bytes' = SwitchField(selector=_structure(
+        Enum_HandshakeType.client_hello, Enum_HandshakeType.server_hello, Enum_HandshakeType.encrypted_extensions,
+        schema=ProtocolNameList))
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'ProtocolNameList | bytes') -> 'None': ...
 
 
 @schema_final
@@ -685,8 +706,8 @@ class KeyShareExtension(Extension, code=Enum_ExtensionType.key_share):
 
 
 @schema_final
-class ConnectionId(Extension, code=Enum_ExtensionType.connection_id):
-    """Header schema for ``connection_id``, a ``ConnectionId`` (:rfc:`9146#section-3`)."""
+class ConnectionId(Schema):
+    """Header schema for a ``ConnectionId`` (:rfc:`9146#section-3`)."""
 
     #: Length of :attr:`cid`.
     length: 'int' = UInt8Field()
@@ -695,6 +716,18 @@ class ConnectionId(Extension, code=Enum_ExtensionType.connection_id):
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', cid: 'bytes') -> 'None': ...
+
+
+@schema_final
+class ConnectionIdExtension(Extension, code=Enum_ExtensionType.connection_id):
+    """Header schema for ``connection_id``."""
+
+    #: A ``ConnectionId`` in a DTLS ``ClientHello`` or ``ServerHello``.
+    data: 'ConnectionId | bytes' = SwitchField(selector=_structure(
+        Enum_HandshakeType.client_hello, Enum_HandshakeType.server_hello, schema=ConnectionId, dtls_only=True))
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'ConnectionId | bytes') -> 'None': ...
 
 
 @schema_final

@@ -75,6 +75,15 @@ takes stays a TLS layer with alias ``SSLv2``. So ``'SSL' in`` selects both TLS a
 DTLS layers, while ``'SSLv3' in`` and ``'SSLv2' in`` select no layer port 443 parsed;
 only ``frame.protochain`` matches those two, by alias.
 
+**A TLS extension decodes only where its RFC defines it**, ruled in review of
+:pr:`2874` (:issue:`2853`): in the handshake messages that RFC names, and in a DTLS
+record alone for a type the IANA registry marks DTLS-only, as ``connection_id``
+(:rfc:`9146#section-10.2`). Anywhere else its octets are kept, and ``make`` refuses
+to build it from keyword arguments. The shared decoders learn the record layer from
+:attr:`SSL._dtls <pcapkit.protocols.application.ssl.protocol.SSL._dtls>`, which
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS` sets, rather than by
+testing for their member.
+
 .. _protocol-family-dispatch:
 
 Dispatching Bases

@@ -123,12 +123,17 @@ MESSAGES = {'client_hello': _client_hello, 'server_hello': _server_hello,
             'hello_retry_request': _retry_request, 'encrypted_extensions': _encrypted_extensions}
 #: The extensions whose structure is the same in every message that carries them: the
 #: messages each RFC sends it in, a body that decodes there, and the ``make`` arguments
-#: that build one. RFC 8422 sections 5.1 and 5.2; RFC 7685 section 3; RFC 7627 section 5.1;
+#: that build one. RFC 9846 sections 4.3 and 4.3.7; RFC 8422 sections 5.1 and 5.2; RFC 9846
+#: section 4.3.3; RFC 7301 section 3.1; RFC 7685 section 3; RFC 7627 section 5.1;
 #: RFC 8879 section 3; RFC 8449 sections 1 and 4, valid in every TLS version so in a TLS 1.2
-#: ServerHello too; RFC 5077 section 3.2; RFC 9846 sections 4.3.2, 4.3.9 and 4.3.6; RFC 5746
-#: section 3.2.
+#: ServerHello too; RFC 5077 section 3.2; RFC 9846 sections 4.3.2, 4.3.9 and 4.3.6; RFC 9146
+#: section 10.2, DTLS-only so in no TLS message (#2853); RFC 5746 section 3.2.
 GATED = {
+    10: ({'client_hello', 'encrypted_extensions'}, _vec(b'\x00\x17'), {'named_group_list': (0x0017,)}),
     11: ({'client_hello', 'server_hello'}, _vec(b'\x00', 1), {'ec_point_format_list': (0,)}),
+    13: ({'client_hello'}, _vec(b'\x04\x03'), {'supported_signature_algorithms': (0x0403,)}),
+    16: ({'client_hello', 'server_hello', 'encrypted_extensions'}, _vec(_vec(b'h2', 1)),
+         {'protocol_name_list': (b'h2',)}),
     21: ({'client_hello'}, bytes(3), {'padding': bytes(3)}),
     23: ({'client_hello', 'server_hello'}, b'', {}),
     27: ({'client_hello'}, _vec(b'\x00\x01', 1), {'algorithms': (1,)}),
@@ -137,7 +142,16 @@ GATED = {
     44: ({'client_hello', 'hello_retry_request'}, _vec(b'cookie'), {'cookie': b'cookie'}),
     45: ({'client_hello'}, _vec(b'\x01', 1), {'ke_modes': (1,)}),
     49: ({'client_hello'}, b'', {}),
+    54: (set(), _vec(b'\xab', 1), {'cid': b'\xab'}),
     0xFF01: ({'client_hello', 'server_hello'}, _vec(b'', 1), {}),
+}
+#: The extensions whose structure differs by message: for each message the RFC sends it in,
+#: a body that decodes there and the ``make`` arguments that build one, each a value or a
+#: callable taking :mod:`pcapkit.protocols.application.ssl.data`. RFC 6066 section 3 (#2852).
+VARIED = {
+    0: {'client_hello': (_vec(b'\x00' + _vec(b'example.com')),
+                         {'server_name_list': lambda D: (D.ServerName(name_type=0, name=b'example.com'),)}),
+        'server_hello': (b'', {}), 'encrypted_extensions': (b'', {})},
 }
 
 
@@ -389,6 +403,24 @@ class HelloExtensionMalformedTests(unittest.TestCase):
                         self.assertEqual(ext.data, body)
                     self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), octets.hex())
 
+    def test_a_varied_structure_decodes_only_in_the_messages_that_have_it(self) -> None:
+        """Each body decodes in the messages of its own structure, and stays raw in any other (#2852)."""
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import ExtensionData
+
+        for code, variants in VARIED.items():
+            for sent, (body, _) in variants.items():
+                for message, hello in MESSAGES.items():
+                    with self.subTest(code=code, body=sent, message=message):
+                        octets = hello(_ext(code, body))
+                        parsed = TLS(octets, len(octets))
+                        ext, = parsed.info.content[0].body.extensions
+                        if message in variants and variants[message][0] == body:
+                            self.assertIsInstance(ext.data, ExtensionData)
+                        else:
+                            self.assertEqual(ext.data, body)
+                        self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), octets.hex())
+
 
 class HelloExtensionConstructionTests(unittest.TestCase):
     """``make`` builds each extension from keyword arguments, and refuses what it cannot write."""
@@ -531,6 +563,25 @@ class HelloExtensionConstructionTests(unittest.TestCase):
         # NOTE: a decoded body decides the structure itself, whatever message carries it.
         made = self._hello((Extension(type=44, data=Cookie(cookie=b'cookie')),), msg_type='encrypted_extensions')
         self.assertEqual(made.hex(), _encrypted_extensions(_ext(44, _vec(b'cookie'))).hex())
+
+    def test_keyword_arguments_build_a_varied_structure_only_in_the_messages_that_have_it(self) -> None:
+        from pcapkit.protocols.application.ssl import data as D
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        options = {'client_hello': {}, 'server_hello': {'msg_type': 'server_hello', 'random': bytes(range(32, 64))},
+                   'hello_retry_request': {'msg_type': 'server_hello', 'random': HRR_RANDOM},
+                   'encrypted_extensions': {'msg_type': 'encrypted_extensions'}}
+        for code, variants in VARIED.items():
+            for message, hello in MESSAGES.items():
+                with self.subTest(code=code, message=message):
+                    if message not in variants:
+                        with self.assertRaises(ProtocolError):
+                            self._hello(((code, {}),), **options[message])
+                        continue
+                    body, kwargs = variants[message]
+                    kwargs = {name: value(D) if callable(value) else value for name, value in kwargs.items()}
+                    self.assertEqual(self._hello(((code, kwargs),), **options[message]).hex(),
+                                     hello(_ext(code, body)).hex())
 
 
 class GreaseTests(unittest.TestCase):
