@@ -1236,7 +1236,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         <pcapkit.protocols.transport.tcp.protocol.TCP.read>`, which reads ``srcport.port``
         to pick the next layer, then raises ``AttributeError: 'int' object has no
         attribute 'port'``. UDP is exposed identically; SCTP is not, only because
-        it keys its next layer on the DATA chunk's PPID and never reads ``.port``.
+        it keys its next layer on the DATA or I-DATA chunk's PPID and never reads
+        ``.port``.
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol

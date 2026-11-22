@@ -8,7 +8,7 @@ from pcapkit.protocols.data import Data, Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Union
+    from typing import Optional, Union
 
     from pcapkit.const.reg.apptype import AppType
     from pcapkit.const.sctp.cause_code import CauseCode
@@ -23,19 +23,21 @@ if TYPE_CHECKING:
 __all__ = [
     'SCTP',
 
-    'DATAChunkFlags', 'TBitFlags', 'GapAckBlock',
+    'DATAChunkFlags', 'TBitFlags', 'GapAckBlock', 'ForwardTSNStream', 'IForwardTSNStream',
 
     'Chunk',
     'UnknownChunk', 'DATAChunk', 'INITChunk', 'INITACKChunk', 'SACKChunk',
     'HeartbeatChunk', 'HeartbeatACKChunk', 'AbortChunk', 'ShutdownChunk',
     'ShutdownACKChunk', 'ErrorChunk', 'CookieEchoChunk', 'CookieACKChunk',
-    'ShutdownCompleteChunk',
+    'ShutdownCompleteChunk', 'IDATAChunk', 'PaddingChunk', 'ForwardTSNChunk',
+    'IForwardTSNChunk',
 
     'Parameter',
     'UnknownParameter', 'HeartbeatInfoParameter', 'IPv4AddressParameter',
     'IPv6AddressParameter', 'StateCookieParameter', 'UnrecognizedParameter',
     'CookiePreservativeParameter', 'HostNameAddressParameter',
-    'SupportedAddressTypesParameter',
+    'SupportedAddressTypesParameter', 'PaddingParameter', 'SupportedExtensionsParameter',
+    'ForwardTSNSupportedParameter',
 
     'ErrorCause',
     'UnknownCause', 'InvalidStreamIdentifierCause', 'MissingMandatoryParameterCause',
@@ -92,6 +94,44 @@ class GapAckBlock(Data):
 
     if TYPE_CHECKING:
         def __init__(self, start: 'int', end: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class ForwardTSNStream(Data):
+    """Data model for SCTP FORWARD TSN chunk stream entries.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Stream identifier of the skipped stream.
+    stream_id: 'int'
+    #: Largest stream sequence number skipped in the stream.
+    stream_seq: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, stream_id: 'int', stream_seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class IForwardTSNStream(Data):
+    """Data model for SCTP I-FORWARD-TSN chunk stream entries.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Stream identifier of the skipped stream.
+    stream_id: 'int'
+    #: Reserved bits, kept as received.
+    reserved: 'int'
+    #: (U)nordered bit, i.e., ``mid`` counts unordered messages.
+    U: 'bool'
+    #: Largest message identifier skipped in the stream.
+    mid: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, stream_id: 'int', reserved: 'int', U: 'bool', mid: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class ErrorCause(Data):
@@ -378,6 +418,48 @@ class SupportedAddressTypesParameter(Parameter):
         def __init__(self, type: 'ParameterType', length: 'int', types: 'tuple[ParameterType, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
+class PaddingParameter(Parameter):
+    """Data model for SCTP padding parameter.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Padding data, which the receiver ignores.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'ParameterType', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class SupportedExtensionsParameter(Parameter):
+    """Data model for SCTP supported extensions parameter.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Chunk types of the extensions the sender supports.
+    types: 'tuple[ChunkType, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'ParameterType', length: 'int', types: 'tuple[ChunkType, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class ForwardTSNSupportedParameter(Parameter):
+    """Data model for SCTP Forward-TSN-Supported parameter.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'ParameterType', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
 class Chunk(Data):
     """Data model for SCTP chunks."""
 
@@ -608,6 +690,92 @@ class ShutdownCompleteChunk(Chunk):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'ChunkType', length: 'int', flags: 'TBitFlags') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class IDATAChunk(Chunk):
+    """Data model for SCTP I-DATA chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Chunk flags.
+    flags: 'DATAChunkFlags'
+    #: Transmission sequence number.
+    tsn: 'int'
+    #: Stream identifier.
+    stream_id: 'int'
+    #: Reserved field, kept as received.
+    reserved: 'int'
+    #: Message identifier.
+    mid: 'int'
+    #: Payload protocol identifier, carried by the first fragment of a user
+    #: message alone; :obj:`None` on a later fragment.
+    ppid: 'Optional[PayloadProtocolIdentifier]'
+    #: Fragment sequence number, ``0`` on the first fragment, whose field
+    #: holds the payload protocol identifier instead (:rfc:`8260#section-2.1`).
+    fsn: 'int'
+    #: User data.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'DATAChunkFlags', tsn: 'int', stream_id: 'int', reserved: 'int', mid: 'int', ppid: 'Optional[PayloadProtocolIdentifier]', fsn: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class PaddingChunk(Chunk):
+    """Data model for SCTP PAD chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
+    #: Padding data, which the receiver ignores.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class ForwardTSNChunk(Chunk):
+    """Data model for SCTP FORWARD TSN chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
+    #: New cumulative TSN.
+    new_cum_tsn: 'int'
+    #: Skipped streams.
+    streams: 'tuple[ForwardTSNStream, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', new_cum_tsn: 'int', streams: 'tuple[ForwardTSNStream, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+@info_final
+class IForwardTSNChunk(Chunk):
+    """Data model for SCTP I-FORWARD-TSN chunks.
+
+    .. versionadded:: 1.7.0
+
+    """
+
+    #: Raw chunk flags, kept as received.
+    flags: 'bytes'
+    #: New cumulative TSN.
+    new_cum_tsn: 'int'
+    #: Skipped streams.
+    streams: 'tuple[IForwardTSNStream, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', new_cum_tsn: 'int', streams: 'tuple[IForwardTSNStream, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

@@ -162,8 +162,8 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         one of the registries this writes to, so naming ``sctp`` here is an error
         rather than a no-op. Its
         :data:`~pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__` registry is
-        keyed by the DATA chunk's payload protocol identifier rather than by
-        port number, so writing a port number into it would dispatch on a
+        keyed by the DATA or I-DATA chunk's payload protocol identifier rather
+        than by port number, so writing a port number into it would dispatch on a
         number from the wrong registry. Use
         :func:`pcapkit.foundation.registry.protocols.transport.register_sctp` instead.
 
@@ -429,9 +429,9 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
 
     Important:
         Unlike :func:`register_tcp` and :func:`register_udp`, ``code`` is a
-        *payload protocol identifier* taken from the DATA chunk, **not** a port
-        number: SCTP names its upper layer per DATA chunk rather than per
-        association. See :rfc:`9260#section-3.3.1`.
+        *payload protocol identifier* taken from the DATA or I-DATA chunk,
+        **not** a port number: SCTP names its upper layer per chunk rather than
+        per association. See :rfc:`9260#section-3.3.1` and :rfc:`8260#section-2.1`.
 
     Raises:
         RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`

@@ -51,6 +51,8 @@ LISTS = {
     'internet.icmpv6:MLDv2Report.records': 'internet.icmpv6:MulticastAddressRecord',
     'internet.igmpv3:Report.records': 'internet.igmpv3:GroupRecord',
     'internet.mh:CGAParametersOption.parameters': 'internet.mh:CGAParameter',
+    'transport.sctp:ForwardTSNChunk.streams': 'transport.sctp:ForwardTSNStream',
+    'transport.sctp:IForwardTSNChunk.streams': 'transport.sctp:IForwardTSNStream',
     'transport.sctp:SACKChunk.gap_blocks': 'transport.sctp:GapAckBlock',
     'transport.tcp:SACK.sack': 'transport.tcp:SACKBlock',
 }

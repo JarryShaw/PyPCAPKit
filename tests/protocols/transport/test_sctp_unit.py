@@ -137,7 +137,7 @@ class SCTPUnitTests(unittest.TestCase):
     def test_constructed_ports_carry_the_same_type_as_parsed_ones(self) -> None:
         """A bare :obj:`int` port is resolved on construction, not left as it is.
 
-        SCTP keys its next layer on the DATA chunk's PPID rather than on a port,
+        SCTP keys its next layer on the DATA or I-DATA chunk's PPID rather than on a port,
         so it never reads ``srcport.port`` off the schema the way TCP and UDP
         do -- but an unresolved port would still leave a constructed packet
         holding an :obj:`int` where a parsed one holds an

@@ -43,6 +43,21 @@ def _data_chunk(value: 'Any') -> 'list':
     return [(Chunk.Payload_Data, {'ppid': value, 'data': b'\x01'})]
 
 
+def _i_data_chunk(value: 'Any') -> 'list':
+    """An I-DATA chunk of a first fragment whose payload protocol identifier is ``value`` (#2811)."""
+    from pcapkit.const.sctp.chunk import Chunk
+
+    return [(Chunk.Payload_Data_supporting_Interleaving, {'ppid': value, 'data': b'\x01'})]
+
+
+def _extensions_param(value: 'Any') -> 'list':
+    """An INIT chunk carrying a supported extensions parameter listing ``value`` (#2811)."""
+    from pcapkit.const.sctp.chunk import Chunk
+    from pcapkit.const.sctp.parameter import Parameter
+
+    return [(Chunk.Initiation, {'parameters': [(Parameter.Supported_Extensions, {'types': [value]})]})]
+
+
 def _addrtypes_param(value: 'Any') -> 'list':
     """An INIT chunk carrying a supported address types parameter listing ``value``."""
     from pcapkit.const.sctp.chunk import Chunk
@@ -129,13 +144,22 @@ def _keyed_cause(info: 'Any', value: 'Any') -> 'list':
 #: Widths from :rfc:`9260`: Payload Protocol Identifier 32 bits (section 3.3.1),
 #: Address Type 16 bits (section 3.3.2.1.5), Missing Param Type 16 bits
 #: (section 3.3.10.2), Chunk Type 8 bits (section 3.2), Parameter Type 16 bits
-#: (section 3.2.1) and Cause Code 16 bits (section 3.3.10), as the schema's
+#: (section 3.2.1) and Cause Code 16 bits (section 3.3.10); I-DATA's Payload
+#: Protocol Identifier 32 bits (:rfc:`8260` section 2.1) and a supported
+#: extension's Chunk Type 8 bits (:rfc:`5061` section 4.2.7). The schema's
 #: ``EnumField`` lengths agree.
 FIELDS = (
     Row('_make_chunk_data', 'ppid',
         'pcapkit.const.sctp.payload_protocol_identifier:PayloadProtocolIdentifier', 32,
         'PayloadProtocolIdentifier_3GPP_NG_Application_Protocol', 'ppid',
         _data_chunk, lambda schema: schema.chunks[0].ppid),
+    Row('_make_chunk_i_data', 'ppid',
+        'pcapkit.const.sctp.payload_protocol_identifier:PayloadProtocolIdentifier', 32,
+        'PayloadProtocolIdentifier_3GPP_NG_Application_Protocol', 'ppid',
+        _i_data_chunk, lambda schema: schema.chunks[0].ppid),
+    Row('_make_param_extensions', 'types',
+        'pcapkit.const.sctp.chunk:Chunk', 8, 'Forward_TSN', 'chunk type',
+        _extensions_param, lambda schema: schema.chunks[0].parameters[0].types[0]),
     Row('_make_param_addrtypes', 'types',
         'pcapkit.const.sctp.parameter:Parameter', 16, 'IPv4_Address', 'parameter type',
         _addrtypes_param, lambda schema: schema.chunks[0].parameters[0].types[0]),

@@ -117,6 +117,40 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
         ]).data
         self.assertEqual(data[12:].hex(), '0400000b' + '00010007' + '61626300')
 
+    def test_extension_chunks_round_trip(self) -> None:
+        """#2811: I-DATA, PAD, FORWARD TSN, I-FORWARD-TSN and their parameters keep every octet.
+
+        Each case sets what a maker would write as zero -- reserved flag bits,
+        I-DATA's reserved field, raw chunk flags and an I-FORWARD-TSN entry's
+        reserved bits -- so a reader or maker dropping one fails here. Each is
+        held to its own reader, since the generic one round-trips them too.
+        """
+        from pcapkit.protocols.transport.sctp.data import UnknownChunk, UnknownParameter
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
+
+        cases = {
+            'I-DATA first fragment': HEADER + '40fb0017' + '00000001' + '0002abcd' + '00000003'
+                                     + '0000003c' + '61626300',
+            'I-DATA later fragment': HEADER + '40050017' + '00000001' + '00020000' + '00000003'
+                                     + '00000004' + '61626300',
+            'PAD': HEADER + '845a0007' + '01020300',
+            'FORWARD TSN': HEADER + 'c0010010' + '00000005' + '00010002' + '00030004',
+            'I-FORWARD-TSN': HEADER + 'c2800018' + '00000005' + '0001ffff' + '00000002'
+                             + '0003fffe' + '00000004',
+            'INIT parameters': HEADER + '01000028' + '00000000' + '00000000' + '00010001'
+                               + '00000000' + '80050007' + '01020300' + '80080007' + 'c082c200'
+                               + 'c0000004',
+        }
+        for name, hexdata in cases.items():
+            with self.subTest(chunk=name):
+                self.assertRoundTrip(hexdata)
+                info = SCTP(bytes.fromhex(hexdata)).info
+                self.assertEqual(SCTP.from_data(info).info, info)
+                for chunk in info.chunks.values():
+                    self.assertNotIsInstance(chunk, UnknownChunk)
+                    for param in getattr(chunk, 'parameters', {}).values():
+                        self.assertNotIsInstance(param, UnknownParameter)
+
 
 if __name__ == '__main__':
     unittest.main()
