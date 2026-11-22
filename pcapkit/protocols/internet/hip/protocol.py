@@ -58,6 +58,7 @@ from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.extlen import ext_len_to_octets
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.internet.hip.data import HIP as Data_HIP
@@ -660,7 +661,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         hip = Data_HIP(
             next=schema.next,
-            length=schema.len * 8 + 8,
+            length=ext_len_to_octets(schema.len),
             type=Enum_Packet(schema.pkt['type']),
             packet_fixed=schema.pkt['bit_0'],
             version=schema.ver['version'],
@@ -811,7 +812,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
                 # NOTE: Over this header alone, whose Header Length is also the pseudo-header's
                 # length (RFC 7401 section 5.1.1); the payload is not covered.
-                size = (length + 1) * 8
+                size = ext_len_to_octets(length)
                 schema.checksum = compute_checksum(schema.pack()[:size],
                                                    prefix=_PSEUDO_HEADER.klass(pseudo, size))
         return schema
