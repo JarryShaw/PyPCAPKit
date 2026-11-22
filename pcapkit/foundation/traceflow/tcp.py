@@ -162,15 +162,15 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         The flow's output file is kept open for its next frame, as
         :meth:`~pcapkit.foundation.traceflow.traceflow.TraceFlow._write`
-        describes, unless :meth:`trace` has just finalised the flow.
+        describes, unless the frame ends the flow. Such a frame is written
+        before the flow is finalised, so its callbacks find every frame its index
+        entry lists in the file.
 
         """
-        # fetch flow label
-        output = self.trace(packet, output=True)
-
-        # dump files
-        self._write(output, packet.frame, f'Frame {packet.index}',
-                    hold=self.make_bufid(packet) in self._buffer)
+        bufid, ends = self._record(packet)
+        self._write(self._buffer[bufid].fpout, packet.frame, f'Frame {packet.index}', hold=not ends)
+        if ends:
+            self._finalise(bufid)
 
     def make_bufid(self, packet: 'Packet[_AT]') -> 'BufferID':
         """Derive the buffer ID a packet belongs to.
@@ -246,6 +246,24 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             :meth:`_unique_label`.
 
         """
+        bufid, ends = self._record(packet)
+        buffer = self._buffer[bufid]
+        if ends:
+            self._finalise(bufid)
+        return buffer.fpout if output else buffer.label
+
+    def _record(self, packet: 'Packet[_AT]') -> 'tuple[BufferID, bool]':
+        """Record a packet in its flow, opening the flow or superseding an ended one.
+
+        Arguments:
+            packet: a flow packet (:term:`trace.tcp.packet`)
+
+        Returns:
+            The flow's buffer ID, and whether the packet ends the flow, which
+            :meth:`trace` then finalises at once and :meth:`dump` once the frame
+            is written (:issue:`2855`).
+
+        """
         # clear cache
         self.__cached__['submit'] = None
 
@@ -311,8 +329,6 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             buffer.__update__(reset=True)
         if buffer.reassembly is not None:
             buffer.reassembly(self._make_segment(packet))
-        fpout = buffer.fpout
-        label = buffer.label
 
         # A *unidirectional* flow is one direction, and a direction is over when
         # its FIN goes out -- so that mode closes on FIN.
@@ -331,11 +347,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         # the flow keeps accepting the packets that still belong to it. What
         # finalises the flow is proof that no more can come -- a new connection's
         # SYN on the same endpoints, handled above, or the end of the capture.
-        if not self._bidir and FIN:
-            self._finalise(BUFID)
-
-        # return label or output object
-        return fpout if output else label
+        return BUFID, not self._bidir and FIN
 
     def _unique_label(self, label: 'str') -> 'str':
         """Make a new flow's label unique within this tracer.
@@ -493,6 +505,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         The flow's file is closed and its entry stored before the callbacks run,
         so a callback that raises propagates and leaves the flow in the index.
+        One raising an :exc:`Exception` does not stop the callbacks after it: the
+        first such error is re-raised once all have run, and a later one logged.
 
         """
         buf = self._buffer.pop(bufid)
@@ -515,8 +529,19 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         # NOTE: stored before the callbacks run, so one that raises cannot drop the flow
         # from the index (#2827).
         self._stream.append(index)
+        error = None  # type: Optional[Exception]
         for callback in self.__callback_fn__:
-            callback(index)
+            try:
+                callback(index)
+            except Exception as exc:  # pylint: disable=broad-except
+                if error is None:
+                    error = exc
+                    continue
+                # NOTE: logged rather than raised, so it cannot replace the first error (#2855).
+                logger.debug('TCP flow %s callback %r raised after an earlier one', label, callback,
+                             exc_info=True)
+        if error is not None:
+            raise error
         return index
 
     def finish(self) -> 'None':

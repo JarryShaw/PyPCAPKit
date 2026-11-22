@@ -275,7 +275,7 @@ class TraceOpenFileTests(unittest.TestCase):
         self.assertEqual((len(calls), len(trace._buffer)), (3, 0))
 
     def test_a_unidirectional_fin_is_written_without_keeping_the_file(self) -> None:
-        """#2815: the FIN that finalises a flow is still written, through a reopen."""
+        """#2815: the FIN that finalises a flow is written to its held file, then closed (#2855)."""
         trace, handles = self.tracer(bidirectional=False)
         trace(self.packet(3, 40000, fin=True))
         self.assertEqual([dumper.filename for dumper in trace._fopen.values()],
@@ -283,7 +283,7 @@ class TraceOpenFileTests(unittest.TestCase):
         flow, = [index for index in trace.index if index.index == (1, 3)]
         with open(flow.fpout, 'rb') as file:
             self.assertEqual(file.read().count(b'"Frame '), 2)
-        self.assertEqual(sum(mode == 'r+' for mode, _ in handles), 3)
+        self.assertEqual(sum(mode == 'r+' for mode, _ in handles), 2)
         trace.finish()
 
 
