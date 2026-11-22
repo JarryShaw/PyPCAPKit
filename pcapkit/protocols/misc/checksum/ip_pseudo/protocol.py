@@ -49,8 +49,8 @@ these members:
   the length it carries with the upper layer's own, see :func:`pseudo_header`;
 * ``_checksum_pending`` is :data:`True` once ``make()`` left out a checksum it
   had no ``pseudo`` for. An IP layer constructed with that upper layer as its
-  payload then rebuilds it with its own pseudo-header; IPv6 also does so past
-  its extension headers, see :func:`compute_upper`.
+  payload, or behind an IPv4 Authentication Header or IPv6 extension headers,
+  then rebuilds it with its own pseudo-header, see :func:`compute_upper`.
 
 The sum itself is in :mod:`pcapkit.corekit.checksum.internet`.
 
@@ -67,6 +67,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
+from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPV6_HEADER_LEN, IPv6
 from pcapkit.protocols.internet.ipv6.schema import IP_MAX_LENGTH
 from pcapkit.protocols.misc.checksum.ip_pseudo.data import IP_Pseudo as Data_IP_Pseudo
@@ -90,9 +91,10 @@ if TYPE_CHECKING:
 
 __all__ = ['IP_Pseudo', 'pseudo_header', 'compute_upper', 'verify_upper']
 
-#: The Authentication Header :func:`verify_upper` looks past to the upper layer,
-#: and the extension header base :func:`compute_upper` looks through, resolved
-#: there rather than imported, so their first import holds
+#: The Authentication Header :func:`verify_upper` and :func:`compute_upper` look
+#: past to the upper layer of IPv4, and the extension header base
+#: :func:`compute_upper` looks through under IPv6, resolved there rather than
+#: imported, so their first import holds
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _AH: 'ModuleDescriptor[AH]' = ModuleDescriptor('pcapkit.protocols.internet.ah.protocol', 'AH')
 _IPV6_EXT: 'ModuleDescriptor[IPv6_Ext]' = \
@@ -670,23 +672,26 @@ def pseudo_header(pseudo: 'IP_Pseudo', length: 'int') -> 'bytes':
                         upper_length=length, zero=pseudo.info.zero).data
 
 
-def compute_upper(ip: 'Schema_IPv6') -> 'Optional[bytes]':
-    """Compute the pending checksum of the upper layer an IPv6 header carries.
+def compute_upper(ip: 'Schema_IPv4 | Schema_IPv6') -> 'Optional[bytes]':
+    """Compute the pending checksum of the upper layer an IP header carries.
 
-    The upper layer is the payload of ``ip``, or a layer the extension headers
-    of that payload carry as constructed, whose ``make()`` left its checksum
-    pending. Behind extension headers, the pseudo-header is the one
+    The upper layer is the payload of ``ip``, or a layer that headers of that
+    payload carry as constructed, whose ``make()`` left its checksum pending:
+    IPv6 extension headers, or Authentication Headers under IPv4
+    (:rfc:`4302#section-3.1.1`). Behind them, the pseudo-header is the one
     :func:`verify_upper` derives from the packet parsed back: the address of a
     Home Address option as the source (:rfc:`6275#section-6.1.1`,
     :rfc:`6275#section-11.3.1`), and the final destination of a Routing header
-    (:rfc:`8200#section-8.1`).
+    (:rfc:`8200#section-8.1`) or of an IPv4 source route (:rfc:`791`).
 
     Where that packet gives no pseudo-header, the checksum stays pending. So
-    behind a Fragment header only an atomic fragment's is computed, since the
-    checksum covers the reassembled packet (:rfc:`8200#section-8.1`).
+    none is computed for an IPv4 fragment, and behind a Fragment header only an
+    atomic fragment's is, since the checksum covers the reassembled packet
+    (:rfc:`8200#section-8.1`).
 
     Args:
-        ip: IPv6 header as :meth:`IPv6.make <pcapkit.protocols.internet.ipv6.protocol.IPv6.make>`
+        ip: IP header as :meth:`IPv4.make <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>`
+            or :meth:`IPv6.make <pcapkit.protocols.internet.ipv6.protocol.IPv6.make>`
             constructed it, holding its payload as given.
 
     Returns:
@@ -698,31 +703,48 @@ def compute_upper(ip: 'Schema_IPv6') -> 'Optional[bytes]':
     """
     payload = ip.payload
     layer = payload  # type: Any
-    code, before = ip.next, 0
-    ext = _IPV6_EXT.klass
+    through = _IPV6_EXT.klass
+    if isinstance(ip, Schema_IPv4):
+        # NOTE: A fragment's checksum covers the datagram (#2471).
+        if ip.flags['offset'] or ip.flags['mf']:
+            return None
+        code, through = ip.proto, _AH.klass
+    else:
+        code = ip.next
+    before = 0
     # NOTE: Only the layers as constructed keep the pending flag; the walk of the packet
     # parsed back then confirms where the upper layer is, as the receiver finds it.
     while not (getattr(layer, '_checksum_pending', False) and layer.__index__() == code):
-        if not isinstance(layer, ext):
+        if not isinstance(layer, through):
             return None
         before += layer.length
         code, layer = layer.info.next, getattr(layer.__header__, 'payload', None)
     upper = cast('ProtocolBase', layer)
 
     if before:
-        # NOTE: Quietly, as the IPv6 layer parses these octets again and reports
+        # NOTE: Quietly, as the IP layer parses these octets again and reports
         # what they carry; a refusal leaves the checksum pending (#2824).
         token = rebuilding.set(True)
         try:
             with CaughtByCaller(ProtocolError, FieldValueError):
-                packet = IPv6(ip.pack())
-                if IP_Pseudo._walk(packet) != (code, before):  # pylint: disable=protected-access
-                    return None
+                packet = (IPv4 if isinstance(ip, Schema_IPv4) else IPv6)(ip.pack())
                 pseudo = IP_Pseudo(ip=packet)
+                if pseudo._upper(packet) != (code, before):  # pylint: disable=protected-access
+                    return None
         except (ProtocolError, FieldValueError):
             return None
         finally:
             rebuilding.reset(token)
+    elif isinstance(ip, Schema_IPv4):
+        # NOTE: The header is parsed back for a source route's destination,
+        # quietly, as the IPv4 layer parses it again (cf. rebuilding).
+        token = rebuilding.set(True)
+        try:
+            header = IPv4(ip.pack()[:ip.vihl['ihl'] * 4])
+        finally:
+            rebuilding.reset(token)
+        # NOTE: The upper layer puts its own length in the pseudo-header.
+        pseudo = IP_Pseudo(ip=header, protocol=code, upper_length=0)
     else:
         # NOTE: The upper layer follows the fixed header, so no extension header
         # moves an address; it puts its own length in the pseudo-header.
