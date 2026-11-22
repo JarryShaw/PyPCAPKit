@@ -30,7 +30,7 @@ class RawNullUnitTests(unittest.TestCase):
         self.assertEqual(raw.name, 'Unknown')
         self.assertEqual(raw.length, 0)
         self.assertEqual(schema.packet, b'raw-packet')
-        self.assertEqual(Raw._make_data(data), {'packet': b'raw-packet'})
+        self.assertEqual(Raw._make_data(data), {'packet': b'raw-packet', 'error': None, 'alias': None})
         with self.assertRaises(UnsupportedCall):
             _ = raw.protocol
         with self.assertRaises(UnsupportedCall):
