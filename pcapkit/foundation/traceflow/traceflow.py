@@ -304,6 +304,14 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
                 default, the callback will be appended to the end
                 of the list
 
+        Every callback runs on each finalised flow, once its output file holds
+        every frame the entry lists. One raising an :exc:`Exception` does not
+        stop the rest, and the first such error propagates once they have run.
+
+        .. versionchanged:: 1.7.0
+
+           A callback that raises no longer stops the ones after it (:issue:`2855`).
+
         """
         if index is not None:
             cls.__callback_fn__.insert(index, callback)
