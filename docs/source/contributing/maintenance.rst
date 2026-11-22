@@ -7,9 +7,10 @@ Maintenance Workflow
 
    Between releases a **coordinator** session maintains the repository: it watches
    the board on a schedule, dispatches agents to do the work, verifies what they
-   return, and alone writes to GitHub. This page is that loop, as a brief another
-   agent can take over and a record of what the owner has established. The labels are
-   on :ref:`process`, CI on :doc:`workflows` and the release on :doc:`releasing`.
+   return, and, but for a worker's own branch and pull request, alone writes to
+   GitHub. This page is that loop, as a brief another agent can take over and a
+   record of what the owner has established. The labels are on :ref:`process`, CI on
+   :doc:`workflows` and the release on :doc:`releasing`.
 
 Actors and Roles
 ----------------
@@ -35,10 +36,11 @@ Actors and Roles
        OWNER -->|"comments, merges"| GH
        GH -->|"every channel, every tick"| COORD
        COORD -->|"brief"| WORKER
-       WORKER -->|"one local commit, report"| COORD
+       WORKER -->|"branch push, pull request"| GH
+       WORKER -->|"report, or a direct change's local commit"| COORD
        COORD -->|"head sha, claims to test"| REVIEW
        REVIEW -->|"verdict"| COORD
-       COORD -->|"push, pull request, comments, labels"| GH
+       COORD -->|"direct pushes, comments, labels"| GH
        GH -->|"push and pull request events"| CI
        CI -->|"check runs, reports"| GH
        COORD -->|"checkpoint"| NOTES
@@ -58,15 +60,17 @@ Actors and Roles
      - Asked to decide in the session: a question goes on the item it concerns.
    * - Coordinator
      - The session's main thread. Runs the loops below, dispatches, verifies every
-       agent claim before it goes public, and **alone** commits, pushes, opens pull
-       requests, posts comments and sets labels.
+       agent claim before acting on it, and **alone** sets labels, posts comments and
+       pushes straight to ``main``.
      - Does the hands-on work itself -- edits, test runs and investigations go to
        agents -- or merges, tags or releases.
    * - Worker
-     - One issue, in its own isolated worktree, ending in one local commit and a
-       report.
-     - Pushes, posts, labels, writes to the notes store, edits the changelog, or
-       spawns agents of its own.
+     - One issue, in its own isolated worktree, ending in one squashed commit pushed
+       to its own branch, its pull request opened, and a report; a direct change
+       stops at the local commit.
+     - Pushes anywhere but its own branch, labels, requests reviewers, posts beyond
+       its pull request, writes to the notes store, edits the changelog, or spawns
+       agents of its own.
    * - Reviewer
      - A cross-review of one head on a model other than the author's, read-only,
        inside a time budget, returning a verdict.
@@ -111,8 +115,8 @@ re-creates a missing one from its file.
        mergeability, file lists and check runs; ``main``'s CI; the CI reports; the
        Actions queue; host load
      - the post gate, the queue thresholds, the host guard
-     - pushes, pull requests, labels, verdicts, rebase notes, dispatches, cancelled
-       runs, pruned worktrees
+     - pushes, labels, verdicts, rebase notes, dispatches, cancelled runs, pruned
+       worktrees
    * - Notes checkpoint
      - 17 min
      - what changed since the last checkpoint
@@ -143,8 +147,9 @@ re-creates a missing one from its file.
        and Board sweep, every 13 min
            S->>C: tick
            C->>G: enumerate items, check runs, queue depth
-           A-->>C: finished commits and verdicts
-           C->>G: push, open, label, post verdicts within the thresholds
+           A->>G: a worker pushes its branch and opens its pull request under the queue threshold
+           A-->>C: reports and verdicts
+           C->>G: label, post verdicts, push direct changes
            C->>A: a worker per idle issue, a reviewer per unreviewed head
        and Notes checkpoint, every 17 min
            S->>C: tick
@@ -189,7 +194,8 @@ Board Sweep
    tick it clears swap the label and dispatch. Strip state and ``review:`` labels from
    closed items, issues and pull requests both, by name -- a bare label ``DELETE``
    removes every label -- reading them back from the item rather than from the search
-   index, which lags. Milestones are left to their automation, never set by hand.
+   index, which lags. Beyond the one a worker sets on opening its pull request,
+   milestones are left to their automation.
 #. **Prune spent worktrees** (`Worktree Cleanup`_).
 #. **Lead the report with what is ready to merge**: ``review: good-to-go`` at the
    current head, every required check run completed, none failed. Experimental legs
@@ -281,7 +287,7 @@ reporting the pull request as ready.
        RR --> RG : GOOD TO GO
        RR --> RN : NEEDS CHANGES
        RR --> RP : head moved mid-review
-       RN --> RP : fix round pushed
+       RN --> RP : fix round pushed and verified
        RG --> RP : new head, patch changed
        RG --> [*] : owner merges
 
@@ -293,19 +299,20 @@ The Pull Request Lifecycle
    flowchart TD
        I["Issue labelled pending"] --> D["Dispatch a worker<br/>issue becomes wip"]
        D --> W["Worker: one commit in its own worktree,<br/>new tests, a report"]
-       W --> V{"Coordinator verifies the diff and the tests;<br/>do the new tests fail with pcapkit/ reverted?"}
-       V -->|no| W
-       V -->|yes| K{"Only docs or tests,<br/>no change to code or behaviour?"}
-       K -->|yes| MAIN["Push straight to main,<br/>close the issue"]
+       W --> K{"Only docs or tests,<br/>no change to code or behaviour?"}
        K -->|no| Q{"Actions queue under 20?"}
-       Q -->|no| H["Hold, and say so on the issue"] --> Q
-       Q -->|yes| P["Push and open the pull request:<br/>repository template, type label, Closes keyword"]
-       P --> R["Cross-review on another model<br/>review: running"]
+       Q -->|no| H["Worker reports held,<br/>and the coordinator says so on the issue"] --> Q
+       Q -->|yes| P["Worker pushes its branch and opens the pull request:<br/>repository template, milestone, one Closes keyword"]
+       P --> V{"Coordinator verifies the diff and the tests;<br/>do the new tests fail with pcapkit/ reverted?"}
+       K -->|yes| V
+       V -->|no| W
+       V -->|"yes, a direct change"| MAIN["Push straight to main,<br/>close the issue"]
+       V -->|"yes, a pull request"| R["Type label, then a cross-review on another model<br/>review: running"]
        P --> CI["CI runs"]
        R --> VD{"Verdict"}
        VD -->|NEEDS CHANGES| NC["One-line verdict, review: needs-changes,<br/>the pull request's CI runs cancelled"]
        NC --> FX["The original worker amends<br/>in its kept worktree"]
-       FX --> PU["Verified, then pushed at queue under 40<br/>review: pending"]
+       FX --> PU["Worker pushes at queue under 40,<br/>then the coordinator verifies<br/>review: pending"]
        PU --> R
        VD -->|GOOD TO GO| GG["One-line verdict<br/>review: good-to-go"]
        GG --> RDY{"Required checks completed green,<br/>no test failing that main passes?"}
@@ -322,9 +329,9 @@ The steps that the graph compresses:
    coordinator commits from a tree of its own, never inside a live agent's worktree.
 *  **The pull request** follows :file:`.github/PULL_REQUEST_TEMPLATE.md`, ticking only
    what holds: the changelog box is left unticked with a note that the changelog is
-   central, unless the pull request carries its own entry. It carries its type label
-   from creation (:ref:`process`). Comments of 8 lines or fewer and bodies of 15 or
-   fewer are recommendations, not hard limits.
+   central, unless the pull request carries its own entry. The coordinator gives it
+   its type label (:ref:`process`) once it opens. Comments of 8 lines or fewer and
+   bodies of 15 or fewer are recommendations, not hard limits.
 *  **A push to an existing branch** uses
    ``--force-with-lease=<branch>:<last-pushed-sha>``.
 *  **The verdict** is posted as its own one-line comment -- the verdict, the head sha
@@ -551,9 +558,15 @@ Briefs
    ``pcapkit.__file__`` asserted to resolve there -- an editable install of the shared
    checkout otherwise wins -- under the soft file-size cap, plus the standing guard
    modules and a scratch revert of :file:`pcapkit/` proving each new test fails;
-*  the rules: one local commit, its conventional subject ending ``(#N)``; no push,
-   post, label, notes store or changelog edit; no sub-agents; no kill by pattern;
-   labels are set by hand, and one login posts everything;
+*  the rules: one squashed commit on its own branch, its conventional subject ending
+   ``(#N)``; the Actions queue under the new-pull-request threshold before the push,
+   or a stop reported as *held*; then the push and a pull request from
+   :file:`.github/PULL_REQUEST_TEMPLATE.md` by ``gh pr create --body-file``, with the
+   milestone set and exactly one ``Closes #N`` -- or, for a direct change, the local
+   commit alone; a fix round amends that commit and pushes it with
+   ``--force-with-lease`` under the fix-round threshold; no other push or post, no
+   label, reviewer request, notes store or changelog edit; no sub-agents; no kill by
+   pattern; labels are set by hand, and one login posts everything;
 *  the parallel streams and the files each owns, which are off limits;
 *  the prose budget -- the documentation rules apply to code comments too;
 *  what to report: the sha, what changed and why, the tests that fail on the base,
