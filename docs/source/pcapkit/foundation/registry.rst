@@ -22,6 +22,12 @@ Foundation Registries
    :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the
    string ``'(null)'`` (:issue:`833`).
 
+.. versionchanged:: 1.7.0
+
+   Each registrar takes the one entry its classmethod takes, under that
+   classmethod's parameter name, where it took ``module`` and ``class_``, with
+   no shim (:issue:`2838`).
+
 Engine Registries
 ~~~~~~~~~~~~~~~~~
 
@@ -39,13 +45,15 @@ Dumper Registries
 Callback Registries
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.foundation.registry.foundation.register_reassembly_ipv4_callback
+.. autofunction:: pcapkit.foundation.registry.foundation.register_reassembly_callback
 
-.. autofunction:: pcapkit.foundation.registry.foundation.register_reassembly_ipv6_callback
+.. autofunction:: pcapkit.foundation.registry.foundation.register_traceflow_callback
 
-.. autofunction:: pcapkit.foundation.registry.foundation.register_reassembly_tcp_callback
+.. versionremoved:: 1.7.0
 
-.. autofunction:: pcapkit.foundation.registry.foundation.register_traceflow_tcp_callback
+   ``register_reassembly_ipv4_callback``, ``register_reassembly_ipv6_callback``,
+   ``register_reassembly_tcp_callback`` and ``register_traceflow_tcp_callback``,
+   which the two above replace with no alias (:issue:`2838`).
 
 Extractor Registries
 ~~~~~~~~~~~~~~~~~~~~
@@ -77,6 +85,12 @@ others build on. Every function below is exported by the package, and by
 
    A package of per-layer submodules rather than a single module
    (:issue:`2578`).
+
+.. versionchanged:: 1.7.0
+
+   Each registrar takes the one entry its classmethod takes, under that
+   classmethod's parameter name, where it took ``module`` and ``class_``; one
+   taking ``meth`` refuses a pair that is not two callables (:issue:`2838`).
 
 .. module:: pcapkit.foundation.registry.protocols.protocol
 

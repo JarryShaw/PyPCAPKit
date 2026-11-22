@@ -14,7 +14,7 @@ This module provides the registries of the internet layer protocols in
    this module's functions (:issue:`2578`).
 
 """
-from typing import TYPE_CHECKING, cast, overload
+from typing import TYPE_CHECKING
 
 from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
 from pcapkit.const.icmp.type import Type as ICMPv4_Type
@@ -28,8 +28,7 @@ from pcapkit.const.mh.option import Option as MH_Option
 from pcapkit.const.mh.packet import Packet as MH_Packet
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.sentinels import NULL
-from pcapkit.foundation.registry.protocols.protocol import _check_code, _register_name
+from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_meth, _register_name
 from pcapkit.protocols.internet.hip.protocol import HIP
 from pcapkit.protocols.internet.hip.schema import Parameter as Schema_HIP_Parameter
 from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
@@ -56,7 +55,6 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
 
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.internet.hip.protocol import \
         ParameterConstructor as HIP_ParameterConstructor
     from pcapkit.protocols.internet.hip.protocol import ParameterParser as HIP_ParameterParser
@@ -99,73 +97,47 @@ logger = get_logger(__name__)
 ###############################################################################
 
 
-@overload
-def register_transtype(code: 'TransType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_transtype(code: 'TransType', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.protocols.internet.internet.Internet.__proto__
-def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                       class_: 'str | NullType' = NULL) -> 'None':
+def register_transtype(code: 'TransType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.internet.internet.Internet.__proto__` registry.
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.transtype.TransType`
-            member, e.g. a member of another enum, or ``module``
+            member, e.g. a member of another enum, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
     _check_code(code, Enum_TransType, Internet)  # type: ignore[type-abstract]
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    Internet.register(code, module)
+    Internet.register(code, protocol)
     logger.debug('registered transtype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (Internet, code))
-
-
-@overload
-def register_ipx(code: 'int | IPX_Packet', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_ipx(code: 'int | IPX_Packet', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (Internet, code))
 
 
 # NOTE: pcapkit.protocols.internet.ipx.protocol.IPX.__proto__
-def register_ipx(code: 'int | IPX_Packet', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                 class_: 'str | NullType' = NULL) -> 'None':
+def register_ipx(code: 'int | IPX_Packet', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.internet.ipx.protocol.IPX.__proto__` registry.
 
     Arguments:
         code: IPX Packet Type, as in :class:`~pcapkit.const.ipx.packet.Packet`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Important:
         Unlike :func:`register_transtype`, ``code`` is an IPX Packet Type, **not**
@@ -176,23 +148,21 @@ def register_ipx(code: 'int | IPX_Packet', module: 'str | ModuleDescriptor[Proto
         RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
             is not accepted, even though it is one) nor a
             :class:`~pcapkit.const.ipx.packet.Packet` member, e.g. a
-            :class:`~pcapkit.const.reg.transtype.TransType` member, or ``module``
+            :class:`~pcapkit.const.reg.transtype.TransType` member, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
     .. versionadded:: 1.6.0
 
     """
     _check_code(code, IPX_Packet, IPX, number=True)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    IPX.register(code, module)
+    IPX.register(code, protocol)
     logger.debug('registered IPX packet type protocol: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (IPX, code))
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (IPX, code))
 
 
 # NOTE: pcapkit.protocols.internet.ipv4.protocol.IPv4.__option__
@@ -216,10 +186,12 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv4.option_number.OptionNumber`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_opt_*`` method.
+            is a name with no matching ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, IPv4_OptionNumber, IPv4)
+    _check_meth(meth, IPv4)
     if isinstance(meth, str) and not hasattr(IPv4, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv4 option parser function')
 
@@ -251,11 +223,13 @@ def register_icmp_type(code: 'ICMPv4_Type | ICMPv6_Type',
 
     Raises:
         RegistryError: If ``code`` is not a member of either ICMP type enum,
-            or ``meth`` is a name with no matching ``_read_data_type_*`` method.
+            or ``meth`` is a name with no matching ``_read_data_type_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     kind, protocol = (ICMPv6_Type, ICMPv6) if isinstance(code, ICMPv6_Type) else (ICMPv4_Type, ICMPv4)
     _check_code(code, kind, protocol)
+    _check_meth(meth, protocol)
     if isinstance(meth, str) and not hasattr(protocol, f'_read_data_type_{meth}'):
         raise RegistryError('method must be a valid ICMP message parser function')
 
@@ -284,10 +258,12 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.hip.parameter.Parameter`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_param_*`` method.
+            is a name with no matching ``_read_param_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, HIP_Parameter, HIP)
+    _check_meth(meth, HIP)
     if isinstance(meth, str) and not hasattr(HIP, f'_read_param_{meth}'):
         raise RegistryError('method must be a valid HIP parameter parser function')
 
@@ -318,10 +294,12 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv6.option.Option`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_opt_*`` method.
+            is a name with no matching ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, IPv6_Option, HOPOPT)
+    _check_meth(meth, HOPOPT)
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid HOPOPT option parser function')
 
@@ -352,10 +330,12 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv6.option.Option`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_opt_*`` method.
+            is a name with no matching ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, IPv6_Option, IPv6_Opts)
+    _check_meth(meth, IPv6_Opts)
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv6-Opts option parser function')
 
@@ -386,10 +366,12 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv6.routing.Routing`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_data_type_*`` method.
+            is a name with no matching ``_read_data_type_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, IPv6_Routing, IPv6_Route)
+    _check_meth(meth, IPv6_Route)
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
         raise RegistryError('method must be a valid IPv6-Route routing data parser function')
 
@@ -420,10 +402,12 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.mh.packet.Packet`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_msg_*`` method.
+            is a name with no matching ``_read_msg_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, MH_Packet, MH)
+    _check_meth(meth, MH)
     if isinstance(meth, str) and not hasattr(MH, f'_read_msg_{meth}'):
         raise RegistryError('method must be a valid MH message type parser function')
 
@@ -454,10 +438,12 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.mh.option.Option`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_opt_*`` method.
+            is a name with no matching ``_read_opt_*`` method, or neither a name
+            nor a pair of two callables.
 
     """
     _check_code(code, MH_Option, MH)
+    _check_meth(meth, MH)
     if isinstance(meth, str) and not hasattr(MH, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid MH option parser function')
 
@@ -488,7 +474,8 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.mh.cga_extension.CGAExtension`
             member, e.g. a member of another enum, or ``meth``
-            is a name with no matching ``_read_ext_*`` method.
+            is a name with no matching ``_read_ext_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionchanged:: 1.5.0
 
@@ -497,6 +484,7 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
 
     """
     _check_code(code, MH_CGAExtension, MH)
+    _check_meth(meth, MH)
     if isinstance(meth, str) and not hasattr(MH, f'_read_ext_{meth}'):
         raise RegistryError('method must be a valid MH CGA extension function')
 

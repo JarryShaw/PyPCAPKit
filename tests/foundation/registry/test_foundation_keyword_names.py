@@ -7,6 +7,10 @@ rather than a registration -- noted in passing while auditing the
 ``__init_subclass__`` keyword rename in #557. A rename can put the two
 out of step silently.
 
+Since #2838 the entry it takes is ``engine``, the name
+:meth:`Extractor.register_engine <pcapkit.foundation.extraction.Extractor.register_engine>`
+gives it, so the engine name stays ``name`` and the class is ``engine``.
+
 These pin the keyword spelling directly against the real signature.
 
 """
@@ -28,8 +32,8 @@ class RegistryKeywordNameTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_register_extractor_engine_takes_name_not_engine(self) -> None:
-        """``name=`` registers; ``engine=`` does not."""
+    def test_register_extractor_engine_takes_name_and_engine(self) -> None:
+        """``name=`` and ``engine=`` register; ``module=`` does not."""
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import foundation as registry
 
@@ -37,23 +41,24 @@ class RegistryKeywordNameTests(unittest.TestCase):
 
         with mock.patch.object(registry.Extractor, 'register_engine') as register_engine:
             registry.register_extractor_engine(name='unit-engine-by-keyword',
-                                               module=descriptor)
+                                               engine=descriptor)
         register_engine.assert_called_once_with('unit-engine-by-keyword', descriptor)
 
         with mock.patch.object(registry.Extractor, 'register_engine') as register_engine:
             with self.assertRaises(TypeError) as caught:
-                registry.register_extractor_engine(engine='unit-engine-by-keyword',
+                registry.register_extractor_engine(name='unit-engine-by-keyword',  # type: ignore[call-arg]
                                                    module=descriptor)
         register_engine.assert_not_called()
-        self.assertIn('engine', str(caught.exception))
+        self.assertIn('module', str(caught.exception))
 
-    def test_register_extractor_engine_signature_names_name(self) -> None:
-        """The documented keyword has to be the one the signature declares."""
+    def test_register_extractor_engine_signature_mirrors_its_classmethod(self) -> None:
+        """The documented keywords have to be the ones the classmethod declares."""
         from pcapkit.foundation.registry import foundation as registry
 
         parameters = inspect.signature(registry.register_extractor_engine).parameters
-        self.assertIn('name', parameters)
-        self.assertNotIn('engine', parameters)
+        wrapped = inspect.signature(registry.Extractor.register_engine).parameters
+        self.assertEqual(list(parameters), ['name', 'engine'])
+        self.assertEqual(list(parameters), list(wrapped))
 
 
 if __name__ == '__main__':

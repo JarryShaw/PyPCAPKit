@@ -14,7 +14,7 @@ This module provides the registries of the link layer protocols in
    this module's functions (:issue:`2578`).
 
 """
-from typing import TYPE_CHECKING, cast, overload
+from typing import TYPE_CHECKING
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.ppp.protocol import Protocol as Enum_PPP_Protocol
@@ -22,8 +22,7 @@ from pcapkit.const.radiotap.field_type import FieldType as Radiotap_FieldType
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.sentinels import NULL
-from pcapkit.foundation.registry.protocols.protocol import _check_code, _register_name
+from pcapkit.foundation.registry.protocols.protocol import _check_code, _check_meth, _register_name
 from pcapkit.protocols.link.frad.protocol import FRAD
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
@@ -40,7 +39,6 @@ if TYPE_CHECKING:
     from typing import Optional, Type
 
     from pcapkit.const.reg.ethertype import EtherType
-    from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.link.ppp.protocol import ControlConstructor as PPP_ControlConstructor
     from pcapkit.protocols.link.ppp.protocol import ControlParser as PPP_ControlParser
     from pcapkit.protocols.link.radiotap.protocol import \
@@ -65,73 +63,47 @@ logger = get_logger(__name__)
 ###############################################################################
 
 
-@overload
-def register_ethertype(code: 'EtherType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_ethertype(code: 'EtherType', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.protocols.link.link.Link.__proto__
-def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                       class_: 'str | NullType' = NULL) -> 'None':
+def register_ethertype(code: 'EtherType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.link.Link.__proto__` registry.
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.ethertype.EtherType`
-            member, e.g. a member of another enum, or ``module``
+            member, e.g. a member of another enum, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
     _check_code(code, Enum_EtherType, Link)  # type: ignore[type-abstract]
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    Link.register(code, module)
+    Link.register(code, protocol)
     logger.debug('registered ethertype protocol: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (Link, code))
-
-
-@overload
-def register_loopback(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_loopback(code: 'int', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (Link, code))
 
 
 # NOTE: pcapkit.protocols.link.loopback.protocol.Loopback.__proto__
-def register_loopback(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                      class_: 'str | NullType' = NULL) -> 'None':
+def register_loopback(code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.loopback.protocol.Loopback.__proto__` registry.
 
     Arguments:
         code: BSD address family
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Important:
         Unlike :func:`register_ethertype`, ``code`` is an address family,
@@ -141,39 +113,26 @@ def register_loopback(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase]
     Raises:
         RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is
             not accepted, even though it is one), or is a member of an enum, or
-            ``module`` is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
+            ``protocol`` is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     .. versionadded:: 1.6.0
 
     """
     _check_code(code, None, Loopback)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    Loopback.register(code, module)
+    Loopback.register(code, protocol)
     logger.debug('registered loopback address family: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (Loopback, code))
-
-
-@overload
-def register_arphrd(code: 'Enum_ARPHRD', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_arphrd(code: 'Enum_ARPHRD', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (Loopback, code))
 
 
 # NOTE: pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__
-def register_arphrd(code: 'Enum_ARPHRD', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                    class_: 'str | NullType' = NULL) -> 'None':
+def register_arphrd(code: 'Enum_ARPHRD', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__` registry, so
@@ -182,53 +141,38 @@ def register_arphrd(code: 'Enum_ARPHRD', module: 'str | ModuleDescriptor[Protoco
 
     Arguments:
         code: ARP hardware type as in :class:`~pcapkit.const.linux.arphrd.ARPHRD`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.linux.arphrd.ARPHRD`
-            member, e.g. a member of another enum, or ``module``
+            member, e.g. a member of another enum, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
     _check_code(code, Enum_ARPHRD, LinuxSLL)  # type: ignore[type-abstract]
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    LinuxSLL.register(code, module)
+    LinuxSLL.register(code, protocol)
     logger.debug('registered ARPHRD protocol: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (LinuxSLL, code))
-
-
-@overload
-def register_frad(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_frad(code: 'int', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (LinuxSLL, code))
 
 
 # NOTE: pcapkit.protocols.link.frad.protocol.FRAD.__proto__
-def register_frad(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                  class_: 'str | NullType' = NULL) -> 'None':
+def register_frad(code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.frad.protocol.FRAD.__proto__` registry.
 
     Arguments:
         code: NLPID, after resolving the ``0x00`` pad ahead of a SNAP header
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is
@@ -236,41 +180,27 @@ def register_frad(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | T
 
     """
     _check_code(code, None, FRAD)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    FRAD.register(code, module)
+    FRAD.register(code, protocol)
     logger.debug('registered FRAD NLPID: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (FRAD, code))
-
-
-@overload
-def register_netlink(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_netlink(code: 'int', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (FRAD, code))
 
 
 # NOTE: pcapkit.protocols.link.netlink.protocol.Netlink.__proto__
-def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                     class_: 'str | NullType' = NULL) -> 'None':
+def register_netlink(code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.netlink.protocol.Netlink.__proto__` registry.
 
     Arguments:
         code: ``nlmsg_type`` of the dissected message
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is
@@ -278,61 +208,45 @@ def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] 
 
     """
     _check_code(code, None, Netlink)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    Netlink.register(code, module)
+    Netlink.register(code, protocol)
     logger.debug('registered Netlink message type: %s', code)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (Netlink, code))
-
-
-@overload
-def register_ppp(code: 'Enum_PPP_Protocol', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_ppp(code: 'Enum_PPP_Protocol', module: 'str', class_: 'str') -> 'None': ...
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (Netlink, code))
 
 
 # NOTE: pcapkit.protocols.link.ppp.protocol.PPP.__proto__
-def register_ppp(code: 'Enum_PPP_Protocol', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                 class_: 'str | NullType' = NULL) -> 'None':
+def register_ppp(code: 'Enum_PPP_Protocol', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.ppp.protocol.PPP.__proto__` registry.
 
     Arguments:
         code: PPP protocol number as in :class:`~pcapkit.const.ppp.protocol.Protocol`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.ppp.protocol.Protocol`
-            member, e.g. a member of another enum, or ``module`` is not a
+            member, e.g. a member of another enum, or ``protocol`` is not a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
     .. versionadded:: 1.7.0
 
     """
     _check_code(code, Enum_PPP_Protocol, PPP)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    PPP.register(code, module)
+    PPP.register(code, protocol)
     logger.debug('registered PPP protocol: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (PPP, code))
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (PPP, code))
 
 
 # NOTE: pcapkit.protocols.link.ppp.protocol.PPP.__control__
@@ -360,13 +274,14 @@ def register_ppp_control(code: 'Enum_PPP_Protocol',
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.ppp.protocol.Protocol`
             member, ``meth`` is a name with no matching ``_read_control_*``
-            method, or ``schema`` is not a
+            method or neither a name nor a pair of two callables, or ``schema`` is not a
             :class:`~pcapkit.protocols.link.ppp.schema.ControlPacket` subclass.
 
     .. versionadded:: 1.7.0
 
     """
     _check_code(code, Enum_PPP_Protocol, PPP)
+    _check_meth(meth, PPP)
     if isinstance(meth, str) and not hasattr(PPP, f'_read_control_{meth}'):
         raise RegistryError('method must be a PPP control packet parser function')
     if schema is not None and not (isinstance(schema, type) and issubclass(schema, Schema_PPP_ControlPacket)):
@@ -378,20 +293,9 @@ def register_ppp_control(code: 'Enum_PPP_Protocol',
     logger.debug('registered PPP control packet parser: %s', code.name)
 
 
-@overload
-def register_radiotap(code: 'Enum_LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
-@overload
-def register_radiotap(code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None': ...
-
-
 # NOTE: pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__
-def register_radiotap(code: 'Enum_LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                      class_: 'str | NullType' = NULL) -> 'None':
+def register_radiotap(code: 'Enum_LinkType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
     r"""Register a new protocol class.
-
-    Notes:
-        The fully qualified class name of the new protocol class
-        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__` registry, keyed
@@ -403,28 +307,25 @@ def register_radiotap(code: 'Enum_LinkType', module: 'str | ModuleDescriptor[Pro
 
     Arguments:
         code: link type as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name or module descriptor or a
+        protocol: module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
-        class\_: class name
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
-            member, e.g. a member of another enum, or ``module``
+            member, e.g. a member of another enum, or ``protocol``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
     _check_code(code, Enum_LinkType, Radiotap)
-    if isinstance(module, str):
-        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    Radiotap.register(code, module)
+    Radiotap.register(code, protocol)
     logger.debug('registered radiotap link type: %s', code.name)
 
     # register protocol to protocol registry
-    if isinstance(module, ModuleDescriptor):
-        module = module.klass
-    _register_name(module, (Radiotap, code))
+    if isinstance(protocol, ModuleDescriptor):
+        protocol = protocol.klass
+    _register_name(protocol, (Radiotap, code))
 
 
 # NOTE: pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__
@@ -456,12 +357,14 @@ def register_radiotap_field(code: 'Radiotap_FieldType',
         RegistryError: If ``code`` is not a
             :class:`~pcapkit.const.radiotap.field_type.FieldType` member, e.g.
             a member of another enum, or ``meth`` is a name with no matching
-            ``_read_field_*`` method.
+            ``_read_field_*`` method, or neither a name
+            nor a pair of two callables.
 
     .. versionadded:: 1.6.0
 
     """
     _check_code(code, Radiotap_FieldType, Radiotap)
+    _check_meth(meth, Radiotap)
     if isinstance(meth, str) and not hasattr(Radiotap, f'_read_field_{meth}'):
         raise RegistryError('method must be a radiotap field parser function')
 

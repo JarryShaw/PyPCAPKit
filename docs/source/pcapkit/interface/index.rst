@@ -10,11 +10,14 @@ simplify the use of :mod:`pcapkit`.
 
    core
    misc
-   registry
 
-:mod:`pcapkit.interface.core` defines the core functions and constants,
-:mod:`pcapkit.interface.misc` the auxiliary ones, and
-:mod:`pcapkit.interface.registry` the helpers the registrars share.
+:mod:`pcapkit.interface.core` defines the core functions and constants, and
+:mod:`pcapkit.interface.misc` the auxiliary ones.
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.interface.registry``, whose helpers moved to
+   :mod:`pcapkit.corekit.registry` (:issue:`2838`).
 
 .. note::
 
@@ -65,10 +68,4 @@ The public interfaces, by category:
 |                  |                     | :data:`pcapkit.interface.core.PyPCAPFile`  |
 +------------------+---------------------+--------------------------------------------+
 | Miscellaneous    | :func:`pcapkit.interface.misc.follow_tcp_stream`                 |
-+------------------+---------------------+--------------------------------------------+
-|                  | :func:`pcapkit.interface.registry.same_entry`                    |
-+                  +---------------------+--------------------------------------------+
-| Registry Helpers | :func:`pcapkit.interface.registry.restore_shipped`               |
-+                  +---------------------+--------------------------------------------+
-|                  | :func:`pcapkit.interface.registry.restore_shipped_dumper`        |
 +------------------+---------------------+--------------------------------------------+

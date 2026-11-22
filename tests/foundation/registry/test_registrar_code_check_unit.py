@@ -136,18 +136,18 @@ REGISTRAR_ENUMS = {
 
 #: Registrars that also take a plain ``int``: the port, PPID, packet type,
 #: address family, NLPID or message type used, the classes whose
-#: ``__proto__`` they write, and any trailing arguments.
+#: ``__proto__`` they write, and any keyword arguments they need.
 NUMBER_REGISTRARS = (
-    ('register_loopback', 2, ('pcapkit.protocols.link.loopback.protocol:Loopback',), ()),
-    ('register_ipx', 17, ('pcapkit.protocols.internet.ipx.protocol:IPX',), ()),
-    ('register_tcp', 80, ('pcapkit.protocols.transport.tcp.protocol:TCP',), ()),
-    ('register_udp', 53, ('pcapkit.protocols.transport.udp.protocol:UDP',), ()),
-    ('register_sctp', 60, ('pcapkit.protocols.transport.sctp.protocol:SCTP',), ()),
-    ('register_dccp', 5004, ('pcapkit.protocols.transport.dccp.protocol:DCCP',), ()),
+    ('register_loopback', 2, ('pcapkit.protocols.link.loopback.protocol:Loopback',), {}),
+    ('register_ipx', 17, ('pcapkit.protocols.internet.ipx.protocol:IPX',), {}),
+    ('register_tcp', 80, ('pcapkit.protocols.transport.tcp.protocol:TCP',), {}),
+    ('register_udp', 53, ('pcapkit.protocols.transport.udp.protocol:UDP',), {}),
+    ('register_sctp', 60, ('pcapkit.protocols.transport.sctp.protocol:SCTP',), {}),
+    ('register_dccp', 5004, ('pcapkit.protocols.transport.dccp.protocol:DCCP',), {}),
     ('register_apptype', 80, ('pcapkit.protocols.transport.tcp.protocol:TCP',
-                              'pcapkit.protocols.transport.udp.protocol:UDP'), ('tcp',)),
-    ('register_frad', 0xCC, ('pcapkit.protocols.link.frad.protocol:FRAD',), ()),
-    ('register_netlink', 16, ('pcapkit.protocols.link.netlink.protocol:Netlink',), ()),
+                              'pcapkit.protocols.transport.udp.protocol:UDP'), {'transport': 'tcp'}),
+    ('register_frad', 0xCC, ('pcapkit.protocols.link.frad.protocol:FRAD',), {}),
+    ('register_netlink', 16, ('pcapkit.protocols.link.netlink.protocol:Netlink',), {}),
 )
 
 #: The registrars above whose registry no enum keys, so a plain ``int`` is the
@@ -254,7 +254,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, number, targets, extra in NUMBER_REGISTRARS:
-            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, **extra,
                                             codes=(None, str(number)))
 
     def test_number_registrars_reject_a_member_of_another_enum(self) -> None:
@@ -266,7 +266,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
             wrong = LinkType(number)
             self.assertIsInstance(wrong, int)
             self.assertEqual(wrong, number)
-            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, **extra,
                                             codes=(wrong,))
 
     def test_number_registrars_reject_a_bool(self) -> None:
@@ -278,7 +278,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import RegistryError
 
         for name, _, targets, extra in NUMBER_REGISTRARS:
-            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, **extra,
                                             codes=(True, False))
         with self.assertRaisesRegex(RegistryError, r'^TCP: code must be an int or a member of AppType, not True$'):
             reg_protocol._check_code(True, reg_transport.Enum_AppType, TCP, number=True)
@@ -300,7 +300,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
 
         for name, _, targets, extra in NUMBER_REGISTRARS:
             if name in INT_ONLY_REGISTRARS:
-                self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+                self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, **extra,
                                                 codes=(None, '2', 2.0, TransType.IPv4, ARPHRD.FRAD))
         for code, message in ((None, 'None'), (True, 'True'),
                               (TransType.IPv4, 'a member of TransType: ')):
@@ -342,7 +342,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         for name, number, targets, extra in NUMBER_REGISTRARS:
             # these take a plain int, so only a member of another enum is wrong
             cases.append((name, resolve(targets[0]).__name__, LinkType(number),
-                          (Raw, *extra), {}))
+                          (Raw,), dict(extra)))
 
         for name, expected, code, args, kwargs in cases:
             with self.subTest(registrar=name):

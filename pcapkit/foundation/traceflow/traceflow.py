@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, overload
 from dictdumper.dumper import Dumper
 
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.registry import restore_shipped_dumper, same_entry
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.protocols.protocol import ProtocolBase
@@ -272,9 +273,6 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
            and ``class_`` name pair, with no alias.
 
         """
-        from pcapkit.interface.registry import (  # pylint: disable=import-outside-toplevel
-            restore_shipped_dumper, same_entry)
-
         shipped = cls._shipped_output.get(format)
         if isinstance(dumper, ModuleDescriptor) and (shipped is None or dumper != shipped[0]):
             dumper = dumper.klass

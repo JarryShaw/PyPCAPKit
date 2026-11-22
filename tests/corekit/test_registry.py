@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.interface.registry`.
+"""Unit tests for :mod:`pcapkit.corekit.registry`.
 
 The registry-entry helpers that the registrars of
 :mod:`pcapkit.foundation.extraction` and
 :mod:`pcapkit.foundation.traceflow.traceflow` share are public, in a module of
-their own under :mod:`pcapkit.interface`, as the owner ruled on GitHub issue
-#1519. The registrars' end-to-end behaviour is covered by
+their own, as the owner ruled on GitHub issue #1519. They moved from
+``pcapkit.interface`` to :mod:`pcapkit.corekit` on #2838, with no re-export.
+The registrars' end-to-end behaviour is covered by
 ``tests/foundation/registry/test_restore_builtin_unit.py``; these tests pin each
 helper's own contract.
 
@@ -17,6 +18,7 @@ to the import the helpers live in.
 
 import collections
 import contextlib
+import importlib
 import sys
 import types
 import unittest
@@ -27,7 +29,7 @@ from tests._support import reimport_once_per_class
 
 #: Name of the stand-in module a descriptor resolves against. Not importable, so
 #: a test can only see it while :meth:`_loaded` has it in :data:`sys.modules`.
-FAKE_MODULE = 'tests_interface_registry_fake'
+FAKE_MODULE = 'tests_corekit_registry_fake'
 
 
 class _Base(unittest.TestCase):
@@ -57,24 +59,36 @@ class _Base(unittest.TestCase):
 class TestPublicSurface(_Base):
 
     def test_all(self) -> None:
-        from pcapkit.interface import registry
+        from pcapkit.corekit import registry
 
         self.assertEqual(registry.__all__, ['same_entry', 'restore_shipped', 'restore_shipped_dumper'])
 
     def test_callers_share_the_public_helpers(self) -> None:
+        from pcapkit.corekit import registry
         from pcapkit.foundation import extraction
-        from pcapkit.interface import registry
+        from pcapkit.foundation.traceflow import traceflow
 
         for name in registry.__all__:
             with self.subTest(name=name):
                 self.assertIs(getattr(extraction, name), getattr(registry, name))
                 self.assertFalse(hasattr(extraction, f'_{name}'))
+        for name in ('same_entry', 'restore_shipped_dumper'):
+            with self.subTest(module='traceflow', name=name):
+                self.assertIs(getattr(traceflow, name), getattr(registry, name))
+
+    def test_old_interface_path_is_gone(self) -> None:
+        """Moved to corekit on #2838 with no re-export, per utilities-or-corekit.rst."""
+        import pcapkit.interface
+
+        with self.assertRaises(ImportError):
+            importlib.import_module('pcapkit.interface.registry')
+        self.assertFalse(hasattr(pcapkit.interface, 'registry'))
 
 
 class TestSameEntry(_Base):
 
     def test_identical_entry(self) -> None:
-        from pcapkit.interface.registry import same_entry
+        from pcapkit.corekit.registry import same_entry
 
         class Thing:
             pass
@@ -82,7 +96,7 @@ class TestSameEntry(_Base):
         self.assertTrue(same_entry(Thing, Thing))
 
     def test_distinct_classes(self) -> None:
-        from pcapkit.interface.registry import same_entry
+        from pcapkit.corekit.registry import same_entry
 
         class Thing:
             pass
@@ -94,7 +108,7 @@ class TestSameEntry(_Base):
 
     def test_descriptors_compare_by_value(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import same_entry
+        from pcapkit.corekit.registry import same_entry
 
         with self._never_resolved():
             self.assertTrue(same_entry(ModuleDescriptor(FAKE_MODULE, 'Thing'),
@@ -104,7 +118,7 @@ class TestSameEntry(_Base):
 
     def test_descriptor_names_loaded_class_either_way_round(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import same_entry
+        from pcapkit.corekit.registry import same_entry
 
         class Thing:
             pass
@@ -121,7 +135,7 @@ class TestSameEntry(_Base):
 
     def test_unloaded_module_is_not_imported(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import same_entry
+        from pcapkit.corekit.registry import same_entry
 
         class Thing:
             pass
@@ -134,7 +148,7 @@ class TestSameEntry(_Base):
     def test_nameless_descriptor_names_nothing(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.corekit.sentinels import NULL
-        from pcapkit.interface.registry import same_entry
+        from pcapkit.corekit.registry import same_entry
 
         with self._loaded(Thing=object), self._never_resolved():
             self.assertFalse(same_entry(ModuleDescriptor(FAKE_MODULE, NULL), object))
@@ -144,7 +158,7 @@ class TestRestoreShipped(_Base):
 
     def test_empty_key_takes_shipped_silently(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import restore_shipped
+        from pcapkit.corekit.registry import restore_shipped
 
         shipped = ModuleDescriptor(FAKE_MODULE, 'Thing')
         registry: 'dict' = {}
@@ -155,7 +169,7 @@ class TestRestoreShipped(_Base):
 
     def test_incumbent_naming_shipped_class_is_kept(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import restore_shipped
+        from pcapkit.corekit.registry import restore_shipped
 
         class Thing:
             pass
@@ -169,7 +183,7 @@ class TestRestoreShipped(_Base):
 
     def test_override_is_overwritten_with_warning(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import restore_shipped
+        from pcapkit.corekit.registry import restore_shipped
         from pcapkit.utilities.warnings import RegistryWarning
 
         class Custom:
@@ -186,7 +200,7 @@ class TestRestoreShippedDumper(_Base):
 
     def test_override_is_overwritten_with_warning(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import restore_shipped_dumper
+        from pcapkit.corekit.registry import restore_shipped_dumper
         from pcapkit.utilities.warnings import RegistryWarning
 
         class Custom:
@@ -204,7 +218,7 @@ class TestRestoreShippedDumper(_Base):
 
     def test_same_dumper_same_ext_is_kept(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import restore_shipped_dumper
+        from pcapkit.corekit.registry import restore_shipped_dumper
 
         class Dumper:
             pass
@@ -219,7 +233,7 @@ class TestRestoreShippedDumper(_Base):
 
     def test_same_dumper_new_ext_is_silent(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import restore_shipped_dumper
+        from pcapkit.corekit.registry import restore_shipped_dumper
 
         class Dumper:
             pass
@@ -237,7 +251,7 @@ class TestRestoreShippedDumper(_Base):
 
     def test_defaultdict_lookup_does_not_insert(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.interface.registry import restore_shipped_dumper
+        from pcapkit.corekit.registry import restore_shipped_dumper
 
         class Fallback:
             pass

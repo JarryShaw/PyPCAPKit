@@ -433,7 +433,7 @@ class RegistryLogLevelTests(unittest.TestCase):
 
     def test_registry_bookkeeping_is_logged_at_debug_not_info(self) -> None:
         from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.registry.foundation import register_reassembly_ipv4_callback
+        from pcapkit.foundation.registry.foundation import register_reassembly_callback
 
         def callback(datagrams: list) -> None:
             """Throwaway callback."""
@@ -442,7 +442,7 @@ class RegistryLogLevelTests(unittest.TestCase):
         try:
             with self.assertLogs('pcapkit.foundation.registry.foundation',
                                  level=logging.DEBUG) as caught:
-                register_reassembly_ipv4_callback(callback)
+                register_reassembly_callback('ipv4', callback)
         finally:
             IPv4.__callback_fn__[:] = saved
 

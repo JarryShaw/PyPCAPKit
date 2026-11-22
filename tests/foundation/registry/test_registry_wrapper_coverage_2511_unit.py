@@ -242,6 +242,7 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
 
     def test_register_ipx_and_register_loopback_dispatch_the_payload(self) -> None:
         from pcapkit.const.ipx.packet import Packet
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols.internet.ipx.protocol import IPX
@@ -262,7 +263,7 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
                     mock.patch.dict(names), mock.patch.dict(reg_protocol._CODE_LEASES), \
                     mock.patch.dict(reg_protocol._NAME_LEASES), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                func(code, 'pcapkit.protocols.transport.udp.protocol', 'UDP')
+                func(code, ModuleDescriptor('pcapkit.protocols.transport.udp.protocol', 'UDP'))
                 parsed = owner(io.BytesIO(packet), len(packet))
             self.assertIs(type(parsed.payload), UDP)
 

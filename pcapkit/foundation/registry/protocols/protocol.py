@@ -517,3 +517,29 @@ def _check_code(code: 'Any', kind: 'Optional[type]', target: 'Type[ProtocolBase]
         raise RegistryError(f'{target.__name__}: code must be {expected}, not a member of '
                             f'{type(code).__name__}: {code!r}')
     raise RegistryError(f'{target.__name__}: code must be {expected}, not {code!r}')
+
+
+def _check_meth(meth: 'Any', target: 'Type[ProtocolBase]') -> 'None':
+    """Reject a ``meth`` that is neither a method name nor a pair of callables.
+
+    Each registrar taking a ``meth`` calls this beside :func:`_check_code`,
+    before touching any registry, so a ``meth`` that would fail only at parse or
+    build time leaves every registry as it was (:issue:`2838`). A name is
+    checked against the ``_read_*`` methods by the registrar itself.
+
+    Args:
+        meth: Method name, or ``(parser, constructor)`` pair, handed to the registrar.
+        target: Protocol class whose registry ``meth`` is destined for, named in
+            the error message as :func:`_check_code` names it.
+
+    Raises:
+        RegistryError: If ``meth`` is not a :class:`str`, nor a :class:`tuple`
+            of two callables.
+
+    """
+    if isinstance(meth, str):
+        return
+    if isinstance(meth, tuple) and len(meth) == 2 and all(callable(item) for item in meth):
+        return
+    raise RegistryError(f'{target.__name__}: meth must be a method name or a (parser, constructor) '
+                        f'pair of callables, not {meth!r}')

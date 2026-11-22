@@ -72,10 +72,10 @@ class TestRegistryNameRestore(unittest.TestCase):
 
         return entry.klass if isinstance(entry, ModuleDescriptor) else entry
 
-    def _call(self, register: 'Any', *args: 'Any') -> None:
+    def _call(self, register: 'Any', *args: 'Any', **kwargs: 'Any') -> None:
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            register(*args)
+            register(*args, **kwargs)
 
     def assert_names_as_found(self) -> None:
         self.assertEqual(sorted(self.names), sorted(self.before))
@@ -335,7 +335,7 @@ class TestRegistryNameRestore(unittest.TestCase):
                     self._call(registrars[op[1][0]], op[1][1], pool[op[2]])
                     held[op[1]] = (step, pool[op[2]])
                 elif op[0] == 'apptype':
-                    self._call(register_apptype, op[1], pool[op[2]], 'tcp', 'udp')
+                    self._call(register_apptype, op[1], pool[op[2]], transport=['tcp', 'udp'])
                     held[('tcp', op[1])] = held[('udp', op[1])] = (step, pool[op[2]])
                 else:
                     self._call(registrars[op[1][0]], op[1][1], shipped[op[1]])

@@ -98,8 +98,7 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
             # ever sees it, is more useful than letting the sentinel reach
             # ``getattr``, which rejects a non-``str`` name with a bare
             # ``TypeError``.
-            raise ProtocolError(f'missing class name for module {self.module!r}: pass an '
-                                'explicit class_ argument')
+            raise ProtocolError(f'missing class name for module {self.module!r}')
 
         # ``self.name`` is a ``str`` from here on -- the ``NULL`` case just
         # raised above -- so ``getattr`` below always gets a real name.

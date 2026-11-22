@@ -350,13 +350,15 @@ class TestPPP(unittest.TestCase):
 
     def test_register_ppp_binds_a_protocol_number(self) -> None:
         from pcapkit.const.ppp.protocol import Protocol
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import register_ppp
         from pcapkit.protocols.link.ppp.protocol import PPP
         from pcapkit.utilities.exceptions import RegistryError
 
         shipped = PPP.__proto__.get(Protocol.Novell_IPX)
         self.assertIsNone(shipped)
-        register_ppp(Protocol.Novell_IPX, 'pcapkit.protocols.internet.ipx.protocol', 'IPX')
+        ipx = ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol', 'IPX')
+        register_ppp(Protocol.Novell_IPX, ipx)
         try:
             ppp = self._parse(b'\x00\x2b' + bytes.fromhex('0000001e' + '00' * 26))
             self.assertEqual(ppp.protochain.chain, 'PPP:IPX')
@@ -364,7 +366,7 @@ class TestPPP(unittest.TestCase):
             del PPP.__proto__[Protocol.Novell_IPX]
 
         with self.assertRaisesRegex(RegistryError, r'^PPP: code must be a member of Protocol, not 43$'):
-            register_ppp(0x2B, 'pcapkit.protocols.internet.ipx.protocol', 'IPX')  # type: ignore[arg-type]
+            register_ppp(0x2B, ipx)  # type: ignore[arg-type]
 
 
     def test_register_ppp_control_overrides_and_restores_a_parser(self) -> None:

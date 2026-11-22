@@ -411,11 +411,13 @@ class DCCPOptionTests(DCCPTestCase):
         register_dccp(DST, Probe)
         self.assertIsInstance(self.DCCP(packet(2, data=b'app', x=False)).payload, Probe)
 
-        # A port's application type, and a protocol named by its module and class.
+        # A port's application type, and a protocol named by a module descriptor.
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.utilities.warnings import RegistryWarning
         with self.assertWarns(RegistryWarning):
-            register_dccp(AppType.get(DST, proto=TransportProtocol.dccp), 'pcapkit.protocols.misc.raw.protocol', 'Raw')
+            register_dccp(AppType.get(DST, proto=TransportProtocol.dccp),
+                          ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
         self.assertIs(type(self.DCCP(packet(2, data=b'app', x=False)).payload), Raw)
 
 
