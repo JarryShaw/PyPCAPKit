@@ -70,7 +70,8 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
         Args:
             length: Length of packet data.
             error: Message saying why the data is kept raw, if any.
-            alias: Original enumeration of the unknown protocol.
+            alias: Original enumeration of the unknown protocol, a member or
+                an :obj:`int`, kept as given.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -120,10 +121,10 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            error: Message saying why the data is kept raw, if any (for
-                parsing), a :obj:`str` or :obj:`None`.
-            alias: Original enumeration of the unknown protocol, an :obj:`int`
-                or :obj:`None`.
+            error: Message saying why the data is kept raw, if any, a
+                :obj:`str` or :obj:`None`.
+            alias: Original enumeration of the unknown protocol, a member or
+                an :obj:`int` kept as given, or :obj:`None`.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -176,13 +177,23 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
     def _make_data(cls, data: 'Data_Raw') -> 'dict[str, Any]':  # type: ignore[override]
         """Create key-value pairs from ``data`` for protocol construction.
 
+        ``protocol`` is passed on, as given, as the ``alias`` :meth:`read` takes.
+
         Args:
             data: protocol data
 
         Returns:
             Key-value pairs for protocol construction.
 
+        .. versionchanged:: 1.7.0
+
+           ``error`` and ``protocol`` are passed on, which :meth:`from_data`
+           dropped (:issue:`2863`).
+
         """
+        # NOTE: ``get``, as a hand-written dict may carry neither (#2863).
         return {
             'packet': data.packet,
+            'error': data.get('error'),
+            'alias': data.get('protocol'),
         }
