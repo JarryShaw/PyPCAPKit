@@ -118,6 +118,7 @@ ANCHORS = (
     'utilities-or-corekit',
     'reassembly-integration',
     'const-vendor-pairing',
+    'public-signatures',
 )
 
 #: Each anchor's own file, one-to-one -- there is no shared page to slice between
