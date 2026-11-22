@@ -1175,12 +1175,12 @@ class ExtractorTests(unittest.TestCase):
             temp = pathlib.Path(tempdir)
             (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
 
-            for trace_format in ('pcap', None):
+            for trace_format, extension in (('pcap', '.pcap'), (None, '.pcap'), ('pcapng', '.pcapng')):
                 with self.subTest(trace_format=trace_format):
                     traced, warn = self._traced(temp, f'default-{trace_format}',
                                                 trace_format=trace_format)
 
-                    self.assertEqual(traced._trace.tcp._fdpext, '.pcap')
+                    self.assertEqual(traced._trace.tcp._fdpext, extension)
                     warn.assert_not_called()
 
     def _warns_bullet_engines(self, lead: str, marker: str) -> 'set[str]':
@@ -1227,20 +1227,22 @@ class ExtractorTests(unittest.TestCase):
         # with the set the bullet names.
         from pcapkit.foundation.extraction import Extractor
 
-        warned = set()
-        with tempfile.TemporaryDirectory() as tempdir:
-            temp = pathlib.Path(tempdir)
-            (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
-
-            for engine in sorted(set(Extractor.__engine__) | {'default', 'pcapkit'}):
-                _, warn = self._traced(temp, f'doc-{engine}', engine=engine, trace_format='pcap')
-                if self._warned(warn, "'trace_format=pcap'"):
-                    warned.add(engine)
-
-        self.assertTrue(warned, 'the guard warned for no engine, so the comparison proves nothing')
-        documented = self._warns_bullet_engines('If using PCAP output for TCP flow tracing',
+        documented = self._warns_bullet_engines('If using PCAP or PCAP-NG output for TCP flow tracing',
                                                 'extraction engine is ')
-        self.assertEqual(documented, warned)
+        for fmt in ('pcap', 'pcapng'):
+            warned = set()
+            with tempfile.TemporaryDirectory() as tempdir:
+                temp = pathlib.Path(tempdir)
+                (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
+
+                for engine in sorted(set(Extractor.__engine__) | {'default', 'pcapkit'}):
+                    _, warn = self._traced(temp, f'doc-{engine}', engine=engine, trace_format=fmt)
+                    if self._warned(warn, f"'trace_format={fmt}'"):
+                        warned.add(engine)
+
+            with self.subTest(trace_format=fmt):
+                self.assertTrue(warned, 'the guard warned for no engine, so the comparison proves nothing')
+                self.assertEqual(documented, warned)
 
     def test_warns_bullet_for_pcap_output_names_the_engines_its_guard_warns_for(self) -> None:
         # The frame-output counterpart of the case above: the bullet naming the
@@ -1248,26 +1250,28 @@ class ExtractorTests(unittest.TestCase):
         # guard that replaces it.
         from pcapkit.foundation.extraction import Extractor
 
-        warned = set()
-        with tempfile.TemporaryDirectory() as tempdir:
-            temp = pathlib.Path(tempdir)
-            (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
+        documented = self._warns_bullet_engines('If using PCAP or PCAP-NG output while', 'i.e. ')
+        for fmt in ('pcap', 'pcapng'):
+            warned = set()
+            with tempfile.TemporaryDirectory() as tempdir:
+                temp = pathlib.Path(tempdir)
+                (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
 
-            for engine in sorted(set(Extractor.__engine__) | {'default', 'pcapkit'}):
-                with mock.patch.object(Extractor, 'run'), \
-                        mock.patch.object(Extractor, '_select_engine', return_value=None), \
-                        mock.patch('pcapkit.foundation.extraction.warn') as warn:
-                    extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{engine}'),
-                                          format='pcap', engine=engine, auto=False,
-                                          nofile=True)  # type: ignore[arg-type]
-                # closed inside the ``with``: Windows cannot delete a file still open (#2101)
-                extractor._ifile.close()
-                if self._warned(warn, "'format=pcap'"):
-                    warned.add(engine)
+                for engine in sorted(set(Extractor.__engine__) | {'default', 'pcapkit'}):
+                    with mock.patch.object(Extractor, 'run'), \
+                            mock.patch.object(Extractor, '_select_engine', return_value=None), \
+                            mock.patch('pcapkit.foundation.extraction.warn') as warn:
+                        extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{engine}'),
+                                              format=fmt, engine=engine, auto=False,
+                                              nofile=True)  # type: ignore[arg-type]
+                    # closed inside the ``with``: Windows cannot delete a file still open (#2101)
+                    extractor._ifile.close()
+                    if self._warned(warn, f"'format={fmt}'"):
+                        warned.add(engine)
 
-        self.assertTrue(warned, 'the guard warned for no engine, so the comparison proves nothing')
-        documented = self._warns_bullet_engines('If using PCAP output while', 'i.e. ')
-        self.assertEqual(documented, warned)
+            with self.subTest(format=fmt):
+                self.assertTrue(warned, 'the guard warned for no engine, so the comparison proves nothing')
+                self.assertEqual(documented, warned)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

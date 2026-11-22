@@ -180,8 +180,8 @@ class EnginePCAPTraceTests(unittest.TestCase):
         self.tmp = tmp.name
 
     def _flows(self, engine: 'str', fin: 'str', *, nanosecond: 'bool' = False,
-               caught: 'list | None' = None) -> 'list[tuple[str, tuple, bytes]]':
-        """``(label, frame numbers, file octets)`` of every flow traced as PCAP.
+               caught: 'list | None' = None, fmt: 'str' = 'pcap') -> 'list[tuple[str, tuple, bytes]]':
+        """``(label, frame numbers, file octets)`` of every flow traced as ``fmt``.
 
         The warnings the extraction raised are appended to ``caught``, if given.
 
@@ -193,7 +193,7 @@ class EnginePCAPTraceTests(unittest.TestCase):
         with warnings.catch_warnings(record=True) as raised:
             warnings.simplefilter('always')
             extractor = extract(fin=fin, nofile=True, engine=engine, tcp=True, trace=True,
-                                trace_fout=fout, trace_format='pcap', trace_nanosecond=nanosecond)
+                                trace_fout=fout, trace_format=fmt, trace_nanosecond=nanosecond)
         self.addCleanup(close_extractor, extractor)
         self.assertEqual([str(w.message) for w in raised if issubclass(w.category, FormatWarning)], [])
         if caught is not None:
@@ -201,7 +201,7 @@ class EnginePCAPTraceTests(unittest.TestCase):
 
         flows = []
         for flow in extractor.trace.tcp:
-            self.assertTrue(flow.fpout.endswith('.pcap'), flow.fpout)
+            self.assertTrue(flow.fpout.endswith(f'.{fmt}'), flow.fpout)
             with open(flow.fpout, 'rb') as file:
                 flows.append((flow.label, tuple(flow.index), file.read()))
         return flows
@@ -240,6 +240,22 @@ class EnginePCAPTraceTests(unittest.TestCase):
             for nanosecond in (False, True):
                 with self.subTest(capture=capture, nanosecond=nanosecond):
                     self._assert_every_engine_holds_the_records(sample_path(capture), nanosecond=nanosecond)
+
+    def test_each_traced_pcapng_holds_the_captured_records(self) -> None:
+        """``trace_format='pcapng'`` writes the frame records ``'pcap'`` does (#2835)."""
+        for capture in CAPTURES:
+            fin = sample_path(capture)
+            for engine in ENGINES:
+                with self.subTest(capture=capture, engine=engine):
+                    skip_if_stand_in(self, fin)
+                    captured = _captured(fin)
+                    flows = self._flows(engine, fin, fmt='pcapng')
+                    self.assertTrue(flows)
+                    for label, index, data in flows:
+                        path = os.path.join(tempfile.mkdtemp(dir=self.tmp), 'flow.pcapng')
+                        with open(path, 'wb') as file:
+                            file.write(data)
+                        self.assertEqual(_captured(path), [captured[number - 1] for number in index], label)
 
     def test_a_stand_in_capture_skips_rather_than_fails(self) -> None:
         # When the Wireshark download fails the generator writes a stand-in under the

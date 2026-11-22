@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>` -- both
     #: registries expose the same keys, so ``'cap'`` and the ``'txt'``/``'xml'``
     #: aliases are spellable for a type checker as they are accepted at runtime.
-    Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
+    Formats = Literal['pcap', 'cap', 'pcapng', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: deliberately duplicated verbatim in ``pcapkit.interface.misc``; update
     # both copies when a new engine lands.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
@@ -301,6 +301,7 @@ class Extractor(Generic[_P]):
         {
             'pcap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
             'cap': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPIO'), '.pcap'),
+            'pcapng': (ModuleDescriptor('pcapkit.dumpkit', 'PCAPNGIO'), '.pcapng'),
             'plist': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
             'xml': (ModuleDescriptor('dictdumper', 'PLIST'), '.plist'),
             'json': (ModuleDescriptor('dictdumper', 'JSON'), '.json'),
@@ -1137,7 +1138,9 @@ class Extractor(Generic[_P]):
         engine passes the header's fields as ``protocol``, ``byteorder``,
         ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:
         :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from
-        them, and the other writers ignore them. The PCAP-NG engine passes none.
+        them, :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` its section and interface
+        from those it takes, and the other writers ignore them. The PCAP-NG
+        engine passes its first section's ``byteorder``.
         :meth:`run` calls it again, without arguments, after the engine has
         started, for the engines that have no such step. Only the first call has
         an effect.
@@ -1301,15 +1304,15 @@ class Extractor(Generic[_P]):
         Warns:
             pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:
 
-                * If using PCAP output for TCP flow tracing while the extraction engine is
-                  PyShark or PyPCAPFile.
-                * If using PCAP output while the extraction engine is a third-party
-                  one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.
+                * If using PCAP or PCAP-NG output for TCP flow tracing while the
+                  extraction engine is PyShark or PyPCAPFile.
+                * If using PCAP or PCAP-NG output while the extraction engine is a
+                  third-party one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.
                 * If output file format is not supported.
 
                 In each case the engine is the one that will actually run: a
                 requested engine that is unavailable falls back to the default
-                engine first, which supports PCAP output.
+                engine first, which supports both.
 
             pcapkit.utilities.warnings.EngineWarning: If the requested extraction
                 engine is not available: its dependency is not installed, its
@@ -1338,9 +1341,9 @@ class Extractor(Generic[_P]):
         self._select_engine()
 
         # NOTE: these engines' adapters hand the writer a plain :obj:`dict` with no record
-        # header, so the PCAP writer has nothing to write; the flow tracer gets the same fix below.
+        # header, so the PCAP and PCAP-NG writers have nothing to write; the tracer gets the same fix below.
         if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
-                and format in ('pcap', 'cap')):
+                and format in ('pcap', 'cap', 'pcapng')):
             warn(f"'Extractor(engine={self._exnam})' does not support 'format={format}'; "
                  "using 'format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
             format = 'json'
@@ -1415,10 +1418,10 @@ class Extractor(Generic[_P]):
         if trace:
             trace_obj_tcp = None
 
-            # NOTE: these adapters report plain :obj:`dict` frames the PCAP dumper cannot serialise,
+            # NOTE: these adapters report plain :obj:`dict` frames no PCAP or PCAP-NG dumper can serialise,
             # and ``None`` means ``'pcap'`` (#406); DPKT and Scapy build frame records (#1507).
             if (self._exnam in ('pyshark', 'pypcapfile')
-                    and trace_format in ('pcap', 'cap', None)):
+                    and trace_format in ('pcap', 'cap', 'pcapng', None)):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
                      "using 'trace_format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = 'json'

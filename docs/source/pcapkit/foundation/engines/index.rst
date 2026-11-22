@@ -118,10 +118,10 @@ offers says so rather than quietly doing less, unless its row says otherwise:
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | :mod:`pcapkit`'s own DTLS layer -- disabled with an           |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
-| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP output, since each frame reaches the writer as a      |
-| :class:`~pcapkit.foundation.engines.scapy.Scapy`,               | plain :obj:`dict` -- ``json`` is written instead, with a      |
-| :class:`~pcapkit.foundation.engines.pyshark.PyShark`,           | :class:`~pcapkit.utilities.warnings.FormatWarning`            |
-| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`,             |                                                               |
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP or PCAP-NG output, since each frame reaches the       |
+| :class:`~pcapkit.foundation.engines.scapy.Scapy`,               | writer as a plain :obj:`dict` -- ``json`` is written          |
+| :class:`~pcapkit.foundation.engines.pyshark.PyShark`,           | instead, with a                                               |
+| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`,             | :class:`~pcapkit.utilities.warnings.FormatWarning`            |
 | :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` and        |                                                               |
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      |                                                               |
 +-----------------------------------------------------------------+---------------------------------------------------------------+

@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     #: and :attr:`TraceFlow.__output__
     #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>`, aliases
     #: included (``'cap'``, ``'xml'``, ``'text'``, ``'txt'``).
-    Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
+    Formats = Literal['pcap', 'cap', 'pcapng', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;
     # each copy needs updating when a new engine lands.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',

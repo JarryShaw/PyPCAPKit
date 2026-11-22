@@ -73,6 +73,7 @@ __all__ = [
 
     # pcapkit.dumpkit
     'PCAPIO',                                               # PCAP Dumper
+    'PCAPNGIO',                                             # PCAP-NG Dumper
     'NotImplementedIO',                                     # Simulated I/O
 
     # pcapkit.foundation

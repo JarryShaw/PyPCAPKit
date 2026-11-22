@@ -229,6 +229,46 @@ class InputAndProgressTests(EndToEndTestCase):
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PCAPNGReportTests(EndToEndTestCase):
+    """``format='pcapng'``, the PCAP-NG capture (#2835)."""
+
+    def records(self, path: str) -> 'list[tuple]':
+        """Each frame of ``path`` as its packet, timestamp and protocol chain."""
+        extractor = self.extract(fin=path, nofile=True, store=True)
+        return [(frame.info.packet, frame.info.get('timestamp_epoch', frame.info.get('time_epoch')),
+                 str(frame.protochain)) for frame in extractor.frame]
+
+    def test_a_pcapng_capture_of_header_interfaces_and_epbs_is_written_back_as_is(self) -> None:
+        # ``dhcp.pcapng`` holds an option-less section header, its interface and EPBs alone.
+        extractor = self.extract(fin=sample_path('dhcp.pcapng'), fout=self.out('report'),
+                                 format='pcapng', store=False)
+
+        self.assertEqual(extractor.format, 'pcapng')
+        self.assertEqual(extractor.output, self.out('report.pcapng'))
+        with open(extractor.output, 'rb') as file, open(sample_path('dhcp.pcapng'), 'rb') as source:
+            self.assertEqual(file.read(), source.read())
+
+    def test_a_pcap_capture_reads_back_frame_for_frame(self) -> None:
+        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
+                                 format='pcapng', store=False)
+
+        self.assertEqual(self.records(extractor.output), self.records(sample_path('in.pcap')))
+        self.assertEqual(self.records(extractor.output)[0][2], IN_PCAP_FIRST_CHAIN)
+
+    def test_a_traced_flow_holds_its_frames(self) -> None:
+        source = self.records(sample_path('http.pcap'))
+        extractor = self.extract(fin=sample_path('http.pcap'), nofile=True, store=False, tcp=True,
+                                 trace=True, trace_format='pcapng', trace_fout=self.out('flows'))
+
+        flows = extractor.trace.tcp
+        self.assertTrue(flows)
+        for flow in flows:
+            with self.subTest(flow=flow.label):
+                self.assertTrue(flow.fpout.endswith('.pcapng'))
+                self.assertEqual(self.records(flow.fpout), [source[number - 1] for number in flow.index])
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TracedFlowOutputTests(EndToEndTestCase):
     """A traced flow's report, written through the file the tracer keeps open (#2815)."""
 

@@ -443,7 +443,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     #: Whether the writer is handed the fields of an
     #: :class:`~pcapkit.corekit.infoclass.Info` rather than the object itself:
     #: every writer but the ones :mod:`pcapkit.dumpkit` defines for internal
-    #: use, i.e. :class:`~pcapkit.dumpkit.pcap.PCAPIO`, which takes the frame,
+    #: use, i.e. :class:`~pcapkit.dumpkit.pcap.PCAPIO` and
+    #: :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO`, which take the frame or block,
     #: and :class:`~pcapkit.dumpkit.null.NotImplementedIO`.
     takes_fields = not issubclass(output, DumperBase) or issubclass(output, Dumper)
     #: Whether the writer's ``__call__`` is :class:`dictdumper.dumper.Dumper`'s,

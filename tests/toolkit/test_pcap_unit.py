@@ -126,13 +126,15 @@ class PCAPToolkitTests(unittest.TestCase):
         layers['IP'] = layers['IPv4']
         if include_tcp:
             layers['TCP'] = self._make_tcp(seq=seq, payload=payload)
-        return FakeFrame(
+        frame = FakeFrame(
             layers,
             types.SimpleNamespace(number=11, timestamp_epoch=60.5,
                                   timestamp='ts', captured_len=4,
-                                  original_len=5, packet=b'abcd'),
+                                  original_len=5, packet=b'abcd', interface_id=1),
             linktype=LinkType.ETHERNET,
         )
+        frame.section_context = types.SimpleNamespace(interfaces=['idb 0', 'idb 1'])
+        return frame
 
     def test_pcap_ipv4_ipv6_tcp_and_traceflow_helpers(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
@@ -260,6 +262,8 @@ class PCAPToolkitTests(unittest.TestCase):
         self.assertEqual(flow.timestamp, 60.5)
         self.assertEqual(flow.frame.frame_info.ts_sec, 60)
         self.assertEqual(flow.frame.frame_info.ts_usec, 500000)
+        # the block's own interface, kept for a PCAP-NG trace (#2835)
+        self.assertEqual(flow.frame['__interface__'], 'idb 1')
         self.assertIsNone(toolkit.tcp_traceflow(self._make_pcapng_frame(include_tcp=False)))
 
         block = types.SimpleNamespace(timestamp_epoch=10.25, timestamp='time',
@@ -272,6 +276,14 @@ class PCAPToolkitTests(unittest.TestCase):
 
         pcap_frame_ns = toolkit.block2frame(block, nanosecond=True)
         self.assertEqual(pcap_frame_ns.frame_info.ts_usec, 250000000)
+
+        # an interface given is kept with the block's options, hidden from the frame's fields (#2835)
+        self.assertNotIn('__interface__', pcap_frame.__dict__)
+        block.options = 'options'
+        kept = toolkit.block2frame(block, interface='idb')
+        self.assertEqual((kept['__interface__'], kept['__options__']), ('idb', 'options'))
+        self.assertEqual(kept, pcap_frame)
+        self.assertNotIn('__interface__', repr(kept))
 
     def test_tcp_reassembly_descriptor_bounds_are_absolute_and_inclusive(self) -> None:
         """The segment descriptor handed to the reassembler (GitHub issue #349).

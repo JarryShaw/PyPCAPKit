@@ -10,5 +10,6 @@ those of :mod:`dictdumper`.
 """
 from pcapkit.dumpkit.null import NotImplementedIO
 from pcapkit.dumpkit.pcap import PCAPIO
+from pcapkit.dumpkit.pcapng import PCAPNGIO
 
-__all__ = ['PCAPIO', 'NotImplementedIO']
+__all__ = ['PCAPIO', 'PCAPNGIO', 'NotImplementedIO']
