@@ -52,11 +52,11 @@ DEADLINE = 60
 #: ``packages``, every unbound submodule of ``submodules`` an export comes from, and
 #: each of ``names``; parse each of ``frames`` from an Ethernet header; look up each
 #: protocol not imported yet with ``get_protocol`` if ``registry`` is set; and, given a
-#: ``capture``, make each of its ``calls``. Then print what failed, hung, was left
-#: unbound, parsed or resolved to the wrong class, or was imported for the first time
-#: without the lock held.
+#: ``capture``, make each of its ``calls``. Then print what failed, with its traceback,
+#: hung, was left unbound, parsed or resolved to the wrong class, or was imported for
+#: the first time without the lock held.
 CHILD = '''
-import importlib, io, json, os, sys, threading, time
+import importlib, io, json, os, sys, threading, time, traceback
 
 spec = json.loads(sys.argv[1])
 import pcapkit
@@ -112,7 +112,7 @@ if spec['registry']:
 for name in calls:
     jobs.extend([('call', name, None)] * 2)
 barrier = threading.Barrier(len(jobs))
-errors, values, wrong, unlocked = [], {}, [], []
+errors, tracebacks, values, wrong, unlocked = [], [], {}, [], []
 
 
 class Audit:
@@ -149,6 +149,7 @@ def reach(*job):
         run(*job)
     except BaseException as error:
         errors.append(f'{job[0]} {job[1]}: {error!r}')
+        tracebacks.append(traceback.format_exc())
 
 
 threads = [threading.Thread(target=reach, args=job, name=f'{job[0]} {job[1]}', daemon=True) for job in jobs]
@@ -162,8 +163,9 @@ for thread in threads:
 hung = [thread.name for thread in threads if thread.is_alive()]
 unbound = [f'{package}.{name}' for (package, name), value in list(values.items())
            if vars(sys.modules[package]).get(name) is not value]
-print(json.dumps({'threads': len(jobs), 'errors': errors, 'hung': hung, 'unbound': unbound, 'wrong': wrong,
-                  'unlocked': sorted(set(unlocked)), 'kinds': sorted({job[0] for job in jobs})}))
+print(json.dumps({'threads': len(jobs), 'errors': errors, 'tracebacks': tracebacks, 'hung': hung,
+                  'unbound': unbound, 'wrong': wrong, 'unlocked': sorted(set(unlocked)),
+                  'kinds': sorted({job[0] for job in jobs})}))
 sys.stdout.flush()
 # A hung thread holds import locks, which interpreter shutdown could wait on.
 os._exit(0)
@@ -261,12 +263,19 @@ class ConcurrentFirstImportTests(unittest.TestCase):
     """Every job run from many threads at once, on a cold import, gets what it asked for."""
 
     def check(self, *args: 'Any', **kwargs: 'Any') -> 'list[dict[str, Any]]':
-        """Run :data:`TRIALS` trials of :data:`CHILD`; fail on one where a job went wrong."""
+        """Run :data:`TRIALS` trials of :data:`CHILD`; fail on one where a job went wrong.
+
+        The message carries the first failed trial's first three tracebacks, which
+        name the code a race went wrong in (#2870).
+
+        """
         outs = [run_trial(*args, **kwargs) for _ in range(TRIALS)]
         keys = ('errors', 'hung', 'unbound', 'wrong', 'unlocked')
-        failed = [{key: out[key][:3] for key in keys if out[key]} for out in outs if any(out[key] for key in keys)]
+        failed = [out for out in outs if any(out[key] for key in keys)]
         if failed:
-            self.fail(f'{len(failed)} of {TRIALS} trials failed; first: {failed[0]}')
+            first = {key: failed[0][key][:3] for key in keys if failed[0][key]}
+            self.fail('\n\n'.join([f'{len(failed)} of {TRIALS} trials failed; first: {first}',
+                                   *failed[0]['tracebacks'][:3]]))
         for out in outs:
             self.assertGreaterEqual(out['threads'], 16)
         return outs
@@ -301,6 +310,17 @@ class ConcurrentFirstImportTests(unittest.TestCase):
             outs = self.check([], [], capture=capture)
         for out in outs:
             self.assertEqual(out['kinds'], ['call', 'parse'])
+
+    def test_a_failed_job_reports_the_code_it_raised_in(self) -> 'None':
+        """A job that raises fails the check with its traceback, not its ``repr`` alone (#2870)."""
+        with self.assertRaises(AssertionError) as context:
+            self.check([], [], (('pcapkit.const.ipv4', 'NoSuchExport'),))
+        message = str(context.exception)
+        self.assertIn(f'{TRIALS} of {TRIALS} trials failed', message)
+        self.assertIn('attr pcapkit.const.ipv4: AttributeError(', message)
+        self.assertIn('Traceback (most recent call last):', message)
+        self.assertIn(f'{os.path.join("pcapkit", "utilities", "importlib.py")}", line', message)
+        self.assertIn('in __getattr__', message)
 
 
 if __name__ == '__main__':
