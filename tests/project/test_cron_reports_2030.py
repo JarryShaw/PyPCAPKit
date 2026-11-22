@@ -71,6 +71,10 @@ ARGS = {
         # dev-release build was pushed on purpose".
         'CONDA_CHANGED': '${{ needs.conda-update.outputs.CONDA_CHANGED }}',
         'DEV_RELEASE': '${{ needs.conda-update.outputs.PCAPKIT_DEV_RELEASE }}',
+        # #2841: the commit is empty where no tag was found, or where the tag
+        # found names other dependencies.
+        'RELEASE_COMMIT': '${{ needs.conda-update.outputs.PCAPKIT_RELEASE_COMMIT }}',
+        'RELEASE_TAG': '${{ needs.conda-update.outputs.PCAPKIT_RELEASE_TAG }}',
         'PCAPKIT_VERSION': '${{ needs.conda-update.outputs.PCAPKIT_VERSION }}',
     }),
     VERSIONS: ('--mode scheduled --status "$status"', {
@@ -543,6 +547,24 @@ class TestThePostSteps(unittest.TestCase):
             '- Tag: skipped, and Upload: skipped -- 1.6.0.dev1 carries a PEP 440 dev-release suffix (.devN), '
             'so PCAPKIT_DEV_RELEASE withheld both deliberately\n'))
 
+    def test_a_pushed_untagged_version_skips_tag_and_upload_with_an_explanation(self) -> None:
+        """#2841: a bump of a version no ``v*`` tag names is pushed and goes no further, which the report says."""
+        self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='scheduled', HEAD_RESULT='success',
+                                       UPDATE_RESULT='success', UPDATE_STATUS='success', TAG_RESULT='skipped',
+                                       DIST_RESULT='skipped', CONDA_CHANGED='true', DEV_RELEASE='false',
+                                       RELEASE_COMMIT='', RELEASE_TAG='', PCAPKIT_VERSION='1.7.0'), ('success',
+            'the run\n- Tag: skipped, and Upload: skipped -- no v1.7.0 tag names a tree to build, so Find the '
+            'release tag withheld both\n'))
+
+    def test_a_pushed_bump_on_other_dependencies_skips_tag_and_upload_with_an_explanation(self) -> None:
+        """#2841: a tag naming other dependencies than main is found but not built, which the report says."""
+        self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='push', HEAD_RESULT='success',
+                                       UPDATE_RESULT='success', UPDATE_STATUS='warning', TAG_RESULT='skipped',
+                                       DIST_RESULT='skipped', CONDA_CHANGED='true', DEV_RELEASE='false',
+                                       RELEASE_COMMIT='', RELEASE_TAG='v1.6.2', PCAPKIT_VERSION='1.6.2'), ('warning',
+            "the run\n- Tag: skipped, and Upload: skipped -- v1.6.2 names other dependencies than main, whose "
+            "vendored requirements the build uses, so Check the release tag's dependencies withheld both\n"))
+
     def test_a_skipped_tag_with_nothing_pushed_adds_no_explanation(self) -> None:
         """The ordinary case -- `CONDA_CHANGED` and `DEV_RELEASE` both unset -- stays silent, as before #2458."""
         self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='scheduled', HEAD_RESULT='success',
@@ -556,10 +578,11 @@ class TestThePostSteps(unittest.TestCase):
         rows = (
             ('a dev version that was not pushed', 'success',
              {'CONDA_CHANGED': 'false', 'DEV_RELEASE': 'true', 'PCAPKIT_VERSION': '1.6.0.dev1'}),
+            # A tagged version's, so #2841's no-tag line stays quiet too.
             ('a pushed build that is not a dev release', 'cancelled',
-             {'CONDA_CHANGED': 'true', 'DEV_RELEASE': 'false'}),
+             {'CONDA_CHANGED': 'true', 'DEV_RELEASE': 'false', 'RELEASE_COMMIT': 'f' * 40}),
             ('DEV_RELEASE unset to empty on a pushed build', 'cancelled',
-             {'CONDA_CHANGED': 'true', 'DEV_RELEASE': ''}),
+             {'CONDA_CHANGED': 'true', 'DEV_RELEASE': '', 'RELEASE_COMMIT': 'f' * 40}),
         )
         for label, update, env in rows:
             with self.subTest(label):

@@ -64,6 +64,12 @@ touching its binaries, so a relabelled one imports cleanly on the runner that
 built it and fails everywhere it was relabelled for. That mode needs only the
 standard library.
 
+With ``--same-dependencies REV`` it reads ``REV``'s :file:`pyproject.toml` with
+``git show`` and exits :data:`NOT_SAME`, naming both sets, when what
+:func:`direct` reads there differs from this tree's. ``conda-update`` builds the
+release tag's tree with this tree's requirements, so it does not build then
+(#2841).
+
 """
 
 from __future__ import annotations
@@ -115,6 +121,9 @@ PINS = ROOT / 'conda' / 'platform-pins.toml'
 #: How long a pin stands before it is due for review, a quarter of a year:
 #: ``--refresh-pins`` dates a pin it moves this far ahead (#1851).
 REVIEW_HORIZON = datetime.timedelta(weeks=13)
+#: ``--same-dependencies``' exit status where the two sets differ (#2841),
+#: as util/verdict_covers_checkout.py's ``--exit-code`` reports its refusal.
+NOT_SAME = 3
 #: The wheel platform tags a build on each of :data:`PLATFORMS` installs, besides
 #: ``any``, for :func:`installs` (#1851): glibc's manylinux on linux-64, and on
 #: macOS the runner's own architecture or universal2, for any macOS version, and
@@ -258,8 +267,13 @@ def environments(pythons: 'Iterable[str]') -> 'list[dict[str, str]]':
 
 def direct(pyproject: 'pathlib.Path' = PYPROJECT) -> 'list[Requirement]':
     """``[project] dependencies`` and the :data:`EXTRAS`, as written in ``pyproject``."""
+    return _direct(pathlib.Path(pyproject).read_text(encoding='utf-8'))
+
+
+def _direct(text: 'str') -> 'list[Requirement]':
+    """:func:`direct`, of a ``pyproject.toml`` already read as ``text``."""
     from packaging.requirements import Requirement  # pylint: disable=import-outside-toplevel
-    project = tomllib.loads(pathlib.Path(pyproject).read_text(encoding='utf-8'))['project']
+    project = tomllib.loads(text)['project']
     lines = list(project.get('dependencies', []))
     for extra in EXTRAS:
         lines.extend(project.get('optional-dependencies', {})[extra])
@@ -767,6 +781,31 @@ def _escape(text: 'str') -> 'str':
     return text.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
 
 
+def same_dependencies(rev: 'str') -> 'int':
+    """``--same-dependencies``: whether ``rev``'s :file:`pyproject.toml` names what :data:`PYPROJECT` does (#2841).
+
+    It prints why, as workflow-command data, and returns 0 when they match and
+    :data:`NOT_SAME` when not, so the caller picks the annotation; 1 with an
+    ``::error`` where ``rev`` has no :file:`pyproject.toml` to read.
+
+    """
+    shown = subprocess.run(['git', 'show', f'{rev}:pyproject.toml'], cwd=ROOT,  # nosec B603 B607
+                           capture_output=True, check=False)
+    if shown.returncode != 0:
+        print(f'::error title=No pyproject.toml at {rev}::'
+              + _escape(shown.stderr.decode('utf-8', 'replace').strip()), flush=True)
+        return 1
+    theirs = sorted({str(requirement) for requirement in _direct(shown.stdout.decode('utf-8'))})
+    ours = sorted({str(requirement) for requirement in direct()})
+    if theirs == ours:
+        print(f'{rev} names the dependencies main does, which conda/requirements.txt vendors', flush=True)
+        return 0
+    print(_escape(f"{rev}'s tree would be built with main's vendored requirements, and the two name different "
+                  f"dependencies. {rev}: {', '.join(theirs) or 'none'}. main: {', '.join(ours) or 'none'}."),
+          flush=True)
+    return NOT_SAME
+
+
 def refresh_pins() -> 'int':
     """``--refresh-pins``: :func:`refresh` :data:`PLATFORM_PINS`, report it, and rewrite :data:`PINS` on a change."""
     today = _today()
@@ -974,10 +1013,14 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
     group.add_argument('--refresh-pins', action='store_true',
                        help='move each platform pin up as far as PyPI has a wheel for its platform, '
                             'and rewrite conda/platform-pins.toml; reads the network')
+    group.add_argument('--same-dependencies', metavar='REV',
+                       help="exit 3 when REV's pyproject.toml names other dependencies than this one's")
     args = parser.parse_args(argv)
 
     if args.smoke is not None:
         return smoke(args.smoke)
+    if args.same_dependencies is not None:
+        return same_dependencies(args.same_dependencies)
     if args.refresh_pins:
         return refresh_pins()
 

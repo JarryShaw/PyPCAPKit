@@ -295,8 +295,11 @@ release view``. With none, the action would create one, and its tag, at
 ``commit`` (``Action.checkForMissingReleaseError()`` and
 ``Action.updateDraftOrCreateRelease()``). Conda Update bumped 1.5.0b9's build
 three times while that run waited on approval, and ``conda-dist`` runs on
-every pushed bump (:issue:`1632`), so a release the action created there would
-tag the pending version at ``main``'s tip and fail Create Release's tag check.
+every pushed bump of a version whose ``v*`` tag exists and names ``main``'s
+dependencies (:issue:`1632`, :issue:`2841`), which a pushed tag makes true before
+its release, so a release the
+action created there would tag the pending version at ``main``'s tip and fail
+Create Release's tag check.
 The action would also retarget a draft at ``commit``
 (``Action.updateDraftOrCreateRelease()`` and ``Action.updateRelease()``), which ``omitDraftDuringUpdate`` keeps a
 draft, but Create Release's ``workflow_run`` run finds the draft and resets
@@ -629,10 +632,17 @@ already has (:issue:`1640`).
 
 A re-run repeats the tagged commit's own workflow, so it cannot upload
 Anaconda files that commit's ``conda`` legs cannot build: 1.5.0b14's
-``osx-64`` legs were broken at its tag (:issue:`2140`). While ``main``'s version
-is still the tagged one, dispatching Conda Update with ``publish`` on ``main``
-builds ``main`` and uploads every platform under a bumped build
-(:issue:`2060`), and the warning a later commit's run posts for an
+``osx-64`` legs were broken at its tag (:issue:`2140`). Dispatching Conda Update
+with ``publish`` on ``main`` uploads every platform under a bumped build
+(:issue:`2060`). Like every Conda Update bump, it **packages only the tree of the**
+``v*`` **tag for** ``main``'s **version**, never ``main``'s own, taking
+:file:`conda/` and :file:`util/` from the bump it commits to ``main``: the recipe
+that can build what the tag's legs could not, and the scripts ``main``'s workflow
+calls (:issue:`2841`). So it works however far ``main`` has moved, and fails before
+pushing anything while that version has no tag or while the tag's
+:file:`pyproject.toml` names other dependencies than ``main``'s, which the bump's
+vendored requirements follow; a scheduled or ``workflow_run`` bump in either state
+stays green and uploads nothing (:doc:`workflows`). The warning a later commit's run posts for an
 unfinished release names that remedy wherever Anaconda files are missing.
 
 **A re-run does not need to be verified by hand against the PyPI and Anaconda

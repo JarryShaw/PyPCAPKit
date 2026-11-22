@@ -1634,6 +1634,9 @@ def head_result(unit_tests: 'str', verdict: 'str') -> 'str':
 
 #: What run 38325136710's Push Changes pushed, "Bumped build to 3".
 PUSHED_COMMIT = 'f4f94bcad4a195f98f1bd07d4d0bc2b6be7c9d15'
+#: A stand-in for the commit a ``v*`` tag names, which #2841's Find the release
+#: tag writes on a publishing bump.
+RELEASE_COMMIT = 'abcdef0123456789abcdef0123456789abcdef01'
 
 
 def conda_context(unit_tests: 'str' = 'skipped',
@@ -1654,7 +1657,8 @@ def conda_context(unit_tests: 'str' = 'skipped',
                   outputs_present: 'bool' = True,
                   mode: 'Optional[str]' = None,
                   publishes: 'object' = None,
-                  bump: 'object' = None) -> 'dict[str, object]':
+                  bump: 'object' = None,
+                  release: 'object' = None) -> 'dict[str, object]':
     """The ``needs``/``github``/status context one row of :data:`CONDA_ROWS` stands for.
 
     **The defaults are run 38325136710**, the broken run in #1632: a
@@ -1697,6 +1701,12 @@ def conda_context(unit_tests: 'str' = 'skipped',
     ``bump`` is Decide whether to bump's output, ``files_changed`` when left
     out; a manual run with ``publish`` sets it 'true' over a 'false' one.
 
+    ``release`` is the commit #2841's Check the release tag's dependencies
+    hands on, which it does on a publishing bump whose version has a ``v*`` tag
+    naming ``main``'s dependencies: left out, it is :data:`RELEASE_COMMIT` there
+    and :data:`NULL` otherwise. ``NULL`` on a publishing bump is a version with
+    no such tag, or a tag naming other dependencies.
+
     """
     if mode is None:
         mode = 'skipped' if event_name == 'workflow_run' and workflow_run_event != 'push' else 'success'
@@ -1716,12 +1726,17 @@ def conda_context(unit_tests: 'str' = 'skipped',
             f'Push Changes writes commit only when it pushes, so it cannot have '
             f'written commit={commit!r} with pushed={pushed!r}'
         )
+    if release is None:
+        release = RELEASE_COMMIT if bump == 'true' and publishes == 'true' else NULL
 
     steps = {}  # type: dict[str, object]
     if outputs_present:
         steps = {
             'verify-changed-files': {'outputs': {'files_changed': files_changed}},
             'bump': {'outputs': {'bump': bump}},
+            'release-tag': {'outputs': {} if release is NULL else {'tag': 'v1.5.0b9', 'commit': release}},
+            'release-deps': {'outputs': {} if release is NULL else
+                             {'same': 'true', 'tag': 'v1.5.0b9', 'commit': release}},
             'push-changes': {'outputs': {'pushed': pushed, 'commit': commit}},
             # The values runs 38325136710 and 38325153882 both produced, for
             # the same reason the results above are a real run's: a row reads
@@ -1891,6 +1906,12 @@ CONDA_ROWS = [
                    verified=NULL, publishes='true', files_changed='false', bump='true'),
      {'unit-tests': True, 'mode': True, 'conda-update': True, 'conda-tag': True,
       'conda-dist': True}),
+    # #2841: a bump of a version no `v*` tag names, as before its release, or
+    # whose tag names other dependencies than main, is pushed, and neither
+    # tagged nor uploaded, since only a tag's tree is built.
+    ('a bump with no v tag to build, so it is pushed but not tagged or uploaded',
+     conda_context(release=NULL, conda_tag='skipped', conda_dist='skipped'),
+     {'conda-update': True, 'conda-tag': False, 'conda-dist': False}),
     ('a manual run with publish off main, which mode refuses',
      conda_context(event_name='workflow_dispatch', unit_tests='success', verdict='skipped',
                    verified=NULL, mode='failure', conda_update='skipped', conda_tag='skipped',
@@ -3739,8 +3760,8 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             f"Only that commit's run may finish it (#1634), so this run released nothing: re-run the Create "
             f'Release run created for {TAGGED_COMMIT}, or release the next version. Its Anaconda files are the '
             "exception: while main's version is still 1.5.0b12, dispatch Conda Update with publish on main, "
-            'which uploads every platform under a bumped build (#2060); the re-run finishes them only if that '
-            "run's own conda legs can still succeed.",
+            "which builds v1.5.0b12's tree and uploads every platform under a bumped build (#2060, #2841); the "
+            "re-run finishes them only if that run's own conda legs can still succeed.",
         ])
 
     def test_missing_anaconda_files_name_the_conda_update_dispatch(self) -> None:
@@ -3755,9 +3776,9 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             f"run's commit {RUN_COMMIT}, and still lacks some of its Anaconda files. Only that commit's run may "
             f'finish it (#1634), so this run released nothing: re-run the Create Release run created for '
             f'{TAGGED_COMMIT}, or release the next version. Its Anaconda files are the exception: while '
-            "main's version is still 1.5.0b14, dispatch Conda Update with publish on main, which uploads "
-            "every platform under a bumped build (#2060); the re-run finishes them only if that run's own "
-            'conda legs can still succeed.',
+            "main's version is still 1.5.0b14, dispatch Conda Update with publish on main, which builds "
+            "v1.5.0b14's tree and uploads every platform under a bumped build (#2060, #2841); the re-run "
+            "finishes them only if that run's own conda legs can still succeed.",
         ])
 
     def test_complete_anaconda_files_keep_the_re_run_remedy_alone(self) -> None:

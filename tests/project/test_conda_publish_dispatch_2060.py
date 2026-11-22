@@ -302,7 +302,9 @@ class TestTheBumpIsForced(unittest.TestCase):
     def test_it_sits_between_the_check_and_the_bump(self) -> None:
         names = [name_of(entry) for entry in _workflows.steps(CONDA, 'conda-update')]
         self.assertEqual(names.index('Decide whether to bump'), names.index('Verify Changed files') + 1)
-        self.assertEqual(names.index('Bump Version'), names.index('Decide whether to bump') + 1)
+        # #2841's checks sit between, so a missing tag or a dependency change is refused before the bump.
+        self.assertEqual(names[names.index('Decide whether to bump') + 1:names.index('Bump Version')],
+                         ['Find the release tag', "Check the release tag's dependencies"])
         self.assertEqual(step('conda-update', 'Decide whether to bump')['id'], 'bump')
 
     @unittest.skipIf(not BASH, 'needs bash on PATH')
@@ -348,9 +350,10 @@ MOVED_DURING = ('::notice title=Not pushed as main moved during the push::',
                 '::warning title=Nothing published as main moved during the push::')
 ALREADY = ('::notice title=Build already on main::',
            '::warning title=Nothing published as the build is already on main::')
-#: What every forced warning says, and what a moved ``main``'s adds.
+#: What every forced warning says, and the dispatch it advises, which builds the tag's tree (#2841).
 NOTHING = 'nothing was published'
-AGAIN = 'dispatch Conda Update again with publish on main'
+RELEASE_TAG = 'v1.5.0b9'
+AGAIN = f"dispatch Conda Update again with publish on main, which builds {RELEASE_TAG}'s tree, not main's"
 
 
 class TestAnUnpushedForcedBumpSaysSo(CondaStepHarness, unittest.TestCase):
@@ -372,13 +375,18 @@ class TestAnUnpushedForcedBumpSaysSo(CondaStepHarness, unittest.TestCase):
     def lines(self, stdout: 'str', prefix: 'str') -> 'list[str]':
         return [line for line in stdout.splitlines() if line.startswith(prefix)]
 
+    @staticmethod
+    def env_for(forced: 'str') -> 'dict[str, str]':
+        """The step's ``env:``: Find the release tag writes ``RELEASE_TAG`` on a forced bump only (#2841)."""
+        return {'FORCED': forced, 'RELEASE_TAG': RELEASE_TAG if forced == 'true' else ''}
+
     def moved_past(self, forced: 'str') -> 'tuple[str, str]':
         """A merge with no verdict lands before the push: the step's stdout, and the merge."""
         clone = self._clone('first')
         merge = self._land('merge', {'pcapkit/toolkit/scapy.py': 'fix\n'},
                            'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
         self._bump(clone, {})
-        result, outputs = self._bash(self.script, clone, {'FORCED': forced})  # type: ignore[attr-defined]
+        result, outputs = self._bash(self.script, clone, self.env_for(forced))  # type: ignore[attr-defined]
         self.assertEqual((result.returncode, outputs), (0, {'pushed': 'false'}), result.stderr)
         return result.stdout, merge
 
@@ -388,7 +396,7 @@ class TestAnUnpushedForcedBumpSaysSo(CondaStepHarness, unittest.TestCase):
         merge, env = self._land_after_fetch('merge', {'pcapkit/toolkit/scapy.py': 'fix\n'},
                                             'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
         self._bump(clone, {})
-        result, outputs = self._bash(self.script, clone, {**env, 'FORCED': forced})  # type: ignore[attr-defined]
+        result, outputs = self._bash(self.script, clone, {**env, **self.env_for(forced)})  # type: ignore[attr-defined]
         self.assertTrue((self.root / 'fired').exists(), 'the merge never raced the fetch')
         self.assertEqual((result.returncode, outputs), (0, {'pushed': 'false'}), result.stderr)
         return result.stdout, merge, self._git(clone, 'rev-parse', 'HEAD')
@@ -404,16 +412,16 @@ class TestAnUnpushedForcedBumpSaysSo(CondaStepHarness, unittest.TestCase):
         for clone in (first, second):
             self._bump(clone, {})
         self.assertEqual(self._bash(self.script, first, {})[1].get('pushed'), 'true')  # type: ignore[attr-defined]
-        result, outputs = self._bash(self.script, second, {'FORCED': forced})  # type: ignore[attr-defined]
+        result, outputs = self._bash(self.script, second, self.env_for(forced))  # type: ignore[attr-defined]
         self.assertEqual((result.returncode, outputs), (0, {'pushed': 'false'}), result.stderr)
         return result.stdout
 
     def test_moved_past_the_checkout_forced(self) -> None:
-        stdout, merge = self.moved_past('true')
+        stdout, _ = self.moved_past('true')
         self.assertEqual(self.lines(stdout, MOVED_PAST[0]), [])
         [line] = self.lines(stdout, MOVED_PAST[1])
         self.assertIn(NOTHING, line)
-        self.assertTrue(line.endswith(f'{AGAIN}, now at {merge}.'), line)
+        self.assertTrue(line.endswith(f'{AGAIN}.'), line)
 
     def assert_unforced_moved_past(self, forced: 'str') -> None:
         stdout, merge = self.moved_past(forced)
@@ -434,7 +442,7 @@ class TestAnUnpushedForcedBumpSaysSo(CondaStepHarness, unittest.TestCase):
         self.assertEqual(self.lines(stdout, MOVED_DURING[0]), [])
         self.assertEqual(self.lines(stdout, MOVED_DURING[1]), [
             f'{MOVED_DURING[1]}main moved from {self.base} to {merge} after the fetch, so {commit} is not a '
-            f'fast-forward. No later run repeats this forced bump, so {NOTHING}: {AGAIN}, now at {merge}.'])
+            f'fast-forward. No later run repeats this forced bump, so {NOTHING}: {AGAIN}.'])
 
     def test_moved_during_the_push_unforced(self) -> None:
         stdout, merge, commit = self.moved_during('false')

@@ -433,8 +433,37 @@ not make when no dependency moved. ``gh workflow run cron-conda.yml --ref main
 gate, environments and ``repository-maintenance`` group, but with the build
 bumped regardless: ``Decide whether to bump`` says so although nothing changed,
 so ``Bump Version``, ``Commit Changes`` and ``Push Changes`` run, ``conda-tag``
-tags the pushed commit, every ``conda-dist`` leg uploads it, the GitHub
-Release steps run, and ``discussion`` posts the report as ``scheduled``. The
+tags the pushed commit, every ``conda-dist`` leg builds and uploads, the GitHub
+Release steps run, and ``discussion`` posts the report as ``scheduled``.
+
+Every publishing bump, scheduled or manual, builds the tree of the ``v*`` tag for
+``main``'s version, not ``main``'s (:issue:`2841`). Before the bump,
+``Find the release tag`` resolves that tag and
+``Check the release tag's dependencies`` compares its :file:`pyproject.toml` with
+``main``'s, whose vendored requirements the build uses. Where either finds nothing
+to build, a manual run fails, and a scheduled or ``workflow_run`` bump stays green
+so the ``main`` run is not red:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 32 38
+
+   * - Found
+     - A manual run with ``publish``
+     - Any other publishing bump
+   * - no ``v*`` tag for the version, as for a dev version
+     - fails with an ``::error``, pushing nothing
+     - pushed, but neither tagged nor uploaded, with a ``::notice``
+   * - a tag naming other dependencies than ``main``
+     - fails with an ``::error`` naming both sets, pushing nothing
+     - pushed, but neither tagged nor uploaded, with a ``::warning`` naming both
+       sets; the report posts as ``warning``
+
+The report says which withheld the tag and upload. Otherwise the bump's commit
+message names the tag, and ``conda-dist``'s ``Check out the release tag's tree``
+switches from the bump to the tagged commit, keeping only the bump's
+:file:`conda/` and :file:`util/` (:doc:`releasing` says why).
+:file:`tests/project/test_conda_publish_from_tag_2841.py` pins this. The
 ``mode`` job is the one place the input is read, and every step or job that
 publishes or names an environment requires its ``publishes`` output to be
 ``'true'``:
@@ -462,8 +491,9 @@ so where ``Push Changes`` does not push it because ``main`` moved past the
 checkout or during the push, the run stays
 green having published nothing, and says so in a warning and in its report
 (:issue:`2060`); the remedy is to dispatch Conda Update again with ``publish``
-on ``main``. Where another run already pushed the same build, that run tags and
-uploads it, and a second dispatch is needed only if it did not.
+on ``main``, which builds the same tag's tree. Where another run already pushed
+the same build, that run tags and uploads it, and a second dispatch is needed
+only if it did not.
 :file:`tests/project/test_conda_publish_dispatch_2060.py` pins this.
 
 ``gate-only: true`` selects not only ``unit-tests.yml``'s ``gate`` (the full
@@ -1793,7 +1823,10 @@ script not listed here is CI-only.
        :doc:`conventions/test-coverage`).
    * - :file:`util/conda_vendor.py`
      - ``Refresh the platform pins`` and ``Setup Conda Distribution`` in
-       ``cron-conda.yml``'s ``conda-update``; ``Smoke-test the vendored packages``
+       ``cron-conda.yml``'s ``conda-update``, and there
+       ``Check the release tag's dependencies`` as
+       ``conda_vendor.py --same-dependencies`` (:issue:`2841`);
+       ``Smoke-test the vendored packages``
        in its ``conda-dist`` and ``create-release.yml``'s ``conda``, as
        ``conda_vendor.py --smoke``.
      - ``python util/conda_vendor.py --check``, which no workflow runs: whether
