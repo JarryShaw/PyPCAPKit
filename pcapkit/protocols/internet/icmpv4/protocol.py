@@ -588,7 +588,8 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
 
         """
         if message is not None:
-            unused = getattr(message, 'unused', b'\x00\x00\x00\x00')
+            unused = self._fill_short_read(getattr(message, 'unused', b'\x00\x00\x00\x00'),
+                                           size=4, model=message, field='data')
             data = message.data
         return Schema_DestinationUnreachable(unused=self._make_octets(unused, size=4, name='unused octets'),
                                              data=data)
@@ -615,7 +616,8 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
 
         """
         if message is not None:
-            unused = getattr(message, 'unused', b'\x00\x00\x00\x00')
+            unused = self._fill_short_read(getattr(message, 'unused', b'\x00\x00\x00\x00'),
+                                           size=4, model=message, field='data')
             data = message.data
         return Schema_TimeExceeded(unused=self._make_octets(unused, size=4, name='unused octets'),
                                    data=data)
@@ -645,7 +647,8 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         """
         if message is not None:
             pointer = message.pointer
-            unused = getattr(message, 'unused', b'\x00\x00\x00')
+            unused = self._fill_short_read(getattr(message, 'unused', b'\x00\x00\x00'),
+                                           size=3, model=message, field='data', offset=1)
             data = message.data
         return Schema_ParameterProblem(pointer=pointer,
                                        unused=self._make_octets(unused, size=3, name='unused octets'),

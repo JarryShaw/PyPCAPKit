@@ -847,7 +847,8 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
 
         """
         if message is not None:
-            unused = getattr(message, 'unused', b'\x00\x00\x00\x00')
+            unused = self._fill_short_read(getattr(message, 'unused', b'\x00\x00\x00\x00'),
+                                           size=4, model=message, field='data')
             data = message.data
         return Schema_DestinationUnreachable(unused=self._make_octets(unused, size=4, name='unused octets'),
                                              data=data)
@@ -897,7 +898,8 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
 
         """
         if message is not None:
-            unused = getattr(message, 'unused', b'\x00\x00\x00\x00')
+            unused = self._fill_short_read(getattr(message, 'unused', b'\x00\x00\x00\x00'),
+                                           size=4, model=message, field='data')
             data = message.data
         return Schema_TimeExceeded(unused=self._make_octets(unused, size=4, name='unused octets'),
                                    data=data)
