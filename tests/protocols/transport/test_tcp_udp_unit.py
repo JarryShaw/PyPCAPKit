@@ -1366,14 +1366,16 @@ class TCPUDPUnitTests(unittest.TestCase):
         option's progress *after* its end-of-option-list break rather than before:
         checking first turns every such segment into an error.
 
-        :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` itself refuses the segment
-        with :exc:`~pcapkit.utilities.exceptions.ProtocolError`, since the 16
-        missing octets would otherwise be rebuilt as zeros (#1404).
+        Inside a frame :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` itself
+        refuses the segment with :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+        since the 16 missing octets would otherwise be rebuilt as zeros (#1404); on
+        its own the end of the data is a cut, and the rebuild cuts back to it (#2880).
 
         """
         from pcapkit.const.tcp.option import Option
         from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
         from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.utilities.contextvars import frame_depth
         from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
@@ -1385,8 +1387,17 @@ class TCPUDPUnitTests(unittest.TestCase):
             [(Option.Maximum_Segment_Size, 4), (Option.End_of_Option_List, 1)],
         )
 
-        with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
-            TCP(raw, len(raw))
+        token = frame_depth.set(1)
+        try:
+            with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
+                TCP(raw, len(raw))
+        finally:
+            frame_depth.reset(token)
+
+        # on its own the end of the data is a cut, which the rebuild cuts back to (#2880)
+        alone = TCP(raw, len(raw))
+        self.assertEqual(alone.info.get('__short_read__'), ('options', 4))
+        self.assertEqual(TCP.from_data(alone.info).data, raw)
 
     def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
         """An option declaring more data than its option area holds is refused alone, and kept in a datagram. C.f. #431, #572, #1325.

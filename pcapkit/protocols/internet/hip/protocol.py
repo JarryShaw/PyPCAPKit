@@ -61,6 +61,7 @@ from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.extlen import ext_len_to_octets
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.corekit.schema.shortread import cut_on_its_own
 from pcapkit.protocols.internet.hip.data import HIP as Data_HIP
 from pcapkit.protocols.internet.hip.data import AckDataParameter as Data_AckDataParameter
 from pcapkit.protocols.internet.hip.data import ACKParameter as Data_ACKParameter
@@ -647,7 +648,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed packet data.
 
         Raises:
-            ProtocolError: If the packet is malformed.
+            ProtocolError: If the packet is malformed. Parsed on its own, a
+                Header Length the cut left as zero is the short read's
+                (:issue:`2880`).
 
         """
         if length is None:
@@ -656,7 +659,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         # NOTE: The two fixed bits "MUST be ignored when receiving" (:rfc:`7401#section-5.1`),
         # so they are kept as read. A Header Length below 4 cannot cover the two HITs.
-        if schema.len < 4:
+        if schema.len < 4 and not cut_on_its_own(schema, 'len'):
             raise ProtocolError(f'HIP: invalid header length: {schema.len}')
 
         hip = Data_HIP(
@@ -676,7 +679,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             rhit=schema.rhit,
         )
 
+        # NOTE: A Header Length the cut left as zero declares no parameters.
         _prml = (schema.len - 4) * 8
+        if _prml < 0 and cut_on_its_own(schema, 'len'):
+            _prml = 0
         if _prml:
             hip.__update__([
                 ('parameters', self._read_hip_param(_prml, version=hip.version)),

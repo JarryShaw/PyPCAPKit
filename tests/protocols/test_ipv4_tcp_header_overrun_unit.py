@@ -5,10 +5,11 @@ This guards against GitHub issue #1404, where an IPv4 ``ihl`` or a TCP Data
 Offset declaring more header
 than the data holds read the missing octets as zeros, and ``from_data`` rebuilt
 them -- 34 octets in and 38 out for an Ethernet frame whose IPv4 ``ihl`` is 6
-with only 20 header octets present. Such a header raises
+with only 20 header octets present. Inside a frame such a header raises
 :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so its parent keeps the
 octets as a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload and rebuilds them
-byte for byte.
+byte for byte. On its own the end of the data is a cut (#2880), so the header is a
+short read, with the header length it declares, and rebuilds as captured.
 
 It also guards against GitHub issue #1402, where ``IPv4.make()`` called
 :func:`int` on each key of a TS option's ``timestamp`` mapping, so a dotted-quad
@@ -50,6 +51,22 @@ SHORT = {
     'TCP offset=10, 28 octets': ('pcapkit.protocols.transport.tcp.protocol', 'TCP', _tcp(10, bytes.fromhex('0101010101010101'))),
 }
 
+#: The header length each short layer declares, in octets.
+HDR_LEN = {
+    'IPv4 ihl=6, 20 octets': 24,
+    'IPv4 ihl=7, 24 octets': 28,
+    'TCP offset=6, 20 octets': 24,
+    'TCP offset=10, 28 octets': 40,
+}
+
+#: The short read each records on its own: the option area, and the octets of it present.
+RECORDS = {
+    'IPv4 ihl=6, 20 octets': ('options', 0),
+    'IPv4 ihl=7, 24 octets': ('options', 4),
+    'TCP offset=6, 20 octets': ('options', 0),
+    'TCP offset=10, 28 octets': ('options', 8),
+}
+
 #: Each short layer inside its parent: (parent module, parent class, frame).
 IN_PARENT = {
     'IPv4 ihl=6, 20 octets': ('pcapkit.protocols.link.ethernet.protocol', 'Ethernet', _ETH + SHORT['IPv4 ihl=6, 20 octets'][2]),
@@ -73,16 +90,37 @@ class TestHeaderLengthOverrun(unittest.TestCase):
 
         return getattr(importlib.import_module(module), name)
 
-    def test_a_short_header_raises_protocol_error(self) -> None:
+    def test_a_short_header_inside_a_frame_raises_protocol_error(self) -> None:
+        from pcapkit.utilities.contextvars import frame_depth
         from pcapkit.utilities.exceptions import ProtocolError
 
         for case, (module, name, data) in SHORT.items():
             with self.subTest(case=case):
                 protocol = self._protocol(module, name)
+                token = frame_depth.set(1)
+                try:
+                    with warnings.catch_warnings():
+                        warnings.simplefilter('ignore')
+                        with self.assertRaisesRegex(ProtocolError, 'header length .* runs past the end of the data'):
+                            protocol(data, len(data))
+                finally:
+                    frame_depth.reset(token)
+
+    def test_a_short_header_on_its_own_is_a_short_read(self) -> None:
+        # on its own the end of the data is a cut, which the rebuild cuts back to (#2880)
+        for case, (module, name, data) in SHORT.items():
+            with self.subTest(case=case):
+                protocol = self._protocol(module, name)
                 with warnings.catch_warnings():
-                    warnings.simplefilter('ignore')
-                    with self.assertRaisesRegex(ProtocolError, 'header length .* runs past the end of the data'):
-                        protocol(data, len(data))
+                    warnings.simplefilter('error')
+                    parsed = protocol(data, len(data))
+                self.assertEqual(parsed.info.get('__short_read__'), RECORDS[case])
+                self.assertEqual(parsed.info.hdr_len, HDR_LEN[case])
+                for path, info in (('model', parsed.info), ('dict', parsed.info.to_dict())):
+                    with self.subTest(path=path):
+                        rebuilt = protocol.from_data(info)
+                        self.assertEqual(rebuilt.data.hex(), data.hex())
+                        self.assertEqual(rebuilt.info, parsed.info)
 
     def test_a_short_header_is_kept_as_captured_by_its_parent(self) -> None:
         from pcapkit.protocols.misc.raw.protocol import Raw

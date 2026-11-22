@@ -584,10 +584,16 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
               left as zero from one read, and leave it to the short read.
             * ``__data_end__`` -- that ``length`` ends where the data does, as a
               :class:`~pcapkit.corekit.fields.collections.ListField` says of an
-              item it counts. Fields running past ``length`` are then the cut
-              the short read records, and do not warn that ``__length__`` fell
-              below zero (:issue:`2749`); past the cut it reads as zero, so a
-              field it sizes reads nothing (:issue:`2848`).
+              item it counts, and :meth:`Protocol.unpack
+              <pcapkit.protocols.protocol.Protocol.unpack>` of a layer parsed on
+              its own (:issue:`2880`). Fields running past ``length`` are then
+              the cut the short read records, and do not warn that
+              ``__length__`` fell below zero (:issue:`2749`); past the cut it
+              reads as zero, so a field it sizes reads nothing (:issue:`2848`).
+            * ``__past_cut__`` -- for the fields past that cut, that nothing is
+              left there: a length a :class:`~pcapkit.corekit.fields.field.Field`
+              resolves below zero from the zeros the cut left reads none
+              (:issue:`2880`).
             * ``__data_present__`` -- that ``data`` holds the data that many
               octets in, and past them the zeros a
               :class:`~pcapkit.corekit.fields.collections.ListField` of schema
@@ -595,8 +601,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
               how many of its octets the data holds, under the same key, so a
               list there ends with the data (:issue:`2760`).
 
-            The last three are cleared as unpacking starts, so a nested schema
-            finds only its own.
+            ``__short_read__``, ``__data_end__``, ``__past_cut__`` and
+            ``__data_present__`` are cleared as unpacking starts, so a nested
+            schema finds only its own.
 
             A payload field of a declared length the data ends inside records a
             cut like any other field, so its layer's rebuild reads as cut
@@ -619,7 +626,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         .. versionchanged:: 1.7.0
 
            Past the cut in a schema whose ``length`` ends with the data, a field
-           sized by ``__length__`` reads nothing (:issue:`2848`).
+           sized by ``__length__`` reads nothing (:issue:`2848`), nor does one
+           whose length the zeros the cut left resolve below zero
+           (:issue:`2880`).
 
         """
         # force cast arg type since decorator changed their signatures
@@ -629,8 +638,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             packet = cast('dict[str, Any]', packet)
 
         # NOTE: ``packet`` may be an enclosing schema's, copied into a nested
-        # context, so its short read is not this schema's (#2727).
+        # context, so its short read is not this schema's (#2727), nor its cut (#2880).
         packet.pop('__short_read__', None)
+        packet.pop('__past_cut__', None)
         # NOTE: Fields running past a length that ends with the data are the cut its
         # short read records, not an overrun (#2749).
         data_end = packet.pop('__data_end__', False)
@@ -641,10 +651,11 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
         self = cls.__new__(cls)
         for field in self.__fields__.values():
-            # NOTE: Past the cut nothing is left of a length that ends with the data, so a
-            # field sized by what is left reads none rather than a negative length (#2848).
-            if data_end and packet['__length__'] < 0 and '__short_read__' in packet:
-                packet['__length__'] = 0
+            # NOTE: Past the cut nothing is left of a length ending with the data: a field sized by
+            # what is left (#2848), or by the zeros the cut left (#2880), reads none, not below zero.
+            if data_end and '__short_read__' in packet:
+                packet['__past_cut__'] = True
+                packet['__length__'] = max(cast('int', packet['__length__']), 0)
             field = field(packet)
 
             # NOTE: ``Field.length`` recomputes struct.calcsize() on every read,
@@ -753,6 +764,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 warn(f'packet length < 0: {packet["__length__"]}',
                      SchemaWarning, stacklevel=stacklevel())
 
+        packet.pop('__past_cut__', None)
         self.__updated__ = False
         return self
 

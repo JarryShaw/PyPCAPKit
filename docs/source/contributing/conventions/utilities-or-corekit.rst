@@ -114,6 +114,27 @@ that would refuse such a zero leaves it to the short read, and refuses a read va
 with a :exc:`~pcapkit.utilities.exceptions.ProtocolError`, as the ``Opt Data Len``
 helpers of :mod:`pcapkit.protocols.internet.ipv6_ext.schema` do (:issue:`2727`).
 
+**On its own, the end of the data is a cut; inside a frame, the frame's lengths say
+where the message ends.** A layer parsed with no layer before it, as
+:data:`~pcapkit.utilities.contextvars.frame_depth` tells, is given the octets
+captured, so :meth:`Protocol.unpack <pcapkit.protocols.protocol.Protocol.unpack>`
+unpacks its header with ``__data_end__``. Past the cut, :meth:`Schema.unpack
+<pcapkit.protocols.schema.Schema.unpack>` then warns nothing of ``__length__`` falling
+below zero and resolves no length below zero from the zeros the cut left, so those
+fields read nothing and the short read records the cut. Settled on :issue:`2880`,
+completing :issue:`2848`. Inside a frame a field running past the length the enclosing
+layer declares overruns it and warns, and the frame keeps a header its octets cannot
+hold as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
+
+A protocol's own check follows the same rule through
+:func:`~pcapkit.corekit.schema.shortread.cut_on_its_own`. On its own, a version or
+length the cut left as zero, or a header length the data ends before, is the short
+read's, as such a zero is for a field callback (:issue:`2727`).
+:func:`~pcapkit.corekit.schema.shortread.fill_short_options` rebuilds that header
+length, which :issue:`1404` refused because the rebuild filled the zeros in. A check
+the cut leaves nothing to decide by still refuses: the PCAP magic number, IGMP's
+classification by length, NGAP's PER decoding, and the TLS, DTLS and HTTP/2 framing.
+
 **A helper in one protocol's own schema module moves there too once code outside that
 protocol uses it and it is generic enough to reuse**, so other implementors can find
 it; a helper only its own protocol calls stays beside the schema. Ruled on

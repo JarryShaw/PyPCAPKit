@@ -184,14 +184,26 @@ class TestTrialParseWarnings(unittest.TestCase):
         self.assertEqual(frame.payload.data, DATA)
 
     def test_ethernet_asked_for_still_warns(self) -> None:
-        """``Ethernet(bytes(10))`` is not on trial: it is built directly, kept, and warns."""
-        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        """``Ethernet(bytes(10))`` is not on trial: built directly inside a frame, it is kept and warns.
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            parsed = Ethernet(bytes(10))
-        self.assertIsInstance(parsed, Ethernet)
-        self.assertEqual(self._schema(caught), ['packet length < 0: -2', 'packet length < 0: -4'])
+        On its own the header ends with the data, so the same cut is a quiet short read (#2880).
+
+        """
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.utilities.contextvars import frame_depth
+
+        for depth, expected in ((1, ['packet length < 0: -2', 'packet length < 0: -4']), (0, [])):
+            with self.subTest(depth=depth):
+                token = frame_depth.set(depth)
+                try:
+                    with warnings.catch_warnings(record=True) as caught:
+                        warnings.simplefilter('always')
+                        parsed = Ethernet(bytes(10))
+                finally:
+                    frame_depth.reset(token)
+                self.assertIsInstance(parsed, Ethernet)
+                self.assertEqual(parsed.info.get('__short_read__'), ('src', 4))  # type: ignore[attr-defined]
+                self.assertEqual(self._schema(caught), expected)
 
     def test_kept_cut_layers_still_warn_from_the_callers_line(self) -> None:
         """A held layer that is kept reports as it did, on both channels."""

@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.l2tp.type import Type as Enum_Type
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.schema.shortread import cut_on_its_own
 from pcapkit.protocols.link.l2tp.data import L2TP as Data_L2TP
 from pcapkit.protocols.link.l2tp.data import Flags as Data_Flags
 from pcapkit.protocols.link.l2tp.protocol import L2TP
@@ -213,7 +214,9 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             Parsed packet data.
 
         Raises:
-            ProtocolError: If the version nibble is not ``2``.
+            ProtocolError: If the version nibble is not ``2``; parsed on its
+                own, one the cut left as zero is the short read's
+                (:issue:`2880`).
 
         """
         schema = self.__header__
@@ -221,7 +224,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
         # NOTE: Any ``Ver`` but 2 is another protocol (RFC 2661 Section 3.1), whose later fields
         # mean something else, so it is refused rather than misread (#548).
-        if _flag['version'] != 2:
+        if not cut_on_its_own(schema, 'flags') and _flag['version'] != 2:
             raise ProtocolError(f'{self.alias}: invalid version: {_flag["version"]}')
 
         flags = Data_Flags(

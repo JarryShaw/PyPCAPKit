@@ -98,14 +98,14 @@ class StandaloneCutTests(unittest.TestCase):
                 *(('ICMP', name, packet, ICMPv4, IPv4, ipv4) for name, packet in ICMPV4.items())]
 
     def parse(self, cls: type, part: bytes) -> object:
-        """``part`` parsed on its own as ``cls``, any warning raised as an error past the header.
+        """``part`` parsed on its own as ``cls``, any warning raised as an error.
 
-        A cut inside the header warns that its length fell below zero, as every
-        protocol's does on its own; the body's fields past a cut warn nothing.
+        On its own the header ends with the data too, so a cut inside it warns
+        nothing either (#2880).
 
         """
         with warnings.catch_warnings():
-            warnings.simplefilter('error' if len(part) >= 4 else 'ignore')
+            warnings.simplefilter('error')
             return cls(io.BytesIO(part), len(part))  # type: ignore[call-arg]
 
     def test_fields_sit_where_the_rfcs_put_them(self) -> None:

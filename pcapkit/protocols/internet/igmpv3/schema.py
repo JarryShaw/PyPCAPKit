@@ -59,11 +59,14 @@ def igmpv3_body_selector(pkt: 'dict[str, Any]') -> 'SchemaField':
     """
     type_ = pkt['type']  # type: Enum_Type
     length = pkt['__length__']  # type: int
+    # NOTE: On its own a message is given the octets captured, so its body's length ends
+    # with the data, as an ICMP body's does; inside a frame its lengths say where (#2880).
+    packet = {} if frame_depth.get() else {'__data_end__': True}
 
     if type_ == Enum_Type.IGMP_Membership_Query:
-        return SchemaField(length=length, schema=Query)
+        return SchemaField(length=length, schema=Query, packet=packet)
     if type_ == Enum_Type.IGMPv3_Membership_Report:
-        return SchemaField(length=length, schema=Report)
+        return SchemaField(length=length, schema=Report, packet=packet)
     raise ProtocolError(f'IGMPv3: unsupported message type: {type_!r}')
 
 

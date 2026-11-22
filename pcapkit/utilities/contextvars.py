@@ -32,7 +32,8 @@ beholding = contextvars.ContextVar('pcapkit.utilities.contextvars.beholding', de
 #: contextvars.ContextVar[int]: How many layers of the frame being dissected
 #: come before the next one :meth:`Protocol._parse_next_layer
 #: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` parses; see
-#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
+#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`. Zero for a layer parsed on
+#: its own, whose header ends with the data (:issue:`2880`).
 frame_depth = contextvars.ContextVar('pcapkit.utilities.contextvars.frame_depth', default=0)
 
 #: contextvars.ContextVar[tuple[int, int] | None]: The captured and the original

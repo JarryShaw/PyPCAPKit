@@ -37,6 +37,7 @@ from pcapkit.const.pppoe.code import Code as Enum_Code
 from pcapkit.const.pppoe.tag import Tag as Enum_Tag
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.schema.shortread import cut_on_its_own
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.pppoe.data import PPPoE as Data_PPPoE
 from pcapkit.protocols.link.pppoe.data import Tag as Data_Tag
@@ -128,13 +129,16 @@ class PPPoE(Link[Data_PPPoE, Schema_PPPoE],
 
         Raises:
             ProtocolError: If the version or the type is not ``1``, or the
-                Length of a discovery packet ends inside a tag.
+                Length of a discovery packet ends inside a tag. Parsed on its
+                own, a version and type the cut left as zero are the short
+                read's (:issue:`2880`).
 
         """
         schema = self.__header__
 
-        # NOTE: RFC 2516 Section 4 fixes both to 1; another is a format this does not know.
-        if schema.info['ver'] != 1 or schema.info['type'] != 1:
+        # NOTE: RFC 2516 Section 4 fixes both to 1; another is a format this does not know. On
+        # its own, those the cut left as zero are its short read's (#2880).
+        if (schema.info['ver'] != 1 or schema.info['type'] != 1) and not cut_on_its_own(schema, 'info'):
             raise ProtocolError(f'{self.alias}: invalid version or type: '
                                 f'{schema.info["ver"]}, {schema.info["type"]}')
 

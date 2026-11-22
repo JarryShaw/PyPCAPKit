@@ -132,10 +132,19 @@ class TestHandledRefusalIsQuiet(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities import exceptions
 
+        from pcapkit.utilities.contextvars import frame_depth
+
         error = 'TCP: header length 60 runs past the end of the data (20 octets)'
         self.assert_quiet_fallback(Ethernet, ETH_IPV4_TCP_LONG, 'Ethernet:IPv4:TCP', 2, error)
         self.assertEqual(exceptions._caught_here.get(), ())  # pylint: disable=protected-access
-        self.assert_direct_construction_is_loud(TCP, TCP_LONG, error)
+        # NOTE: On its own the end of the data is a cut, the short read's (#2880), so the
+        # octets are built directly as a frame's layer would be.
+        token = frame_depth.set(1)
+        try:
+            self.assert_direct_construction_is_loud(TCP, TCP_LONG, error)
+        finally:
+            frame_depth.reset(token)
+        self.assertEqual(TCP(TCP_LONG, len(TCP_LONG)).info.get('__short_read__'), ('options', 0))
 
 
 if __name__ == '__main__':

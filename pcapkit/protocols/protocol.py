@@ -940,6 +940,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             data model's ``__short_read__`` before :meth:`read` runs, as the
             record of a cut those octets may not show (:issue:`2761`).
 
+            Parsed on its own rather than inside a frame, a layer is given the
+            octets captured, so its header is unpacked with ``__data_end__``
+            (see :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`):
+            a cut inside it is the short read it records, with no
+            ``packet length < 0`` warning per field and no length resolved below
+            zero (:issue:`2880`). A check :meth:`read` makes of a value the cut
+            left asks :func:`~pcapkit.corekit.schema.shortread.cut_on_its_own`
+            whether to leave it to the short read.
+
         Raises:
             ProtocolError: If the made header holds raw items and its packed
                 octets do not parse, either as a schema or by :meth:`read`.
@@ -952,8 +961,18 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            the one :meth:`from_data` passes on, is replaced too, rather than
            reaching :meth:`read` (:issue:`2725`).
 
+        .. versionchanged:: 1.7.0
+
+           A layer parsed on its own unpacks its header as ending with the data,
+           so a cut inside it warns nothing and resolves no length below zero
+           (:issue:`2880`).
+
         """
         packet = kwargs.get('__packet__', {})  # packet data
+        # NOTE: On its own a layer is given the octets captured, so the header it parses ends
+        # with the data; inside a frame the frame's lengths say where it ends (#2880).
+        if cast('Optional[_ST]', self.__header__) is None and not frame_depth.get():
+            packet['__data_end__'] = True
         if cast('Optional[_ST]', self.__header__) is None and self.__short_read__ is not None:
             # NOTE: A rebuilt short read is parsed as quietly as its made header was read,
             # and keeps the record of a cut its octets may not show (#2711, #2761).
@@ -1138,7 +1157,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             after an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
             A refusal it absorbs is quiet, any other error is logged at
             :data:`logging.WARNING`, and the failed parse's warnings are dropped,
-            as :meth:`_analyze_next_layer` describes.
+            as :meth:`_analyze_next_layer` describes. An empty payload is
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a
+            frame.
 
         .. versionchanged:: 1.7.0
 
@@ -1146,7 +1167,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            rather than the octets the failed parse left unread (:issue:`2842`).
            Its ``protocol`` is ``proto``, a refusal it absorbs is quiet, any
            other error is logged at :data:`logging.WARNING`, and the failed
-           parse's warnings are dropped (:issue:`2862`).
+           parse's warnings are dropped (:issue:`2862`). An empty payload is
+           ``NoPayload`` (:issue:`2880`).
 
         """
         protocol = cls._lookup_next_layer(cls.__proto__, proto)
@@ -3023,7 +3045,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             its ``error`` the failure's message and its ``protocol`` ``code``,
             as a frame's fallback is, or as
             :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after
-            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
+            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`. An
+            empty payload is :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`
+            unparsed.
 
         Note:
             The parse runs on trial, as under
@@ -3038,8 +3062,17 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             layers it carries, as a frame's layer does. The fallback is built after
             the trial ends, so an error it raises is loud.
 
+            An empty payload is kept as a frame keeps an empty next layer (see
+            :meth:`_empty_next_layer`): parsed on its own, ``klass`` would read
+            a header cut before its first octet, made of nothing but zeros
+            (:issue:`2880`).
+
         """
         payload_io = io.BytesIO(payload)
+        # NOTE: No octets are no layer, as a frame's ``_empty_next_layer`` keeps them (#2880).
+        if not payload:
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+            return NoPayload(payload_io, 0, **kwargs)
         eof, error = False, ''
         # NOTE: ``beholding`` as well, so a trial block inside the parse, as TLS's, drops its
         # warnings on a raise rather than reporting them past this one (#2308).

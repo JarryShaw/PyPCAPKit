@@ -7,8 +7,9 @@
 :mod:`pcapkit.corekit.schema.shortread` carries a header cut short by the end of the
 capture through to the protocol's info, by which a protocol rebuilt from that info
 is cut back to the octets its header had (:issue:`1458`), for the layer base classes
-and the PCAP global header alike. It names the protocol and schema classes for type
-checking only, since those import it. It is one of the :mod:`pcapkit.corekit.schema`
+and the PCAP global header alike, and tells a protocol's checks of a header parsed on
+its own where the cut fell (:issue:`2880`). It names the protocol and schema classes
+for type checking only, since those import it. It is one of the :mod:`pcapkit.corekit.schema`
 helpers shared across the schema layer, not part of the header schema framework in
 :mod:`pcapkit.protocols.schema`; see :ref:`utilities-or-corekit`.
 
@@ -22,7 +23,8 @@ import collections.abc
 import io
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.utilities.contextvars import frame_length
+from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.utilities.contextvars import frame_depth, frame_length
 
 if TYPE_CHECKING:
     from typing import Any, Iterable, Optional, TypeVar
@@ -32,7 +34,8 @@ if TYPE_CHECKING:
 
     _PB = TypeVar('_PB', bound=ProtocolBase)
 
-__all__ = ['keep_short_read', 'replay_short_read', 'hoist_short_read']
+__all__ = ['keep_short_read', 'replay_short_read', 'hoist_short_read', 'cut_on_its_own', 'fill_short_options',
+           'ends_inside_option']
 
 
 def keep_short_read(protocol: 'ProtocolBase', length: 'Optional[int]' = None) -> 'None':
@@ -171,3 +174,115 @@ def hoist_short_read(schema: 'Schema', name: 'str', parts: 'Iterable[Optional[Sc
     if '__short_read__' not in schema.__dict__ and any(
             part is not None and '__short_read__' in part.__dict__ for part in parts):
         schema.__dict__['__short_read__'] = (name, len(schema.__buffer__[name]))
+
+
+def cut_on_its_own(header: 'Schema', name: 'Optional[str]' = None, end: 'Optional[int]' = None) -> 'bool':
+    """Tell a check of a header parsed on its own whether the data ended before what it reads.
+
+    Args:
+        header: The header just parsed.
+        name: Its field the check reads; :data:`None` for the whole header.
+        end: How many octets of ``name``, from its start, the check reads;
+            :data:`None` for all of them.
+
+    Returns:
+        Whether ``header`` was parsed with no layer before it, as
+        :data:`~pcapkit.utilities.contextvars.frame_depth` tells, and the short
+        read it records ends the data before those octets of ``name``, or
+        anywhere in it without a ``name``.
+
+    On its own the end of the data is a cut (:issue:`2880`), so a value past it is a
+    zero the cut left, not one read. A check that would refuse such a value leaves it
+    to the short read, as a field callback does (:issue:`2727`), and so does one refusing
+    a header length the data ends inside, refused on :issue:`1404` because the rebuild
+    filled the zeros in, which the short read now cuts back. Inside a frame its lengths
+    say where the message ends, so such a check refuses as before.
+
+    .. versionadded:: 1.7.0
+
+    """
+    record = header.__dict__.get('__short_read__')
+    if record is None or frame_depth.get():
+        return False
+    if name is None:
+        return True
+    cut, count = record
+    for key in header.__fields__:
+        if key == cut:
+            return key != name or end is None or count < end
+        if key == name:
+            return False
+    return False
+
+
+def fill_short_options(data: 'Any', options: 'Any', size: 'int', zero: 'tuple[Any, Any]',
+                       padding: 'Optional[bytes]' = None) -> 'tuple[Any, Optional[bytes]]':
+    """Fill out an options area a short read ended inside, so a rebuild writes its length.
+
+    Args:
+        data: The data model a protocol is rebuilt from.
+        options: Its options, keyed by code, as the protocol's ``read`` gives them, or
+            :data:`None` for none.
+        size: Octets its header length gives the options area.
+        zero: The code and data model of the one-octet option a zero octet reads as.
+        padding: Octets it records after an End of Option List, or :data:`None` where
+            the protocol records none.
+
+    Returns:
+        ``options`` and ``padding`` to ``size`` octets where ``data`` records a short
+        read: past ``size``, trailing ``zero`` options dropped; short of it, filled out
+        with zero octets, after ``padding`` where the options end with ``zero``, else
+        as that many ``zero`` options.
+
+    A header length the data ends before is read as parsed on its own
+    (:func:`cut_on_its_own`), but ``make`` writes the length of the options it is
+    given, which past the cut are a cut option's whole length and the end of the
+    list its zeros read as. Whatever is filled or dropped lies past the cut, so the
+    rebuild's cut back leaves the octets and the header length its parse read
+    (:issue:`2880`).
+
+    .. versionadded:: 1.7.0
+
+    """
+    if options is None or data.get('__short_read__') is None:
+        return options, padding
+    items = list(options.items(multi=True))
+    fill = size - sum(option.length for _, option in items) - len(padding or b'')
+    if fill < 0:
+        while fill < 0 and items and items[-1][0] == zero[0]:
+            fill += items.pop()[1].length
+        options = OrderedMultiDict(items)
+    if fill <= 0:
+        return options, padding
+    if padding is not None and items and items[-1][0] == zero[0]:
+        return options, padding + bytes(fill)
+    return OrderedMultiDict([*items, *[zero] * fill]), padding
+
+
+def ends_inside_option(options: 'Any', count: 'int') -> 'bool':
+    """Tell whether the first ``count`` octets of an options area end inside one of its options.
+
+    Args:
+        options: The options read from the area, keyed by code, each with the
+            ``length`` it declares.
+        count: Octets of the area the data holds.
+
+    Returns:
+        Whether an option starts before ``count`` octets and declares more than them.
+
+    Such an option rebuilds by the values it holds rather than by the length it
+    declares, so neither its own length nor the header length before it would
+    rebuild as parsed: a header the data ends inside an option of stays refused
+    on its own too (:issue:`1404`, :issue:`2880`).
+
+    .. versionadded:: 1.7.0
+
+    """
+    offset = 0
+    for _, option in options.items(multi=True):
+        if offset >= count:
+            return False
+        offset += option.length
+        if offset > count:
+            return True
+    return False
