@@ -59,6 +59,13 @@ OCTETS = {
     # a Type 2 Routing header with a non-zero Reserved field
     'pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route': (
         bytes([59, 2, 2, 1, 1, 2, 3, 4]) + bytes(15) + b'\x01',),
+    # error messages and an Echo with non-zero fixed fields, cut inside them on their own (#2848)
+    'pcapkit.protocols.internet.icmpv4.protocol.ICMPv4': (
+        bytes.fromhex('0301abcda1a2a3a4') + b'quoted', bytes.fromhex('0c02abcd05a1a2a3') + b'quoted',
+        bytes.fromhex('0800abcd12345678') + b'echoed'),
+    'pcapkit.protocols.internet.icmpv6.protocol.ICMPv6': (
+        bytes.fromhex('0103abcda1a2a3a4') + b'quoted', bytes.fromhex('0200abcd000005dc') + b'quoted',
+        bytes.fromhex('0401abcd00000028') + b'quoted', bytes.fromhex('8000abcd12345678') + b'echoed'),
     # a Report of two group records
     'pcapkit.protocols.internet.igmpv3.protocol.IGMPv3': (
         bytes.fromhex('2200c7e100000002') + bytes.fromhex('01000002ef0101010a0000010a000002')

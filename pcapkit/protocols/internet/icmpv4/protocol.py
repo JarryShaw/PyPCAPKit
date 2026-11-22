@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.icmp.type import Type as Enum_Type
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema.shortread import hoist_short_read
 from pcapkit.protocols.internet.icmp.protocol import ICMP
 from pcapkit.protocols.internet.icmpv4.data import \
     DestinationUnreachable as Data_DestinationUnreachable
@@ -203,6 +204,10 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         else:
             meth = name[0]
         icmp = meth(schema.data, header=schema, length=length)
+
+        # NOTE: Every schema in the body reads to the end of the data, so a cut
+        # inside one is the message's (#2848).
+        hoist_short_read(schema, 'data', (schema.data,))
 
         # NOTE: The checksum covers the whole message, with no pseudo-header (RFC 792);
         # an IP fragment carries only part of one.
