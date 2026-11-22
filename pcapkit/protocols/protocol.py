@@ -36,6 +36,7 @@ import shutil
 import string
 import struct
 import textwrap
+import traceback
 import types
 import urllib.parse
 from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, overload
@@ -57,10 +58,11 @@ from pcapkit.utilities import config
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.contextvars import beholding, frame_depth, rebuilding
-from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
-                                          ProtocolNotImplemented, RegistryError, StructError,
-                                          UnsupportedCall, stacklevel)
+from pcapkit.utilities.exceptions import (BaseError, CaughtByCaller, ProtocolError,
+                                          ProtocolNotFound, ProtocolNotImplemented, RegistryError,
+                                          StructError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.inspect import isabstract
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 from pcapkit.utilities.warnings import (ProtocolWarning, RegistryWarning, UnknownFieldWarning,
                                         hold_warnings, warn)
 
@@ -76,6 +78,10 @@ if TYPE_CHECKING:
     from pcapkit.corekit.enum import EnumLookup
 
 __all__ = ['Protocol', 'ProtocolBase']
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 _PT = TypeVar('_PT', bound='Data')
 _ST = TypeVar('_ST', bound='Schema')
@@ -1127,37 +1133,24 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             instance. A payload that fails to parse is kept as
             :class:`~pcapkit.protocols.misc.raw.protocol.Raw` holding all of it,
-            its ``error`` the failure's message, or as
-            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after
-            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
+            its ``error`` the failure's message and its ``protocol`` ``proto``,
+            or as :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`
+            after an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
+            A refusal it absorbs is quiet, any other error is logged at
+            :data:`logging.WARNING`, and the failed parse's warnings are dropped,
+            as :meth:`_analyze_next_layer` describes.
 
         .. versionchanged:: 1.7.0
 
            The fallback holds the whole payload and the failure's message,
            rather than the octets the failed parse left unread (:issue:`2842`).
+           Its ``protocol`` is ``proto``, a refusal it absorbs is quiet, any
+           other error is logged at :data:`logging.WARNING`, and the failed
+           parse's warnings are dropped (:issue:`2862`).
 
         """
         protocol = cls._lookup_next_layer(cls.__proto__, proto)
-
-        payload_io = io.BytesIO(payload)
-        try:
-            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
-        except Exception as exc:
-            if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
-            else:
-                from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # pylint: disable=import-outside-toplevel # isort: skip
-            # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
-
-            # log error
-            #logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
-
-            # NOTE: Rewound, as the failed parse read the stream, and given the failure as ``error``,
-            # as ``beholder`` gives a frame's fallback (#2842).
-            payload_io.seek(0)
-            kwargs['error'] = str(exc)
-            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
-        return report
+        return cls._analyze_next_layer(protocol, payload, proto, **kwargs)
 
     @classmethod
     def register(cls, code: 'int', protocol: 'ModuleDescriptor | Type[ProtocolBase]') -> 'None':
@@ -3011,6 +3004,78 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             next_ = Raw(file_, length, **kwargs)
         return next_
+
+    @staticmethod
+    def _analyze_next_layer(klass: 'Type[ProtocolBase]', payload: 'bytes', code: 'Any', /,
+                            **kwargs: 'Any') -> 'ProtocolBase':
+        """Parse a payload :meth:`analyze` dispatched, or keep it as raw octets if it fails.
+
+        Arguments:
+            klass: protocol class the payload was dispatched to
+            payload: payload to parse
+            code: code the payload was dispatched on, the fallback's ``alias``
+                unless ``kwargs`` gives one
+            **kwargs: keyword arguments for ``klass``'s constructor
+
+        Returns:
+            Instance of ``klass``. A payload that fails to parse is kept as
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` holding all of it,
+            its ``error`` the failure's message and its ``protocol`` ``code``,
+            as a frame's fallback is, or as
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after
+            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
+
+        Note:
+            The parse runs on trial, as under
+            :func:`~pcapkit.corekit.decorators.beholder`. A
+            :exc:`~pcapkit.utilities.exceptions.ProtocolError` built during it is
+            quiet, so the refusal the fallback records logs nothing and installs no
+            exception hook (:issue:`2588`). Any other error is as loud as it was
+            constructed, and is logged here at :data:`logging.WARNING` as well, as
+            :func:`~pcapkit.corekit.decorators.beholder` logs it, with its traceback
+            in verbose mode. A parse that raises is dropped with its warnings
+            (:issue:`2308`), and a parse kept reports its own after those of the
+            layers it carries, as a frame's layer does. The fallback is built after
+            the trial ends, so an error it raises is loud.
+
+        """
+        payload_io = io.BytesIO(payload)
+        eof, error = False, ''
+        # NOTE: ``beholding`` as well, so a trial block inside the parse, as TLS's, drops its
+        # warnings on a raise rather than reporting them past this one (#2308).
+        token = beholding.set(True)
+        try:
+            with hold_warnings() as held:
+                try:
+                    with CaughtByCaller(ProtocolError):
+                        return klass(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
+                except Exception:
+                    held.discard = True
+                    raise
+        except Exception as exc:
+            eof, error = isinstance(exc, StructError) and exc.eof, str(exc)  # pylint: disable=no-member
+            # NOTE: Keyed on the class, as ``beholder`` keys it: a refusal is quiet (#2588), and
+            # any other error, a quiet end-of-file StructError included, is logged at WARNING.
+            if not isinstance(exc, ProtocolError):
+                logger.warning(error, stack_info=DEVMODE, stacklevel=stacklevel())
+
+                if VERBOSE:
+                    logger.error('The following error occurred while parsing the packet:')
+                    traceback.print_exc()
+        finally:
+            beholding.reset(token)
+
+        if eof:
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
+        else:
+            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # type: ignore[assignment] # pylint: disable=import-outside-toplevel # isort: skip
+
+        # NOTE: Rewound, as the failed parse read the stream; ``error`` and ``alias`` as
+        # ``beholder`` gives a frame's fallback (#2842, #2862).
+        payload_io.seek(0)
+        kwargs.setdefault('alias', code)
+        kwargs['error'] = error
+        return protocol(payload_io, len(payload), **kwargs)
 
     def _check_term_threshold(self) -> bool:
         """Check if reached termination threshold."""
