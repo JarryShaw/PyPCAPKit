@@ -742,7 +742,8 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
     an extension header. Each is verified if it defines
     ``_verify_pseudo_checksum``, against the
     :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo` of ``ip``,
-    or against :data:`None` if that cannot be derived or names another protocol.
+    or quietly against :data:`None` if that cannot be derived or names another
+    protocol.
 
     Args:
         ip: Parsed IPv4 or IPv6 layer.
@@ -750,7 +751,8 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
     .. versionchanged:: 1.7.0
 
        Verifies a Mobility Header or HIP that IPv6 walks as an extension
-       header (:issue:`2813`).
+       header (:issue:`2813`). Where the pseudo-header cannot be derived, the
+       refusal logs nothing and installs no exception hook (:issue:`2859`).
 
     """
     ah = _AH.klass
@@ -774,8 +776,10 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
             continue
         if not derived:
             derived = True
+            # NOTE: Quietly, as the refusal is recorded as NO_PSEUDO_HEADER (#2859).
             try:
-                pseudo = IP_Pseudo(ip=ip)
+                with CaughtByCaller(ProtocolError, FieldValueError):
+                    pseudo = IP_Pseudo(ip=ip)
             except (ProtocolError, FieldValueError):
                 pseudo = None
         verify(pseudo if pseudo is not None and pseudo.protocol == layer.__index__() else None)
