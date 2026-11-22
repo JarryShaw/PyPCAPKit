@@ -74,6 +74,7 @@ DECLARED = (
     ('IPV6_TCP_WARNED_LIMIT', 32, 0, 'pins one of its packets in memory'),
     ('TCP_GAP_LIMIT', 16_777_216, 0, 'zero-fills the gap in memory'),
     ('FALLBACK_LIMIT', 10_000, 0, 'a large or endless object graph'),
+    ('TRACE_OPEN_FILE_LIMIT', 64, 0, 'holds a file descriptor'),
     ('DETECT_CACHE_SIZE', 1024, 0, 'never-repeating text'),
     ('READ_CHUNK', 1_048_576, 1, 'a bogus record length allocates'),
     ('MAX_ZERO_PAD_LENGTH', 262_144, 0, 'declare a field that long'),
@@ -565,6 +566,29 @@ class ReaderTests(unittest.TestCase):
                 make_dumper(dictdumper.JSON)(path)({'node': node}, name='x')
             with mock.patch.object(self.config, 'FALLBACK_LIMIT', -1):
                 make_dumper(dictdumper.JSON)(path)({'node': node}, name='x')
+
+    def test_trace_open_file_limit_in_traceflow(self) -> None:
+        # #2815: the most flow files a tracer keeps open, read whenever it keeps one.
+        from ipaddress import ip_address
+
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.foundation.traceflow.data.tcp import Packet
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        def packet(index: int) -> object:
+            return Packet(LinkType.ETHERNET, index, {'frame': index}, False, False, False,
+                          ip_address('192.0.2.1'), ip_address('198.51.100.2'), 40000 + index, 9,
+                          1.0, 0, 0, b'', bytearray())
+
+        for limit, held in ((0, 0), (2, 2), (-1, 3)):
+            with tempfile.TemporaryDirectory() as tmpdir, \
+                    mock.patch.object(self.config, 'TRACE_OPEN_FILE_LIMIT', limit):
+                trace = TCP(tmpdir, 'json')
+                for index in range(3):
+                    trace(packet(index))
+                with self.subTest(limit=limit):
+                    self.assertEqual(len(trace._fopen), held)
+                trace.finish()
 
 
 def run(code: str, **values: str) -> 'subprocess.CompletedProcess[str]':

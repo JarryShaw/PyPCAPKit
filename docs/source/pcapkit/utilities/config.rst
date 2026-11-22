@@ -69,6 +69,11 @@ Limits
      - ``10000``
      - ``>= 0``, or ``-1``
      - a large or endless object graph is dumped without bound
+   * - :envvar:`PCAPKIT_TRACE_OPEN_FILE_LIMIT`
+     - ``64``
+     - ``>= 0``, or ``-1``
+     - each open flow file holds a file descriptor, so many flows at once can
+       exhaust the process limit (:issue:`2815`)
    * - :envvar:`PCAPKIT_DETECT_CACHE_SIZE`
      - ``1024``
      - ``>= 0``, or ``-1``
@@ -113,6 +118,13 @@ Limits
 
    Sets :data:`~pcapkit.utilities.config.FALLBACK_LIMIT`.
 
+.. envvar:: PCAPKIT_TRACE_OPEN_FILE_LIMIT
+
+   Sets :data:`~pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT`. ``0`` reopens a
+   flow's file for each frame.
+
+   .. versionadded:: 1.7.0
+
 .. envvar:: PCAPKIT_DETECT_CACHE_SIZE
 
    Sets :data:`~pcapkit.utilities.config.DETECT_CACHE_SIZE`. Read once, when
@@ -139,6 +151,7 @@ Limits
 .. autodata:: pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT
 .. autodata:: pcapkit.utilities.config.TCP_GAP_LIMIT
 .. autodata:: pcapkit.utilities.config.FALLBACK_LIMIT
+.. autodata:: pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT
 .. autodata:: pcapkit.utilities.config.DETECT_CACHE_SIZE
 .. autodata:: pcapkit.utilities.config.READ_CHUNK
 .. autodata:: pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH

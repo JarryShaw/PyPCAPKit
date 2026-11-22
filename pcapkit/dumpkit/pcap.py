@@ -96,6 +96,10 @@ class PCAPIO(DumperBase):
         #: Units per second of a record's fraction, in the other resolution.
         _tsalt: 'int'
 
+    #: Output file :meth:`open` keeps open, or :data:`None` while each call
+    #: opens it.
+    _handle = None  # type: Optional[IO[bytes]]
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -145,10 +149,43 @@ class PCAPIO(DumperBase):
         Returns:
             The dumper itself (to support chain calling).
 
+        Notes:
+            While :meth:`open` keeps the file open, the frame is written there,
+            then flushed, so the file on disk holds every frame written, as when
+            each call closed it.
+
         """
-        with open(self._file, 'ab') as file:
-            self._append_value(value, file, name or '')
+        file = self._handle
+        if file is None:
+            with open(self._file, 'ab') as file:
+                self._append_value(value, file, name or '')
+            return self
+        self._append_value(value, file, name or '')
+        file.flush()
         return self
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def open(self) -> 'None':
+        """Keep the output file open for the calls that follow, until :meth:`close`.
+
+        .. versionadded:: 1.7.0
+
+        """
+        if self._handle is None:
+            self._handle = open(self._file, 'ab')  # pylint: disable=consider-using-with
+
+    def close(self) -> 'None':
+        """Close the file :meth:`open` kept open; later calls open it themselves.
+
+        .. versionadded:: 1.7.0
+
+        """
+        file, self._handle = self._handle, None
+        if file is not None:
+            file.close()
 
     ##########################################################################
     # Utilities.

@@ -15,7 +15,9 @@ under :file:`examples/captures/` are inputs only.
 """
 from __future__ import annotations
 
+import struct
 import unittest
+from unittest import mock
 
 from tests._support import sample_path
 from tests.integration._helpers import (HAS_RUNTIME, EndToEndTestCase, plist_keys, read_json,
@@ -25,6 +27,17 @@ from tests.integration._helpers import (HAS_RUNTIME, EndToEndTestCase, plist_key
 IN_PCAP_SECTIONS = ['Global Header', 'Frame 1', 'Frame 2', 'Frame 3', 'Frame 4', 'Frame 5', 'Frame 6']
 #: Protocol chain of the first frame of :file:`in.pcap`.
 IN_PCAP_FIRST_CHAIN = 'Ethernet:IPv6:ICMPv6'
+
+
+def pcap_records(data: bytes) -> 'list[tuple[int, int, bytes]]':
+    """Every ``(ts_sec, ts_usec, packet)`` record of a little-endian microsecond PCAP file."""
+    assert data[:4] == bytes.fromhex('d4c3b2a1'), data[:4].hex()
+    records, offset = [], 24
+    while offset < len(data):
+        ts_sec, ts_usec, incl_len, _ = struct.unpack_from('<IIII', data, offset)
+        records.append((ts_sec, ts_usec, data[offset + 16:offset + 16 + incl_len]))
+        offset += 16 + incl_len
+    return records
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -212,6 +225,46 @@ class InputAndProgressTests(EndToEndTestCase):
             extractor.output  # pylint: disable=pointless-statement
         with self.assertRaises(UnsupportedCall):
             extractor.frame  # pylint: disable=pointless-statement
+
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class TracedFlowOutputTests(EndToEndTestCase):
+    """A traced flow's report, written through the file the tracer keeps open (#2815)."""
+
+    def trace(self, fmt: str, limit: int, name: str) -> 'tuple':
+        """Trace :file:`http.pcap` into ``name`` at ``limit``: the tracer and its flows."""
+        from pcapkit.utilities import config
+
+        with mock.patch.object(config, 'TRACE_OPEN_FILE_LIMIT', limit):
+            extractor = self.extract(fin=sample_path('http.pcap'), nofile=True, store=False, tcp=True,
+                                     trace=True, trace_format=fmt, trace_fout=self.out(name),
+                                     trace_byteorder='little')
+        tracer = extractor._trace.tcp  # pylint: disable=protected-access
+        return tracer, extractor.trace.tcp
+
+    def test_a_kept_open_pcap_flow_holds_its_frames_as_a_reopen_writes_them(self) -> None:
+        with open(sample_path('http.pcap'), 'rb') as file:
+            source = pcap_records(file.read())
+        tracer, flows = self.trace('pcap', 64, 'kept')
+        self.assertEqual(tracer._fopen, {})  # pylint: disable=protected-access
+        _, reopened = self.trace('pcap', 0, 'reopened')
+        self.assertEqual([flow.label for flow in flows], [flow.label for flow in reopened])
+
+        for flow, other in zip(flows, reopened):
+            with self.subTest(flow=flow.label):
+                with open(flow.fpout, 'rb') as file, open(other.fpout, 'rb') as reference:
+                    data = file.read()
+                    self.assertEqual(data, reference.read())
+                self.assertEqual(pcap_records(data), [source[number - 1] for number in flow.index])
+
+    def test_a_kept_open_json_flow_report_parses_with_one_section_per_frame(self) -> None:
+        tracer, flows = self.trace('json', 64, 'kept')
+        self.assertEqual(tracer._fopen, {})  # pylint: disable=protected-access
+
+        for flow in flows:
+            with self.subTest(flow=flow.label):
+                self.assertEqual(list(read_json(flow.fpout)), [f'Frame {number}' for number in flow.index])
 
 
 if __name__ == '__main__':

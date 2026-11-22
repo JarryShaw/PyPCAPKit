@@ -9,6 +9,7 @@
 classes with.
 
 """
+import builtins
 import collections
 import datetime
 import decimal
@@ -61,7 +62,7 @@ _XML_ILLEGAL = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff
 _JSON_PRINTABLE = frozenset(string.printable)
 
 
-class DumperBase(dictdumper.dumper.Dumper):
+class DumperBase(dictdumper.dumper.Dumper):  # pylint: disable=abstract-method
     """Base :class:`~dictdumper.dumper.Dumper` object.
 
     Note:
@@ -69,6 +70,24 @@ class DumperBase(dictdumper.dumper.Dumper):
         :class:`Dumper` instead.
 
     """
+
+    def open(self) -> 'None':
+        """Keep the output file open for the calls that follow, until :meth:`close`.
+
+        A flow tracer calls the pair around a flow's frames, so that a dumper
+        need not reopen its file per frame (:issue:`2815`). The base
+        implementation keeps nothing open, so each call opens the file itself.
+
+        .. versionadded:: 1.7.0
+
+        """
+
+    def close(self) -> 'None':
+        """Close the file :meth:`open` kept open; later calls open it themselves.
+
+        .. versionadded:: 1.7.0
+
+        """
 
 
 class Dumper(DumperBase):
@@ -340,6 +359,13 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
        :attr:`~pcapkit.protocols.protocol.Protocol.info`, as a frame is,
        rather than by its attributes (:issue:`2733`).
 
+    .. versionchanged:: 1.7.0
+
+       The dumper has the :meth:`~DumperBase.open` and
+       :meth:`~DumperBase.close` pair, which keeps a :mod:`dictdumper` writer's
+       file open across blocks rather than reopening it per block
+       (:issue:`2815`).
+
     """
     # NOTE: ``plist`` (and ``'xml'``) still needs XML-1.0-unspellable strings written
     # as bytes (#1262) and aware datetimes in UTC (#1448); ``dictdumper`` escapes the rest.
@@ -420,6 +446,10 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     #: use, i.e. :class:`~pcapkit.dumpkit.pcap.PCAPIO`, which takes the frame,
     #: and :class:`~pcapkit.dumpkit.null.NotImplementedIO`.
     takes_fields = not issubclass(output, DumperBase) or issubclass(output, Dumper)
+    #: Whether the writer's ``__call__`` is :class:`dictdumper.dumper.Dumper`'s,
+    #: which opens the file per block, so that :meth:`DictDumper.open` can keep it
+    #: open instead (:issue:`2815`).
+    holds_text = takes_fields and output.__call__ is dictdumper.dumper.Dumper.__call__
 
     class DictDumper(output):
         """Customised :class:`~dictdumper.dumper.Dumper` object."""
@@ -446,10 +476,54 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     the block it is handed without calling
                     :meth:`object_hook` on it, only on what it holds.
 
+                    While :meth:`open` keeps the file open, the block is
+                    written there, then flushed, so the file on disk holds
+                    every block written, as when each call closed it.
+
                 """
                 if isinstance(value, (Info, MultiDict, ProtocolBase)):
                     value = fields(value)
-                return super().__call__(value, name)
+                file = self._handle if holds_text else None
+                if file is None:
+                    return super().__call__(value, name)
+                # NOTE: :meth:`dictdumper.dumper.Dumper.__call__`'s body, on the file kept open.
+                self._append_value(value, file, name)
+                self._sptr = file.tell()  # pylint: disable=attribute-defined-outside-init
+                file.write(self._hend)
+                file.flush()
+                return self
+
+        if holds_text:
+            #: Output file :meth:`open` keeps open, or :data:`None` while each
+            #: call opens it.
+            _handle = None  # type: Optional[TextIO]
+
+            def open(self) -> 'None':
+                """Keep the output file open for the calls that follow, until :meth:`close`.
+
+                Args:
+                    self: Dumper instance.
+
+                """
+                if self._handle is None:
+                    # NOTE: the mode and default encoding :meth:`dictdumper.dumper.Dumper.__call__`
+                    # opens with, so the octets written are the same.
+                    self._handle = builtins.open(self._file, 'r+')  # pylint: disable=consider-using-with,unspecified-encoding
+
+            def close(self) -> 'None':
+                """Close the file :meth:`open` kept open; later calls open it themselves.
+
+                Args:
+                    self: Dumper instance.
+
+                """
+                file, self._handle = self._handle, None
+                if file is not None:
+                    file.close()
+        elif not issubclass(output, DumperBase):
+            # NOTE: a writer with a ``__call__`` of its own opens its file itself.
+            open = DumperBase.open
+            close = DumperBase.close
 
         #: Objects :meth:`_append_fallback` is expanding, by :func:`id` -- the
         #: one being written and every one enclosing it.

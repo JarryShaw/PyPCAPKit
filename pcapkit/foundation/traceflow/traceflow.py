@@ -15,6 +15,7 @@ import collections
 import os
 import sys
 import types
+import weakref
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from dictdumper.dumper import Dumper
@@ -23,6 +24,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import FileExists, RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
@@ -51,6 +53,17 @@ if TYPE_CHECKING:
     from pcapkit.corekit.infoclass import Info
 
     CallbackFn = Callable[[_IT], None]
+
+
+def _close_files(files: 'collections.OrderedDict[int, Dumper]') -> 'None':
+    """Close every dumper of ``files``, least recently written first, and forget it.
+
+    Args:
+        files: a tracer's :attr:`~TraceFlowBase._fopen`
+
+    """
+    while files:
+        files.popitem(last=False)[1].close()
 
 
 class TraceFlowMeta(abc.ABCMeta):
@@ -385,10 +398,10 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         been read to its end, which is the point at which a flow that was never
         superseded can be said to be over.
 
-        The base implementation does nothing, so a tracer that has no such notion
-        need not override it. :meth:`submit` must remain able to report a flow that
-        was never finalised, since nothing guarantees this is called: a tracer
-        driven directly rather than through an
+        The base implementation only calls :meth:`close`, so a tracer that has no
+        such notion need not override it. :meth:`submit` must remain able to report
+        a flow that was never finalised, since nothing guarantees this is called: a
+        tracer driven directly rather than through an
         :class:`~pcapkit.foundation.extraction.Extractor` never sees an end of
         capture.
 
@@ -396,7 +409,66 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         <pcapkit.foundation.extraction.Extractor._cleanup>` can run more than once
         for one extraction.
 
+        .. versionchanged:: 1.7.0
+
+           The base implementation calls :meth:`close` (:issue:`2815`).
+
         """
+        self.close()
+
+    def close(self) -> 'None':
+        """Close every flow output file this tracer keeps open.
+
+        :meth:`_write` keeps a flow's file open between its frames. A flow
+        written to after this reopens its file, so tracing can go on.
+        :meth:`finish` calls this, and so does :meth:`__call__` when tracing a
+        frame raises; a tracer dropped before either closes them when it is
+        collected.
+
+        .. versionadded:: 1.7.0
+
+        """
+        _close_files(self._fopen)
+
+    def _write(self, dumper: 'Dumper', value: 'Any', name: 'str', *, hold: 'bool' = True) -> 'None':
+        """Write a frame to a flow's output file, keeping the file open.
+
+        Arguments:
+            dumper: the flow's output dumper
+            value: the frame
+            name: name of the frame's block
+            hold: whether the flow takes more frames, and so whether its file is
+                worth keeping open
+
+        Keeping the file open between frames, through
+        :meth:`~pcapkit.dumpkit.common.DumperBase.open`, saves reopening it per
+        frame (:issue:`2815`). At most
+        :data:`~pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT` files are kept
+        open: past it, the one written least recently is closed, and reopened on
+        its flow's next frame.
+
+        """
+        files = self._fopen
+        key = id(dumper)
+        if key in files:
+            files.move_to_end(key)
+        elif hold and (limit := config.TRACE_OPEN_FILE_LIMIT):
+            while 0 < limit <= len(files):
+                files.popitem(last=False)[1].close()
+            dumper.open()
+            files[key] = dumper
+        dumper(value, name=name)
+
+    def _release(self, dumper: 'Dumper') -> 'None':
+        """Close a flow's output file, once the flow takes no more frames.
+
+        Arguments:
+            dumper: the flow's output dumper
+
+        """
+        held = self._fopen.pop(id(dumper), None)
+        if held is not None:
+            held.close()
 
     ##########################################################################
     # Data models.
@@ -465,6 +537,13 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         self._foutio = fio
         #: Optional[str]: Output file extension.
         self._fdpext = ext
+        #: collections.OrderedDict[int, Dumper]: Dumpers keeping their flow's
+        #: output file open, by :func:`id`, least recently written first; see
+        #: :meth:`_write`.
+        self._fopen = collections.OrderedDict()  # type: collections.OrderedDict[int, Dumper]
+        # NOTE: closes them for a tracer dropped before finish(); a ``weakref.finalize``,
+        # as GraalPy never calls ``__del__`` (#1997), holding the files only, never ``self``.
+        self._finalizer = weakref.finalize(self, _close_files, self._fopen)
 
         logger.debug('%s flow tracing initialised (root=%s, format=%s, byteorder=%s, '
                      'nanosecond=%s, bidirectional=%s, analyse=%s)', self.name, fout,
@@ -476,9 +555,16 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         Arguments:
             packet: a flow packet (:term:`trace.tcp.packet`)
 
+        An error closes every output file kept open (:meth:`close`), since the
+        caller may then stop before :meth:`finish`.
+
         """
         # trace frame record
-        self.dump(packet)
+        try:
+            self.dump(packet)
+        except BaseException:
+            self.close()
+            raise
 
     def __init_subclass__(cls) -> 'None':
         """Initialise subclass.
