@@ -20,7 +20,7 @@ class Loopback(Schema):
 
     The address family is kept as its 4 octets, since their byte order depends
     on the link type the frame was captured under; see
-    :func:`~pcapkit.protocols.link.loopback.protocol.family_byteorder`.
+    :func:`~pcapkit.corekit.schema.byteorder.family_byteorder`.
 
     """
 

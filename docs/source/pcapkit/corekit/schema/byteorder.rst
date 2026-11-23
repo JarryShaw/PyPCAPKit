@@ -10,6 +10,10 @@ classic PCAP file (:mod:`~pcapkit.protocols.misc.pcap.frame.schema`) and the
 blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.misc.pcapng.schema`), and
 :func:`packet_byteorder` is what the callback and the PCAP-NG makers
 (:mod:`pcapkit.protocols.misc.pcapng.protocol`) read it with.
+:func:`family_byteorder` reads the byte order a BSD loopback header's address
+family was written in, for
+:class:`~pcapkit.protocols.link.loopback.protocol.Loopback` and the `DPKT`_
+engine (:mod:`pcapkit.foundation.engines.dpkt`) alike.
 
 .. versionadded:: 1.6.0
 
@@ -23,3 +27,5 @@ blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.misc.pcapng.schema`), and
 .. autofunction:: pcapkit.corekit.schema.byteorder.byteorder_callback
 
 .. autofunction:: pcapkit.corekit.schema.byteorder.packet_byteorder
+
+.. autofunction:: pcapkit.corekit.schema.byteorder.family_byteorder

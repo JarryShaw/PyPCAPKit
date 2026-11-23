@@ -21,6 +21,11 @@ whose structure is described as below:
 
 .. [*] https://www.tcpdump.org/linktypes/LINKTYPE_NULL.html
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.link.loopback.protocol.family_byteorder``, now
+   :func:`pcapkit.corekit.schema.byteorder.family_byteorder` (:issue:`2897`).
+
 """
 import collections
 import sys
@@ -28,6 +33,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.schema.byteorder import family_byteorder
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.loopback.data import Loopback as Data_Loopback
 from pcapkit.protocols.link.loopback.schema import Loopback as Schema_Loopback
@@ -42,38 +48,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
-__all__ = ['Loopback', 'family_byteorder']
-
-
-def family_byteorder(family: 'bytes', linktype: 'Optional[int]' = None) -> 'Literal["big", "little"]':
-    """Byte order a loopback header's address family was written in.
-
-    Args:
-        family: The 4 octets of the address family.
-        linktype: Link type the frame was captured under; :data:`None` reads as
-            ``LINKTYPE_NULL``.
-
-    Returns:
-        ``'big'`` for ``LINKTYPE_LOOP`` (108), whose family is in network byte
-        order. Otherwise, for ``LINKTYPE_NULL`` (0), ``'big'`` if the octets
-        read as a smaller number big-endian than little-endian, else
-        ``'little'``.
-
-    Note:
-        A ``LINKTYPE_NULL`` family is in the byte order of the host that
-        captured the packet, which the capture file does not record. Every
-        address family is below ``0x10000``, so its zero octets lie at the high
-        end, and the smaller of the two readings is the one in the writer's byte
-        order. A family that reads the same both ways, such as 0, packs to the
-        same octets either way. A ``LINKTYPE_LOOP`` family is never inferred,
-        so one written little-endian reads as a family no table holds.
-
-    """
-    if linktype == Enum_LinkType.LOOP:
-        return 'big'
-    if int.from_bytes(family, 'big') < int.from_bytes(family, 'little'):
-        return 'big'
-    return 'little'
+__all__ = ['Loopback']
 
 
 class Loopback(Link[Data_Loopback, Schema_Loopback],
@@ -85,8 +60,8 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
     for ``LINKTYPE_LOOP``. Which link type a frame was captured under is the
     ``alias`` it was dispatched with; for ``LINKTYPE_NULL``, which a frame
     parsed on its own is read as, the byte order is read from the octets
-    themselves (see :func:`family_byteorder`). Either way it is kept in
-    :attr:`~pcapkit.protocols.protocol.Protocol.info`, and
+    themselves (see :func:`~pcapkit.corekit.schema.byteorder.family_byteorder`).
+    Either way it is kept in :attr:`~pcapkit.protocols.protocol.Protocol.info`, and
     :meth:`from_data <pcapkit.protocols.link.link.Link.from_data>`
     reads the family back in that byte order rather than inferring it again.
 

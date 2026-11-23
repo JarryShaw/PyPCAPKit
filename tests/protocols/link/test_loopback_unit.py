@@ -269,7 +269,7 @@ class TestLoopback(unittest.TestCase):
 
     def test_family_byteorder(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.loopback.protocol import family_byteorder
+        from pcapkit.corekit.schema.byteorder import family_byteorder
 
         for octets, null in ((b'\x02\x00\x00\x00', 'little'), (b'\x00\x00\x00\x02', 'big'),
                              (bytes(4), 'little'), (b'\x02\x00\x02\x00', 'little')):

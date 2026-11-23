@@ -10,9 +10,13 @@ section declares out of the packet data: :func:`byteorder_callback` sets it on a
 classic PCAP file (:mod:`~pcapkit.protocols.misc.pcap.frame.schema`) and the
 blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.misc.pcapng.schema`), and
 :func:`packet_byteorder` is what the callback and the PCAP-NG makers
-(:mod:`pcapkit.protocols.misc.pcapng.protocol`) read it with. It is one of the
-:mod:`pcapkit.corekit.schema` helpers shared across the schema layer, not part of
-the header schema framework in :mod:`pcapkit.protocols.schema`; see
+(:mod:`pcapkit.protocols.misc.pcapng.protocol`) read it with.
+:func:`family_byteorder` reads the byte order a BSD loopback header's address
+family was written in, for
+:class:`~pcapkit.protocols.link.loopback.protocol.Loopback` and the `DPKT`_
+engine (:mod:`pcapkit.foundation.engines.dpkt`) alike. It is one of the
+:mod:`pcapkit.corekit.schema` helpers the protocols and the capture engines call,
+not part of the header schema framework in :mod:`pcapkit.protocols.schema`; see
 :ref:`utilities-or-corekit`.
 
 .. versionadded:: 1.6.0
@@ -29,10 +33,12 @@ the header schema framework in :mod:`pcapkit.protocols.schema`; see
 import sys
 from typing import TYPE_CHECKING
 
-__all__ = ['packet_byteorder', 'byteorder_callback']
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+
+__all__ = ['packet_byteorder', 'byteorder_callback', 'family_byteorder']
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Optional
 
     from typing_extensions import Literal
 
@@ -87,3 +93,39 @@ def byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None'
 
     """
     field._byteorder = packet_byteorder(packet)
+
+
+def family_byteorder(family: 'bytes', linktype: 'Optional[int]' = None) -> 'Literal["big", "little"]':
+    """Byte order a loopback header's address family was written in.
+
+    Args:
+        family: The 4 octets of the address family.
+        linktype: Link type the frame was captured under; :data:`None` reads as
+            ``LINKTYPE_NULL``.
+
+    Returns:
+        ``'big'`` for ``LINKTYPE_LOOP`` (108), whose family is in network byte
+        order. Otherwise, for ``LINKTYPE_NULL`` (0), ``'big'`` if the octets
+        read as a smaller number big-endian than little-endian, else
+        ``'little'``.
+
+    Note:
+        A ``LINKTYPE_NULL`` family is in the byte order of the host that
+        captured the packet, which the capture file does not record. Every
+        address family is below ``0x10000``, so its zero octets lie at the high
+        end, and the smaller of the two readings is the one in the writer's byte
+        order. A family that reads the same both ways, such as 0, packs to the
+        same octets either way. A ``LINKTYPE_LOOP`` family is never inferred,
+        so one written little-endian reads as a family no table holds.
+
+    .. versionadded:: 1.7.0
+
+       Moved here from ``pcapkit.protocols.link.loopback.protocol``
+       (:issue:`2897`).
+
+    """
+    if linktype == Enum_LinkType.LOOP:
+        return 'big'
+    if int.from_bytes(family, 'big') < int.from_bytes(family, 'little'):
+        return 'big'
+    return 'little'

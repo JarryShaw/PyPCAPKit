@@ -125,6 +125,8 @@ USED = (
     ('pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
     ('pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
     ('pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN', 'pcapkit.corekit.const.tcpheader'),
+    # #2897: the helper the old module still calls.
+    ('pcapkit.protocols.link.loopback.protocol', 'family_byteorder', 'pcapkit.corekit.schema.byteorder'),
 )
 
 #: Every removed ``(old module, name)`` pair.
@@ -210,6 +212,9 @@ SHIPPED = (
      'pcapkit/protocols/transport/tcp/schema.py', 'pcapkit/protocols/transport/tcp.rst', '1.7.0'),
     ('pcapkit.protocols.transport.tcp.schema', 'TCP_DATA_OFFSET_OCTET',
      'pcapkit/protocols/transport/tcp/schema.py', 'pcapkit/protocols/transport/tcp.rst', '1.7.0'),
+    # #2897: shipped in 1.6.x, moved to pcapkit.corekit.schema.
+    ('pcapkit.protocols.link.loopback.protocol', 'family_byteorder',
+     'pcapkit/protocols/link/loopback/protocol.py', 'pcapkit/protocols/link/loopback.rst', '1.7.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its
