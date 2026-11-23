@@ -393,7 +393,7 @@ class PyPCAPEngineTests(unittest.TestCase):
 
         messages = [call.args[0] for call in warn.call_args_list
                     if call.args[1] is AttributeWarning]
-        self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages),
+        self.assertTrue(any("so reassembly=['dtls'] will be ignored" in message for message in messages),
                         messages)
         self.assertFalse(extractor._flag_r)
         self.assertNotIn('dtls', extractor._reasm)

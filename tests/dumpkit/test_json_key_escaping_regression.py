@@ -42,10 +42,12 @@ class TestPcapngJSONReportTests(unittest.TestCase):
     def test_the_json_report_parses_and_keeps_the_bytes_key(self) -> None:
         """The report loads, and the client random reads back unchanged."""
         from pcapkit.interface import extract
+        from pcapkit.foundation.options import DumpOptions
 
         output = self.tmp_path / 'test.pcapng.json'
-        extractor = extract(fin=sample_path('test.pcapng'), fout=str(output), format='json',
-                            store=False, extension=False)
+        extractor = extract(fin=sample_path('test.pcapng'),
+                            dump=DumpOptions(fout=str(output), format='json', extension=False),
+                            store=False)
         self.addCleanup(close_extractor, extractor)
 
         with output.open(encoding='utf-8') as file:

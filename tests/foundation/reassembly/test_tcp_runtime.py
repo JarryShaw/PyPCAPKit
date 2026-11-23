@@ -39,9 +39,7 @@ class TCPReassemblyRuntimeTests(unittest.TestCase):
         """
         from pcapkit import extract
 
-        extractor = extract(fin=sample_path('test.pcap'), fout='/tmp/out', format='tree',
-                            store=True, nofile=True, tcp=True, reassembly=True,
-                            reasm_strict=True)
+        extractor = extract(fin=sample_path('test.pcap'), store=True, reassembly=['tcp'])
         self.addCleanup(close_extractor, extractor)
 
         frames = {frame.info.number: frame for frame in extractor.frame}

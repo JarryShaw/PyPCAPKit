@@ -59,11 +59,11 @@ class DatagramPickleTests(unittest.TestCase):
 
         for container, write in CONTAINERS:
             for kind, (frames, _) in FRAMES.items():
-                extractor = _extract(self, write(frames), reassembly=True, ip=True, tcp=True)
+                extractor = _extract(self, write(frames), reassembly=['ipv4', 'ipv6', 'tcp'])
                 datagram, = getattr(extractor.reassembly, kind)
                 yield kind, container, datagram, _analysis(kind)[0], _parsed
             extractor = _extract(self, write([_frame(record) for record in COMPLETE]),
-                                 reassembly=True, dtls=True)
+                                 reassembly=['dtls'])
             datagram, = extractor.reassembly.dtls
             yield 'dtls', container, datagram, dtls_handshake, lambda packet: packet
 
@@ -88,7 +88,7 @@ class DatagramPickleTests(unittest.TestCase):
     def test_the_reassembly_result_pickles_under_every_protocol(self) -> None:
         from pcapkit.foundation.reassembly.data.data import Deferred, ReassemblyData
 
-        reassembly = _extract(self, _pcap(FRAMES['ipv4'][0]), reassembly=True, ip=True).reassembly
+        reassembly = _extract(self, _pcap(FRAMES['ipv4'][0]), reassembly=['ipv4', 'ipv6']).reassembly
         held = _held(reassembly.ipv4[0])
         for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
             with self.subTest(protocol=protocol):

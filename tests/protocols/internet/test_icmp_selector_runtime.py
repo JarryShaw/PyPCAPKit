@@ -46,7 +46,7 @@ class ICMPSelectorRuntimeTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=sample_path(SAMPLES[version]), store=True, nofile=True,
+            extractor = extract(fin=sample_path(SAMPLES[version]), store=True,
                                 engine='default', **kwargs)
         self.addCleanup(close_extractor, extractor)
         return extractor.frame[0]

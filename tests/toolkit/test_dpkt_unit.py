@@ -846,9 +846,8 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
             )
             handle.close()
 
-            extractor = pcapkit.extract(fin=handle.name, nofile=True, store=False,
-                                        engine='dpkt', ipv6=True, reassembly=True,
-                                        reasm_strict=True)
+            extractor = pcapkit.extract(fin=handle.name, store=False, engine='dpkt',
+                                        reassembly=['ipv6'])
             try:
                 datagrams = list(extractor.reassembly.ipv6)
             finally:
@@ -919,8 +918,7 @@ class DPKTEngineReassemblyTests(unittest.TestCase):
         except FileNotFoundError as exc:
             self.skipTest(str(exc))
 
-        extractor = pcapkit.extract(fin=path, nofile=True, store=False, engine='dpkt',
-                                    tcp=True, reassembly=True, reasm_strict=True)
+        extractor = pcapkit.extract(fin=path, store=False, engine='dpkt', reassembly=['tcp'])
         try:
             datagrams = list(extractor.reassembly.tcp)
         finally:
@@ -956,8 +954,7 @@ class DPKTTimestampTests(unittest.TestCase):
         import pcapkit
         from pcapkit.toolkit.dpkt import packet2timestamp
 
-        extractor = pcapkit.extract(fin=sample_path('in.pcap'), nofile=True, store=True,
-                                    engine='dpkt')
+        extractor = pcapkit.extract(fin=sample_path('in.pcap'), store=True, engine='dpkt')
         try:
             stamps = [packet2timestamp(frame) for frame in extractor.frame]
         finally:
@@ -996,10 +993,11 @@ class DPKTTimestampTests(unittest.TestCase):
         import tempfile
 
         from pcapkit.interface.misc import follow_tcp_stream
+        from pcapkit.foundation.options import TraceFlowOptions
 
         with tempfile.TemporaryDirectory() as tempdir:
             streams = follow_tcp_stream(fin=sample_path('in.pcap'), engine='dpkt',
-                                        fout=tempdir, format='json')
+                                        traceflow=TraceFlowOptions(protocols=['tcp'], fout=tempdir, format='json'))
             self.assertEqual([(len(stream.packets), stream.conversations) for stream in streams],
                              [(2, ()), (1, ())])
 

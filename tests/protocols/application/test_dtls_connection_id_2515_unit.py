@@ -251,7 +251,7 @@ class CaptureTests(unittest.TestCase):
         path = _ethernet_pcap(self, MBEDTLS)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extraction = pcapkit.extract(fin=path, nofile=True)
+            extraction = pcapkit.extract(fin=path)
         try:
             self.assertEqual([str(frame.protochain) for frame in extraction.frame],
                              [f'Ethernet:IPv4:{chain}' for chain, _ in TSHARK])
@@ -290,7 +290,7 @@ class InstanceMemoryTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extraction = pcapkit.extract(fin=_ethernet_pcap(self, datagrams), nofile=True, **kwargs)
+            extraction = pcapkit.extract(fin=_ethernet_pcap(self, datagrams), **kwargs)
         self.addCleanup(close_extractor, extraction)
         return extraction
 

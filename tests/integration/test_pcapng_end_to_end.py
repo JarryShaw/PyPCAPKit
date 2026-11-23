@@ -4,7 +4,7 @@
 Translates :file:`examples/legacy_smoke/test_pcapng.py`, which dumped
 :file:`dhcp.pcapng` to a tree report and checked nothing.
 :file:`tests/protocols/test_pcapng_regression.py` already asserts that each
-PCAP-NG fixture extracts with ``length > 0`` and ``nofile=True``; this module
+PCAP-NG fixture extracts with ``length > 0`` and no output; this module
 pins the exact block inventory *and* dumps a real report file, which that module
 does not cover.
 
@@ -72,13 +72,16 @@ class PcapngTreeReportTests(EndToEndTestCase):
     """Every fixture dumps a tree report."""
 
     def test_every_fixture_dumps_a_report_with_its_expected_frame_count(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         for capture, frames in PCAPNG_FRAMES.items():
             with self.subTest(capture=capture):
                 path = sample_path(capture)
                 if capture in UPSTREAM_ONLY_COUNTS:
                     skip_if_stand_in(self, path)
-                extractor = self.extract(fin=path, fout=self.out(capture),
-                                         format='tree', store=False)
+                extractor = self.extract(fin=path,
+                                         dump=DumpOptions(fout=self.out(capture), format='tree'),
+                                         store=False)
 
                 report = self.tmp_path / f'{capture}.txt'
                 self.assertEqual(extractor.length, frames)
@@ -93,22 +96,28 @@ class PcapngJsonReportTests(EndToEndTestCase):
     """The block inventory each fixture's report records."""
 
     def test_reports_hold_the_expected_blocks(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         for capture, sections in PCAPNG_SECTIONS.items():
             with self.subTest(capture=capture):
                 path = sample_path(capture)
                 if capture in UPSTREAM_ONLY_COUNTS:
                     skip_if_stand_in(self, path)
-                extractor = self.extract(fin=path, fout=self.out(capture),
-                                         format='json', store=False)
+                extractor = self.extract(fin=path,
+                                         dump=DumpOptions(fout=self.out(capture), format='json'),
+                                         store=False)
                 report = read_json(extractor.output)
 
                 self.assertEqual(section_counts(report), sections)
                 self.assertEqual(extractor.length, PCAPNG_FRAMES[capture])
 
     def test_interface_descriptions_are_reported_one_per_interface(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         path = sample_path('many_interfaces.pcapng')
         skip_if_stand_in(self, path)
-        extractor = self.extract(fin=path, fout=self.out('many'), format='json', store=False)
+        extractor = self.extract(fin=path, dump=DumpOptions(fout=self.out('many'), format='json'),
+                                 store=False)
         report = read_json(extractor.output)
 
         self.assertEqual(extractor.length, 64)
@@ -118,8 +127,11 @@ class PcapngJsonReportTests(EndToEndTestCase):
         self.assertNotIn('Interface Description 12', report)
 
     def test_split_reports_cover_every_block_not_just_the_frames(self) -> None:
-        extractor = self.extract(fin=sample_path('dhcp.pcapng'), fout=self.out('blocks'),
-                                 format='json', files=True, store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('dhcp.pcapng'),
+                                 dump=DumpOptions(fout=self.out('blocks'), format='json', files=True),
+                                 store=False)
 
         self.assertEqual(report_stems(extractor.output), sorted([
             'Section Header 1', 'Interface Description 1',
@@ -139,7 +151,7 @@ class PcapngByteOrderTests(EndToEndTestCase):
     """
 
     def exchange(self, capture: 'str') -> 'list[tuple[str, str, int, int, int]]':
-        extractor = self.extract(fin=sample_path(capture), nofile=True, store=True)
+        extractor = self.extract(fin=sample_path(capture), store=True)
         self.assertEqual(extractor.length, 4)
 
         rows = []
@@ -159,7 +171,7 @@ class PcapngByteOrderTests(EndToEndTestCase):
     def test_all_three_layouts_yield_the_same_protocol_chains(self) -> None:
         chains = {}
         for capture in ('dhcp.pcapng', 'dhcp_big_endian.pcapng', 'dhcp_little_endian.pcapng'):
-            extractor = self.extract(fin=sample_path(capture), nofile=True, store=True)
+            extractor = self.extract(fin=sample_path(capture), store=True)
             chains[capture] = [str(frame.protochain) for frame in extractor.frame]
 
         self.assertEqual(list(chains.values()),
@@ -192,8 +204,12 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
         close the JSON string early.
 
         """
-        extractor = self.extract(fin=sample_path('test.pcapng'), fout=self.out('report'),
-                                 format='json', store=False)
+
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('test.pcapng'),
+                                 dump=DumpOptions(fout=self.out('report'), format='json'),
+                                 store=False)
         report = read_json(extractor.output)
 
         self.assertEqual(extractor.length, 5)

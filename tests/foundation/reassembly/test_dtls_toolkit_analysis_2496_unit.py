@@ -234,14 +234,16 @@ class DTLSExtractorWiringTests(unittest.TestCase):
 
     def test_dtls_reassembly_is_off_unless_asked_for(self) -> None:
         capture = _pcap([_frame(record) for record in RECORDS])
-        self.assertIsNone(_extract(self, capture, reassembly=True, ip=True).reassembly.dtls)
-        self.assertEqual(len(_extract(self, capture, reassembly=True, dtls=True).reassembly.dtls), 1)
+        self.assertIsNone(_extract(self, capture, reassembly=['ipv4', 'ipv6']).reassembly.dtls)
+        self.assertEqual(len(_extract(self, capture, reassembly=['dtls']).reassembly.dtls), 1)
 
     def test_the_reassembly_timeout_does_not_reach_dtls(self) -> None:
         """The RFC gives DTLS handshake reassembly no timeout, so fragments a
-        second apart still complete under a half-second ``reasm_timeout``."""
+        second apart still complete under a half-second reassembly ``timeout``."""
+        from pcapkit.foundation.options import ReassemblyOptions
+
         extractor = _extract(self, _pcap([_frame(record) for record in RECORDS]),
-                             reassembly=True, dtls=True, reasm_timeout=0.5)
+                             reassembly=ReassemblyOptions(protocols=['dtls'], timeout=0.5))
         datagram, = extractor.reassembly.dtls
         self.assertTrue(datagram.completed)
 
@@ -283,7 +285,7 @@ class DTLSThirdPartyEngineTests(unittest.TestCase):
         from pcapkit.utilities.warnings import AttributeWarning
 
         messages = [call.args[0] for call in warn.call_args_list if call.args[1] is AttributeWarning]
-        self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages), messages)
+        self.assertTrue(any("reassembly; so 'dtls' will be ignored" in message for message in messages), messages)
         self.assertTrue(extractor._flag_r)
         self.assertEqual(list(extractor._reasm), ['ipv4', 'tcp'])
         self.assertIs(extractor._reasm.ipv4, ipv4)
@@ -330,7 +332,7 @@ class DTLSThirdPartyEngineTests(unittest.TestCase):
                 mock.patch('pcapkit.foundation.engines.engine.warn') as warn:
             engine.run()
         messages = [call.args[0] for call in warn.call_args_list if call.args[1] is AttributeWarning]
-        self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages), messages)
+        self.assertTrue(any("so reassembly=['dtls'] will be ignored" in message for message in messages), messages)
         self.assertFalse(extractor._flag_r)
         self.assertFalse(extractor._reasm)
 

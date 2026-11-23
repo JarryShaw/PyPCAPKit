@@ -115,7 +115,7 @@ class PcapFrameByteOrderRuntimeTests(unittest.TestCase):
         with open(path, 'rb') as stream:
             raw = stream.read()
 
-        extractor = extract(fin=path, store=True, nofile=True)
+        extractor = extract(fin=path, store=True)
         return raw, list(extractor.frame)
 
     def assertRecords(self, name: 'str', magic: 'bytes', endian: 'str',

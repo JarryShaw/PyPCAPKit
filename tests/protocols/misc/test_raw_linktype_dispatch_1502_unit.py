@@ -46,7 +46,7 @@ class TestRawLinktypeDispatch(unittest.TestCase):
                 file.write(octets)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                return pcapkit.extract(fin=path, nofile=True, store=True, reassembly=True, ip=True)
+                return pcapkit.extract(fin=path, store=True, reassembly=['ipv4', 'ipv6'])
 
     @staticmethod
     def _keywords(frame):  # type: ignore[no-untyped-def]

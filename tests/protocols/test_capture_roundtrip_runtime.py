@@ -172,7 +172,7 @@ class CaptureRoundTripTests(unittest.TestCase):
         names = captures()
         self.assertGreater(len(names), 2, f'no generated captures under {SAMPLE_ROOT}')
         for name in names:
-            extractor = extract(fin=str(SAMPLE_ROOT / name), store=True, nofile=True)
+            extractor = extract(fin=str(SAMPLE_ROOT / name), store=True)
             try:
                 for number, frame in enumerate(extractor.frame, start=1):
                     for path, layer in walk(frame):
@@ -242,7 +242,7 @@ class CaptureRoundTripTests(unittest.TestCase):
                                 ctx.interfaces.append(parsed.info)
                         parts.append(PCAPNG.from_data(parsed.info, **keywords(parsed)).data)
                 else:
-                    extractor = extract(fin=str(SAMPLE_ROOT / name), store=True, nofile=True)
+                    extractor = extract(fin=str(SAMPLE_ROOT / name), store=True)
                     self.addCleanup(close_extractor, extractor)
                     header = extractor._exeng._gbhdr  # pylint: disable=protected-access
                     parts = [Header.from_data(header.info).data]

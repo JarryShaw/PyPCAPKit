@@ -502,7 +502,7 @@ class ExtractorLoggingTests(unittest.TestCase):
         from tests._support import sample_path
 
         with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
-            with Extractor(fin=sample_path('in.pcap'), nofile=True, store=False) as extractor:
+            with Extractor(fin=sample_path('in.pcap'), store=False) as extractor:
                 pass
 
         messages = [record.getMessage() for record in caught.records]
@@ -535,7 +535,7 @@ class ExtractorLoggingTests(unittest.TestCase):
 
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
-            with Extractor(fin=sample_path('in.pcap'), nofile=True, store=False, verbose=True):
+            with Extractor(fin=sample_path('in.pcap'), store=False, verbose=True):
                 pass
 
         frames = [line for line in stdout.getvalue().splitlines()
@@ -547,8 +547,7 @@ class ExtractorLoggingTests(unittest.TestCase):
         # with per-frame records
         with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
             with contextlib.redirect_stdout(io.StringIO()):
-                with Extractor(fin=sample_path('in.pcap'), nofile=True, store=False,
-                               verbose=True):
+                with Extractor(fin=sample_path('in.pcap'), store=False, verbose=True):
                     pass
         self.assertEqual([record.getMessage() for record in caught.records
                           if record.getMessage().startswith('Frame ')], [])

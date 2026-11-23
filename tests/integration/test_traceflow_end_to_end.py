@@ -2,8 +2,8 @@
 """End-to-end TCP flow tracing.
 
 Translates :file:`examples/legacy_smoke/test_trace.py`, which traced
-:file:`http.pcap` and pretty-printed the index, and the ``trace=True`` half of
-:file:`test_api.py`. Tracing writes one report per flow into ``trace_fout``, so
+:file:`http.pcap` and pretty-printed the index, and the ``trace`` half of
+:file:`test_api.py`. Tracing writes one report per flow into its ``fout``, so
 what is asserted here is the index the extractor exposes *and* that the reports
 on disk hold exactly the frames the index claims.
 
@@ -35,10 +35,11 @@ class TraceFlowTests(EndToEndTestCase):
     """Flow tracing over :file:`tcp.pcap`, which is seven frames."""
 
     def trace(self, capture: 'str' = 'tcp.pcap') -> 'tuple':
-        extractor = self.extract(fin=sample_path(capture), nofile=True, store=False,
-                                 tcp=True, trace=True, trace_format='json',
-                                 trace_fout=self.out('trace'))
-        return extractor.length, extractor.trace.tcp
+        from pcapkit.foundation.options import TraceFlowOptions
+
+        extractor = self.extract(fin=sample_path(capture), store=False,
+                                 traceflow=TraceFlowOptions(protocols=['tcp'], fout=self.out('trace'), format='json'))
+        return extractor.length, extractor.traceflow.tcp
 
     def test_both_directions_of_a_connection_become_one_flow(self) -> None:
         length, flows = self.trace()
@@ -88,10 +89,10 @@ class TraceFlowTests(EndToEndTestCase):
     def test_tracing_is_refused_when_it_was_not_requested(self) -> None:
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        extractor = self.extract(fin=sample_path('tcp.pcap'), nofile=True, store=False, tcp=True)
+        extractor = self.extract(fin=sample_path('tcp.pcap'), store=False)
 
         with self.assertRaises(UnsupportedCall):
-            extractor.trace  # pylint: disable=pointless-statement
+            extractor.traceflow  # pylint: disable=pointless-statement
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -107,10 +108,11 @@ class TraceFlowScaleTests(EndToEndTestCase):
     """
 
     def test_every_frame_lands_in_exactly_one_flow(self) -> None:
-        extractor = self.extract(fin=sample_path('http.pcap'), nofile=True, store=False,
-                                 tcp=True, trace=True, trace_format='json',
-                                 trace_fout=self.out('trace'))
-        flows = extractor.trace.tcp
+        from pcapkit.foundation.options import TraceFlowOptions
+
+        extractor = self.extract(fin=sample_path('http.pcap'), store=False,
+                                 traceflow=TraceFlowOptions(protocols=['tcp'], fout=self.out('trace'), format='json'))
+        flows = extractor.traceflow.tcp
 
         self.assertEqual(extractor.length, 1117)
         # 111 connections, not the 331 directions they are made of. Every one of
@@ -139,10 +141,11 @@ class TraceFlowScaleTests(EndToEndTestCase):
             self.assertEqual(flow.index, tuple(sorted(flow.forward + flow.reverse)))
 
     def test_one_report_is_written_per_flow(self) -> None:
-        extractor = self.extract(fin=sample_path('http.pcap'), nofile=True, store=False,
-                                 tcp=True, trace=True, trace_format='json',
-                                 trace_fout=self.out('trace'))
-        flows = extractor.trace.tcp
+        from pcapkit.foundation.options import TraceFlowOptions
+
+        extractor = self.extract(fin=sample_path('http.pcap'), store=False,
+                                 traceflow=TraceFlowOptions(protocols=['tcp'], fout=self.out('trace'), format='json'))
+        flows = extractor.traceflow.tcp
 
         written = {entry.name for entry in self.tmp_path.joinpath('trace').iterdir()}
         self.assertEqual(written, {f'{flow.label}.json' for flow in flows})

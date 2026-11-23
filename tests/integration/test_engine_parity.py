@@ -58,16 +58,17 @@ class EngineParityTests(EndToEndTestCase):
         for capture, expected in PARITY_CAPTURES.items():
             for engine in self.available():
                 with self.subTest(capture=capture, engine=engine):
-                    extractor = self.extract(fin=sample_path(capture), nofile=True,
-                                             store=False, engine=engine)
+                    extractor = self.extract(fin=sample_path(capture), store=False, engine=engine)
                     self.assertEqual(extractor.length, expected)
 
     def test_every_engine_writes_a_report(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         for engine in self.available():
             with self.subTest(engine=engine):
                 extractor = self.extract(fin=sample_path('in.pcap'),
-                                         fout=self.out(f'{engine}-report'),
-                                         format='tree', store=False, engine=engine)
+                                         dump=DumpOptions(fout=self.out(f'{engine}-report'), format='tree'),
+                                         store=False, engine=engine)
 
                 report = self.tmp_path / f'{engine}-report.txt'
                 self.assertEqual(extractor.output, str(report))
@@ -80,10 +81,8 @@ class EngineParityTests(EndToEndTestCase):
         # string, so the macro and the name have to be interchangeable.
         import pcapkit
 
-        by_macro = self.extract(fin=sample_path('tcp.pcap'), nofile=True, store=True,
-                                engine=pcapkit.PCAPKit)
-        by_name = self.extract(fin=sample_path('tcp.pcap'), nofile=True, store=True,
-                               engine='default')
+        by_macro = self.extract(fin=sample_path('tcp.pcap'), store=True, engine=pcapkit.PCAPKit)
+        by_name = self.extract(fin=sample_path('tcp.pcap'), store=True, engine='default')
 
         self.assertEqual(pcapkit.PCAPKit, 'default')
         self.assertEqual(by_macro.length, by_name.length)
@@ -96,16 +95,14 @@ class EngineParityTests(EndToEndTestCase):
         # their chain in dpkt's names.
         from pcapkit.toolkit.dpkt import packet2chain
 
-        foreign = self.extract(fin=sample_path('in.pcap'), nofile=True, store=True,
-                               engine='dpkt')
+        foreign = self.extract(fin=sample_path('in.pcap'), store=True, engine='dpkt')
 
         self.assertEqual(packet2chain(foreign.frame[0]), 'Ethernet:IP6:ICMP6')
         self.assertEqual(packet2chain(foreign.frame[2]), 'Ethernet:IP:TCP')
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_scapy_engine_returns_every_link_layer_octet(self) -> None:
-        foreign = self.extract(fin=sample_path('arp.pcap'), nofile=True, store=True,
-                               engine='scapy')
+        foreign = self.extract(fin=sample_path('arp.pcap'), store=True, engine='scapy')
 
         self.assertEqual(len(foreign.frame), len(ARP_ETHERNET_HEADERS))
         for number, (frame, header) in enumerate(zip(foreign.frame, ARP_ETHERNET_HEADERS), start=1):

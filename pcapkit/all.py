@@ -80,6 +80,10 @@ __all__ = [
     'Extractor',                                            # Extraction
     'TraceFlowManager', 'TCP_TraceFlow',                    # Trace Flow
 
+    # pcapkit.foundation.options
+    'DumpOptions', 'ReassemblyOptions',                     # Extraction Options
+    'TraceFlowOptions', 'StreamOptions',                    # Extraction Options
+
     # pcapkit.foundation.reassembly
     'ReassemblyManager',                                    # Reassembly Manager
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly

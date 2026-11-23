@@ -125,7 +125,7 @@ class TestFRADAndGREBindings(unittest.TestCase):
                 file.write(data)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                extractor = pcapkit.extract(fin=path, nofile=True, store=True)
+                extractor = pcapkit.extract(fin=path, store=True)
         return list(extractor.frame)
 
     def _assert_rebuilds(self, layer, **kwargs) -> None:  # type: ignore[no-untyped-def]
@@ -268,6 +268,7 @@ class TestFRADAndGREBindings(unittest.TestCase):
         import ipaddress
 
         import pcapkit
+        from pcapkit.foundation.options import TraceFlowOptions
 
         segments = (_tcp(1000, 0x02), _tcp(1001, 0x18, b'hello '), _tcp(1007, 0x18, b'world'), _tcp(1012, 0x11))
         records = [_ether(0x0800, _ipv4(47, _gre(_ipv4(6, segment, ident=10 + index, ends=TUNNELLED)),
@@ -283,9 +284,9 @@ class TestFRADAndGREBindings(unittest.TestCase):
                 file.write(_pcap(1, tuple(records)))
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                with pcapkit.extract(fin=path, nofile=True, store=True, reassembly=True, ipv4=True, tcp=True,
-                                     trace=True, trace_fout=os.path.join(tmp, 'trace')) as extraction:
-                    flows, reassembly = extraction.trace.tcp, extraction.reassembly
+                with pcapkit.extract(fin=path, store=True, reassembly=['ipv4', 'tcp'],
+                                     traceflow=TraceFlowOptions(protocols=['tcp'], fout=os.path.join(tmp, 'trace'))) as extraction:
+                    flows, reassembly = extraction.traceflow.tcp, extraction.reassembly
 
         self.assertEqual([(flow.index, flow.label.split('-')[:2]) for flow in flows],
                          [((1, 2, 3, 4), ['10.0.0.1_40000', '10.0.0.2_80'])])

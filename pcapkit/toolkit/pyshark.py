@@ -620,7 +620,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             seq=_absolute(tcp, 'seq'),                                           # TCP sequence number
             ack=_absolute(tcp, 'ack'),                                           # TCP acknowledgement number
             # NOTE: PyShark reports fields, not octets, so both are empty;
-            # ``Extractor`` refuses ``trace_analyse=True`` on this engine.
+            # ``Extractor`` refuses ``TraceFlowOptions(analyze=True)`` on this engine.
             header=b'',                                                          # unavailable
             payload=bytearray(),                                                 # unavailable
         )

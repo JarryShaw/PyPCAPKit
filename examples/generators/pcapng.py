@@ -1025,8 +1025,7 @@ def _verify(path: 'pathlib.Path') -> 'tuple[str, list[str]]':
     logger.handlers, logger.propagate = [capture], False
     logger.setLevel(logging.WARNING)
     try:
-        extractor = extract(fin=str(path), fout='/tmp/out', format='tree',
-                            store=True, nofile=True)
+        extractor = extract(fin=str(path), store=True)
         return f'{extractor.length} frames', capture.messages
     except Exception as exc:  # pylint: disable=broad-except
         return f'FAILED to parse: {type(exc).__name__}: {exc}', capture.messages

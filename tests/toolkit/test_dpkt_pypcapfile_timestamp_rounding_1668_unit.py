@@ -138,6 +138,7 @@ def read(test: unittest.TestCase, engine: str, container: str, nanosecond: bool,
         return _READINGS[key]
 
     from pcapkit import extract
+    from pcapkit.foundation.options import TraceFlowOptions
     from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
     from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
@@ -161,13 +162,13 @@ def read(test: unittest.TestCase, engine: str, container: str, nanosecond: bool,
         with open(path, 'wb') as file:
             file.write(build(records(fractions, seconds), nanosecond=nanosecond))
         with precision(digits):
-            extractor = extract(fin=path, nofile=True, engine=engine, reassembly=True, ipv4=True, ipv6=True,
-                                tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'),
-                                trace_format='json')
+            extractor = extract(fin=path, engine=engine, reassembly=['ipv4', 'ipv6', 'tcp'],
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=os.path.join(tmp, 'trace'),
+                                                           format='json'))
         try:
             if extractor._exnam != engine:  # pylint: disable=protected-access
                 test.skipTest(f'{engine} did not run')
-            seen['names'] = sorted(os.path.basename(flow.fpout) for flow in extractor.trace.tcp)
+            seen['names'] = sorted(os.path.basename(flow.fpout) for flow in extractor.traceflow.tcp)
         finally:
             close_extractor(extractor)
     _READINGS[key] = seen

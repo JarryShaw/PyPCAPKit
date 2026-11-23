@@ -11,21 +11,21 @@ checkout. This module writes them, with
 
 ``test.pcap``
     Read by ``examples/legacy_smoke/test_reassembly.py``, which extracts it
-    with ``tcp=True``, ``reasm_strict=True`` and ``reassembly=True`` and prints
-    every reassembled TCP datagram. Two connections to port 80, one over IPv4
-    and one over IPv6 -- the script formats the two address families
-    differently, so it needs both -- fronted by the DNS lookup that resolves
-    the IPv4 server. The IPv4 response body is spread over four segments
-    delivered out of order, with one of them retransmitted; the IPv6 request
-    body is spread over three segments delivered in order. The IPv4 connection
+    with ``reassembly=['tcp']`` and prints every reassembled TCP datagram. Two
+    connections to port 80, one over IPv4 and one over IPv6 -- the script
+    formats the two address families differently, so it needs both -- fronted
+    by the DNS lookup that resolves the IPv4 server. The IPv4 response body is
+    spread over four segments delivered out of order, with one of them
+    retransmitted; the IPv6 request body is spread over three segments
+    delivered in order. The IPv4 connection
     closes with a FIN from each end, the IPv6 one with a FIN from the server
     and an abortive RST from the client, so the capture covers a
     FIN-completed stream and an RST-aborted one.
 
 ``http6.cap``
     Read by ``examples/legacy_smoke/test_analyse.py``, which extracts it with
-    ``tcp=True``, ``reasm_strict=True`` and ``reassembly=True`` and pretty-prints
-    the application layer :mod:`pcapkit` finds in each reassembled datagram. Two
+    ``reassembly=['tcp']`` and pretty-prints the application layer
+    :mod:`pcapkit` finds in each reassembled datagram. Two
     HTTP/1.1 connections over IPv6 to port 80: a page fetch whose response body
     spans three segments, and a conditional request for a stylesheet answered
     ``304 Not Modified`` with no body at all. Every datagram, requests and

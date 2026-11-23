@@ -278,6 +278,7 @@ class TestStringFieldDumpers(unittest.TestCase):
 
     def test_plist_and_tree_dump_an_undecodable_comment(self) -> None:
         import pcapkit
+        from pcapkit.foundation.options import DumpOptions
 
         for comment in (b'\xff\xfe', b'caf\xe9'):
             for fmt, suffix in (('plist', '.plist'), ('tree', '.txt'), ('json', '.json')):
@@ -288,7 +289,7 @@ class TestStringFieldDumpers(unittest.TestCase):
                         with open(fin, 'wb') as file:
                             file.write(pcapng(comment))
 
-                        pcapkit.extract(fin=fin, fout=fout, format=fmt,
+                        pcapkit.extract(fin=fin, dump=DumpOptions(fout=fout, format=fmt),
                                         store=False, engine='default')
                         with open(fout, 'rb') as file:
                             dumped = file.read()

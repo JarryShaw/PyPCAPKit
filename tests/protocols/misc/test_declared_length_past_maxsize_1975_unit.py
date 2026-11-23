@@ -216,7 +216,7 @@ class TestDeclaredLengthPastMaxsize(unittest.TestCase):
 
         with narrow_build(limit), warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extractor = pcapkit.extract(fin=fin, nofile=True, store=True, engine='default', **kwargs)
+            extractor = pcapkit.extract(fin=fin, store=True, engine='default', **kwargs)
         close_extractor(extractor)
         return list(extractor.frame), [str(item.message) for item in caught]
 

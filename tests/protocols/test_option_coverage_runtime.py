@@ -104,8 +104,7 @@ class OptionCoverageCaptureTests(unittest.TestCase):
 
             with self.subTest(capture=name):
                 with time_limit(EXTRACT_TIMEOUT):
-                    extractor = pcapkit.extract(fin=path, nofile=True, format='tree',
-                                                store=True, ip=True, tcp=True)
+                    extractor = pcapkit.extract(fin=path, store=True)
                 self.addCleanup(close_extractor, extractor)
 
                 self.assertGreater(extractor.length, 0,
@@ -156,8 +155,7 @@ class OptionCoverageCaptureTests(unittest.TestCase):
         snaplen = int.from_bytes(ghdr[16:20], 'little' if little else 'big')
 
         with time_limit(EXTRACT_TIMEOUT):
-            extractor = pcapkit.extract(fin=path, nofile=True, format='tree',
-                                        store=True, ip=True, tcp=True)
+            extractor = pcapkit.extract(fin=path, store=True)
         self.addCleanup(close_extractor, extractor)
 
         # Found from the octets after the Ethernet and IPv6 headers rather than
@@ -192,6 +190,7 @@ class OptionCoverageCaptureTests(unittest.TestCase):
 
         """
         import pcapkit
+        from pcapkit.foundation.options import DumpOptions
 
         found = 0
         for name in sorted(CAPTURES):
@@ -208,9 +207,10 @@ class OptionCoverageCaptureTests(unittest.TestCase):
                         # read out of a loop is a plain ``str`` to a checker.
                         fmt_arg = fmt  # type: Any
                         with time_limit(EXTRACT_TIMEOUT):
-                            extractor = pcapkit.extract(
-                                fin=path, fout=out, format=fmt_arg, store=False,
-                                ip=True, tcp=True, reassembly=True)
+                            extractor = pcapkit.extract(fin=path,
+                                                        dump=DumpOptions(fout=out, format=fmt_arg),
+                                                        store=False,
+                                                        reassembly=['ipv4', 'ipv6', 'tcp'])
                         self.addCleanup(close_extractor, extractor)
                         self.assertGreater(extractor.length, 0)
                         self.assertTrue(os.path.isfile(out),
@@ -257,8 +257,7 @@ class OptionCoverageCaptureTests(unittest.TestCase):
             found += 1
             with self.subTest(capture=name):
                 with time_limit(EXTRACT_TIMEOUT):
-                    extractor = pcapkit.extract(fin=path, nofile=True, format='tree',
-                                                store=False)
+                    extractor = pcapkit.extract(fin=path, store=False)
                 self.addCleanup(close_extractor, extractor)
                 self.assertEqual(
                     extractor.length, count,

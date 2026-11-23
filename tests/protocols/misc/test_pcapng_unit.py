@@ -296,7 +296,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             try:
                 with os.fdopen(handle, 'wb') as file:
                     file.write(prologue + trailer)
-                extract(fin=path, store=True, nofile=True).engine.close()
+                extract(fin=path, store=True).engine.close()
             finally:
                 os.unlink(path)
 
@@ -3041,7 +3041,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         try:
             with os.fdopen(handle, 'wb') as file:
                 file.write(capture)
-            extractor = extract(fin=path, store=True, nofile=True)
+            extractor = extract(fin=path, store=True)
         finally:
             os.unlink(path)
 
@@ -3371,7 +3371,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         except FileNotFoundError as exc:
             self.skipTest(str(exc))
 
-        extractor = extract(fin=path, store=True, nofile=True)
+        extractor = extract(fin=path, store=True)
         section = extractor.engine._ctx_list[0].section
 
         self.assertEqual(section.byteorder, 'big')
@@ -3494,7 +3494,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             with self.subTest(TZ=zone):
                 offsets.add(self._under_timezone(zone))
 
-                block = extract(fin=path, store=True, nofile=True).frame[0].info
+                block = extract(fin=path, store=True).frame[0].info
 
                 self.assertEqual(block.timestamp_epoch, expected)
                 self.assertEqual(block.timestamp,
@@ -3975,7 +3975,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extractor = Extractor(NamedBuffer(data), nofile=True, store=True)
+            extractor = Extractor(NamedBuffer(data), store=True)
         return extractor, caught
 
     def _sweep(self) -> 'tuple[dict[int, int], dict[int, BaseException]]':
@@ -4424,7 +4424,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extractor = Extractor(NamedBuffer(blob), nofile=True, store=True)
+            extractor = Extractor(NamedBuffer(blob), store=True)
         journals = extractor.engine._ctx_list[0].journals
         self.assertEqual(len(journals), 1)
         return journals[0].data, caught
@@ -4819,7 +4819,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
 
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                extractor = Extractor(NamedBuffer(io.BytesIO(blob)), nofile=True, store=True)
+                extractor = Extractor(NamedBuffer(io.BytesIO(blob)), store=True)
 
             print(json.dumps({'file': pcapkit.__file__, 'input': len(blob),
                               'frames': len(extractor.frame)}))

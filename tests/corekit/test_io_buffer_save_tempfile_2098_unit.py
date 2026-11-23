@@ -120,20 +120,22 @@ class Unseekable(io.RawIOBase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'pcapkit runtime dependencies are not installed')
 class TestExtractorBufferFile(unittest.TestCase):
-    """``Extractor(buffer_save=True)`` over a pipe leaves no temporary file behind."""
+    """``StreamOptions(buffer_save=True)`` over a pipe leaves no temporary file behind."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
     def test_an_extraction_removes_its_buffer_file(self) -> None:
         import pcapkit  # pylint: disable=import-outside-toplevel
+        from pcapkit.foundation.options import StreamOptions  # pylint: disable=import-outside-toplevel
 
         frame = b'\x02\x00\x00\x00\x00\x01\x02\x00\x00\x00\x00\x02\x88\xb5' + bytes(46)
         record = struct.pack('<IIII', 1_700_000_000, 0, len(frame), len(frame)) + frame
         data = struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 65535, 1) + record * 200
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = pcapkit.extract(fin=Unseekable(data), nofile=True, buffer_save=True)
+            extractor = pcapkit.extract(fin=Unseekable(data),
+                                        stream=StreamOptions(buffer_save=True))
         buffer_path = extractor._ifile._buffer_path  # pylint: disable=protected-access
         self.assertTrue(buffer_path)
         self.assertEqual(len(extractor.frame), 200)  # type: ignore[attr-defined]

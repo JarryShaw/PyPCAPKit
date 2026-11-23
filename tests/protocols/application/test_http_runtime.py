@@ -17,7 +17,7 @@ class HTTPRuntimeTests(unittest.TestCase):
     def _extract(self, sample: str):
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path(sample), store=True)
         self.addCleanup(close_extractor, extractor)
         return extractor
 

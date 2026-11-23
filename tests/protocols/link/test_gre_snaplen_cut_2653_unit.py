@@ -154,7 +154,7 @@ class GRESnaplenCutTests(unittest.TestCase):
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', verify), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            frame = self.pcapkit.extract(fin=io.BytesIO(capture), nofile=True).frame[0]
+            frame = self.pcapkit.extract(fin=io.BytesIO(capture)).frame[0]
         return frame, [str(item.message) for item in caught
                        if issubclass(item.category, self.ChecksumWarning)]
 

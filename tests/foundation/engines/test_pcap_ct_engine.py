@@ -477,7 +477,7 @@ class PCAP_CTEngineTests(unittest.TestCase):
 
         messages = [call.args[0] for call in warn.call_args_list
                     if call.args[1] is AttributeWarning]
-        self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages),
+        self.assertTrue(any("so reassembly=['dtls'] will be ignored" in message for message in messages),
                         messages)
         self.assertFalse(extractor._flag_r)
         self.assertNotIn('dtls', extractor._reasm)
@@ -591,8 +591,7 @@ class PCAP_CTEngineTests(unittest.TestCase):
         from pcapkit.utilities.warnings import EngineWarning
 
         with mock.patch('pcapkit.foundation.extraction.warn') as warn:
-            extractor = extract(fin=sample_path('in.pcap'), engine='pcap_ct',
-                                store=True, nofile=True)
+            extractor = extract(fin=sample_path('in.pcap'), engine='pcap_ct', store=True)
         self.addCleanup(close_extractor, extractor)
 
         # A missing engine module only warns and falls back to pcapkit's own

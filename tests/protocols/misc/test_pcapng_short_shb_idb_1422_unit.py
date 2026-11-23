@@ -174,7 +174,7 @@ class TestPCAPNGShortSHBIDB(unittest.TestCase):
         stream = _octets('shb-16', '<') + _octets('idb-16', '<') + good
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = Extractor(NamedBuffer(stream), nofile=True, store=True)
+            extractor = Extractor(NamedBuffer(stream), store=True)
             frames = extractor.frame
         self.assertEqual(len(frames), 1)
         self.assertEqual(frames[0].info.captured_len, 4)

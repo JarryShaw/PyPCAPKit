@@ -122,12 +122,16 @@ class CaptureDumpTests(unittest.TestCase):
         self.addCleanup(quiet.__exit__, None, None, None)
         warnings.simplefilter('ignore')
 
-    def dump(self, name: 'str', fmt: 'str', stem: 'str', **kwargs: 'Any') -> 'tuple[Any, str]':
+    def dump(self, name: 'str', fmt: 'str', stem: 'str', *, extension: 'bool' = True,
+             **kwargs: 'Any') -> 'tuple[Any, str]':
         """Extract capture ``name`` to ``stem`` as ``fmt``; return the extractor and output path."""
         from pcapkit import extract
+        from pcapkit.foundation.options import DumpOptions
 
         out = os.path.join(self.tmpdir.name, stem)
-        extractor = extract(fin=str(SAMPLE_ROOT / name), fout=out, format=fmt, **kwargs)
+        extractor = extract(fin=str(SAMPLE_ROOT / name), dump=DumpOptions(fout=out, format=fmt,
+                                                                          extension=extension),
+                            **kwargs)
         self.addCleanup(close_extractor, extractor)
         return extractor, extractor.output
 
@@ -148,7 +152,7 @@ class CaptureDumpTests(unittest.TestCase):
         with time_limit(SWEEP_TIMEOUT):
             for name in captures():
                 extractor, path = self.dump(name, 'pcapng', f'{name}.out.pcapng', store=True, extension=False)
-                again = extract(fin=path, nofile=True, store=True)
+                again = extract(fin=path, store=True)
                 self.addCleanup(close_extractor, again)
                 with self.subTest(capture=name):
                     self.assertEqual(records(again), records(extractor))

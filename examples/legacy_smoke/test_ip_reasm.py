@@ -4,13 +4,14 @@ import os
 import textwrap
 
 import pcapkit
+from pcapkit.foundation.options import DumpOptions
 
 os.system('> ../captures/out')  # nosec: B605 B607
 
 extraction = pcapkit.extract(
-    fin='../captures/ipv4.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
-    store=False, ipv4=True, verbose=True, reasm_strict=True, #nofile=True,
-    fout='../captures/ip_out.txt', format='tree', reassembly=True,
+    '../captures/ipv4.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
+    store=False, verbose=True, reassembly=['ipv4'],
+    dump=DumpOptions(fout='../captures/ip_out.txt', format='tree'),
 )
 # pprint.pprint(extraction.frame)
 

@@ -17,6 +17,7 @@ import abc
 import collections.abc
 import contextlib
 import enum
+import inspect
 import itertools
 import sys
 import types
@@ -204,6 +205,12 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
         else:
             cls.__base_ready__ = True
         return cls
+
+    # NOTE: before 3.9.7, inspect.signature reads ``Info.__new__(*args, **kwargs)`` over any
+    # ``__init__`` (bpo-40897), so a final class, which nothing derives from, states its own.
+    if sys.version_info < (3, 9, 7) and '__signature__' not in cls.__dict__:
+        init = inspect.signature(cls.__init__)  # type: ignore[misc]
+        cls.__signature__ = init.replace(parameters=tuple(init.parameters.values())[1:])  # type: ignore[attr-defined]
 
     cls.__finalised__ = FinalisedState.FINAL
     return final(cls)

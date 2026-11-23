@@ -3,7 +3,7 @@
 
 GitHub issue #1555. With the four IPv4 frames of :file:`tcp.pcap` given Total
 Length 0, as TCP segmentation offload leaves them, a reassembler that takes the
-data length from ``tl - ihl`` makes ``extract(ipv4=True, reassembly=True)``
+data length from ``tl - ihl`` makes ``extract(fin, reassembly=['ipv4'])``
 report four ``PARTIAL`` datagrams with no payload under every engine, against
 four ``COMPLETE`` ones of 44, 32, 244 and 32 octets on the unmodified capture.
 Wireshark does not reassemble such a frame at all -- it is one segment -- so the
@@ -116,11 +116,12 @@ class TSOReassemblyTests(unittest.TestCase):
 
     def _extract(self, fin: 'str', engine: 'str', strict: 'bool') -> 'Any':
         from pcapkit import extract
+        from pcapkit.foundation.options import ReassemblyOptions
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=fin, nofile=True, engine=engine, ipv4=True,
-                                reassembly=True, reasm_strict=strict)
+            extractor = extract(fin=fin, engine=engine,
+                                reassembly=ReassemblyOptions(protocols=['ipv4'], strict=strict))
         self.addCleanup(close_extractor, extractor)
         return extractor
 

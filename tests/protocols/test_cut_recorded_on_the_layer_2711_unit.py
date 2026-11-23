@@ -166,7 +166,7 @@ class CutRecordedOnTheLayerTests(unittest.TestCase):
     def extract(self, linktype: int, packet: bytes, original: int) -> 'tuple[Any, list[str]]':
         """The frame a savefile of ``packet`` holds, and what reading it reported."""
         with _reported() as messages:
-            frame = self.pcapkit.extract(fin=io.BytesIO(pcap(linktype, packet, original)), nofile=True).frame[0]
+            frame = self.pcapkit.extract(fin=io.BytesIO(pcap(linktype, packet, original))).frame[0]
         return frame, messages
 
     def assertRebuildsAsCut(self, layer: 'Any') -> 'None':  # pylint: disable=invalid-name

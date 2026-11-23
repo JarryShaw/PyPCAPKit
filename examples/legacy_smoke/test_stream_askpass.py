@@ -13,6 +13,7 @@ import subprocess  # nosec: B404
 import tempfile
 
 import pcapkit
+from pcapkit.foundation.options import DumpOptions, StreamOptions
 
 #: Interface to capture on. ``en0`` is macOS; on Linux this is usually ``eth0``
 #: or ``wlan0`` -- see ``ip link`` or ``tcpdump -D``.
@@ -27,5 +28,6 @@ print(f'buffering the live capture to {BUFFER}')
 
 with subprocess.Popen(shlex.split(f'sudo -A tcpdump -i {INTERFACE} -s 0 -w - -U'),  # nosec: B603
                       stdout=subprocess.PIPE) as file:
-    pcapkit.extract(fin=file.stdout, fout='../captures/stream.txt', format='tree', no_eof=True,
-                    verbose=True, buffer_save=True, buffer_path=BUFFER)
+    pcapkit.extract(fin=file.stdout, dump=DumpOptions(fout='../captures/stream.txt', format='tree'),
+                    stream=StreamOptions(buffer_save=True, buffer_path=BUFFER, no_eof=True),
+                    verbose=True)

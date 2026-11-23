@@ -51,11 +51,13 @@ class TestMessageForm(unittest.TestCase):
 
     def test_follow_tcp_stream_engine_fallback(self) -> None:
         from pcapkit.interface.misc import follow_tcp_stream
+        from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.utilities.warnings import EngineWarning
 
         with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            follow_tcp_stream(fin=sample_path('in.pcap'), fout=tmp, engine='pyshark')
+            follow_tcp_stream(fin=sample_path('in.pcap'),
+                              traceflow=TraceFlowOptions(protocols=['tcp'], fout=tmp), engine='pyshark')
         self.assertEqual([str(w.message) for w in caught if issubclass(w.category, EngineWarning)],
                          ["unsupported extraction engine: 'pyshark'; using default engine instead"])
 
@@ -63,6 +65,7 @@ class TestMessageForm(unittest.TestCase):
         from pcapkit.foundation.engines.engine import Engine
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.interface.misc import follow_tcp_stream
+        from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.utilities.warnings import EngineWarning
 
         class UnitEngine(Engine[object]):  # no ``engine=``, so not registered here
@@ -84,7 +87,8 @@ class TestMessageForm(unittest.TestCase):
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             Extractor.register_engine('unit-engine', UnitEngine)
-            streams = follow_tcp_stream(fin=sample_path('in.pcap'), fout=tmp,
+            streams = follow_tcp_stream(fin=sample_path('in.pcap'),
+                                        traceflow=TraceFlowOptions(protocols=['tcp'], fout=tmp),
                                         engine='unit-engine')
         self.assertEqual(streams, ())
         self.assertEqual([str(w.message) for w in caught if issubclass(w.category, EngineWarning)],
@@ -97,25 +101,27 @@ class TestMessageForm(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            Extractor(fin=sample_path('in.pcap'), nofile=True, store=False, engine='no-such-engine')
+            Extractor(fin=sample_path('in.pcap'), store=False, engine='no-such-engine')
         self.assertEqual([str(w.message) for w in caught if issubclass(w.category, EngineWarning)],
                          ["unsupported extraction engine: 'no-such-engine'; using default engine instead"])
 
     def test_make_name_unknown_output_format(self) -> None:
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import DumpOptions
         from pcapkit.utilities.exceptions import FormatError
 
         # The only output-format rejection an ``Extractor`` reaches. The
         # ``FormatWarning`` in ``Extractor.__init__`` fires on ``ext is None``,
         # which ``make_name`` -- called earlier in the same constructor, and
-        # only when ``nofile=False``, which is also the warning's condition --
+        # only when ``dump`` is given, which is also the warning's condition --
         # has already raised on, so that warning is unreachable.
         for fmt, pinned in (('no-such-format', "unknown output format: 'no-such-format'"),
                             ('', "unknown output format: ''")):
             with self.subTest(format=fmt), tempfile.TemporaryDirectory() as tmp:
                 with self.assertRaises(FormatError) as context:
-                    Extractor(fin=sample_path('in.pcap'), fout=os.path.join(tmp, 'out'),
-                              format=fmt, auto=False)
+                    Extractor(fin=sample_path('in.pcap'),
+                              dump=DumpOptions(fout=os.path.join(tmp, 'out'), format=fmt),
+                              auto=False)
                 self.assertEqual(str(context.exception), pinned)
 
     def test_make_fout_unsupported_output_format(self) -> None:

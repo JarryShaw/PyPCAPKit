@@ -176,6 +176,7 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]') -> 'dict[s
 
     """
     from pcapkit import extract
+    from pcapkit.foundation.options import TraceFlowOptions
     from pcapkit.foundation.reassembly.tcp import TCP
     from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
@@ -202,13 +203,14 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]') -> 'dict[s
         with open(path, 'wb') as file:
             file.write(wire.pcap(records))
         warnings.simplefilter('ignore')
-        extractor = extract(fin=path, nofile=True, engine=engine, reassembly=True, tcp=True,
-                            trace=True, trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+        extractor = extract(fin=path, engine=engine, reassembly=['tcp'],
+                            traceflow=TraceFlowOptions(protocols=['tcp'], fout=os.path.join(tmp, 'trace'),
+                                                       format='json'))
         try:
             if extractor._exnam != engine:  # pylint: disable=protected-access
                 test.skipTest(f'{engine} did not run')
             seen['ids'] = [datagram.id for datagram in extractor.reassembly.tcp]
-            seen['flows'] = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
+            seen['flows'] = [(flow.label, tuple(flow.index)) for flow in extractor.traceflow.tcp]
         finally:
             close_extractor(extractor)
     return seen
@@ -307,7 +309,7 @@ class TCPCarrierWalkTests(unittest.TestCase):
             path = os.path.join(tmp, 'vrrp.pcap')
             with open(path, 'wb') as file:
                 file.write(wire.pcap([(1, 0, octets), (1, 1, eth(v4(tcp(2), 6)))]))
-            extractor = extract(fin=path, nofile=True, engine='dpkt', verbose=True)
+            extractor = extract(fin=path, engine='dpkt', verbose=True)
             try:
                 ran = extractor._exnam  # pylint: disable=protected-access
             finally:

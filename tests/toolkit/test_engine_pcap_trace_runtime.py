@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""DPKT and Scapy write ``trace_format='pcap'`` flows as PCAP (#1507).
+"""DPKT and Scapy write ``'pcap'`` flow traces as PCAP (#1507).
 
 Both engines expose each frame's captured octets, its timestamp, its original
 length and its link type, so their flow tracing adapters carry a PCAP frame
@@ -187,20 +187,22 @@ class EnginePCAPTraceTests(unittest.TestCase):
 
         """
         from pcapkit import extract
+        from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.utilities.warnings import FormatWarning
 
         fout = tempfile.mkdtemp(dir=self.tmp)
         with warnings.catch_warnings(record=True) as raised:
             warnings.simplefilter('always')
-            extractor = extract(fin=fin, nofile=True, engine=engine, tcp=True, trace=True,
-                                trace_fout=fout, trace_format=fmt, trace_nanosecond=nanosecond)
+            extractor = extract(fin=fin, engine=engine,
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=fout, format=fmt,
+                                                           nanosecond=nanosecond))
         self.addCleanup(close_extractor, extractor)
         self.assertEqual([str(w.message) for w in raised if issubclass(w.category, FormatWarning)], [])
         if caught is not None:
             caught.extend(raised)
 
         flows = []
-        for flow in extractor.trace.tcp:
+        for flow in extractor.traceflow.tcp:
             self.assertTrue(flow.fpout.endswith(f'.{fmt}'), flow.fpout)
             with open(flow.fpout, 'rb') as file:
                 flows.append((flow.label, tuple(flow.index), file.read()))
@@ -242,7 +244,7 @@ class EnginePCAPTraceTests(unittest.TestCase):
                     self._assert_every_engine_holds_the_records(sample_path(capture), nanosecond=nanosecond)
 
     def test_each_traced_pcapng_holds_the_captured_records(self) -> None:
-        """``trace_format='pcapng'`` writes the frame records ``'pcap'`` does (#2835)."""
+        """A ``'pcapng'`` trace writes the frame records a ``'pcap'`` one does (#2835)."""
         for capture in CAPTURES:
             fin = sample_path(capture)
             for engine in ENGINES:
@@ -358,6 +360,7 @@ class EnginePCAPTraceTests(unittest.TestCase):
     def test_no_engine_warns_about_original_lengths(self) -> None:
         # The frame record is complete, so there is nothing to warn about -- not on
         # a PCAP trace, not on a JSON one, and not from follow_tcp_stream.
+        from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.interface.misc import follow_tcp_stream
 
         for engine in ENGINES:
@@ -365,8 +368,9 @@ class EnginePCAPTraceTests(unittest.TestCase):
                 with self.subTest(engine=engine, trace_format=trace_format), \
                         warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
-                    follow_tcp_stream(fin=sample_path('tcp.pcap'), engine=engine, format=trace_format,
-                                      fout=tempfile.mkdtemp(dir=self.tmp))
+                    follow_tcp_stream(fin=sample_path('tcp.pcap'), engine=engine,
+                                      traceflow=TraceFlowOptions(protocols=['tcp'], format=trace_format,
+                                                                 fout=tempfile.mkdtemp(dir=self.tmp)))
                     self.assertEqual([str(w.message) for w in caught if 'original length' in str(w.message)], [])
 
     def test_dict_capable_trace_formats_are_unchanged(self) -> None:
@@ -375,17 +379,18 @@ class EnginePCAPTraceTests(unittest.TestCase):
         # the engine's own mapping of the frame, value types included.
         # Re-measure the digests if dictdumper's output ever changes.
         from pcapkit import extract
+        from pcapkit.foundation.options import TraceFlowOptions
 
         for engine in ENGINES:
             with self.subTest(engine=engine):
                 fout = tempfile.mkdtemp(dir=self.tmp)
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    extractor = extract(fin=sample_path('tcp.pcap'), nofile=True, engine=engine, tcp=True,
-                                        trace=True, trace_fout=fout, trace_format='json')
+                    extractor = extract(fin=sample_path('tcp.pcap'), engine=engine,
+                                        traceflow=TraceFlowOptions(protocols=['tcp'], fout=fout, format='json'))
                 self.addCleanup(close_extractor, extractor)
                 digests = {}
-                for flow in extractor.trace.tcp:
+                for flow in extractor.traceflow.tcp:
                     with open(flow.fpout, 'rb') as file:
                         digests[os.path.basename(flow.fpout)] = hashlib.sha256(file.read()).hexdigest()
                 self.assertEqual(digests, JSON_TRACE_SHA256[engine])
@@ -416,7 +421,7 @@ class EnginePCAPTraceTests(unittest.TestCase):
         with mock.patch.object(RawPcapReader, 'close', counted), \
                 mock.patch.object(scapy.all, 'sniff', side_effect=RuntimeError('sniff failed')), \
                 self.assertRaisesRegex(RuntimeError, 'sniff failed'):
-            extract(fin=sample_path('tcp.pcap'), nofile=True, engine='scapy')
+            extract(fin=sample_path('tcp.pcap'), engine='scapy')
         self.assertEqual(len(calls), 1)
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')

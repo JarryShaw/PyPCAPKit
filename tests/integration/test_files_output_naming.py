@@ -50,9 +50,12 @@ class FilesOutputNamingTests(EndToEndTestCase):
 
     def _names(self, capture: 'str', fmt: 'str') -> 'list[str]':
         """Sorted names of the files one ``files=True`` extraction wrote."""
+
+        from pcapkit.foundation.options import DumpOptions
+
         out = self.out(f'{capture.rsplit(".", 1)[0]}-{fmt}')
-        self.extract(fin=sample_path(capture), fout=out, format=fmt,
-                     files=True, store=False)
+        self.extract(fin=sample_path(capture), dump=DumpOptions(fout=out, format=fmt, files=True),
+                     store=False)
         import pathlib
         return sorted(entry.name for entry in pathlib.Path(out).iterdir())
 
@@ -88,18 +91,23 @@ class FilesOutputNamingTests(EndToEndTestCase):
         ``report`` with no suffix, or ``report..json``.
 
         """
+
+        from pcapkit.foundation.options import DumpOptions
+
         for fmt, suffix in FORMATS.items():
             with self.subTest(format=fmt):
                 extractor = self.extract(fin=sample_path('arp.pcap'),
-                                         fout=self.out(f'report-{fmt}'),
-                                         format=fmt, store=False)
+                                         dump=DumpOptions(fout=self.out(f'report-{fmt}'), format=fmt),
+                                         store=False)
 
                 self.assertEqual(extractor.output, self.out(f'report-{fmt}{suffix}'))
                 self.assertEqual(extractor.output.count('.'), 1)
 
     def test_output_name_already_carrying_the_suffix_is_left_alone(self) -> None:
+        from pcapkit.foundation.options import DumpOptions
+
         extractor = self.extract(fin=sample_path('arp.pcap'),
-                                 fout=self.out('kept.json'), format='json',
+                                 dump=DumpOptions(fout=self.out('kept.json'), format='json'),
                                  store=False)
 
         self.assertEqual(extractor.output, self.out('kept.json'))

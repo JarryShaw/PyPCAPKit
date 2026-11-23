@@ -55,7 +55,7 @@ def _extract(record: bytes, linktype: int, protocol: 'object' = None) -> 'str':
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             kwargs = {} if protocol is None else {'protocol': protocol}
-            extractor = pcapkit.extract(fin=path, nofile=True, store=True, **kwargs)
+            extractor = pcapkit.extract(fin=path, store=True, **kwargs)
     return extractor.frame[0].protochain.chain
 
 

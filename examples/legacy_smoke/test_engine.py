@@ -17,14 +17,15 @@ instead, which would otherwise show up here as a healthy frame count.
 import os
 
 import pcapkit
+from pcapkit.foundation.options import DumpOptions
 from _engine_support import ENGINES, ran_as_asked, report, unavailable
 
 for engine in ENGINES:
     fout = f'../captures/engines/{engine}.txt'
 
     try:
-        extraction = pcapkit.extract(fin='../captures/in.pcap', fout=fout,
-                                     format='tree', engine=engine)  # type: ignore[arg-type]
+        extraction = pcapkit.extract('../captures/in.pcap', dump=DumpOptions(fout=fout, format='tree'),
+                                     engine=engine)  # type: ignore[arg-type]
     except Exception as exc:  # pylint: disable=broad-except
         reason = unavailable(exc)
         if reason is None:

@@ -15,11 +15,13 @@ deprecated |jspcapy|_.
 
 """
 import argparse
+import os
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_args
 
 from pcapkit import __version__
-from pcapkit.foundation.extraction import Extractor
+from pcapkit.foundation.extraction import Extractor, Layers
+from pcapkit.foundation.options import DumpOptions, StreamOptions
 from pcapkit.interface import JSON, PLIST, TREE
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import stacklevel
@@ -89,12 +91,10 @@ def get_parser() -> 'ArgumentParser':
                         help=('Stop dissecting each frame after this protocol, e.g. '
                               '"IPv4" (case-insensitive); the rest of the frame is '
                               'kept as raw data. Third-party engines ignore it.'))
-    # NOTE: ``choices``, as nothing downstream rejects an unknown layer name and the
-    # parse would silently run to the top of the stack (GH-356).
-    # NOTE: the defaults are :data:`None`, for which ``Extractor.__init__``
-    # substitutes its own sentinels, not the ``'None'``/``'null'`` strings.
+    # NOTE: ``choices`` refuses an unknown layer with the usage line before ``Extractor`` does
+    # (GH-356); the defaults are None, which ``Extractor`` reads as no limit.
     parser.add_argument('-L', '--layer', action='store', dest='layer', default=None, metavar='LAYER',
-                        type=str.lower, choices=['link', 'internet', 'transport', 'application', 'none'],
+                        type=str.lower, choices=get_args(Layers),
                         help=('Stop dissecting each frame after its protocol in this '
                               'layer: "link", "internet", "transport" or "application" '
                               '(case-insensitive); "none", the default, sets no limit. '
@@ -120,22 +120,23 @@ def main() -> 'int':
         fmt = JSON
     elif args.plist:
         fmt = PLIST
-    elif args.tree:
-        fmt = TREE
     else:
-        fmt = None
+        fmt = TREE
 
     no_eof = args.fin == '-'
     if args.fin == '-':
         args.fin = sys.stdin.buffer
+    elif args.auto_extension and os.path.splitext(args.fin)[1] not in Extractor.PCAP_EXT:
+        # NOTE: ``-a`` names the input as it always has; ``Extractor`` itself opens ``fin`` as named.
+        args.fin = f'{args.fin}.pcap'
 
-    extractor = Extractor(store=False, auto=not args.verbose,
-                          fin=args.fin, fout=args.fout,
-                          files=args.files, format=fmt,
+    extractor = Extractor(args.fin, store=False, auto=not args.verbose,
+                          dump=DumpOptions(fout=args.fout or 'out', format=fmt,
+                                           files=args.files, extension=args.auto_extension),
                           layer=args.layer, protocol=args.protocol,
-                          engine=args.engine, extension=args.auto_extension,
-                          verbose=args.verbose, buffer_save=args.buffer_save,
-                          no_eof=no_eof, buffer_path=args.buffer_path)  # type: ignore[var-annotated]
+                          engine=args.engine, verbose=args.verbose,
+                          stream=StreamOptions(buffer_save=args.buffer_save, no_eof=no_eof,
+                                               buffer_path=args.buffer_path))  # type: ignore[var-annotated]
 
     if args.verbose:
         try:

@@ -235,9 +235,12 @@ class ExtractorReassemblyTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _datagram(self, kind: str, write: 'Any', *, whole: bool = True, **kwargs: 'Any') -> 'Any':
+    def _datagram(self, kind: str, write: 'Any', *, whole: bool = True, strict: bool = True) -> 'Any':
+        from pcapkit.foundation.options import ReassemblyOptions
+
         frames = FRAMES[kind][0 if whole else 1]
-        extractor = _extract(self, write(frames), reassembly=True, ip=True, tcp=True, **kwargs)
+        extractor = _extract(self, write(frames),
+                             reassembly=ReassemblyOptions(protocols=['ipv4', 'ipv6', 'tcp'], strict=strict))
         datagram, = getattr(extractor.reassembly, kind)
         return datagram
 
@@ -293,7 +296,7 @@ class ExtractorReassemblyTests(unittest.TestCase):
             for container, write in CONTAINERS:
                 for strict in (True, False):
                     with self.subTest(kind=kind, container=container, strict=strict):
-                        datagram = self._datagram(kind, write, whole=False, reasm_strict=strict)
+                        datagram = self._datagram(kind, write, whole=False, strict=strict)
                         self.assertEqual(datagram.completed.name, 'PARTIAL')
                         self.assertIsInstance(datagram.payload, tuple if strict else bytes)
                         self.assertIsInstance(_held(datagram), type(None) if strict else Deferred)

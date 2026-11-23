@@ -67,11 +67,14 @@ class RepeatedFieldDumpTests(unittest.TestCase):
     def dump(self, fmt: 'str') -> 'bytes':
         """Extract :func:`capture` as ``fmt``; return the output file."""
         from pcapkit import extract
+        from pcapkit.foundation.options import DumpOptions
 
         src = os.path.join(self.tmpdir.name, 'in.pcap')
         with open(src, 'wb') as file:
             file.write(capture())
-        extractor = extract(fin=src, fout=os.path.join(self.tmpdir.name, f'out-{fmt}'), format=fmt, store=False)
+        extractor = extract(fin=src,
+                            dump=DumpOptions(fout=os.path.join(self.tmpdir.name, f'out-{fmt}'), format=fmt),
+                            store=False)
         with open(extractor.output, 'rb') as file:
             return file.read()
 

@@ -13,19 +13,20 @@ them.
 
 """
 import collections
+import collections.abc
 import functools
 import importlib
 import inspect
 import io
 import os
-import sys
 import types
 import weakref
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, Literal, TypeVar, cast, get_args
 
 from dictdumper.dumper import Dumper
 
 from pcapkit.corekit.context import ContextRegistry
+from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.io import PeekableStream, SeekableReader, can_seek
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.registry import restore_shipped, restore_shipped_dumper, same_entry
@@ -34,14 +35,17 @@ from pcapkit.foundation.engines import _pcap_backend
 from pcapkit.foundation.engines.engine import Engine, EngineBase
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
+from pcapkit.foundation.options import (DumpOptions, ReassemblyOptions, StreamOptions,
+                                        TraceFlowOptions)
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.reassembly.data import ReassemblyData
 from pcapkit.foundation.reassembly.reassembly import Reassembly, ReassemblyBase
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.foundation.traceflow.traceflow import TraceFlow, TraceFlowBase
-from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
-                                          RegistryError, UnsupportedCall, stacklevel)
+from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.utilities.exceptions import (CallableError, EndianError, FileNotFound, FormatError,
+                                          IterableError, RegistryError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import (AttributeWarning, EngineWarning, ExtractionWarning,
                                         FormatWarning, RegistryWarning, warn)
@@ -56,13 +60,11 @@ if TYPE_CHECKING:
     from pcapfile.structs import pcap_packet as PCAPFilePacket
     from pyshark.packet.packet import Packet as PySharkPacket
     from scapy.packet import Packet as ScapyPacket
-    from typing_extensions import Literal
 
     from pcapkit.corekit.context import ProtocolContext
     from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
     from pcapkit.protocols.misc.pcap.frame.protocol import Frame
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
-    from pcapkit.protocols.protocol import ProtocolBase
 
     #: Every key registered in :attr:`Extractor.__output__` and in
     #: :attr:`TraceFlow.__output__
@@ -74,7 +76,6 @@ if TYPE_CHECKING:
     # both copies when a new engine lands.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
                       'pypcapfile']
-    Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
     # NOTE: the PyPCAP and PCAP_CT engines dissect nothing, so their packet is the
     # ``(timestamp, bytes)`` pair ``pcap.pcap`` yields; one member covers both.
@@ -87,6 +88,9 @@ if TYPE_CHECKING:
     VerboseHandler = Callable[['Extractor', Packet], Any]
 
 __all__ = ['Extractor']
+
+#: Layers an extraction may stop at, as ``layer`` names them; ``'none'`` sets no limit.
+Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
@@ -131,6 +135,10 @@ def _release_input(ifile: 'IO[bytes]') -> 'None':
         pass
 
 
+#: The names :data:`Layers` admits, in order.
+_LAYERS = get_args(Layers)
+
+
 class Extractor(Generic[_P]):
     """Extractor for PCAP files.
 
@@ -165,9 +173,25 @@ class Extractor(Generic[_P]):
 
     .. versionchanged:: 1.7.0
 
-       ``reasm_protocols`` is appended, enabling any registered reassembler by
-       name, and each enabled one is fed every frame's timestamp
-       (:issue:`2814`).
+       Every parameter after ``fin`` is keyword-only, and the output,
+       reassembly, flow tracing and input settings are grouped into ``dump``,
+       ``reassembly``, ``traceflow`` and ``stream``, taking
+       :class:`~pcapkit.foundation.options.DumpOptions`,
+       :class:`~pcapkit.foundation.options.ReassemblyOptions`,
+       :class:`~pcapkit.foundation.options.TraceFlowOptions` and
+       :class:`~pcapkit.foundation.options.StreamOptions`. ``reassembly``
+       and ``traceflow`` also take a list of registered names, so any registered
+       reassembler can be enabled, and each enabled one is fed every frame's
+       timestamp (:issue:`2814`). ``nofile``, ``fout``, ``format``,
+       ``extension``, ``files``, ``ip``, ``ipv4``, ``ipv6``, ``tcp``,
+       ``dtls``, the ``reasm_*``, ``trace_*`` and ``buffer_*`` parameters and
+       ``no_eof`` are removed with no alias. Nothing is written without
+       ``dump``, ``fin`` is opened as named, with no ``.pcap`` appended, and an
+       unknown ``layer`` raises (:issue:`2836`).
+
+    .. versionremoved:: 1.7.0
+
+       ``trace``, renamed :attr:`traceflow` with no alias (:issue:`2836`).
 
     """
     if TYPE_CHECKING:
@@ -192,7 +216,7 @@ class Extractor(Generic[_P]):
         _flag_e: 'bool'
         #: Split file flag, i.e. dump each frame into different files.
         _flag_f: 'bool'
-        #: No output file, i.e., no output file is to be generated.
+        #: No output file flag, set when ``dump`` is :data:`None`.
         _flag_q: 'bool'
         #: Output opened flag. It indicates if :meth:`~pcapkit.foundation.extraction.Extractor._open_output`
         #: has replaced the writer class in :attr:`_ofile` with the writer.
@@ -209,12 +233,14 @@ class Extractor(Generic[_P]):
         #: :attr:`~pcapkit.foundation.extraction.Extractor._vfunc_default`
         #: tells apart.
         _flag_v: 'bool'
-        #: No EOF flag. It is useful when the input is a live capture on a pipe or
-        #: on standard input, where reaching the end of what has arrived so far
-        #: does not mean the capture is over: the extraction retries instead of
-        #: stopping. It retries only while the input is still producing, though --
-        #: see :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress`
-        #: for the rule and for what it narrows, without which an exhausted stream
+        #: No EOF flag, which ``stream`` sets from
+        #: :attr:`StreamOptions.no_eof <pcapkit.foundation.options.StreamOptions.no_eof>`.
+        #: It is useful when the input is a live capture on a pipe or on standard
+        #: input, where reaching the end of what has arrived so far does not mean
+        #: the capture is over: the extraction retries instead of stopping. It
+        #: retries only while the input is still producing, though -- see
+        #: :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress` for
+        #: the rule and for what it narrows, without which an exhausted stream
         #: spins forever (:issue:`620`).
         _flag_n: 'bool'
         #: Input filename flag. It indicates if the input file is a file
@@ -243,9 +269,7 @@ class Extractor(Generic[_P]):
         #: Frame record for flow tracing.
         _trace: 'TraceFlowManager'
 
-        #: TCP flag. It indicates if TCP flow tracing is enabled, and TCP
-        #: reassembly with it, which
-        #: :attr:`~pcapkit.foundation.extraction.Extractor._reasm` holds.
+        #: TCP flag. It indicates if TCP flow tracing is enabled.
         _tcp: 'bool'
 
         #: Extract til protocol.
@@ -371,11 +395,11 @@ class Extractor(Generic[_P]):
 
         Raises:
             UnsupportedCall: If :attr:`self._flag_q <pcapkit.foundation.extraction.Extractor._flag_q>`
-                is set as :data:`True`, as output is disabled by initialisation parameter.
+                is set as :data:`True`, as no ``dump`` was given.
 
         """
         if self._flag_q:
-            raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
+            raise UnsupportedCall("'Extractor(dump=None)' object has no attribute 'format'")
         return self._offmt
 
     @property
@@ -394,11 +418,11 @@ class Extractor(Generic[_P]):
 
         Raises:
             UnsupportedCall: If :attr:`self._flag_q <pcapkit.foundation.extraction.Extractor._flag_q>`
-                is set as :data:`True`, as output is disabled by initialisation parameter.
+                is set as :data:`True`, as no ``dump`` was given.
 
         """
         if self._flag_q:
-            raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'output'")
+            raise UnsupportedCall("'Extractor(dump=None)' object has no attribute 'output'")
         return cast('str', self._ofnm)
 
     @property
@@ -444,10 +468,10 @@ class Extractor(Generic[_P]):
         """
         if self._flag_r:
             return ReassemblyData(**{name: tuple(reasm.datagram) for (name, reasm) in self._reasm.items()})
-        raise UnsupportedCall("'Extractor(reassembly=False)' object has no attribute 'reassembly'")
+        raise UnsupportedCall("'Extractor(reassembly=None)' object has no attribute 'reassembly'")
 
     @property
-    def trace(self) -> 'TraceFlowData':
+    def traceflow(self) -> 'TraceFlowData':
         """Index table for traced flow.
 
         * ``tcp`` -- tuple of TCP flows (:term:`trace.tcp.index`)
@@ -461,13 +485,18 @@ class Extractor(Generic[_P]):
            Raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when
            flow tracing is disabled, where 1.1.0 built the record regardless.
 
+        .. versionadded:: 1.7.0
+
+           Renamed from ``trace``, with no alias, to match ``traceflow`` and
+           :attr:`reassembly` (:issue:`2836`).
+
         """
         if self._flag_t:
             data = TraceFlowData(
                 tcp=tuple(self._trace.tcp.index) if self._tcp else None,
             )
             return data
-        raise UnsupportedCall("'Extractor(trace=False)' object has no attribute 'trace'")
+        raise UnsupportedCall("'Extractor(traceflow=None)' object has no attribute 'traceflow'")
 
     @property
     def engine(self) -> 'EngineBase[_P]':
@@ -999,59 +1028,54 @@ class Extractor(Generic[_P]):
         return module
 
     @classmethod
-    def make_name(cls, fin: 'str | IO[bytes]' = 'in.pcap', fout: 'str' = 'out',
-                  fmt: 'Formats' = 'tree', extension: 'bool' = True, *, files: 'bool' = False,
-                  nofile: 'bool' = False) -> 'tuple[str, Optional[str], Formats, Optional[str], bool]':
+    def make_name(cls, fin: 'str | IO[bytes]', dump: 'Optional[DumpOptions]' = None
+                  ) -> 'tuple[str, Optional[str], Optional[Formats], Optional[str], bool]':
         """Generate input and output filenames.
 
         The method will perform following processing:
 
-        1. sanitise ``fin`` as the input PCAP filename; ``in.pcap`` as default value and
-           append ``.pcap`` extension if needed and ``extension`` is :data:`True`; as well
-           as test if the file exists; for a binary IO object, use its ``name``,
-           or a placeholder such as ``<BytesIO>`` if it has no :obj:`str` one;
-        2. if ``nofile`` is :data:`True`, skips following processing;
-        3. look up the output file extension registered for ``fmt``; should none be
-           registered, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;
-        4. create the parent directory of ``fout``, and with ``files`` the ``fout``
-           directory itself;
-        5. it will also append corresponding file extension to the output file name if needed
-           and ``extension`` is :data:`True`.
+        1. take ``fin`` as the input filename, as given, and test that the file
+           exists; for a binary IO object, use its ``name``, or a placeholder
+           such as ``<BytesIO>`` if it has no :obj:`str` one;
+        2. if ``dump`` is :data:`None`, skip the following processing;
+        3. look up the output file extension registered for ``dump.format``;
+           should none be registered, then it raises
+           :exc:`~pcapkit.utilities.exceptions.FormatError`;
+        4. create the parent directory of ``dump.fout``, and with ``dump.files``
+           the ``dump.fout`` directory itself;
+        5. append the format's file extension to ``dump.fout`` if it lacks one,
+           ``dump.extension`` is :data:`True` and ``dump.files`` is not.
 
         And the method returns the generated input and output filenames as follows:
 
         0. input filename
-        1. output filename / directory name
-        2. output format
+        1. output filename / directory name, or :data:`None` without ``dump``
+        2. output format, or :data:`None` without ``dump``
         3. output file extension, bare, i.e. **without** the leading ``.``, so
            that a caller composing a per-frame filename writes
-           ``f'{name}.{ext}'``
+           ``f'{name}.{ext}'``; :data:`None` without ``dump``
         4. if split each frame into different files
 
         Args:
             fin: Input filename or a binary IO object.
-            fout: Output filename.
-            fmt: Output file format.
-            extension: If append ``.pcap`` file extension to the input filename
-                if ``fin`` does not have such file extension; if check and append extensions
-                to output file.
-            files: If split each frame into different files.
-            nofile: If no output file is to be dumped.
+            dump: Output settings; :data:`None` writes no output.
 
         Returns:
             Generated input and output filenames.
 
         Raises:
             FileNotFound: If input file does not exist.
-            FormatError: If no file extension is registered for ``fmt``.
+            FormatError: If no file extension is registered for ``dump.format``.
+
+        .. versionchanged:: 1.7.0
+
+           ``dump`` replaces ``fout``, ``fmt``, ``extension``, ``files`` and
+           ``nofile``, and ``fin`` is taken as given, with no ``.pcap``
+           appended (:issue:`2836`).
 
         """
         if isinstance(fin, str):
-            if extension:  # pylint: disable=else-if-used
-                ifnm = fin if os.path.splitext(fin)[1] in cls.PCAP_EXT else f'{fin}.pcap'
-            else:
-                ifnm = fin
-
+            ifnm = fin
             if not os.path.isfile(ifnm):
                 raise FileNotFound(2, 'No such file or directory', ifnm)
         else:
@@ -1060,32 +1084,32 @@ class Extractor(Generic[_P]):
             name = getattr(fin, 'name', None)
             ifnm = name if isinstance(name, str) else f'<{type(fin).__name__}>'
 
-        if nofile:
-            ofnm = None
-            ext = None
+        if dump is None:
+            return ifnm, None, None, None, False
+
+        fout, fmt, files = dump.fout, dump.format, dump.files
+        # NOTE: ``__output__`` is a defaultdict; subscripting would insert an
+        # unknown format into the registry before the error below is raised.
+        entry = cls.__output__.get(fmt)
+        registered = entry[1] if entry is not None else None
+        if registered is None:
+            raise FormatError(f'unknown output format: {fmt!r}')
+
+        # NOTE: registered extensions carry the leading dot but the value returned is bare, so
+        # strip it once here; per-frame names otherwise read ``Frame 1..json`` (#358).
+        ext = registered[1:] if registered.startswith('.') else registered
+
+        if (parent := os.path.split(fout)[0]):
+            os.makedirs(parent, exist_ok=True)
+
+        if files:
+            ofnm = fout
+            os.makedirs(ofnm, exist_ok=True)
+        elif dump.extension:
+            # NOTE: The dot belongs to the separator here, not to ``ext``.
+            ofnm = fout if os.path.splitext(fout)[1] == f'.{ext}' else f'{fout}.{ext}'
         else:
-            # NOTE: ``__output__`` is a defaultdict; subscripting would insert an
-            # unknown format into the registry before the error below is raised.
-            entry = cls.__output__.get(fmt)
-            registered = entry[1] if entry is not None else None
-            if registered is None:
-                raise FormatError(f'unknown output format: {fmt!r}')
-
-            # NOTE: registered extensions carry the leading dot but the value returned is bare, so
-            # strip it once here; per-frame names otherwise read ``Frame 1..json`` (#358).
-            ext = registered[1:] if registered.startswith('.') else registered
-
-            if (parent := os.path.split(fout)[0]):
-                os.makedirs(parent, exist_ok=True)
-
-            if files:
-                ofnm = fout
-                os.makedirs(ofnm, exist_ok=True)
-            elif extension:
-                # NOTE: The dot belongs to the separator here, not to ``ext``.
-                ofnm = fout if os.path.splitext(fout)[1] == f'.{ext}' else f'{fout}.{ext}'
-            else:
-                ofnm = fout
+            ofnm = fout
 
         return ifnm, ofnm, fmt, ext, files
 
@@ -1202,90 +1226,28 @@ class Extractor(Generic[_P]):
     # Data models.
     ##########################################################################
 
-    def __init__(self,
-                 fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,     # basic settings # pylint: disable=redefined-builtin
-                 auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
-                 files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
-                 engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
-                 reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
-                 reasm_timeout: 'Optional[float]' = None,                                                                       # reassembly settings # pylint: disable=line-too-long
-                 trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
-                 trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
-                 trace_bidirectional: 'bool' = True, trace_analyse: 'bool' = False,                                            # trace settings # pylint: disable=line-too-long
-                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
-                 dtls: 'bool' = False,                                                                                          # reassembly settings # pylint: disable=line-too-long
-                 buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
-                 no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
-                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # context settings # pylint: disable=line-too-long
-                 reasm_protocols: 'Optional[Iterable[str]]' = None) -> 'None':                                                 # reassembly settings # pylint: disable=line-too-long
+    def __init__(self, fin: 'str | IO[bytes]', *,
+                 dump: 'Optional[DumpOptions]' = None,
+                 engine: 'Engines' = 'default',
+                 layer: 'Optional[Layers | Type[ProtocolBase]]' = None,
+                 protocol: 'Optional[Protocols]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 reassembly: 'Optional[ReassemblyOptions | Iterable[str]]' = None,
+                 traceflow: 'Optional[TraceFlowOptions | Iterable[str]]' = None,
+                 stream: 'Optional[StreamOptions]' = None,
+                 auto: 'bool' = True, store: 'bool' = True,
+                 verbose: 'bool | VerboseHandler' = False) -> 'None':
         """Initialise PCAP Reader.
 
         Args:
-            fin: file name to be read or a binary IO object;
+            fin: file name to be read, as named, or a binary IO object;
                 if file not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`
-            fout: file name to be written
-            format: file format of output
-
-            auto: if automatically run till EOF
-            extension: if check and append extensions to output file
-            store: if store extracted packet info
-
-            files: if split each frame into different files
-            nofile: if no output file is to be dumped
-            verbose: a :obj:`bool` value or a function takes the :class:`Extractor`
-                instance and current parsed frame (depends on engine selected) as
-                parameters to print verbose output information
-
+            dump: output settings; :data:`None` writes no output
             engine: extraction engine to be used
-            layer: extract til which layer
+            layer: extract til which layer, by name or as a protocol class,
+                whose :attr:`~pcapkit.protocols.protocol.ProtocolBase.__layer__`
+                names it
             protocol: extract til which protocol
-
-            reassembly: if perform reassembly
-            reasm_strict: if set strict flag for reassembly
-            reasm_store: if store reassembled datagrams
-            reasm_timeout: reassembly timeout in seconds, measured on the
-                *capture's* own clock rather than the host's, since an offline
-                parser has no other notion of time passing; :data:`None` selects
-                each protocol's own default -- 60 seconds for IPv4
-                (:rfc:`1122#section-3.3.2`) and IPv6 (:rfc:`8200#section-4.5`),
-                disabled for TCP, which no specification gives a deadline. Pass
-                :data:`math.inf` to disable it everywhere; DTLS reassembly takes
-                none (:rfc:`6347#section-4.2.3`)
-
-            trace: if trace TCP traffic flows
-            trace_fout: path name for flow tracer if necessary
-            trace_format: output file format of flow tracer
-            trace_byteorder: output file byte order
-            trace_nanosecond: output nanosecond-resolution file flag
-            trace_bidirectional: whether both halves of a conversation are
-                traced as one flow, which is the default; :data:`False` traces
-                a flow per direction
-            trace_analyse: whether each traced flow reassembles its application
-                layer, so that its ``packet`` can be read. Off by default,
-                because it buffers every traced payload -- a cost tracing does
-                not otherwise pay. Unavailable on the ``pyshark`` engine, which
-                reports dissected fields rather than the octets behind them
-
-            ip: if record data for IPv4 & IPv6 reassembly (must be used with ``reassembly=True``)
-            ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)
-            ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)
-            tcp: if perform TCP reassembly and/or flow tracing
-                (must be used with ``reassembly=True`` or ``trace=True``)
-            dtls: if perform DTLS handshake-message reassembly (must be used
-                with ``reassembly=True``); the default engine alone supports it
-
-            buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
-            buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
-            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
-
-            no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,
-                which is what a live capture on a pipe or on standard input wants,
-                since a read there blocks until the writer produces more or closes.
-                Retrying stops as soon as one retry finds nothing new, so an
-                exhausted input finishes rather than spinning; on a *seekable*
-                input, where nothing blocks, that means a file still being appended
-                to ends at the data present when the extraction reached it
-
             context: caller supplied parsing context for protocols that need
                 information not carried on the wire, keyed by protocol index
                 ID -- cf. :mod:`pcapkit.corekit.context`. Accepts a
@@ -1295,11 +1257,19 @@ class Extractor(Generic[_P]):
                 :term:`default engine`, whose PCAP and PCAP-NG readers parse
                 with :mod:`pcapkit`'s own protocol implementations; the third
                 party engines ignore it.
-
-            reasm_protocols: names of further reassemblers to enable (must be used
-                with ``reassembly=True``), each as registered in
-                :attr:`__reassembly__`, as ``'ipv4'``, ``'ipv6'``, ``'tcp'`` and
-                ``'dtls'`` are
+            reassembly: reassembly settings, or the names of the reassemblers to
+                enable with their defaults, each as registered in
+                :attr:`__reassembly__`; :data:`None`, or no names, reassembles
+                nothing
+            traceflow: flow tracing settings, or the names of the flow tracers
+                to enable with their defaults, each as registered in
+                :attr:`__traceflow__`; :data:`None`, or no names, traces nothing
+            stream: input stream settings; :data:`None` takes their defaults
+            auto: if automatically run till EOF
+            store: if store extracted packet info
+            verbose: a :obj:`bool` value or a function takes the :class:`Extractor`
+                instance and current parsed frame (depends on engine selected) as
+                parameters to print verbose output information
 
         Warns:
             pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:
@@ -1318,35 +1288,78 @@ class Extractor(Generic[_P]):
                 engine is not available: its dependency is not installed, its
                 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
                 rules it out, or the supplied engine is unknown.
-            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is
-                requested while the extraction engine is PyShark.
+            pcapkit.utilities.warnings.AttributeWarning: If ``reassembly`` or
+                ``traceflow`` names nothing, which turns it off; or if
+                ``traceflow`` asks for
+                :attr:`~pcapkit.foundation.options.TraceFlowOptions.analyze`
+                while the extraction engine is PyShark, or names a registered flow
+                tracer other than TCP's, which no engine feeds.
 
         Raises:
             UnsupportedCall: If ``fin`` is a stream without a :obj:`str` ``name``
                 and the engine that will run -- Scapy, PyShark, PyPCAP or
                 pcap-ct -- opens its input by path.
-            FormatError: If ``reasm_protocols`` names no registered reassembler.
+            FormatError: If ``layer`` names no layer, ``reassembly`` or
+                ``traceflow`` names a protocol with no registered reassembler or
+                flow tracer, or ``traceflow`` names a format with no dumper.
+            RegistryError: If ``engine`` is not a name, or ``dump``,
+                ``reassembly``, ``traceflow`` or ``stream`` is neither
+                :data:`None` nor its options class, nor, for ``reassembly`` and
+                ``traceflow``, a list of names.
+            EndianError: If ``traceflow`` names a byte order other than ``'big'``
+                and ``'little'``.
 
         """
-        if fin is None:
-            fin = 'in.pcap'
-        if fout is None:
-            fout = 'out'
-        if format is None:
-            format = 'tree'
+        dump_opts = self._options('dump', dump, DumpOptions)
+        reasm_opts = self._options('reassembly', reassembly, ReassemblyOptions)
+        trace_opts = self._options('traceflow', traceflow, TraceFlowOptions)
+        stream_opts = self._options('stream', stream, StreamOptions) or StreamOptions()
+
+        # NOTE: no names mean the feature is off, as ``None`` does (#2834).
+        if reasm_opts is not None and not reasm_opts.protocols:
+            warn("'Extractor(reassembly=...)' names no reassembler; treated as off, "
+                 'as reassembly=None', AttributeWarning, stacklevel=stacklevel())
+            reasm_opts = None
+        if trace_opts is not None and not trace_opts.protocols:
+            warn("'Extractor(traceflow=...)' names no flow tracer; treated as off, "
+                 'as traceflow=None', AttributeWarning, stacklevel=stacklevel())
+            trace_opts = None
+
+        if not isinstance(engine, str):
+            raise RegistryError(f"'Extractor(engine={engine!r})': expected an engine name")
+
+        # NOTE: names and the tracer's settings are checked before anything is opened or created.
+        for name in reasm_opts.protocols if reasm_opts is not None else ():
+            if name not in self.__reassembly__:
+                raise FormatError(f'unsupported reassembly protocol: {name!r}')
+        for name in trace_opts.protocols if trace_opts is not None else ():
+            if name not in self.__traceflow__:
+                raise FormatError(f'unsupported flow tracing protocol: {name!r}')
+        if trace_opts is not None and 'tcp' in trace_opts.protocols:
+            self._check_trace(trace_opts)
+
+        if isinstance(layer, type) and issubclass(layer, ProtocolBase):
+            layer = cast('Layers', (layer.__layer__ or 'none'))
+        if not isinstance(layer, str) and layer is not None:
+            raise FormatError(f'unknown layer: {layer!r}; expected one of {", ".join(map(repr, _LAYERS))}')
+        layer_name = (layer or 'none').lower()
+        if layer_name not in _LAYERS:
+            raise FormatError(f'unknown layer: {layer!r}; expected one of {", ".join(map(repr, _LAYERS))}')
 
         # NOTE: settled first, since the format and trace checks depend on which
         # engine *runs*: an unavailable one falls back to the default engine.
-        self._exnam = cast('Engines', (engine or 'default').lower())  # extract using engine
+        self._exnam = cast('Engines', engine.lower())  # extract using engine
         self._select_engine()
 
         # NOTE: these engines' adapters hand the writer a plain :obj:`dict` with no record
         # header, so the PCAP and PCAP-NG writers have nothing to write; the tracer gets the same fix below.
-        if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
-                and format in ('pcap', 'cap', 'pcapng')):
-            warn(f"'Extractor(engine={self._exnam})' does not support 'format={format}'; "
-                 "using 'format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
-            format = 'json'
+        if (dump_opts is not None
+                and self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
+                and dump_opts.format in ('pcap', 'cap', 'pcapng')):
+            warn(f"'Extractor(engine={self._exnam})' does not support output format "
+                 f"{dump_opts.format!r}; using 'json' instead", FormatWarning, stacklevel=stacklevel())
+            dump_opts = DumpOptions(fout=dump_opts.fout, format='json', files=dump_opts.files,
+                                    extension=dump_opts.extension)
 
         # NOTE: these engines open ``_ifnm`` as a path, so a stream without a ``str`` name would
         # be opened as a file named ``<BytesIO>`` (#1506); refuse before anything runs.
@@ -1357,24 +1370,24 @@ class Extractor(Generic[_P]):
                                   'the engine opens savefiles by name and cannot read an '
                                   'in-memory stream')
 
-        ifnm, ofnm, fmt, oext, files = self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
+        ifnm, ofnm, fmt, oext, files = self.make_name(fin, dump_opts)
 
         self._ifnm = ifnm  # input file name
         self._ofnm = ofnm  # output file name
         self._fext = oext  # output file extension
 
-        self._flag_a = auto                  # auto extract flag
-        self._flag_d = store                 # store data flag
-        self._flag_e = False                 # EOF flag
-        self._flag_f = files                 # split file flag
-        self._flag_q = nofile                # no output flag
-        self._flag_o = False                 # output opened flag
-        self._flag_r = reassembly            # reassembly flag
-        self._flag_t = trace                 # trace flag
-        self._flag_v = False                 # verbose flag
-        self._flag_s = isinstance(fin, str)  # input filename flag
-        self._flag_n = no_eof                # no EOF flag
-        self._eof_mark = None                # stream position at the last EOF
+        self._flag_a = auto                       # auto extract flag
+        self._flag_d = store                      # store data flag
+        self._flag_e = False                      # EOF flag
+        self._flag_f = files                      # split file flag
+        self._flag_q = dump_opts is None          # no output flag
+        self._flag_o = False                      # output opened flag
+        self._flag_r = reasm_opts is not None     # reassembly flag
+        self._flag_t = trace_opts is not None     # trace flag
+        self._flag_v = False                      # verbose flag
+        self._flag_s = isinstance(fin, str)       # input filename flag
+        self._flag_n = stream_opts.no_eof         # no EOF flag
+        self._eof_mark = None                     # stream position at the last EOF
 
         # verbose callback function
         if isinstance(verbose, bool):
@@ -1396,55 +1409,58 @@ class Extractor(Generic[_P]):
         self._frnum = 0   # frame number
         self._frame = []  # frame record
 
-        self._tcp = tcp  # TCP reassembly and flow tracing
+        self._exptl = protocol or 'null'                      # extract til protocol
+        self._exlyr = cast('Layers', layer_name)              # extract til layer
+        self._exctx = ContextRegistry.make(context)           # caller supplied context
 
-        self._exptl = protocol or 'null'                              # extract til protocol
-        self._exlyr = cast('Layers', (layer or 'none').lower())       # extract til layer
-        self._exctx = ContextRegistry.make(context)                   # caller supplied context
-
-        # NOTE: the flags name the built-ins; every reassembler, built-in or not, is made by name.
-        reasm_names = [name for (name, flag) in (('ipv4', ipv4 or ip), ('ipv6', ipv6 or ip),
-                                                 ('tcp', tcp), ('dtls', dtls)) if flag]
-        reasm_names.extend(name.lower() for name in reasm_protocols or ())
         reasm_objs = {}  # type: dict[str, ReassemblyBase]
-        if reassembly:
-            for name in reasm_names:
-                if name not in reasm_objs:
-                    logger.debug('%s reassembly enabled', name)
-                    reasm_objs[name] = self.make_reassembly(name, strict=reasm_strict, store=reasm_store,
-                                                            timeout=reasm_timeout)
+        if reasm_opts is not None:
+            for name in reasm_opts.protocols:
+                logger.debug('%s reassembly enabled', name)
+                reasm_objs[name] = self.make_reassembly(name, strict=reasm_opts.strict, store=reasm_opts.store,
+                                                        timeout=reasm_opts.timeout)
         self._reasm = ReassemblyManager(reasm_objs)
 
-        if trace:
+        self._tcp = False
+        if trace_opts is not None:
             trace_obj_tcp = None
+            trace_format = trace_opts.format
+            trace_analyze = trace_opts.analyze
 
-            # NOTE: these adapters report plain :obj:`dict` frames no PCAP or PCAP-NG dumper can serialise,
-            # and ``None`` means ``'pcap'`` (#406); DPKT and Scapy build frame records (#1507).
-            if (self._exnam in ('pyshark', 'pypcapfile')
-                    and trace_format in ('pcap', 'cap', 'pcapng', None)):
-                warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
-                     "using 'trace_format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
+            # NOTE: these adapters report plain :obj:`dict` frames no PCAP or PCAP-NG dumper can serialise
+            # (#406); DPKT and Scapy build frame records (#1507).
+            if self._exnam in ('pyshark', 'pypcapfile') and trace_format in ('pcap', 'cap', 'pcapng'):
+                warn(f"'Extractor(engine={self._exnam})' does not support flow tracing format "
+                     f"{trace_format!r}; using 'json' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = 'json'
 
             # NOTE: PyShark hands the tracer fields, not octets, so there is no payload to
             # reassemble; refuse rather than return an empty answer that looks real.
-            if trace_analyse and self._exnam == 'pyshark':
+            if trace_analyze and self._exnam == 'pyshark':
                 warn(f"'Extractor(engine={self._exnam})' does not expose packet payloads; "
-                     "using 'trace_analyse=False' instead", AttributeWarning,
+                     'so TraceFlowOptions(analyze=True) will be ignored', AttributeWarning,
                      stacklevel=stacklevel())
-                trace_analyse = False
+                trace_analyze = False
 
-            if self._tcp:
+            # NOTE: every engine feeds the TCP tracer alone, so another registered one is dropped.
+            for name in trace_opts.protocols:
+                if name != 'tcp':
+                    warn(f"'Extractor(engine={self._exnam})' object does not support {name} flow "
+                         f'tracing; so {name!r} will be ignored', AttributeWarning, stacklevel=stacklevel())
+
+            if 'tcp' in trace_opts.protocols:
                 logger.debug('TCP flow tracing enabled')
+                self._tcp = True
 
                 trace_cls_tcp = self.__traceflow__['tcp']
                 if isinstance(trace_cls_tcp, ModuleDescriptor):
                     trace_cls_tcp = trace_cls_tcp.klass
                     self.__traceflow__['tcp'] = trace_cls_tcp  # update mapping upon import
-                trace_obj_tcp = cast('TCP_TraceFlow', trace_cls_tcp(fout=trace_fout, format=trace_format,
-                                                                    byteorder=trace_byteorder, nanosecond=trace_nanosecond,
-                                                                    bidirectional=trace_bidirectional,
-                                                                    analyse=trace_analyse))
+                trace_obj_tcp = cast('TCP_TraceFlow', trace_cls_tcp(fout=trace_opts.fout, format=trace_format,
+                                                                    byteorder=trace_opts.byteorder,
+                                                                    nanosecond=trace_opts.nanosecond,
+                                                                    bidirectional=trace_opts.bidirectional,
+                                                                    analyse=trace_analyze))
 
             self._trace = TraceFlowManager(
                 tcp=trace_obj_tcp,
@@ -1462,8 +1478,8 @@ class Extractor(Generic[_P]):
             logger.debug('input stream is not seekable, wrapping it in SeekableReader')
             # NOTE: ``stream_closing`` follows ownership, closing only a handle this class opened; a
             # non-seekable stream always came from the caller, so this matches ``_cleanup`` (#610).
-            self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
-                                         stream_closing=self._flag_s)
+            self._ifile = SeekableReader(self._ifile, stream_opts.buffer_size, stream_opts.buffer_save,
+                                         stream_opts.buffer_path, stream_closing=self._flag_s)
         elif not hasattr(self._ifile, 'peek'):
             logger.debug('input stream has no peek(), wrapping it in PeekableStream')
             self._ifile = cast('BufferedReader', PeekableStream(self._ifile))
@@ -1474,7 +1490,8 @@ class Extractor(Generic[_P]):
         if self._owns_input():
             self._finalizer = weakref.finalize(self, _release_input, self._ifile)
 
-        if not self._flag_q:
+        # NOTE: ``fmt`` is None exactly when ``dump`` is, i.e. under ``_flag_q``.
+        if fmt is not None:
             output, ext = self.__output__[fmt]
             if ext is None:
                 warn(f'unsupported output format: {fmt!r}; disabled file output feature',
@@ -1640,9 +1657,9 @@ class Extractor(Generic[_P]):
             for more than tidiness: ``_flag_s`` is assigned early in
             :meth:`__init__` and ``_ifile`` only much later, so a constructor
             that fails in between -- an unreadable path, or a negative
-            ``reasm_timeout`` with ``reassembly=True`` and ``ip``, ``ipv4``,
-            ``ipv6`` or ``tcp`` set -- leaves an instance whose flag says "mine"
-            and which has no stream at all. The close itself is guarded too, that
+            :attr:`ReassemblyOptions.timeout
+            <pcapkit.foundation.options.ReassemblyOptions.timeout>` -- leaves
+            an instance whose flag says "mine" and which has no stream at all. The close itself is guarded too, that
             being what a close during interpreter shutdown can fail at.
 
         """
@@ -1653,6 +1670,55 @@ class Extractor(Generic[_P]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _check_trace(self, trace: 'TraceFlowOptions') -> 'None':
+        """Check the TCP tracer's output settings, before its directory is made.
+
+        Arguments:
+            trace: the flow tracing settings
+
+        Raises:
+            FormatError: If no dumper is registered for ``trace.format``.
+            EndianError: If ``trace.byteorder`` is neither ``'big'`` nor ``'little'``.
+
+        """
+        trace_cls = self.__traceflow__['tcp']
+        if isinstance(trace_cls, ModuleDescriptor):
+            trace_cls = trace_cls.klass
+            self.__traceflow__['tcp'] = trace_cls  # update mapping upon import
+        # NOTE: ``__output__`` is a defaultdict; subscripting would insert the unknown format.
+        entry = trace_cls.__output__.get(trace.format)
+        if entry is None or entry[1] is None:
+            raise FormatError(f'unknown flow tracing format: {trace.format!r}')
+        if trace.byteorder not in ('big', 'little'):
+            raise EndianError(f'unknown flow tracing byte order: {trace.byteorder!r}')
+
+    @staticmethod
+    def _options(name: 'str', value: 'Any', kind: 'Type[Info]') -> 'Any':
+        """Check an options argument, reading a list of names as ``kind`` would.
+
+        Arguments:
+            name: the parameter, for the error message
+            value: the argument given
+            kind: its options class; one taking ``protocols`` also accepts a
+                list of names, read as ``kind(protocols=value)``
+
+        Returns:
+            ``value`` as ``kind``, or :data:`None`.
+
+        Raises:
+            RegistryError: If ``value`` is neither :data:`None`, ``kind``, nor
+                a list of names where ``kind`` takes one.
+
+        """
+        if value is None or isinstance(value, kind):
+            return value
+        if (kind in (ReassemblyOptions, TraceFlowOptions) and not isinstance(value, (str, bytes))
+                and isinstance(value, collections.abc.Iterable)):
+            return kind(protocols=value)
+        expected = f'a list of registered names or {kind.__name__}' if kind in (ReassemblyOptions, TraceFlowOptions) \
+            else kind.__name__
+        raise RegistryError(f"'Extractor({name}={value!r})': expected None or {expected}")
 
     def _owns_input(self) -> 'bool':
         """Whether the input stream is this class's to close.

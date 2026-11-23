@@ -87,7 +87,7 @@ class TestFrameInclLenOverrun(unittest.TestCase):
         octets = GLOBAL + _record(len(PACKET)) + _record(1000)
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            extractor = pcapkit.extract(fin=io.BytesIO(octets), nofile=True, store=True, engine='default')
+            extractor = pcapkit.extract(fin=io.BytesIO(octets), store=True, engine='default')
         close_extractor(extractor)
         frames = list(extractor.frame)
         self.assertEqual([bytes(frame.info.packet) for frame in frames], [PACKET, PACKET])

@@ -13,13 +13,13 @@ functions. Some common scenarios:
 
    .. code-block:: python
 
-      from pcapkit import extract
+      from pcapkit import DumpOptions, extract
       # dump to a PLIST file with no frame storage (property frame disabled)
-      plist = extract(fin='in.pcap', fout='out.plist', format='plist', store=False)
+      plist = extract('in.pcap', dump=DumpOptions(fout='out.plist', format='plist'), store=False)
       # dump to a JSON file with no extension auto-complete
-      json = extract(fin='in.cap', fout='out.json', format='json', extension=False)
+      json = extract('in.cap', dump=DumpOptions(fout='out.json', format='json', extension=False))
       # dump to a folder with each tree-view text file per frame
-      tree = extract(fin='in.pcap', fout='out', format='tree', files=True)
+      tree = extract('in.pcap', dump=DumpOptions(fout='out', format='tree', files=True))
 
 2. extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame
    (with no output file)
@@ -27,7 +27,7 @@ functions. Some common scenarios:
    .. code-block:: python
 
       from pcapkit import IP, extract
-      extraction = extract(fin='in.pcap', nofile=True)
+      extraction = extract('in.pcap')
       frame0 = extraction.frame[0]
       # check if IP (IPv4 or IPv6) in this frame
       if IP in frame0:
@@ -40,9 +40,9 @@ functions. Some common scenarios:
    .. code-block:: python
 
       from pcapkit import HTTP, extract
-      # under reasm_strict, the default, an incompletely reassembled
+      # under strict reassembly, the default, an incompletely reassembled
       # datagram carries no packet, hence the check below
-      extraction = extract(fin='in.pcap', store=False, nofile=True, reassembly=True, tcp=True, reasm_strict=True)
+      extraction = extract('in.pcap', store=False, reassembly=['tcp'])
       # print extracted packet if HTTP in reassembled payloads
       for datagram in extraction.reassembly.tcp:
           if datagram.packet is not None and HTTP in datagram.packet:

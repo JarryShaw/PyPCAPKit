@@ -1282,7 +1282,7 @@ class SCTPUnitTests(unittest.TestCase):
         # actually went on the wire, not against what we asked for.
         packets = [Ether(bytes(packet)) for packet in packets]
 
-        extractor = extract(fin=path, nofile=True, store=True)
+        extractor = extract(fin=path, store=True)
         self.addCleanup(close_extractor, extractor)
         frames = list(extractor.frame)
         self.assertEqual(len(frames), len(packets))

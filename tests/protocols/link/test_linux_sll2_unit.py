@@ -408,7 +408,7 @@ class TestLinuxSLL2(unittest.TestCase):
                 file.write(_pcap(list(raw)))
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                extractor = pcapkit.extract(fin=path, nofile=True, store=True)
+                extractor = pcapkit.extract(fin=path, store=True)
 
         self.assertEqual([frame.protochain.chain for frame in extractor.frame],
                          ['LINUX_SLL2:IPv4:UDP', 'LINUX_SLL2:IPv4:UDP', 'LINUX_SLL2:Netlink:Raw'])

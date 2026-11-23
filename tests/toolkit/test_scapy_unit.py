@@ -47,7 +47,7 @@ def extract(test: 'unittest.TestCase', frames: 'list[bytes]', linktype: 'int' = 
     test.addCleanup(os.remove, path)
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        extractor = pcapkit.extract(fin=path, nofile=True, engine='scapy', **kwargs)
+        extractor = pcapkit.extract(fin=path, engine='scapy', **kwargs)
     test.addCleanup(close_extractor, extractor)
     if extractor._exnam != 'scapy':  # pylint: disable=protected-access
         test.skipTest('scapy did not run')
@@ -464,7 +464,7 @@ class ScapyTrailerTests(unittest.TestCase):
         self.assertEqual((last.ihl, last.tl), (40, 80))
 
     def test_reassembled_datagrams_are_the_datagram_sent(self) -> None:
-        extractor = self._extract(self._ip_frames(), store=False, reassembly=True, ip=True)
+        extractor = self._extract(self._ip_frames(), store=False, reassembly=['ipv4', 'ipv6'])
         for name, datagrams in (('ipv4', extractor.reassembly.ipv4),
                                 ('ipv6', extractor.reassembly.ipv6)):
             with self.subTest(version=name):
@@ -498,7 +498,7 @@ class ScapyTrailerTests(unittest.TestCase):
                 self.assertEqual(flow.header, header)
 
     def test_tcp_reassembly_is_the_stream_sent(self) -> None:
-        extractor = self._extract(self._tcp_frames(), store=False, reassembly=True, tcp=True)
+        extractor = self._extract(self._tcp_frames(), store=False, reassembly=['tcp'])
         scapy = {(str(datagram.id.src[0]), datagram.id.src[1]): datagram.payload
                  for datagram in extractor.reassembly.tcp}
         # ``b'X\x00\x00\x00\x00\x00\xef'`` without the fix: the first segment's
@@ -609,7 +609,7 @@ class ScapyFrameGuardTests(unittest.TestCase):
         frame = bytes.fromhex('4500001c00010000400600000a0000010a000002') + bytes(8)
         for linktype in (101, 228):
             with self.subTest(linktype=linktype):
-                extractor = extract(self, [b'', frame], linktype, store=True, reassembly=True, ipv4=True)
+                extractor = extract(self, [b'', frame], linktype, store=True, reassembly=['ipv4'])
                 self.assertEqual(len(extractor.frame), 2)
                 self.assertIsNone(toolkit.ipv4_reassembly(extractor.frame[0]))
                 self.assertEqual([tuple(datagram.index) for datagram in extractor.reassembly.ipv4], [(2,)])
@@ -647,7 +647,7 @@ class ScapyFrameGuardTests(unittest.TestCase):
         frames = [bytes(self._ether() / IPv6(**ipv6) / Raw(bytes(tso))) + TRAILER,
                   bytes(self._ether() / IPv6(**ipv6, plen=22) / Raw(options)) + TRAILER]
 
-        extractor = extract(self, frames, store=True, reassembly=True, ipv4=True)
+        extractor = extract(self, frames, store=True, reassembly=['ipv4'])
         whole, cut = extractor.frame
         data = toolkit.ipv4_reassembly(whole)
         assert data is not None

@@ -62,10 +62,12 @@ class PlistKeyEscapingTests(unittest.TestCase):
     def report(self, capture: 'str', fmt: 'str') -> 'pathlib.Path':
         """Extract ``capture`` into a report of ``fmt`` and return its path."""
         from pcapkit.interface import extract
+        from pcapkit.foundation.options import DumpOptions
 
         output = self.tmp_path / f'{capture}.{fmt}'
-        extractor = extract(fin=sample_path(capture), fout=str(output), format=fmt,
-                            store=False, extension=False)
+        extractor = extract(fin=sample_path(capture),
+                            dump=DumpOptions(fout=str(output), format=fmt, extension=False),
+                            store=False)
         self.addCleanup(close_extractor, extractor)
 
         self.assertEqual(extractor.length, 5)

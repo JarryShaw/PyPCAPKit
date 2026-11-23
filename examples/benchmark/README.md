@@ -247,8 +247,8 @@ milliseconds per packet. Where this departs from it, and why:
 | Warnings other than `EngineWarning` are silenced during timing | `ExtractionWarning: EOF reached` fires on every extraction of this capture; `EngineWarning` is escalated to an exception so a mid-run fallback cannot be missed |
 | Engines run inside the repeat loop, not outside | a machine that slows down partway then affects every engine in a pass about equally, which is what lets the within-pass ratio cancel the drift |
 
-Not changed: the capture, the round count, the clock, the warm-up discard, and the
-`store=False, nofile=True` extraction arguments.
+Not changed: the capture, the round count, the clock, the warm-up discard, and an
+extraction with `store=False` and no output.
 
 ## Apple Silicon, arm64 and emulation
 

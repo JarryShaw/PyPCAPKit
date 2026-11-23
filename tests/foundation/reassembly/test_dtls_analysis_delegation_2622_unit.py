@@ -75,7 +75,7 @@ class _Reassembled(unittest.TestCase):
 
     def _datagram(self, write: 'Any', body: 'bytes' = BODY) -> 'Any':
         extractor = _extract(self, write([_frame(record) for record in _records(body)]),
-                             reassembly=True, dtls=True)
+                             reassembly=['dtls'])
         datagram, = extractor.reassembly.dtls
         self.assertTrue(datagram.completed)
         return datagram

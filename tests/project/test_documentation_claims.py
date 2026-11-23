@@ -48,7 +48,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 class TestNoEOFDocumentedOnce(unittest.TestCase):
-    """``no_eof`` means "keep going", and both docstrings have to say so."""
+    """``no_eof`` means "keep going", and its one docstring has to say so."""
 
     @staticmethod
     def _no_eof_line(doc: 'str | None') -> 'str':
@@ -58,17 +58,22 @@ class TestNoEOFDocumentedOnce(unittest.TestCase):
                 return ' '.join(stripped.split())
         raise AssertionError('no no_eof entry found in docstring')
 
-    def test_extractor_and_extract_agree(self) -> None:
-        """The two public docstrings for ``no_eof`` say the same thing."""
+    def test_extractor_and_extract_leave_it_to_stream_options(self) -> None:
+        """``no_eof`` is documented once, where it is defined.
+
+        Two copies disagreeing is how #546 arose. ``Extractor.__init__`` and
+        ``extract()`` take it inside ``stream`` (#2836), so only
+        :class:`~pcapkit.foundation.options.StreamOptions` documents it.
+
+        """
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import StreamOptions
         from pcapkit.interface.core import extract
 
-        self.assertEqual(
-            self._no_eof_line(inspect.getdoc(Extractor.__init__)),
-            self._no_eof_line(inspect.getdoc(extract)),
-            'Extractor.__init__ and extract() document no_eof differently; they '
-            'are the same flag and disagreeing is how #546 arose',
-        )
+        self._no_eof_line(inspect.getdoc(StreamOptions))
+        for function in (Extractor.__init__, extract):
+            with self.subTest(function=function.__qualname__), self.assertRaises(AssertionError):
+                self._no_eof_line(inspect.getdoc(function))
 
     def test_documented_sense_matches_the_code(self) -> None:
         """The docstring says "not raise", and the code continues on EOF.
@@ -90,8 +95,9 @@ class TestNoEOFDocumentedOnce(unittest.TestCase):
 
         """
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import StreamOptions
 
-        line = self._no_eof_line(inspect.getdoc(Extractor.__init__))
+        line = self._no_eof_line(inspect.getdoc(StreamOptions))
         self.assertIn('not raise', line,
                       f'no_eof is documented as {line!r}, but the flag suppresses '
                       'the EOF stop rather than raising')

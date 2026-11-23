@@ -11,8 +11,7 @@ STATS = os.path.join('temp', 'parse_pcap.pstats')
 
 
 def test() -> 'None':
-    pcapkit.extract(fin='../captures/http.pcap', store=True,
-                    nofile=True, engine='default', verbose=True)
+    pcapkit.extract(fin='../captures/http.pcap', store=True, engine='default', verbose=True)
 
 
 if __name__ == '__main__':

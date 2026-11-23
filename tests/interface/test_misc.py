@@ -36,7 +36,7 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 #: conversations, not three.
 IN_PCAP_TCP_STREAMS = 2
 
-#: The same capture with ``trace_bidirectional=False``, i.e. per-direction flow
+#: The same capture with ``TraceFlowOptions(bidirectional=False)``, i.e. per-direction flow
 #: tracing, in which each direction of a conversation is a flow of its own.
 IN_PCAP_TCP_FLOWS_PER_DIRECTION = 3
 
@@ -79,11 +79,13 @@ class FollowTCPStreamTests(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.tmp_dir = tmp.name
 
-    def _follow(self, **kwargs: object) -> tuple:
+    def _follow(self, *, engine: 'Any' = None, **trace: 'Any') -> tuple:
+        from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.interface.misc import follow_tcp_stream
 
-        kwargs.setdefault('fout', self.tmp_dir)
-        return follow_tcp_stream(fin=sample_path('in.pcap'), **kwargs)  # type: ignore[arg-type]
+        trace.setdefault('fout', self.tmp_dir)
+        return follow_tcp_stream(fin=sample_path('in.pcap'), engine=engine,
+                                 traceflow=TraceFlowOptions(protocols=['tcp'], **trace))
 
     def test_default_engine_finds_every_tcp_stream(self) -> None:
         streams = self._follow()
@@ -102,13 +104,13 @@ class FollowTCPStreamTests(unittest.TestCase):
         self.assertEqual(sorted(len(stream.packets) for stream in streams), [1, 2])
 
     def test_per_direction_tracing_still_splits_the_conversation(self) -> None:
-        """``trace_bidirectional=False`` gives per-direction flows.
+        """``TraceFlowOptions(bidirectional=False)`` gives per-direction flows.
 
         The compatibility escape hatch has to keep working, and it is what makes
         the merge above measurable rather than merely asserted.
 
         """
-        streams = self._follow(trace_bidirectional=False)
+        streams = self._follow(bidirectional=False)
         self.assertEqual(len(streams), IN_PCAP_TCP_FLOWS_PER_DIRECTION)
         self.assertEqual(sorted(len(stream.packets) for stream in streams), [1, 1, 1])
 
@@ -142,8 +144,7 @@ class FollowTCPStreamTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             native = self._follow()
             foreign = self._follow(engine='scapy')
-            extractor = pcapkit.extract(fin=sample_path('in.pcap'), engine='scapy',
-                                        store=True, nofile=True)
+            extractor = pcapkit.extract(fin=sample_path('in.pcap'), engine='scapy', store=True)
 
         # Asserted first, and on the frame type rather than on the stream count,
         # because it names the *cause*. A regression of #406 fails here as "frame 0
@@ -212,12 +213,12 @@ class FollowTCPStreamTests(unittest.TestCase):
         if not engines:
             self.skipTest('neither dpkt nor scapy installed')
         for engine in engines:
-            for format in ('pcap', None):
-                with self.subTest(engine=engine, format=format), \
+            for trace in ({'format': 'pcap'}, {}):
+                with self.subTest(engine=engine, format=trace.get('format')), \
                         tempfile.TemporaryDirectory() as fout, \
                         warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
-                    streams = self._follow(engine=engine, format=format, fout=fout)
+                    streams = self._follow(engine=engine, fout=fout, **trace)
 
                     self.assertFalse(any(issubclass(w.category, FormatWarning) for w in caught))
                     self.assertEqual(len(streams), IN_PCAP_TCP_STREAMS)
@@ -234,10 +235,10 @@ class FollowTCPStreamTests(unittest.TestCase):
         from pcapkit.utilities.warnings import EngineWarning
 
         class _FakeExtractor:
-            def __init__(self, **kwargs: object) -> None:
+            def __init__(self, fin: object, **kwargs: object) -> None:
                 self.engine = types.SimpleNamespace(name='ThirdParty')
                 self.frame = ()  # type: tuple
-                self.trace = types.SimpleNamespace(tcp=[])
+                self.traceflow = types.SimpleNamespace(tcp=[])
 
         with mock.patch.object(misc, 'Extractor', _FakeExtractor):
             with warnings.catch_warnings(record=True) as caught:

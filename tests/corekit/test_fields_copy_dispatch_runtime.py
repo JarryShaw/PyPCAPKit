@@ -111,7 +111,7 @@ class FieldCopyDispatchByteIdentityTests(unittest.TestCase):
         with open(path, 'rb') as stream:
             raw = stream.read()
 
-        extractor = extract(fin=path, store=True, nofile=True, engine='default')
+        extractor = extract(fin=path, store=True, engine='default')
         frames = list(extractor.frame)
 
         self.assertGreater(len(frames), 0, f'{name} produced no frames at all')

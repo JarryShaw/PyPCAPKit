@@ -93,14 +93,15 @@ class IPv6CutFragmentEngineTests(unittest.TestCase):
 
     def _datagrams(self, name: 'str', octets: 'bytes', engine: 'str', strict: 'bool') -> 'Any':
         from pcapkit import extract
+        from pcapkit.foundation.options import ReassemblyOptions
 
         path = os.path.join(self.tmp, name)
         with open(path, 'wb') as file:
             file.write(octets)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=path, nofile=True, engine=engine, ipv6=True,
-                                reassembly=True, reasm_strict=strict)
+            extractor = extract(fin=path, engine=engine,
+                                reassembly=ReassemblyOptions(protocols=['ipv6'], strict=strict))
         self.addCleanup(close_extractor, extractor)
         return extractor.reassembly.ipv6
 

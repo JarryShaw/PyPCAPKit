@@ -117,7 +117,7 @@ class _VerboseCases:
             with warnings.catch_warnings(record=True) as caught, contextlib.redirect_stdout(out):
                 warnings.simplefilter('always')
                 extractor = Extractor(fin=sample_path(CAPTURE), engine=self.ENGINE,  # type: ignore[arg-type]
-                                      nofile=True, store=True, verbose=verbose)
+                                      store=True, verbose=verbose)
             return extractor, out.getvalue(), caught
 
         extractor, out, caught = retry_reaped_tshark(attempt)

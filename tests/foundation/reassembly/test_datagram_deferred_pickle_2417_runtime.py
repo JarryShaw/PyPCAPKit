@@ -46,8 +46,7 @@ class SampleCaptureDatagramPickleTests(unittest.TestCase):
         """Every TCP datagram ``path`` reassembles, packets left unresolved."""
         import pcapkit
 
-        extraction = pcapkit.extract(fin=str(path), nofile=True, store=True,
-                                     tcp=True, reassembly=True)
+        extraction = pcapkit.extract(fin=str(path), store=True, reassembly=['tcp'])
         return [datagram for datagram in extraction.reassembly.tcp
                 if _held(datagram) is not None]
 

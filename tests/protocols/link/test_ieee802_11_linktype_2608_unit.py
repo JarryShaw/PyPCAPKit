@@ -75,7 +75,7 @@ class TestIEEE802_11LinkTypes(unittest.TestCase):
                 file.write(data)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                extractor = pcapkit.extract(fin=path, nofile=True, store=True)
+                extractor = pcapkit.extract(fin=path, store=True)
         return list(extractor.frame)
 
     def _assert_rebuilds(self, layer, **kwargs) -> None:  # type: ignore[no-untyped-def]

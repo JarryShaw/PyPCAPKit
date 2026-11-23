@@ -184,7 +184,7 @@ def preflight(engine: 'str', fin: 'str') -> 'str | None':
         return reason
 
     try:
-        extraction = pcapkit.extract(fin=fin, store=False, nofile=True, verbose=False,
+        extraction = pcapkit.extract(fin=fin, store=False, verbose=False,
                                      engine=engine)  # type: ignore[arg-type]
     except Exception as exc:  # pylint: disable=broad-except
         reason = unavailable(exc)

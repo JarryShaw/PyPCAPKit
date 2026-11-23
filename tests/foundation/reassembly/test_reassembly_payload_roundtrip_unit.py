@@ -251,14 +251,15 @@ CASES = {case.label: case for case in _ip_cases() + _tcp_cases()}
 def run_case(case: 'Case') -> 'Outcome':
     """Reassemble ``case`` and compare each datagram with the payload it came from."""
     from pcapkit import extract
+    from pcapkit.foundation.options import ReassemblyOptions
 
     # a millisecond apart, so no case outlasts a reassembly timeout
     data = pcap([(1_500_000_000, 1000 * i, frame) for i, frame in enumerate(case.frames)])
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         try:
-            extractor = extract(fin=io.BytesIO(data), nofile=True, store=False, reassembly=True,
-                                reasm_strict=case.strict, **{case.kind: True})
+            extractor = extract(fin=io.BytesIO(data), store=False,
+                                reassembly=ReassemblyOptions(protocols=[case.kind], strict=case.strict))
         except Exception as exc:  # pylint: disable=broad-except
             return Outcome('ERROR', f'{type(exc).__name__}: {exc}')
         close_extractor(extractor)

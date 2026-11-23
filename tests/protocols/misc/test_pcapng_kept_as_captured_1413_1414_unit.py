@@ -120,7 +120,7 @@ class TestPCAPNGKeptAsCaptured(PCAPNGTestCase):
         good = _block(6, struct.pack('<IIIII', 0, 0, 0, 4, 4) + b'abcd')
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = Extractor(NamedBuffer(shb + idb + short + good), nofile=True, store=True)
+            extractor = Extractor(NamedBuffer(shb + idb + short + good), store=True)
             frames = extractor.frame
             self.assertEqual(len(frames), 2)
             self.assertEqual(frames[1].info.captured_len, 4)

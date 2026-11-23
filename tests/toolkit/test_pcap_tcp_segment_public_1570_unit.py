@@ -76,7 +76,7 @@ class _Base(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extractor = extract(fin=io.BytesIO(capture), nofile=True, store=True)
+            extractor = extract(fin=io.BytesIO(capture), store=True)
         self.addCleanup(close_extractor, extractor)
         return extractor.frame[-1]
 

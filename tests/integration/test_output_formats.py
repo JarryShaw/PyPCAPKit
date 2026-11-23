@@ -45,8 +45,11 @@ class TreeReportTests(EndToEndTestCase):
     """``format='tree'``, the human-readable report."""
 
     def test_tree_report_describes_the_global_header_and_every_frame(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
-                                 format='tree', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('report'), format='tree'),
+                                 store=False)
 
         self.assertEqual(extractor.length, 6)
         self.assertEqual(extractor.output, self.out('report.txt'))
@@ -58,10 +61,14 @@ class TreeReportTests(EndToEndTestCase):
         self.assertIn(IN_PCAP_FIRST_CHAIN, report)
 
     def test_extension_flag_decides_whether_a_suffix_is_appended(self) -> None:
-        appended = self.extract(fin=sample_path('arp.pcap'), fout=self.out('with-suffix'),
-                                format='tree', store=False, extension=True)
-        verbatim = self.extract(fin=sample_path('arp.pcap'), fout=self.out('verbatim'),
-                                format='tree', store=False, extension=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        appended = self.extract(fin=sample_path('arp.pcap'),
+                                dump=DumpOptions(fout=self.out('with-suffix'), format='tree'),
+                                store=False)
+        verbatim = self.extract(fin=sample_path('arp.pcap'),
+                                dump=DumpOptions(fout=self.out('verbatim'), format='tree', extension=False),
+                                store=False)
 
         self.assertEqual(appended.output, self.out('with-suffix.txt'))
         self.assertEqual(verbatim.output, self.out('verbatim'))
@@ -69,8 +76,11 @@ class TreeReportTests(EndToEndTestCase):
         self.assertTrue((self.tmp_path / 'verbatim').is_file())
 
     def test_report_directory_is_created_on_demand(self) -> None:
-        extractor = self.extract(fin=sample_path('arp.pcap'), fout=self.out('nested/deeper/report'),
-                                 format='tree', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('arp.pcap'),
+                                 dump=DumpOptions(fout=self.out('nested/deeper/report'), format='tree'),
+                                 store=False)
 
         self.assertEqual(extractor.length, 2)
         self.assertTrue((self.tmp_path / 'nested' / 'deeper' / 'report.txt').is_file())
@@ -81,8 +91,11 @@ class JsonReportTests(EndToEndTestCase):
     """``format='json'``, the machine-readable report."""
 
     def test_json_report_parses_and_holds_one_section_per_frame(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
-                                 format='json', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('report'), format='json'),
+                                 store=False)
 
         self.assertEqual(extractor.output, self.out('report.json'))
 
@@ -91,8 +104,11 @@ class JsonReportTests(EndToEndTestCase):
         self.assertEqual(section_counts(report), {'Global Header': 1, 'Frame': 6})
 
     def test_json_report_records_the_protocol_chain_of_each_frame(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
-                                 format='json', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('report'), format='json'),
+                                 store=False)
         report = read_json(extractor.output)
 
         self.assertEqual(report['Frame 1']['protocols'], IN_PCAP_FIRST_CHAIN)
@@ -102,8 +118,11 @@ class JsonReportTests(EndToEndTestCase):
         self.assertIn('ipv6', report['Frame 1']['ethernet'])
 
     def test_json_global_header_records_the_capture_byte_order(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
-                                 format='json', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('report'), format='json'),
+                                 store=False)
         report = read_json(extractor.output)
 
         self.assertEqual(extractor.magic_number, b'\xd4\xc3\xb2\xa1')
@@ -116,8 +135,11 @@ class PlistReportTests(EndToEndTestCase):
     """``format='plist'``, the macOS property list report."""
 
     def test_plist_report_is_well_formed_xml_with_one_key_per_frame(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
-                                 format='plist', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('report'), format='plist'),
+                                 store=False)
 
         self.assertEqual(extractor.output, self.out('report.plist'))
         self.assertEqual(plist_keys(extractor.output), IN_PCAP_SECTIONS)
@@ -136,12 +158,15 @@ class PlistRoundTripTests(EndToEndTestCase):
         naive UTC, since ``aware_datetime`` is new in Python 3.13.
 
         """
+
+        from pcapkit.foundation.options import DumpOptions
         import datetime
         import decimal
         import plistlib
 
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
-                                 format='plist', store=False)
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('report'), format='plist'),
+                                 store=False)
 
         with open(extractor.output, 'rb') as stream:
             report = plistlib.load(stream)
@@ -158,16 +183,22 @@ class SplitReportTests(EndToEndTestCase):
     """``files=True``, one report file per frame."""
 
     def test_split_json_reports_are_written_one_per_section(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('frames'),
-                                 format='json', files=True, store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('frames'), format='json', files=True),
+                                 store=False)
 
         self.assertEqual(extractor.output, self.out('frames'))
         self.assertTrue(self.tmp_path.joinpath('frames').is_dir())
         self.assertEqual(report_stems(extractor.output), sorted(IN_PCAP_SECTIONS))
 
     def test_every_split_report_is_parseable_on_its_own(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('frames'),
-                                 format='json', files=True, store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('frames'), format='json', files=True),
+                                 store=False)
 
         for report in sorted(self.tmp_path.joinpath('frames').iterdir()):
             with self.subTest(report=report.name):
@@ -181,8 +212,11 @@ class SplitReportTests(EndToEndTestCase):
         # ``examples/legacy_smoke/test_ipv6.py`` used ipv6.pcap for exactly this,
         # and at 16 frames it is still small enough to be a cheap check that the
         # frame numbering does not collide once it passes single digits.
-        extractor = self.extract(fin=sample_path('ipv6.pcap'), fout=self.out('ipv6'),
-                                 format='tree', files=True, store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('ipv6.pcap'),
+                                 dump=DumpOptions(fout=self.out('ipv6'), format='tree', files=True),
+                                 store=False)
 
         expected = ['Global Header'] + [f'Frame {number}' for number in range(1, 17)]
         self.assertEqual(extractor.length, 16)
@@ -197,7 +231,7 @@ class InputAndProgressTests(EndToEndTestCase):
         # ``examples/legacy_smoke/test_file.py``: hand ``fin`` a file object
         # rather than a path.
         with open(sample_path('in.pcap'), 'rb') as stream:
-            extractor = self.extract(fin=stream, nofile=True, store=True)
+            extractor = self.extract(fin=stream, store=True)
 
             self.assertEqual(extractor.length, 6)
             self.assertEqual(extractor.input, sample_path('in.pcap'))
@@ -207,7 +241,7 @@ class InputAndProgressTests(EndToEndTestCase):
         # ``verbose`` also takes a callable, which is the only form of it that
         # can be asserted on without capturing stdout.
         seen = []  # type: list[tuple[int, str]]
-        extractor = self.extract(fin=sample_path('in.pcap'), nofile=True, store=False,
+        extractor = self.extract(fin=sample_path('in.pcap'), store=False,
                                  verbose=lambda ext, frame: seen.append(
                                      (ext.length, str(frame.protochain))))
 
@@ -219,7 +253,7 @@ class InputAndProgressTests(EndToEndTestCase):
     def test_report_attributes_are_refused_when_no_report_is_written(self) -> None:
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        extractor = self.extract(fin=sample_path('arp.pcap'), nofile=True, store=False)
+        extractor = self.extract(fin=sample_path('arp.pcap'), store=False)
 
         with self.assertRaises(UnsupportedCall):
             extractor.output  # pylint: disable=pointless-statement
@@ -234,14 +268,16 @@ class PCAPNGReportTests(EndToEndTestCase):
 
     def records(self, path: str) -> 'list[tuple]':
         """Each frame of ``path`` as its packet, timestamp and protocol chain."""
-        extractor = self.extract(fin=path, nofile=True, store=True)
+        extractor = self.extract(fin=path, store=True)
         return [(frame.info.packet, frame.info.get('timestamp_epoch', frame.info.get('time_epoch')),
                  str(frame.protochain)) for frame in extractor.frame]
 
     def test_a_pcapng_capture_of_header_interfaces_and_epbs_is_written_back_as_is(self) -> None:
         # ``dhcp.pcapng`` holds an option-less section header, its interface and EPBs alone.
-        extractor = self.extract(fin=sample_path('dhcp.pcapng'), fout=self.out('report'),
-                                 format='pcapng', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('dhcp.pcapng'),
+                                 dump=DumpOptions(fout=self.out('report'), format='pcapng'), store=False)
 
         self.assertEqual(extractor.format, 'pcapng')
         self.assertEqual(extractor.output, self.out('report.pcapng'))
@@ -249,18 +285,22 @@ class PCAPNGReportTests(EndToEndTestCase):
             self.assertEqual(file.read(), source.read())
 
     def test_a_pcap_capture_reads_back_frame_for_frame(self) -> None:
-        extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
-                                 format='pcapng', store=False)
+        from pcapkit.foundation.options import DumpOptions
+
+        extractor = self.extract(fin=sample_path('in.pcap'),
+                                 dump=DumpOptions(fout=self.out('report'), format='pcapng'), store=False)
 
         self.assertEqual(self.records(extractor.output), self.records(sample_path('in.pcap')))
         self.assertEqual(self.records(extractor.output)[0][2], IN_PCAP_FIRST_CHAIN)
 
     def test_a_traced_flow_holds_its_frames(self) -> None:
-        source = self.records(sample_path('http.pcap'))
-        extractor = self.extract(fin=sample_path('http.pcap'), nofile=True, store=False, tcp=True,
-                                 trace=True, trace_format='pcapng', trace_fout=self.out('flows'))
+        from pcapkit.foundation.options import TraceFlowOptions
 
-        flows = extractor.trace.tcp
+        source = self.records(sample_path('http.pcap'))
+        extractor = self.extract(fin=sample_path('http.pcap'), store=False,
+                                 traceflow=TraceFlowOptions(protocols=['tcp'], format='pcapng', fout=self.out('flows')))
+
+        flows = extractor.traceflow.tcp
         self.assertTrue(flows)
         for flow in flows:
             with self.subTest(flow=flow.label):
@@ -274,14 +314,16 @@ class TracedFlowOutputTests(EndToEndTestCase):
 
     def trace(self, fmt: str, limit: int, name: str) -> 'tuple':
         """Trace :file:`http.pcap` into ``name`` at ``limit``: the tracer and its flows."""
+
+        from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.utilities import config
 
         with mock.patch.object(config, 'TRACE_OPEN_FILE_LIMIT', limit):
-            extractor = self.extract(fin=sample_path('http.pcap'), nofile=True, store=False, tcp=True,
-                                     trace=True, trace_format=fmt, trace_fout=self.out(name),
-                                     trace_byteorder='little')
+            extractor = self.extract(fin=sample_path('http.pcap'), store=False,
+                                     traceflow=TraceFlowOptions(protocols=['tcp'], fout=self.out(name), format=fmt,
+                                                                byteorder='little'))
         tracer = extractor._trace.tcp  # pylint: disable=protected-access
-        return tracer, extractor.trace.tcp
+        return tracer, extractor.traceflow.tcp
 
     def test_a_kept_open_pcap_flow_holds_its_frames_as_a_reopen_writes_them(self) -> None:
         with open(sample_path('http.pcap'), 'rb') as file:

@@ -3,7 +3,7 @@
 
 Each case builds a capture of TCP conversations as an in-memory savefile,
 traces it through :func:`~pcapkit.interface.extract` with
-``trace_format='pcap'``, and reads every flow's output file back twice: with
+``format='pcap'``, and reads every flow's output file back twice: with
 :mod:`struct` alone, as an independent reference, and with :mod:`pcapkit`. The
 round trip closes when
 
@@ -18,7 +18,7 @@ round trip closes when
 The conversations cover the shapes :mod:`pcapkit.foundation.traceflow.tcp`
 distinguishes: a whole connection, two interleaved, one mixed with UDP, one over
 IPv6, a port pair reused after a close, a reset, one left half-open, and the
-per-direction ``trace_bidirectional=False`` mode. Each runs in every byte order
+per-direction ``bidirectional=False`` mode. Each runs in every byte order
 and resolution the PCAP writer offers.
 
 Every case builds its own octets and reads no capture. Classes are imported
@@ -158,6 +158,7 @@ def _is_tcp(frame: 'bytes') -> 'bool':
 def run_case(case: 'Case') -> 'Outcome':
     """Trace ``case`` to PCAP, then read every flow's file back."""
     from pcapkit import extract
+    from pcapkit.foundation.options import TraceFlowOptions
 
     container, in_order, in_nsec, out_order, out_nsec = case.variant
     # the fraction is distinct per frame and, in nanoseconds, finer than a microsecond
@@ -172,14 +173,14 @@ def run_case(case: 'Case') -> 'Outcome':
     with warnings.catch_warnings(), tempfile.TemporaryDirectory() as tracedir:
         warnings.simplefilter('ignore')
         try:
-            extractor = extract(fin=io.BytesIO(data), nofile=True, store=False, trace=True, tcp=True,
-                                trace_fout=tracedir, trace_format='pcap',
-                                trace_byteorder=out_order, trace_nanosecond=out_nsec,
-                                trace_bidirectional=case.bidirectional)
+            extractor = extract(fin=io.BytesIO(data), store=False,
+                                traceflow=TraceFlowOptions(protocols=['tcp'], fout=tracedir, format='pcap',
+                                                           byteorder=out_order, nanosecond=out_nsec,
+                                                           bidirectional=case.bidirectional))
         except Exception as exc:  # pylint: disable=broad-except
             return Outcome('ERROR', f'{type(exc).__name__}: {exc}')
         close_extractor(extractor)
-        flows = list(extractor.trace.tcp)
+        flows = list(extractor.traceflow.tcp)
 
         seen = []  # type: list[int]
         for flow in flows:
@@ -203,7 +204,7 @@ def run_case(case: 'Case') -> 'Outcome':
                     return Outcome('RECORD', f'{flow.label} record {position + 1} '
                                              f'(frame {flow.index[position]}): {diff}')
             try:
-                reread = extract(fin=flow.fpout, nofile=True, store=False)
+                reread = extract(fin=flow.fpout, store=False)
             except Exception as exc:  # pylint: disable=broad-except
                 return Outcome('REREAD', f'{flow.label}: {type(exc).__name__}: {exc}')
             close_extractor(reread)

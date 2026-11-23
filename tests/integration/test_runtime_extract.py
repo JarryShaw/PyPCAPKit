@@ -15,7 +15,7 @@ class RuntimeExtractionTests(unittest.TestCase):
     def test_extract_reads_small_pcap_sample(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/pypcapkit-out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('in.pcap'), store=True)
 
         self.assertEqual(extractor.length, 6)
         self.assertEqual(len(extractor.frame), 6)
@@ -24,7 +24,7 @@ class RuntimeExtractionTests(unittest.TestCase):
     def test_extract_reads_arp_sample(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('arp.pcap'), fout='/tmp/pypcapkit-out', format='tree', store=True, nofile=True)
+        extractor = extract(fin=sample_path('arp.pcap'), store=True)
 
         self.assertEqual(extractor.length, 2)
         self.assertEqual(len(extractor.frame), 2)
@@ -32,7 +32,7 @@ class RuntimeExtractionTests(unittest.TestCase):
     def test_manual_iteration_mode_yields_frames(self) -> None:
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/pypcapkit-out', format='tree', store=False, nofile=True, auto=False)
+        extractor = extract(fin=sample_path('in.pcap'), store=False, auto=False)
         first = next(extractor)
         second = extractor()
 

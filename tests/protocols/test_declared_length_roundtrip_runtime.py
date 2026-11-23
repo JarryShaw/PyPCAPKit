@@ -50,8 +50,7 @@ class DeclaredLengthRoundTripTests(unittest.TestCase):
     def _frames(self, sample: str) -> 'list':
         from pcapkit.interface import extract
 
-        extractor = extract(fin=sample_path(sample), fout='/tmp/out', format='tree',
-                            store=True, nofile=True)
+        extractor = extract(fin=sample_path(sample), store=True)
         self.addCleanup(close_extractor, extractor)
         return list(extractor.frame)
 

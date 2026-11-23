@@ -56,8 +56,7 @@ class TestFrameTrailingBytes(unittest.TestCase):
 
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                ext = pcapkit.extract(fin=path, nofile=True, store=True, auto=False,
-                                      engine='default')
+                ext = pcapkit.extract(fin=path, store=True, auto=False, engine='default')
                 frames = []
                 # bounded, so that a reader which never reaches EOF fails
                 # rather than spinning

@@ -15,12 +15,14 @@ the :mod:`~pcapkit.foundation.analysis` of what they reassemble.
 """
 from pcapkit.foundation.analysis import *
 from pcapkit.foundation.extraction import Extractor
+from pcapkit.foundation.options import *
 from pcapkit.foundation.reassembly import *
 from pcapkit.foundation.registry import *
 from pcapkit.foundation.traceflow import *
 
 __all__ = [
     'Extractor',
+    'DumpOptions', 'ReassemblyOptions', 'TraceFlowOptions', 'StreamOptions',
 
     'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly',
     'ReassemblyManager',

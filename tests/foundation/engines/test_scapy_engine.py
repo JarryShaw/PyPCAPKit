@@ -76,7 +76,7 @@ warnings.simplefilter('ignore')
 
 import pcapkit
 
-extractor = pcapkit.extract(fin=sys.argv[1], engine='scapy', store=True, nofile=True)
+extractor = pcapkit.extract(fin=sys.argv[1], engine='scapy', store=True)
 
 # Imported only now, and from ``scapy.config`` rather than ``scapy.all``, so that
 # reading the table cannot be what filled it in.

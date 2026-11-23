@@ -107,6 +107,7 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]', container:
 
     """
     from pcapkit import extract
+    from pcapkit.foundation.options import TraceFlowOptions
     from pcapkit.foundation.reassembly.ipv4 import IPv4
     from pcapkit.foundation.reassembly.ipv6 import IPv6
     from pcapkit.foundation.reassembly.tcp import TCP
@@ -138,8 +139,9 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]', container:
         with open(path, 'wb') as file:
             file.write(write([(1, number, octets) for number, octets in enumerate(frames)]))
         warnings.simplefilter('ignore')
-        extractor = extract(fin=path, nofile=True, engine=engine, reassembly=True, ip=True, tcp=True,
-                            trace=True, trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+        extractor = extract(fin=path, engine=engine, reassembly=['ipv4', 'ipv6', 'tcp'],
+                            traceflow=TraceFlowOptions(protocols=['tcp'], fout=os.path.join(tmp, 'trace'),
+                                                       format='json'))
         try:
             if extractor._exnam != engine:  # pylint: disable=protected-access
                 test.skipTest(f'{engine} did not run')
@@ -150,7 +152,7 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]', container:
                          for datagram in extractor.reassembly.ipv6],
                 'TCP': [datagram.id for datagram in extractor.reassembly.tcp],
             }
-            seen['flows'] = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
+            seen['flows'] = [(flow.label, tuple(flow.index)) for flow in extractor.traceflow.tcp]
         finally:
             close_extractor(extractor)
     return seen

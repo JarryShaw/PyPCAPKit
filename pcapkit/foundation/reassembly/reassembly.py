@@ -631,7 +631,7 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
         .. code-block:: python
 
            PCAP.register_reassembly('my_protocol', my_adapter)
-           Extractor('in.pcap', reassembly=True, reasm_protocols=['my_protocol'])
+           Extractor('in.pcap', reassembly=['my_protocol'])
 
     Arguments:
         strict: if :data:`True`, report a datagram that is not completely

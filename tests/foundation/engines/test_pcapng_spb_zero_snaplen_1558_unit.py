@@ -61,7 +61,7 @@ class TestSPBZeroSnaplen(unittest.TestCase):
             file.write(_capture(snaplen))
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            return pcapkit.extract(fin=path, engine='default', nofile=True, store=True)
+            return pcapkit.extract(fin=path, engine='default', store=True)
 
     def test_engine_reads_the_original_length(self) -> None:
         for snaplen in (0, 65535):

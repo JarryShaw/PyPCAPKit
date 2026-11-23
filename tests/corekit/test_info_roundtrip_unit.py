@@ -57,9 +57,15 @@ __tier__ = 'LATEST'
 PACKAGES = ('pcapkit.protocols', 'pcapkit.foundation.reassembly.data',
             'pcapkit.foundation.traceflow.data')
 
-#: Values a model's ``__post_init__`` needs in a shape no marker has, by label;
-#: each is a callable, so it is built against the current import.
+#: Values a model's ``__init__`` or ``__post_init__`` needs in a shape no marker
+#: has, by label; each is a callable, so it is built against the current import.
 VALUES = {
+    'foundation.options:ReassemblyOptions': {
+        'protocols': lambda: ('ipv4', 'tcp'),
+    },
+    'foundation.options:TraceFlowOptions': {
+        'protocols': lambda: ('tcp',),
+    },
     'protocols.misc.pcapng.data:NameResolutionBlock': {
         'records': lambda: importlib.import_module('pcapkit.corekit.multidict').OrderedMultiDict(),
     },

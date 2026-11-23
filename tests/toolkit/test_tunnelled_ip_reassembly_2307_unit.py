@@ -117,8 +117,7 @@ def reassemble(test: unittest.TestCase, engine: str, version: int, frames: 'list
         with open(path, 'wb') as file:
             file.write(wire.pcapng(records) if pcapng else wire.pcap(records))
         warnings.simplefilter('ignore')
-        extractor = extract(fin=path, nofile=True, engine=engine, reassembly=True,
-                            ipv4=version == 4, ipv6=version == 6)
+        extractor = extract(fin=path, engine=engine, reassembly=['ipv4' if version == 4 else 'ipv6'])
         try:
             if extractor._exnam != engine:  # pylint: disable=protected-access
                 test.skipTest(f'{engine} did not run')
