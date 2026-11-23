@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -576,7 +578,6 @@
 <span class="sd">macros, which wrap the classes of :mod:`pcapkit.foundation`.</span>
 
 <span class="sd">"""</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -591,7 +592,9 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span><span class="p">,</span> <span class="n">ProtocolContext</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engines</span><span class="p">,</span> <span class="n">Formats</span><span class="p">,</span> <span class="n">Layers</span><span class="p">,</span> <span class="n">Protocols</span><span class="p">,</span> <span class="n">VerboseHandler</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engines</span><span class="p">,</span> <span class="n">Layers</span><span class="p">,</span> <span class="n">Protocols</span><span class="p">,</span> <span class="n">VerboseHandler</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.options</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">DumpOptions</span><span class="p">,</span> <span class="n">ReassemblyOptions</span><span class="p">,</span> <span class="n">StreamOptions</span><span class="p">,</span>
+                                            <span class="n">TraceFlowOptions</span><span class="p">)</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowBase</span>
 
@@ -631,82 +634,28 @@
 
 <div class="viewcode-block" id="extract">
 <a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.extract">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str | IO[bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>     <span class="c1"># basic settings # pylint: disable=redefined-builtin</span>
-            <span class="n">auto</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                                           <span class="c1"># internal settings # pylint: disable=line-too-long</span>
-            <span class="n">files</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool | VerboseHandler'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                       <span class="c1"># output settings # pylint: disable=line-too-long</span>
-            <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[Layers] | Type[ProtocolBase]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                         <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
-            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                        <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
-            <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
-            <span class="n">reasm_timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                       <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
-            <span class="n">trace</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-            <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-            <span class="n">trace_bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">trace_analyse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                            <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-            <span class="n">ip</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
-            <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                          <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
-            <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
-            <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                      <span class="c1"># EOF settings # pylint: disable=line-too-long</span>
-            <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># context settings # pylint: disable=line-too-long</span>
-            <span class="n">reasm_protocols</span><span class="p">:</span> <span class="s1">'Optional[Iterable[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Extractor'</span><span class="p">:</span>                                              <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'str | IO[bytes]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+            <span class="n">dump</span><span class="p">:</span> <span class="s1">'Optional[DumpOptions]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">engine</span><span class="p">:</span> <span class="s1">'Engines'</span> <span class="o">=</span> <span class="s1">'default'</span><span class="p">,</span>
+            <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[Layers | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+            <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'Optional[ReassemblyOptions | Iterable[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">traceflow</span><span class="p">:</span> <span class="s1">'Optional[TraceFlowOptions | Iterable[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">stream</span><span class="p">:</span> <span class="s1">'Optional[StreamOptions]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">auto</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool | VerboseHandler'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Extractor'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Extract a PCAP file.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        fin: file name to be read or a binary IO object;</span>
+<span class="sd">        fin: file name to be read, as named, or a binary IO object;</span>
 <span class="sd">            if the file does not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`</span>
-<span class="sd">        fout: file name to be written</span>
-<span class="sd">        format: file format of output</span>
-
-<span class="sd">        auto: if automatically run till EOF</span>
-<span class="sd">        extension: if check and append extensions to output file</span>
-<span class="sd">        store: if store extracted packet info</span>
-
-<span class="sd">        files: if split each frame into different files</span>
-<span class="sd">        nofile: if no output file is to be dumped</span>
-<span class="sd">        verbose: a :obj:`bool` value or a function that takes the</span>
-<span class="sd">            :class:`~pcapkit.foundation.extraction.Extractor`</span>
-<span class="sd">            instance and current parsed frame (depends on engine selected) as</span>
-<span class="sd">            parameters to print verbose output information</span>
-
+<span class="sd">        dump: output settings, a</span>
+<span class="sd">            :class:`~pcapkit.foundation.options.DumpOptions`; :data:`None`</span>
+<span class="sd">            writes no output</span>
 <span class="sd">        engine: extraction engine to be used</span>
-<span class="sd">        layer: extract til which layer</span>
+<span class="sd">        layer: extract til which layer, by name or as a protocol class</span>
 <span class="sd">        protocol: extract til which protocol</span>
-
-<span class="sd">        reassembly: if perform reassembly</span>
-<span class="sd">        reasm_strict: if set strict flag for reassembly</span>
-<span class="sd">        reasm_store: if store reassembled datagrams</span>
-<span class="sd">        reasm_timeout: reassembly timeout in seconds, on the capture's own</span>
-<span class="sd">            clock; :data:`None` selects each protocol's default (60 seconds for</span>
-<span class="sd">            IPv4 and IPv6, disabled for TCP); DTLS reassembly takes none</span>
-
-<span class="sd">        trace: if trace TCP traffic flows</span>
-<span class="sd">        trace_fout: path name for flow tracer if necessary</span>
-<span class="sd">        trace_format: output file format of flow tracer</span>
-<span class="sd">        trace_byteorder: output file byte order</span>
-<span class="sd">        trace_nanosecond: output nanosecond-resolution file flag</span>
-<span class="sd">        trace_bidirectional: whether both halves of a conversation are traced as</span>
-<span class="sd">            one flow, which is the default</span>
-<span class="sd">        trace_analyse: whether each traced flow reassembles its application</span>
-<span class="sd">            layer, so that its ``packet`` can be read; off by default</span>
-
-<span class="sd">        ip: if record data for IPv4 &amp; IPv6 reassembly (must be used with ``reassembly=True``)</span>
-<span class="sd">        ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)</span>
-<span class="sd">        ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)</span>
-<span class="sd">        tcp: if perform TCP reassembly and/or flow tracing</span>
-<span class="sd">            (must be used with ``reassembly=True`` or ``trace=True``)</span>
-<span class="sd">        dtls: if perform DTLS handshake-message reassembly (must be used with</span>
-<span class="sd">            ``reassembly=True``); the default engine alone supports it</span>
-
-<span class="sd">        buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
-<span class="sd">        buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
-<span class="sd">        buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
-
-<span class="sd">        no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,</span>
-<span class="sd">            which is what a live capture on a pipe or on standard input wants,</span>
-<span class="sd">            since a read there blocks until the writer produces more or closes.</span>
-<span class="sd">            Retrying stops as soon as one retry finds nothing new, so an</span>
-<span class="sd">            exhausted input finishes rather than spinning; on a *seekable*</span>
-<span class="sd">            input, where nothing blocks, that means a file still being appended</span>
-<span class="sd">            to ends at the data present when the extraction reached it</span>
-
 <span class="sd">        context: caller supplied parsing context for protocols that need</span>
 <span class="sd">            information not carried on the wire, keyed by protocol index ID --</span>
 <span class="sd">            cf. :mod:`pcapkit.corekit.context`. The motivating case is</span>
@@ -719,11 +668,27 @@
 <span class="sd">                ...                          encryption_key=key)</span>
 <span class="sd">                &gt;&gt;&gt; extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))</span>
 
-<span class="sd">        reasm_protocols: names of further reassemblers to enable (must be used</span>
-<span class="sd">            with ``reassembly=True``), each as registered in</span>
+<span class="sd">        reassembly: reassembly settings, a</span>
+<span class="sd">            :class:`~pcapkit.foundation.options.ReassemblyOptions`, or the</span>
+<span class="sd">            names of the reassemblers to enable, each as registered in</span>
 <span class="sd">            :attr:`Extractor.__reassembly__</span>
-<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__reassembly__&gt;`, as</span>
-<span class="sd">            ``'ipv4'``, ``'ipv6'``, ``'tcp'`` and ``'dtls'`` are</span>
+<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__reassembly__&gt;`;</span>
+<span class="sd">            :data:`None`, or no names, reassembles nothing</span>
+<span class="sd">        traceflow: flow tracing settings, a</span>
+<span class="sd">            :class:`~pcapkit.foundation.options.TraceFlowOptions`, or the names</span>
+<span class="sd">            of the flow tracers to enable, each as registered in</span>
+<span class="sd">            :attr:`Extractor.__traceflow__</span>
+<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__traceflow__&gt;`;</span>
+<span class="sd">            :data:`None`, or no names, traces nothing</span>
+<span class="sd">        stream: input stream settings, a</span>
+<span class="sd">            :class:`~pcapkit.foundation.options.StreamOptions`; :data:`None`</span>
+<span class="sd">            takes their defaults</span>
+<span class="sd">        auto: if automatically run till EOF</span>
+<span class="sd">        store: if store extracted packet info</span>
+<span class="sd">        verbose: a :obj:`bool` value or a function that takes the</span>
+<span class="sd">            :class:`~pcapkit.foundation.extraction.Extractor`</span>
+<span class="sd">            instance and current parsed frame (depends on engine selected) as</span>
+<span class="sd">            parameters to print verbose output information</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        An :class:`~pcapkit.foundation.extraction.Extractor` object.</span>
@@ -749,24 +714,14 @@
 
 <span class="sd">    .. versionchanged:: 1.7.0</span>
 
-<span class="sd">       ``reasm_protocols`` is appended (:issue:`2814`).</span>
+<span class="sd">       Takes exactly the parameters of</span>
+<span class="sd">       :class:`~pcapkit.foundation.extraction.Extractor`, whose 1.7.0 note</span>
+<span class="sd">       lists what is grouped and what is removed (:issue:`2836`).</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
-        <span class="n">layer</span> <span class="o">=</span> <span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">__layer__</span> <span class="ow">or</span> <span class="s1">'none'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># type: ignore[assignment]</span>
-
-    <span class="k">return</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
-                     <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="n">nofile</span><span class="p">,</span>
-                     <span class="n">auto</span><span class="o">=</span><span class="n">auto</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
-                     <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
-                     <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="n">dtls</span><span class="p">,</span>
-                     <span class="n">reassembly</span><span class="o">=</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">reasm_store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span>
-                     <span class="n">reasm_timeout</span><span class="o">=</span><span class="n">reasm_timeout</span><span class="p">,</span>
-                     <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
-                     <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">,</span>
-                     <span class="n">trace_bidirectional</span><span class="o">=</span><span class="n">trace_bidirectional</span><span class="p">,</span> <span class="n">trace_analyse</span><span class="o">=</span><span class="n">trace_analyse</span><span class="p">,</span>
-                     <span class="n">buffer_size</span><span class="o">=</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_path</span><span class="o">=</span><span class="n">buffer_path</span><span class="p">,</span> <span class="n">buffer_save</span><span class="o">=</span><span class="n">buffer_save</span><span class="p">,</span>
-                     <span class="n">no_eof</span><span class="o">=</span><span class="n">no_eof</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">reasm_protocols</span><span class="o">=</span><span class="n">reasm_protocols</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="n">dump</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+                     <span class="n">reassembly</span><span class="o">=</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">traceflow</span><span class="o">=</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="n">auto</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
+                     <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
 
 
 

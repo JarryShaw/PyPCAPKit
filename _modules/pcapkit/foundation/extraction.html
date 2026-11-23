@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -581,19 +583,20 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">get_args</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeekableStream</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">,</span> <span class="n">can_seek</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">restore_shipped</span><span class="p">,</span> <span class="n">restore_shipped_dumper</span><span class="p">,</span> <span class="n">same_entry</span>
@@ -602,14 +605,17 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span><span class="p">,</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAP</span> <span class="k">as</span> <span class="n">PCAP_Engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">PCAPNG_Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.options</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">DumpOptions</span><span class="p">,</span> <span class="n">ReassemblyOptions</span><span class="p">,</span> <span class="n">StreamOptions</span><span class="p">,</span>
+                                        <span class="n">TraceFlowOptions</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">Reassembly</span><span class="p">,</span> <span class="n">ReassemblyBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlow</span><span class="p">,</span> <span class="n">TraceFlowBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CallableError</span><span class="p">,</span> <span class="n">FileNotFound</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">IterableError</span><span class="p">,</span>
-                                          <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CallableError</span><span class="p">,</span> <span class="n">EndianError</span><span class="p">,</span> <span class="n">FileNotFound</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span>
+                                          <span class="n">IterableError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span>
                                         <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
@@ -624,13 +630,11 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.structs</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap_packet</span> <span class="k">as</span> <span class="n">PCAPFilePacket</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">PySharkPacket</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">ScapyPacket</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolContext</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_TraceFlow</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
     <span class="c1">#: Every key registered in :attr:`Extractor.__output__` and in</span>
     <span class="c1">#: :attr:`TraceFlow.__output__</span>
@@ -642,7 +646,6 @@
     <span class="c1"># both copies when a new engine lands.</span>
     <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span>
                       <span class="s1">'pypcapfile'</span><span class="p">]</span>
-    <span class="n">Layers</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'link'</span><span class="p">,</span> <span class="s1">'internet'</span><span class="p">,</span> <span class="s1">'transport'</span><span class="p">,</span> <span class="s1">'application'</span><span class="p">,</span> <span class="s1">'none'</span><span class="p">]</span>
 
     <span class="c1"># NOTE: the PyPCAP and PCAP_CT engines dissect nothing, so their packet is the</span>
     <span class="c1"># ``(timestamp, bytes)`` pair ``pcap.pcap`` yields; one member covers both.</span>
@@ -655,6 +658,9 @@
     <span class="n">VerboseHandler</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">'Extractor'</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Extractor'</span><span class="p">]</span>
+
+<span class="c1">#: Layers an extraction may stop at, as ``layer`` names them; ``'none'`` sets no limit.</span>
+<span class="n">Layers</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'link'</span><span class="p">,</span> <span class="s1">'internet'</span><span class="p">,</span> <span class="s1">'transport'</span><span class="p">,</span> <span class="s1">'application'</span><span class="p">,</span> <span class="s1">'none'</span><span class="p">]</span>
 
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
@@ -699,6 +705,10 @@
         <span class="k">pass</span>
 
 
+<span class="c1">#: The names :data:`Layers` admits, in order.</span>
+<span class="n">_LAYERS</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">Layers</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="Extractor">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Extractor</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">_P</span><span class="p">]):</span>
@@ -735,9 +745,25 @@
 
 <span class="sd">    .. versionchanged:: 1.7.0</span>
 
-<span class="sd">       ``reasm_protocols`` is appended, enabling any registered reassembler by</span>
-<span class="sd">       name, and each enabled one is fed every frame's timestamp</span>
-<span class="sd">       (:issue:`2814`).</span>
+<span class="sd">       Every parameter after ``fin`` is keyword-only, and the output,</span>
+<span class="sd">       reassembly, flow tracing and input settings are grouped into ``dump``,</span>
+<span class="sd">       ``reassembly``, ``traceflow`` and ``stream``, taking</span>
+<span class="sd">       :class:`~pcapkit.foundation.options.DumpOptions`,</span>
+<span class="sd">       :class:`~pcapkit.foundation.options.ReassemblyOptions`,</span>
+<span class="sd">       :class:`~pcapkit.foundation.options.TraceFlowOptions` and</span>
+<span class="sd">       :class:`~pcapkit.foundation.options.StreamOptions`. ``reassembly``</span>
+<span class="sd">       and ``traceflow`` also take a list of registered names, so any registered</span>
+<span class="sd">       reassembler can be enabled, and each enabled one is fed every frame's</span>
+<span class="sd">       timestamp (:issue:`2814`). ``nofile``, ``fout``, ``format``,</span>
+<span class="sd">       ``extension``, ``files``, ``ip``, ``ipv4``, ``ipv6``, ``tcp``,</span>
+<span class="sd">       ``dtls``, the ``reasm_*``, ``trace_*`` and ``buffer_*`` parameters and</span>
+<span class="sd">       ``no_eof`` are removed with no alias. Nothing is written without</span>
+<span class="sd">       ``dump``, ``fin`` is opened as named, with no ``.pcap`` appended, and an</span>
+<span class="sd">       unknown ``layer`` raises (:issue:`2836`).</span>
+
+<span class="sd">    .. versionremoved:: 1.7.0</span>
+
+<span class="sd">       ``trace``, renamed :attr:`traceflow` with no alias (:issue:`2836`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -762,7 +788,7 @@
         <span class="n">_flag_e</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Split file flag, i.e. dump each frame into different files.</span>
         <span class="n">_flag_f</span><span class="p">:</span> <span class="s1">'bool'</span>
-        <span class="c1">#: No output file, i.e., no output file is to be generated.</span>
+        <span class="c1">#: No output file flag, set when ``dump`` is :data:`None`.</span>
         <span class="n">_flag_q</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Output opened flag. It indicates if :meth:`~pcapkit.foundation.extraction.Extractor._open_output`</span>
         <span class="c1">#: has replaced the writer class in :attr:`_ofile` with the writer.</span>
@@ -779,12 +805,14 @@
         <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._vfunc_default`</span>
         <span class="c1">#: tells apart.</span>
         <span class="n">_flag_v</span><span class="p">:</span> <span class="s1">'bool'</span>
-        <span class="c1">#: No EOF flag. It is useful when the input is a live capture on a pipe or</span>
-        <span class="c1">#: on standard input, where reaching the end of what has arrived so far</span>
-        <span class="c1">#: does not mean the capture is over: the extraction retries instead of</span>
-        <span class="c1">#: stopping. It retries only while the input is still producing, though --</span>
-        <span class="c1">#: see :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress`</span>
-        <span class="c1">#: for the rule and for what it narrows, without which an exhausted stream</span>
+        <span class="c1">#: No EOF flag, which ``stream`` sets from</span>
+        <span class="c1">#: :attr:`StreamOptions.no_eof &lt;pcapkit.foundation.options.StreamOptions.no_eof&gt;`.</span>
+        <span class="c1">#: It is useful when the input is a live capture on a pipe or on standard</span>
+        <span class="c1">#: input, where reaching the end of what has arrived so far does not mean</span>
+        <span class="c1">#: the capture is over: the extraction retries instead of stopping. It</span>
+        <span class="c1">#: retries only while the input is still producing, though -- see</span>
+        <span class="c1">#: :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress` for</span>
+        <span class="c1">#: the rule and for what it narrows, without which an exhausted stream</span>
         <span class="c1">#: spins forever (:issue:`620`).</span>
         <span class="n">_flag_n</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Input filename flag. It indicates if the input file is a file</span>
@@ -813,9 +841,7 @@
         <span class="c1">#: Frame record for flow tracing.</span>
         <span class="n">_trace</span><span class="p">:</span> <span class="s1">'TraceFlowManager'</span>
 
-        <span class="c1">#: TCP flag. It indicates if TCP flow tracing is enabled, and TCP</span>
-        <span class="c1">#: reassembly with it, which</span>
-        <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._reasm` holds.</span>
+        <span class="c1">#: TCP flag. It indicates if TCP flow tracing is enabled.</span>
         <span class="n">_tcp</span><span class="p">:</span> <span class="s1">'bool'</span>
 
         <span class="c1">#: Extract til protocol.</span>
@@ -941,11 +967,11 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_q &lt;pcapkit.foundation.extraction.Extractor._flag_q&gt;`</span>
-<span class="sd">                is set as :data:`True`, as output is disabled by initialisation parameter.</span>
+<span class="sd">                is set as :data:`True`, as no ``dump`` was given.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(nofile=True)' object has no attribute 'format'"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(dump=None)' object has no attribute 'format'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offmt</span>
 
     <span class="nd">@property</span>
@@ -964,11 +990,11 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_q &lt;pcapkit.foundation.extraction.Extractor._flag_q&gt;`</span>
-<span class="sd">                is set as :data:`True`, as output is disabled by initialisation parameter.</span>
+<span class="sd">                is set as :data:`True`, as no ``dump`` was given.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(nofile=True)' object has no attribute 'output'"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(dump=None)' object has no attribute 'output'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'str'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -1014,10 +1040,10 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ReassemblyData</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">reasm</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">reasm</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(reassembly=False)' object has no attribute 'reassembly'"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(reassembly=None)' object has no attribute 'reassembly'"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TraceFlowData'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">traceflow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TraceFlowData'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Index table for traced flow.</span>
 
 <span class="sd">        * ``tcp`` -- tuple of TCP flows (:term:`trace.tcp.index`)</span>
@@ -1031,13 +1057,18 @@
 <span class="sd">           Raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when</span>
 <span class="sd">           flow tracing is disabled, where 1.1.0 built the record regardless.</span>
 
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">           Renamed from ``trace``, with no alias, to match ``traceflow`` and</span>
+<span class="sd">           :attr:`reassembly` (:issue:`2836`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">TraceFlowData</span><span class="p">(</span>
                 <span class="n">tcp</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">data</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(trace=False)' object has no attribute 'trace'"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(traceflow=None)' object has no attribute 'traceflow'"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'EngineBase[_P]'</span><span class="p">:</span>
@@ -1595,59 +1626,54 @@
 <div class="viewcode-block" id="Extractor.make_name">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.make_name">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'str | IO[bytes]'</span> <span class="o">=</span> <span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="s1">'out'</span><span class="p">,</span>
-                  <span class="n">fmt</span><span class="p">:</span> <span class="s1">'Formats'</span> <span class="o">=</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                  <span class="n">nofile</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, Optional[str], Formats, Optional[str], bool]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'str | IO[bytes]'</span><span class="p">,</span> <span class="n">dump</span><span class="p">:</span> <span class="s1">'Optional[DumpOptions]'</span> <span class="o">=</span> <span class="kc">None</span>
+                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, Optional[str], Optional[Formats], Optional[str], bool]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Generate input and output filenames.</span>
 
 <span class="sd">        The method will perform following processing:</span>
 
-<span class="sd">        1. sanitise ``fin`` as the input PCAP filename; ``in.pcap`` as default value and</span>
-<span class="sd">           append ``.pcap`` extension if needed and ``extension`` is :data:`True`; as well</span>
-<span class="sd">           as test if the file exists; for a binary IO object, use its ``name``,</span>
-<span class="sd">           or a placeholder such as ``&lt;BytesIO&gt;`` if it has no :obj:`str` one;</span>
-<span class="sd">        2. if ``nofile`` is :data:`True`, skips following processing;</span>
-<span class="sd">        3. look up the output file extension registered for ``fmt``; should none be</span>
-<span class="sd">           registered, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;</span>
-<span class="sd">        4. create the parent directory of ``fout``, and with ``files`` the ``fout``</span>
-<span class="sd">           directory itself;</span>
-<span class="sd">        5. it will also append corresponding file extension to the output file name if needed</span>
-<span class="sd">           and ``extension`` is :data:`True`.</span>
+<span class="sd">        1. take ``fin`` as the input filename, as given, and test that the file</span>
+<span class="sd">           exists; for a binary IO object, use its ``name``, or a placeholder</span>
+<span class="sd">           such as ``&lt;BytesIO&gt;`` if it has no :obj:`str` one;</span>
+<span class="sd">        2. if ``dump`` is :data:`None`, skip the following processing;</span>
+<span class="sd">        3. look up the output file extension registered for ``dump.format``;</span>
+<span class="sd">           should none be registered, then it raises</span>
+<span class="sd">           :exc:`~pcapkit.utilities.exceptions.FormatError`;</span>
+<span class="sd">        4. create the parent directory of ``dump.fout``, and with ``dump.files``</span>
+<span class="sd">           the ``dump.fout`` directory itself;</span>
+<span class="sd">        5. append the format's file extension to ``dump.fout`` if it lacks one,</span>
+<span class="sd">           ``dump.extension`` is :data:`True` and ``dump.files`` is not.</span>
 
 <span class="sd">        And the method returns the generated input and output filenames as follows:</span>
 
 <span class="sd">        0. input filename</span>
-<span class="sd">        1. output filename / directory name</span>
-<span class="sd">        2. output format</span>
+<span class="sd">        1. output filename / directory name, or :data:`None` without ``dump``</span>
+<span class="sd">        2. output format, or :data:`None` without ``dump``</span>
 <span class="sd">        3. output file extension, bare, i.e. **without** the leading ``.``, so</span>
 <span class="sd">           that a caller composing a per-frame filename writes</span>
-<span class="sd">           ``f'{name}.{ext}'``</span>
+<span class="sd">           ``f'{name}.{ext}'``; :data:`None` without ``dump``</span>
 <span class="sd">        4. if split each frame into different files</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            fin: Input filename or a binary IO object.</span>
-<span class="sd">            fout: Output filename.</span>
-<span class="sd">            fmt: Output file format.</span>
-<span class="sd">            extension: If append ``.pcap`` file extension to the input filename</span>
-<span class="sd">                if ``fin`` does not have such file extension; if check and append extensions</span>
-<span class="sd">                to output file.</span>
-<span class="sd">            files: If split each frame into different files.</span>
-<span class="sd">            nofile: If no output file is to be dumped.</span>
+<span class="sd">            dump: Output settings; :data:`None` writes no output.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Generated input and output filenames.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FileNotFound: If input file does not exist.</span>
-<span class="sd">            FormatError: If no file extension is registered for ``fmt``.</span>
+<span class="sd">            FormatError: If no file extension is registered for ``dump.format``.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           ``dump`` replaces ``fout``, ``fmt``, ``extension``, ``files`` and</span>
+<span class="sd">           ``nofile``, and ``fin`` is taken as given, with no ``.pcap``</span>
+<span class="sd">           appended (:issue:`2836`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>  <span class="c1"># pylint: disable=else-if-used</span>
-                <span class="n">ifnm</span> <span class="o">=</span> <span class="n">fin</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fin</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">PCAP_EXT</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">fin</span><span class="si">}</span><span class="s1">.pcap'</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">ifnm</span> <span class="o">=</span> <span class="n">fin</span>
-
+            <span class="n">ifnm</span> <span class="o">=</span> <span class="n">fin</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ifnm</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">FileNotFound</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'No such file or directory'</span><span class="p">,</span> <span class="n">ifnm</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1656,32 +1682,32 @@
             <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">ifnm</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">fin</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&gt;'</span>
 
-        <span class="k">if</span> <span class="n">nofile</span><span class="p">:</span>
-            <span class="n">ofnm</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">ext</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">dump</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ifnm</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span>
+
+        <span class="n">fout</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="n">dump</span><span class="o">.</span><span class="n">fout</span><span class="p">,</span> <span class="n">dump</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">dump</span><span class="o">.</span><span class="n">files</span>
+        <span class="c1"># NOTE: ``__output__`` is a defaultdict; subscripting would insert an</span>
+        <span class="c1"># unknown format into the registry before the error below is raised.</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="n">registered</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">registered</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: registered extensions carry the leading dot but the value returned is bare, so</span>
+        <span class="c1"># strip it once here; per-frame names otherwise read ``Frame 1..json`` (#358).</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="n">registered</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">registered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span> <span class="k">else</span> <span class="n">registered</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fout</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">ofnm</span> <span class="o">=</span> <span class="n">fout</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">ofnm</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dump</span><span class="o">.</span><span class="n">extension</span><span class="p">:</span>
+            <span class="c1"># NOTE: The dot belongs to the separator here, not to ``ext``.</span>
+            <span class="n">ofnm</span> <span class="o">=</span> <span class="n">fout</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fout</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sa">f</span><span class="s1">'.</span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s1">'</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">fout</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: ``__output__`` is a defaultdict; subscripting would insert an</span>
-            <span class="c1"># unknown format into the registry before the error below is raised.</span>
-            <span class="n">entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
-            <span class="n">registered</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">registered</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-
-            <span class="c1"># NOTE: registered extensions carry the leading dot but the value returned is bare, so</span>
-            <span class="c1"># strip it once here; per-frame names otherwise read ``Frame 1..json`` (#358).</span>
-            <span class="n">ext</span> <span class="o">=</span> <span class="n">registered</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">registered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span> <span class="k">else</span> <span class="n">registered</span>
-
-            <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fout</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
-                <span class="n">ofnm</span> <span class="o">=</span> <span class="n">fout</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">ofnm</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">extension</span><span class="p">:</span>
-                <span class="c1"># NOTE: The dot belongs to the separator here, not to ``ext``.</span>
-                <span class="n">ofnm</span> <span class="o">=</span> <span class="n">fout</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fout</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sa">f</span><span class="s1">'.</span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s1">'</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">fout</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s1">'</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">ofnm</span> <span class="o">=</span> <span class="n">fout</span>
+            <span class="n">ofnm</span> <span class="o">=</span> <span class="n">fout</span>
 
         <span class="k">return</span> <span class="n">ifnm</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">files</span></div>
 
@@ -1810,90 +1836,28 @@
 
 <div class="viewcode-block" id="Extractor.__init__">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str | IO[bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>     <span class="c1"># basic settings # pylint: disable=redefined-builtin</span>
-                 <span class="n">auto</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                                           <span class="c1"># internal settings # pylint: disable=line-too-long</span>
-                 <span class="n">files</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool | VerboseHandler'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                       <span class="c1"># output settings # pylint: disable=line-too-long</span>
-                 <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[Layers]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
-                 <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
-                 <span class="n">reasm_timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                       <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
-                 <span class="n">trace</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-                 <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-                 <span class="n">trace_bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">trace_analyse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                            <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-                 <span class="n">ip</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
-                 <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                          <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
-                 <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
-                 <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                      <span class="c1"># EOF settings # pylint: disable=line-too-long</span>
-                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># context settings # pylint: disable=line-too-long</span>
-                 <span class="n">reasm_protocols</span><span class="p">:</span> <span class="s1">'Optional[Iterable[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>                                                 <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'str | IO[bytes]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">dump</span><span class="p">:</span> <span class="s1">'Optional[DumpOptions]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">engine</span><span class="p">:</span> <span class="s1">'Engines'</span> <span class="o">=</span> <span class="s1">'default'</span><span class="p">,</span>
+                 <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[Layers | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">context</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                 <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'Optional[ReassemblyOptions | Iterable[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">traceflow</span><span class="p">:</span> <span class="s1">'Optional[TraceFlowOptions | Iterable[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">stream</span><span class="p">:</span> <span class="s1">'Optional[StreamOptions]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">auto</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool | VerboseHandler'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Initialise PCAP Reader.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            fin: file name to be read or a binary IO object;</span>
+<span class="sd">            fin: file name to be read, as named, or a binary IO object;</span>
 <span class="sd">                if file not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`</span>
-<span class="sd">            fout: file name to be written</span>
-<span class="sd">            format: file format of output</span>
-
-<span class="sd">            auto: if automatically run till EOF</span>
-<span class="sd">            extension: if check and append extensions to output file</span>
-<span class="sd">            store: if store extracted packet info</span>
-
-<span class="sd">            files: if split each frame into different files</span>
-<span class="sd">            nofile: if no output file is to be dumped</span>
-<span class="sd">            verbose: a :obj:`bool` value or a function takes the :class:`Extractor`</span>
-<span class="sd">                instance and current parsed frame (depends on engine selected) as</span>
-<span class="sd">                parameters to print verbose output information</span>
-
+<span class="sd">            dump: output settings; :data:`None` writes no output</span>
 <span class="sd">            engine: extraction engine to be used</span>
-<span class="sd">            layer: extract til which layer</span>
+<span class="sd">            layer: extract til which layer, by name or as a protocol class,</span>
+<span class="sd">                whose :attr:`~pcapkit.protocols.protocol.ProtocolBase.__layer__`</span>
+<span class="sd">                names it</span>
 <span class="sd">            protocol: extract til which protocol</span>
-
-<span class="sd">            reassembly: if perform reassembly</span>
-<span class="sd">            reasm_strict: if set strict flag for reassembly</span>
-<span class="sd">            reasm_store: if store reassembled datagrams</span>
-<span class="sd">            reasm_timeout: reassembly timeout in seconds, measured on the</span>
-<span class="sd">                *capture's* own clock rather than the host's, since an offline</span>
-<span class="sd">                parser has no other notion of time passing; :data:`None` selects</span>
-<span class="sd">                each protocol's own default -- 60 seconds for IPv4</span>
-<span class="sd">                (:rfc:`1122#section-3.3.2`) and IPv6 (:rfc:`8200#section-4.5`),</span>
-<span class="sd">                disabled for TCP, which no specification gives a deadline. Pass</span>
-<span class="sd">                :data:`math.inf` to disable it everywhere; DTLS reassembly takes</span>
-<span class="sd">                none (:rfc:`6347#section-4.2.3`)</span>
-
-<span class="sd">            trace: if trace TCP traffic flows</span>
-<span class="sd">            trace_fout: path name for flow tracer if necessary</span>
-<span class="sd">            trace_format: output file format of flow tracer</span>
-<span class="sd">            trace_byteorder: output file byte order</span>
-<span class="sd">            trace_nanosecond: output nanosecond-resolution file flag</span>
-<span class="sd">            trace_bidirectional: whether both halves of a conversation are</span>
-<span class="sd">                traced as one flow, which is the default; :data:`False` traces</span>
-<span class="sd">                a flow per direction</span>
-<span class="sd">            trace_analyse: whether each traced flow reassembles its application</span>
-<span class="sd">                layer, so that its ``packet`` can be read. Off by default,</span>
-<span class="sd">                because it buffers every traced payload -- a cost tracing does</span>
-<span class="sd">                not otherwise pay. Unavailable on the ``pyshark`` engine, which</span>
-<span class="sd">                reports dissected fields rather than the octets behind them</span>
-
-<span class="sd">            ip: if record data for IPv4 &amp; IPv6 reassembly (must be used with ``reassembly=True``)</span>
-<span class="sd">            ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)</span>
-<span class="sd">            ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)</span>
-<span class="sd">            tcp: if perform TCP reassembly and/or flow tracing</span>
-<span class="sd">                (must be used with ``reassembly=True`` or ``trace=True``)</span>
-<span class="sd">            dtls: if perform DTLS handshake-message reassembly (must be used</span>
-<span class="sd">                with ``reassembly=True``); the default engine alone supports it</span>
-
-<span class="sd">            buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
-<span class="sd">            buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
-<span class="sd">            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
-
-<span class="sd">            no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,</span>
-<span class="sd">                which is what a live capture on a pipe or on standard input wants,</span>
-<span class="sd">                since a read there blocks until the writer produces more or closes.</span>
-<span class="sd">                Retrying stops as soon as one retry finds nothing new, so an</span>
-<span class="sd">                exhausted input finishes rather than spinning; on a *seekable*</span>
-<span class="sd">                input, where nothing blocks, that means a file still being appended</span>
-<span class="sd">                to ends at the data present when the extraction reached it</span>
-
 <span class="sd">            context: caller supplied parsing context for protocols that need</span>
 <span class="sd">                information not carried on the wire, keyed by protocol index</span>
 <span class="sd">                ID -- cf. :mod:`pcapkit.corekit.context`. Accepts a</span>
@@ -1903,11 +1867,19 @@
 <span class="sd">                :term:`default engine`, whose PCAP and PCAP-NG readers parse</span>
 <span class="sd">                with :mod:`pcapkit`'s own protocol implementations; the third</span>
 <span class="sd">                party engines ignore it.</span>
-
-<span class="sd">            reasm_protocols: names of further reassemblers to enable (must be used</span>
-<span class="sd">                with ``reassembly=True``), each as registered in</span>
-<span class="sd">                :attr:`__reassembly__`, as ``'ipv4'``, ``'ipv6'``, ``'tcp'`` and</span>
-<span class="sd">                ``'dtls'`` are</span>
+<span class="sd">            reassembly: reassembly settings, or the names of the reassemblers to</span>
+<span class="sd">                enable with their defaults, each as registered in</span>
+<span class="sd">                :attr:`__reassembly__`; :data:`None`, or no names, reassembles</span>
+<span class="sd">                nothing</span>
+<span class="sd">            traceflow: flow tracing settings, or the names of the flow tracers</span>
+<span class="sd">                to enable with their defaults, each as registered in</span>
+<span class="sd">                :attr:`__traceflow__`; :data:`None`, or no names, traces nothing</span>
+<span class="sd">            stream: input stream settings; :data:`None` takes their defaults</span>
+<span class="sd">            auto: if automatically run till EOF</span>
+<span class="sd">            store: if store extracted packet info</span>
+<span class="sd">            verbose: a :obj:`bool` value or a function takes the :class:`Extractor`</span>
+<span class="sd">                instance and current parsed frame (depends on engine selected) as</span>
+<span class="sd">                parameters to print verbose output information</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:</span>
@@ -1926,35 +1898,78 @@
 <span class="sd">                engine is not available: its dependency is not installed, its</span>
 <span class="sd">                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
 <span class="sd">                rules it out, or the supplied engine is unknown.</span>
-<span class="sd">            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is</span>
-<span class="sd">                requested while the extraction engine is PyShark.</span>
+<span class="sd">            pcapkit.utilities.warnings.AttributeWarning: If ``reassembly`` or</span>
+<span class="sd">                ``traceflow`` names nothing, which turns it off; or if</span>
+<span class="sd">                ``traceflow`` asks for</span>
+<span class="sd">                :attr:`~pcapkit.foundation.options.TraceFlowOptions.analyze`</span>
+<span class="sd">                while the extraction engine is PyShark, or names a registered flow</span>
+<span class="sd">                tracer other than TCP's, which no engine feeds.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If ``fin`` is a stream without a :obj:`str` ``name``</span>
 <span class="sd">                and the engine that will run -- Scapy, PyShark, PyPCAP or</span>
 <span class="sd">                pcap-ct -- opens its input by path.</span>
-<span class="sd">            FormatError: If ``reasm_protocols`` names no registered reassembler.</span>
+<span class="sd">            FormatError: If ``layer`` names no layer, ``reassembly`` or</span>
+<span class="sd">                ``traceflow`` names a protocol with no registered reassembler or</span>
+<span class="sd">                flow tracer, or ``traceflow`` names a format with no dumper.</span>
+<span class="sd">            RegistryError: If ``engine`` is not a name, or ``dump``,</span>
+<span class="sd">                ``reassembly``, ``traceflow`` or ``stream`` is neither</span>
+<span class="sd">                :data:`None` nor its options class, nor, for ``reassembly`` and</span>
+<span class="sd">                ``traceflow``, a list of names.</span>
+<span class="sd">            EndianError: If ``traceflow`` names a byte order other than ``'big'``</span>
+<span class="sd">                and ``'little'``.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">fin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fin</span> <span class="o">=</span> <span class="s1">'in.pcap'</span>
-        <span class="k">if</span> <span class="n">fout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fout</span> <span class="o">=</span> <span class="s1">'out'</span>
-        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">format</span> <span class="o">=</span> <span class="s1">'tree'</span>
+        <span class="n">dump_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="s1">'dump'</span><span class="p">,</span> <span class="n">dump</span><span class="p">,</span> <span class="n">DumpOptions</span><span class="p">)</span>
+        <span class="n">reasm_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="s1">'reassembly'</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">,</span> <span class="n">ReassemblyOptions</span><span class="p">)</span>
+        <span class="n">trace_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="s1">'traceflow'</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">,</span> <span class="n">TraceFlowOptions</span><span class="p">)</span>
+        <span class="n">stream_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">(</span><span class="s1">'stream'</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">StreamOptions</span><span class="p">)</span> <span class="ow">or</span> <span class="n">StreamOptions</span><span class="p">()</span>
+
+        <span class="c1"># NOTE: no names mean the feature is off, as ``None`` does (#2834).</span>
+        <span class="k">if</span> <span class="n">reasm_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reasm_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">"'Extractor(reassembly=...)' names no reassembler; treated as off, "</span>
+                 <span class="s1">'as reassembly=None'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="n">reasm_opts</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">"'Extractor(traceflow=...)' names no flow tracer; treated as off, "</span>
+                 <span class="s1">'as traceflow=None'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="n">trace_opts</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s2">)': expected an engine name"</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: names and the tracer's settings are checked before anything is opened or created.</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">reasm_opts</span><span class="o">.</span><span class="n">protocols</span> <span class="k">if</span> <span class="n">reasm_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported reassembly protocol: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span> <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">'tcp'</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_trace</span><span class="p">(</span><span class="n">trace_opts</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
+            <span class="n">layer</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Layers'</span><span class="p">,</span> <span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">__layer__</span> <span class="ow">or</span> <span class="s1">'none'</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown layer: </span><span class="si">{</span><span class="n">layer</span><span class="si">!r}</span><span class="s1">; expected one of </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span><span class="w"> </span><span class="n">_LAYERS</span><span class="p">))</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">layer_name</span> <span class="o">=</span> <span class="p">(</span><span class="n">layer</span> <span class="ow">or</span> <span class="s1">'none'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">layer_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_LAYERS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown layer: </span><span class="si">{</span><span class="n">layer</span><span class="si">!r}</span><span class="s1">; expected one of </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span><span class="w"> </span><span class="n">_LAYERS</span><span class="p">))</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="c1"># NOTE: settled first, since the format and trace checks depend on which</span>
         <span class="c1"># engine *runs*: an unavailable one falls back to the default engine.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engines'</span><span class="p">,</span> <span class="p">(</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>  <span class="c1"># extract using engine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Engines'</span><span class="p">,</span> <span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>  <span class="c1"># extract using engine</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_select_engine</span><span class="p">()</span>
 
         <span class="c1"># NOTE: these engines' adapters hand the writer a plain :obj:`dict` with no record</span>
         <span class="c1"># header, so the PCAP and PCAP-NG writers have nothing to write; the tracer gets the same fix below.</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">)):</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'format=</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">'; "</span>
-                 <span class="s2">"using 'format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="nb">format</span> <span class="o">=</span> <span class="s1">'json'</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">dump_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">dump_opts</span><span class="o">.</span><span class="n">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">)):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support output format "</span>
+                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">dump_opts</span><span class="o">.</span><span class="n">format</span><span class="si">!r}</span><span class="s2">; using 'json' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="n">dump_opts</span> <span class="o">=</span> <span class="n">DumpOptions</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">dump_opts</span><span class="o">.</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'json'</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">dump_opts</span><span class="o">.</span><span class="n">files</span><span class="p">,</span>
+                                    <span class="n">extension</span><span class="o">=</span><span class="n">dump_opts</span><span class="o">.</span><span class="n">extension</span><span class="p">)</span>
 
         <span class="c1"># NOTE: these engines open ``_ifnm`` as a path, so a stream without a ``str`` name would</span>
         <span class="c1"># be opened as a file named ``&lt;BytesIO&gt;`` (#1506); refuse before anything runs.</span>
@@ -1965,24 +1980,24 @@
                                   <span class="s1">'the engine opens savefiles by name and cannot read an '</span>
                                   <span class="s1">'in-memory stream'</span><span class="p">)</span>
 
-        <span class="n">ifnm</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">oext</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_name</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">extension</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="n">nofile</span><span class="p">)</span>
+        <span class="n">ifnm</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">oext</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_name</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">dump_opts</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span> <span class="o">=</span> <span class="n">ifnm</span>  <span class="c1"># input file name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span> <span class="o">=</span> <span class="n">ofnm</span>  <span class="c1"># output file name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fext</span> <span class="o">=</span> <span class="n">oext</span>  <span class="c1"># output file extension</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_a</span> <span class="o">=</span> <span class="n">auto</span>                  <span class="c1"># auto extract flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_d</span> <span class="o">=</span> <span class="n">store</span>                 <span class="c1"># store data flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_e</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># EOF flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="o">=</span> <span class="n">files</span>                 <span class="c1"># split file flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span> <span class="o">=</span> <span class="n">nofile</span>                <span class="c1"># no output flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># output opened flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_r</span> <span class="o">=</span> <span class="n">reassembly</span>            <span class="c1"># reassembly flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="o">=</span> <span class="n">trace</span>                 <span class="c1"># trace flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># verbose flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># input filename flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="n">no_eof</span>                <span class="c1"># no EOF flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_eof_mark</span> <span class="o">=</span> <span class="kc">None</span>                <span class="c1"># stream position at the last EOF</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_a</span> <span class="o">=</span> <span class="n">auto</span>                       <span class="c1"># auto extract flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_d</span> <span class="o">=</span> <span class="n">store</span>                      <span class="c1"># store data flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_e</span> <span class="o">=</span> <span class="kc">False</span>                      <span class="c1"># EOF flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="o">=</span> <span class="n">files</span>                      <span class="c1"># split file flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span> <span class="o">=</span> <span class="n">dump_opts</span> <span class="ow">is</span> <span class="kc">None</span>          <span class="c1"># no output flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span> <span class="o">=</span> <span class="kc">False</span>                      <span class="c1"># output opened flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_r</span> <span class="o">=</span> <span class="n">reasm_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>     <span class="c1"># reassembly flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="o">=</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>     <span class="c1"># trace flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="kc">False</span>                      <span class="c1"># verbose flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>       <span class="c1"># input filename flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="n">stream_opts</span><span class="o">.</span><span class="n">no_eof</span>         <span class="c1"># no EOF flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eof_mark</span> <span class="o">=</span> <span class="kc">None</span>                     <span class="c1"># stream position at the last EOF</span>
 
         <span class="c1"># verbose callback function</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
@@ -2004,55 +2019,58 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># frame number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># frame record</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span> <span class="o">=</span> <span class="n">tcp</span>  <span class="c1"># TCP reassembly and flow tracing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">=</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="s1">'null'</span>                      <span class="c1"># extract til protocol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Layers'</span><span class="p">,</span> <span class="n">layer_name</span><span class="p">)</span>              <span class="c1"># extract til layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span> <span class="o">=</span> <span class="n">ContextRegistry</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>           <span class="c1"># caller supplied context</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">=</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="s1">'null'</span>                              <span class="c1"># extract til protocol</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Layers'</span><span class="p">,</span> <span class="p">(</span><span class="n">layer</span> <span class="ow">or</span> <span class="s1">'none'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>       <span class="c1"># extract til layer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span> <span class="o">=</span> <span class="n">ContextRegistry</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>                   <span class="c1"># caller supplied context</span>
-
-        <span class="c1"># NOTE: the flags name the built-ins; every reassembler, built-in or not, is made by name.</span>
-        <span class="n">reasm_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">'ipv4'</span><span class="p">,</span> <span class="n">ipv4</span> <span class="ow">or</span> <span class="n">ip</span><span class="p">),</span> <span class="p">(</span><span class="s1">'ipv6'</span><span class="p">,</span> <span class="n">ipv6</span> <span class="ow">or</span> <span class="n">ip</span><span class="p">),</span>
-                                                 <span class="p">(</span><span class="s1">'tcp'</span><span class="p">,</span> <span class="n">tcp</span><span class="p">),</span> <span class="p">(</span><span class="s1">'dtls'</span><span class="p">,</span> <span class="n">dtls</span><span class="p">))</span> <span class="k">if</span> <span class="n">flag</span><span class="p">]</span>
-        <span class="n">reasm_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">reasm_protocols</span> <span class="ow">or</span> <span class="p">())</span>
         <span class="n">reasm_objs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, ReassemblyBase]</span>
-        <span class="k">if</span> <span class="n">reassembly</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">reasm_names</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reasm_objs</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> reassembly enabled'</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-                    <span class="n">reasm_objs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_reassembly</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span>
-                                                            <span class="n">timeout</span><span class="o">=</span><span class="n">reasm_timeout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reasm_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">reasm_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> reassembly enabled'</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">reasm_objs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_reassembly</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">reasm_opts</span><span class="o">.</span><span class="n">strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_opts</span><span class="o">.</span><span class="n">store</span><span class="p">,</span>
+                                                        <span class="n">timeout</span><span class="o">=</span><span class="n">reasm_opts</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reasm</span> <span class="o">=</span> <span class="n">ReassemblyManager</span><span class="p">(</span><span class="n">reasm_objs</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">trace</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">trace_format</span> <span class="o">=</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">format</span>
+            <span class="n">trace_analyze</span> <span class="o">=</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">analyze</span>
 
-            <span class="c1"># NOTE: these adapters report plain :obj:`dict` frames no PCAP or PCAP-NG dumper can serialise,</span>
-            <span class="c1"># and ``None`` means ``'pcap'`` (#406); DPKT and Scapy build frame records (#1507).</span>
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
-                    <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'trace_format=</span><span class="si">{</span><span class="n">trace_format</span><span class="si">}</span><span class="s2">'; "</span>
-                     <span class="s2">"using 'trace_format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="c1"># NOTE: these adapters report plain :obj:`dict` frames no PCAP or PCAP-NG dumper can serialise</span>
+            <span class="c1"># (#406); DPKT and Scapy build frame records (#1507).</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">):</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support flow tracing format "</span>
+                     <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">trace_format</span><span class="si">!r}</span><span class="s2">; using 'json' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">trace_format</span> <span class="o">=</span> <span class="s1">'json'</span>
 
             <span class="c1"># NOTE: PyShark hands the tracer fields, not octets, so there is no payload to</span>
             <span class="c1"># reassemble; refuse rather than return an empty answer that looks real.</span>
-            <span class="k">if</span> <span class="n">trace_analyse</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">==</span> <span class="s1">'pyshark'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">trace_analyze</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">==</span> <span class="s1">'pyshark'</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not expose packet payloads; "</span>
-                     <span class="s2">"using 'trace_analyse=False' instead"</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span>
+                     <span class="s1">'so TraceFlowOptions(analyze=True) will be ignored'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span>
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-                <span class="n">trace_analyse</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">trace_analyze</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
+            <span class="c1"># NOTE: every engine feeds the TCP tracer alone, so another registered one is dropped.</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'tcp'</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' object does not support </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> flow "</span>
+                         <span class="sa">f</span><span class="s1">'tracing; so </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> will be ignored'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="s1">'tcp'</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow tracing enabled'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="n">trace_cls_tcp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace_cls_tcp</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
                     <span class="n">trace_cls_tcp</span> <span class="o">=</span> <span class="n">trace_cls_tcp</span><span class="o">.</span><span class="n">klass</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls_tcp</span>  <span class="c1"># update mapping upon import</span>
-                <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP_TraceFlow'</span><span class="p">,</span> <span class="n">trace_cls_tcp</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
-                                                                    <span class="n">byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">,</span>
-                                                                    <span class="n">bidirectional</span><span class="o">=</span><span class="n">trace_bidirectional</span><span class="p">,</span>
-                                                                    <span class="n">analyse</span><span class="o">=</span><span class="n">trace_analyse</span><span class="p">))</span>
+                <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP_TraceFlow'</span><span class="p">,</span> <span class="n">trace_cls_tcp</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
+                                                                    <span class="n">byteorder</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+                                                                    <span class="n">nanosecond</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">,</span>
+                                                                    <span class="n">bidirectional</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">bidirectional</span><span class="p">,</span>
+                                                                    <span class="n">analyse</span><span class="o">=</span><span class="n">trace_analyze</span><span class="p">))</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span> <span class="o">=</span> <span class="n">TraceFlowManager</span><span class="p">(</span>
                 <span class="n">tcp</span><span class="o">=</span><span class="n">trace_obj_tcp</span><span class="p">,</span>
@@ -2070,8 +2088,8 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream is not seekable, wrapping it in SeekableReader'</span><span class="p">)</span>
             <span class="c1"># NOTE: ``stream_closing`` follows ownership, closing only a handle this class opened; a</span>
             <span class="c1"># non-seekable stream always came from the caller, so this matches ``_cleanup`` (#610).</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">SeekableReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">,</span>
-                                         <span class="n">stream_closing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">SeekableReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">stream_opts</span><span class="o">.</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">stream_opts</span><span class="o">.</span><span class="n">buffer_save</span><span class="p">,</span>
+                                         <span class="n">stream_opts</span><span class="o">.</span><span class="n">buffer_path</span><span class="p">,</span> <span class="n">stream_closing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="s1">'peek'</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream has no peek(), wrapping it in PeekableStream'</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BufferedReader'</span><span class="p">,</span> <span class="n">PeekableStream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">))</span>
@@ -2082,7 +2100,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_finalizer</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_release_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
+        <span class="c1"># NOTE: ``fmt`` is None exactly when ``dump`` is, i.e. under ``_flag_q``.</span>
+        <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">output</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s1">; disabled file output feature'</span><span class="p">,</span>
@@ -2266,9 +2285,9 @@
 <span class="sd">            for more than tidiness: ``_flag_s`` is assigned early in</span>
 <span class="sd">            :meth:`__init__` and ``_ifile`` only much later, so a constructor</span>
 <span class="sd">            that fails in between -- an unreadable path, or a negative</span>
-<span class="sd">            ``reasm_timeout`` with ``reassembly=True`` and ``ip``, ``ipv4``,</span>
-<span class="sd">            ``ipv6`` or ``tcp`` set -- leaves an instance whose flag says "mine"</span>
-<span class="sd">            and which has no stream at all. The close itself is guarded too, that</span>
+<span class="sd">            :attr:`ReassemblyOptions.timeout</span>
+<span class="sd">            &lt;pcapkit.foundation.options.ReassemblyOptions.timeout&gt;` -- leaves</span>
+<span class="sd">            an instance whose flag says "mine" and which has no stream at all. The close itself is guarded too, that</span>
 <span class="sd">            being what a close during interpreter shutdown can fail at.</span>
 
 <span class="sd">        """</span>
@@ -2280,6 +2299,55 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">:</span> <span class="s1">'TraceFlowOptions'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Check the TCP tracer's output settings, before its directory is made.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            trace: the flow tracing settings</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If no dumper is registered for ``trace.format``.</span>
+<span class="sd">            EndianError: If ``trace.byteorder`` is neither ``'big'`` nor ``'little'``.</span>
+
+<span class="sd">        """</span>
+        <span class="n">trace_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace_cls</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">trace_cls</span> <span class="o">=</span> <span class="n">trace_cls</span><span class="o">.</span><span class="n">klass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls</span>  <span class="c1"># update mapping upon import</span>
+        <span class="c1"># NOTE: ``__output__`` is a defaultdict; subscripting would insert the unknown format.</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">trace_cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown flow tracing format: </span><span class="si">{</span><span class="n">trace</span><span class="o">.</span><span class="n">format</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">byteorder</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'big'</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown flow tracing byte order: </span><span class="si">{</span><span class="n">trace</span><span class="o">.</span><span class="n">byteorder</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_options</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Type[Info]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Check an options argument, reading a list of names as ``kind`` would.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            name: the parameter, for the error message</span>
+<span class="sd">            value: the argument given</span>
+<span class="sd">            kind: its options class; one taking ``protocols`` also accepts a</span>
+<span class="sd">                list of names, read as ``kind(protocols=value)``</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``value`` as ``kind``, or :data:`None`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RegistryError: If ``value`` is neither :data:`None`, ``kind``, nor</span>
+<span class="sd">                a list of names where ``kind`` takes one.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ReassemblyOptions</span><span class="p">,</span> <span class="n">TraceFlowOptions</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">))</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">kind</span><span class="p">(</span><span class="n">protocols</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'a list of registered names or </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ReassemblyOptions</span><span class="p">,</span> <span class="n">TraceFlowOptions</span><span class="p">)</span> \
+            <span class="k">else</span> <span class="n">kind</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">)': expected None or </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Extractor._owns_input">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._owns_input">[docs]</a>

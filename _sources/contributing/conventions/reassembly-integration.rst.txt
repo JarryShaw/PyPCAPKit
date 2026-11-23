@@ -34,6 +34,14 @@ zero-fills to merge a segment. It bounds zero-filled memory, as
 :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` does for a field, and ``-1``
 lifts it for the uncapped reassembly point 4 asks for. Ruled on :issue:`2546`.
 
+**Every callback runs, and the first exception is re-raised**, for reassembly and
+flow-tracing callbacks alike. One raising an :exc:`Exception` does not stop the
+ones after it: the first such error propagates once the last has run, and a later
+one is logged at debug level. Any other :exc:`BaseException`, such as
+:exc:`KeyboardInterrupt`, stops them at once. Both run them through
+:func:`~pcapkit.utilities.callbacks.run_callbacks`. Ruled in review of :pr:`2875`
+(:issue:`2855`).
+
 Parse Ownership
 ~~~~~~~~~~~~~~~
 

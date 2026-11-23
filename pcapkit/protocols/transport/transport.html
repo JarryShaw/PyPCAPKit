@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -705,7 +707,9 @@ instance. A payload that fails to parse is kept as
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a>
 keeps one, its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> the port looked up, as an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, as
 a frame’s fallback records the port <a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>
-looked up.</p>
+looked up. An empty payload is
+<a class="reference internal" href="../misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, as in a
+frame.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -740,7 +744,7 @@ rather than the octets the failed parse left unread (<a class="extlink-issue ref
 Its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is the port looked up, a refusal it absorbs is
 quiet, any other error is logged at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> rather
 than <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>, and the failed parse’s warnings are dropped
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>). An empty payload is <code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
 </div>
 </dd></dl>
 

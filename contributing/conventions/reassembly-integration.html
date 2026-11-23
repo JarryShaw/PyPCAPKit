@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -613,6 +615,13 @@ accept overlaps – the engine adds no timeout, cap or ordering rule of its own.
 zero-fills to merge a segment. It bounds zero-filled memory, as
 <a class="reference internal" href="../../pcapkit/utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> does for a field, and <code class="docutils literal notranslate"><span class="pre">-1</span></code>
 lifts it for the uncapped reassembly point 4 asks for. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>.</p>
+<p><strong>Every callback runs, and the first exception is re-raised</strong>, for reassembly and
+flow-tracing callbacks alike. One raising an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> does not stop the
+ones after it: the first such error propagates once the last has run, and a later
+one is logged at debug level. Any other <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#BaseException" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseException</span></code></a>, such as
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyboardInterrupt" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code></a>, stops them at once. Both run them through
+<a class="reference internal" href="../../pcapkit/utilities/callbacks.html#pcapkit.utilities.callbacks.run_callbacks" title="pcapkit.utilities.callbacks.run_callbacks"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_callbacks()</span></code></a>. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2875">#2875</a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2855">#2855</a>).</p>
 </section>
 <section id="parse-ownership">
 <h2>Parse Ownership<a class="headerlink" href="#parse-ownership" title="Link to this heading">¶</a></h2>

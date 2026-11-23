@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -575,8 +577,9 @@
 <span class="sd">:mod:`pcapkit.corekit.schema.shortread` carries a header cut short by the end of the</span>
 <span class="sd">capture through to the protocol's info, by which a protocol rebuilt from that info</span>
 <span class="sd">is cut back to the octets its header had (:issue:`1458`), for the layer base classes</span>
-<span class="sd">and the PCAP global header alike. It names the protocol and schema classes for type</span>
-<span class="sd">checking only, since those import it. It is one of the :mod:`pcapkit.corekit.schema`</span>
+<span class="sd">and the PCAP global header alike, and tells a protocol's checks of a header parsed on</span>
+<span class="sd">its own where the cut fell (:issue:`2880`). It names the protocol and schema classes</span>
+<span class="sd">for type checking only, since those import it. It is one of the :mod:`pcapkit.corekit.schema`</span>
 <span class="sd">helpers shared across the schema layer, not part of the header schema framework in</span>
 <span class="sd">:mod:`pcapkit.protocols.schema`; see :ref:`utilities-or-corekit`.</span>
 
@@ -590,7 +593,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">frame_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">frame_depth</span><span class="p">,</span> <span class="n">frame_length</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
@@ -600,7 +604,8 @@
 
     <span class="n">_PB</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PB'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">ProtocolBase</span><span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'keep_short_read'</span><span class="p">,</span> <span class="s1">'replay_short_read'</span><span class="p">,</span> <span class="s1">'hoist_short_read'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'keep_short_read'</span><span class="p">,</span> <span class="s1">'replay_short_read'</span><span class="p">,</span> <span class="s1">'hoist_short_read'</span><span class="p">,</span> <span class="s1">'cut_on_its_own'</span><span class="p">,</span> <span class="s1">'fill_short_options'</span><span class="p">,</span>
+           <span class="s1">'ends_inside_option'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="keep_short_read">
@@ -747,6 +752,127 @@
     <span class="k">if</span> <span class="s1">'__short_read__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
             <span class="n">part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">):</span>
         <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__short_read__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="cut_on_its_own">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.cut_on_its_own">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cut_on_its_own</span><span class="p">(</span><span class="n">header</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell a check of a header parsed on its own whether the data ended before what it reads.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        header: The header just parsed.</span>
+<span class="sd">        name: Its field the check reads; :data:`None` for the whole header.</span>
+<span class="sd">        end: How many octets of ``name``, from its start, the check reads;</span>
+<span class="sd">            :data:`None` for all of them.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether ``header`` was parsed with no layer before it, as</span>
+<span class="sd">        :data:`~pcapkit.utilities.contextvars.frame_depth` tells, and the short</span>
+<span class="sd">        read it records ends the data before those octets of ``name``, or</span>
+<span class="sd">        anywhere in it without a ``name``.</span>
+
+<span class="sd">    On its own the end of the data is a cut (:issue:`2880`), so a value past it is a</span>
+<span class="sd">    zero the cut left, not one read. A check that would refuse such a value leaves it</span>
+<span class="sd">    to the short read, as a field callback does (:issue:`2727`), and so does one refusing</span>
+<span class="sd">    a header length the data ends inside, refused on :issue:`1404` because the rebuild</span>
+<span class="sd">    filled the zeros in, which the short read now cuts back. Inside a frame its lengths</span>
+<span class="sd">    say where the message ends, so such a check refuses as before.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">cut</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">record</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">cut</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">end</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="fill_short_options">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.fill_short_options">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fill_short_options</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">zero</span><span class="p">:</span> <span class="s1">'tuple[Any, Any]'</span><span class="p">,</span>
+                       <span class="n">padding</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, Optional[bytes]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fill out an options area a short read ended inside, so a rebuild writes its length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: The data model a protocol is rebuilt from.</span>
+<span class="sd">        options: Its options, keyed by code, as the protocol's ``read`` gives them, or</span>
+<span class="sd">            :data:`None` for none.</span>
+<span class="sd">        size: Octets its header length gives the options area.</span>
+<span class="sd">        zero: The code and data model of the one-octet option a zero octet reads as.</span>
+<span class="sd">        padding: Octets it records after an End of Option List, or :data:`None` where</span>
+<span class="sd">            the protocol records none.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``options`` and ``padding`` to ``size`` octets where ``data`` records a short</span>
+<span class="sd">        read: past ``size``, trailing ``zero`` options dropped; short of it, filled out</span>
+<span class="sd">        with zero octets, after ``padding`` where the options end with ``zero``, else</span>
+<span class="sd">        as that many ``zero`` options.</span>
+
+<span class="sd">    A header length the data ends before is read as parsed on its own</span>
+<span class="sd">    (:func:`cut_on_its_own`), but ``make`` writes the length of the options it is</span>
+<span class="sd">    given, which past the cut are a cut option's whole length and the end of the</span>
+<span class="sd">    list its zeros read as. Whatever is filled or dropped lies past the cut, so the</span>
+<span class="sd">    rebuild's cut back leaves the octets and the header length its parse read</span>
+<span class="sd">    (:issue:`2880`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">options</span><span class="p">,</span> <span class="n">padding</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">fill</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fill</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">fill</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">items</span> <span class="ow">and</span> <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">zero</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">fill</span> <span class="o">+=</span> <span class="n">items</span><span class="o">.</span><span class="n">pop</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">length</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fill</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">options</span><span class="p">,</span> <span class="n">padding</span>
+    <span class="k">if</span> <span class="n">padding</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">items</span> <span class="ow">and</span> <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">zero</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">options</span><span class="p">,</span> <span class="n">padding</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">OrderedMultiDict</span><span class="p">([</span><span class="o">*</span><span class="n">items</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="n">zero</span><span class="p">]</span> <span class="o">*</span> <span class="n">fill</span><span class="p">]),</span> <span class="n">padding</span></div>
+
+
+
+<div class="viewcode-block" id="ends_inside_option">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.ends_inside_option">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ends_inside_option</span><span class="p">(</span><span class="n">options</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether the first ``count`` octets of an options area end inside one of its options.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        options: The options read from the area, keyed by code, each with the</span>
+<span class="sd">            ``length`` it declares.</span>
+<span class="sd">        count: Octets of the area the data holds.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether an option starts before ``count`` octets and declares more than them.</span>
+
+<span class="sd">    Such an option rebuilds by the values it holds rather than by the length it</span>
+<span class="sd">    declares, so neither its own length nor the header length before it would</span>
+<span class="sd">    rebuild as parsed: a header the data ends inside an option of stays refused</span>
+<span class="sd">    on its own too (:issue:`1404`, :issue:`2880`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="o">&gt;=</span> <span class="n">count</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="o">&gt;</span> <span class="n">count</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 </pre></div>
         </article>

@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -592,20 +594,20 @@ functions. Some common scenarios:</p>
 <ol class="arabic">
 <li><p>extract a PCAP file and dump the result to a specific file
 (with no reassembly)</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">DumpOptions</span><span class="p">,</span> <span class="n">extract</span>
 <span class="c1"># dump to a PLIST file with no frame storage (property frame disabled)</span>
-<span class="n">plist</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">'out.plist'</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'plist'</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plist</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="n">DumpOptions</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="s1">'out.plist'</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'plist'</span><span class="p">),</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="c1"># dump to a JSON file with no extension auto-complete</span>
-<span class="n">json</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.cap'</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">'out.json'</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'json'</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">json</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="s1">'in.cap'</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="n">DumpOptions</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="s1">'out.json'</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'json'</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 <span class="c1"># dump to a folder with each tree-view text file per frame</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">'out'</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'tree'</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="n">DumpOptions</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="s1">'out'</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">'tree'</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 </pre></div>
 </div>
 </li>
 <li><p>extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame
 (with no output file)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span><span class="p">,</span> <span class="n">extract</span>
-<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="s1">'in.pcap'</span><span class="p">)</span>
 <span class="n">frame0</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="c1"># check if IP (IPv4 or IPv6) in this frame</span>
 <span class="k">if</span> <span class="n">IP</span> <span class="ow">in</span> <span class="n">frame0</span><span class="p">:</span>
@@ -617,9 +619,9 @@ functions. Some common scenarios:</p>
 <li><p>extract a PCAP file and reassemble TCP payload
 (with no output file nor frame storage)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">extract</span>
-<span class="c1"># under reasm_strict, the default, an incompletely reassembled</span>
+<span class="c1"># under strict reassembly, the default, an incompletely reassembled</span>
 <span class="c1"># datagram carries no packet, hence the check below</span>
-<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">])</span>
 <span class="c1"># print extracted packet if HTTP in reassembled payloads</span>
 <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">HTTP</span> <span class="ow">in</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span><span class="p">:</span>

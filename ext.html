@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1477,6 +1479,10 @@ takes one argument, the list of datagrams that submission produced. A flow traci
 callback runs as each flow is finalised and takes that flow’s
 <a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>. Each should return
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; any return value is ignored.</p>
+<p>Every callback runs, of either kind: the first <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> one raises
+propagates once the last has run. A reassembly callback reading
+<a class="reference internal" href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> gets the
+datagrams stored so far, without the outstanding buffers.</p>
 <p>A reassembly callback can discard datagrams by modifying its list in place, but
 prefer not to: if the result itself is wrong for your purpose, subclass the
 class and change its algorithm instead.</p>

@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -802,7 +804,9 @@ or as <a class="reference internal" href="misc/no_payload.html#pcapkit.protocols
 after an end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.
 A refusal it absorbs is quiet, any other error is logged at
 <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a>, and the failed parse’s warnings are dropped,
-as <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._analyze_next_layer" title="pcapkit.protocols.protocol.Protocol._analyze_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_analyze_next_layer()</span></code></a> describes.</p>
+as <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._analyze_next_layer" title="pcapkit.protocols.protocol.Protocol._analyze_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_analyze_next_layer()</span></code></a> describes. An empty payload is
+<a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, as in a
+frame.</p>
 </dd>
 </dl>
 <div class="versionchanged">
@@ -810,7 +814,8 @@ as <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._ana
 rather than the octets the failed parse left unread (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2842">#2842</a>).
 Its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is <code class="docutils literal notranslate"><span class="pre">proto</span></code>, a refusal it absorbs is quiet, any
 other error is logged at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a>, and the failed
-parse’s warnings are dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>).</p>
+parse’s warnings are dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>). An empty payload is
+<code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
 </div>
 </dd></dl>
 
@@ -967,6 +972,14 @@ option given to <code class="docutils literal notranslate"><span class="pre">mak
 from the octets captured, its warnings discarded, and given its
 data model’s <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> before <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> runs, as the
 record of a cut those octets may not show (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
+<p>Parsed on its own rather than inside a frame, a layer is given the
+octets captured, so its header is unpacked with <code class="docutils literal notranslate"><span class="pre">__data_end__</span></code>
+(see <a class="reference internal" href="index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>):
+a cut inside it is the short read it records, with no
+<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> warning per field and no length resolved below
+zero (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>). A check <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> makes of a value the cut
+left asks <a class="reference internal" href="../corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.cut_on_its_own" title="pcapkit.corekit.schema.shortread.cut_on_its_own"><code class="xref py py-func docutils literal notranslate"><span class="pre">cut_on_its_own()</span></code></a>
+whether to leave it to the short read.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -980,6 +993,11 @@ record of a cut those octets may not show (<a class="extlink-issue reference ext
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span>A raw item that <code class="docutils literal notranslate"><span class="pre">make()</span></code> takes from inside a data model, such as
 the one <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> passes on, is replaced too, rather than
 reaching <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2725">#2725</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>A layer parsed on its own unpacks its header as ending with the data,
+so a cut inside it warns nothing and resolves no length below zero
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
 </div>
 </dd></dl>
 
@@ -2181,7 +2199,9 @@ unless <code class="docutils literal notranslate"><span class="pre">kwargs</span
 its <code class="docutils literal notranslate"><span class="pre">error</span></code> the failure’s message and its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> <code class="docutils literal notranslate"><span class="pre">code</span></code>,
 as a frame’s fallback is, or as
 <a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> after
-an end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.</p>
+an end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>. An
+empty payload is <a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>
+unparsed.</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -2197,6 +2217,10 @@ in verbose mode. A parse that raises is dropped with its warnings
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>), and a parse kept reports its own after those of the
 layers it carries, as a frame’s layer does. The fallback is built after
 the trial ends, so an error it raises is loud.</p>
+<p>An empty payload is kept as a frame keeps an empty next layer (see
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._empty_next_layer" title="pcapkit.protocols.protocol.Protocol._empty_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_empty_next_layer()</span></code></a>): parsed on its own, <code class="docutils literal notranslate"><span class="pre">klass</span></code> would read
+a header cut before its first octet, made of nothing but zeros
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
 </div>
 </dd></dl>
 

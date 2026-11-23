@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -706,7 +708,7 @@ bounds how many are dissected.</p></li>
 (<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.2.3"><strong>RFC 6347 Section 4.2.3</strong></a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>). Each fragment is flagged
 <a class="reference internal" href="#pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented" title="pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_fragmented</span></code></a>
 and its <a class="reference internal" href="#pcapkit.protocols.application.dtls.data.DTLSHandshake.body" title="pcapkit.protocols.application.dtls.data.DTLSHandshake.body"><code class="xref py py-attr docutils literal notranslate"><span class="pre">body</span></code></a>
-kept as raw octets. <code class="docutils literal notranslate"><span class="pre">Extractor(reassembly=True,</span> <span class="pre">dtls=True)</span></code> reassembles the
+kept as raw octets. <code class="docutils literal notranslate"><span class="pre">Extractor(fin,</span> <span class="pre">reassembly=['dtls'])</span></code> reassembles the
 message, and <a class="reference internal" href="../../foundation/analysis/dtls.html#pcapkit.foundation.analysis.dtls.dtls_handshake" title="pcapkit.foundation.analysis.dtls.dtls_handshake"><code class="xref py py-func docutils literal notranslate"><span class="pre">dtls_handshake()</span></code></a> decodes it
 with <a class="reference internal" href="#pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake" title="pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze_handshake()</span></code></a>, which
 reads it with <a class="reference internal" href="#pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake" title="pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_handshake()</span></code></a>.</p>

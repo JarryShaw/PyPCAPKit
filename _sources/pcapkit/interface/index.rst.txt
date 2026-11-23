@@ -35,6 +35,14 @@ The public interfaces, by category:
 +                  +---------------------+--------------------------------------------+
 |                  | :func:`pcapkit.interface.core.trace`                             |
 +                  +---------------------+--------------------------------------------+
+|                  | :class:`pcapkit.foundation.options.DumpOptions`                  |
++                  +---------------------+--------------------------------------------+
+|                  | :class:`pcapkit.foundation.options.ReassemblyOptions`            |
++                  +---------------------+--------------------------------------------+
+|                  | :class:`pcapkit.foundation.options.TraceFlowOptions`             |
++                  +---------------------+--------------------------------------------+
+|                  | :class:`pcapkit.foundation.options.StreamOptions`                |
++                  +---------------------+--------------------------------------------+
 |                  |                     | :data:`pcapkit.interface.core.TREE`        |
 +                  +                     +--------------------------------------------+
 |                  |                     | :data:`pcapkit.interface.core.JSON`        |

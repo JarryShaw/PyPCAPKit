@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -605,6 +607,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pppoe.tag</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tag</span> <span class="k">as</span> <span class="n">Enum_Tag</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.pppoe.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPPoE</span> <span class="k">as</span> <span class="n">Data_PPPoE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.pppoe.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tag</span> <span class="k">as</span> <span class="n">Data_Tag</span>
@@ -700,13 +703,16 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the version or the type is not ``1``, or the</span>
-<span class="sd">                Length of a discovery packet ends inside a tag.</span>
+<span class="sd">                Length of a discovery packet ends inside a tag. Parsed on its</span>
+<span class="sd">                own, a version and type the cut left as zero are the short</span>
+<span class="sd">                read's (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="c1"># NOTE: RFC 2516 Section 4 fixes both to 1; another is a format this does not know.</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">'ver'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># NOTE: RFC 2516 Section 4 fixes both to 1; another is a format this does not know. On</span>
+        <span class="c1"># its own, those the cut left as zero are its short read's (#2880).</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">'ver'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'info'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid version or type: '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">"ver"</span><span class="p">]</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 

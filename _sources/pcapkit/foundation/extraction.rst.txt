@@ -4,8 +4,9 @@ File Extractor
 .. module:: pcapkit.foundation.extraction
 
 :mod:`pcapkit.foundation.extraction` contains
-:class:`~pcapkit.foundation.extraction.Extractor` only, which reads a capture
-file and dissects its frames, dumping, reassembling and tracing them as asked.
+:class:`~pcapkit.foundation.extraction.Extractor`, which reads a capture file
+and dissects its frames, dumping, reassembling and tracing them as asked, with
+the settings :mod:`~pcapkit.foundation.options` holds.
 
 .. seealso::
 
@@ -53,17 +54,17 @@ An extraction runs in this order; a third-party engine implements its own
            direction TB
            F1["parse the next frame, under layer= and protocol="]
            F2["count it, then the verbose callback"]
-           F3{"nofile?"}
+           F3{"dump?"}
            F3W["write it: a file per frame under files=,<br/>else the one output"]
            F4{"reassembly?"}
-           F4R["toolkit extractors feed the IPv4, IPv6,<br/>TCP and DTLS reassemblers switched on"]
-           F5{"trace, and tcp?"}
+           F4R["the engine's toolkit adapters feed<br/>each enabled reassembler"]
+           F5{"traceflow names tcp?"}
            F5T["toolkit tcp\_traceflow feeds<br/>the TCP flow tracer"]
            F6{"store?"}
            F6S["kept in .frame"]
            F1 --> F2 --> F3
-           F3 -->|no| F3W --> F4
-           F3 -->|yes| F4
+           F3 -->|yes| F3W --> F4
+           F3 -->|no| F4
            F4 -->|yes| F4R --> F5
            F4 -->|no| F5
            F5 -->|yes| F5T --> F6
@@ -104,7 +105,7 @@ An extraction runs in this order; a third-party engine implements its own
    .. autoproperty:: output
    .. autoproperty:: frame
    .. autoproperty:: reassembly
-   .. autoproperty:: trace
+   .. autoproperty:: traceflow
    .. autoproperty:: engine
    .. autoproperty:: magic_number
 

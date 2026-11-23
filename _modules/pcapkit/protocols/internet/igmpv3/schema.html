@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -627,11 +629,14 @@
 <span class="sd">    """</span>
     <span class="n">type_</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span>  <span class="c1"># type: Enum_Type</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span>  <span class="c1"># type: int</span>
+    <span class="c1"># NOTE: On its own a message is given the octets captured, so its body's length ends</span>
+    <span class="c1"># with the data, as an ICMP body's does; inside a frame its lengths say where (#2880).</span>
+    <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">else</span> <span class="p">{</span><span class="s1">'__data_end__'</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMP_Membership_Query</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Query</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Query</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMPv3_Membership_Report</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Report</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Report</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IGMPv3: unsupported message type: </span><span class="si">{</span><span class="n">type_</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
 

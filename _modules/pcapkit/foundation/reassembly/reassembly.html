@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -585,6 +587,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.callbacks</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_callbacks</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.pickle</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReduceAsProtocol2</span>
@@ -714,6 +717,7 @@
     <span class="n">_flag_s</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="n">_flag_d</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="n">_flag_n</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="n">_flag_c</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="n">_timeout</span><span class="p">:</span> <span class="s1">'float'</span>
 
     <span class="c1"># Internal data storage for cached properties.</span>
@@ -774,7 +778,17 @@
     <span class="c1"># total number of reassembled packets</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Total number of reassembled packets."""</span>
+<span class="w">        </span><span class="sd">"""Total number of reassembled packets.</span>
+
+<span class="sd">        Read from a callback, it counts the stored datagrams only, as</span>
+<span class="sd">        :attr:`datagram` reports them there.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: a callback's read bypasses the cache, as its ``datagram`` lacks the outstanding</span>
+        <span class="c1"># buffers (#2867).</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
@@ -790,6 +804,9 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">datagram</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[_DT, ...]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Reassembled datagram.</span>
+
+<span class="sd">        Read from a callback, it holds the stored datagrams only, without</span>
+<span class="sd">        submitting the outstanding buffers; see :meth:`fetch`.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_d &lt;_flag_d&gt;` is</span>
@@ -887,14 +904,25 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            ``datagrams``, for :meth:`submit` to return.</span>
 
+<span class="sd">        Every callback runs, through</span>
+<span class="sd">        :func:`~pcapkit.utilities.callbacks.run_callbacks`: the first</span>
+<span class="sd">        :exc:`Exception` one raises propagates once the last has run. While they</span>
+<span class="sd">        run, :meth:`fetch` returns what :attr:`_dtgram` holds, so a callback</span>
+<span class="sd">        reading :attr:`datagram` does not run them again.</span>
+
 <span class="sd">        .. versionadded:: 1.7.0</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).</span>
         <span class="k">if</span> <span class="n">store</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: restored rather than cleared, as a callback feeding a packet nests a run (#2867).</span>
+        <span class="n">held</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">run_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> reassembly'</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span> <span class="o">=</span> <span class="n">held</span>
         <span class="k">return</span> <span class="n">datagrams</span>
 
     <span class="c1"># abandon timed-out buffers</span>
@@ -1009,7 +1037,20 @@
 <span class="sd">        :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">        will be returned.</span>
 
+<span class="sd">        Called from a callback, it returns what :attr:`_dtgram` holds and</span>
+<span class="sd">        submits nothing, since a submission would run the callbacks again.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           A callback reading :attr:`datagram` while a buffer is outstanding</span>
+<span class="sd">           gets the stored datagrams, where it recursed until</span>
+<span class="sd">           :exc:`RecursionError` (:issue:`2867`).</span>
+
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: ahead of the caches, which are stale while ``expire`` runs its callbacks (#2867).</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1074,6 +1115,14 @@
 <span class="sd">                default, the callback will be appended to the end</span>
 <span class="sd">                of the list</span>
 
+<span class="sd">        Every callback runs on each submission. One raising an</span>
+<span class="sd">        :exc:`Exception` does not stop the rest, and the first such error</span>
+<span class="sd">        propagates once they have run.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           A callback that raises no longer stops the ones after it (:issue:`2881`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
@@ -1128,6 +1177,10 @@
         <span class="c1">#: bool: New datagram flag. If set to :data:`True`, the</span>
         <span class="c1">#: :attr:`self._dtgram &lt;_dtgram&gt;` will be repopulated.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1">#: bool: Callback flag. Set while the callbacks run, so a callback</span>
+        <span class="c1">#: reading :attr:`datagram` gets :attr:`self._dtgram &lt;_dtgram&gt;`</span>
+        <span class="c1">#: rather than a submission that would run them again.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__timeout__</span>
@@ -1207,7 +1260,7 @@
 <span class="sd">        .. code-block:: python</span>
 
 <span class="sd">           PCAP.register_reassembly('my_protocol', my_adapter)</span>
-<span class="sd">           Extractor('in.pcap', reassembly=True, reasm_protocols=['my_protocol'])</span>
+<span class="sd">           Extractor('in.pcap', reassembly=['my_protocol'])</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>

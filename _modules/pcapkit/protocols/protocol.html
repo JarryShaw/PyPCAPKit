@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1536,6 +1538,15 @@
 <span class="sd">            data model's ``__short_read__`` before :meth:`read` runs, as the</span>
 <span class="sd">            record of a cut those octets may not show (:issue:`2761`).</span>
 
+<span class="sd">            Parsed on its own rather than inside a frame, a layer is given the</span>
+<span class="sd">            octets captured, so its header is unpacked with ``__data_end__``</span>
+<span class="sd">            (see :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`):</span>
+<span class="sd">            a cut inside it is the short read it records, with no</span>
+<span class="sd">            ``packet length &lt; 0`` warning per field and no length resolved below</span>
+<span class="sd">            zero (:issue:`2880`). A check :meth:`read` makes of a value the cut</span>
+<span class="sd">            left asks :func:`~pcapkit.corekit.schema.shortread.cut_on_its_own`</span>
+<span class="sd">            whether to leave it to the short read.</span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the made header holds raw items and its packed</span>
 <span class="sd">                octets do not parse, either as a schema or by :meth:`read`.</span>
@@ -1548,8 +1559,18 @@
 <span class="sd">           the one :meth:`from_data` passes on, is replaced too, rather than</span>
 <span class="sd">           reaching :meth:`read` (:issue:`2725`).</span>
 
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           A layer parsed on its own unpacks its header as ending with the data,</span>
+<span class="sd">           so a cut inside it warns nothing and resolves no length below zero</span>
+<span class="sd">           (:issue:`2880`).</span>
+
 <span class="sd">        """</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
+        <span class="c1"># NOTE: On its own a layer is given the octets captured, so the header it parses ends</span>
+        <span class="c1"># with the data; inside a frame the frame's lengths say where it ends (#2880).</span>
+        <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[_ST]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+            <span class="n">packet</span><span class="p">[</span><span class="s1">'__data_end__'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[_ST]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># NOTE: A rebuilt short read is parsed as quietly as its made header was read,</span>
             <span class="c1"># and keeps the record of a cut its octets may not show (#2711, #2761).</span>
@@ -1749,7 +1770,9 @@
 <span class="sd">            after an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
 <span class="sd">            A refusal it absorbs is quiet, any other error is logged at</span>
 <span class="sd">            :data:`logging.WARNING`, and the failed parse's warnings are dropped,</span>
-<span class="sd">            as :meth:`_analyze_next_layer` describes.</span>
+<span class="sd">            as :meth:`_analyze_next_layer` describes. An empty payload is</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a</span>
+<span class="sd">            frame.</span>
 
 <span class="sd">        .. versionchanged:: 1.7.0</span>
 
@@ -1757,7 +1780,8 @@
 <span class="sd">           rather than the octets the failed parse left unread (:issue:`2842`).</span>
 <span class="sd">           Its ``protocol`` is ``proto``, a refusal it absorbs is quiet, any</span>
 <span class="sd">           other error is logged at :data:`logging.WARNING`, and the failed</span>
-<span class="sd">           parse's warnings are dropped (:issue:`2862`).</span>
+<span class="sd">           parse's warnings are dropped (:issue:`2862`). An empty payload is</span>
+<span class="sd">           ``NoPayload`` (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
@@ -3766,7 +3790,9 @@
 <span class="sd">            its ``error`` the failure's message and its ``protocol`` ``code``,</span>
 <span class="sd">            as a frame's fallback is, or as</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` after</span>
-<span class="sd">            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
+<span class="sd">            an end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`. An</span>
+<span class="sd">            empty payload is :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`</span>
+<span class="sd">            unparsed.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            The parse runs on trial, as under</span>
@@ -3781,8 +3807,17 @@
 <span class="sd">            layers it carries, as a frame's layer does. The fallback is built after</span>
 <span class="sd">            the trial ends, so an error it raises is loud.</span>
 
+<span class="sd">            An empty payload is kept as a frame keeps an empty next layer (see</span>
+<span class="sd">            :meth:`_empty_next_layer`): parsed on its own, ``klass`` would read</span>
+<span class="sd">            a header cut before its first octet, made of nothing but zeros</span>
+<span class="sd">            (:issue:`2880`).</span>
+
 <span class="sd">        """</span>
         <span class="n">payload_io</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="c1"># NOTE: No octets are no layer, as a frame's ``_empty_next_layer`` keeps them (#2880).</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="k">return</span> <span class="n">NoPayload</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">eof</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">''</span>
         <span class="c1"># NOTE: ``beholding`` as well, so a trial block inside the parse, as TLS's, drops its</span>
         <span class="c1"># warnings on a raise rather than reporting them past this one (#2308).</span>

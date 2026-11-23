@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -616,6 +618,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span><span class="p">,</span> <span class="n">fill_short_options</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DCCP</span> <span class="k">as</span> <span class="n">Data_DCCP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">AckVector</span> <span class="k">as</span> <span class="n">Data_AckVector</span>
@@ -882,7 +885,9 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the Data Offset is smaller than the header the</span>
 <span class="sd">                packet type has, or declares more header than the data holds</span>
-<span class="sd">                (:rfc:`4340#section-5.1`).</span>
+<span class="sd">                (:rfc:`4340#section-5.1`). Parsed on its own, a Data Offset or</span>
+<span class="sd">                Type the cut left as zero and the end of the data inside the</span>
+<span class="sd">                header are the short read's (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -903,11 +908,18 @@
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">fixed</span> <span class="o">=</span> <span class="n">header_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dccp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="n">fixed</span><span class="p">:</span>
+        <span class="c1"># NOTE: On its own, a Type the cut left as zero says nothing of the header, so only a Data</span>
+        <span class="c1"># Offset below every type's is refused, and none the cut left as zero is (#2880).</span>
+        <span class="n">fixed</span> <span class="o">=</span> <span class="n">least</span> <span class="o">=</span> <span class="n">header_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="n">what</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'a </span><span class="si">{</span><span class="n">dccp</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+        <span class="k">if</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'type'</span><span class="p">):</span>
+            <span class="n">least</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'offset'</span><span class="p">)</span> <span class="k">else</span> <span class="n">DCCP_MIN_HEADER_LEN</span>
+            <span class="n">what</span> <span class="o">=</span> <span class="s1">'any packet type'</span>
+        <span class="k">if</span> <span class="n">dccp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="n">least</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">dccp</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> is shorter than the '</span>
-                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">fixed</span><span class="si">}</span><span class="s1"> octets of a </span><span class="si">{</span><span class="n">dccp</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">dccp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">least</span><span class="si">}</span><span class="s1"> octets of </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="c1"># NOTE: On its own the end of the data inside the header is its short read's too.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">dccp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">dccp</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
                                 <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
 
@@ -1123,6 +1135,15 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="n">options</span><span class="p">,</span> <span class="n">type_</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'options'</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># NOTE: A Data Offset the data ended before rebuilds as parsed (#2880). Only a Type the</span>
+            <span class="c1"># cut left as zero has more header than it, and a DCCP-Data stands in, past the cut.</span>
+            <span class="n">fixed</span> <span class="o">=</span> <span class="n">header_length</span><span class="p">({</span><span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span> <span class="s1">'type'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">type_</span><span class="p">),</span> <span class="s1">'x'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)})</span>
+            <span class="k">if</span> <span class="n">DCCP_MIN_HEADER_LEN</span> <span class="o">&lt;=</span> <span class="n">data</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="n">fixed</span><span class="p">:</span>
+                <span class="n">type_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">fixed</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_PacketType'</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Data</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="n">DCCP_MIN_HEADER_LEN</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="n">Data_Padding</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Padding</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">options</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fill_short_options</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">fixed</span><span class="p">,</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Padding</span><span class="p">,</span> <span class="n">padding</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'srcport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>
             <span class="s1">'dstport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>
@@ -1130,8 +1151,8 @@
             <span class="s1">'cscov'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">cscov</span><span class="p">,</span>
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
             <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
-            <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="s1">'x'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+            <span class="s1">'type'</span><span class="p">:</span> <span class="n">type_</span><span class="p">,</span>
+            <span class="s1">'x'</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
             <span class="s1">'seq_reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'seq_reserved'</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="s1">'seq'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="s1">'ack_reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ack_reserved'</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -1139,7 +1160,7 @@
             <span class="s1">'service_code'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'service_code'</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="s1">'reset_code'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reset_code'</span><span class="p">,</span> <span class="n">Enum_ResetCode</span><span class="o">.</span><span class="n">Unspecified</span><span class="p">),</span>
             <span class="s1">'reset_data'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reset_data'</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span>
-            <span class="s1">'options'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'options'</span><span class="p">),</span>
+            <span class="s1">'options'</span><span class="p">:</span> <span class="n">options</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 

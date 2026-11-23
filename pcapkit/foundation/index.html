@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation holds the machinery of pcapkit: the PCAP file extractor Extractor, and the engines it reads through;, the IP, TCP and DTLS reassembly, and the analysis of what it reassembles;, t..." />
-<meta name="description" content="pcapkit.foundation holds the machinery of pcapkit: the PCAP file extractor Extractor, and the engines it reads through;, the IP, TCP and DTLS reassembly, and the analysis of what it reassembles;, t..." />
+<meta property="og:description" content="pcapkit.foundation holds the machinery of pcapkit: the PCAP file extractor Extractor, the options it takes, and the engines it reads through;, the IP, TCP and DTLS reassembly, and the analysis of w..." />
+<meta name="description" content="pcapkit.foundation holds the machinery of pcapkit: the PCAP file extractor Extractor, the options it takes, and the engines it reads through;, the IP, TCP and DTLS reassembly, and the analysis of w..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="File Extractor" href="extraction.html"><link rel="prev" title="Auxiliary Interface" href="../interface/misc.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -587,7 +589,8 @@
 <p><a class="reference internal" href="#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> holds the machinery of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>:</p>
 <ul class="simple">
 <li><p>the PCAP file extractor <a class="reference internal" href="extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>,
-and the <a class="reference internal" href="engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">engines</span></code></a> it reads through;</p></li>
+the <a class="reference internal" href="options.html#module-pcapkit.foundation.options" title="pcapkit.foundation.options"><code class="xref py py-mod docutils literal notranslate"><span class="pre">options</span></code></a> it takes, and the
+<a class="reference internal" href="engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">engines</span></code></a> it reads through;</p></li>
 <li><p>the IP, TCP and DTLS <a class="reference internal" href="reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">reassembly</span></code></a>, and the
 <a class="reference internal" href="analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a> of what it reassembles;</p></li>
 <li><p>the TCP flow tracer <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>;</p></li>
@@ -599,6 +602,7 @@ and the <a class="reference internal" href="engines/index.html#module-pcapkit.fo
 <li class="toctree-l2"><a class="reference internal" href="extraction.html#type-variables">Type Variables</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="options.html">Extraction Options</a></li>
 <li class="toctree-l1"><a class="reference internal" href="engines/index.html">Engine Support</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="engines/engine.html">Base Engine</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="engines/engine.html#internal-definitions">Internal Definitions</a></li>

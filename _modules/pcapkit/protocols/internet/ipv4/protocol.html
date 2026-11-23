@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -628,6 +630,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span><span class="p">,</span> <span class="n">ends_inside_option</span><span class="p">,</span> <span class="n">fill_short_options</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">EOOLOption</span> <span class="k">as</span> <span class="n">Data_EOOLOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESECOption</span> <span class="k">as</span> <span class="n">Data_ESECOption</span>
@@ -675,7 +678,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Schema_UnassignedOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">rebuilding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -689,7 +691,6 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Data_Option</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_Option</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_Pseudo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
     <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_OptionNumber</span><span class="p">,</span> <span class="n">Data_Option</span><span class="p">]</span>
@@ -699,12 +700,12 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv4'</span><span class="p">]</span>
 
-<span class="c1">#: The pseudo-header :meth:`IPv4.make` computes a payload's checksum over, and the</span>
-<span class="c1">#: check :meth:`IPv4.__post_init__` runs on the upper layer, resolved there rather</span>
-<span class="c1">#: than imported, so their first import holds</span>
+<span class="c1">#: What computes the upper layer's pending checksum in :meth:`IPv4.make`, and what</span>
+<span class="c1">#: verifies it in :meth:`IPv4.__post_init__`, resolved there rather than</span>
+<span class="c1">#: imported, so their first import holds</span>
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
-<span class="n">_IP_PSEUDO</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[IP_Pseudo]'</span> <span class="o">=</span> \
-    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'IP_Pseudo'</span><span class="p">)</span>
+<span class="n">_COMPUTE_UPPER</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'compute_upper'</span><span class="p">)</span>
 <span class="n">_VERIFY_UPPER</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'verify_upper'</span><span class="p">)</span>
 
@@ -941,13 +942,18 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the version is not 4, if ``ihl`` declares</span>
 <span class="sd">                more header than the data holds, or if an option is malformed.</span>
+<span class="sd">                Parsed on its own, a version the cut left as zero and the end of</span>
+<span class="sd">                the data inside the header are the short read's, whose rebuild</span>
+<span class="sd">                cuts back to it, unless the data ends inside an option</span>
+<span class="sd">                (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">vihl</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="c1"># NOTE: On its own, a version and IHL the cut left as zero are its short read's (#2880).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">vihl</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'vihl'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[IPv4] invalid version: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">vihl</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">ipv4</span> <span class="o">=</span> <span class="n">Data_IPv4</span><span class="p">(</span>
@@ -977,13 +983,19 @@
 
         <span class="c1"># NOTE: An ``ihl`` past the captured header reads zeros that ``from_data`` would rebuild;</span>
         <span class="c1"># rejecting it keeps the octets as captured inside the parent (#1404).</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
-                                <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
+        <span class="n">overrun</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span>
+        <span class="k">if</span> <span class="n">overrun</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: An IHL the cut left as zero declares no options.</span>
         <span class="n">_optl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">IPV4_HEADER_LEN</span>
+        <span class="k">if</span> <span class="n">_optl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'vihl'</span><span class="p">):</span>
+            <span class="n">_optl</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">overrun</span> <span class="ow">and</span> <span class="n">ends_inside_option</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">_used</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
             <span class="n">ipv4</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'options'</span><span class="p">,</span> <span class="n">options</span><span class="p">),</span>
@@ -1068,6 +1080,12 @@
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
+<span class="sd">        An upper layer whose ``make()`` left its checksum pending, as the</span>
+<span class="sd">        payload or behind the Authentication Headers it is constructed with,</span>
+<span class="sd">        gets it computed under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`</span>
+<span class="sd">        unless the packet is a fragment, see</span>
+<span class="sd">        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper`.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            tos_pre: Precedence of the packet.</span>
 <span class="sd">            tos_del: Delay of the packet.</span>
@@ -1115,6 +1133,11 @@
 <span class="sd">           Takes ``reserved`` ahead of ``df`` (:issue:`1326`), and</span>
 <span class="sd">           ``total_length`` (:issue:`1155`) and ``padding`` (:issue:`1317`)</span>
 <span class="sd">           ahead of ``payload``, which shifts every later positional argument.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           Computes the pending checksum of an upper layer behind an</span>
+<span class="sd">           Authentication Header too (:issue:`2861`).</span>
 
 <span class="sd">        """</span>
         <span class="n">tos_pre_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">tos_pre</span><span class="p">,</span> <span class="n">Enum_ToSPrecedence</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'precedence'</span><span class="p">)</span>
@@ -1177,23 +1200,12 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_checksum</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="n">schema</span><span class="o">.</span><span class="n">chksum</span> <span class="o">=</span> <span class="n">compute_checksum</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">])</span>
 
-        <span class="c1"># NOTE: A payload that left its checksum out gets it over this header's</span>
-        <span class="c1"># pseudo-header, unless a fragment, whose checksum covers the datagram (#2471).</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">CHECKSUM_COMPUTE</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="s1">'_checksum_pending'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="fm">__index__</span><span class="p">()</span> <span class="o">==</span> <span class="n">proto</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">offset</span> <span class="ow">or</span> <span class="n">mf</span><span class="p">)):</span>
-            <span class="n">IP_Pseudo</span> <span class="o">=</span> <span class="n">_IP_PSEUDO</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
-
-            <span class="c1"># NOTE: The header is parsed back for a source route's destination,</span>
-            <span class="c1"># quietly, as this layer parses it again (cf. rebuilding).</span>
-            <span class="n">token</span> <span class="o">=</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">header</span> <span class="o">=</span> <span class="n">IPv4</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">])</span>
-            <span class="k">finally</span><span class="p">:</span>
-                <span class="n">rebuilding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-            <span class="c1"># NOTE: The payload puts its own length in the pseudo-header.</span>
-            <span class="n">pseudo</span> <span class="o">=</span> <span class="n">IP_Pseudo</span><span class="p">(</span><span class="n">ip</span><span class="o">=</span><span class="n">header</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">upper_length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">upper</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
-            <span class="n">schema</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="n">upper</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">upper</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pseudo</span><span class="o">=</span><span class="n">pseudo</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="c1"># NOTE: An upper layer that left its checksum out, here or behind an AH, gets it</span>
+        <span class="c1"># over this header's pseudo-header, unless a fragment (#2471, #2861).</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">CHECKSUM_COMPUTE</span><span class="p">:</span>
+            <span class="n">computed</span> <span class="o">=</span> <span class="n">_COMPUTE_UPPER</span><span class="o">.</span><span class="n">klass</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">computed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">schema</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="n">computed</span>
         <span class="k">return</span> <span class="n">schema</span></div>
 
 
@@ -1329,6 +1341,13 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="n">options</span><span class="p">,</span> <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># NOTE: An IHL the data ended before rebuilds as parsed (#2880).</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">Data_OptionType</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">'change'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">'class'</span><span class="p">:</span> <span class="n">Enum_OptionClass</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="s1">'number'</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+            <span class="n">eool</span> <span class="o">=</span> <span class="n">Data_EOOLOption</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
+            <span class="n">options</span><span class="p">,</span> <span class="n">padding</span> <span class="o">=</span> <span class="n">fill_short_options</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">,</span>
+                                                  <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">,</span> <span class="n">eool</span><span class="p">),</span> <span class="n">padding</span><span class="p">)</span>
         <span class="c1"># NOTE: ``make`` takes ``offset`` in 8-octet units but ``data.offset`` is in octets, so</span>
         <span class="c1"># scale it down for an exact round trip, as ``IPv6_Frag._make_data`` does.</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -1349,13 +1368,13 @@
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
             <span class="c1"># NOTE: ``options`` is on ``data`` only when ``hdr_len`` exceeds the fixed header</span>
             <span class="c1"># (see :meth:`read`), so it is read defensively.</span>
-            <span class="s1">'options'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'options'</span><span class="p">:</span> <span class="n">options</span><span class="p">,</span>
             <span class="c1"># NOTE: Passed through rather than recomputed by ``make``, so a truncated capture</span>
             <span class="c1"># rebuilds with the length that was on the wire (#1155).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="c1"># NOTE: And the octets after End of Option List, which no option records. The header</span>
             <span class="c1"># length is not passed, so edited options recompute it.</span>
-            <span class="s1">'padding'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="s1">'padding'</span><span class="p">:</span> <span class="n">padding</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="c1"># NOTE: And the octets captured past the Total Length (#1209).</span>
             <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>

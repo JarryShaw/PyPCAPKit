@@ -127,7 +127,7 @@ Known Limitations
 (:rfc:`6347#section-4.2.3`, :issue:`2440`). Each fragment is flagged
 :attr:`~pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented`
 and its :attr:`~pcapkit.protocols.application.dtls.data.DTLSHandshake.body`
-kept as raw octets. ``Extractor(reassembly=True, dtls=True)`` reassembles the
+kept as raw octets. ``Extractor(fin, reassembly=['dtls'])`` reassembles the
 message, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it
 with :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake`, which
 reads it with :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake`.

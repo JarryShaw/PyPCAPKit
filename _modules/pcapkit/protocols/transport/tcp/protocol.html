@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -620,6 +622,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span><span class="p">,</span> <span class="n">ends_inside_option</span><span class="p">,</span> <span class="n">fill_short_options</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">CC</span> <span class="k">as</span> <span class="n">Data_CC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPDSS</span> <span class="k">as</span> <span class="n">Data_MPTCPDSS</span>
@@ -1144,7 +1147,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the Data Offset declares more header than the</span>
-<span class="sd">                data holds.</span>
+<span class="sd">                data holds. Parsed on its own, the end of the data is a cut and</span>
+<span class="sd">                the short read's, whose rebuild cuts back to it, unless it ends</span>
+<span class="sd">                inside an option (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1190,15 +1195,21 @@
 
         <span class="c1"># NOTE: Rejected rather than read as zeros, which ``from_data`` would</span>
         <span class="c1"># rebuild, so the parent keeps the octets as captured (#1404).</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
-                                <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
+        <span class="n">overrun</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span>
+        <span class="k">if</span> <span class="n">overrun</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: A Data Offset the cut left as zero declares no options.</span>
         <span class="n">_optl</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">TCP_MIN_HEADER_LEN</span>
+        <span class="k">if</span> <span class="n">_optl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'offset'</span><span class="p">):</span>
+            <span class="n">_optl</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
             <span class="c1"># NOTE: Post-EOOL octets are kept so ``make`` rebuilds the parsed Data Offset;</span>
             <span class="c1"># sliced as IPv4 does, since a built schema keeps them in ``options`` (#2769).</span>
             <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tcp_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">overrun</span> <span class="ow">and</span> <span class="n">ends_inside_option</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">_used</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
             <span class="n">tcp</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
                 <span class="s1">'options'</span><span class="p">:</span> <span class="n">options</span><span class="p">,</span>
@@ -1432,6 +1443,12 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="n">options</span><span class="p">,</span> <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># NOTE: A Data Offset the data ended before rebuilds as parsed (#2880).</span>
+            <span class="n">eool</span> <span class="o">=</span> <span class="n">Data_EndOfOptionList</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">options</span><span class="p">,</span> <span class="n">padding</span> <span class="o">=</span> <span class="n">fill_short_options</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">,</span>
+                                                  <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">,</span> <span class="n">eool</span><span class="p">),</span> <span class="n">padding</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'srcport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>
             <span class="s1">'dstport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>
@@ -1449,8 +1466,8 @@
             <span class="s1">'window'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">window_size</span><span class="p">,</span>
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
             <span class="s1">'urgent'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">urgent_pointer</span><span class="p">,</span>
-            <span class="s1">'options'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="s1">'padding'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
+            <span class="s1">'options'</span><span class="p">:</span> <span class="n">options</span><span class="p">,</span>
+            <span class="s1">'padding'</span><span class="p">:</span> <span class="n">padding</span><span class="p">,</span>
             <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>

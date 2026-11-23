@@ -55,11 +55,11 @@ A checksum over the IP pseudo-header is verified and computed by the enclosing
 :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` layer, which builds the
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`, rather than by
 the upper layer reaching back to its parent. So an upper layer constructed
-alone, or behind another header such as an IPv4 Authentication Header, has its
-checksum computed only if given the ``pseudo`` to compute it over, and one
-parsed alone records no outcome. IPv6 computes one behind its extension
-headers too, see :func:`compute_upper`. The sum itself is in
-:mod:`pcapkit.corekit.checksum.internet`.
+alone, or behind a header the IP layer does not look through, such as ESP, has
+its checksum computed only if given the ``pseudo`` to compute it over, and one
+parsed alone records no outcome. IPv4 computes one behind an Authentication
+Header too, and IPv6 behind its extension headers, see :func:`compute_upper`.
+The sum itself is in :mod:`pcapkit.corekit.checksum.internet`.
 
 .. autoclass:: pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo
    :no-members:

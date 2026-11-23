@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -583,6 +585,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.callbacks</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_callbacks</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TCP'</span><span class="p">]</span>
@@ -1094,7 +1097,8 @@
 <span class="sd">        The flow's file is closed and its entry stored before the callbacks run,</span>
 <span class="sd">        so a callback that raises propagates and leaves the flow in the index.</span>
 <span class="sd">        One raising an :exc:`Exception` does not stop the callbacks after it: the</span>
-<span class="sd">        first such error is re-raised once all have run, and a later one logged.</span>
+<span class="sd">        first such error is re-raised once all have run, and a later one logged,</span>
+<span class="sd">        by :func:`~pcapkit.utilities.callbacks.run_callbacks`.</span>
 
 <span class="sd">        """</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
@@ -1117,19 +1121,7 @@
         <span class="c1"># NOTE: stored before the callbacks run, so one that raises cannot drop the flow</span>
         <span class="c1"># from the index (#2827).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Exception]</span>
-        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">callback</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
-                <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">error</span> <span class="o">=</span> <span class="n">exc</span>
-                    <span class="k">continue</span>
-                <span class="c1"># NOTE: logged rather than raised, so it cannot replace the first error (#2855).</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow </span><span class="si">%s</span><span class="s1"> callback </span><span class="si">%r</span><span class="s1"> raised after an earlier one'</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span>
-                             <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">error</span>
+        <span class="n">run_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s1">'TCP flow </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">index</span>
 
 <div class="viewcode-block" id="TCP.finish">

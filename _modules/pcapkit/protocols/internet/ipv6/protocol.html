@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -605,6 +607,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.jumbogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.shortread</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_on_its_own</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_MAX_LENGTH</span>
@@ -633,6 +636,10 @@
     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'compute_upper'</span><span class="p">)</span>
 <span class="n">_VERIFY_UPPER</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'verify_upper'</span><span class="p">)</span>
+<span class="c1">#: The extension header base whose lengths :meth:`IPv6.make` checks, resolved</span>
+<span class="c1">#: there for the same reason.</span>
+<span class="n">_IPV6_EXT</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_ext.protocol'</span><span class="p">,</span> <span class="s1">'IPv6_Ext'</span><span class="p">)</span>
 
 <span class="c1">#: Length of the fixed IPv6 header, i.e. the offset of the first extension</span>
 <span class="c1">#: header, :rfc:`8200#section-3`. The one home of this value (:issue:`1739`); it</span>
@@ -785,6 +792,8 @@
 <span class="sd">            ProtocolError: If the version is not 6, or if the packet is one of</span>
 <span class="sd">                the errors :rfc:`2675#section-3` has a receiver detect (see</span>
 <span class="sd">                :func:`~pcapkit.protocols.internet.ipv6.schema.jumbogram_error`).</span>
+<span class="sd">                Parsed on its own, a version, Payload Length or Next Header the</span>
+<span class="sd">                cut left as zero is the short read's (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -793,14 +802,14 @@
 
         <span class="c1"># NOTE: This class reads IPv6 only, as ``IPv4.read`` reads IPv4 only; telling the two</span>
         <span class="c1"># apart by the Version is left to the dispatchers (#1680).</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">hextet</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">hextet</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">6</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'hextet'</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[IPv6] invalid version: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">hextet</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># NOTE: A receiver treats each as an error (#1687), so the frame stops here, as in</span>
         <span class="c1"># ``IPv4.read``; a Fragment header beside a Jumbo Payload is caught on the walk.</span>
         <span class="n">rest</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span>
         <span class="n">error</span> <span class="o">=</span> <span class="n">jumbogram_error</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut_on_its_own</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">ipv6</span> <span class="o">=</span> <span class="n">Data_IPv6</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
@@ -857,6 +866,14 @@
 <span class="sd">        computed under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`, see</span>
 <span class="sd">        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper`.</span>
 
+<span class="sd">        An extension header ``payload`` chains as a layer, as far as a</span>
+<span class="sd">        receiver's walk reaches, must be a multiple of 8 octets long</span>
+<span class="sd">        (:rfc:`8200#section-4`), unless its class clears</span>
+<span class="sd">        :attr:`IPv6_Ext._ipv6_aligned</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._ipv6_aligned&gt;`.</span>
+<span class="sd">        A chain given as octets is written as is, as :meth:`_make_data`</span>
+<span class="sd">        rebuilds a captured one.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            traffic_class: Traffic class.</span>
 <span class="sd">            flow_label: Flow label.</span>
@@ -878,7 +895,8 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member</span>
-<span class="sd">                or code that does not fit in one octet.</span>
+<span class="sd">                or code that does not fit in one octet, or an extension header</span>
+<span class="sd">                chained as a layer is not a multiple of 8 octets long.</span>
 
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
@@ -887,11 +905,26 @@
 
 <span class="sd">        .. versionchanged:: 1.7.0</span>
 
-<span class="sd">           Computes the pending checksum of an upper layer past extension</span>
-<span class="sd">           headers too (:issue:`2824`).</span>
+<span class="sd">           * Computes the pending checksum of an upper layer past extension</span>
+<span class="sd">             headers too (:issue:`2824`).</span>
+<span class="sd">           * Refuses an extension header that is not a multiple of 8 octets</span>
+<span class="sd">             long (:issue:`2886`).</span>
 
 <span class="sd">        """</span>
         <span class="n">next_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'next header'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: RFC 8200 s4 makes each extension header a multiple of 8 octets; the walk is</span>
+        <span class="c1"># the receiver's, over the layers given, as in compute_upper (#2886).</span>
+        <span class="n">layer</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">payload</span><span class="p">,</span> <span class="n">next_val</span><span class="p">,</span> <span class="n">_IPV6_EXT</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># type: Any, Any, Any</span>
+        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span> <span class="ow">and</span> <span class="n">layer</span><span class="o">.</span><span class="n">_ipv6_aligned</span><span class="p">:</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">Enum_ExtensionHeader</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1"> header length: '</span>
+                                    <span class="sa">f</span><span class="s1">'must be a multiple of 8 octets, not </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">code</span><span class="p">,</span> <span class="n">layer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># NOTE: Written as given, so a truncated capture keeps its declared length (#1155);</span>
         <span class="c1"># otherwise computed, or zero for an oversize payload or a jumbogram (#1687).</span>

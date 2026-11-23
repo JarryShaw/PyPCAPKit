@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -761,23 +763,45 @@ dict key.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If Payload Length describes fewer octets than the
+    fixed fields (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.2"><strong>RFC 4302 Section 2.2</strong></a>). Parsed on its own, one
+    the cut left as zero is the short read’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ah.protocol.AH.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransType.UDP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ah/protocol.html#AH.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ah.protocol.AH.make" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransType.UDP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ah/protocol.html#AH.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ah.protocol.AH.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
+<p>Without <code class="docutils literal notranslate"><span class="pre">payload_length</span></code>, the ICV field is <code class="docutils literal notranslate"><span class="pre">icv</span></code> and the fewest
+zero octets that make the header a multiple of 32 bits under IPv4 or
+64 bits under IPv6 (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.6"><strong>RFC 4302 Section 2.6</strong></a>);
+<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-3.3.3.2.1"><strong>RFC 4302 Section 3.3.3.2.1</strong></a> leaves the padding’s content to the
+sender. Payload Length counts the padding (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.2"><strong>RFC 4302 Section 2.2</strong></a>),
+and a parse reads it back as part of <code class="docutils literal notranslate"><span class="pre">icv</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>next</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Next header type.</p></li>
-<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Reserved field; zero on send per <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.3"><strong>RFC 4302 Section 2.3</strong></a>,
+<li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Reserved field; zero on send per <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.3"><strong>RFC 4302 Section 2.3</strong></a>,
 but written as given so that a parsed header rebuilds unchanged.</p></li>
 <li><p><strong>spi</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Security Parameters Index.</p></li>
 <li><p><strong>seq</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Sequence Number Field.</p></li>
-<li><p><strong>icv</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Integrity Check Value (ICV).</p></li>
+<li><p><strong>icv</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Integrity Check Value (ICV), with any padding already in it
+kept as given.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload of current instance.</p></li>
+<li><p><strong>payload_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Payload Length, in 32-bit words minus 2; computed
+from the padded ICV when omitted. When given, it must describe
+<code class="docutils literal notranslate"><span class="pre">icv</span></code> exactly, and no padding is added, so that
+<a class="reference internal" href="#pcapkit.protocols.internet.ah.protocol.AH._make_data" title="pcapkit.protocols.internet.ah.protocol.AH._make_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_data()</span></code></a> rebuilds a parsed header as captured,
+aligned or not.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">4</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">6</span></span></code></span>]</span>) – Version of the IP header carrying this one, which sets
+the alignment <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-3.3.3.2.1"><strong>RFC 4302 Section 3.3.3.2.1</strong></a> pads the ICV to.</p></li>
+<li><p><strong>extension</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If the header is an IPv6 extension header, aligned for
+IPv6 whatever <code class="docutils literal notranslate"><span class="pre">version</span></code> says, since <a class="reference internal" href="#pcapkit.protocols.internet.ah.protocol.AH.__post_init__" title="pcapkit.protocols.internet.ah.protocol.AH.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a>
+always passes <code class="docutils literal notranslate"><span class="pre">version</span></code> its default of <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -789,12 +813,21 @@ but written as given so that a parsed header rebuilds unchanged.</p></li>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">next</span></code> is a name, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, or a member
-    or code that does not fit in one octet.</p>
+    or code that does not fit in one octet, <code class="docutils literal notranslate"><span class="pre">version</span></code> is neither
+    <code class="docutils literal notranslate"><span class="pre">4</span></code> nor <code class="docutils literal notranslate"><span class="pre">6</span></code>, the padded ICV is too long for Payload Length
+    to count, or <code class="docutils literal notranslate"><span class="pre">payload_length</span></code> does not fit in one octet or
+    does not describe <code class="docutils literal notranslate"><span class="pre">icv</span></code> exactly.</p>
 </dd>
 </dl>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Takes <code class="docutils literal notranslate"><span class="pre">reserved</span></code> ahead of <code class="docutils literal notranslate"><span class="pre">spi</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1327">#1327</a>), which shifts
 every later positional argument.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>Pads <code class="docutils literal notranslate"><span class="pre">icv</span></code> to the alignment <code class="docutils literal notranslate"><span class="pre">version</span></code> and <code class="docutils literal notranslate"><span class="pre">extension</span></code> set,
+where it cut the octets past a multiple of 32 bits, and refuses an
+ICV too long for Payload Length, where it wrapped the field; takes
+<code class="docutils literal notranslate"><span class="pre">payload_length</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2886">#2886</a>).</p>
 </div>
 </dd></dl>
 
@@ -882,7 +915,7 @@ every later positional argument.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ah.schema.</span></span><span class="sig-name descname"><span class="pre">AH_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN" title="Link to this definition">¶</a></dt>
 <dd><p>Length of the fixed part of an IP Authentication Header (AH), before its
-Integrity Check Value, <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2"><strong>RFC 4302 Section 2</strong></a>. The one home of this value
+Integrity Check Value, <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2"><strong>RFC 4302 Section 2</strong></a>. The one home of this value
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>), here so that the schema’s ICV length and the protocol
 modules read the same one; it is fixed by the RFC, so it is never
 configurable.</p>
@@ -933,7 +966,8 @@ configurable.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ah.schema.AH.icv">
 <span class="sig-name descname"><span class="pre">icv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">icv&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ah.schema.AH.icv" title="Link to this definition">¶</a></dt>
-<dd><p>Integrity check value.</p>
+<dd><p>Integrity check value, with the padding <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.6"><strong>RFC 4302 Section 2.6</strong></a> aligns
+the header with.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -992,7 +1026,8 @@ configurable.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ah.data.AH.icv">
 <span class="sig-name descname"><span class="pre">icv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ah.data.AH.icv" title="Link to this definition">¶</a></dt>
-<dd><p>Integrity check value.</p>
+<dd><p>Integrity check value, with the padding <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.6"><strong>RFC 4302 Section 2.6</strong></a> aligns
+the header with.</p>
 </dd></dl>
 
 </dd></dl>

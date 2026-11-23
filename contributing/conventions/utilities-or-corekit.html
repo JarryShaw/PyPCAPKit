@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -680,6 +682,24 @@ after the one the data ends inside, as <code class="docutils literal notranslate
 that would refuse such a zero leaves it to the short read, and refuses a read value
 with a <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, as the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>
 helpers of <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext.schema" title="pcapkit.protocols.internet.ipv6_ext.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.schema</span></code></a> do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>).</p>
+<p><strong>On its own, the end of the data is a cut; inside a frame, the frame’s lengths say
+where the message ends.</strong> A layer parsed with no layer before it, as
+<a class="reference internal" href="../../pcapkit/utilities/contextvars.html#pcapkit.utilities.contextvars.frame_depth" title="pcapkit.utilities.contextvars.frame_depth"><code class="xref py py-data docutils literal notranslate"><span class="pre">frame_depth</span></code></a> tells, is given the octets
+captured, so <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.unpack</span></code></a>
+unpacks its header with <code class="docutils literal notranslate"><span class="pre">__data_end__</span></code>. Past the cut, <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> then warns nothing of <code class="docutils literal notranslate"><span class="pre">__length__</span></code> falling
+below zero and resolves no length below zero from the zeros the cut left, so those
+fields read nothing and the short read records the cut. Settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>,
+completing <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2848">#2848</a>. Inside a frame a field running past the length the enclosing
+layer declares overruns it and warns, and the frame keeps a header its octets cannot
+hold as <a class="reference internal" href="../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
+<p>A protocol’s own check follows the same rule through
+<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.cut_on_its_own" title="pcapkit.corekit.schema.shortread.cut_on_its_own"><code class="xref py py-func docutils literal notranslate"><span class="pre">cut_on_its_own()</span></code></a>. On its own, a version or
+length the cut left as zero, or a header length the data ends before, is the short
+read’s, as such a zero is for a field callback (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>).
+<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.fill_short_options" title="pcapkit.corekit.schema.shortread.fill_short_options"><code class="xref py py-func docutils literal notranslate"><span class="pre">fill_short_options()</span></code></a> rebuilds that header
+length, which <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1404">#1404</a> refused because the rebuild filled the zeros in. A check
+the cut leaves nothing to decide by still refuses: the PCAP magic number, IGMP’s
+classification by length, NGAP’s PER decoding, and the TLS, DTLS and HTTP/2 framing.</p>
 <p><strong>A helper in one protocol’s own schema module moves there too once code outside that
 protocol uses it and it is generic enough to reuse</strong>, so other implementors can find
 it; a helper only its own protocol calls stays beside the schema. Ruled on

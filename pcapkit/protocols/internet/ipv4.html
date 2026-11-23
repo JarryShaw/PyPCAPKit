@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -923,7 +925,11 @@ exist; any other value is a <code class="docutils literal notranslate"><span cla
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the version is not 4, if <code class="docutils literal notranslate"><span class="pre">ihl</span></code> declares
-    more header than the data holds, or if an option is malformed.</p>
+    more header than the data holds, or if an option is malformed.
+    Parsed on its own, a version the cut left as zero and the end of
+    the data inside the header are the short read’s, whose rebuild
+    cuts back to it, unless the data ends inside an option
+    (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -932,6 +938,11 @@ exist; any other value is a <code class="docutils literal notranslate"><span cla
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv4.protocol.IPv4.make">
 <span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tos_pre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ToSPrecedence.Routine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tos_del</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ToSDelay.NORMAL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tos_thr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ToSThroughput.NORMAL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tos_rel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ToSReliability.NORMAL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tos_ecn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ToSECN.Not_ECT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransType.UDP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv4/protocol.html#IPv4.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv4.protocol.IPv4.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
+<p>An upper layer whose <code class="docutils literal notranslate"><span class="pre">make()</span></code> left its checksum pending, as the
+payload or behind the Authentication Headers it is constructed with,
+gets it computed under <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_COMPUTE" title="pcapkit.utilities.config.CHECKSUM_COMPUTE"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_COMPUTE</span></code></a>
+unless the packet is a fragment, see
+<a class="reference internal" href="../misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_upper()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -985,6 +996,10 @@ link-layer padding; written as is.</p></li>
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Takes <code class="docutils literal notranslate"><span class="pre">reserved</span></code> ahead of <code class="docutils literal notranslate"><span class="pre">df</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1326">#1326</a>), and
 <code class="docutils literal notranslate"><span class="pre">total_length</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1155">#1155</a>) and <code class="docutils literal notranslate"><span class="pre">padding</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1317">#1317</a>)
 ahead of <code class="docutils literal notranslate"><span class="pre">payload</span></code>, which shifts every later positional argument.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>Computes the pending checksum of an upper layer behind an
+Authentication Header too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2861">#2861</a>).</p>
 </div>
 </dd></dl>
 

@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -576,7 +578,6 @@
 <span class="sd">functions and their data models.</span>
 
 <span class="sd">"""</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
@@ -586,8 +587,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pypcapfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyPCAPFile</span> <span class="k">as</span> <span class="n">PyPCAPFile_Engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scapy</span> <span class="k">as</span> <span class="n">Scapy_Engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -603,13 +605,6 @@
     <span class="c1">#: open ``...`` parameter list, which lets both call shapes type-check.</span>
     <span class="n">ReassemblyAdapter</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="s1">'Optional[TCP_Data]'</span><span class="p">]</span>
 
-    <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'little'</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">]</span>
-    <span class="c1">#: Every output format key shipped in</span>
-    <span class="c1">#: :attr:`Extractor.__output__ &lt;pcapkit.foundation.extraction.Extractor.__output__&gt;`</span>
-    <span class="c1">#: and :attr:`TraceFlow.__output__</span>
-    <span class="c1">#: &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__&gt;`, aliases</span>
-    <span class="c1">#: included (``'cap'``, ``'xml'``, ``'text'``, ``'txt'``).</span>
-    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="s1">'pcapng'</span><span class="p">,</span> <span class="s1">'json'</span><span class="p">,</span> <span class="s1">'tree'</span><span class="p">,</span> <span class="s1">'text'</span><span class="p">,</span> <span class="s1">'txt'</span><span class="p">,</span> <span class="s1">'plist'</span><span class="p">,</span> <span class="s1">'xml'</span><span class="p">]</span>
     <span class="c1"># NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;</span>
     <span class="c1"># each copy needs updating when a new engine lands.</span>
     <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">,</span> <span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">,</span>
@@ -642,36 +637,32 @@
 
 <div class="viewcode-block" id="follow_tcp_stream">
 <a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extractor options</span>
-                      <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                      <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TraceFlow options # pylint: disable=redefined-builtin</span>
-                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'ByteOrder'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">trace_bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                      <span class="n">trace_analyse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Stream, ...]'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>           <span class="c1"># Extractor options</span>
+                      <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">traceflow</span><span class="p">:</span> <span class="s1">'Optional[TraceFlowOptions]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Stream, ...]'</span><span class="p">:</span>  <span class="c1"># TraceFlow options</span>
 <span class="w">    </span><span class="sd">"""Follow TCP streams.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        fin: file name to be read; if the file does not exist, raise</span>
+<span class="sd">        fin: file name to be read, as named; if the file does not exist, raise</span>
 <span class="sd">            :exc:`~pcapkit.utilities.exceptions.FileNotFound`</span>
-<span class="sd">        extension: if check and append extensions to output file</span>
 <span class="sd">        verbose: if print verbose output information</span>
 <span class="sd">        engine: extraction engine to be used</span>
-
-<span class="sd">        fout: path name for flow tracer if necessary</span>
-<span class="sd">        format: output file format of flow tracer</span>
-<span class="sd">        byteorder: output file byte order</span>
-<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
-<span class="sd">        trace_bidirectional: whether both directions of a conversation are</span>
-<span class="sd">            followed as one stream, which is the default; :data:`False` gives</span>
-<span class="sd">            one stream per direction</span>
-<span class="sd">        trace_analyse: whether each traced flow reassembles its application</span>
-<span class="sd">            layer, so that :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;` can be read off</span>
-<span class="sd">            :attr:`Extractor.trace &lt;pcapkit.foundation.extraction.Extractor.trace&gt;`.</span>
-<span class="sd">            Off by default; the returned ``conversations`` come from the TCP</span>
-<span class="sd">            reassembly this function always runs.</span>
+<span class="sd">        traceflow: flow tracing settings, whose</span>
+<span class="sd">            :attr:`~pcapkit.foundation.options.TraceFlowOptions.protocols` name</span>
+<span class="sd">            ``'tcp'``; :data:`None` takes their defaults. With</span>
+<span class="sd">            :attr:`~pcapkit.foundation.options.TraceFlowOptions.analyze`,</span>
+<span class="sd">            :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;` can be read off</span>
+<span class="sd">            :attr:`Extractor.traceflow &lt;pcapkit.foundation.extraction.Extractor.traceflow&gt;`;</span>
+<span class="sd">            the returned ``conversations`` come from the TCP reassembly this</span>
+<span class="sd">            function always runs. With</span>
+<span class="sd">            :attr:`~pcapkit.foundation.options.TraceFlowOptions.bidirectional`,</span>
+<span class="sd">            the default, a stream holds both directions of a conversation.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple of extracted TCP streams.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FormatError: If ``traceflow`` does not name ``'tcp'``.</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -679,7 +670,19 @@
 <span class="sd">       stream holds both directions of a conversation; 1.4.x returned one</span>
 <span class="sd">       stream per direction.</span>
 
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       ``traceflow`` replaces ``fout``, ``format``, ``byteorder``, ``nanosecond``,</span>
+<span class="sd">       ``trace_bidirectional`` and ``trace_analyse``, with no alias, and every</span>
+<span class="sd">       parameter after ``fin`` is keyword-only. ``fin`` is required and opened</span>
+<span class="sd">       as named, so ``extension`` is removed (:issue:`2836`).</span>
+
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">traceflow</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">traceflow</span> <span class="o">=</span> <span class="n">TraceFlowOptions</span><span class="p">(</span><span class="n">protocols</span><span class="o">=</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="s1">'tcp'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">traceflow</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'follow_tcp_stream traces TCP, but traceflow names </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">traceflow</span><span class="o">.</span><span class="n">protocols</span><span class="p">)</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
     <span class="c1"># NOTE: PyShark has no TCP reassembly adapter, and PyPCAP and PCAP_CT disable</span>
     <span class="c1"># TCP flow tracing, so none of them can follow a stream.</span>
     <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">):</span>
@@ -687,13 +690,8 @@
              <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">extraction</span> <span class="o">=</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
-                           <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
-                           <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">reassembly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
-                           <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
-                           <span class="n">trace_bidirectional</span><span class="o">=</span><span class="n">trace_bidirectional</span><span class="p">,</span>
-                           <span class="n">trace_analyse</span><span class="o">=</span><span class="n">trace_analyse</span><span class="p">)</span>  <span class="c1"># type: ignore[var-annotated]</span>
+    <span class="n">extraction</span> <span class="o">=</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span> <span class="ow">or</span> <span class="s1">'default'</span><span class="p">,</span>
+                           <span class="n">traceflow</span><span class="o">=</span><span class="n">traceflow</span><span class="p">)</span>  <span class="c1"># type: ignore[var-annotated]</span>
 
     <span class="c1"># NOTE: dispatch on the engine instance with ``isinstance`` (#399), so a subclass</span>
     <span class="c1"># of a built-in engine reaches its adapter; only third-party adapters take ``count``.</span>
@@ -731,7 +729,7 @@
 
     <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Stream]</span>
     <span class="n">frames</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span>
-    <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">traceflow</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
         <span class="n">reassembly</span> <span class="o">=</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">packets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Packet]</span>

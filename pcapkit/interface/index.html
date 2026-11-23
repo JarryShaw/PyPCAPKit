@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -623,12 +625,20 @@ request.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td rowspan="19"><p>Core Interfaces</p></td>
+<tr class="row-even"><td rowspan="23"><p>Core Interfaces</p></td>
 <td colspan="2"><p><a class="reference internal" href="core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.core.extract()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td colspan="2"><p><a class="reference internal" href="core.html#pcapkit.interface.core.reassemble" title="pcapkit.interface.core.reassemble"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.core.reassemble()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td colspan="2"><p><a class="reference internal" href="core.html#pcapkit.interface.core.trace" title="pcapkit.interface.core.trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.core.trace()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p><a class="reference internal" href="../foundation/options.html#pcapkit.foundation.options.DumpOptions" title="pcapkit.foundation.options.DumpOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.options.DumpOptions</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p><a class="reference internal" href="../foundation/options.html#pcapkit.foundation.options.ReassemblyOptions" title="pcapkit.foundation.options.ReassemblyOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.options.ReassemblyOptions</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p><a class="reference internal" href="../foundation/options.html#pcapkit.foundation.options.TraceFlowOptions" title="pcapkit.foundation.options.TraceFlowOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.options.TraceFlowOptions</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p><a class="reference internal" href="../foundation/options.html#pcapkit.foundation.options.StreamOptions" title="pcapkit.foundation.options.StreamOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.options.StreamOptions</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td rowspan="4"><p>Output File Formats</p></td>
 <td><p><a class="reference internal" href="core.html#pcapkit.interface.core.TREE" title="pcapkit.interface.core.TREE"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.interface.core.TREE</span></code></a></p></td>

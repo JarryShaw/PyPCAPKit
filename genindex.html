@@ -207,6 +207,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -338,6 +339,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1637,6 +1639,8 @@
 </li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._flag_a">_flag_a (pcapkit.foundation.extraction.Extractor attribute)</a>
 </li>
+        <li><a href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_c">_flag_c (pcapkit.foundation.reassembly.reassembly.Reassembly attribute)</a>
+</li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._flag_d">_flag_d (pcapkit.foundation.extraction.Extractor attribute)</a>
 
         <ul>
@@ -1759,6 +1763,12 @@
 </li>
         <li><a href="pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._IPInterfaceField">_IPInterfaceField (class in pcapkit.corekit.fields.ipaddress)</a>
 </li>
+        <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP._ipv6_aligned">_ipv6_aligned (pcapkit.protocols.internet.esp.protocol.ESP attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._ipv6_aligned">(pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext attribute)</a>
+</li>
+        </ul></li>
         <li><a href="pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._ipv6_carries_tcp">_ipv6_carries_tcp() (in module pcapkit.toolkit.pypcapfile)</a>
 </li>
         <li><a href="pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._is_raw">_is_raw() (in module pcapkit.toolkit.pypcapfile)</a>
@@ -2877,10 +2887,10 @@
 </li>
         <li><a href="pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.protocol.ARP._make_proto_resolve">_make_proto_resolve() (pcapkit.protocols.link.arp.protocol.ARP method)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_qos_attribute">_make_qos_attribute() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_qos_attribute">_make_qos_attribute() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH._make_qos_attributes">_make_qos_attributes() (pcapkit.protocols.internet.mh.protocol.MH method)</a>
 </li>
         <li><a href="pcapkit/protocols/link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11._make_qos_control">_make_qos_control() (pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11 method)</a>
@@ -7397,6 +7407,8 @@
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.an_signaling">an_signaling (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions.analyze">analyze (pcapkit.foundation.options.TraceFlowOptions attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze">analyze() (pcapkit.protocols.protocol.Protocol class method)</a>
 
         <ul>
@@ -9897,6 +9909,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.bid_serv">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions.bidirectional">bidirectional (pcapkit.foundation.options.TraceFlowOptions attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.BIDReferenceSuboption">BIDReferenceSuboption (class in pcapkit.protocols.internet.mh.data)</a>
 
         <ul>
@@ -10171,14 +10185,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.blackjack">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.blaze">blaze (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.blaze">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.blizwow">blizwow (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -10867,6 +10881,12 @@
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.data.HandoverInitiateMessage.buffer">(pcapkit.protocols.internet.mh.data.HandoverInitiateMessage attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.StreamOptions.buffer_path">buffer_path (pcapkit.foundation.options.StreamOptions attribute)</a>
+</li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.StreamOptions.buffer_save">buffer_save (pcapkit.foundation.options.StreamOptions attribute)</a>
+</li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.StreamOptions.buffer_size">buffer_size (pcapkit.foundation.options.StreamOptions attribute)</a>
+</li>
         <li><a href="pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.data.dtls.BufferID">BufferID (in module pcapkit.foundation.reassembly.data.dtls)</a>
 
         <ul>
@@ -10993,9 +11013,11 @@
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BytearrayError">BytearrayError</a>
 </li>
-        <li><a href="pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.data.Loopback.byteorder">byteorder (pcapkit.protocols.link.loopback.data.Loopback attribute)</a>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions.byteorder">byteorder (pcapkit.foundation.options.TraceFlowOptions attribute)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.data.Loopback.byteorder">(pcapkit.protocols.link.loopback.data.Loopback attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/link/netlink.html#pcapkit.protocols.link.netlink.data.Netlink.byteorder">(pcapkit.protocols.link.netlink.data.Netlink attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.data.MagicNumber.byteorder">(pcapkit.protocols.misc.pcap.header.data.MagicNumber attribute)</a>
@@ -15331,6 +15353,8 @@
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.CustomOption">(class in pcapkit.protocols.misc.pcapng.schema)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.cut_on_its_own">cut_on_its_own() (in module pcapkit.corekit.schema.shortread)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.cvc">cvc (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -17071,14 +17095,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.dfn">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dfoxserver">dfoxserver (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.dfoxserver">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dfserver">dfserver (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -18657,6 +18681,8 @@
 </li>
         <li><a href="pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase">DumperBase (class in pcapkit.dumpkit.common)</a>
 </li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.DumpOptions">DumpOptions (class in pcapkit.foundation.options)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.data.DFFFlags.dup">dup (pcapkit.protocols.internet.hopopt.data.DFFFlags attribute)</a>
 
         <ul>
@@ -20039,6 +20065,8 @@
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.EndRecord">(class in pcapkit.protocols.misc.pcapng.schema)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.ends_inside_option">ends_inside_option() (in module pcapkit.corekit.schema.shortread)</a>
+</li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.EnergySavingIndication">EnergySavingIndication (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.enfs">enfs (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -21240,6 +21268,8 @@
           <li><a href="pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.type.Type.Extension">(pcapkit.const.ieee802_11.type.Type attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.DumpOptions.extension">extension (pcapkit.foundation.options.DumpOptions attribute)</a>
+</li>
         <li><a href="pcapkit/const/icmpv6.html#pcapkit.const.icmpv6.parameter_problem_code.ParameterProblemCode.Extension_header_chain_too_long">Extension_header_chain_too_long (pcapkit.const.icmpv6.parameter_problem_code.ParameterProblemCode attribute)</a>
 </li>
         <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT">EXTENSION_HEADER_LIMIT (in module pcapkit.utilities.config)</a>
@@ -22012,6 +22042,8 @@
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FileNotFound">FileNotFound</a>
 </li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.DumpOptions.files">files (pcapkit.foundation.options.DumpOptions attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.filesphere">filesphere (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -22028,6 +22060,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.filex_lport">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.fill_short_options">fill_short_options() (in module pcapkit.corekit.schema.shortread)</a>
+</li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.IF_FilterOption.filter">filter (pcapkit.protocols.misc.pcapng.schema.IF_FilterOption attribute)</a>
 </li>
         <li><a href="pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE">FILTER_NAME_TO_LINKTYPE (in module pcapkit.toolkit.pyshark)</a>
@@ -23289,6 +23323,10 @@
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.format">format (pcapkit.foundation.extraction.Extractor property)</a>
 
         <ul>
+          <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.DumpOptions.format">(pcapkit.foundation.options.DumpOptions attribute)</a>
+</li>
+          <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions.format">(pcapkit.foundation.options.TraceFlowOptions attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.data.ESECOption.format">(pcapkit.protocols.internet.ipv4.data.ESECOption attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.schema.ESECOption.format">(pcapkit.protocols.internet.ipv4.schema.ESECOption attribute)</a>
@@ -23362,6 +23400,12 @@
 
         <ul>
           <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.Memo.found">(pcapkit.foundation.engines._pcap_backend.Memo attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.DumpOptions.fout">fout (pcapkit.foundation.options.DumpOptions attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions.fout">(pcapkit.foundation.options.TraceFlowOptions attribute)</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.fpitp">fpitp (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -36488,6 +36532,8 @@
 </li>
           <li><a href="pcapkit/foundation/extraction.html#module-pcapkit.foundation.extraction">pcapkit.foundation.extraction</a>
 </li>
+          <li><a href="pcapkit/foundation/options.html#module-pcapkit.foundation.options">pcapkit.foundation.options</a>
+</li>
           <li><a href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly">pcapkit.foundation.reassembly</a>
 </li>
           <li><a href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly.data">pcapkit.foundation.reassembly.data</a>
@@ -37057,6 +37103,8 @@
           <li><a href="pcapkit/toolkit/3rdparty.html#module-pcapkit.toolkit.scapy">pcapkit.toolkit.scapy</a>
 </li>
           <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities">pcapkit.utilities</a>
+</li>
+          <li><a href="pcapkit/utilities/callbacks.html#module-pcapkit.utilities.callbacks">pcapkit.utilities.callbacks</a>
 </li>
           <li><a href="pcapkit/utilities/chardet.html#module-pcapkit.utilities.chardet">pcapkit.utilities.chardet</a>
 </li>
@@ -39230,6 +39278,8 @@
         <li><a href="pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP.nanosecond">nanosecond (pcapkit.foundation.engines.pcap.PCAP property)</a>
 
         <ul>
+          <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions.nanosecond">(pcapkit.foundation.options.TraceFlowOptions attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.data.MagicNumber.nanosecond">(pcapkit.protocols.misc.pcap.header.data.MagicNumber attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.protocol.Header.nanosecond">(pcapkit.protocols.misc.pcap.header.protocol.Header property)</a>
@@ -41208,6 +41258,8 @@
         <li><a href="pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NO_DEFAULT">NO_DEFAULT (in module pcapkit.corekit.sentinels)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.NO_DH_PROPOSAL_CHOSEN">NO_DH_PROPOSAL_CHOSEN (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
+</li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.StreamOptions.no_eof">no_eof (pcapkit.foundation.options.StreamOptions attribute)</a>
 </li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.error_code.ErrorCode.NO_ERROR">NO_ERROR (pcapkit.const.http.error_code.ErrorCode attribute)</a>
 </li>
@@ -47289,6 +47341,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.foundation.options
+
+        <ul>
+          <li><a href="pcapkit/foundation/options.html#module-pcapkit.foundation.options">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.foundation.reassembly
 
         <ul>
@@ -49283,6 +49342,13 @@
 
         <ul>
           <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities">module</a>
+</li>
+        </ul></li>
+        <li>
+    pcapkit.utilities.callbacks
+
+        <ul>
+          <li><a href="pcapkit/utilities/callbacks.html#module-pcapkit.utilities.callbacks">module</a>
 </li>
         </ul></li>
         <li>
@@ -53326,6 +53392,10 @@
         <li><a href="pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.protocols">protocols (pcapkit.corekit.protochain.ProtoChain property)</a>
 
         <ul>
+          <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.ReassemblyOptions.protocols">(pcapkit.foundation.options.ReassemblyOptions attribute)</a>
+</li>
+          <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions.protocols">(pcapkit.foundation.options.TraceFlowOptions attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.Frame.protocols">(pcapkit.protocols.misc.pcap.frame.data.Frame attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.data.EnhancedPacketBlock.protocols">(pcapkit.protocols.misc.pcapng.data.EnhancedPacketBlock attribute)</a>
@@ -55633,6 +55703,8 @@
         <li><a href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.ReassemblyManager">ReassemblyManager (class in pcapkit.foundation.reassembly)</a>
 </li>
         <li><a href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta">ReassemblyMeta (class in pcapkit.foundation.reassembly.reassembly)</a>
+</li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.ReassemblyOptions">ReassemblyOptions (class in pcapkit.foundation.options)</a>
 </li>
         <li><a href="pcapkit/const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype.Reassociation_Request">Reassociation_Request (pcapkit.const.ieee802_11.management_subtype.ManagementSubtype attribute)</a>
 </li>
@@ -58828,12 +58900,12 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_8609">reserved_8609 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8615">reserved_8615 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8665">reserved_8665 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8666">reserved_8666 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_8668">reserved_8668 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
@@ -59376,7 +59448,7 @@
 </li>
           <li><a href="contributing/conventions/protocol-layer-placement.html#index-5">RFC 1122 Section 2.3.2</a>, <a href="pcapkit/protocols/application/rarp.html#index-1">[1]</a>
 </li>
-          <li><a href="contributing/pep.html#index-44">RFC 1122 Section 3.3.2</a>, <a href="contributing/pep.html#index-47">[1]</a>, <a href="pcapkit/foundation/extraction.html#index-0">[2]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-4">[3]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-7">[4]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-0">[5]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-6">[6]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-11">[7]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-3">[8]</a>
+          <li><a href="contributing/pep.html#index-44">RFC 1122 Section 3.3.2</a>, <a href="contributing/pep.html#index-47">[1]</a>, <a href="pcapkit/foundation/options.html#index-0">[2]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-4">[3]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-7">[4]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-0">[5]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-6">[6]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-11">[7]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-3">[8]</a>
 </li>
           <li><a href="pcapkit/const/ftp.html#index-29">RFC 1123</a>, <a href="pcapkit/const/ftp.html#index-43">[1]</a>, <a href="pcapkit/const/ftp.html#index-48">[2]</a>, <a href="pcapkit/const/ftp.html#index-61">[3]</a>, <a href="pcapkit/const/ftp.html#index-67">[4]</a>, <a href="pcapkit/const/ftp.html#index-73">[5]</a>, <a href="pcapkit/const/ftp.html#index-75">[6]</a>, <a href="pcapkit/const/ftp.html#index-77">[7]</a>, <a href="pcapkit/const/ftp.html#index-79">[8]</a>, <a href="pcapkit/const/ftp.html#index-81">[9]</a>
 </li>
@@ -59570,11 +59642,11 @@
 </li>
           <li><a href="pcapkit/const/esp.html#index-46">RFC 2403</a>
 </li>
-          <li><a href="pcapkit/const/esp.html#index-49">RFC 2404</a>, <a href="pcapkit/const/hip.html#index-29">[1]</a>, <a href="pcapkit/protocols/internet/esp.html#index-24">[2]</a>
+          <li><a href="pcapkit/const/esp.html#index-49">RFC 2404</a>, <a href="pcapkit/const/hip.html#index-29">[1]</a>, <a href="pcapkit/protocols/internet/esp.html#index-26">[2]</a>
 </li>
           <li><a href="pcapkit/const/esp.html#index-2">RFC 2405</a>
 </li>
-          <li><a href="pcapkit/const/esp.html#index-16">RFC 2410</a>, <a href="pcapkit/const/hip.html#index-35">[1]</a>, <a href="pcapkit/const/hip.html#index-61">[2]</a>, <a href="pcapkit/protocols/internet/esp.html#index-15">[3]</a>
+          <li><a href="pcapkit/const/esp.html#index-16">RFC 2410</a>, <a href="pcapkit/const/hip.html#index-35">[1]</a>, <a href="pcapkit/const/hip.html#index-61">[2]</a>, <a href="pcapkit/protocols/internet/esp.html#index-17">[3]</a>
 </li>
           <li><a href="changelog/1.6.0.html#index-0">RFC 2427</a>, <a href="pcapkit/protocols/link/frad.html#index-10">[1]</a>, <a href="pcapkit/protocols/link/frad.html#index-6">[2]</a>
 </li>
@@ -59622,11 +59694,11 @@
 </li>
           <li><a href="changelog/1.5.0.html#index-17">RFC 2661</a>, <a href="changelog/1.5.0.html#index-19">[1]</a>, <a href="changelog/1.5.0.html#index-37">[2]</a>, <a href="changelog/1.5.0.html#index-71">[3]</a>, <a href="contributing/pep.html#index-34">[4]</a>, <a href="pcapkit/foundation/registry.html#index-1">[5]</a>, <a href="pcapkit/protocols/link/l2tp.html#index-0">[6]</a>, <a href="pcapkit/protocols/link/l2tp.html#index-1">[7]</a>, <a href="pcapkit/protocols/link/l2tp.html#index-4">[8]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-0">[9]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-1">[10]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-4">[11]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-5">[12]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-6">[13]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-7">[14]</a>
 </li>
-          <li><a href="changelog/1.5.0.html#index-74">RFC 2675</a>, <a href="pcapkit/const/ipv6.html#index-17">[1]</a>, <a href="pcapkit/corekit/schema/jumbogram.html#index-0">[2]</a>, <a href="pcapkit/corekit/schema/jumbogram.html#index-1">[3]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-18">[4]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-12">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-18">[6]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-8">[7]</a>
+          <li><a href="changelog/1.5.0.html#index-74">RFC 2675</a>, <a href="pcapkit/const/ipv6.html#index-17">[1]</a>, <a href="pcapkit/corekit/schema/jumbogram.html#index-0">[2]</a>, <a href="pcapkit/corekit/schema/jumbogram.html#index-1">[3]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-18">[4]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-13">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-18">[6]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-8">[7]</a>
 </li>
-          <li><a href="pcapkit/corekit/schema/jumbogram.html#index-2">RFC 2675 Section 2</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-10">[1]</a>
+          <li><a href="pcapkit/corekit/schema/jumbogram.html#index-2">RFC 2675 Section 2</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-11">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/ipv6.html#index-13">RFC 2675 Section 3</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-2">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-3">[2]</a>
+          <li><a href="pcapkit/protocols/internet/ipv6.html#index-14">RFC 2675 Section 3</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-2">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-4">[2]</a>
 </li>
           <li><a href="pcapkit/protocols/transport/udp.html#index-2">RFC 2675 Section 4</a>
 </li>
@@ -59804,7 +59876,7 @@
 </li>
           <li><a href="pcapkit/protocols/application/dns.html#index-16">RFC 3596 Section 2.2</a>, <a href="pcapkit/protocols/application/dns.html#index-50">[1]</a>
 </li>
-          <li><a href="pcapkit/const/esp.html#index-17">RFC 3602</a>, <a href="pcapkit/const/hip.html#index-28">[1]</a>, <a href="pcapkit/const/hip.html#index-37">[2]</a>, <a href="pcapkit/const/hip.html#index-39">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-16">[4]</a>
+          <li><a href="pcapkit/const/esp.html#index-17">RFC 3602</a>, <a href="pcapkit/const/hip.html#index-28">[1]</a>, <a href="pcapkit/const/hip.html#index-37">[2]</a>, <a href="pcapkit/const/hip.html#index-39">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-18">[4]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-191">RFC 3620</a>, <a href="pcapkit/const/reg.html#index-192">[1]</a>, <a href="pcapkit/const/reg.html#index-492">[2]</a>, <a href="pcapkit/const/reg.html#index-493">[3]</a>
 </li>
@@ -59818,7 +59890,7 @@
 </li>
           <li><a href="contributing/pep.html#index-3">RFC 3686</a>, <a href="pcapkit/const/esp.html#index-18">[1]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-10">RFC 3692</a>, <a href="pcapkit/const/ipv6.html#index-12">[1]</a>, <a href="pcapkit/const/reg.html#index-87">[2]</a>, <a href="pcapkit/const/reg.html#index-88">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-11">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-189">[5]</a>, <a href="pcapkit/protocols/internet/mh.html#index-345">[6]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-10">RFC 3692</a>, <a href="pcapkit/const/ipv6.html#index-12">[1]</a>, <a href="pcapkit/const/reg.html#index-87">[2]</a>, <a href="pcapkit/const/reg.html#index-88">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-14">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-189">[5]</a>, <a href="pcapkit/protocols/internet/mh.html#index-345">[6]</a>
 </li>
           <li><a href="pcapkit/const/http.html#index-28">RFC 3744 Section 8.1</a>
 </li>
@@ -59890,7 +59962,7 @@
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#index-20">RFC 4068 Section 6.3.3</a>
 </li>
-          <li><a href="pcapkit/const/esp.html#index-22">RFC 4106</a>, <a href="pcapkit/const/esp.html#index-24">[1]</a>, <a href="pcapkit/const/esp.html#index-26">[2]</a>, <a href="pcapkit/const/hip.html#index-43">[3]</a>, <a href="pcapkit/const/hip.html#index-44">[4]</a>, <a href="pcapkit/protocols/internet/esp.html#index-17">[5]</a>, <a href="pcapkit/protocols/internet/esp.html#index-18">[6]</a>, <a href="pcapkit/protocols/internet/esp.html#index-19">[7]</a>, <a href="pcapkit/protocols/internet/esp.html#index-26">[8]</a>, <a href="pcapkit/protocols/internet/esp.html#index-6">[9]</a>
+          <li><a href="pcapkit/const/esp.html#index-22">RFC 4106</a>, <a href="pcapkit/const/esp.html#index-24">[1]</a>, <a href="pcapkit/const/esp.html#index-26">[2]</a>, <a href="pcapkit/const/hip.html#index-43">[3]</a>, <a href="pcapkit/const/hip.html#index-44">[4]</a>, <a href="pcapkit/protocols/internet/esp.html#index-19">[5]</a>, <a href="pcapkit/protocols/internet/esp.html#index-20">[6]</a>, <a href="pcapkit/protocols/internet/esp.html#index-21">[7]</a>, <a href="pcapkit/protocols/internet/esp.html#index-28">[8]</a>, <a href="pcapkit/protocols/internet/esp.html#index-8">[9]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-152">RFC 4120</a>, <a href="pcapkit/const/reg.html#index-153">[1]</a>, <a href="pcapkit/const/reg.html#index-457">[2]</a>, <a href="pcapkit/const/reg.html#index-458">[3]</a>
 </li>
@@ -59930,17 +60002,23 @@
 </li>
           <li><a href="pcapkit/const/ipv6.html#index-5">RFC 4302</a>, <a href="pcapkit/const/reg.html#index-57">[1]</a>, <a href="pcapkit/protocols/internet/ah.html#index-1">[2]</a>, <a href="pcapkit/protocols/internet/ipsec.html#index-0">[3]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-13">[4]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/ah.html#index-3">RFC 4302 Section 2</a>
+          <li><a href="pcapkit/protocols/internet/ah.html#index-8">RFC 4302 Section 2</a>
 </li>
-          <li><a href="contributing/conventions/utilities-or-corekit.html#index-1">RFC 4302 Section 2.2</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-7">[1]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-18">[2]</a>
+          <li><a href="contributing/conventions/utilities-or-corekit.html#index-1">RFC 4302 Section 2.2</a>, <a href="pcapkit/protocols/internet/ah.html#index-2">[1]</a>, <a href="pcapkit/protocols/internet/ah.html#index-5">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-8">[3]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-18">[4]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/ah.html#index-2">RFC 4302 Section 2.3</a>
+          <li><a href="pcapkit/protocols/internet/ah.html#index-6">RFC 4302 Section 2.3</a>
 </li>
-          <li><a href="contributing/conventions/extension-header-subclassing.html#index-0">RFC 4302 Section 3.1.1</a>, <a href="pcapkit/protocols/internet/ah.html#index-0">[1]</a>
+          <li><a href="pcapkit/protocols/internet/ah.html#index-10">RFC 4302 Section 2.6</a>, <a href="pcapkit/protocols/internet/ah.html#index-3">[1]</a>, <a href="pcapkit/protocols/internet/ah.html#index-9">[2]</a>
+</li>
+          <li><a href="contributing/conventions/extension-header-subclassing.html#index-0">RFC 4302 Section 3.1.1</a>, <a href="pcapkit/protocols/internet/ah.html#index-0">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-12">[2]</a>
 </li>
           <li><a href="contributing/pep.html#index-52">RFC 4302 Section 3.3.3</a>
 </li>
-          <li><a href="changelog/1.5.0.html#index-14">RFC 4303</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-7">[1]</a>, <a href="pcapkit/const/ipv6.html#index-4">[2]</a>, <a href="pcapkit/const/reg.html#index-56">[3]</a>, <a href="pcapkit/corekit/context.html#index-0">[4]</a>, <a href="pcapkit/protocols/internet/esp.html#index-0">[5]</a>, <a href="pcapkit/protocols/internet/esp.html#index-25">[6]</a>, <a href="pcapkit/protocols/internet/esp.html#index-27">[7]</a>, <a href="pcapkit/protocols/internet/esp.html#index-28">[8]</a>, <a href="pcapkit/protocols/internet/esp.html#index-29">[9]</a>, <a href="pcapkit/protocols/internet/esp.html#index-3">[10]</a>, <a href="pcapkit/protocols/internet/esp.html#index-30">[11]</a>, <a href="pcapkit/protocols/internet/esp.html#index-4">[12]</a>, <a href="pcapkit/protocols/internet/esp.html#index-5">[13]</a>, <a href="pcapkit/protocols/internet/esp.html#index-8">[14]</a>, <a href="pcapkit/protocols/internet/esp.html#index-9">[15]</a>, <a href="pcapkit/protocols/internet/ipsec.html#index-1">[16]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-5">[17]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-9">[18]</a>
+          <li><a href="pcapkit/protocols/internet/ah.html#index-4">RFC 4302 Section 3.3.3.2.1</a>, <a href="pcapkit/protocols/internet/ah.html#index-7">[1]</a>
+</li>
+          <li><a href="changelog/1.5.0.html#index-14">RFC 4303</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-7">[1]</a>, <a href="pcapkit/const/ipv6.html#index-4">[2]</a>, <a href="pcapkit/const/reg.html#index-56">[3]</a>, <a href="pcapkit/corekit/context.html#index-0">[4]</a>, <a href="pcapkit/protocols/internet/esp.html#index-0">[5]</a>, <a href="pcapkit/protocols/internet/esp.html#index-10">[6]</a>, <a href="pcapkit/protocols/internet/esp.html#index-11">[7]</a>, <a href="pcapkit/protocols/internet/esp.html#index-27">[8]</a>, <a href="pcapkit/protocols/internet/esp.html#index-29">[9]</a>, <a href="pcapkit/protocols/internet/esp.html#index-30">[10]</a>, <a href="pcapkit/protocols/internet/esp.html#index-31">[11]</a>, <a href="pcapkit/protocols/internet/esp.html#index-32">[12]</a>, <a href="pcapkit/protocols/internet/esp.html#index-5">[13]</a>, <a href="pcapkit/protocols/internet/esp.html#index-6">[14]</a>, <a href="pcapkit/protocols/internet/esp.html#index-7">[15]</a>, <a href="pcapkit/protocols/internet/ipsec.html#index-1">[16]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-6">[17]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-10">[18]</a>
+</li>
+          <li><a href="pcapkit/protocols/internet/esp.html#index-3">RFC 4303 Section 2.4</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-12">[1]</a>
 </li>
           <li><a href="contributing/conventions/extension-header-subclassing.html#index-1">RFC 4303 Section 3.1.1</a>, <a href="pcapkit/protocols/internet/esp.html#index-1">[1]</a>
 </li>
@@ -60104,7 +60182,7 @@
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#index-352">RFC 4866 Section 5.1</a>
 </li>
-          <li><a href="contributing/pep.html#index-2">RFC 4868</a>, <a href="pcapkit/const/esp.html#index-63">[1]</a>, <a href="pcapkit/const/esp.html#index-64">[2]</a>, <a href="pcapkit/const/esp.html#index-65">[3]</a>, <a href="pcapkit/const/hip.html#index-36">[4]</a>, <a href="pcapkit/const/hip.html#index-38">[5]</a>, <a href="pcapkit/const/hip.html#index-40">[6]</a>, <a href="pcapkit/protocols/internet/esp.html#index-21">[7]</a>, <a href="pcapkit/protocols/internet/esp.html#index-22">[8]</a>, <a href="pcapkit/protocols/internet/esp.html#index-23">[9]</a>
+          <li><a href="contributing/pep.html#index-2">RFC 4868</a>, <a href="pcapkit/const/esp.html#index-63">[1]</a>, <a href="pcapkit/const/esp.html#index-64">[2]</a>, <a href="pcapkit/const/esp.html#index-65">[3]</a>, <a href="pcapkit/const/hip.html#index-36">[4]</a>, <a href="pcapkit/const/hip.html#index-38">[5]</a>, <a href="pcapkit/const/hip.html#index-40">[6]</a>, <a href="pcapkit/protocols/internet/esp.html#index-23">[7]</a>, <a href="pcapkit/protocols/internet/esp.html#index-24">[8]</a>, <a href="pcapkit/protocols/internet/esp.html#index-25">[9]</a>
 </li>
           <li><a href="pcapkit/const/sctp.html#index-15">RFC 4895</a>, <a href="pcapkit/const/sctp.html#index-43">[1]</a>, <a href="pcapkit/const/sctp.html#index-44">[2]</a>, <a href="pcapkit/const/sctp.html#index-45">[3]</a>, <a href="pcapkit/const/sctp.html#index-73">[4]</a>
 </li>
@@ -60248,7 +60326,7 @@
 </li>
           <li><a href="pcapkit/const/esp.html#index-29">RFC 5529</a>, <a href="pcapkit/const/esp.html#index-30">[1]</a>, <a href="pcapkit/const/esp.html#index-31">[2]</a>, <a href="pcapkit/const/esp.html#index-33">[3]</a>, <a href="pcapkit/const/esp.html#index-35">[4]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-9">RFC 5533</a>, <a href="pcapkit/const/mh.html#index-355">[1]</a>, <a href="pcapkit/const/reg.html#index-80">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-12">[3]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-9">RFC 5533</a>, <a href="pcapkit/const/mh.html#index-355">[1]</a>, <a href="pcapkit/const/reg.html#index-80">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-15">[3]</a>
 </li>
           <li><a href="pcapkit/const/mh.html#index-359">RFC 5535</a>, <a href="pcapkit/protocols/internet/mh.html#index-185">[1]</a>, <a href="pcapkit/protocols/internet/mh.html#index-190">[2]</a>, <a href="pcapkit/protocols/internet/mh.html#index-346">[3]</a>
 </li>
@@ -60490,9 +60568,9 @@
 </li>
           <li><a href="changelog.html#index-1">RFC 6275</a>, <a href="changelog/1.0.2.html#index-0">[1]</a>, <a href="changelog/1.5.0.html#index-33">[2]</a>, <a href="pcapkit/const/icmpv6.html#index-24">[3]</a>, <a href="pcapkit/const/icmpv6.html#index-25">[4]</a>, <a href="pcapkit/const/icmpv6.html#index-26">[5]</a>, <a href="pcapkit/const/icmpv6.html#index-27">[6]</a>, <a href="pcapkit/const/ipv6.html#index-119">[7]</a>, <a href="pcapkit/const/ipv6.html#index-27">[8]</a>, <a href="pcapkit/const/ipv6.html#index-7">[9]</a>, <a href="pcapkit/const/mh.html#index-145">[10]</a>, <a href="pcapkit/const/mh.html#index-146">[11]</a>, <a href="pcapkit/const/mh.html#index-147">[12]</a>, <a href="pcapkit/const/mh.html#index-148">[13]</a>, <a href="pcapkit/const/mh.html#index-149">[14]</a>, <a href="pcapkit/const/mh.html#index-150">[15]</a>, <a href="pcapkit/const/mh.html#index-216">[16]</a>, <a href="pcapkit/const/mh.html#index-217">[17]</a>, <a href="pcapkit/const/mh.html#index-218">[18]</a>, <a href="pcapkit/const/mh.html#index-219">[19]</a>, <a href="pcapkit/const/mh.html#index-22">[20]</a>, <a href="pcapkit/const/mh.html#index-220">[21]</a>, <a href="pcapkit/const/mh.html#index-221">[22]</a>, <a href="pcapkit/const/mh.html#index-222">[23]</a>, <a href="pcapkit/const/mh.html#index-223">[24]</a>, <a href="pcapkit/const/mh.html#index-273">[25]</a>, <a href="pcapkit/const/mh.html#index-275">[26]</a>, <a href="pcapkit/const/mh.html#index-281">[27]</a>, <a href="pcapkit/const/mh.html#index-282">[28]</a>, <a href="pcapkit/const/mh.html#index-283">[29]</a>, <a href="pcapkit/const/mh.html#index-284">[30]</a>, <a href="pcapkit/const/mh.html#index-285">[31]</a>, <a href="pcapkit/const/mh.html#index-286">[32]</a>, <a href="pcapkit/const/mh.html#index-287">[33]</a>, <a href="pcapkit/const/mh.html#index-288">[34]</a>, <a href="pcapkit/const/mh.html#index-289">[35]</a>, <a href="pcapkit/const/mh.html#index-290">[36]</a>, <a href="pcapkit/const/mh.html#index-291">[37]</a>, <a href="pcapkit/const/mh.html#index-292">[38]</a>, <a href="pcapkit/const/mh.html#index-32">[39]</a>, <a href="pcapkit/const/mh.html#index-327">[40]</a>, <a href="pcapkit/const/mh.html#index-33">[41]</a>, <a href="pcapkit/const/mh.html#index-34">[42]</a>, <a href="pcapkit/const/mh.html#index-35">[43]</a>, <a href="pcapkit/const/reg.html#index-75">[44]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-19">[45]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-19">[46]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-7">[47]</a>, <a href="pcapkit/protocols/internet/mh.html#index-10">[48]</a>, <a href="pcapkit/protocols/internet/mh.html#index-11">[49]</a>, <a href="pcapkit/protocols/internet/mh.html#index-12">[50]</a>, <a href="pcapkit/protocols/internet/mh.html#index-196">[51]</a>, <a href="pcapkit/protocols/internet/mh.html#index-2">[52]</a>, <a href="pcapkit/protocols/internet/mh.html#index-211">[53]</a>, <a href="pcapkit/protocols/internet/mh.html#index-42">[54]</a>, <a href="pcapkit/protocols/internet/mh.html#index-5">[55]</a>, <a href="pcapkit/protocols/internet/mh.html#index-53">[56]</a>, <a href="pcapkit/protocols/internet/mh.html#index-56">[57]</a>, <a href="pcapkit/protocols/internet/mh.html#index-58">[58]</a>, <a href="pcapkit/protocols/internet/mh.html#index-59">[59]</a>, <a href="pcapkit/protocols/internet/mh.html#index-6">[60]</a>, <a href="pcapkit/protocols/internet/mh.html#index-60">[61]</a>, <a href="pcapkit/protocols/internet/mh.html#index-7">[62]</a>, <a href="pcapkit/protocols/internet/mh.html#index-8">[63]</a>, <a href="pcapkit/protocols/internet/mh.html#index-81">[64]</a>, <a href="pcapkit/protocols/internet/mh.html#index-9">[65]</a>
 </li>
-          <li><a href="pcapkit/protocols/misc/checksum.html#index-10">RFC 6275 Section 11.3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-13">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-5">[2]</a>
+          <li><a href="pcapkit/protocols/misc/checksum.html#index-10">RFC 6275 Section 11.3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-14">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-5">[2]</a>
 </li>
-          <li><a href="contributing/conventions/extension-header-subclassing.html#index-4">RFC 6275 Section 6.1.1</a>, <a href="contributing/pep.html#index-48">[1]</a>, <a href="pcapkit/corekit/schema/extlen.html#index-2">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-2">[3]</a>, <a href="pcapkit/protocols/internet/mh.html#index-1">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-229">[5]</a>, <a href="pcapkit/protocols/internet/mh.html#index-4">[6]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-12">[7]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-16">[8]</a>
+          <li><a href="contributing/conventions/extension-header-subclassing.html#index-4">RFC 6275 Section 6.1.1</a>, <a href="contributing/pep.html#index-48">[1]</a>, <a href="pcapkit/corekit/schema/extlen.html#index-2">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-2">[3]</a>, <a href="pcapkit/protocols/internet/mh.html#index-1">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-229">[5]</a>, <a href="pcapkit/protocols/internet/mh.html#index-4">[6]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-13">[7]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-18">[8]</a>
 </li>
           <li><a href="pcapkit/protocols/internet/mh.html#index-15">RFC 6275 Section 6.1.7</a>, <a href="pcapkit/protocols/internet/mh.html#index-19">[1]</a>
 </li>
@@ -60530,7 +60608,7 @@
 </li>
           <li><a href="pcapkit/foundation/reassembly/dtls.html#index-7">RFC 6347 Section 4.2.2</a>, <a href="pcapkit/protocols/application/dtls.html#index-27">[1]</a>, <a href="pcapkit/protocols/application/dtls.html#index-42">[2]</a>, <a href="pcapkit/protocols/application/ssl.html#index-40">[3]</a>
 </li>
-          <li><a href="changelog/1.6.0.html#index-20">RFC 6347 Section 4.2.3</a>, <a href="contributing/pep.html#index-32">[1]</a>, <a href="pcapkit/foundation/analysis/dtls.html#index-0">[2]</a>, <a href="pcapkit/foundation/analysis/dtls.html#index-1">[3]</a>, <a href="pcapkit/foundation/extraction.html#index-2">[4]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-0">[5]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-2">[6]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-4">[7]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-5">[8]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-6">[9]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-9">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-7">[11]</a>, <a href="pcapkit/protocols/application/dtls.html#index-15">[12]</a>, <a href="pcapkit/protocols/application/dtls.html#index-28">[13]</a>, <a href="pcapkit/protocols/application/ssl.html#index-41">[14]</a>, <a href="pcapkit/toolkit/builtin.html#index-1">[15]</a>, <a href="pcapkit/toolkit/builtin.html#index-8">[16]</a>
+          <li><a href="changelog/1.6.0.html#index-20">RFC 6347 Section 4.2.3</a>, <a href="contributing/pep.html#index-32">[1]</a>, <a href="pcapkit/foundation/analysis/dtls.html#index-0">[2]</a>, <a href="pcapkit/foundation/analysis/dtls.html#index-1">[3]</a>, <a href="pcapkit/foundation/options.html#index-2">[4]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-0">[5]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-2">[6]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-4">[7]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-5">[8]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-6">[9]</a>, <a href="pcapkit/foundation/reassembly/dtls.html#index-9">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-7">[11]</a>, <a href="pcapkit/protocols/application/dtls.html#index-15">[12]</a>, <a href="pcapkit/protocols/application/dtls.html#index-28">[13]</a>, <a href="pcapkit/protocols/application/ssl.html#index-41">[14]</a>, <a href="pcapkit/toolkit/builtin.html#index-1">[15]</a>, <a href="pcapkit/toolkit/builtin.html#index-8">[16]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-107">RFC 6352</a>, <a href="pcapkit/const/reg.html#index-108">[1]</a>
 </li>
@@ -60584,11 +60662,11 @@
 </li>
           <li><a href="pcapkit/const/dns.html#index-50">RFC 6563</a>
 </li>
-          <li><a href="changelog/1.5.0.html#index-23">RFC 6564</a>, <a href="contributing/conventions/registry-protocol.html#index-22">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-1">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-15">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-5">[4]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-8">[5]</a>
+          <li><a href="changelog/1.5.0.html#index-23">RFC 6564</a>, <a href="contributing/conventions/registry-protocol.html#index-22">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-1">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-18">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-6">[4]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-9">[5]</a>
 </li>
-          <li><a href="contributing/conventions/utilities-or-corekit.html#index-0">RFC 6564 Section 4</a>, <a href="pcapkit/corekit/schema/extlen.html#index-0">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-0">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-14">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-4">[4]</a>
+          <li><a href="contributing/conventions/utilities-or-corekit.html#index-0">RFC 6564 Section 4</a>, <a href="pcapkit/corekit/schema/extlen.html#index-0">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-0">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-17">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-5">[4]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/ipv6_ext.html#index-2">RFC 6564 Section 5</a>
+          <li><a href="pcapkit/protocols/internet/ipv6_ext.html#index-3">RFC 6564 Section 5</a>
 </li>
           <li><a href="pcapkit/const/http.html#index-134">RFC 6585</a>, <a href="pcapkit/const/http.html#index-135">[1]</a>, <a href="pcapkit/const/http.html#index-136">[2]</a>, <a href="pcapkit/const/http.html#index-148">[3]</a>
 </li>
@@ -60818,7 +60896,7 @@
 </li>
           <li><a href="changelog/1.6.0.html#index-30">RFC 7401 Section 5.1</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-3">[1]</a>, <a href="pcapkit/corekit/schema/extlen.html#index-3">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-0">[3]</a>, <a href="pcapkit/protocols/internet/hip.html#index-8">[4]</a>, <a href="pcapkit/protocols/internet/hip.html#index-9">[5]</a>, <a href="pcapkit/protocols/internet/hip.html#index-97">[6]</a>, <a href="pcapkit/protocols/internet/hip.html#index-98">[7]</a>
 </li>
-          <li><a href="contributing/pep.html#index-49">RFC 7401 Section 5.1.1</a>, <a href="pcapkit/protocols/internet/hip.html#index-10">[1]</a>, <a href="pcapkit/protocols/internet/hip.html#index-5">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-79">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-17">[4]</a>
+          <li><a href="contributing/pep.html#index-49">RFC 7401 Section 5.1.1</a>, <a href="pcapkit/protocols/internet/hip.html#index-10">[1]</a>, <a href="pcapkit/protocols/internet/hip.html#index-5">[2]</a>, <a href="pcapkit/protocols/internet/hip.html#index-79">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-19">[4]</a>
 </li>
           <li><a href="changelog/1.5.0.html#index-57">RFC 7401 Section 5.1.3</a>
 </li>
@@ -60934,9 +61012,9 @@
 </li>
           <li><a href="pcapkit/const/dns.html#index-145">RFC 7901</a>
 </li>
-          <li><a href="changelog/1.5.0.html#index-11">RFC 791</a>, <a href="changelog/1.6.0.html#index-29">[1]</a>, <a href="contributing/pep.html#index-37">[2]</a>, <a href="contributing/pep.html#index-43">[3]</a>, <a href="pcapkit/const/ipv4.html#index-0">[4]</a>, <a href="pcapkit/const/ipv4.html#index-1">[5]</a>, <a href="pcapkit/const/ipv4.html#index-3">[6]</a>, <a href="pcapkit/const/ipv4.html#index-4">[7]</a>, <a href="pcapkit/const/ipv4.html#index-6">[8]</a>, <a href="pcapkit/const/ipv4.html#index-7">[9]</a>, <a href="pcapkit/const/ipv4.html#index-9">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-0">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-0">[12]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-2">[13]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-0">[14]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-1">[15]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-10">[16]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-6">[17]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-1">[18]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-4">[19]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-10">[20]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-2">[21]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-0">[22]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-9">[23]</a>, <a href="pcapkit/protocols/internet/ip.html#index-0">[24]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-0">[25]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-1">[26]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-11">[27]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-16">[28]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-18">[29]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-2">[30]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-20">[31]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-28">[32]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-3">[33]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-4">[34]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-5">[35]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-11">[36]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-6">[37]</a>
+          <li><a href="changelog/1.5.0.html#index-11">RFC 791</a>, <a href="changelog/1.6.0.html#index-29">[1]</a>, <a href="contributing/pep.html#index-37">[2]</a>, <a href="contributing/pep.html#index-43">[3]</a>, <a href="pcapkit/const/ipv4.html#index-0">[4]</a>, <a href="pcapkit/const/ipv4.html#index-1">[5]</a>, <a href="pcapkit/const/ipv4.html#index-3">[6]</a>, <a href="pcapkit/const/ipv4.html#index-4">[7]</a>, <a href="pcapkit/const/ipv4.html#index-6">[8]</a>, <a href="pcapkit/const/ipv4.html#index-7">[9]</a>, <a href="pcapkit/const/ipv4.html#index-9">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-0">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-0">[12]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-2">[13]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-0">[14]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-1">[15]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-10">[16]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-6">[17]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-1">[18]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-4">[19]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-10">[20]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-2">[21]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-0">[22]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-9">[23]</a>, <a href="pcapkit/protocols/internet/ip.html#index-0">[24]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-0">[25]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-1">[26]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-11">[27]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-16">[28]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-18">[29]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-2">[30]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-20">[31]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-28">[32]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-3">[33]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-4">[34]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-5">[35]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-11">[36]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-16">[37]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-6">[38]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/ipv4.html#index-23">RFC 791 Section 3.1</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-24">[1]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-27">[2]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-8">[3]</a>
+          <li><a href="pcapkit/protocols/internet/ipv4.html#index-23">RFC 791 Section 3.1</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-24">[1]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-27">[2]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-9">[3]</a>
 </li>
           <li><a href="changelog/1.5.0.html#index-12">RFC 791 Section 3.2</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-3">[1]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-2">[2]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-4">[3]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-2">[4]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-1">[5]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-19">[6]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-2">[7]</a>
 </li>
@@ -60954,7 +61032,7 @@
 </li>
           <li><a href="changelog/1.6.0.html#index-21">RFC 793</a>, <a href="pcapkit/protocols/misc/checksum.html#index-3">[1]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-3">[2]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-5">[3]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-6">[4]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-7">[5]</a>
 </li>
-          <li><a href="pcapkit/protocols/misc/checksum.html#index-0">RFC 793 Section 3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-18">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-20">[2]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-4">[3]</a>
+          <li><a href="pcapkit/protocols/misc/checksum.html#index-0">RFC 793 Section 3.1</a>, <a href="pcapkit/protocols/misc/checksum.html#index-20">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-22">[2]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-4">[3]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-31">RFC 7973</a>
 </li>
@@ -61020,9 +61098,9 @@
 </li>
           <li><a href="changelog/1.5.0.html#index-31">RFC 8200</a>, <a href="changelog/1.5.0.html#index-83">[1]</a>, <a href="changelog/1.5.0.html#index-9">[2]</a>, <a href="pcapkit/const/ipv6.html#index-0">[3]</a>, <a href="pcapkit/const/ipv6.html#index-1">[4]</a>, <a href="pcapkit/const/ipv6.html#index-3">[5]</a>, <a href="pcapkit/const/ipv6.html#index-6">[6]</a>, <a href="pcapkit/const/reg.html#index-34">[7]</a>, <a href="pcapkit/const/reg.html#index-60">[8]</a>, <a href="pcapkit/const/reg.html#index-61">[9]</a>, <a href="pcapkit/const/reg.html#index-62">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-4">[11]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-2">[12]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-3">[13]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-4">[14]</a>, <a href="pcapkit/protocols/internet/ip.html#index-1">[15]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-1">[16]</a>, <a href="pcapkit/protocols/internet/ipv6_frag.html#index-0">[17]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-2">[18]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-3">[19]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-4">[20]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-1">[21]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-4">[22]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-4">[23]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-14">RFC 8200 Section 3</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-11">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-6">[2]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-7">[3]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-9">[4]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-14">RFC 8200 Section 3</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-10">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-12">[2]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-7">[3]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-8">[4]</a>
 </li>
-          <li><a href="changelog/1.6.0.html#index-24">RFC 8200 Section 4</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-0">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-4">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-13">[3]</a>, <a href="pcapkit/protocols/internet/mh.html#index-233">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-245">[5]</a>, <a href="pcapkit/protocols/internet/mh.html#index-254">[6]</a>, <a href="pcapkit/protocols/internet/mh.html#index-262">[7]</a>, <a href="pcapkit/vendor/ipv6.html#index-0">[8]</a>
+          <li><a href="changelog/1.6.0.html#index-24">RFC 8200 Section 4</a>, <a href="pcapkit/protocols/internet/esp.html#index-4">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-0">[2]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-3">[3]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-5">[4]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-11">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-16">[6]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-2">[7]</a>, <a href="pcapkit/protocols/internet/mh.html#index-233">[8]</a>, <a href="pcapkit/protocols/internet/mh.html#index-245">[9]</a>, <a href="pcapkit/protocols/internet/mh.html#index-254">[10]</a>, <a href="pcapkit/protocols/internet/mh.html#index-262">[11]</a>, <a href="pcapkit/vendor/ipv6.html#index-0">[12]</a>
 </li>
           <li><a href="pcapkit/corekit/schema/jumbogram.html#index-3">RFC 8200 Section 4.1</a>, <a href="pcapkit/utilities/config.html#index-21">[1]</a>
 </li>
@@ -61032,13 +61110,13 @@
 </li>
           <li><a href="pcapkit/protocols/internet/ipv6_route.html#index-11">RFC 8200 Section 4.4</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-3">[1]</a>
 </li>
-          <li><a href="changelog/1.6.0.html#index-28">RFC 8200 Section 4.5</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-6">[1]</a>, <a href="contributing/pep.html#index-38">[2]</a>, <a href="contributing/pep.html#index-45">[3]</a>, <a href="contributing/pep.html#index-46">[4]</a>, <a href="pcapkit/foundation/extraction.html#index-1">[5]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-5">[6]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-6">[7]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-5">[8]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-7">[9]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-12">[10]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-3">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-5">[12]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-8">[13]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-9">[14]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-3">[15]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-7">[16]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-0">[17]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-1">[18]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-3">[19]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-4">[20]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-5">[21]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-6">[22]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-7">[23]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-8">[24]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-9">[25]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-2">[26]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-12">[27]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-4">[28]</a>, <a href="pcapkit/protocols/internet/esp.html#index-2">[29]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-10">[30]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-6">[31]</a>, <a href="pcapkit/protocols/internet/ipv6_frag.html#index-1">[32]</a>
+          <li><a href="changelog/1.6.0.html#index-28">RFC 8200 Section 4.5</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-6">[1]</a>, <a href="contributing/pep.html#index-38">[2]</a>, <a href="contributing/pep.html#index-45">[3]</a>, <a href="contributing/pep.html#index-46">[4]</a>, <a href="pcapkit/foundation/options.html#index-1">[5]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-5">[6]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-6">[7]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-5">[8]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-7">[9]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-12">[10]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-3">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-5">[12]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-8">[13]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-9">[14]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-3">[15]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-7">[16]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-0">[17]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-1">[18]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-3">[19]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-4">[20]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-5">[21]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-6">[22]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-7">[23]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-8">[24]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-9">[25]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-2">[26]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-12">[27]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-4">[28]</a>, <a href="pcapkit/protocols/internet/esp.html#index-2">[29]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-13">[30]</a>, <a href="pcapkit/protocols/internet/ipv6_ext.html#index-7">[31]</a>, <a href="pcapkit/protocols/internet/ipv6_frag.html#index-1">[32]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/ipv6_ext.html#index-3">RFC 8200 Section 4.8</a>
+          <li><a href="pcapkit/protocols/internet/ipv6_ext.html#index-4">RFC 8200 Section 4.8</a>
 </li>
-          <li><a href="changelog/1.6.0.html#index-22">RFC 8200 Section 8.1</a>, <a href="contributing/pep.html#index-56">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-14">[2]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-15">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-19">[4]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-2">[5]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-21">[6]</a>, <a href="pcapkit/protocols/transport/udp.html#index-4">[7]</a>
+          <li><a href="changelog/1.6.0.html#index-22">RFC 8200 Section 8.1</a>, <a href="contributing/pep.html#index-56">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-15">[2]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-17">[3]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-2">[4]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-21">[5]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-23">[6]</a>, <a href="pcapkit/protocols/transport/udp.html#index-4">[7]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/esp.html#index-12">RFC 8221</a>, <a href="pcapkit/protocols/internet/esp.html#index-13">[1]</a>, <a href="pcapkit/protocols/internet/esp.html#index-14">[2]</a>, <a href="pcapkit/protocols/internet/esp.html#index-20">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-7">[4]</a>
+          <li><a href="pcapkit/protocols/internet/esp.html#index-14">RFC 8221</a>, <a href="pcapkit/protocols/internet/esp.html#index-15">[1]</a>, <a href="pcapkit/protocols/internet/esp.html#index-16">[2]</a>, <a href="pcapkit/protocols/internet/esp.html#index-22">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-9">[4]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-37">RFC 823</a>
 </li>
@@ -61162,7 +61240,7 @@
 </li>
           <li><a href="pcapkit/const/dns.html#index-101">RFC 8749</a>
 </li>
-          <li><a href="contributing/pep.html#index-9">RFC 8750</a>, <a href="pcapkit/const/esp.html#index-38">[1]</a>, <a href="pcapkit/const/esp.html#index-39">[2]</a>, <a href="pcapkit/const/esp.html#index-40">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-10">[4]</a>
+          <li><a href="contributing/pep.html#index-9">RFC 8750</a>, <a href="pcapkit/const/esp.html#index-38">[1]</a>, <a href="pcapkit/const/esp.html#index-39">[2]</a>, <a href="pcapkit/const/esp.html#index-40">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-12">[4]</a>
 </li>
           <li><a href="pcapkit/const/icmpv6.html#index-57">RFC 8754</a>, <a href="pcapkit/const/ipv6.html#index-121">[1]</a>, <a href="pcapkit/protocols/misc/checksum.html#index-9">[2]</a>
 </li>
@@ -61454,7 +61532,7 @@
 </li>
           <li><a href="pcapkit/const/http.html#index-26">RFC 9218</a>, <a href="pcapkit/const/http.html#index-85">[1]</a>
 </li>
-          <li><a href="contributing/pep.html#index-10">RFC 9227</a>, <a href="pcapkit/const/esp.html#index-41">[1]</a>, <a href="pcapkit/const/esp.html#index-42">[2]</a>, <a href="pcapkit/const/esp.html#index-43">[3]</a>, <a href="pcapkit/const/esp.html#index-44">[4]</a>, <a href="pcapkit/protocols/internet/esp.html#index-11">[5]</a>
+          <li><a href="contributing/pep.html#index-10">RFC 9227</a>, <a href="pcapkit/const/esp.html#index-41">[1]</a>, <a href="pcapkit/const/esp.html#index-42">[2]</a>, <a href="pcapkit/const/esp.html#index-43">[3]</a>, <a href="pcapkit/const/esp.html#index-44">[4]</a>, <a href="pcapkit/protocols/internet/esp.html#index-13">[5]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-216">RFC 9250</a>, <a href="pcapkit/const/reg.html#index-517">[1]</a>
 </li>
@@ -62767,6 +62845,8 @@
           <li><a href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.run">(pcapkit.foundation.reassembly.reassembly.Reassembly method)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/callbacks.html#pcapkit.utilities.callbacks.run_callbacks">run_callbacks() (in module pcapkit.utilities.callbacks)</a>
+</li>
         <li><a href="pcapkit/protocols/transport/dccp.html#pcapkit.protocols.transport.dccp.data.AckVectorRun.run_length">run_length (pcapkit.protocols.transport.dccp.data.AckVectorRun attribute)</a>
 
         <ul>
@@ -65733,8 +65813,6 @@
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.schema.SMFDPDTestFlag">(class in pcapkit.protocols.internet.ipv6_opts.schema)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.data.SMFHashBasedDPDOption">SMFHashBasedDPDOption (class in pcapkit.protocols.internet.hopopt.data)</a>
 
         <ul>
@@ -65745,6 +65823,8 @@
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.schema.SMFHashBasedDPDOption">(class in pcapkit.protocols.internet.ipv6_opts.schema)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.data.SMFIdentificationBasedDPDOption">SMFIdentificationBasedDPDOption (class in pcapkit.protocols.internet.hopopt.data)</a>
 
         <ul>
@@ -67319,6 +67399,8 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.storageos">storageos (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.ReassemblyOptions.store">store (pcapkit.foundation.options.ReassemblyOptions attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.storman">storman (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -67411,6 +67493,8 @@
 </li>
         <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.schema.StreamID">StreamID (class in pcapkit.protocols.application.httpv2.schema)</a>
 </li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.StreamOptions">StreamOptions (class in pcapkit.foundation.options)</a>
+</li>
         <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.data.ForwardTSNChunk.streams">streams (pcapkit.protocols.transport.sctp.data.ForwardTSNChunk attribute)</a>
 
         <ul>
@@ -67459,6 +67543,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.strexec_s">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.ReassemblyOptions.strict">strict (pcapkit.foundation.options.ReassemblyOptions attribute)</a>
+</li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StringError">StringError</a>
 </li>
         <li><a href="pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField">StringField (class in pcapkit.corekit.fields.strings)</a>
@@ -69805,6 +69891,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.timelot">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.ReassemblyOptions.timeout">timeout (pcapkit.foundation.options.ReassemblyOptions attribute)</a>
+</li>
         <li><a href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT">TIMEOUT (pcapkit.foundation.reassembly.data.data.Completion attribute)</a>
 </li>
         <li><a href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.timeout">timeout (pcapkit.foundation.reassembly.reassembly.Reassembly property)</a>
@@ -70523,8 +70611,6 @@
         </ul></li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.method.Method.TRACE">TRACE (pcapkit.const.http.method.Method attribute)</a>
 </li>
-        <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.trace">trace (pcapkit.foundation.extraction.Extractor property)</a>
-</li>
         <li><a href="pcapkit/interface/core.html#pcapkit.interface.core.trace">trace() (in module pcapkit.interface.core)</a>
 
         <ul>
@@ -70551,6 +70637,8 @@
 </li>
         <li><a href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow">TraceFlow (class in pcapkit.foundation.traceflow.traceflow)</a>
 </li>
+        <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.traceflow">traceflow (pcapkit.foundation.extraction.Extractor property)</a>
+</li>
         <li><a href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase">TraceFlowBase (class in pcapkit.foundation.traceflow.traceflow)</a>
 </li>
         <li><a href="pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.TraceFlowData">TraceFlowData (class in pcapkit.foundation.traceflow.data.data)</a>
@@ -70558,6 +70646,8 @@
         <li><a href="pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.TraceFlowManager">TraceFlowManager (class in pcapkit.foundation.traceflow)</a>
 </li>
         <li><a href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta">TraceFlowMeta (class in pcapkit.foundation.traceflow.traceflow)</a>
+</li>
+        <li><a href="pcapkit/foundation/options.html#pcapkit.foundation.options.TraceFlowOptions">TraceFlowOptions (class in pcapkit.foundation.options)</a>
 </li>
         <li><a href="pcapkit/const/icmp.html#pcapkit.const.icmp.type.Type.Traceroute">Traceroute (pcapkit.const.icmp.type.Type attribute)</a>
 </li>

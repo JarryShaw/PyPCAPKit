@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1234,11 +1236,23 @@
 <span class="sd">        This method will return a new instance of :class:`Field` instead of</span>
 <span class="sd">        updating the current instance.</span>
 
+<span class="sd">        Past the cut of a schema whose length ends with the data, which</span>
+<span class="sd">        ``__past_cut__`` in ``packet`` marks, a callable ``length`` resolving</span>
+<span class="sd">        below zero from the zeros the cut left resolves to zero instead; see</span>
+<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           Resolves a length below zero past such a cut to zero (:issue:`2880`).</span>
+
 <span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
         <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">new_self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+            <span class="c1"># NOTE: Nothing is left past the cut (#2880).</span>
+            <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__past_cut__'</span><span class="p">):</span>
+                <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="n">new_self</span></div>
 </div>
 

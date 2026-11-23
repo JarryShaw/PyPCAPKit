@@ -73,7 +73,7 @@ offers says so rather than quietly doing less, unless its row says otherwise:
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | Gap, and how it is surfaced                                   |
 +=================================================================+===============================================================+
-| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly, and no ``trace_analyse``, since it reports     |
+| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly, and no trace ``analyze``, since it reports     |
 |                                                                 | dissected fields rather than octets -- each disabled with an  |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
 +-----------------------------------------------------------------+---------------------------------------------------------------+

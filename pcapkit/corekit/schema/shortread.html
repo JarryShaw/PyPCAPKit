@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -587,8 +589,9 @@
 <p><a class="reference internal" href="#module-pcapkit.corekit.schema.shortread" title="pcapkit.corekit.schema.shortread"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.shortread</span></code></a> carries a header cut short by the end of the
 capture through to the protocol’s info, by which a protocol rebuilt from that info
 is cut back to the octets its header had (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>), for the layer base classes
-and the PCAP global header alike. It names the protocol and schema classes for type
-checking only, since those import it.</p>
+and the PCAP global header alike, and tells a protocol’s checks of a header parsed on
+its own where the cut fell (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>). It names the protocol and schema classes
+for type checking only, since those import it.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.schema</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>).</p>
 </div>
@@ -691,6 +694,105 @@ read. Elsewhere a nested record need not mean that: hoisting one in
 <a class="reference internal" href="#pcapkit.corekit.schema.shortread.keep_short_read" title="pcapkit.corekit.schema.shortread.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a> marks a complete TCP segment with a malformed MPTCP DSS
 option as cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2660">#2660</a>). IGMPv3 and ICMPv6 hoist the record of a message
 body counting records the data ends before.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.shortread.cut_on_its_own">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.shortread.</span></span><span class="sig-name descname"><span class="pre">cut_on_its_own</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/shortread.html#cut_on_its_own"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.shortread.cut_on_its_own" title="Link to this definition">¶</a></dt>
+<dd><p>Tell a check of a header parsed on its own whether the data ended before what it reads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>header</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – The header just parsed.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Its field the check reads; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for the whole header.</p></li>
+<li><p><strong>end</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – How many octets of <code class="docutils literal notranslate"><span class="pre">name</span></code>, from its start, the check reads;
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for all of them.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether <code class="docutils literal notranslate"><span class="pre">header</span></code> was parsed with no layer before it, as
+<a class="reference internal" href="../../utilities/contextvars.html#pcapkit.utilities.contextvars.frame_depth" title="pcapkit.utilities.contextvars.frame_depth"><code class="xref py py-data docutils literal notranslate"><span class="pre">frame_depth</span></code></a> tells, and the short
+read it records ends the data before those octets of <code class="docutils literal notranslate"><span class="pre">name</span></code>, or
+anywhere in it without a <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+</dd>
+</dl>
+<p>On its own the end of the data is a cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>), so a value past it is a
+zero the cut left, not one read. A check that would refuse such a value leaves it
+to the short read, as a field callback does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>), and so does one refusing
+a header length the data ends inside, refused on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1404">#1404</a> because the rebuild
+filled the zeros in, which the short read now cuts back. Inside a frame its lengths
+say where the message ends, so such a check refuses as before.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.shortread.fill_short_options">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.shortread.</span></span><span class="sig-name descname"><span class="pre">fill_short_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/shortread.html#fill_short_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.shortread.fill_short_options" title="Link to this definition">¶</a></dt>
+<dd><p>Fill out an options area a short read ended inside, so a rebuild writes its length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The data model a protocol is rebuilt from.</p></li>
+<li><p><strong>options</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Its options, keyed by code, as the protocol’s <code class="docutils literal notranslate"><span class="pre">read</span></code> gives them, or
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for none.</p></li>
+<li><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets its header length gives the options area.</p></li>
+<li><p><strong>zero</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – The code and data model of the one-octet option a zero octet reads as.</p></li>
+<li><p><strong>padding</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Octets it records after an End of Option List, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> where
+the protocol records none.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">options</span></code> and <code class="docutils literal notranslate"><span class="pre">padding</span></code> to <code class="docutils literal notranslate"><span class="pre">size</span></code> octets where <code class="docutils literal notranslate"><span class="pre">data</span></code> records a short
+read: past <code class="docutils literal notranslate"><span class="pre">size</span></code>, trailing <code class="docutils literal notranslate"><span class="pre">zero</span></code> options dropped; short of it, filled out
+with zero octets, after <code class="docutils literal notranslate"><span class="pre">padding</span></code> where the options end with <code class="docutils literal notranslate"><span class="pre">zero</span></code>, else
+as that many <code class="docutils literal notranslate"><span class="pre">zero</span></code> options.</p>
+</dd>
+</dl>
+<p>A header length the data ends before is read as parsed on its own
+(<a class="reference internal" href="#pcapkit.corekit.schema.shortread.cut_on_its_own" title="pcapkit.corekit.schema.shortread.cut_on_its_own"><code class="xref py py-func docutils literal notranslate"><span class="pre">cut_on_its_own()</span></code></a>), but <code class="docutils literal notranslate"><span class="pre">make</span></code> writes the length of the options it is
+given, which past the cut are a cut option’s whole length and the end of the
+list its zeros read as. Whatever is filled or dropped lies past the cut, so the
+rebuild’s cut back leaves the octets and the header length its parse read
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.shortread.ends_inside_option">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.shortread.</span></span><span class="sig-name descname"><span class="pre">ends_inside_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/shortread.html#ends_inside_option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.shortread.ends_inside_option" title="Link to this definition">¶</a></dt>
+<dd><p>Tell whether the first <code class="docutils literal notranslate"><span class="pre">count</span></code> octets of an options area end inside one of its options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The options read from the area, keyed by code, each with the
+<code class="docutils literal notranslate"><span class="pre">length</span></code> it declares.</p></li>
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets of the area the data holds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether an option starts before <code class="docutils literal notranslate"><span class="pre">count</span></code> octets and declares more than them.</p>
+</dd>
+</dl>
+<p>Such an option rebuilds by the values it holds rather than by the length it
+declares, so neither its own length nor the header length before it would
+rebuild as parsed: a header the data ends inside an option of stays refused
+on its own too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1404">#1404</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.7.0.</span></p>
 </div>

@@ -208,6 +208,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/foundation/options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
@@ -339,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1183,10 +1185,16 @@
 <span class="sd">              left as zero from one read, and leave it to the short read.</span>
 <span class="sd">            * ``__data_end__`` -- that ``length`` ends where the data does, as a</span>
 <span class="sd">              :class:`~pcapkit.corekit.fields.collections.ListField` says of an</span>
-<span class="sd">              item it counts. Fields running past ``length`` are then the cut</span>
-<span class="sd">              the short read records, and do not warn that ``__length__`` fell</span>
-<span class="sd">              below zero (:issue:`2749`); past the cut it reads as zero, so a</span>
-<span class="sd">              field it sizes reads nothing (:issue:`2848`).</span>
+<span class="sd">              item it counts, and :meth:`Protocol.unpack</span>
+<span class="sd">              &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;` of a layer parsed on</span>
+<span class="sd">              its own (:issue:`2880`). Fields running past ``length`` are then</span>
+<span class="sd">              the cut the short read records, and do not warn that</span>
+<span class="sd">              ``__length__`` fell below zero (:issue:`2749`); past the cut it</span>
+<span class="sd">              reads as zero, so a field it sizes reads nothing (:issue:`2848`).</span>
+<span class="sd">            * ``__past_cut__`` -- for the fields past that cut, that nothing is</span>
+<span class="sd">              left there: a length a :class:`~pcapkit.corekit.fields.field.Field`</span>
+<span class="sd">              resolves below zero from the zeros the cut left reads none</span>
+<span class="sd">              (:issue:`2880`).</span>
 <span class="sd">            * ``__data_present__`` -- that ``data`` holds the data that many</span>
 <span class="sd">              octets in, and past them the zeros a</span>
 <span class="sd">              :class:`~pcapkit.corekit.fields.collections.ListField` of schema</span>
@@ -1194,8 +1202,9 @@
 <span class="sd">              how many of its octets the data holds, under the same key, so a</span>
 <span class="sd">              list there ends with the data (:issue:`2760`).</span>
 
-<span class="sd">            The last three are cleared as unpacking starts, so a nested schema</span>
-<span class="sd">            finds only its own.</span>
+<span class="sd">            ``__short_read__``, ``__data_end__``, ``__past_cut__`` and</span>
+<span class="sd">            ``__data_present__`` are cleared as unpacking starts, so a nested</span>
+<span class="sd">            schema finds only its own.</span>
 
 <span class="sd">            A payload field of a declared length the data ends inside records a</span>
 <span class="sd">            cut like any other field, so its layer's rebuild reads as cut</span>
@@ -1218,7 +1227,9 @@
 <span class="sd">        .. versionchanged:: 1.7.0</span>
 
 <span class="sd">           Past the cut in a schema whose ``length`` ends with the data, a field</span>
-<span class="sd">           sized by ``__length__`` reads nothing (:issue:`2848`).</span>
+<span class="sd">           sized by ``__length__`` reads nothing (:issue:`2848`), nor does one</span>
+<span class="sd">           whose length the zeros the cut left resolve below zero</span>
+<span class="sd">           (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
         <span class="c1"># force cast arg type since decorator changed their signatures</span>
@@ -1228,8 +1239,9 @@
             <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
         <span class="c1"># NOTE: ``packet`` may be an enclosing schema's, copied into a nested</span>
-        <span class="c1"># context, so its short read is not this schema's (#2727).</span>
+        <span class="c1"># context, so its short read is not this schema's (#2727), nor its cut (#2880).</span>
         <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__past_cut__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="c1"># NOTE: Fields running past a length that ends with the data are the cut its</span>
         <span class="c1"># short read records, not an overrun (#2749).</span>
         <span class="n">data_end</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__data_end__'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -1240,10 +1252,11 @@
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="c1"># NOTE: Past the cut nothing is left of a length that ends with the data, so a</span>
-            <span class="c1"># field sized by what is left reads none rather than a negative length (#2848).</span>
-            <span class="k">if</span> <span class="n">data_end</span> <span class="ow">and</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># NOTE: Past the cut nothing is left of a length ending with the data: a field sized by</span>
+            <span class="c1"># what is left (#2848), or by the zeros the cut left (#2880), reads none, not below zero.</span>
+            <span class="k">if</span> <span class="n">data_end</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__past_cut__'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="c1"># NOTE: ``Field.length`` recomputes struct.calcsize() on every read,</span>
@@ -1352,6 +1365,7 @@
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'packet length &lt; 0: </span><span class="si">{</span><span class="n">packet</span><span class="p">[</span><span class="s2">"__length__"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
                      <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
+        <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__past_cut__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 

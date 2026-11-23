@@ -215,6 +215,7 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../extraction.html">File Extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../options.html">Extraction Options</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../engines/engine.html">Base Engine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../engines/builtin.html">Built-in Engines</a></li>
@@ -346,6 +347,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/inspect.html">Abstract Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/callbacks.html">Running Callbacks</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -617,7 +619,7 @@ that is not meant to be selectable by name declines:</p>
 <a class="reference internal" href="../../toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> adapter it holds for that name, and an
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> enables it by name:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PCAP</span><span class="o">.</span><span class="n">register_reassembly</span><span class="p">(</span><span class="s1">'my_protocol'</span><span class="p">,</span> <span class="n">my_adapter</span><span class="p">)</span>
-<span class="n">Extractor</span><span class="p">(</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reasm_protocols</span><span class="o">=</span><span class="p">[</span><span class="s1">'my_protocol'</span><span class="p">])</span>
+<span class="n">Extractor</span><span class="p">(</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="p">[</span><span class="s1">'my_protocol'</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -691,12 +693,16 @@ one table every reassembly registration lands in.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.count">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.count" title="Link to this definition">¶</a></dt>
 <dd><p>Total number of reassembled packets.</p>
+<p>Read from a callback, it counts the stored datagrams only, as
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> reports them there.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">datagram</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="Link to this definition">¶</a></dt>
 <dd><p>Reassembled datagram.</p>
+<p>Read from a callback, it holds the stored datagrams only, without
+submitting the outstanding buffers; see <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.fetch" title="pcapkit.foundation.reassembly.reassembly.Reassembly.fetch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fetch()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d" title="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_d</span></code></a> is
@@ -801,6 +807,11 @@ that raises cannot lose them</p></li>
 <dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">datagrams</span></code>, for <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.submit" title="pcapkit.foundation.reassembly.reassembly.Reassembly.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> to return.</p>
 </dd>
 </dl>
+<p>Every callback runs, through
+<a class="reference internal" href="../../utilities/callbacks.html#pcapkit.utilities.callbacks.run_callbacks" title="pcapkit.utilities.callbacks.run_callbacks"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_callbacks()</span></code></a>: the first
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> one raises propagates once the last has run. While they
+run, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.fetch" title="pcapkit.foundation.reassembly.reassembly.Reassembly.fetch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fetch()</span></code></a> returns what <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a> holds, so a callback
+reading <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> does not run them again.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.7.0.</span></p>
 </div>
@@ -895,6 +906,13 @@ to <em>forcedly</em> obtain newly reassembled payload. Otherwise, the
 already calculated
 <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 will be returned.</p>
+<p>Called from a callback, it returns what <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a> holds and
+submits nothing, since a submission would run the callbacks again.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>A callback reading <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> while a buffer is outstanding
+gets the stored datagrams, where it recursed until
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RecursionError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RecursionError</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2867">#2867</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -945,6 +963,12 @@ of the list</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 </dl>
+<p>Every callback runs on each submission. One raising an
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> does not stop the rest, and the first such error
+propagates once they have run.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span>A callback that raises no longer stops the ones after it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2881">#2881</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py attribute">
@@ -987,6 +1011,19 @@ will be discarded after callback.</p>
 <span class="sig-name descname"><span class="pre">_flag_n</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_n" title="Link to this definition">¶</a></dt>
 <dd><p>New datagram flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, the
 <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a> will be repopulated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_c">
+<span class="sig-name descname"><span class="pre">_flag_c</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_c" title="Link to this definition">¶</a></dt>
+<dd><p>Callback flag. Set while the callbacks run, so a callback
+reading <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> gets <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
+rather than a submission that would run them again.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
