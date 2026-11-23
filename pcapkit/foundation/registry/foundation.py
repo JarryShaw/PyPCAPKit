@@ -68,12 +68,16 @@ def register_extractor_engine(name: 'str', engine: 'ModuleDescriptor[Engine] | T
     :data:`pcapkit.foundation.extraction.Extractor.__engine__` registry.
 
     Arguments:
-        name: engine name
+        name: engine name, stored lower-cased
         engine: module descriptor or an
             :class:`~pcapkit.foundation.engines.engine.Engine` subclass (a class
             deriving only from :class:`~pcapkit.foundation.engines.engine.EngineBase`
             is refused: that is the base for pcapkit's own engines, unless it is
             the engine ``name`` shipped with, which restores it)
+
+    Raises:
+        RegistryError: If ``name`` is not a :class:`str`, or ``engine`` is
+            refused as above.
 
     .. versionchanged:: 1.3.0
 
@@ -82,7 +86,7 @@ def register_extractor_engine(name: 'str', engine: 'ModuleDescriptor[Engine] | T
     .. versionchanged:: 1.7.0
 
        ``engine`` is the class, where ``module`` and ``class_`` named it
-       (:issue:`2838`).
+       (:issue:`2838`), and ``name`` is stored lower-cased (:issue:`2879`).
 
     """
     Extractor.register_engine(name, engine)
@@ -286,12 +290,16 @@ def register_extractor_reassembly(protocol: 'str',
     :data:`pcapkit.foundation.extraction.Extractor.__reassembly__` registry.
 
     Arguments:
-        protocol: protocol name
+        protocol: protocol name, stored lower-cased
         reassembly: module descriptor or a
             :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass (a class
             deriving only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
             is refused: that is the base for pcapkit's own classes, unless it is
             the class ``protocol`` shipped with, which restores it)
+
+    Raises:
+        RegistryError: If ``protocol`` is not a :class:`str`, or ``reassembly``
+            is refused as above.
 
     """
     Extractor.register_reassembly(protocol, reassembly)
@@ -348,12 +356,16 @@ def register_extractor_traceflow(protocol: 'str',
     :data:`pcapkit.foundation.extraction.Extractor.__traceflow__` registry.
 
     Arguments:
-        protocol: protocol name
+        protocol: protocol name, stored lower-cased
         traceflow: module descriptor or a
             :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass (a class
             deriving only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
             is refused: that is the base for pcapkit's own classes, unless it is
             the class ``protocol`` shipped with, which restores it)
+
+    Raises:
+        RegistryError: If ``protocol`` is not a :class:`str`, or ``traceflow``
+            is refused as above.
 
     """
     Extractor.register_traceflow(protocol, traceflow)

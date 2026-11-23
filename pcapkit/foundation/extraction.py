@@ -135,6 +135,35 @@ def _release_input(ifile: 'IO[bytes]') -> 'None':
         pass
 
 
+def _registry_key(kind: 'str', name: 'str') -> 'str':
+    """The key a name is stored and looked up under in a name-keyed registry.
+
+    The one key rule of :attr:`Extractor.__engine__
+    <pcapkit.foundation.extraction.Extractor.__engine__>`,
+    :attr:`Extractor.__reassembly__
+    <pcapkit.foundation.extraction.Extractor.__reassembly__>` and
+    :attr:`Extractor.__traceflow__
+    <pcapkit.foundation.extraction.Extractor.__traceflow__>`, shared by their
+    registrars and :meth:`Extractor.make_reassembly
+    <pcapkit.foundation.extraction.Extractor.make_reassembly>`, so a name is
+    reachable however it was cased (:issue:`2879`).
+
+    Arguments:
+        kind: entry kind, for the error message
+        name: the name given
+
+    Returns:
+        ``name``, lower-cased.
+
+    Raises:
+        RegistryError: If ``name`` is not a :obj:`str`.
+
+    """
+    if not isinstance(name, str):
+        raise RegistryError(f'{kind} name must be a str, not {name!r}')
+    return name.lower()
+
+
 #: The names :data:`Layers` admits, in order.
 _LAYERS = get_args(Layers)
 
@@ -335,8 +364,9 @@ class Extractor(Generic[_P]):
         },
     )  # type: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]
 
-    #: Engine mapping for extracting frames. The values should be a module descriptor
-    #: or an :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass: every
+    #: Engine mapping for extracting frames, keyed by lower-cased engine name, as
+    #: ``engine`` is looked up. The values should be a module descriptor or an
+    #: :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass: every
     #: built-in derives from the base directly, and the public ``register_engine``
     #: additionally admits only :class:`~pcapkit.foundation.engines.engine.Engine`
     #: subclasses.
@@ -351,8 +381,9 @@ class Extractor(Generic[_P]):
         'pypcapfile': ModuleDescriptor('pcapkit.foundation.engines.pypcapfile', 'PyPCAPFile'),
     }  # type: dict[str, ModuleDescriptor[EngineBase] | Type[EngineBase]]
 
-    #: Reassembly support mapping for extracting frames. The values should be a module
-    #: descriptor or a :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
+    #: Reassembly support mapping for extracting frames, keyed by lower-cased protocol
+    #: name, as every lookup reads it. The values should be a module descriptor or a
+    #: :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
     #: subclass: every built-in derives from the base directly, and the public
     #: ``register_reassembly`` additionally admits only
     #: :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclasses.
@@ -363,8 +394,9 @@ class Extractor(Generic[_P]):
         'dtls': ModuleDescriptor('pcapkit.foundation.reassembly.dtls', 'DTLS'),
     }  # type: dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]
 
-    #: Flow tracing support mapping for extracting frames. The values should be a module
-    #: descriptor or a :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
+    #: Flow tracing support mapping for extracting frames, keyed by lower-cased protocol
+    #: name, as every lookup reads it. The values should be a module descriptor or a
+    #: :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
     #: subclass: every built-in derives from the base directly, and the public
     #: ``register_traceflow`` additionally admits only
     #: :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclasses.
@@ -596,7 +628,8 @@ class Extractor(Generic[_P]):
             entry, so an override can be undone (:issue:`1363`).
 
         Arguments:
-            name: engine name
+            name: engine name, lower-cased, as :meth:`__init__` looks up
+                ``engine``
             engine: module descriptor or an :class:`~pcapkit.foundation.engines.engine.Engine`
                 subclass; a class deriving only from
                 :class:`~pcapkit.foundation.engines.engine.EngineBase` is refused, as
@@ -605,7 +638,8 @@ class Extractor(Generic[_P]):
                 engine ``name`` shipped with
 
         Raises:
-            RegistryError: If ``engine`` is not a class, or not an
+            RegistryError: If ``name`` is not a :obj:`str`, or ``engine`` is not
+                a class, or not an
                 :class:`~pcapkit.foundation.engines.engine.Engine` subclass.
 
         Warns:
@@ -618,7 +652,13 @@ class Extractor(Generic[_P]):
            and ``class_`` name pair, with no alias, and the engine name it
            took as ``engine`` is ``name``.
 
+        .. versionchanged:: 1.7.0
+
+           ``name`` is lower-cased, so a mixed-case name reaches the entry
+           ``engine`` looks up (:issue:`2879`).
+
         """
+        name = _registry_key('engine', name)
         # The shipped built-in is matched before the descriptor is resolved, so
         # restoring an optional engine does not import it (#1363).
         shipped = cls._shipped_engine.get(name)
@@ -644,18 +684,20 @@ class Extractor(Generic[_P]):
         built-in engine is written. Not part of the public API.
 
         Arguments:
-            name: engine name
+            name: engine name, lower-cased
             engine: module descriptor or an
                 :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
 
         Raises:
-            RegistryError: If ``engine`` is not an :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
+            RegistryError: If ``name`` is not a :obj:`str`, or ``engine`` is not an
+                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
                 ``name``; it is overwritten.
 
         """
+        name = _registry_key('engine', name)
         if isinstance(engine, ModuleDescriptor):
             engine = engine.klass
         if not issubclass(engine, EngineBase):
@@ -684,7 +726,9 @@ class Extractor(Generic[_P]):
             shipped entry, so an override can be undone (:issue:`1363`).
 
         Arguments:
-            protocol: protocol name
+            protocol: protocol name, lower-cased, as :meth:`make_reassembly`
+                and :class:`~pcapkit.foundation.options.ReassemblyOptions` look
+                it up
             reassembly: module descriptor or a
                 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass; a class deriving
                 only from :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` is refused, as
@@ -693,7 +737,8 @@ class Extractor(Generic[_P]):
                 ``protocol`` shipped with
 
         Raises:
-            RegistryError: If ``reassembly`` is not a class, or not a
+            RegistryError: If ``protocol`` is not a :obj:`str`, or ``reassembly``
+                is not a class, or not a
                 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass.
 
         Warns:
@@ -705,7 +750,13 @@ class Extractor(Generic[_P]):
            ``reassembly``, a module descriptor or a class, replaces the
            ``module`` and ``class_`` name pair, with no alias.
 
+        .. versionchanged:: 1.7.0
+
+           ``protocol`` is lower-cased, so a mixed-case name reaches the entry
+           every lookup reads (:issue:`2879`).
+
         """
+        protocol = _registry_key('reassembly', protocol)
         shipped = cls._shipped_reassembly.get(protocol)
         if isinstance(reassembly, ModuleDescriptor) and reassembly != shipped:
             reassembly = reassembly.klass
@@ -729,12 +780,13 @@ class Extractor(Generic[_P]):
         built-in is written. Not part of the public API.
 
         Arguments:
-            protocol: protocol name
+            protocol: protocol name, lower-cased
             reassembly: module descriptor or a
                 :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass
 
         Raises:
-            RegistryError: If ``reassembly`` is not a
+            RegistryError: If ``protocol`` is not a :obj:`str`, or ``reassembly``
+                is not a
                 :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass.
 
         Warns:
@@ -742,6 +794,7 @@ class Extractor(Generic[_P]):
                 ``protocol``; it is overwritten.
 
         """
+        protocol = _registry_key('reassembly', protocol)
         if isinstance(reassembly, ModuleDescriptor):
             reassembly = reassembly.klass
         if not issubclass(reassembly, ReassemblyBase):
@@ -762,8 +815,7 @@ class Extractor(Generic[_P]):
 
         Arguments:
             protocol: protocol name, matched lower-cased, as
-                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
-                registers under
+                :meth:`register_reassembly` registers it
             strict: if set strict flag for reassembly
             store: if store reassembled datagrams
             timeout: reassembly timeout in seconds, on the capture's own clock;
@@ -776,11 +828,12 @@ class Extractor(Generic[_P]):
 
         Raises:
             FormatError: If no reassembly is registered under ``protocol``.
+            RegistryError: If ``protocol`` is not a :obj:`str`.
 
         .. versionadded:: 1.7.0
 
         """
-        name = protocol.lower()
+        name = _registry_key('reassembly', protocol)
         reasm_cls = cls.__reassembly__.get(name)
         if reasm_cls is None:
             raise FormatError(f'unsupported reassembly protocol: {protocol!r}')
@@ -813,7 +866,8 @@ class Extractor(Generic[_P]):
             shipped entry, so an override can be undone (:issue:`1363`).
 
         Arguments:
-            protocol: protocol name
+            protocol: protocol name, lower-cased, as
+                :class:`~pcapkit.foundation.options.TraceFlowOptions` looks it up
             traceflow: module descriptor or a
                 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass; a class deriving
                 only from :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` is refused, as
@@ -822,7 +876,8 @@ class Extractor(Generic[_P]):
                 ``protocol`` shipped with
 
         Raises:
-            RegistryError: If ``traceflow`` is not a class, or not a
+            RegistryError: If ``protocol`` is not a :obj:`str`, or ``traceflow``
+                is not a class, or not a
                 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass.
 
         Warns:
@@ -834,7 +889,13 @@ class Extractor(Generic[_P]):
            ``traceflow``, a module descriptor or a class, replaces the
            ``module`` and ``class_`` name pair, with no alias.
 
+        .. versionchanged:: 1.7.0
+
+           ``protocol`` is lower-cased, so a mixed-case name reaches the entry
+           every lookup reads (:issue:`2879`).
+
         """
+        protocol = _registry_key('traceflow', protocol)
         shipped = cls._shipped_traceflow.get(protocol)
         if isinstance(traceflow, ModuleDescriptor) and traceflow != shipped:
             traceflow = traceflow.klass
@@ -858,12 +919,13 @@ class Extractor(Generic[_P]):
         built-in is written. Not part of the public API.
 
         Arguments:
-            protocol: protocol name
+            protocol: protocol name, lower-cased
             traceflow: module descriptor or a
                 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass
 
         Raises:
-            RegistryError: If ``traceflow`` is not a
+            RegistryError: If ``protocol`` is not a :obj:`str`, or ``traceflow``
+                is not a
                 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass.
 
         Warns:
@@ -871,6 +933,7 @@ class Extractor(Generic[_P]):
                 ``protocol``; it is overwritten.
 
         """
+        protocol = _registry_key('traceflow', protocol)
         if isinstance(traceflow, ModuleDescriptor):
             traceflow = traceflow.klass
         if not issubclass(traceflow, TraceFlowBase):
@@ -1853,7 +1916,9 @@ class Extractor(Generic[_P]):
         run. This method can run more than once for one extraction -- each call to
         :meth:`__next__` or :meth:`__call__` that reaches the end of a
         caller-supplied stream runs it again -- so ``finish`` is required to be
-        idempotent rather than guarded here.
+        idempotent rather than guarded here. Should ``finish`` raise, as a
+        raising flow tracing callback makes it, the input and the engine are
+        released as under ``failed``, and its error propagates (:issue:`2857`).
 
         Arguments:
             failed: whether the extraction stopped on an error instead, which is
@@ -1876,7 +1941,13 @@ class Extractor(Generic[_P]):
 
         self._flag_e = True
         if self._flag_t and self._tcp:
-            self._trace.tcp.finish()
+            try:
+                self._trace.tcp.finish()
+            except BaseException:
+                # NOTE: a raising callback still releases input and engine (#2857); ``failed``
+                # logs an error from the engine's close, so the callback's is the one raised.
+                self._release(failed=True)
+                raise
         self._release()
 
     def _release(self, *, failed: 'bool' = False) -> 'None':
