@@ -99,43 +99,67 @@ def packet2dict(packet: 'bytes', timestamp: 'float', *,
     }
 
 
-def ipv4_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
+def ipv4_reassembly(packet: 'bytes', timestamp: 'float', *, data_link: 'Enum_LinkType',
+                    count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
     Args:
         packet: Raw packet bytes.
+        timestamp: Timestamp of the packet.
+        data_link: Data link layer protocol (from the capture handle).
         count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `PyPCAP`_ provides no IPv4 layer to read.
 
+    .. versionchanged:: 1.7.0
+
+       Takes ``timestamp`` and ``data_link`` too, as the engine calls a
+       registered reassembly adapter, so a 1.6.x call with ``packet`` alone fails.
+
     """
     raise UnsupportedCall(f'{_ENGINE}: IPv4 reassembly is not supported: {_NO_DISSECTION}')
 
 
-def ipv6_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
+def ipv6_reassembly(packet: 'bytes', timestamp: 'float', *, data_link: 'Enum_LinkType',
+                    count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     Args:
         packet: Raw packet bytes.
+        timestamp: Timestamp of the packet.
+        data_link: Data link layer protocol (from the capture handle).
         count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `PyPCAP`_ provides no IPv6 layer to read.
 
+    .. versionchanged:: 1.7.0
+
+       Takes ``timestamp`` and ``data_link`` too, as the engine calls a
+       registered reassembly adapter, so a 1.6.x call with ``packet`` alone fails.
+
     """
     raise UnsupportedCall(f'{_ENGINE}: IPv6 reassembly is not supported: {_NO_DISSECTION}')
 
 
-def tcp_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'TCP_Packet | None':
+def tcp_reassembly(packet: 'bytes', timestamp: 'float', *, data_link: 'Enum_LinkType',
+                   count: 'int' = -1) -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     Args:
         packet: Raw packet bytes.
+        timestamp: Timestamp of the packet.
+        data_link: Data link layer protocol (from the capture handle).
         count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `PyPCAP`_ provides no TCP layer to read.
+
+    .. versionchanged:: 1.7.0
+
+       Takes ``timestamp`` and ``data_link`` too, as the engine calls a
+       registered reassembly adapter, so a 1.6.x call with ``packet`` alone fails.
 
     """
     raise UnsupportedCall(f'{_ENGINE}: TCP reassembly is not supported: {_NO_DISSECTION}')

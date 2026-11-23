@@ -118,6 +118,12 @@ class PyShark(EngineBase['PySharkPacket']):
     #: Engine module name.
     __engine_module__ = 'pyshark'
 
+    #: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the
+    #: PyShark packet and its frame number. None ships, as PyShark reports
+    #: dissected fields rather than the octets a reassembler buffers; one
+    #: registered with :meth:`register_reassembly` is fed.
+    __reassembly__ = {}  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     #: Flow tracing adapters, each called as ``adapter(packet, count=n)`` on the
     #: PyShark packet and its frame number.
     __traceflow__ = {
@@ -235,10 +241,8 @@ class PyShark(EngineBase['PySharkPacket']):
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
                   is provided as the PyShark engine does not
                   support such operations.
-                * if reassembly is enabled, as the PyShark engine
-                  does not support such operation.
-                * if a flow tracer with no adapter in :attr:`__traceflow__` is
-                  enabled.
+                * if a reassembler with no adapter in :attr:`__reassembly__`, or
+                  a flow tracer with none in :attr:`__traceflow__`, is enabled.
                 * if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                   is provided, as the PyShark engine does not parse with
                   :mod:`pcapkit`'s own protocol implementations.
@@ -257,7 +261,8 @@ class PyShark(EngineBase['PySharkPacket']):
                  "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        # NOTE: no entry in ``__reassembly__``, so this disables reassembly with a warning.
+        # NOTE: no shipped entry in ``__reassembly__``, so this disables reassembly with a warning
+        # unless an adapter is registered.
         self._setup_reassembly()
         self._setup_traceflow()
 
@@ -292,7 +297,7 @@ class PyShark(EngineBase['PySharkPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.pyshark import packet2dict
+        from pcapkit.toolkit.pyshark import packet2dict, packet2timestamp
         ext = self._extractor
 
         # fetch the next PyShark packet that is a packet record
@@ -315,6 +320,10 @@ class PyShark(EngineBase['PySharkPacket']):
                 ofile(info, name=frnum)
             else:
                 ext._ofile(info, name=frnum)
+
+        # record fragments
+        if ext._flag_r:
+            self._reassemble(packet2timestamp(packet), packet, count=ext._frnum)
 
         # trace flows
         if ext._flag_t:

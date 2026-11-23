@@ -28,7 +28,8 @@ if TYPE_CHECKING:
 
     from pyshark.packet.packet import Packet
 
-__all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAME_TO_LINKTYPE']
+__all__ = ['packet2dict', 'packet2timestamp', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE',
+           'FILTER_NAME_TO_LINKTYPE']
 
 #: Message prefix shared by every message below, read off
 #: :attr:`PyShark.__engine_name__
@@ -457,6 +458,32 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
     return dict_
 
 
+def packet2timestamp(packet: 'Packet') -> 'float':
+    """Read the capture timestamp of a PyShark packet.
+
+    Args:
+        packet: PyShark packet.
+
+    Returns:
+        ``frame.time_epoch``, as the :obj:`float` nearest its decimal value. A
+        record without one reads the PDML ``geninfo`` timestamp PyShark keeps as
+        ``sniff_timestamp`` instead. A Simple Packet Block carries no timestamp,
+        so tshark reports no ``frame.time_epoch`` for it, and that one is
+        ``'0.000000000'``, the UNIX epoch (measured on ``test.pcapng`` frame 4).
+
+    Raises:
+        ProtocolError: If the timestamp is not decimal text.
+
+    .. versionadded:: 1.7.0
+
+    """
+    frame = _frame_layer(packet)
+    epoch = None if frame is None else getattr(frame, 'time_epoch', None)
+    if epoch is None:
+        epoch = packet.sniff_timestamp
+    return _parse_epoch(epoch)
+
+
 def _carrier(packet: 'Packet') -> 'tuple[Any, Any]':
     """Fetch the TCP layer of a PyShark packet and the IP layer that carries it.
 
@@ -597,14 +624,6 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             except (KeyError, ValueError):
                 raise MissingKeyError('frame.encap_type=%s' % encap_type) from None
 
-        # A Simple Packet Block carries no timestamp, so tshark reports no
-        # ``frame.time_epoch`` for it; the PDML ``geninfo`` timestamp PyShark
-        # keeps as ``sniff_timestamp`` is then ``'0.000000000'``, the UNIX epoch
-        # (measured on ``test.pcapng`` frame 4).
-        epoch = getattr(frame, 'time_epoch', None)
-        if epoch is None:
-            epoch = packet.sniff_timestamp
-
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=protocol,                                                   # data link type
             index=count,                                                         # frame number
@@ -616,7 +635,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             dst=ipaddress.ip_address(ip.dst),                                    # destination IP
             srcport=int(tcp.srcport),                                            # TCP source port
             dstport=int(tcp.dstport),                                            # TCP destination port
-            timestamp=_parse_epoch(epoch),                                       # timestamp
+            timestamp=packet2timestamp(packet),                                  # timestamp
             seq=_absolute(tcp, 'seq'),                                           # TCP sequence number
             ack=_absolute(tcp, 'ack'),                                           # TCP acknowledgement number
             # NOTE: PyShark reports fields, not octets, so both are empty;

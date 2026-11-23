@@ -37,8 +37,8 @@ House Conventions
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`, how its callbacks and those of
-     :mod:`pcapkit.foundation.traceflow` run, and how an engine feeds each flow
-     tracer;
+     :mod:`pcapkit.foundation.traceflow` run, and how an engine feeds each
+     reassembler and flow tracer;
    * :ref:`const-vendor-pairing` -- :mod:`pcapkit.const`, the
      :mod:`pcapkit.vendor` crawler each module needs, and how a package of it
      imports its modules;
