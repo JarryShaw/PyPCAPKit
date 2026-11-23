@@ -597,6 +597,11 @@
 
 <span class="sd">.. [*] https://www.tcpdump.org/linktypes/LINKTYPE_NULL.html</span>
 
+<span class="sd">.. versionremoved:: 1.7.0</span>
+
+<span class="sd">   ``pcapkit.protocols.link.loopback.protocol.family_byteorder``, now</span>
+<span class="sd">   :func:`pcapkit.corekit.schema.byteorder.family_byteorder` (:issue:`2897`).</span>
+
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -604,6 +609,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.byteorder</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Loopback</span> <span class="k">as</span> <span class="n">Data_Loopback</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Loopback</span> <span class="k">as</span> <span class="n">Schema_Loopback</span>
@@ -618,41 +624,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Loopback'</span><span class="p">,</span> <span class="s1">'family_byteorder'</span><span class="p">]</span>
-
-
-<div class="viewcode-block" id="family_byteorder">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.protocol.family_byteorder">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">family_byteorder</span><span class="p">(</span><span class="n">family</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["big", "little"]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Byte order a loopback header's address family was written in.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        family: The 4 octets of the address family.</span>
-<span class="sd">        linktype: Link type the frame was captured under; :data:`None` reads as</span>
-<span class="sd">            ``LINKTYPE_NULL``.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        ``'big'`` for ``LINKTYPE_LOOP`` (108), whose family is in network byte</span>
-<span class="sd">        order. Otherwise, for ``LINKTYPE_NULL`` (0), ``'big'`` if the octets</span>
-<span class="sd">        read as a smaller number big-endian than little-endian, else</span>
-<span class="sd">        ``'little'``.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        A ``LINKTYPE_NULL`` family is in the byte order of the host that</span>
-<span class="sd">        captured the packet, which the capture file does not record. Every</span>
-<span class="sd">        address family is below ``0x10000``, so its zero octets lie at the high</span>
-<span class="sd">        end, and the smaller of the two readings is the one in the writer's byte</span>
-<span class="sd">        order. A family that reads the same both ways, such as 0, packs to the</span>
-<span class="sd">        same octets either way. A ``LINKTYPE_LOOP`` family is never inferred,</span>
-<span class="sd">        so one written little-endian reads as a family no table holds.</span>
-
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">'big'</span>
-    <span class="k">if</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">'big'</span>
-    <span class="k">return</span> <span class="s1">'little'</span></div>
-
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Loopback'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Loopback">
@@ -666,8 +638,8 @@
 <span class="sd">    for ``LINKTYPE_LOOP``. Which link type a frame was captured under is the</span>
 <span class="sd">    ``alias`` it was dispatched with; for ``LINKTYPE_NULL``, which a frame</span>
 <span class="sd">    parsed on its own is read as, the byte order is read from the octets</span>
-<span class="sd">    themselves (see :func:`family_byteorder`). Either way it is kept in</span>
-<span class="sd">    :attr:`~pcapkit.protocols.protocol.Protocol.info`, and</span>
+<span class="sd">    themselves (see :func:`~pcapkit.corekit.schema.byteorder.family_byteorder`).</span>
+<span class="sd">    Either way it is kept in :attr:`~pcapkit.protocols.protocol.Protocol.info`, and</span>
 <span class="sd">    :meth:`from_data &lt;pcapkit.protocols.link.link.Link.from_data&gt;`</span>
 <span class="sd">    reads the family back in that byte order rather than inferring it again.</span>
 

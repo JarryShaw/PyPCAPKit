@@ -596,10 +596,11 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PCAP_CT'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap</span> <span class="k">as</span> <span class="n">Handle</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPCTPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
@@ -663,8 +664,9 @@
 
 <span class="sd">    * returns each frame as a ``(timestamp, bytes)`` :obj:`tuple` rather than as</span>
 <span class="sd">      a parsed packet object, and</span>
-<span class="sd">    * disables both reassembly and flow tracing, warning as it does so, since</span>
-<span class="sd">      neither can be derived without an IP or TCP layer to read.</span>
+<span class="sd">    * ships no reassembly or flow tracing adapter, since neither can be derived</span>
+<span class="sd">      without an IP or TCP layer to read, so it disables both, warning as it</span>
+<span class="sd">      does so, unless one is registered on it (see :attr:`__reassembly__`).</span>
 
 <span class="sd">    It also requires the input to be a real file on disk, because</span>
 <span class="sd">    :c:func:`pcap_open_offline` opens by *name* -- there is no way to hand</span>
@@ -721,6 +723,18 @@
 
     <span class="c1">#: Distribution this engine drives.</span>
     <span class="n">__engine_distribution__</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">PCAP_CT</span>
+
+    <span class="c1">#: Reassembly adapters, each called as</span>
+    <span class="c1">#: ``adapter(packet, timestamp, data_link=link, count=n)`` on the frame's</span>
+    <span class="c1">#: octets and timestamp, the savefile's link type and its frame number. None</span>
+    <span class="c1">#: ships, as |pcap|_ dissects nothing; one registered with</span>
+    <span class="c1">#: :meth:`register_reassembly` is fed.</span>
+    <span class="n">__reassembly__</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]</span>
+
+    <span class="c1">#: Flow tracing adapters, each called as :attr:`__reassembly__`'s are. None</span>
+    <span class="c1">#: ships, for the same reason; one registered with</span>
+    <span class="c1">#: :meth:`register_traceflow` is fed.</span>
+    <span class="n">__traceflow__</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Class methods.</span>
@@ -884,9 +898,9 @@
 <span class="sd">                * if :attr:`self.extractor._exctx &lt;pcapkit.foundation.extraction.Extractor._exctx&gt;`</span>
 <span class="sd">                  is provided, as the pcap-ct engine does not parse with :mod:`pcapkit`'s</span>
 <span class="sd">                  own protocol implementations.</span>
-<span class="sd">                * if reassembly and/or flow tracing is enabled, as the pcap-ct</span>
-<span class="sd">                  engine performs no protocol dissection and so cannot support</span>
-<span class="sd">                  either operation.</span>
+<span class="sd">                * if a reassembler with no adapter in :attr:`__reassembly__`, or</span>
+<span class="sd">                  a flow tracer with none in :attr:`__traceflow__`, is enabled;</span>
+<span class="sd">                  this engine ships none, as it performs no protocol dissection.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the file format is not supported, i.e., not a PCAP</span>
@@ -947,8 +961,8 @@
                                   <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="si">!r}</span><span class="s1"> is not one; libpcap opens savefiles '</span>
                                   <span class="s1">'by name and cannot read an in-memory stream'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: no entry in ``__reassembly__`` or ``__traceflow__``, so reassembly and flow tracing</span>
-        <span class="c1"># are both disabled, each with a warning.</span>
+        <span class="c1"># NOTE: no shipped entry in ``__reassembly__`` or ``__traceflow__``, so each is disabled</span>
+        <span class="c1"># with a warning unless an adapter is registered.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_reassembly</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_traceflow</span><span class="p">()</span>
 
@@ -1013,8 +1027,11 @@
                 <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span>
 
-        <span class="c1"># NOTE: reassembly is disabled in ``run``, so there is deliberately no bookkeeping for it</span>
-        <span class="c1"># here; flow tracing feeds any adapter registered in ``__traceflow__``.</span>
+        <span class="c1"># record fragments</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reassemble</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+
+        <span class="c1"># trace flows</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
 

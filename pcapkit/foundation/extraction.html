@@ -622,7 +622,7 @@ each needs installed.</p>
     MAN[&quot;the caller drives it&lt;br/&gt;next(extractor) or extractor()&quot;]
     RF[&quot;engine.read\_frame()&quot;]
     EOF{&quot;no\_eof, and the input&lt;br/&gt;still producing?&quot;}
-    CLEAN[&quot;\_cleanup(): TCP flow tracing finished,&lt;br/&gt;the input closed if this class opened it,&lt;br/&gt;the engine closed&quot;]
+    CLEAN[&quot;\_cleanup(): every flow tracer finished,&lt;br/&gt;the input closed if this class opened it,&lt;br/&gt;the engine closed&quot;]
     FAIL[&quot;\_cleanup(failed=True), then re-raised&lt;br/&gt;input and engine released,&lt;br/&gt;tracing not finished&quot;]
     NEXT[&quot;the frame: read on under auto,&lt;br/&gt;else returned to the caller&quot;]
 
@@ -644,8 +644,8 @@ each needs installed.</p>
         F3W[&quot;write it: a file per frame under files=,&lt;br/&gt;else the one output&quot;]
         F4{&quot;reassembly?&quot;}
         F4R[&quot;the engine's toolkit adapters feed&lt;br/&gt;each enabled reassembler&quot;]
-        F5{&quot;traceflow names tcp?&quot;}
-        F5T[&quot;toolkit tcp\_traceflow feeds&lt;br/&gt;the TCP flow tracer&quot;]
+        F5{&quot;traceflow?&quot;}
+        F5T[&quot;the engine's toolkit adapters feed&lt;br/&gt;each enabled flow tracer&quot;]
         F6{&quot;store?&quot;}
         F6S[&quot;kept in .frame&quot;]
         F1 --&gt; F2 --&gt; F3
@@ -720,7 +720,8 @@ reassembly, flow tracing and input settings are grouped into <code class="docuti
 <a class="reference internal" href="options.html#pcapkit.foundation.options.StreamOptions" title="pcapkit.foundation.options.StreamOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamOptions</span></code></a>. <code class="docutils literal notranslate"><span class="pre">reassembly</span></code>
 and <code class="docutils literal notranslate"><span class="pre">traceflow</span></code> also take a list of registered names, so any registered
 reassembler can be enabled, and each enabled one is fed every frame’s
-timestamp (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2814">#2814</a>). <code class="docutils literal notranslate"><span class="pre">nofile</span></code>, <code class="docutils literal notranslate"><span class="pre">fout</span></code>, <code class="docutils literal notranslate"><span class="pre">format</span></code>,
+timestamp (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2814">#2814</a>). Every enabled flow tracer is made and fed,
+where TCP’s alone was (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2843">#2843</a>). <code class="docutils literal notranslate"><span class="pre">nofile</span></code>, <code class="docutils literal notranslate"><span class="pre">fout</span></code>, <code class="docutils literal notranslate"><span class="pre">format</span></code>,
 <code class="docutils literal notranslate"><span class="pre">extension</span></code>, <code class="docutils literal notranslate"><span class="pre">files</span></code>, <code class="docutils literal notranslate"><span class="pre">ip</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv4</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv6</span></code>, <code class="docutils literal notranslate"><span class="pre">tcp</span></code>,
 <code class="docutils literal notranslate"><span class="pre">dtls</span></code>, the <code class="docutils literal notranslate"><span class="pre">reasm_*</span></code>, <code class="docutils literal notranslate"><span class="pre">trace_*</span></code> and <code class="docutils literal notranslate"><span class="pre">buffer_*</span></code> parameters and
 <code class="docutils literal notranslate"><span class="pre">no_eof</span></code> are removed with no alias. Nothing is written without
@@ -773,7 +774,7 @@ parameters to print verbose output information</p></li>
 <dd class="field-even"><ul>
 <li><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.FormatWarning" title="pcapkit.utilities.warnings.FormatWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.FormatWarning</span></code></a> – Warns under the following circumstances:</p>
 <ul class="simple">
-<li><p>If using PCAP or PCAP-NG output for TCP flow tracing while the
+<li><p>If using PCAP or PCAP-NG output for flow tracing while the
 extraction engine is PyShark or PyPCAPFile.</p></li>
 <li><p>If using PCAP or PCAP-NG output while the extraction engine is a
 third-party one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.</p></li>
@@ -791,8 +792,8 @@ rules it out, or the supplied engine is unknown.</p></li>
 <code class="docutils literal notranslate"><span class="pre">traceflow</span></code> names nothing, which turns it off; or if
 <code class="docutils literal notranslate"><span class="pre">traceflow</span></code> asks for
 <a class="reference internal" href="options.html#pcapkit.foundation.options.TraceFlowOptions.analyze" title="pcapkit.foundation.options.TraceFlowOptions.analyze"><code class="xref py py-attr docutils literal notranslate"><span class="pre">analyze</span></code></a>
-while the extraction engine is PyShark, or names a registered flow
-tracer other than TCP’s, which no engine feeds.</p></li>
+while the extraction engine is PyShark; or if the engine has no
+adapter for an enabled reassembler or flow tracer, which it drops.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -900,6 +901,9 @@ reassembly is disabled, where 1.1.0 built the record regardless.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tcp</span></code> – tuple of TCP flows (<a class="reference internal" href="traceflow/tcp.html#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>)</p></li>
 </ul>
+<p>It is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when TCP flow tracing is disabled, and every other
+enabled flow tracer adds the tuple of its flows, under the name it is
+registered by.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_t" title="pcapkit.foundation.extraction.Extractor._flag_t"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_t</span></code></a>
@@ -912,7 +916,8 @@ flow tracing is disabled, where 1.1.0 built the record regardless.</p>
 </div>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.7.0: </span>Renamed from <code class="docutils literal notranslate"><span class="pre">trace</span></code>, with no alias, to match <code class="docutils literal notranslate"><span class="pre">traceflow</span></code> and
-<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.reassembly" title="pcapkit.foundation.extraction.Extractor.reassembly"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reassembly</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2836">#2836</a>).</p>
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.reassembly" title="pcapkit.foundation.extraction.Extractor.reassembly"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reassembly</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2836">#2836</a>). Carries every enabled flow
+tracer, not only TCP’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2843">#2843</a>).</p>
 </div>
 </dd></dl>
 
@@ -1171,6 +1176,46 @@ without one</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.make_traceflow">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">make_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">fout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./tmp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pcap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.byteorder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyze</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor.make_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.make_traceflow" title="Link to this definition">¶</a></dt>
+<dd><p>Make the flow tracer registered under a protocol name.</p>
+<p>Every caller reaches a flow tracer through this:
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> for each one it
+enables, and <a class="reference internal" href="../interface/core.html#pcapkit.interface.core.trace" title="pcapkit.interface.core.trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">trace()</span></code></a>. Its keywords are
+those of <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – protocol name, matched lower-cased, as
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.register_traceflow" title="pcapkit.foundation.extraction.Extractor.register_traceflow"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_traceflow()</span></code></a> registers it</p></li>
+<li><p><strong>fout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output root path, made if missing</p></li>
+<li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output format</p></li>
+<li><p><strong>byteorder</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'little'</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'big'</span></span></code></span>]</span>) – output file byte order</p></li>
+<li><p><strong>nanosecond</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – output nanosecond-resolution file flag</p></li>
+<li><p><strong>bidirectional</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether both halves of a conversation are traced as
+one flow</p></li>
+<li><p><strong>analyze</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether each traced flow reassembles its application layer</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The flow tracer instance.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If no flow tracer is registered under <code class="docutils literal notranslate"><span class="pre">protocol</span></code>.</p></li>
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is not a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.run" title="Link to this definition">¶</a></dt>
 <dd><p>Start extraction.</p>
@@ -1407,16 +1452,18 @@ file <em>if this class opened it</em> and calls
 a path, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_s" title="pcapkit.foundation.extraction.Extractor._flag_s"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_s</span></code></a> set – is closed,
 and a stream the caller supplied is left alone for the caller to close
 when it is done with it.</p>
-<p>It also tells the flow tracer the capture has ended, via
+<p>It also tells every enabled flow tracer the capture has ended, via
 <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.finish</span></code></a>.
 That is the point at which a traced flow nothing has superseded can be
 said to be over, so it is where such a flow is finalised and its callbacks
 run. This method can run more than once for one extraction – each call to
 <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__next__" title="pcapkit.foundation.extraction.Extractor.__next__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__next__()</span></code></a> or <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__call__" title="pcapkit.foundation.extraction.Extractor.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a> that reaches the end of a
 caller-supplied stream runs it again – so <code class="docutils literal notranslate"><span class="pre">finish</span></code> is required to be
-idempotent rather than guarded here. Should <code class="docutils literal notranslate"><span class="pre">finish</span></code> raise, as a
-raising flow tracing callback makes it, the input and the engine are
-released as under <code class="docutils literal notranslate"><span class="pre">failed</span></code>, and its error propagates (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2857">#2857</a>).</p>
+idempotent rather than guarded here. Every tracer is finished whatever
+another’s <code class="docutils literal notranslate"><span class="pre">finish</span></code> raises, as a raising flow tracing callback makes it:
+the first <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> propagates once the last has run, and any
+other <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#BaseException" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseException</span></code></a> at once. Either way the input and the engine
+are released as under <code class="docutils literal notranslate"><span class="pre">failed</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2857">#2857</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2843">#2843</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>failed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether the extraction stopped on an error instead, which is
@@ -1504,7 +1551,10 @@ engines that cannot reassemble clear it on startup.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_t">
 <span class="sig-name descname"><span class="pre">_flag_t</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_t" title="Link to this definition">¶</a></dt>
-<dd><p>Trace flag. It indicates if the flow tracing is enabled.</p>
+<dd><p>Trace flag. It indicates if flow tracing is enabled. Every engine
+reads it to decide whether to feed
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._trace" title="pcapkit.foundation.extraction.Extractor._trace"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_trace</span></code></a>, and clears it
+on startup once it has dropped every enabled flow tracer.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1617,13 +1667,8 @@ has no adapter for at startup.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._trace">
 <span class="sig-name descname"><span class="pre">_trace</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="traceflow/index.html#pcapkit.foundation.traceflow.TraceFlowManager" title="pcapkit.foundation.traceflow.TraceFlowManager"><span class="pre">TraceFlowManager</span></a></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._trace" title="Link to this definition">¶</a></dt>
-<dd><p>Frame record for flow tracing.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._tcp">
-<span class="sig-name descname"><span class="pre">_tcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._tcp" title="Link to this definition">¶</a></dt>
-<dd><p>TCP flag. It indicates if TCP flow tracing is enabled.</p>
+<dd><p>The enabled flow tracers, each fed every frame. An engine drops one it
+has no adapter for at startup.</p>
 </dd></dl>
 
 <dl class="py attribute">

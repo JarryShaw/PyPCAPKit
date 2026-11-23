@@ -140,6 +140,7 @@ The `PyShark`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
+   .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
    .. autoattribute:: PYTHON_CEILING
 
@@ -212,9 +213,12 @@ The `PyPCAP`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
    `PyPCAP`_ is a :manpage:`libpcap(3)` binding aimed primarily at live capture.
    Offline it performs **no protocol dissection**: each frame is the
-   ``(timestamp, bytes)`` pair that :c:func:`pcap_next_ex` produced. Reassembly
-   and flow tracing are therefore unavailable and are disabled -- with an
-   :class:`~pcapkit.utilities.warnings.AttributeWarning` -- when requested.
+   ``(timestamp, bytes)`` pair that :c:func:`pcap_next_ex` produced. The engine
+   therefore ships no reassembly or flow tracing adapter, and disables either --
+   with an :class:`~pcapkit.utilities.warnings.AttributeWarning` -- when
+   requested, unless an adapter is registered on it with
+   :meth:`~pcapkit.foundation.engines.engine.EngineBase.register_reassembly` or
+   :meth:`~pcapkit.foundation.engines.engine.EngineBase.register_traceflow`.
 
    The engine also reads PCAP savefiles only, and only from a file on disk.
    PCAP-NG is rejected with a
@@ -231,6 +235,8 @@ The `PyPCAP`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __engine_distribution__
+   .. autoattribute:: __reassembly__
+   .. autoattribute:: __traceflow__
 
    .. automethod:: unsupported_reason
 
@@ -326,10 +332,10 @@ The `pcap-ct`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
    Being the same interface, `pcap-ct`_ has the same limits. It performs **no
    protocol dissection**: each frame is the ``(timestamp, bytes)`` pair that
-   :c:func:`pcap_next_ex` produced. Reassembly and flow tracing are therefore
-   unavailable regardless of which backend is installed, and are disabled -- with
-   an :class:`~pcapkit.utilities.warnings.AttributeWarning` -- when requested;
-   the adapters in :mod:`pcapkit.toolkit.pcap_ct` raise
+   :c:func:`pcap_next_ex` produced. It therefore ships no reassembly or flow
+   tracing adapter either, and disables or feeds each as
+   :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` does; the adapters in
+   :mod:`pcapkit.toolkit.pcap_ct` raise
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than fail
    obscurely. It also reads from a file on disk only, because
    :c:func:`pcap_open_offline` opens a savefile by *name*; a non-file input is
@@ -374,6 +380,8 @@ The `pcap-ct`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __engine_distribution__
+   .. autoattribute:: __reassembly__
+   .. autoattribute:: __traceflow__
 
    .. automethod:: unsupported_reason
 

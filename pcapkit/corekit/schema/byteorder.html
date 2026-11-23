@@ -598,7 +598,11 @@ section declares out of the packet data: <a class="reference internal" href="#pc
 classic PCAP file (<a class="reference internal" href="../../protocols/misc/pcap.html#module-pcapkit.protocols.misc.pcap.frame.schema" title="pcapkit.protocols.misc.pcap.frame.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a>) and the
 blocks of a PCAP-NG file (<a class="reference internal" href="../../protocols/misc/pcapng.html#module-pcapkit.protocols.misc.pcapng.schema" title="pcapkit.protocols.misc.pcapng.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a>), and
 <a class="reference internal" href="#pcapkit.corekit.schema.byteorder.packet_byteorder" title="pcapkit.corekit.schema.byteorder.packet_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet_byteorder()</span></code></a> is what the callback and the PCAP-NG makers
-(<a class="reference internal" href="../../protocols/misc/pcapng.html#module-pcapkit.protocols.misc.pcapng.protocol" title="pcapkit.protocols.misc.pcapng.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.protocol</span></code></a>) read it with.</p>
+(<a class="reference internal" href="../../protocols/misc/pcapng.html#module-pcapkit.protocols.misc.pcapng.protocol" title="pcapkit.protocols.misc.pcapng.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.protocol</span></code></a>) read it with.
+<a class="reference internal" href="#pcapkit.corekit.schema.byteorder.family_byteorder" title="pcapkit.corekit.schema.byteorder.family_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">family_byteorder()</span></code></a> reads the byte order a BSD loopback header’s address
+family was written in, for
+<a class="reference internal" href="../../protocols/link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a> and the <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>
+engine (<a class="reference internal" href="../../foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.dpkt" title="pcapkit.foundation.engines.dpkt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.dpkt</span></code></a>) alike.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.byteorder</span></code>, with both its helpers
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>).</p>
@@ -658,6 +662,44 @@ live one level up.</p>
 byte order when the packet data declares none.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.byteorder.family_byteorder">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.byteorder.</span></span><span class="sig-name descname"><span class="pre">family_byteorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">family</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linktype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/byteorder.html#family_byteorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.byteorder.family_byteorder" title="Link to this definition">¶</a></dt>
+<dd><p>Byte order a loopback header’s address family was written in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>family</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The 4 octets of the address family.</p></li>
+<li><p><strong>linktype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Link type the frame was captured under; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> reads as
+<code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'big'</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'little'</span></span></code></span>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">'big'</span></code> for <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code> (108), whose family is in network byte
+order. Otherwise, for <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code> (0), <code class="docutils literal notranslate"><span class="pre">'big'</span></code> if the octets
+read as a smaller number big-endian than little-endian, else
+<code class="docutils literal notranslate"><span class="pre">'little'</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code> family is in the byte order of the host that
+captured the packet, which the capture file does not record. Every
+address family is below <code class="docutils literal notranslate"><span class="pre">0x10000</span></code>, so its zero octets lie at the high
+end, and the smaller of the two readings is the one in the writer’s byte
+order. A family that reads the same both ways, such as 0, packs to the
+same octets either way. A <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code> family is never inferred,
+so one written little-endian reads as a family no table holds.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback.protocol</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2897">#2897</a>).</p>
+</div>
 </dd></dl>
 
 </section>

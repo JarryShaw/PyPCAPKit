@@ -685,15 +685,23 @@
 
 <div class="viewcode-block" id="ipv4_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pcap_ct.ipv4_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span>
+                    <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Raw packet bytes.</span>
+<span class="sd">        timestamp: Timestamp of the packet.</span>
+<span class="sd">        data_link: Data link layer protocol (from the capture handle).</span>
 <span class="sd">        count: Packet index. If not provided, defaults to ``-1``.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedCall: Always, as `pcap-ct`_ provides no IPv4 layer to read.</span>
+
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       Takes ``timestamp`` and ``data_link`` too, as the engine calls a</span>
+<span class="sd">       registered reassembly adapter, so a 1.6.x call with ``packet`` alone fails.</span>
 
 <span class="sd">    """</span>
     <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: IPv4 reassembly is not supported: </span><span class="si">{</span><span class="n">_NO_DISSECTION</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
@@ -702,15 +710,23 @@
 
 <div class="viewcode-block" id="ipv6_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pcap_ct.ipv6_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span>
+                    <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for IPv6 reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Raw packet bytes.</span>
+<span class="sd">        timestamp: Timestamp of the packet.</span>
+<span class="sd">        data_link: Data link layer protocol (from the capture handle).</span>
 <span class="sd">        count: Packet index. If not provided, defaults to ``-1``.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedCall: Always, as `pcap-ct`_ provides no IPv6 layer to read.</span>
+
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       Takes ``timestamp`` and ``data_link`` too, as the engine calls a</span>
+<span class="sd">       registered reassembly adapter, so a 1.6.x call with ``packet`` alone fails.</span>
 
 <span class="sd">    """</span>
     <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: IPv6 reassembly is not supported: </span><span class="si">{</span><span class="n">_NO_DISSECTION</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
@@ -719,15 +735,23 @@
 
 <div class="viewcode-block" id="tcp_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pcap_ct.tcp_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TCP_Packet | None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span>
+                   <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TCP_Packet | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for TCP reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Raw packet bytes.</span>
+<span class="sd">        timestamp: Timestamp of the packet.</span>
+<span class="sd">        data_link: Data link layer protocol (from the capture handle).</span>
 <span class="sd">        count: Packet index. If not provided, defaults to ``-1``.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedCall: Always, as `pcap-ct`_ provides no TCP layer to read.</span>
+
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       Takes ``timestamp`` and ``data_link`` too, as the engine calls a</span>
+<span class="sd">       registered reassembly adapter, so a 1.6.x call with ``packet`` alone fails.</span>
 
 <span class="sd">    """</span>
     <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: TCP reassembly is not supported: </span><span class="si">{</span><span class="n">_NO_DISSECTION</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>

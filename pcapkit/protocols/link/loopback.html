@@ -593,9 +593,13 @@
           <section id="module-pcapkit.protocols.link.loopback">
 <span id="bsd-loopback-encapsulation"></span><h1>BSD Loopback Encapsulation<a class="headerlink" href="#module-pcapkit.protocols.link.loopback" title="Link to this heading">¶</a></h1>
 <div class="versionremoved" id="module-pcapkit.protocols.link.loopback.protocol">
-<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback.family_byteorder</span></code>, with no alias: it is in this
-module, and <a class="reference internal" href="#module-pcapkit.protocols.link.loopback" title="pcapkit.protocols.link.loopback"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback</span></code></a> exports the protocol class alone
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback.family_byteorder</span></code>, with no alias:
+<a class="reference internal" href="#module-pcapkit.protocols.link.loopback" title="pcapkit.protocols.link.loopback"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback</span></code></a> exports the protocol class alone
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback.protocol.family_byteorder</span></code>, now
+<a class="reference internal" href="../../corekit/schema/byteorder.html#pcapkit.corekit.schema.byteorder.family_byteorder" title="pcapkit.corekit.schema.byteorder.family_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.byteorder.family_byteorder()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2897">#2897</a>).</p>
 </div>
 <p><a class="reference internal" href="#module-pcapkit.protocols.link.loopback.protocol" title="pcapkit.protocols.link.loopback.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback.protocol</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a>,
@@ -634,8 +638,8 @@ that captured the packet for <code class="docutils literal notranslate"><span cl
 for <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code>. Which link type a frame was captured under is the
 <code class="docutils literal notranslate"><span class="pre">alias</span></code> it was dispatched with; for <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code>, which a frame
 parsed on its own is read as, the byte order is read from the octets
-themselves (see <a class="reference internal" href="#pcapkit.protocols.link.loopback.protocol.family_byteorder" title="pcapkit.protocols.link.loopback.protocol.family_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">family_byteorder()</span></code></a>). Either way it is kept in
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a>, and
+themselves (see <a class="reference internal" href="../../corekit/schema/byteorder.html#pcapkit.corekit.schema.byteorder.family_byteorder" title="pcapkit.corekit.schema.byteorder.family_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">family_byteorder()</span></code></a>).
+Either way it is kept in <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a>, and
 <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.from_data" title="pcapkit.protocols.link.link.Link.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data</span></code></a>
 reads the family back in that byte order rather than inferring it again.</p>
 <p>The address families are those of the BSD socket API, whose <code class="docutils literal notranslate"><span class="pre">AF_INET6</span></code>
@@ -840,40 +844,6 @@ header types. <code class="docutils literal notranslate"><span class="pre">LINKT
 
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.loopback.protocol.family_byteorder">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.loopback.protocol.</span></span><span class="sig-name descname"><span class="pre">family_byteorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">family</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linktype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/loopback/protocol.html#family_byteorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.loopback.protocol.family_byteorder" title="Link to this definition">¶</a></dt>
-<dd><p>Byte order a loopback header’s address family was written in.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>family</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The 4 octets of the address family.</p></li>
-<li><p><strong>linktype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Link type the frame was captured under; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> reads as
-<code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'big'</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'little'</span></span></code></span>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">'big'</span></code> for <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code> (108), whose family is in network byte
-order. Otherwise, for <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code> (0), <code class="docutils literal notranslate"><span class="pre">'big'</span></code> if the octets
-read as a smaller number big-endian than little-endian, else
-<code class="docutils literal notranslate"><span class="pre">'little'</span></code>.</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>A <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code> family is in the byte order of the host that
-captured the packet, which the capture file does not record. Every
-address family is below <code class="docutils literal notranslate"><span class="pre">0x10000</span></code>, so its zero octets lie at the high
-end, and the smaller of the two readings is the one in the writer’s byte
-order. A family that reads the same both ways, such as 0, packs to the
-same octets either way. A <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code> family is never inferred,
-so one written little-endian reads as a family no table holds.</p>
-</div>
-</dd></dl>
-
 <section id="module-pcapkit.protocols.link.loopback.schema">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.link.loopback.schema" title="Link to this heading">¶</a></h2>
 <div class="versionremoved">
@@ -887,7 +857,7 @@ so one written little-endian reads as a family no table holds.</p>
 <p>Header schema for BSD loopback encapsulation.</p>
 <p>The address family is kept as its 4 octets, since their byte order depends
 on the link type the frame was captured under; see
-<a class="reference internal" href="#pcapkit.protocols.link.loopback.protocol.family_byteorder" title="pcapkit.protocols.link.loopback.protocol.family_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">family_byteorder()</span></code></a>.</p>
+<a class="reference internal" href="../../corekit/schema/byteorder.html#pcapkit.corekit.schema.byteorder.family_byteorder" title="pcapkit.corekit.schema.byteorder.family_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">family_byteorder()</span></code></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.loopback.schema.Loopback.family">
 <span class="sig-name descname"><span class="pre">family</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">family&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.link.loopback.schema.Loopback.family" title="Link to this definition">¶</a></dt>

@@ -680,13 +680,15 @@ offers says so rather than quietly doing less, unless its row says otherwise:</p
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></p></td>
-<td><p>no reassembly, and no trace <code class="docutils literal notranslate"><span class="pre">analyze</span></code>, since it reports
-dissected fields rather than octets – each disabled with an
+<td><p>no reassembly unless an adapter is registered, and no trace
+<code class="docutils literal notranslate"><span class="pre">analyze</span></code>, since it reports dissected fields rather than
+octets – each disabled with an
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a></p></td>
 <td><p>no protocol dissection at all, hence no reassembly and no
-flow tracing – both disabled with an
+flow tracing unless an adapter is registered – both
+otherwise disabled with an
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>; PCAP
 savefiles on disk only, otherwise
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> /
@@ -696,7 +698,8 @@ savefiles on disk only, otherwise
 <td><p>the same gaps as
 <a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> above –
 it reads the same interface, so no dissection, no reassembly
-and no flow tracing, and PCAP savefiles on disk only</p></td>
+and no flow tracing unless an adapter is registered, and PCAP
+savefiles on disk only</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a></p></td>
 <td><p>no IPv6 decoder, hence no IPv6 reassembly – disabled with an
@@ -896,9 +899,9 @@ same – see the warning below</p></td>
 </table>
 </div>
 <p>Neither engine dissects anything, so both have the same gaps – <strong>no reassembly
-and no flow tracing, whichever is installed</strong> – a property of
-<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> rather than of the distribution. Pick on availability, not
-on features.</p>
+and no flow tracing unless an adapter is registered, whichever is installed</strong> – a
+property of <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> rather than of the distribution. Pick on
+availability, not on features.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> needs no toolchain to <em>install</em>,

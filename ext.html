@@ -1111,8 +1111,9 @@ capture file. The shipped engines derive from
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>An engine may support less than <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
-offers. <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> dissect no protocol, so they support neither
-reassembly nor flow tracing; <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder, so it
+offers. <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> dissect no protocol, so they support
+reassembly and flow tracing only once an adapter is registered on them;
+<a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder, so it
 reassembles IPv4 and TCP but not IPv6. Each engine warns, or raises, for a
 capability it cannot provide rather than silently producing an empty result.
 The exceptions pass without a warning: <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> and <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> leave TCP

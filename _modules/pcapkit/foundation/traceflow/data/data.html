@@ -777,13 +777,27 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.TraceFlowData">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TraceFlowData</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data storage for flow tracing."""</span>
+<span class="w">    </span><span class="sd">"""Data storage for flow tracing.</span>
+
+<span class="sd">    The built-in ``tcp`` field is :data:`None` when TCP flow tracing is disabled.</span>
+<span class="sd">    Every other enabled flow tracer adds a field of its own, under the name it is</span>
+<span class="sd">    registered by in :attr:`Extractor.__traceflow__</span>
+<span class="sd">    &lt;pcapkit.foundation.extraction.Extractor.__traceflow__&gt;`, iterated after</span>
+<span class="sd">    ``tcp`` in the order given.</span>
+
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       Takes a field for each enabled flow tracer beyond TCP's (:issue:`2843`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: TCP traced flows.</span>
     <span class="n">tcp</span><span class="p">:</span> <span class="s1">'tuple[TCP_Index, ...]'</span>
 
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Index, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Index, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=super-init-not-called</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Optional[tuple[Any, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">()</span></div>
 
 </pre></div>
         </article>

@@ -6,9 +6,14 @@ BSD Loopback Encapsulation
 
 .. versionremoved:: 1.6.0
 
-   ``pcapkit.protocols.link.loopback.family_byteorder``, with no alias: it is in this
-   module, and :mod:`pcapkit.protocols.link.loopback` exports the protocol class alone
+   ``pcapkit.protocols.link.loopback.family_byteorder``, with no alias:
+   :mod:`pcapkit.protocols.link.loopback` exports the protocol class alone
    (:issue:`2534`).
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.link.loopback.protocol.family_byteorder``, now
+   :func:`pcapkit.corekit.schema.byteorder.family_byteorder` (:issue:`2897`).
 
 :mod:`pcapkit.protocols.link.loopback.protocol` contains
 :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`,
@@ -47,8 +52,6 @@ is kept as ``loopback.byteorder``.
    .. automethod:: __index__
 
    .. automethod:: _make_data
-
-.. autofunction:: pcapkit.protocols.link.loopback.protocol.family_byteorder
 
 Header Schemas
 --------------

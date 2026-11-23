@@ -943,6 +943,15 @@ sudo<span class="w"> </span>apparmor_parser<span class="w"> </span>-r<span class
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark.__reassembly__">
+<span class="sig-name descname"><span class="pre">__reassembly__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.__reassembly__" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly adapters, each called as <code class="docutils literal notranslate"><span class="pre">adapter(packet,</span> <span class="pre">count=n)</span></code> on the
+PyShark packet and its frame number. None ships, as PyShark reports
+dissected fields rather than the octets a reassembler buffers; one
+registered with <code class="xref py py-meth docutils literal notranslate"><span class="pre">register_reassembly()</span></code> is fed.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark.__traceflow__">
 <span class="sig-name descname"><span class="pre">__traceflow__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'tcp':</span> <span class="pre">('pcapkit.toolkit.pyshark',</span> <span class="pre">'tcp_traceflow')}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.__traceflow__" title="Link to this definition">¶</a></dt>
 <dd><p>Flow tracing adapters, each called as <code class="docutils literal notranslate"><span class="pre">adapter(packet,</span> <span class="pre">count=n)</span></code> on the
@@ -1017,10 +1026,8 @@ as an iterator from <code class="docutils literal notranslate"><span class="pre"
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
 is provided as the PyShark engine does not
 support such operations.</p></li>
-<li><p>if reassembly is enabled, as the PyShark engine
-does not support such operation.</p></li>
-<li><p>if a flow tracer with no adapter in <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.__traceflow__" title="pcapkit.foundation.engines.pyshark.PyShark.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__traceflow__</span></code></a> is
-enabled.</p></li>
+<li><p>if a reassembler with no adapter in <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.__reassembly__" title="pcapkit.foundation.engines.pyshark.PyShark.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>, or
+a flow tracer with none in <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.__traceflow__" title="pcapkit.foundation.engines.pyshark.PyShark.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__traceflow__</span></code></a>, is enabled.</p></li>
 <li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exctx" title="pcapkit.foundation.extraction.Extractor._exctx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code></a>
 is provided, as the PyShark engine does not parse with
 <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own protocol implementations.</p></li>
@@ -1157,9 +1164,12 @@ aborting (<a class="extlink-issue reference external" href="https://github.com/J
 <p class="admonition-title">Important</p>
 <p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> is a <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> binding aimed primarily at live capture.
 Offline it performs <strong>no protocol dissection</strong>: each frame is the
-<code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair that <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> produced. Reassembly
-and flow tracing are therefore unavailable and are disabled – with an
-<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – when requested.</p>
+<code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair that <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> produced. The engine
+therefore ships no reassembly or flow tracing adapter, and disables either –
+with an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – when
+requested, unless an adapter is registered on it with
+<a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase.register_reassembly" title="pcapkit.foundation.engines.engine.EngineBase.register_reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_reassembly()</span></code></a> or
+<a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase.register_traceflow" title="pcapkit.foundation.engines.engine.EngineBase.register_traceflow"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_traceflow()</span></code></a>.</p>
 <p>The engine also reads PCAP savefiles only, and only from a file on disk.
 PCAP-NG is rejected with a
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>, because
@@ -1180,8 +1190,9 @@ dissection is performed. Consequently this engine</p>
 <ul class="simple">
 <li><p>returns each frame as a <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> rather than as
 a parsed packet object, and</p></li>
-<li><p>disables both reassembly and flow tracing, warning as it does so, since
-neither can be derived without an IP or TCP layer to read.</p></li>
+<li><p>ships no reassembly or flow tracing adapter, since neither can be derived
+without an IP or TCP layer to read, so it disables both, warning as it
+does so, unless one is registered on it (see <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__" title="pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>).</p></li>
 </ul>
 <p>It also requires the input to be a real file on disk, because
 <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens by <em>name</em> – there is no way to hand
@@ -1225,6 +1236,24 @@ and <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCA
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.__engine_distribution__">
 <span class="sig-name descname"><span class="pre">__engine_distribution__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pypcap'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__engine_distribution__" title="Link to this definition">¶</a></dt>
 <dd><p>Distribution this engine drives.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__">
+<span class="sig-name descname"><span class="pre">__reassembly__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly adapters, each called as
+<code class="docutils literal notranslate"><span class="pre">adapter(packet,</span> <span class="pre">timestamp,</span> <span class="pre">data_link=link,</span> <span class="pre">count=n)</span></code> on the frame’s
+octets and timestamp, the savefile’s link type and its frame number. None
+ships, as <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> dissects nothing; one registered with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register_reassembly()</span></code> is fed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.__traceflow__">
+<span class="sig-name descname"><span class="pre">__traceflow__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__traceflow__" title="Link to this definition">¶</a></dt>
+<dd><p>Flow tracing adapters, each called as <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__" title="pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>’s are. None
+ships, for the same reason; one registered with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register_traceflow()</span></code> is fed.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1294,9 +1323,9 @@ support such operations.</p></li>
 <li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exctx" title="pcapkit.foundation.extraction.Extractor._exctx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code></a>
 is provided, as the PyPCAP engine does not parse with <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s
 own protocol implementations.</p></li>
-<li><p>if reassembly and/or flow tracing is enabled, as the PyPCAP
-engine performs no protocol dissection and so cannot support
-either operation.</p></li>
+<li><p>if a reassembler with no adapter in <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__" title="pcapkit.foundation.engines.pypcap.PyPCAP.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>, or
+a flow tracer with none in <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.__traceflow__" title="pcapkit.foundation.engines.pypcap.PyPCAP.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__traceflow__</span></code></a>, is enabled;
+this engine ships none, as it performs no protocol dissection.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -1474,10 +1503,10 @@ included in the <code class="docutils literal notranslate"><span class="pre">all
 <p class="admonition-title">Important</p>
 <p>Being the same interface, <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> has the same limits. It performs <strong>no
 protocol dissection</strong>: each frame is the <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> pair that
-<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> produced. Reassembly and flow tracing are therefore
-unavailable regardless of which backend is installed, and are disabled – with
-an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – when requested;
-the adapters in <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pcap_ct" title="pcapkit.toolkit.pcap_ct"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap_ct</span></code></a> raise
+<code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_next_ex()</span></code> produced. It therefore ships no reassembly or flow
+tracing adapter either, and disables or feeds each as
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> does; the adapters in
+<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pcap_ct" title="pcapkit.toolkit.pcap_ct"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap_ct</span></code></a> raise
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> rather than fail
 obscurely. It also reads from a file on disk only, because
 <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens a savefile by <em>name</em>; a non-file input is
@@ -1566,8 +1595,9 @@ Consequently this engine</p>
 <ul class="simple">
 <li><p>returns each frame as a <code class="docutils literal notranslate"><span class="pre">(timestamp,</span> <span class="pre">bytes)</span></code> <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> rather than as
 a parsed packet object, and</p></li>
-<li><p>disables both reassembly and flow tracing, warning as it does so, since
-neither can be derived without an IP or TCP layer to read.</p></li>
+<li><p>ships no reassembly or flow tracing adapter, since neither can be derived
+without an IP or TCP layer to read, so it disables both, warning as it
+does so, unless one is registered on it (see <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>).</p></li>
 </ul>
 <p>It also requires the input to be a real file on disk, because
 <code class="xref c c-func docutils literal notranslate"><span class="pre">pcap_open_offline()</span></code> opens by <em>name</em> – there is no way to hand
@@ -1610,6 +1640,24 @@ two engines stay distinguishable.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_distribution__">
 <span class="sig-name descname"><span class="pre">__engine_distribution__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pcap-ct'</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__engine_distribution__" title="Link to this definition">¶</a></dt>
 <dd><p>Distribution this engine drives.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__">
+<span class="sig-name descname"><span class="pre">__reassembly__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly adapters, each called as
+<code class="docutils literal notranslate"><span class="pre">adapter(packet,</span> <span class="pre">timestamp,</span> <span class="pre">data_link=link,</span> <span class="pre">count=n)</span></code> on the frame’s
+octets and timestamp, the savefile’s link type and its frame number. None
+ships, as <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> dissects nothing; one registered with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register_reassembly()</span></code> is fed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__traceflow__">
+<span class="sig-name descname"><span class="pre">__traceflow__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__traceflow__" title="Link to this definition">¶</a></dt>
+<dd><p>Flow tracing adapters, each called as <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>’s are. None
+ships, for the same reason; one registered with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register_traceflow()</span></code> is fed.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1706,9 +1754,9 @@ support such operations.</p></li>
 <li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exctx" title="pcapkit.foundation.extraction.Extractor._exctx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code></a>
 is provided, as the pcap-ct engine does not parse with <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s
 own protocol implementations.</p></li>
-<li><p>if reassembly and/or flow tracing is enabled, as the pcap-ct
-engine performs no protocol dissection and so cannot support
-either operation.</p></li>
+<li><p>if a reassembler with no adapter in <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>, or
+a flow tracer with none in <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.__traceflow__" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__traceflow__</span></code></a>, is enabled;
+this engine ships none, as it performs no protocol dissection.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>

@@ -595,6 +595,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">get_args</span>
@@ -638,7 +639,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">ScapyPacket</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolContext</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_TraceFlow</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span>
 
@@ -789,7 +789,8 @@
 <span class="sd">       :class:`~pcapkit.foundation.options.StreamOptions`. ``reassembly``</span>
 <span class="sd">       and ``traceflow`` also take a list of registered names, so any registered</span>
 <span class="sd">       reassembler can be enabled, and each enabled one is fed every frame's</span>
-<span class="sd">       timestamp (:issue:`2814`). ``nofile``, ``fout``, ``format``,</span>
+<span class="sd">       timestamp (:issue:`2814`). Every enabled flow tracer is made and fed,</span>
+<span class="sd">       where TCP's alone was (:issue:`2843`). ``nofile``, ``fout``, ``format``,</span>
 <span class="sd">       ``extension``, ``files``, ``ip``, ``ipv4``, ``ipv6``, ``tcp``,</span>
 <span class="sd">       ``dtls``, the ``reasm_*``, ``trace_*`` and ``buffer_*`` parameters and</span>
 <span class="sd">       ``no_eof`` are removed with no alias. Nothing is written without</span>
@@ -833,7 +834,10 @@
         <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._reasm`, and the</span>
         <span class="c1">#: engines that cannot reassemble clear it on startup.</span>
         <span class="n">_flag_r</span><span class="p">:</span> <span class="s1">'bool'</span>
-        <span class="c1">#: Trace flag. It indicates if the flow tracing is enabled.</span>
+        <span class="c1">#: Trace flag. It indicates if flow tracing is enabled. Every engine</span>
+        <span class="c1">#: reads it to decide whether to feed</span>
+        <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._trace`, and clears it</span>
+        <span class="c1">#: on startup once it has dropped every enabled flow tracer.</span>
         <span class="n">_flag_t</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Verbose flag. It indicates if verbose output is enabled, whether by</span>
         <span class="c1">#: ``verbose=True`` or by a callback, which</span>
@@ -873,11 +877,9 @@
         <span class="c1">#: The enabled reassemblers, each fed every frame. An engine drops one it</span>
         <span class="c1">#: has no adapter for at startup.</span>
         <span class="n">_reasm</span><span class="p">:</span> <span class="s1">'ReassemblyManager'</span>
-        <span class="c1">#: Frame record for flow tracing.</span>
+        <span class="c1">#: The enabled flow tracers, each fed every frame. An engine drops one it</span>
+        <span class="c1">#: has no adapter for at startup.</span>
         <span class="n">_trace</span><span class="p">:</span> <span class="s1">'TraceFlowManager'</span>
-
-        <span class="c1">#: TCP flag. It indicates if TCP flow tracing is enabled.</span>
-        <span class="n">_tcp</span><span class="p">:</span> <span class="s1">'bool'</span>
 
         <span class="c1">#: Extract til protocol.</span>
         <span class="n">_exptl</span><span class="p">:</span> <span class="s1">'Protocols'</span>
@@ -1086,6 +1088,10 @@
 
 <span class="sd">        * ``tcp`` -- tuple of TCP flows (:term:`trace.tcp.index`)</span>
 
+<span class="sd">        It is :data:`None` when TCP flow tracing is disabled, and every other</span>
+<span class="sd">        enabled flow tracer adds the tuple of its flows, under the name it is</span>
+<span class="sd">        registered by.</span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_t &lt;pcapkit.foundation.extraction.Extractor._flag_t&gt;`</span>
 <span class="sd">                is :data:`False`, as flow tracing is disabled.</span>
@@ -1098,14 +1104,12 @@
 <span class="sd">        .. versionadded:: 1.7.0</span>
 
 <span class="sd">           Renamed from ``trace``, with no alias, to match ``traceflow`` and</span>
-<span class="sd">           :attr:`reassembly` (:issue:`2836`).</span>
+<span class="sd">           :attr:`reassembly` (:issue:`2836`). Carries every enabled flow</span>
+<span class="sd">           tracer, not only TCP's (:issue:`2843`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">TraceFlowData</span><span class="p">(</span>
-                <span class="n">tcp</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">data</span>
+            <span class="k">return</span> <span class="n">TraceFlowData</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tracer</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"'Extractor(traceflow=None)' object has no attribute 'traceflow'"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -1539,6 +1543,72 @@
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="n">protocol</span><span class="p">]</span> <span class="o">=</span> <span class="n">traceflow</span>
 
+<div class="viewcode-block" id="Extractor.make_traceflow">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.make_traceflow">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_traceflow</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="s1">'./tmp'</span><span class="p">,</span>
+                       <span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="s1">'pcap'</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                       <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+                       <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                       <span class="n">analyze</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TraceFlowBase'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make the flow tracer registered under a protocol name.</span>
+
+<span class="sd">        Every caller reaches a flow tracer through this:</span>
+<span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` for each one it</span>
+<span class="sd">        enables, and :func:`~pcapkit.interface.core.trace`. Its keywords are</span>
+<span class="sd">        those of :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            protocol: protocol name, matched lower-cased, as</span>
+<span class="sd">                :meth:`register_traceflow` registers it</span>
+<span class="sd">            fout: output root path, made if missing</span>
+<span class="sd">            format: output format</span>
+<span class="sd">            byteorder: output file byte order</span>
+<span class="sd">            nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">            bidirectional: whether both halves of a conversation are traced as</span>
+<span class="sd">                one flow</span>
+<span class="sd">            analyze: whether each traced flow reassembles its application layer</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The flow tracer instance.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If no flow tracer is registered under ``protocol``.</span>
+<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">trace_cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_traceflow_class</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">trace_cls</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
+                         <span class="n">bidirectional</span><span class="o">=</span><span class="n">bidirectional</span><span class="p">,</span> <span class="n">analyze</span><span class="o">=</span><span class="n">analyze</span><span class="p">)</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_traceflow_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[TraceFlowBase]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The flow tracing class registered under a protocol name, imported.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            protocol: protocol name, matched lower-cased</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The class, which replaces its module descriptor in</span>
+<span class="sd">            :attr:`__traceflow__`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If no flow tracer is registered under ``protocol``.</span>
+<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'traceflow'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">trace_cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">trace_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace_cls</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">trace_cls</span> <span class="o">=</span> <span class="n">trace_cls</span><span class="o">.</span><span class="n">klass</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls</span>  <span class="c1"># update mapping upon import</span>
+        <span class="k">return</span> <span class="n">trace_cls</span>
+
 <div class="viewcode-block" id="Extractor.run">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=inconsistent-return-statements</span>
@@ -1953,7 +2023,7 @@
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:</span>
 
-<span class="sd">                * If using PCAP or PCAP-NG output for TCP flow tracing while the</span>
+<span class="sd">                * If using PCAP or PCAP-NG output for flow tracing while the</span>
 <span class="sd">                  extraction engine is PyShark or PyPCAPFile.</span>
 <span class="sd">                * If using PCAP or PCAP-NG output while the extraction engine is a</span>
 <span class="sd">                  third-party one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.</span>
@@ -1971,8 +2041,8 @@
 <span class="sd">                ``traceflow`` names nothing, which turns it off; or if</span>
 <span class="sd">                ``traceflow`` asks for</span>
 <span class="sd">                :attr:`~pcapkit.foundation.options.TraceFlowOptions.analyze`</span>
-<span class="sd">                while the extraction engine is PyShark, or names a registered flow</span>
-<span class="sd">                tracer other than TCP's, which no engine feeds.</span>
+<span class="sd">                while the extraction engine is PyShark; or if the engine has no</span>
+<span class="sd">                adapter for an enabled reassembler or flow tracer, which it drops.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If ``fin`` is a stream without a :obj:`str` ``name``</span>
@@ -2014,7 +2084,7 @@
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span> <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">():</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">'tcp'</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_trace</span><span class="p">(</span><span class="n">trace_opts</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
@@ -2100,9 +2170,8 @@
                                                         <span class="n">timeout</span><span class="o">=</span><span class="n">reasm_opts</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reasm</span> <span class="o">=</span> <span class="n">ReassemblyManager</span><span class="p">(</span><span class="n">reasm_objs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">trace_objs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, TraceFlowBase]</span>
         <span class="k">if</span> <span class="n">trace_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">trace_format</span> <span class="o">=</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">format</span>
             <span class="n">trace_analyze</span> <span class="o">=</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">analyze</span>
 
@@ -2121,29 +2190,14 @@
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">trace_analyze</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="c1"># NOTE: every engine feeds the TCP tracer alone, so another registered one is dropped.</span>
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'tcp'</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' object does not support </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> flow "</span>
-                         <span class="sa">f</span><span class="s1">'tracing; so </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> will be ignored'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-
-            <span class="k">if</span> <span class="s1">'tcp'</span> <span class="ow">in</span> <span class="n">trace_opts</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow tracing enabled'</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span> <span class="o">=</span> <span class="kc">True</span>
-
-                <span class="n">trace_cls_tcp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace_cls_tcp</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-                    <span class="n">trace_cls_tcp</span> <span class="o">=</span> <span class="n">trace_cls_tcp</span><span class="o">.</span><span class="n">klass</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls_tcp</span>  <span class="c1"># update mapping upon import</span>
-                <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP_TraceFlow'</span><span class="p">,</span> <span class="n">trace_cls_tcp</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
-                                                                    <span class="n">byteorder</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
-                                                                    <span class="n">nanosecond</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">,</span>
-                                                                    <span class="n">bidirectional</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">bidirectional</span><span class="p">,</span>
-                                                                    <span class="n">analyze</span><span class="o">=</span><span class="n">trace_analyze</span><span class="p">))</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span> <span class="o">=</span> <span class="n">TraceFlowManager</span><span class="p">(</span>
-                <span class="n">tcp</span><span class="o">=</span><span class="n">trace_obj_tcp</span><span class="p">,</span>
-            <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> flow tracing enabled'</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">trace_objs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_traceflow</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
+                                                       <span class="n">byteorder</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+                                                       <span class="n">nanosecond</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">,</span>
+                                                       <span class="n">bidirectional</span><span class="o">=</span><span class="n">trace_opts</span><span class="o">.</span><span class="n">bidirectional</span><span class="p">,</span>
+                                                       <span class="n">analyze</span><span class="o">=</span><span class="n">trace_analyze</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span> <span class="o">=</span> <span class="n">TraceFlowManager</span><span class="p">(</span><span class="n">trace_objs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'opening input file </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">ifnm</span><span class="p">)</span>
@@ -2370,24 +2424,22 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">:</span> <span class="s1">'TraceFlowOptions'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Check the TCP tracer's output settings, before its directory is made.</span>
+<span class="w">        </span><span class="sd">"""Check each enabled flow tracer's output settings, before a directory is made.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            trace: the flow tracing settings</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FormatError: If no dumper is registered for ``trace.format``.</span>
+<span class="sd">            FormatError: If an enabled flow tracer has no dumper registered for</span>
+<span class="sd">                ``trace.format``.</span>
 <span class="sd">            EndianError: If ``trace.byteorder`` is neither ``'big'`` nor ``'little'``.</span>
 
 <span class="sd">        """</span>
-        <span class="n">trace_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace_cls</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-            <span class="n">trace_cls</span> <span class="o">=</span> <span class="n">trace_cls</span><span class="o">.</span><span class="n">klass</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls</span>  <span class="c1"># update mapping upon import</span>
-        <span class="c1"># NOTE: ``__output__`` is a defaultdict; subscripting would insert the unknown format.</span>
-        <span class="n">entry</span> <span class="o">=</span> <span class="n">trace_cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown flow tracing format: </span><span class="si">{</span><span class="n">trace</span><span class="o">.</span><span class="n">format</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">trace</span><span class="o">.</span><span class="n">protocols</span><span class="p">:</span>
+            <span class="c1"># NOTE: ``__output__`` is a defaultdict; subscripting would insert the unknown format.</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traceflow_class</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown flow tracing format: </span><span class="si">{</span><span class="n">trace</span><span class="o">.</span><span class="n">format</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">byteorder</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'big'</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown flow tracing byte order: </span><span class="si">{</span><span class="n">trace</span><span class="o">.</span><span class="n">byteorder</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -2552,16 +2604,18 @@
 <span class="sd">        and a stream the caller supplied is left alone for the caller to close</span>
 <span class="sd">        when it is done with it.</span>
 
-<span class="sd">        It also tells the flow tracer the capture has ended, via</span>
+<span class="sd">        It also tells every enabled flow tracer the capture has ended, via</span>
 <span class="sd">        :meth:`TraceFlow.finish &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.finish&gt;`.</span>
 <span class="sd">        That is the point at which a traced flow nothing has superseded can be</span>
 <span class="sd">        said to be over, so it is where such a flow is finalised and its callbacks</span>
 <span class="sd">        run. This method can run more than once for one extraction -- each call to</span>
 <span class="sd">        :meth:`__next__` or :meth:`__call__` that reaches the end of a</span>
 <span class="sd">        caller-supplied stream runs it again -- so ``finish`` is required to be</span>
-<span class="sd">        idempotent rather than guarded here. Should ``finish`` raise, as a</span>
-<span class="sd">        raising flow tracing callback makes it, the input and the engine are</span>
-<span class="sd">        released as under ``failed``, and its error propagates (:issue:`2857`).</span>
+<span class="sd">        idempotent rather than guarded here. Every tracer is finished whatever</span>
+<span class="sd">        another's ``finish`` raises, as a raising flow tracing callback makes it:</span>
+<span class="sd">        the first :exc:`Exception` propagates once the last has run, and any</span>
+<span class="sd">        other :exc:`BaseException` at once. Either way the input and the engine</span>
+<span class="sd">        are released as under ``failed`` (:issue:`2857`, :issue:`2843`).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            failed: whether the extraction stopped on an error instead, which is</span>
@@ -2583,9 +2637,9 @@
             <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_e</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_finish_traceflow</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
                 <span class="c1"># NOTE: a raising callback still releases input and engine (#2857); ``failed``</span>
                 <span class="c1"># logs an error from the engine's close, so the callback's is the one raised.</span>
@@ -2593,6 +2647,31 @@
                 <span class="k">raise</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">()</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finish_traceflow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Finish every enabled flow tracer, whatever another's ``finish`` raises.</span>
+
+<span class="sd">        So one tracer's raising callback leaves no other's flows unfinalised, as</span>
+<span class="sd">        :func:`~pcapkit.utilities.callbacks.run_callbacks` runs callbacks.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: The first :exc:`Exception` a tracer's ``finish`` raised,</span>
+<span class="sd">                once the last has run; a later one is logged at debug level. Any</span>
+<span class="sd">                other :exc:`BaseException` propagates at once.</span>
+
+<span class="sd">        """</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Exception]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tracer</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+                <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="n">exc</span>
+                    <span class="k">continue</span>
+                <span class="c1"># NOTE: logged rather than raised, so it cannot replace the first error.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> flow tracer raised on finish after an earlier one'</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span>
 
 <div class="viewcode-block" id="Extractor._release">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._release">[docs]</a>

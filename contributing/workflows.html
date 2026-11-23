@@ -1442,6 +1442,15 @@ The finding keeps its <code class="docutils literal notranslate"><span class="pr
 KTLO leg past its job’s <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is still cancelled, and its check run
 reads red, though since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a> nothing gating waits on it, so that warning is worth
 acting on before the cap.</p>
+<p>No cap finding fires on a job the workflow no longer runs, such as a leg renamed or
+split inside the window (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2904">#2904</a>); its rows stay in the tables, marked <em>(no longer
+run)</em>, and a note names it. A leg’s old name still matches its job’s template, so the
+runs decide: for each event but <code class="docutils literal notranslate"><span class="pre">pull_request</span></code>, the newest run in the sample that ran
+the job and succeeded, failed or timed out must omit the name, and be newer than every
+run listing it, since that run can predate a merge. A light pull request
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>) runs a subset of the legs, so none is consulted. A job no such run ran
+keeps every name, and each event is judged on its own runs, so no job run on some
+events alone is exempted.</p>
 </section>
 <section id="work-kept-off-the-pull-request-queue-1538">
 <h2>Work Kept Off the Pull-Request Queue (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#work-kept-off-the-pull-request-queue-1538" title="Link to this heading">¶</a></h2>

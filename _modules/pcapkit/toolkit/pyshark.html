@@ -604,7 +604,8 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span> <span class="s1">'ENCAP_TYPE_TO_LINKTYPE'</span><span class="p">,</span> <span class="s1">'FILTER_NAME_TO_LINKTYPE'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span> <span class="s1">'ENCAP_TYPE_TO_LINKTYPE'</span><span class="p">,</span>
+           <span class="s1">'FILTER_NAME_TO_LINKTYPE'</span><span class="p">]</span>
 
 <span class="c1">#: Message prefix shared by every message below, read off</span>
 <span class="c1">#: :attr:`PyShark.__engine_name__</span>
@@ -1036,6 +1037,35 @@
 
 
 
+<div class="viewcode-block" id="packet2timestamp">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark.packet2timestamp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read the capture timestamp of a PyShark packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyShark packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``frame.time_epoch``, as the :obj:`float` nearest its decimal value. A</span>
+<span class="sd">        record without one reads the PDML ``geninfo`` timestamp PyShark keeps as</span>
+<span class="sd">        ``sniff_timestamp`` instead. A Simple Packet Block carries no timestamp,</span>
+<span class="sd">        so tshark reports no ``frame.time_epoch`` for it, and that one is</span>
+<span class="sd">        ``'0.000000000'``, the UNIX epoch (measured on ``test.pcapng`` frame 4).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If the timestamp is not decimal text.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="n">epoch</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">'time_epoch'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">epoch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">sniff_timestamp</span>
+    <span class="k">return</span> <span class="n">_parse_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="_carrier">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark._carrier">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, Any]'</span><span class="p">:</span>
@@ -1187,14 +1217,6 @@
             <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="s1">'frame.encap_type=</span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="n">encap_type</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
-        <span class="c1"># A Simple Packet Block carries no timestamp, so tshark reports no</span>
-        <span class="c1"># ``frame.time_epoch`` for it; the PDML ``geninfo`` timestamp PyShark</span>
-        <span class="c1"># keeps as ``sniff_timestamp`` is then ``'0.000000000'``, the UNIX epoch</span>
-        <span class="c1"># (measured on ``test.pcapng`` frame 4).</span>
-        <span class="n">epoch</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">'time_epoch'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">epoch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">epoch</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">sniff_timestamp</span>
-
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>                                                   <span class="c1"># data link type</span>
             <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                                         <span class="c1"># frame number</span>
@@ -1206,7 +1228,7 @@
             <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                                    <span class="c1"># destination IP</span>
             <span class="n">srcport</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="p">),</span>                                            <span class="c1"># TCP source port</span>
             <span class="n">dstport</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="p">),</span>                                            <span class="c1"># TCP destination port</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="n">_parse_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">),</span>                                       <span class="c1"># timestamp</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                                  <span class="c1"># timestamp</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="s1">'seq'</span><span class="p">),</span>                                           <span class="c1"># TCP sequence number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="s1">'ack'</span><span class="p">),</span>                                           <span class="c1"># TCP acknowledgement number</span>
             <span class="c1"># NOTE: PyShark reports fields, not octets, so both are empty;</span>

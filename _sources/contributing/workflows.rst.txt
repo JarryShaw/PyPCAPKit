@@ -841,6 +841,16 @@ KTLO leg past its job's ``timeout-minutes`` is still cancelled, and its check ru
 reads red, though since :issue:`1738` nothing gating waits on it, so that warning is worth
 acting on before the cap.
 
+No cap finding fires on a job the workflow no longer runs, such as a leg renamed or
+split inside the window (:issue:`2904`); its rows stay in the tables, marked *(no longer
+run)*, and a note names it. A leg's old name still matches its job's template, so the
+runs decide: for each event but ``pull_request``, the newest run in the sample that ran
+the job and succeeded, failed or timed out must omit the name, and be newer than every
+run listing it, since that run can predate a merge. A light pull request
+(:issue:`2243`) runs a subset of the legs, so none is consulted. A job no such run ran
+keeps every name, and each event is judged on its own runs, so no job run on some
+events alone is exempted.
+
 Work Kept Off the Pull-Request Queue (:issue:`1538`)
 -----------------------------------------------------------------------------------------------------
 

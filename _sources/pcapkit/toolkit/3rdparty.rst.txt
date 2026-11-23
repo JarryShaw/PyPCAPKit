@@ -117,8 +117,8 @@ PyShark Tools
 
 .. note::
 
-   The `PyShark`_ engine supports no reassembly, so this module has a flow
-   tracing adapter only.
+   `PyShark`_ reports dissected fields, not the octets a reassembler buffers, so
+   this module has a flow tracing adapter only.
 
 .. autofunction:: pcapkit.toolkit.pyshark.tcp_traceflow
 
@@ -132,6 +132,8 @@ Auxiliary Functions
 -------------------
 
 .. autofunction:: pcapkit.toolkit.pyshark.packet2dict
+
+.. autofunction:: pcapkit.toolkit.pyshark.packet2timestamp
 
 .. autofunction:: pcapkit.toolkit.pyshark._carrier
 

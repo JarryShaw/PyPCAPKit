@@ -594,6 +594,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.const.capture</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BYTE_ORDER_MAGIC</span><span class="p">,</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
                                            <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span> <span class="n">RESOLUTION</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.byteorder</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">localcontext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
@@ -949,7 +950,7 @@
 <span class="w">    </span><span class="sd">"""A :class:`dpkt.loopback.Loopback` that reads the address family by link type.</span>
 
 <span class="sd">    It reads the address family in the byte order</span>
-<span class="sd">    :func:`~pcapkit.protocols.link.loopback.protocol.family_byteorder` gives for</span>
+<span class="sd">    :func:`~pcapkit.corekit.schema.byteorder.family_byteorder` gives for</span>
 <span class="sd">    ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for</span>
 <span class="sd">    ``LINKTYPE_NULL`` -- and dispatches on families 2 (IPv4) and 24, 28 and 30</span>
 <span class="sd">    (IPv6). Unlike `DPKT`_'s own, it names an IPv4 or IPv6 payload ``ip`` or</span>
@@ -971,8 +972,6 @@
 
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
-
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>  <span class="c1"># isort:skip</span>
 
     <span class="n">layers</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span> <span class="mi">24</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">28</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">30</span><span class="p">:</span> <span class="n">ip6</span><span class="p">}</span>
 

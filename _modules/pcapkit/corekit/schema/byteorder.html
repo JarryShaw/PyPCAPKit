@@ -586,9 +586,13 @@
 <span class="sd">classic PCAP file (:mod:`~pcapkit.protocols.misc.pcap.frame.schema`) and the</span>
 <span class="sd">blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.misc.pcapng.schema`), and</span>
 <span class="sd">:func:`packet_byteorder` is what the callback and the PCAP-NG makers</span>
-<span class="sd">(:mod:`pcapkit.protocols.misc.pcapng.protocol`) read it with. It is one of the</span>
-<span class="sd">:mod:`pcapkit.corekit.schema` helpers shared across the schema layer, not part of</span>
-<span class="sd">the header schema framework in :mod:`pcapkit.protocols.schema`; see</span>
+<span class="sd">(:mod:`pcapkit.protocols.misc.pcapng.protocol`) read it with.</span>
+<span class="sd">:func:`family_byteorder` reads the byte order a BSD loopback header's address</span>
+<span class="sd">family was written in, for</span>
+<span class="sd">:class:`~pcapkit.protocols.link.loopback.protocol.Loopback` and the `DPKT`_</span>
+<span class="sd">engine (:mod:`pcapkit.foundation.engines.dpkt`) alike. It is one of the</span>
+<span class="sd">:mod:`pcapkit.corekit.schema` helpers the protocols and the capture engines call,</span>
+<span class="sd">not part of the header schema framework in :mod:`pcapkit.protocols.schema`; see</span>
 <span class="sd">:ref:`utilities-or-corekit`.</span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
@@ -605,10 +609,12 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet_byteorder'</span><span class="p">,</span> <span class="s1">'byteorder_callback'</span><span class="p">]</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet_byteorder'</span><span class="p">,</span> <span class="s1">'byteorder_callback'</span><span class="p">,</span> <span class="s1">'family_byteorder'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
@@ -668,6 +674,45 @@
 
 <span class="sd">    """</span>
     <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="family_byteorder">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/schema/byteorder.html#pcapkit.corekit.schema.byteorder.family_byteorder">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">family_byteorder</span><span class="p">(</span><span class="n">family</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["big", "little"]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Byte order a loopback header's address family was written in.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        family: The 4 octets of the address family.</span>
+<span class="sd">        linktype: Link type the frame was captured under; :data:`None` reads as</span>
+<span class="sd">            ``LINKTYPE_NULL``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``'big'`` for ``LINKTYPE_LOOP`` (108), whose family is in network byte</span>
+<span class="sd">        order. Otherwise, for ``LINKTYPE_NULL`` (0), ``'big'`` if the octets</span>
+<span class="sd">        read as a smaller number big-endian than little-endian, else</span>
+<span class="sd">        ``'little'``.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        A ``LINKTYPE_NULL`` family is in the byte order of the host that</span>
+<span class="sd">        captured the packet, which the capture file does not record. Every</span>
+<span class="sd">        address family is below ``0x10000``, so its zero octets lie at the high</span>
+<span class="sd">        end, and the smaller of the two readings is the one in the writer's byte</span>
+<span class="sd">        order. A family that reads the same both ways, such as 0, packs to the</span>
+<span class="sd">        same octets either way. A ``LINKTYPE_LOOP`` family is never inferred,</span>
+<span class="sd">        so one written little-endian reads as a family no table holds.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">       Moved here from ``pcapkit.protocols.link.loopback.protocol``</span>
+<span class="sd">       (:issue:`2897`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">'big'</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">'big'</span>
+    <span class="k">return</span> <span class="s1">'little'</span></div>
 
 </pre></div>
         </article>

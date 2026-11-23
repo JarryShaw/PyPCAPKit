@@ -447,8 +447,9 @@ The engines and the file formats they read:
 .. note::
 
    An engine may support less than :class:`~pcapkit.foundation.extraction.Extractor`
-   offers. `PyPCAP`_ and `pcap-ct`_ dissect no protocol, so they support neither
-   reassembly nor flow tracing; `PyPCAPFile`_ has no IPv6 decoder, so it
+   offers. `PyPCAP`_ and `pcap-ct`_ dissect no protocol, so they support
+   reassembly and flow tracing only once an adapter is registered on them;
+   `PyPCAPFile`_ has no IPv6 decoder, so it
    reassembles IPv4 and TCP but not IPv6. Each engine warns, or raises, for a
    capability it cannot provide rather than silently producing an empty result.
    The exceptions pass without a warning: `PyPCAPFile`_ and `DPKT`_ leave TCP

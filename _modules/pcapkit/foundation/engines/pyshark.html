@@ -696,6 +696,12 @@
     <span class="c1">#: Engine module name.</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'pyshark'</span>
 
+    <span class="c1">#: Reassembly adapters, each called as ``adapter(packet, count=n)`` on the</span>
+    <span class="c1">#: PyShark packet and its frame number. None ships, as PyShark reports</span>
+    <span class="c1">#: dissected fields rather than the octets a reassembler buffers; one</span>
+    <span class="c1">#: registered with :meth:`register_reassembly` is fed.</span>
+    <span class="n">__reassembly__</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]</span>
+
     <span class="c1">#: Flow tracing adapters, each called as ``adapter(packet, count=n)`` on the</span>
     <span class="c1">#: PyShark packet and its frame number.</span>
     <span class="n">__traceflow__</span> <span class="o">=</span> <span class="p">{</span>
@@ -818,10 +824,8 @@
 <span class="sd">                  and/or :attr:`self.extractor._exptl &lt;pcapkit.foundation.extraction.Extractor._exptl&gt;`</span>
 <span class="sd">                  is provided as the PyShark engine does not</span>
 <span class="sd">                  support such operations.</span>
-<span class="sd">                * if reassembly is enabled, as the PyShark engine</span>
-<span class="sd">                  does not support such operation.</span>
-<span class="sd">                * if a flow tracer with no adapter in :attr:`__traceflow__` is</span>
-<span class="sd">                  enabled.</span>
+<span class="sd">                * if a reassembler with no adapter in :attr:`__reassembly__`, or</span>
+<span class="sd">                  a flow tracer with none in :attr:`__traceflow__`, is enabled.</span>
 <span class="sd">                * if :attr:`self.extractor._exctx &lt;pcapkit.foundation.extraction.Extractor._exctx&gt;`</span>
 <span class="sd">                  is provided, as the PyShark engine does not parse with</span>
 <span class="sd">                  :mod:`pcapkit`'s own protocol implementations.</span>
@@ -840,7 +844,8 @@
                  <span class="s2">"'context=' is ignored"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="c1"># NOTE: no entry in ``__reassembly__``, so this disables reassembly with a warning.</span>
+        <span class="c1"># NOTE: no shipped entry in ``__reassembly__``, so this disables reassembly with a warning</span>
+        <span class="c1"># unless an adapter is registered.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_reassembly</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_traceflow</span><span class="p">()</span>
 
@@ -878,7 +883,7 @@
 <span class="sd">            for more operational information.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pyshark</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2dict</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pyshark</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">packet2timestamp</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="c1"># fetch the next PyShark packet that is a packet record</span>
@@ -901,6 +906,10 @@
                 <span class="n">ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
+
+        <span class="c1"># record fragments</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reassemble</span><span class="p">(</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span> <span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
 
         <span class="c1"># trace flows</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>

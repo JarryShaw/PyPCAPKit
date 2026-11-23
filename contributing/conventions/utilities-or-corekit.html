@@ -600,13 +600,14 @@ can be checked from the import graph alone, and needed the fewest moves.</p>
         flowchart TD
     NEW[&quot;a new support module,&lt;br/&gt;helper, constant&lt;br/&gt;or ContextVar&quot;] --&gt; CONST{&quot;a constant the&lt;br/&gt;format or RFCs fix?&quot;}
     CONST --&gt;|&quot;referenced beyond its&lt;br/&gt;protocol or family&quot;| SHARED[&quot;corekit.const&lt;br/&gt;one module per topic&quot;]
-    CONST --&gt;|&quot;referenced by its&lt;br/&gt;protocol or family alone&quot;| STAY[&quot;stays beside&lt;br/&gt;that schema&quot;]
+    CONST --&gt;|&quot;referenced by its&lt;br/&gt;protocol or family alone&quot;| STAY[&quot;stays in its&lt;br/&gt;protocol or family&quot;]
     CONST --&gt;|no| LAYER{&quot;a schema-layer&lt;br/&gt;helper used&lt;br/&gt;outside it?&quot;}
-    LAYER --&gt;|no| OWNED{&quot;a helper in&lt;br/&gt;one protocol's&lt;br/&gt;schema?&quot;}
+    LAYER --&gt;|no| OWNED{&quot;a helper in&lt;br/&gt;one protocol's&lt;br/&gt;own modules?&quot;}
     LAYER --&gt;|yes| SCHEMA[&quot;corekit.schema&lt;br/&gt;one module per group&quot;]
-    OWNED --&gt;|&quot;used beyond that&lt;br/&gt;protocol, and generic&quot;| SCHEMA
+    OWNED --&gt;|&quot;in its schema, used&lt;br/&gt;beyond its protocol&lt;br/&gt;or family&quot;| SCHEMA
+    OWNED --&gt;|&quot;elsewhere, used&lt;br/&gt;beyond its protocol&lt;br/&gt;or family&quot;| UTIL
     OWNED --&gt;|no| VAR{&quot;a ContextVar?&quot;}
-    OWNED --&gt;|&quot;used by that&lt;br/&gt;protocol alone&quot;| STAY
+    OWNED --&gt;|&quot;used by its protocol&lt;br/&gt;or family alone&quot;| STAY
     VAR --&gt;|&quot;set or read by&lt;br/&gt;several modules&quot;| CTX[&quot;utilities.contextvars&quot;]
     VAR --&gt;|no| UTIL{&quot;usable by any&lt;br/&gt;code, importing&lt;br/&gt;no pcapkit but&lt;br/&gt;utilities?&quot;}
     VAR --&gt;|&quot;used by one&lt;br/&gt;module only&quot;| PRIV[&quot;private, in&lt;br/&gt;that module&quot;]
@@ -710,9 +711,10 @@ length, which <a class="extlink-issue reference external" href="https://github.c
 the cut leaves nothing to decide by still refuses: the PCAP magic number, IGMP’s
 classification by length, NGAP’s PER decoding, and the TLS, DTLS and HTTP/2 framing.</p>
 <p><strong>A helper in one protocol’s own schema module moves there too once code outside that
-protocol uses it and it is generic enough to reuse</strong>, so other implementors can find
-it; a helper only its own protocol calls stays beside the schema. Ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>. A protocol’s own modules are its protocol, data and schema modules. So
+protocol or its family uses it</strong>, so other implementors can find it; a helper only its
+own protocol calls stays beside the schema. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>, and widened to the
+rest of a protocol’s own modules on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2897">#2897</a> (<a class="reference internal" href="#shared-helpers">Shared Helpers</a>). A protocol’s
+own modules are its protocol, data and schema modules. So
 <a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html#pcapkit.corekit.schema.jumbogram.jumbo_payload_length" title="pcapkit.corekit.schema.jumbogram.jumbo_payload_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">jumbo_payload_length()</span></code></a>, which the IPv6
 pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
 <a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html#module-pcapkit.corekit.schema.jumbogram" title="pcapkit.corekit.schema.jumbogram"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.jumbogram</span></code></a>, while
@@ -775,6 +777,42 @@ protocol’s package, as
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_shared_format_constants_2883_unit.py</span></code> fails on a module
 there that does, and on a constant of a protocol’s own modules that a module outside
 that protocol or its family references, by import or as an attribute of the module.</p>
+</section>
+<section id="shared-helpers">
+<h2>Shared Helpers<a class="headerlink" href="#shared-helpers" title="Link to this heading">¶</a></h2>
+<p><strong>A function or class of a protocol’s own modules that anything outside its protocol
+or family references lives in a common home</strong>: the module of <a class="reference internal" href="../../pcapkit/utilities/index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a>
+or <a class="reference internal" href="../../pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> for its topic, as the questions above place it, and never a
+generic helpers module. Ruled by the owner in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2895">#2895</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2883">#2883</a>)
+and recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2897">#2897</a>. References and places count as for the constants, and
+so does a <a class="reference internal" href="../../pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming the helper, as a
+lazy import does. So <a class="reference internal" href="../../pcapkit/corekit/schema/byteorder.html#pcapkit.corekit.schema.byteorder.family_byteorder" title="pcapkit.corekit.schema.byteorder.family_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">family_byteorder()</span></code></a>,
+which the <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> engine reads as well as
+<a class="reference internal" href="../../pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a>, is among the byte-order
+helpers of <a class="reference internal" href="../../pcapkit/corekit/schema/byteorder.html#module-pcapkit.corekit.schema.byteorder" title="pcapkit.corekit.schema.byteorder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.byteorder</span></code></a>: it reads
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a>, so fails the <code class="docutils literal notranslate"><span class="pre">utilities</span></code> question.
+The next-layer and link-address checks that
+<a class="reference internal" href="../../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> share stay in their
+family base’s <a class="reference internal" href="../../pcapkit/protocols/link/linux_sll.html#module-pcapkit.protocols.link.linux_sll.protocol" title="pcapkit.protocols.link.linux_sll.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.linux_sll.protocol</span></code></a>.</p>
+<p><strong>A protocol’s own structures are not helpers</strong>: the dissector, header schema and data
+model classes its modules hold (<a class="reference internal" href="protocol-family-grouping.html#protocol-family-grouping"><span class="std std-ref">Protocol Family Grouping</span></a>), every subclass of
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> or <a class="reference internal" href="../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>
+there, stay in its package whoever references them, as the framework bases do. A field
+class, an enumeration or a context its modules define is a helper.</p>
+<p><strong>The IP pseudo-header’s functions stay beside it.</strong>
+<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.pseudo_header" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.pseudo_header"><code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_header()</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_upper()</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper"><code class="xref py py-func docutils literal notranslate"><span class="pre">verify_upper()</span></code></a>, which the IP
+layers and the layers above them reach through a
+<a class="reference internal" href="../../pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>, act on
+<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a> and through it
+on IPv4 and IPv6, which is what <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2580">#2580</a> keeps in
+<a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#module-pcapkit.protocols.misc.checksum" title="pcapkit.protocols.misc.checksum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.checksum</span></code></a>.</p>
+<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_shared_format_constants_2883_unit.py</span></code> fails on a helper a
+module outside its protocol or family references, the pseudo-header functions aside,
+and imports a class to tell a structure from a helper.</p>
 </section>
 <section id="context-variables">
 <h2>Context Variables<a class="headerlink" href="#context-variables" title="Link to this heading">¶</a></h2>
@@ -856,6 +894,7 @@ from <code class="docutils literal notranslate"><span class="pre">__all__</span>
 <li><a class="reference internal" href="#">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a><ul>
 <li><a class="reference internal" href="#shared-schema-helpers">Shared Schema Helpers</a></li>
 <li><a class="reference internal" href="#shared-constants">Shared Constants</a></li>
+<li><a class="reference internal" href="#shared-helpers">Shared Helpers</a></li>
 <li><a class="reference internal" href="#context-variables">Context Variables</a></li>
 </ul>
 </li>
