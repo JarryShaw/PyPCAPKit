@@ -663,6 +663,12 @@ Each is recorded here with its basis, or the lack of one:
   :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s member names, so
   ``'TCP'`` names ``TransportProtocol.tcp``. Its basis is that class's row above,
   :rfc:`6335#section-8.1.1` by limb 2.
+* :attr:`Extractor.__engine__ <pcapkit.foundation.extraction.Extractor.__engine__>`,
+  :attr:`Extractor.__reassembly__ <pcapkit.foundation.extraction.Extractor.__reassembly__>`
+  and :attr:`Extractor.__traceflow__ <pcapkit.foundation.extraction.Extractor.__traceflow__>`
+  are keyed by lower-cased name: their registrars lower-case the name as every lookup of
+  them does, so ``'IPv4'`` names the ``ipv4`` reassembler (:issue:`2879`). No authority
+  assigns these names, so there is nothing to cite.
 * :meth:`TCP.read <pcapkit.protocols.transport.tcp.protocol.TCP.read>` and
   :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` upper-case the TCP
   schema's flag keys, ``cwr`` to ``fin``, to look up
