@@ -107,7 +107,6 @@ from pcapkit.protocols.internet.ipv4.schema import TSOption as Schema_TSOption
 from pcapkit.protocols.internet.ipv4.schema import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema import Schema
 from pcapkit.utilities import config
-from pcapkit.utilities.contextvars import rebuilding
 from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
@@ -121,7 +120,6 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.internet.ipv4.data import Option as Data_Option
     from pcapkit.protocols.internet.ipv4.schema import Option as Schema_Option
-    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
@@ -131,12 +129,12 @@ if TYPE_CHECKING:
 
 __all__ = ['IPv4']
 
-#: The pseudo-header :meth:`IPv4.make` computes a payload's checksum over, and the
-#: check :meth:`IPv4.__post_init__` runs on the upper layer, resolved there rather
-#: than imported, so their first import holds
+#: What computes the upper layer's pending checksum in :meth:`IPv4.make`, and what
+#: verifies it in :meth:`IPv4.__post_init__`, resolved there rather than
+#: imported, so their first import holds
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
-_IP_PSEUDO: 'ModuleDescriptor[IP_Pseudo]' = \
-    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'IP_Pseudo')
+_COMPUTE_UPPER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'compute_upper')
 _VERIFY_UPPER: 'ModuleDescriptor[Any]' = \
     ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'verify_upper')
 
@@ -493,6 +491,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              **kwargs: 'Any') -> 'Schema_IPv4':
         """Make (construct) packet data.
 
+        An upper layer whose ``make()`` left its checksum pending, as the
+        payload or behind the Authentication Headers it is constructed with,
+        gets it computed under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`
+        unless the packet is a fragment, see
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper`.
+
         Args:
             tos_pre: Precedence of the packet.
             tos_del: Delay of the packet.
@@ -540,6 +544,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            Takes ``reserved`` ahead of ``df`` (:issue:`1326`), and
            ``total_length`` (:issue:`1155`) and ``padding`` (:issue:`1317`)
            ahead of ``payload``, which shifts every later positional argument.
+
+        .. versionchanged:: 1.7.0
+
+           Computes the pending checksum of an upper layer behind an
+           Authentication Header too (:issue:`2861`).
 
         """
         tos_pre_val = self._make_index(tos_pre, Enum_ToSPrecedence, bits=3, name='precedence')
@@ -602,23 +611,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
             schema.chksum = compute_checksum(schema.pack()[:ihl * 4])
 
-        # NOTE: A payload that left its checksum out gets it over this header's
-        # pseudo-header, unless a fragment, whose checksum covers the datagram (#2471).
-        if (config.CHECKSUM_COMPUTE and getattr(payload, '_checksum_pending', False)
-                and cast('ProtocolBase', payload).__index__() == proto and not (offset or mf)):
-            IP_Pseudo = _IP_PSEUDO.klass  # pylint: disable=invalid-name
-
-            # NOTE: The header is parsed back for a source route's destination,
-            # quietly, as this layer parses it again (cf. rebuilding).
-            token = rebuilding.set(True)
-            try:
-                header = IPv4(schema.pack()[:ihl * 4])
-            finally:
-                rebuilding.reset(token)
-            # NOTE: The payload puts its own length in the pseudo-header.
-            pseudo = IP_Pseudo(ip=header, protocol=proto, upper_length=0)
-            upper = cast('ProtocolBase', payload)
-            schema.payload = upper.from_data(upper.info, checksum=None, pseudo=pseudo).data
+        # NOTE: An upper layer that left its checksum out, here or behind an AH, gets it
+        # over this header's pseudo-header, unless a fragment (#2471, #2861).
+        if config.CHECKSUM_COMPUTE:
+            computed = _COMPUTE_UPPER.klass(schema)
+            if computed is not None:
+                schema.payload = computed
         return schema
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv4':
