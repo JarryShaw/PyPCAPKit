@@ -64,6 +64,8 @@ Extractor Registries
 
 .. autofunction:: pcapkit.foundation.registry.foundation.register_extractor_traceflow
 
+.. autofunction:: pcapkit.foundation.registry.foundation.register_engine_traceflow
+
 Protocol Registries
 -------------------
 

@@ -49,6 +49,7 @@ __all__ = [
     'register_reassembly_callback', 'register_traceflow_callback',
 
     'register_extractor_reassembly', 'register_engine_reassembly', 'register_extractor_traceflow',
+    'register_engine_traceflow',
 ]
 
 #: logging.Logger: Module-level logger, a child of the package-wide
@@ -334,6 +335,24 @@ def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str'
     .. versionadded:: 1.7.0
 
     """
+    engine_cls = _engine_class(engine)
+    engine_cls.register_reassembly(protocol, adapter)
+    logger.debug('registered %s engine reassembly: %s', engine_cls.name, protocol)
+
+
+def _engine_class(engine: 'str | Type[EngineBase]') -> 'Type[EngineBase]':
+    """Resolve the engine an engine adapter registrar writes to.
+
+    Arguments:
+        engine: engine name, as registered in
+            :data:`pcapkit.foundation.extraction.Extractor.__engine__`, or an
+            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
+
+    Raises:
+        RegistryError: If ``engine`` names no registered engine, or is not an
+            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
+
+    """
     engine_cls = engine  # type: ModuleDescriptor[EngineBase] | Type[EngineBase] | str | None
     if isinstance(engine, str):
         engine_cls = Extractor.__engine__.get(engine.lower())
@@ -342,9 +361,7 @@ def register_engine_reassembly(engine: 'str | Type[EngineBase]', protocol: 'str'
     if not isinstance(engine_cls, type) or not issubclass(engine_cls, EngineBase):
         raise RegistryError(f'engine must be a registered engine name or an EngineBase subclass, '
                             f'not {engine!r}')
-
-    engine_cls.register_reassembly(protocol, adapter)
-    logger.debug('registered %s engine reassembly: %s', engine_cls.name, protocol)
+    return engine_cls
 
 
 # NOTE: pcapkit.foundation.extraction.Extractor.__traceflow__
@@ -370,3 +387,36 @@ def register_extractor_traceflow(protocol: 'str',
     """
     Extractor.register_traceflow(protocol, traceflow)
     logger.debug('registered extractor flow tracing: %s', protocol)
+
+
+# NOTE: pcapkit.foundation.engines.engine.EngineBase.__traceflow__
+def register_engine_traceflow(engine: 'str | Type[EngineBase]', protocol: 'str',
+                              adapter: 'ModuleDescriptor[Adapter] | Adapter') -> 'None':
+    r"""Register a new flow tracing adapter of an engine.
+
+    The function will register the given :mod:`pcapkit.toolkit` adapter to the
+    :attr:`EngineBase.__traceflow__
+    <pcapkit.foundation.engines.engine.EngineBase.__traceflow__>` registry of
+    ``engine``, which then feeds the flow tracer registered under ``protocol``
+    from its frames.
+
+    Arguments:
+        engine: engine name, as registered in
+            :data:`pcapkit.foundation.extraction.Extractor.__engine__`, or an
+            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass;
+            :class:`~pcapkit.foundation.engines.pcap.PCAP` and
+            :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` have no name, so
+            take the class
+        protocol: flow tracing name
+        adapter: module descriptor or the adapter itself
+
+    Raises:
+        RegistryError: If ``engine`` names no registered engine, or is not an
+            :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
+
+    .. versionadded:: 1.7.0
+
+    """
+    engine_cls = _engine_class(engine)
+    engine_cls.register_traceflow(protocol, adapter)
+    logger.debug('registered %s engine flow tracing: %s', engine_cls.name, protocol)

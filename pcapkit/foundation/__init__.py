@@ -61,5 +61,6 @@ __all__ = [
     'register_dumper',
     'register_extractor_dumper', 'register_traceflow_dumper',
     'register_extractor_reassembly', 'register_engine_reassembly', 'register_extractor_traceflow',
+    'register_engine_traceflow',
     'register_reassembly_callback', 'register_traceflow_callback',
 ]

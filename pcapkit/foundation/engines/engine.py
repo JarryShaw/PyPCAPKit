@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.reassembly import ReassemblyManager
+from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, RegistryWarning, warn
 
@@ -23,9 +24,9 @@ if TYPE_CHECKING:
 
     from pcapkit.foundation.extraction import Extractor
 
-    #: A :mod:`pcapkit.toolkit` reassembly adapter. Called on a frame with the
-    #: arguments its engine passes, it returns the reassembler's input record, a
-    #: tuple of them, or :data:`None`.
+    #: A :mod:`pcapkit.toolkit` reassembly or flow tracing adapter. Called on a
+    #: frame with the arguments its engine passes, it returns the reassembler's or
+    #: the flow tracer's input record, a tuple of them, or :data:`None`.
     Adapter = Callable[..., Any]
 
 _T = TypeVar('_T')
@@ -115,6 +116,16 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
     #:
     #: .. versionadded:: 1.7.0
     __reassembly__ = {}  # type: dict[str, ModuleDescriptor[Adapter] | Adapter]
+
+    #: Flow tracing adapters. For each flow tracer this engine supports, under the
+    #: name it is registered by in :attr:`Extractor.__traceflow__
+    #: <pcapkit.foundation.extraction.Extractor.__traceflow__>`, the
+    #: :mod:`pcapkit.toolkit` function that makes its input from a frame. An
+    #: enabled flow tracer with no entry is dropped at startup, with a warning,
+    #: and an engine with none supports no flow tracing.
+    #:
+    #: .. versionadded:: 1.7.0
+    __traceflow__ = {}  # type: dict[str, ModuleDescriptor[Adapter] | Adapter]
 
     ##########################################################################
     # Properties.
@@ -214,16 +225,39 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         .. versionadded:: 1.7.0
 
         """
+        cls._register_adapter('__reassembly__', 'reassembly', protocol, adapter)
+
+    @classmethod
+    def _register_adapter(cls, table: 'str', kind: 'str', protocol: 'str',
+                          adapter: 'ModuleDescriptor[Adapter] | Adapter') -> 'None':
+        """Write an adapter into this engine's own copy of an adapter map.
+
+        Arguments:
+            table: the map's attribute, ``'__reassembly__'`` or ``'__traceflow__'``
+            kind: what the map feeds, as the overwrite warning names it
+            protocol: name to register ``adapter`` under, lower-cased
+            adapter: module descriptor or callable
+
+        Raises:
+            RegistryError: If ``adapter`` is neither a module descriptor nor
+                callable.
+
+        Warns:
+            RegistryWarning: If a different adapter is already registered under
+                ``protocol``; it is overwritten.
+
+        """
         if not isinstance(adapter, ModuleDescriptor) and not callable(adapter):
             raise RegistryError(f'adapter must be a module descriptor or callable, not {adapter!r}')
-        if '__reassembly__' not in cls.__dict__:
-            cls.__reassembly__ = dict(cls.__reassembly__)
+        if table not in cls.__dict__:
+            setattr(cls, table, dict(getattr(cls, table)))
+        adapters = getattr(cls, table)  # type: dict[str, ModuleDescriptor[Adapter] | Adapter]
         name = protocol.lower()
-        incumbent = cls.__reassembly__.get(name)
+        incumbent = adapters.get(name)
         if incumbent is not None and incumbent != adapter:
-            warn(f'{cls.__name__}: reassembly adapter {name} already registered, overwriting',
+            warn(f'{cls.__name__}: {kind} adapter {name} already registered, overwriting',
                  RegistryWarning, stacklevel=stacklevel())
-        cls.__reassembly__[name] = adapter
+        adapters[name] = adapter
 
     def _setup_reassembly(self) -> 'None':
         """Disable each enabled reassembler this engine has no adapter for.
@@ -282,6 +316,99 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
                 continue
             for packet in (data if isinstance(data, tuple) else (data,)):
                 reasm(packet)
+
+    ##########################################################################
+    # Flow tracing.
+    ##########################################################################
+
+    @classmethod
+    def register_traceflow(cls, protocol: 'str', adapter: 'ModuleDescriptor[Adapter] | Adapter') -> 'None':
+        """Register the adapter feeding a flow tracer from this engine's frames.
+
+        Arguments:
+            protocol: name the flow tracer is registered by in
+                :attr:`Extractor.__traceflow__
+                <pcapkit.foundation.extraction.Extractor.__traceflow__>`,
+                lower-cased
+            adapter: module descriptor or callable, taking a frame as this
+                engine's own adapters do
+
+        Raises:
+            RegistryError: If ``adapter`` is neither a module descriptor nor
+                callable.
+
+        Warns:
+            RegistryWarning: If a different adapter is already registered under
+                ``protocol``; it is overwritten.
+
+        The entry is written on ``cls`` alone, so a subclass registering one
+        leaves the engine it derives from as it was.
+
+        .. versionadded:: 1.7.0
+
+        """
+        cls._register_adapter('__traceflow__', 'flow tracing', protocol, adapter)
+
+    def _setup_traceflow(self) -> 'None':
+        """Drop each enabled flow tracer this engine has no adapter for.
+
+        Warns:
+            AttributeWarning: For each flow tracer dropped; once, naming them
+                all, if this engine supports no flow tracing.
+
+        Dropping the last flow tracer turns flow tracing off.
+
+        """
+        ext = self._extractor
+        if not ext._flag_t:
+            return
+
+        held = [name for (name, tracer) in ext._trace.items() if tracer is not None]
+        adapters = self.__traceflow__
+        unsupported = [name for name in held if name not in adapters]
+        if not unsupported:
+            return
+
+        if not adapters:
+            warn(f"'Extractor(engine={ext._exnam})' object does not support flow tracing; "
+                 f'so traceflow={held!r} will be ignored', AttributeWarning, stacklevel=stacklevel())
+        else:
+            for name in unsupported:
+                warn(f"'Extractor(engine={ext._exnam})' object does not support {ext._trace[name].name} "
+                     f'flow tracing; so {name!r} will be ignored', AttributeWarning,
+                     stacklevel=stacklevel())
+
+        # NOTE: a dropped tracer is passed as None, which the manager reads as disabled; with none
+        # left, tracing is off, so the Extractor neither finishes nor reports a tracer it lost.
+        ext._trace = TraceFlowManager(**{name: (None if name in unsupported else tracer)
+                                         for (name, tracer) in ext._trace.items()})
+        if len(unsupported) == len(held):
+            ext._flag_t = False
+
+    def _traceflow(self, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Feed a frame to every enabled flow tracer.
+
+        Arguments:
+            *args: the frame, as this engine's adapters take it
+            **kwargs: as this engine's adapters take them
+
+        Each flow tracer is fed its adapter's record, or each of a tuple of
+        them.
+
+        """
+        adapters = self.__traceflow__
+        for (name, tracer) in self._extractor._trace.items():
+            if tracer is None:
+                continue
+
+            adapter = adapters[name]
+            if isinstance(adapter, ModuleDescriptor):
+                adapter = adapter.klass
+            data = adapter(*args, **kwargs)
+            if data is None:
+                continue
+            for packet in (data if isinstance(data, tuple) else (data,)):
+                tracer(packet)
 
     ##########################################################################
     # Data models.

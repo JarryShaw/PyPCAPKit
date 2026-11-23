@@ -11,6 +11,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 import sys
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.logging import get_logger
@@ -19,7 +20,7 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Protocol, Type
+    from typing import Any, Callable, Optional, Protocol, Type
 
     from pyshark.capture.file_capture import FileCapture as PySharkFileCapture
     from pyshark.packet.layers.base import BaseLayer
@@ -116,6 +117,12 @@ class PyShark(EngineBase['PySharkPacket']):
 
     #: Engine module name.
     __engine_module__ = 'pyshark'
+
+    #: Flow tracing adapters, each called as ``adapter(packet, count=n)`` on the
+    #: PyShark packet and its frame number.
+    __traceflow__ = {
+        'tcp': ModuleDescriptor('pcapkit.toolkit.pyshark', 'tcp_traceflow'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     #: First Python version `PyShark`_ does not work on, as a ``(major, minor)``
     #: pair. Released 0.6 builds its event loop with
@@ -230,6 +237,8 @@ class PyShark(EngineBase['PySharkPacket']):
                   support such operations.
                 * if reassembly is enabled, as the PyShark engine
                   does not support such operation.
+                * if a flow tracer with no adapter in :attr:`__traceflow__` is
+                  enabled.
                 * if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                   is provided, as the PyShark engine does not parse with
                   :mod:`pcapkit`'s own protocol implementations.
@@ -250,6 +259,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
         # NOTE: no entry in ``__reassembly__``, so this disables reassembly with a warning.
         self._setup_reassembly()
+        self._setup_traceflow()
 
         # setup verbose handler, unless the caller gave one of their own
         # (#1874); a packet always has a frame layer, since read_frame skips
@@ -282,7 +292,7 @@ class PyShark(EngineBase['PySharkPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.pyshark import packet2dict, tcp_traceflow
+        from pcapkit.toolkit.pyshark import packet2dict
         ext = self._extractor
 
         # fetch the next PyShark packet that is a packet record
@@ -308,10 +318,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
         # trace flows
         if ext._flag_t:
-            if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
-                if data_tf_tcp is not None:
-                    ext._trace.tcp(data_tf_tcp)
+            self._traceflow(packet, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

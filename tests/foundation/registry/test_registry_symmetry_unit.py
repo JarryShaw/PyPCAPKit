@@ -473,6 +473,8 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_dccp': 'DCCP.__proto__ ships no entry, so there is none to restore',
             'register_engine_reassembly': 'takes an adapter, not a class; override and restore are in '
                                           'test_foundation.test_engine_reassembly_wrapper',
+            'register_engine_traceflow': 'takes an adapter, not a class; override and restore are in '
+                                         'test_foundation.test_engine_traceflow_wrapper',
         }
         self.assertEqual(sorted(set(registry.__all__) - covered - set(excused)), [])
         self.assertEqual(sorted((covered | set(excused)) - set(registry.__all__)), [])

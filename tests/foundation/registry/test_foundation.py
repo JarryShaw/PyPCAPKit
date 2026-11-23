@@ -180,6 +180,48 @@ class FoundationRegistryTests(unittest.TestCase):
                 register_engine_reassembly('dpkt', 'unit-2814-bad', 42)  # type: ignore[arg-type]
             self.assertEqual(DPKT.__reassembly__, before)
 
+    def test_engine_traceflow_wrapper(self) -> None:
+        """#2843: the wrapper writes an engine's ``__traceflow__``, found by name or class."""
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.engines.dpkt import DPKT
+        from pcapkit.foundation.engines.pcap import PCAP
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.registry import register_engine_traceflow
+        from pcapkit.utilities.exceptions import RegistryError
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        def adapter(frame: object) -> None:
+            return None
+
+        with mock.patch.dict(DPKT.__traceflow__), mock.patch.dict(PCAP.__traceflow__):
+            shipped = DPKT.__traceflow__['tcp']
+
+            # by registered engine name, case-folded, as a module descriptor
+            register_engine_traceflow('DPKT', 'unit-2843',
+                                      ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_traceflow'))
+            self.assertEqual(DPKT.__traceflow__['unit-2843'],
+                             ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_traceflow'))
+
+            # by class, as the nameless default-engine readers are given, and as a callable
+            register_engine_traceflow(PCAP, 'unit-2843', adapter)
+            self.assertIs(PCAP.__traceflow__['unit-2843'], adapter)
+
+            # an override is undone by handing back an equal descriptor
+            with self.assertWarns(RegistryWarning):
+                register_engine_traceflow('dpkt', 'tcp', adapter)
+            with self.assertWarns(RegistryWarning):
+                register_engine_traceflow('dpkt', 'tcp', ModuleDescriptor(shipped.module, shipped.name))
+            self.assertEqual(DPKT.__traceflow__['tcp'], shipped)
+
+            before = dict(DPKT.__traceflow__)
+            for engine in ('no-such-engine', 'default', Extractor, 'dpkt-not'):
+                with self.subTest(engine=engine):
+                    with self.assertRaisesRegex(RegistryError, 'registered engine name or an EngineBase'):
+                        register_engine_traceflow(engine, 'unit-2843-bad', adapter)  # type: ignore[arg-type]
+            with self.assertRaises(RegistryError):
+                register_engine_traceflow('dpkt', 'unit-2843-bad', 42)  # type: ignore[arg-type]
+            self.assertEqual(DPKT.__traceflow__, before)
+
     def test_registration_accepts_pcapkit_own_builtin_classes(self) -> None:
         """The built-ins pass the internal ``issubclass`` gate, and non-subclasses still fail.
 

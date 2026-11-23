@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines import _pcap_backend
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.utilities.exceptions import FormatError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 
@@ -296,14 +295,10 @@ class PyPCAP(EngineBase['RawFrame']):
                                   f'but {ext._ifnm!r} is not one; libpcap opens savefiles '
                                   'by name and cannot read an in-memory stream')
 
-        # NOTE: no entry in ``__reassembly__``, so this disables reassembly with a warning.
+        # NOTE: no entry in ``__reassembly__`` or ``__traceflow__``, so reassembly and flow tracing
+        # are both disabled, each with a warning.
         self._setup_reassembly()
-
-        if ext._flag_t and ext._tcp:
-            ext._flag_t = False
-            ext._trace = TraceFlowManager(tcp=None)
-            warn("'Extractor(engine=pypcap)' object does not support flow tracing; "
-                 "so traceflow=['tcp'] will be ignored", AttributeWarning, stacklevel=stacklevel())
+        self._setup_traceflow()
 
         # NOTE: ``promisc=False`` is defensive: should ``pcap_open_offline`` fail, the constructor
         # falls back to a live device, which must not request promiscuous mode.
@@ -354,8 +349,10 @@ class PyPCAP(EngineBase['RawFrame']):
                 ofile = ext._ofile
             ext._offmt = ofile.kind
 
-        # NOTE: reassembly and flow tracing are disabled in ``run``, so there is
-        # deliberately no bookkeeping for either here.
+        # NOTE: reassembly is disabled in ``run``, so there is deliberately no bookkeeping for it
+        # here; flow tracing feeds any adapter registered in ``__traceflow__``.
+        if ext._flag_t:
+            self._traceflow(packet, timestamp, data_link=self._dlink, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

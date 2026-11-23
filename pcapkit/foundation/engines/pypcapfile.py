@@ -163,6 +163,13 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         'tcp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tcp_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
+    #: Flow tracing adapters, each called as
+    #: ``adapter(packet, data_link=link, count=n)`` on the decoded packet, the
+    #: savefile's link type and its frame number.
+    __traceflow__ = {
+        'tcp': ModuleDescriptor('pcapkit.toolkit.pypcapfile', 'tcp_traceflow'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -230,7 +237,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   is provided, as the PyPCAPFile engine does not parse with :mod:`pcapkit`'s
                   own protocol implementations.
                 * if a reassembler with no adapter in :attr:`__reassembly__` is
-                  enabled, as IPv6's and DTLS's are not.
+                  enabled, as IPv6's and DTLS's are not, or a flow tracer with
+                  none in :attr:`__traceflow__`.
                 * if |pcapfile|_ has no decoder for the savefile's link layer
                   type, in which case frames are left undecoded.
 
@@ -260,6 +268,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                               'the PyPCAPFile engine reads PCAP savefiles only')
 
         self._setup_reassembly()
+        self._setup_traceflow()
 
         stream = NamedStream(ext._ifile, ext._ifnm)
         sfile = pcapfile.savefile.load_savefile(stream, layers=0, lazy=True)
@@ -287,7 +296,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.pypcapfile import packet2dict, packet2timestamp, tcp_traceflow
+        from pcapkit.toolkit.pypcapfile import packet2dict, packet2timestamp
         ext = self._extractor
 
         # fetch PyPCAPFile packet
@@ -315,10 +324,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
         # trace flows
         if ext._flag_t:
-            if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, data_link=self._dlink, count=ext._frnum)
-                if data_tf_tcp is not None:
-                    ext._trace.tcp(data_tf_tcp)
+            self._traceflow(packet, data_link=self._dlink, count=ext._frnum)
 
         # record frames
         if ext._flag_d:
