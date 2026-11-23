@@ -36,6 +36,9 @@ What is read, and the rules for reading it:
   oldest such run's sha, and a cap that differs between the two is reported, since a
   trend across it is not one trend. One read per run would cost ~300 calls for a
   value that rarely moves.
+* **A job the workflow no longer runs**, as a leg renamed or split inside the
+  window, keeps its rows, marked, but no cap finding (#2904). The newest runs'
+  jobs say which those are (:func:`no_longer_run`).
 * **Test timings** come from the ``junit-unit-*`` artifacts the unit legs upload,
   for the newest :data:`JUNIT_RUNS` successful push runs. Each testcase's own
   ``time`` is used; a suite's ``tests=`` count includes subtests and is not.
@@ -885,6 +888,45 @@ def _measured(run: 'dict[str, Any]', specs: 'list[dict[str, Any]]') -> 'bool':
         _timed_out(job, _job_cap(specs, job['name'])) for job in run.get('jobs', ()) if _ran(job))
 
 
+def no_longer_run(runs: 'list[dict[str, Any]]', specs: 'list[dict[str, Any]]') -> 'set[str]':
+    """The job names in one workflow's ``runs`` that its head no longer runs (#2904).
+
+    The text names no leg of a ``fromJSON`` matrix, and a leg's old name still
+    matches its job's template, so the runs decide. For each event but
+    ``pull_request``, take the newest :func:`_measured` run that ran the job: a name
+    is gone when each such run omits it and is newer than every run listing it, as
+    that run can predate a merge whose own push is not yet measured. A light pull
+    request runs a subset of the legs, so none is consulted, and a job no such run
+    ran, as one run on pull requests alone, keeps every name.
+
+    """
+    seen = {}  # type: dict[str, str]
+    newest = {}  # type: dict[tuple[str, str], tuple[str, set[str]]]
+    for run in sorted(runs, key=lambda run: run['created_at'], reverse=True):
+        jobs = run.get('jobs') or ()
+        for job in jobs:
+            seen.setdefault(job['name'], run['created_at'])
+        if run.get('event') == 'pull_request' or not _measured(run, specs):
+            continue
+        listed = collections.defaultdict(set)  # type: dict[str, set[str]]
+        ran = set()  # type: set[str]
+        for job in jobs:
+            spec = match_job(specs, job['name'])
+            if spec is not None:
+                listed[spec['id']].add(job['name'])
+                if _ran(job):
+                    ran.add(spec['id'])
+        for job_id in ran:
+            newest.setdefault((job_id, run['event']), (run['created_at'], listed[job_id]))
+    gone = set()  # type: set[str]
+    for name, last in seen.items():
+        spec = match_job(specs, name)
+        held = [ref for (job_id, _), ref in newest.items() if spec and job_id == spec['id']]
+        if held and all(name not in names and last < created for created, names in held):
+            gone.add(name)
+    return gone
+
+
 def analyse(data: 'dict[str, Any]') -> 'dict[str, Any]':
     """The metrics of one window, from what :func:`collect` read."""
     origin = parse_time(data['since'])
@@ -934,6 +976,8 @@ def analyse(data: 'dict[str, Any]') -> 'dict[str, Any]':
                             _timed_out(job, cap) and step.get('conclusion') == 'cancelled'):
                         steps[(workflow, job['name'], step['name'])].append(step)
 
+    gone = {workflow: no_longer_run(info['runs'], specs.get(workflow, []))
+            for workflow, info in data['workflows'].items()}
     unmatched = set()
     for (workflow, name), samples in sorted(jobs.items()):
         spec = match_job(specs.get(workflow, []), name)
@@ -942,7 +986,7 @@ def analyse(data: 'dict[str, Any]') -> 'dict[str, Any]':
         cap = spec['timeout'] if spec else DEFAULT_TIMEOUT
         durations = [(_days(job['started_at'], origin), minutes(job['started_at'], job['completed_at']))
                      for job in samples]
-        row = {'workflow': workflow, 'name': name, 'cap': cap,
+        row = {'workflow': workflow, 'name': name, 'cap': cap, 'still_run': name not in gone[workflow],
                **describe(value for _, value in durations),
                'queue': describe(minutes(job.get('created_at') or job['started_at'], job['started_at'])
                                  for job in samples)}
@@ -952,13 +996,17 @@ def analyse(data: 'dict[str, Any]') -> 'dict[str, Any]':
     if unmatched:
         report['notes'].append('Matched no job in the workflow file, so judged against the '
                                f'{DEFAULT_TIMEOUT}-minute default cap: ' + ', '.join(sorted(unmatched)))
+    retired = [f'{row["workflow"]}: {row["name"]}' for row in report['jobs'] if not row['still_run']]
+    if retired:
+        report['notes'].append('No longer run, so judged by no cap finding (H1, H2, H4): '
+                               + ', '.join(retired))
 
     for (workflow, job_name, name), samples in sorted(steps.items()):
         cap = step_cap(match_job(specs.get(workflow, []), job_name), name)
         durations = [(_days(step['started_at'], origin), minutes(step['started_at'], step['completed_at']))
                      for step in samples if step.get('started_at') and step.get('completed_at')]
         row = {'workflow': workflow, 'job': job_name, 'name': name, 'cap': cap,
-               **describe(value for _, value in durations)}
+               'still_run': job_name not in gone[workflow], **describe(value for _, value in durations)}
         if cap:
             row['p90_share_of_cap'] = row['p90'] / cap if row['p90'] is not None else None
             row.update(projection(durations, cap))
@@ -1151,7 +1199,8 @@ def non_blocking(workflow: 'str', job: 'str') -> 'bool':
 def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 'list[dict[str, str]]':
     """Every HARD (``H*``) and WARN (``W*``) threshold that fires on ``report``.
 
-    A cap finding on a :func:`non_blocking` job keeps its ``H`` id but is a warning.
+    A cap finding on a :func:`non_blocking` job keeps its ``H`` id but is a warning,
+    and none fires on a job, or its steps, that :func:`no_longer_run` names.
 
     """
     found = []  # type: list[dict[str, str]]
@@ -1163,6 +1212,8 @@ def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 
                       'message': message})
 
     for row in report['jobs']:
+        if not row.get('still_run', True):
+            continue
         label = f'`{row["name"]}` ({row["workflow"]})'
         soft = non_blocking(row['workflow'], row['name'])
         if row['n'] >= MIN_SAMPLES and row['p90'] >= HARD_CAP_SHARE * row['cap']:
@@ -1173,7 +1224,7 @@ def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 
                        f'{_fmt(row["days_to_cap"])} days on a linear fit '
                        f'(+{_fmt(row["slope_per_day"], 2)} min/day).', soft)
     for row in report['steps']:
-        if not row.get('cap'):
+        if not row.get('cap') or not row.get('still_run', True):
             continue
         label = f'`{row["job"]}` step `{row["name"]}`'
         soft = non_blocking(row['workflow'], row['job'])
@@ -1256,6 +1307,11 @@ def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 
 # --------------------------------------------------------------------- output
 
 
+def _job_cell(row: 'dict[str, Any]', key: 'str') -> 'str':
+    """A table row's job name, marked when :func:`no_longer_run` names it."""
+    return row[key] + ('' if row.get('still_run', True) else ' *(no longer run)*')
+
+
 def summary(report: 'dict[str, Any]', findings: 'list[dict[str, str]]') -> 'str':
     """The Markdown the workflow appends to its job summary."""
     window = report['window']
@@ -1293,7 +1349,7 @@ def summary(report: 'dict[str, Any]', findings: 'list[dict[str, str]]') -> 'str'
             '| Workflow | Job | n | Median | p90 | Max | Queue p90 | Cap | p90 / cap '
             '| Trend min/day | Days to 50% | Days to cap |', '|---|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|']
     for row in jobs:
-        out.append(f'| {row["workflow"]} | {row["name"]} | {row["n"]} | {_fmt(row["median"])} | '
+        out.append(f'| {row["workflow"]} | {_job_cell(row, "name")} | {row["n"]} | {_fmt(row["median"])} | '
                    f'{_fmt(row["p90"])} | {_fmt(row["max"])} | {_fmt(row["queue"]["p90"])} | '
                    f'{row["cap"]} | {row["p90_share_of_cap"]:.0%} | {_fmt(row["slope_per_day"], 2)} | '
                    f'{_fmt(row["days_to_half_cap"])} | {_fmt(row["days_to_cap"])} |')
@@ -1302,7 +1358,7 @@ def summary(report: 'dict[str, Any]', findings: 'list[dict[str, str]]') -> 'str'
     out += ['', f'### Steps, by p90 (top {TABLE_ROWS})', '',
             '| Job | Step | n | Median | p90 | Step cap | Days to cap |', '|---|---|--:|--:|--:|--:|--:|']
     for row in steps:
-        out.append(f'| {row["job"]} | {row["name"]} | {row["n"]} | {_fmt(row["median"])} | '
+        out.append(f'| {_job_cell(row, "job")} | {row["name"]} | {row["n"]} | {_fmt(row["median"])} | '
                    f'{_fmt(row["p90"])} | {row["cap"] or "-"} | {_fmt(row.get("days_to_cap"))} |')
 
     out += ['', '### Critical path to `Required checks passed`', '',

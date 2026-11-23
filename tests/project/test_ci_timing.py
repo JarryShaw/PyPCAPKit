@@ -15,14 +15,17 @@ this tier has no network and no token:
   The run listing and the job listings are real responses from 2026-10-05 and
   2026-10-09, trimmed to the fields the script reads; run 37323913186 is the push
   run that reads ``cancelled`` because its ``protocols`` ordering job hit the 45-minute
-  cap. ``artifacts-37998639834.json`` is that push run's real listing with two
-  **synthetic** entries added, ``junit-unit-3.13`` and an expired ``junit-unit-3.14``:
-  the run predates the upload, so it has no JUnit artifact of its own.
-  ``junit-unit-3.13.xml`` is hand-written in pytest's JUnit format, with times chosen
-  to trip the test-level checks, and the workflow file is an excerpt. Expected
-  figures are re-derived from the fixtures here rather than restated.
+  cap, a leg split by the newest push run. ``artifacts-37998639834.json`` is that push
+  run's real listing with two **synthetic** entries added, ``junit-unit-3.13`` and an
+  expired ``junit-unit-3.14``: the run predates the upload, so it has no JUnit
+  artifact of its own. ``junit-unit-3.13.xml`` is hand-written in pytest's JUnit
+  format, with times chosen to trip the test-level checks, and the workflow file is
+  an excerpt. Expected figures are re-derived from the fixtures here rather than
+  restated.
 * :class:`TestThresholds` -- every threshold, at its boundary, on a report held
   just short of all of them.
+* :class:`TestNoLongerRun` -- no cap finding on a job the workflow no longer runs
+  (#2904), and the runs that decide which those are.
 * :class:`TestTimingArtifacts` and :class:`TestReviewWorkflow` -- what the script
   relies on in :file:`unit-tests.yml` (artifact names, the coverage leg, upload
   steps that cannot fail a required leg) and the review workflow's own triggers and
@@ -590,9 +593,7 @@ class TestEndToEnd(unittest.TestCase):
                     if row['job'] == job['name'] and row['name'] == cut['name'])
         self.assertEqual(cut['conclusion'], 'cancelled')
         self.assertAlmostEqual(step['max'], span(cut['started_at'], cut['completed_at']))
-        self.assertIn('H1', self.ids())
-        self.assertIn('::error title=CI timing H1::', self.stdout)
-        self.assertEqual(self.status, ci_timing.EXIT_HARD)
+        # Whether it fires is TestNoLongerRun's: the leg was split before the newest push.
 
     def test_a_superseded_job_is_not_measured(self) -> 'None':
         """The cancelled pull-request run's ``Python 3.14`` stopped at 6 minutes, not at its cap."""
@@ -715,7 +716,7 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(refs, [run['head_sha'] for run in all_runs() if run['event'] == 'push'])
 
     def test_the_summary_says_what_was_read(self) -> 'None':
-        self.assertIn('- **HARD H1:**', self.summary)
+        self.assertIn('- **WARN W9:**', self.summary)
         self.assertIn('| pull_request | 2 | 1 | 1 |', self.summary)
         self.assertIn('unit-tests.yml 4 of 4 (2026-10-05T14:20Z to 2026-10-09T22:57Z)', self.summary)
         self.assertEqual(self.report['window']['read']['unit-tests.yml'],
@@ -747,6 +748,162 @@ class TestEndToEnd(unittest.TestCase):
         notes = ci_timing.analyse(data)['notes']
         self.assertEqual(len(notes), 1)
         self.assertIn('moved from 40 to 45', notes[0])
+
+
+class _Relisted(FakeAPI):
+    """Serves :data:`PUSH_RUN`'s jobs passed through ``change``, a function of the list."""
+
+    def __init__(self, change: 'Callable[[list[dict]], list[dict]]') -> 'None':
+        super().__init__()
+        self.change = change
+
+    def __call__(self, url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
+        body, headers = super().__call__(url, accept)
+        if urllib.parse.urlsplit(url).path.endswith(f'/runs/{PUSH_RUN}/attempts/1/jobs'):
+            page = json.loads(body)
+            page['jobs'] = self.change(page['jobs'])
+            body = json.dumps(page).encode()
+        return body, headers
+
+
+def listed(number: 'int', event: 'str', day: 'int', names: 'Iterable[str]',
+           conclusion: 'str' = 'success', ran: 'bool' = True) -> 'dict':
+    """A run created at noon on 2026-10-``day`` listing a 30-minute job per name."""
+    begun, ended = f'2026-10-{day:02d}T12:00:00Z', f'2026-10-{day:02d}T12:30:00Z'
+    return {'id': number, 'event': event, 'conclusion': conclusion, 'created_at': begun, 'jobs': [
+        {'name': name, 'conclusion': 'success' if ran else 'skipped', 'run_attempt': 1,
+         'runner_name': 'GitHub Actions 1' if ran else '', 'started_at': begun, 'completed_at': ended}
+        for name in names]}
+
+
+class TestNoLongerRun(unittest.TestCase):
+    """#2904: no cap finding fires on a job its workflow no longer runs.
+
+    A leg's old name still matches its job's template, so the names come from the
+    newest runs' job lists. Recorded: run 37323913186's ``protocols`` ordering leg
+    was split before the newest push, 37998639834, ran ``protocols (rest)``.
+
+    """
+
+    OLD = 'Plain unittest ordering (protocols)'
+    SPLIT = 'Plain unittest ordering (protocols (rest))'
+    #: #2899's split, against the real unit-tests.yml.
+    PYPY = ('Python pypy3.11', 'Python pypy3.12')
+    PARTS = tuple(f'{name} (part {part})' for name in PYPY for part in (1, 2))
+    LIVE = 'Python 3.14'
+
+    @classmethod
+    def setUpClass(cls) -> 'None':
+        cls.specs = ci_timing.parse_workflow(UNIT_TESTS.read_text(encoding='utf-8'))
+
+    def run_on(self, api: 'FakeAPI') -> 'tuple[int, str, dict, str]':
+        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1), \
+                mock.patch.object(ci_timing, 'COVERAGE_JOB', FIXTURE_COVERAGE_JOB), \
+                mock.patch.object(ci_timing, 'PAIRED_JOBS', FIXTURE_PAIRED_JOBS):
+            return run_main(api=api)
+
+    def gone(self, *runs: 'dict', specs: 'Optional[list[dict]]' = None) -> 'set[str]':
+        return ci_timing.no_longer_run(list(runs), self.specs if specs is None else specs)
+
+    @unittest.skipUnless(HAS_LXML, NO_LXML)
+    def test_a_split_leg_fires_nothing_and_is_marked(self) -> 'None':
+        status, _, report, summary = self.run_on(FakeAPI())
+        row = next(row for row in report['jobs'] if row['name'] == self.OLD)
+        steps = [step for step in report['steps'] if step['job'] == self.OLD]
+        # Past H1's and H2's share, so only being no longer run keeps them quiet.
+        self.assertGreaterEqual(row['p90'], ci_timing.HARD_CAP_SHARE * row['cap'])
+        self.assertTrue(any(step['cap'] and step['p90'] >= ci_timing.HARD_CAP_SHARE * step['cap']
+                            for step in steps))
+        ids = [item['id'] for item in report['findings']]
+        for code in ('H1', 'H2', 'H4'):
+            self.assertNotIn(code, ids)
+        self.assertEqual(status, 0)
+        self.assertFalse(row['still_run'])
+        self.assertEqual({step['still_run'] for step in steps}, {False})
+        self.assertEqual({row['name'] for row in report['jobs'] if not row['still_run']}, {self.OLD})
+        marked = f'{self.OLD} *(no longer run)*'
+        self.assertIn(f'| unit-tests.yml | {marked} | 1 |', summary)
+        self.assertIn(f'| {marked} | Run tests/protocols ', summary)
+        self.assertNotIn(f'{self.SPLIT} *(no longer run)*', summary)
+        self.assertIn(f'No longer run, so judged by no cap finding (H1, H2, H4): unit-tests.yml: {self.OLD}',
+                      report['notes'])
+
+    @unittest.skipUnless(HAS_LXML, NO_LXML)
+    def test_a_leg_the_newest_push_still_runs_still_fires(self) -> 'None':
+        def unsplit(jobs: 'list[dict]') -> 'list[dict]':
+            return [{**job, 'name': self.OLD} if job['name'] == self.SPLIT else job for job in jobs]
+
+        status, stdout, report, _ = self.run_on(_Relisted(unsplit))
+        self.assertTrue(next(row for row in report['jobs'] if row['name'] == self.OLD)['still_run'])
+        self.assertEqual({item['id'] for item in report['findings'] if item['level'] == 'hard'}, {'H1', 'H2'})
+        self.assertIn('::error title=CI timing H1::', stdout)
+        self.assertEqual(status, ci_timing.EXIT_HARD)
+
+    @unittest.skipUnless(HAS_LXML, NO_LXML)
+    def test_a_job_the_newest_push_did_not_run_is_judged_on_an_older_one(self) -> 'None':
+        def drop(jobs: 'list[dict]') -> 'list[dict]':
+            return [job for job in jobs if job['name'] != self.SPLIT]
+
+        status, _, report, _ = self.run_on(_Relisted(drop))
+        self.assertTrue(next(row for row in report['jobs'] if row['name'] == self.OLD)['still_run'])
+        self.assertIn('H1', [item['id'] for item in report['findings']])
+        self.assertEqual(status, ci_timing.EXIT_HARD)
+
+    def test_a_renamed_leg_is_gone_and_its_successors_are_not(self) -> 'None':
+        before = listed(1, 'push', 5, self.PYPY + (self.LIVE,))
+        after = listed(2, 'push', 8, self.PARTS + (self.LIVE,))
+        self.assertEqual(self.gone(before, after), set(self.PYPY))
+        # Every old name still matches the template, which is why the runs decide.
+        self.assertEqual({ci_timing.match_job(self.specs, name)['id'] for name in self.PYPY}, {'test'})
+        self.assertEqual(self.gone(before), set())
+
+    def test_a_light_pull_request_exempts_nothing(self) -> 'None':
+        """A newer pull-request run of the ``latest`` leg alone says nothing about the rest."""
+        light = listed(3, 'pull_request', 9, (self.LIVE,))
+        self.assertEqual(self.gone(listed(2, 'push', 8, self.PARTS + (self.LIVE,)), light), set())
+
+    def test_a_name_listed_after_the_newest_finished_run_stays(self) -> 'None':
+        """A pull request created after the merge, or a superseded push, runs the new legs."""
+        before = listed(1, 'push', 5, self.PYPY + (self.LIVE,))
+        for later in (listed(2, 'pull_request', 8, self.PARTS),
+                      listed(2, 'push', 8, self.PARTS, conclusion='cancelled')):
+            with self.subTest(event=later['event']):
+                self.assertEqual(self.gone(before, later), set())
+
+    def test_a_leg_of_one_event_is_judged_by_that_event(self) -> 'None':
+        compat = ci_timing.parse_workflow('jobs:\n  compat:\n    name: Compat Python ${{ matrix.python-version }}\n')
+        runs = (listed(1, 'schedule', 2, ('Compat Python 3.15',)),
+                listed(2, 'schedule', 4, ('Compat Python 3.16', 'Compat Python 3.14')),
+                listed(3, 'push', 8, ('Compat Python 3.14',)))
+        self.assertEqual(self.gone(*runs, specs=compat), {'Compat Python 3.15'})
+
+    def test_a_job_no_finished_run_ran_keeps_its_names(self) -> 'None':
+        old = listed(1, 'pull_request', 5, self.PYPY)
+        skipped = listed(2, 'push', 8, (self.LIVE,), ran=False)
+        self.assertEqual(self.gone(old, skipped), set())
+        self.assertEqual(self.gone(old, listed(2, 'push', 8, (self.LIVE,))), set(self.PYPY))
+        self.assertEqual(self.gone(listed(1, 'push', 5, self.PYPY), listed(2, 'push', 8, self.PARTS), specs=[]),
+                         set())
+
+    def test_no_cap_finding_on_a_row_no_longer_run(self) -> 'None':
+        def fired(still_run: 'Optional[bool]') -> 'list[str]':
+            report, baseline = quiet()
+            report['jobs'][0].update(p90=30.0, days_to_cap=0.0)
+            report['steps'][0].update(p90=15.0, days_to_cap=0.0)
+            if still_run is not None:
+                report['jobs'][0]['still_run'] = report['steps'][0]['still_run'] = still_run
+            return [item['id'] for item in ci_timing.evaluate(report, baseline)]
+
+        self.assertEqual(fired(False), [])
+        # A row without the flag, as a baseline from before it has, is judged.
+        for flag in (True, None):
+            with self.subTest(still_run=flag):
+                self.assertEqual(fired(flag), ['H1', 'H4', 'H2', 'H4'])
+
+    def test_the_rule_is_documented(self) -> 'None':
+        page = ' '.join(DOC.read_text(encoding='utf-8').split())
+        self.assertIn('No cap finding fires on a job the workflow no longer runs', page)
+        self.assertIn(ci_timing._job_cell({'name': '', 'still_run': False}, 'name').strip(), page)
 
 
 class TestSampling(unittest.TestCase):
