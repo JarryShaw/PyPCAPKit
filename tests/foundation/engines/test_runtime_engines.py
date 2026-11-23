@@ -476,7 +476,9 @@ class ThirdPartyEngineTests(unittest.TestCase):
             clean_engine.run()
         self.assertFalse(callable(getattr(clean_extractor._vfunc, '__name__', None)))
 
-        extractor, sink = make_extractor(_flag_f=True)
+        # NOTE: ``run`` turns reassembly off, as PyShark ships no adapter, so each
+        # extractor reading a frame without it has ``_flag_r`` off too.
+        extractor, sink = make_extractor(_flag_f=True, _flag_r=False)
         engine = PyShark(extractor)
         engine._extmp = capture
         with mock.patch('pcapkit.toolkit.pyshark.packet2dict', return_value={'packet': True}):
@@ -492,7 +494,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
         engine.close()
         self.assertTrue(capture.closed)
 
-        stream_mode, stream_sink = make_extractor(_flag_f=False, _flag_t=True, _flag_d=False)
+        stream_mode, stream_sink = make_extractor(_flag_f=False, _flag_r=False, _flag_t=True, _flag_d=False)
         engine = PyShark(stream_mode)
         engine._extmp = capture
         with mock.patch('pcapkit.toolkit.pyshark.packet2dict', return_value={'packet': True}):
@@ -501,7 +503,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
         self.assertEqual(stream_sink.records[-1][1], 'Frame 1')
         stream_mode._tracers.tcp.assert_not_called()
 
-        disabled, _ = make_extractor(_flag_q=True, _flag_t=False, _flag_d=False)
+        disabled, _ = make_extractor(_flag_q=True, _flag_r=False, _flag_t=False, _flag_d=False)
         engine = PyShark(disabled)
         engine._extmp = capture
         with mock.patch('pcapkit.toolkit.pyshark.packet2dict', return_value={'packet': True}):
@@ -509,7 +511,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                 self.assertIs(engine.read_frame(), capture.packet)
         disabled._tracers.tcp.assert_not_called()
 
-        no_tcp, _ = make_extractor(_flag_q=True, _flag_t=True, _flag_d=False, _tcp=False)
+        no_tcp, _ = make_extractor(_flag_q=True, _flag_r=False, _flag_t=True, _flag_d=False, _tcp=False)
         engine = PyShark(no_tcp)
         engine._extmp = capture
         with mock.patch('pcapkit.toolkit.pyshark.packet2dict', return_value={'packet': True}):

@@ -91,7 +91,7 @@ class TestPySharkNonPacketRecords(unittest.TestCase):
 
         stream = iter(records)
         extractor = types.SimpleNamespace(_frnum=0, _vfunc=lambda e, f: None, _flag_q=True,
-                                          _flag_t=False, _flag_d=True, _frame=[])
+                                          _flag_r=False, _flag_t=False, _flag_d=True, _frame=[])
         engine = PyShark.__new__(PyShark)  # skip __init__, which imports pyshark
         engine._extractor = extractor
         engine._extmp = types.SimpleNamespace(next=lambda: next(stream))

@@ -20,10 +20,11 @@ from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 __all__ = ['PCAP_CT']
 
 if TYPE_CHECKING:
-    from typing import Iterator, Optional, Protocol, Tuple, Type
+    from typing import Any, Callable, Iterator, Optional, Protocol, Tuple, Type
 
     from pcap import pcap as Handle
 
+    from pcapkit.corekit.module import ModuleDescriptor
     from pcapkit.foundation.extraction import Extractor
 
     class _PCAPCTPackage(Protocol):
@@ -85,8 +86,9 @@ class PCAP_CT(EngineBase['RawFrame']):
 
     * returns each frame as a ``(timestamp, bytes)`` :obj:`tuple` rather than as
       a parsed packet object, and
-    * disables both reassembly and flow tracing, warning as it does so, since
-      neither can be derived without an IP or TCP layer to read.
+    * ships no reassembly or flow tracing adapter, since neither can be derived
+      without an IP or TCP layer to read, so it disables both, warning as it
+      does so, unless one is registered on it (see :attr:`__reassembly__`).
 
     It also requires the input to be a real file on disk, because
     :c:func:`pcap_open_offline` opens by *name* -- there is no way to hand
@@ -143,6 +145,18 @@ class PCAP_CT(EngineBase['RawFrame']):
 
     #: Distribution this engine drives.
     __engine_distribution__ = _pcap_backend.PCAP_CT
+
+    #: Reassembly adapters, each called as
+    #: ``adapter(packet, timestamp, data_link=link, count=n)`` on the frame's
+    #: octets and timestamp, the savefile's link type and its frame number. None
+    #: ships, as |pcap|_ dissects nothing; one registered with
+    #: :meth:`register_reassembly` is fed.
+    __reassembly__ = {}  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
+    #: Flow tracing adapters, each called as :attr:`__reassembly__`'s are. None
+    #: ships, for the same reason; one registered with
+    #: :meth:`register_traceflow` is fed.
+    __traceflow__ = {}  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
     # Class methods.
@@ -298,9 +312,9 @@ class PCAP_CT(EngineBase['RawFrame']):
                 * if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                   is provided, as the pcap-ct engine does not parse with :mod:`pcapkit`'s
                   own protocol implementations.
-                * if reassembly and/or flow tracing is enabled, as the pcap-ct
-                  engine performs no protocol dissection and so cannot support
-                  either operation.
+                * if a reassembler with no adapter in :attr:`__reassembly__`, or
+                  a flow tracer with none in :attr:`__traceflow__`, is enabled;
+                  this engine ships none, as it performs no protocol dissection.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
@@ -361,8 +375,8 @@ class PCAP_CT(EngineBase['RawFrame']):
                                   f'but {ext._ifnm!r} is not one; libpcap opens savefiles '
                                   'by name and cannot read an in-memory stream')
 
-        # NOTE: no entry in ``__reassembly__`` or ``__traceflow__``, so reassembly and flow tracing
-        # are both disabled, each with a warning.
+        # NOTE: no shipped entry in ``__reassembly__`` or ``__traceflow__``, so each is disabled
+        # with a warning unless an adapter is registered.
         self._setup_reassembly()
         self._setup_traceflow()
 
@@ -424,8 +438,11 @@ class PCAP_CT(EngineBase['RawFrame']):
                 ofile = ext._ofile
             ext._offmt = ofile.kind
 
-        # NOTE: reassembly is disabled in ``run``, so there is deliberately no bookkeeping for it
-        # here; flow tracing feeds any adapter registered in ``__traceflow__``.
+        # record fragments
+        if ext._flag_r:
+            self._reassemble(timestamp, packet, timestamp, data_link=self._dlink, count=ext._frnum)
+
+        # trace flows
         if ext._flag_t:
             self._traceflow(packet, timestamp, data_link=self._dlink, count=ext._frnum)
 

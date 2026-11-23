@@ -80,11 +80,14 @@ class EngineNamePrefixTests(unittest.TestCase):
             toolkit = importlib.import_module('pcapkit.toolkit.%s' % module)
             suffix = NO_DISSECTION[module]
             for name, call, description in (
-                ('ipv4_reassembly', lambda t=toolkit: t.ipv4_reassembly(b'raw', count=1),
+                ('ipv4_reassembly', lambda t=toolkit: t.ipv4_reassembly(
+                    b'raw', 1.0, data_link=LinkType.ETHERNET, count=1),
                  'IPv4 reassembly is not supported'),
-                ('ipv6_reassembly', lambda t=toolkit: t.ipv6_reassembly(b'raw', count=1),
+                ('ipv6_reassembly', lambda t=toolkit: t.ipv6_reassembly(
+                    b'raw', 1.0, data_link=LinkType.ETHERNET, count=1),
                  'IPv6 reassembly is not supported'),
-                ('tcp_reassembly', lambda t=toolkit: t.tcp_reassembly(b'raw', count=1),
+                ('tcp_reassembly', lambda t=toolkit: t.tcp_reassembly(
+                    b'raw', 1.0, data_link=LinkType.ETHERNET, count=1),
                  'TCP reassembly is not supported'),
                 ('tcp_traceflow', lambda t=toolkit: t.tcp_traceflow(
                     b'raw', 1.0, data_link=LinkType.ETHERNET, count=1),
@@ -100,11 +103,12 @@ class EngineNamePrefixTests(unittest.TestCase):
 
     def test_pcap_ct_is_named_the_way_its_engine_names_itself(self) -> None:
         """The reported regression: the engine is ``PCAP_CT``, not ``pcap-ct``."""
+        from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.pcap_ct import ipv4_reassembly
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with self.assertRaises(UnsupportedCall) as caught:
-            ipv4_reassembly(b'raw', count=1)
+            ipv4_reassembly(b'raw', 1.0, data_link=LinkType.ETHERNET, count=1)
         self.assertEqual(str(caught.exception).split(':')[0], 'PCAP_CT')
         self.assertEqual(engine_name('pcap_ct'), 'PCAP_CT')
 

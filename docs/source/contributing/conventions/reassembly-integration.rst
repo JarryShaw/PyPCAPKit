@@ -112,10 +112,11 @@ are the parser methods the rule allows.
 **Point 2 holds through the engines, not through one** :mod:`pcapkit.toolkit`
 **helper.** Each engine's :attr:`EngineBase.__reassembly__
 <pcapkit.foundation.engines.engine.EngineBase.__reassembly__>` maps every reassembler it
-supports to the toolkit adapter that feeds it, written by
+supports to the adapter that feeds it: a toolkit one it ships, or one registered with
 :meth:`EngineBase.register_reassembly
-<pcapkit.foundation.engines.engine.EngineBase.register_reassembly>`, so the maps together
-declare which engines support a reassembler. An enabled reassembler with no entry is
+<pcapkit.foundation.engines.engine.EngineBase.register_reassembly>`. So the maps together
+declare which engines support a reassembler, and registering an adapter on an engine
+makes it support one. An enabled reassembler with no entry is
 disabled with an :class:`~pcapkit.utilities.warnings.AttributeWarning`, and an engine
 with no entries at all, as :mod:`pcapkit.foundation.engines.pyshark`, disables
 reassembly (:issue:`2814`). DTLS has entries on the default engine alone.
@@ -127,6 +128,18 @@ supports to its toolkit adapter, written by :meth:`EngineBase.register_traceflow
 with no entry is dropped with an :class:`~pcapkit.utilities.warnings.AttributeWarning`,
 and an engine with no entries, as :mod:`pcapkit.foundation.engines.pypcap` and
 :mod:`pcapkit.foundation.engines.pcap_ct`, disables flow tracing (:issue:`2843`).
+
+**Every engine feeds what its maps hold.** Each one's ``read_frame`` calls
+:meth:`EngineBase._reassemble <pcapkit.foundation.engines.engine.EngineBase._reassemble>`
+and :meth:`EngineBase._traceflow <pcapkit.foundation.engines.engine.EngineBase._traceflow>`,
+so an adapter registered on an engine that ships none, as PyShark, PyPCAP and pcap-ct
+do for reassembly, is fed rather than refused: registering is how an engine gains
+support (:issue:`2893`).
+Each engine declares both maps itself, empty or not, and documents there how it calls
+an adapter.
+:file:`tests/foundation/engines/test_reassembly_feed_2893_unit.py` fails on an engine
+whose ``read_frame`` leaves either uncalled, or that inherits either map rather than
+declaring it.
 
 **Point 3 holds for every engine.**
 :func:`~pcapkit.foundation.analysis.ip.ip_datagram` parses a reassembled IPv4 or IPv6

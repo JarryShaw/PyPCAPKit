@@ -73,12 +73,14 @@ offers says so rather than quietly doing less, unless its row says otherwise:
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | Gap, and how it is surfaced                                   |
 +=================================================================+===============================================================+
-| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly, and no trace ``analyze``, since it reports     |
-|                                                                 | dissected fields rather than octets -- each disabled with an  |
+| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly unless an adapter is registered, and no trace   |
+|                                                                 | ``analyze``, since it reports dissected fields rather than    |
+|                                                                 | octets -- each disabled with an                               |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`              | no protocol dissection at all, hence no reassembly and no     |
-|                                                                 | flow tracing -- both disabled with an                         |
+|                                                                 | flow tracing unless an adapter is registered -- both          |
+|                                                                 | otherwise disabled with an                                    |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`; PCAP   |
 |                                                                 | savefiles on disk only, otherwise                             |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError` /            |
@@ -87,7 +89,8 @@ offers says so rather than quietly doing less, unless its row says otherwise:
 | :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`            | the same gaps as                                              |
 |                                                                 | :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` above --   |
 |                                                                 | it reads the same interface, so no dissection, no reassembly  |
-|                                                                 | and no flow tracing, and PCAP savefiles on disk only          |
+|                                                                 | and no flow tracing unless an adapter is registered, and PCAP |
+|                                                                 | savefiles on disk only                                        |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | no IPv6 decoder, hence no IPv6 reassembly -- disabled with an |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
@@ -249,9 +252,9 @@ separate projects, with different install requirements and interpreter coverage:
 +---------------------------------------------------------------+---------------------+-------------------+---------------------------------------------------+
 
 Neither engine dissects anything, so both have the same gaps -- **no reassembly
-and no flow tracing, whichever is installed** -- a property of
-:manpage:`libpcap(3)` rather than of the distribution. Pick on availability, not
-on features.
+and no flow tracing unless an adapter is registered, whichever is installed** -- a
+property of :manpage:`libpcap(3)` rather than of the distribution. Pick on
+availability, not on features.
 
 .. warning::
 

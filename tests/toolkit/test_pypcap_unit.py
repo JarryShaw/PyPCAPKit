@@ -54,9 +54,12 @@ class PyPCAPToolkitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         for name, call in (
-            ('ipv4_reassembly', lambda: ipv4_reassembly(b'raw', count=1)),
-            ('ipv6_reassembly', lambda: ipv6_reassembly(b'raw', count=1)),
-            ('tcp_reassembly', lambda: tcp_reassembly(b'raw', count=1)),
+            ('ipv4_reassembly', lambda: ipv4_reassembly(b'raw', 1.0,
+                                                        data_link=LinkType.ETHERNET, count=1)),
+            ('ipv6_reassembly', lambda: ipv6_reassembly(b'raw', 1.0,
+                                                        data_link=LinkType.ETHERNET, count=1)),
+            ('tcp_reassembly', lambda: tcp_reassembly(b'raw', 1.0,
+                                                      data_link=LinkType.ETHERNET, count=1)),
             ('tcp_traceflow', lambda: tcp_traceflow(b'raw', 1.0,
                                                     data_link=LinkType.ETHERNET, count=1)),
         ):
