@@ -198,7 +198,7 @@ class Dumper(DumperBase):
         from pcapkit.foundation.traceflow.traceflow import \
             TraceFlow  # pylint: disable=import-outside-toplevel
 
-        TraceFlow.register_dumper(fmt, cls, ext)
+        TraceFlow.register_dumper(fmt, cls, ext=ext)
 
         return super().__init_subclass__()
 

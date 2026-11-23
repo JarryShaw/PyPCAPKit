@@ -168,10 +168,10 @@ class RaisingCallbackTests(unittest.TestCase):
         cls, kwargs, _, steps = scenario()
         if dropping:
             class Dropping(cls):  # type: ignore[valid-type,misc]
-                def submit(self, buf: 'Any', *, bufid: 'Any', timeout: bool = False,  # type: ignore[override]
+                def submit(self, buf: 'Any', *, bufid: 'Any', expired: bool = False,  # type: ignore[override]
                            **kw: 'Any') -> 'list[Any]':
                     kw.pop('store', None)
-                    return super().submit(buf, bufid=bufid, timeout=timeout, **kw)
+                    return super().submit(buf, bufid=bufid, expired=expired, **kw)
 
             cls = Dropping
         reasm = cls(**kwargs)
@@ -184,7 +184,7 @@ class RaisingCallbackTests(unittest.TestCase):
                 fired.append(True)
                 raise Refused(target)
 
-        type(reasm).register(callback)
+        type(reasm).register_callback(callback)
         self.addCleanup(type(reasm).__callback_fn__.remove, callback)
 
         for (number, step) in enumerate(steps):
@@ -354,7 +354,7 @@ class RaisingCallbackTests(unittest.TestCase):
                    for datagram in datagrams):
                 raise Refused()
 
-        IPv6.register(callback)
+        IPv6.register_callback(callback)
         self.addCleanup(IPv6.__callback_fn__.remove, callback)
         reasm = IPv6()
         for (num, ts) in ((1, T0), (2, T0 + 1), (3, T0 + 50)):

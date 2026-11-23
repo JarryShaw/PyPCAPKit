@@ -97,7 +97,7 @@ class RaisingCallbackTests(unittest.TestCase):
         recorder = self.opened(root)
         handles = recorder.__enter__()  # pylint: disable=unnecessary-dunder-call
         self.addCleanup(recorder.__exit__, None, None, None)
-        trace = TCP(root, fmt, byteorder='little', **kwargs)
+        trace = TCP(fout=root, format=fmt, byteorder='little', **kwargs)
 
         closes = collections.Counter()  # type: collections.Counter[str]
         real = trace._foutio.close
@@ -234,7 +234,7 @@ class RaisingCallbackTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         packets = self.packets()
-        reference = TCP(tempfile.mkdtemp(dir=self.tmpdir.name), fmt, byteorder='little')
+        reference = TCP(fout=tempfile.mkdtemp(dir=self.tmpdir.name), format=fmt, byteorder='little')
         for packet in packets:
             reference(packet)
         reference.finish()

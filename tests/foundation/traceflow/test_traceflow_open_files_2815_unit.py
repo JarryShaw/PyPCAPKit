@@ -186,7 +186,7 @@ class TraceOpenFileTests(unittest.TestCase):
         recorder = self.opened(root)
         handles = recorder.__enter__()  # pylint: disable=unnecessary-dunder-call
         self.addCleanup(recorder.__exit__, None, None, None)
-        trace = TCP(root, 'json', **kwargs)
+        trace = TCP(fout=root, format='json', **kwargs)
         trace(self.packet(1, 40000, syn=True))
         trace(self.packet(2, 40001, syn=True))
         self.assertEqual(len(trace._fopen), 2)

@@ -198,7 +198,7 @@ class Index(DeferredPacket, Info):
     reverse: 'tuple[int, ...]'
     #: Reassembled datagrams of the conversation's **application layer**, one
     #: per direction and acknowledgement number, or :data:`None` when the tracer
-    #: was not asked for it (``analyse=False``, the default).
+    #: was not asked for it (``analyze=False``, the default).
     #:
     #: Reassembled on the first read, not when the flow is finalised, and each
     #: datagram's own

@@ -50,7 +50,7 @@ class TestTraceFlowLabelUnique(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'json', bidirectional=bidirectional)
+            trace = TCP(fout=tempdir, format='json', bidirectional=bidirectional)
             for packet in packets:
                 trace.dump(packet)
             trace.finish()

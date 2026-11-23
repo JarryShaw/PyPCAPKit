@@ -271,7 +271,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         Arguments:
             buf: buffer dict of reassembled packets
             **kwargs: arbitrary keyword arguments; implementations accept
-                ``timeout``, set when the buffer is being submitted because
+                ``expired``, set when the buffer is being submitted because
                 :meth:`expire` abandoned it rather than because it completed or
                 the capture ended, and ``store``, set when the buffer has left
                 :attr:`_buffer` for good, which they pass on to :meth:`_notify`
@@ -283,6 +283,8 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
            run; :meth:`_release` stores what one dropping ``store`` returns,
            after its callbacks. :meth:`expire` stores what it returns, so a
            caller must not also extend :attr:`_dtgram` with it (:issue:`2856`).
+           The ``timeout`` flag is renamed ``expired``, with no alias, as
+           ``timeout`` is a number of seconds everywhere else (:issue:`2839`).
 
         """
 
@@ -416,7 +418,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
                          '(ICMP Time Exceeded owed: %s)', self.name, bufid,
                          timestamp - cast('Any', buffer).timestamp, self._timeout, owed_icmp)
 
-            ret.extend(self._release(buffer, bufid=bufid, timeout=True))
+            ret.extend(self._release(buffer, bufid=bufid, expired=True))
         return ret
 
     # advance the capture clock
@@ -529,7 +531,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
     # register callback function
     @classmethod
-    def register(cls, callback: 'CallbackFn', *, index: 'Optional[int]' = None) -> 'None':
+    def register_callback(cls, callback: 'CallbackFn', *, index: 'Optional[int]' = None) -> 'None':
         """Register callback function.
 
         Arguments:
@@ -546,7 +548,11 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
         .. versionchanged:: 1.7.0
 
-           A callback that raises no longer stops the ones after it (:issue:`2881`).
+           Renamed from ``register``, with no alias, to match
+           :meth:`TraceFlow.register_callback
+           <pcapkit.foundation.traceflow.traceflow.TraceFlow.register_callback>`
+           (:issue:`2839`). A callback that raises no longer stops the ones after
+           it (:issue:`2881`).
 
         """
         if index is not None:

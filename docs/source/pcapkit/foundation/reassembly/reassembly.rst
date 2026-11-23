@@ -62,7 +62,7 @@ follow :rfc:`791` and :rfc:`815`.
    .. automethod:: fetch
    .. automethod:: index
    .. automethod:: run
-   .. automethod:: register
+   .. automethod:: register_callback
 
    .. autoattribute:: __callback_fn__
       :no-value:

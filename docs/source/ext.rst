@@ -769,8 +769,8 @@ A sketch of an IPv4 reassembly class, modelled on
            self._release(self._buffer.pop(info.bufid), bufid=info.bufid)
 
        # NOTE: Convert a complete ``Buffer`` into ``Datagram`` instances.
-       # ``expire()`` passes ``timeout`` as well, and stores what it returns.
-       def submit(self, buf: 'Buffer', *, bufid: 'BufferID', timeout: 'bool' = False,
+       # ``expire()`` passes ``expired`` as well, and stores what it returns.
+       def submit(self, buf: 'Buffer', *, bufid: 'BufferID', expired: 'bool' = False,
                   store: 'bool' = False) -> 'list[Datagram]':
            datagram = ...  # list of ``Datagram`` instances
 

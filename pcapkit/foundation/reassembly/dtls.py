@@ -40,6 +40,10 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
+        timeout: reassembly timeout in seconds, on the capture's own clock;
+            :data:`None` selects
+            :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`,
+            which for DTLS disables expiry
 
     Note:
         The buffer ID is the UDP 4-tuple plus the DTLS **epoch**: the record
@@ -65,6 +69,11 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         # Fetch result:
         >>> result = dtls_reassembly.datagram
 
+    .. versionchanged:: 1.7.0
+
+       ``timeout`` is added, as the other reassembly classes take it; the
+       default still never expires a buffer (:issue:`2839`).
+
     """
     if TYPE_CHECKING:
         protocol: 'Type[DTLS_Protocol]'
@@ -85,14 +94,15 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
 
     # No ``__timeout__``: RFC 6347 section 4.2.3 and RFC 9147 section 5.5 give
     # DTLS handshake reassembly no timeout, so it inherits the base default,
-    # :data:`math.inf`, and a buffer is never expired by time. It is held until
-    # its messages complete or the capture ends.
+    # :data:`math.inf`, and by default a buffer is held until its messages
+    # complete or the capture ends.
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True) -> 'None':
+    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True,
+                 timeout: 'Optional[float]' = None) -> 'None':
         """Initialise packet reassembly.
 
         Args:
@@ -100,9 +110,15 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
                 reassembled as the tuple of its received runs; otherwise as
                 one contiguous payload, its holes zero-filled
             store: if store reassembled datagram in memory
+            timeout: reassembly timeout in seconds, on the capture's own clock;
+                :data:`None` selects
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`
+
+        Raises:
+            FieldValueError: If ``timeout`` is negative.
 
         """
-        super().__init__(strict=strict, store=store)
+        super().__init__(strict=strict, store=store, timeout=timeout)
 
         #: Optional[Datagram[_AT]]: The message, if any, that the most recent
         #: call to :meth:`reassembly` completed; see :attr:`last`.
@@ -155,8 +171,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         FO = info.fragment_offset   # Fragment Offset
         FL = info.fragment_length   # Fragment Length
 
-        # No time-based expiry: a buffer is held until its messages complete,
-        # so a fragment is never abandoned for arriving late.
+        # NOTE: only ``expire`` abandons a buffer, under a ``timeout`` the caller gave.
         buf = self._buffer.get(BUFID)
         if buf is None:
             buf = Buffer(msg={}, timestamp=info.timestamp)
@@ -211,7 +226,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             self._last = datagram
             self._notify([datagram], store=True)
 
-    def submit(self, buf: 'Buffer', *, bufid: 'BufferID', checked: 'bool' = False, timeout: 'bool' = False, store: 'bool' = False) -> 'list[Datagram[_AT]]':  # type: ignore[override] # pylint: disable=arguments-differ,unused-argument,line-too-long
+    def submit(self, buf: 'Buffer', *, bufid: 'BufferID', checked: 'bool' = False, expired: 'bool' = False, store: 'bool' = False) -> 'list[Datagram[_AT]]':  # type: ignore[override] # pylint: disable=arguments-differ,unused-argument,line-too-long
         """Submit reassembled payload.
 
         Arguments:
@@ -220,7 +235,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             checked: unused; every message's completeness is decided from its
                 own hole list, so there is nothing for a caller to assert
                 ahead of time
-            timeout: whether this buffer is being submitted because
+            expired: whether this buffer is being submitted because
                 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout
             store: whether ``buf`` has left
@@ -236,13 +251,17 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             :attr:`~pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT`
             or :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`.
 
+        .. versionchanged:: 1.7.0
+
+           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).
+
         """
         ret = []  # type: list[Datagram[_AT]]
         for (msn, frag) in buf.msg.items():
             if not frag.hdl:
                 completion = Completion.COMPLETE
             else:
-                completion = Completion.TIMEOUT if timeout else Completion.PARTIAL
+                completion = Completion.TIMEOUT if expired else Completion.PARTIAL
             ret.append(self._datagram_from_fragment(frag, bufid, msn, completion))
 
         return self._notify(ret, store=store)

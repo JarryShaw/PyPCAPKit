@@ -56,8 +56,8 @@ class ReassemblyBaseTests(unittest.TestCase):
 
         callback_calls: list[list[DummyDatagram]] = []
         leading_calls: list[list[DummyDatagram]] = []
-        DummyReassembly.register(callback_calls.append)
-        DummyReassembly.register(leading_calls.append, index=0)
+        DummyReassembly.register_callback(callback_calls.append)
+        DummyReassembly.register_callback(leading_calls.append, index=0)
 
         reasm = DummyReassembly()
         self.assertEqual(DummyReassembly.name, 'Dummy')

@@ -728,13 +728,13 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 TCP_Protocol._make_port(bufid[3], Enum_TransportProtocol.tcp))  # pylint: disable=protected-access
 
     def submit(self, buf: 'Buffer', *, bufid: 'BufferID',  # type: ignore[override] # pylint: disable=arguments-differ
-               timeout: 'bool' = False, store: 'bool' = False) -> 'list[Datagram]':
+               expired: 'bool' = False, store: 'bool' = False) -> 'list[Datagram]':
         """Submit reassembled payload.
 
         Arguments:
             buf: :term:`buffer <reasm.tcp.buffer>` dict of reassembled packets
             bufid: buffer identifier
-            timeout: whether this buffer is being submitted because
+            expired: whether this buffer is being submitted because
                 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout
             store: whether ``buf`` has left
@@ -779,6 +779,10 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             nothing here; it is recorded because "the same member the header
             carries" would be an overstatement of it.
 
+        .. versionchanged:: 1.7.0
+
+           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).
+
         """
         datagram = []  # type: list[Datagram] # reassembled datagram
 
@@ -810,7 +814,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             # Any gap entry counts, including one lying wholly outside ``raw``:
             # that is the range a split stream left out (see ``reassembly``).
             completion = Completion.COMPLETE if not buffer.gap else (
-                Completion.TIMEOUT if timeout else Completion.PARTIAL
+                Completion.TIMEOUT if expired else Completion.PARTIAL
             )
 
             # if this buffer is incomplete

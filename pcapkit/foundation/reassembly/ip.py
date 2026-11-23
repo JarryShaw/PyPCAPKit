@@ -484,7 +484,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         return None
 
     def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
-               checked: 'bool' = False, timeout: 'bool' = False,
+               checked: 'bool' = False, expired: 'bool' = False,
                overlap: 'bool' = False, store: 'bool' = False) -> 'list[Datagram[_AT]]':
         """Submit reassembled payload.
 
@@ -492,7 +492,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             buf: buffer dict of reassembled packets
             bufid: buffer identifier
             checked: buffer consistency checked flag
-            timeout: whether this buffer is being submitted because
+            expired: whether this buffer is being submitted because
                 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout, which is what
                 separates
@@ -518,6 +518,10 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             :attr:`protocol <pcapkit.foundation.reassembly.reassembly.Reassembly.protocol>`,
             deferred to its first read.
 
+        .. versionchanged:: 1.7.0
+
+           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).
+
         """
         TDL = buf.TDL
         RCVBT = buf.RCVBT
@@ -532,7 +536,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # How completely this datagram came out, and why it stopped. Derived once,
         # so the two branches below cannot disagree about it.
         completion = Completion.COMPLETE if flag else (
-            Completion.OVERLAP if overlap else Completion.TIMEOUT if timeout else Completion.PARTIAL
+            Completion.OVERLAP if overlap else Completion.TIMEOUT if expired else Completion.PARTIAL
         )
 
         # if datagram is incomplete

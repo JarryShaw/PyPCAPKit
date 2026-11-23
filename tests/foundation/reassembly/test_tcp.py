@@ -66,7 +66,7 @@ class TCPReassemblyTests(unittest.TestCase):
             __protocol_type__ = Analyzer
 
         callback_calls = []
-        TestTCP.register(callback_calls.append)
+        TestTCP.register_callback(callback_calls.append)
 
         reasm = TestTCP()
         # A SYN spends a sequence number of its own, so the payload it carries

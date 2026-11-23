@@ -141,12 +141,20 @@ class InterfaceCoreTests(unittest.TestCase):
             TraceFlow.__name__ = name
             return TraceFlow
 
-        for module_name, attr_name, klass in [
-            ('pcapkit.foundation.traceflow.tcp', 'TCP', make_trace('TCP')),
-        ]:
-            module = types.ModuleType(module_name)
-            setattr(module, attr_name, klass)
-            sys.modules[module_name] = module
+        class ModuleDescriptor:
+            def __init__(self, klass):
+                self.klass = klass
+
+        # NOTE: ``trace`` reaches every flow tracer through ``TraceFlow.registry`` (#2837),
+        # a descriptor resolved to its class.
+        traceflow_module = types.ModuleType('pcapkit.foundation.traceflow.traceflow')
+        traceflow_module.TraceFlow = type('TraceFlow', (), {
+            'registry': {'tcp': make_trace('TCP'), 'udp-lazy': ModuleDescriptor(make_trace('UDP'))},
+        })
+        sys.modules['pcapkit.foundation.traceflow.traceflow'] = traceflow_module
+        module_module = types.ModuleType('pcapkit.corekit.module')
+        module_module.ModuleDescriptor = ModuleDescriptor
+        sys.modules['pcapkit.corekit.module'] = module_module
 
         protocol_module = types.ModuleType('pcapkit.protocols.protocol')
 
@@ -202,6 +210,8 @@ class InterfaceCoreTests(unittest.TestCase):
         self.assertEqual(module.reassemble('IPv4', timeout=30.0).timeout, 30.0)
         self.assertEqual(type(module.reassemble('IPv4')).__name__, 'IPv4')
         self.assertEqual(type(module.reassemble('IPv6')).__name__, 'IPv6')
+        # NOTE: ``strict`` left out takes the class's default (#2837).
+        self.assertTrue(module.reassemble('IPv4').strict)
 
     def test_trace_dispatches_supported_protocols(self) -> None:
         module, ProtocolBase = self._load_module()
@@ -217,6 +227,7 @@ class InterfaceCoreTests(unittest.TestCase):
         result = module.trace(TCP, fout='class.pcap', format='pcap')
         self.assertEqual(type(result).__name__, 'TCP')
         self.assertEqual(result.kwargs['fout'], 'class.pcap')
+        self.assertEqual(type(module.trace('UDP-Lazy')).__name__, 'UDP')
 
     def test_interface_package_re_exports_core_symbols(self) -> None:
         module, _ = self._load_module()
@@ -231,7 +242,7 @@ class InterfaceCoreTests(unittest.TestCase):
         with self.assertRaises(module.FormatError):
             module.reassemble('UDP')
         with self.assertRaises(module.FormatError):
-            module.trace('UDP', fout=None, format=None)
+            module.trace('UDP')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
