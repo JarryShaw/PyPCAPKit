@@ -12,10 +12,12 @@ scheduled workflow's cron line of its failures, so no ``issues: write`` is neede
 
 What is read, and the rules for reading it:
 
-* **Every completed run in the window is listed**, for Unit Tests and for each of
+* **Every run in the window is listed**, for Unit Tests and for each of
   :data:`OTHER_WORKFLOWS`, one day per query: a filtered listing returns at most
   1,000 runs, and GitHub Pages alone completed 1,154 in the week to 2026-10-09. The
-  run counts, and so the superseded share, come from the whole listing.
+  query sets no ``status``, a filter that lags behind runs already completed
+  (#2906); a run still in flight has no ``conclusion`` yet and is dropped. The run
+  counts, and so the superseded share, come from the whole listing.
 * **Jobs are read for an evenly spaced sample** of those runs -- ``--runs`` per event
   for Unit Tests, ``--other-runs`` per other workflow -- so the sample spans the whole
   window rather than its newest days. The span read is printed with the report.
@@ -675,8 +677,9 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
 
     groups = []  # type: list[list[dict[str, Any]]]
     for workflow in (UNIT_TESTS,) + OTHER_WORKFLOWS:
+        # Unfiltered by status, which lags (#2906); a run in flight has no conclusion.
         listed = [run for run in list_runs(client, f'{base}/workflows/{workflow}/runs', since, now,
-                                           data['notes'], status='completed')
+                                           data['notes'])
                   if run.get('conclusion') in ('success', 'failure', 'cancelled')]
         if workflow == UNIT_TESTS:
             chosen = []  # type: list[dict[str, Any]]
