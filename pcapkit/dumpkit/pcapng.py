@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.dumpkit.common import DumperBase
 from pcapkit.protocols.misc.pcap.header.data import Header as Data_Header
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 from pcapkit.protocols.misc.pcapng.protocol import PCAPNG as P_PCAPNG
 from pcapkit.utilities.exceptions import FormatError
 

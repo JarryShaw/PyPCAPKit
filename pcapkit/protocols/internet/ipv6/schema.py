@@ -7,11 +7,17 @@
    ``pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length``, now
    :func:`pcapkit.corekit.schema.jumbogram.jumbo_payload_length` (:issue:`2674`).
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH``, now
+   :data:`pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` (:issue:`2883`).
+
 """
 
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
@@ -27,17 +33,6 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional
 
     from pcapkit.protocols.protocol import ProtocolBase
-
-#: The most octets a 16-bit IP length field declares, for IPv4's Total Length
-#: the header included (:rfc:`791#section-3.1`) and for IPv6's Payload Length
-#: the fixed header excluded (:rfc:`8200#section-3`); a longer IPv6 payload is
-#: a jumbogram, whose Jumbo Payload Length must exceed it (:rfc:`2675#section-2`).
-#: The one home of this value (:issue:`1739`), here so that the schema's
-#: jumbogram check and the protocol modules read the same one; it is fixed by
-#: the RFCs, so it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-IP_MAX_LENGTH = 65535
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict

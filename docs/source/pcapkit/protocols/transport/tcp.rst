@@ -147,9 +147,12 @@ Header Schemas
    ``pcapkit.protocols.schema.transport.tcp``, with no alias: the module moved here
    (:issue:`2534`).
 
-.. autodata:: pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN
+.. versionremoved:: 1.7.0
 
-.. autodata:: pcapkit.protocols.transport.tcp.schema.TCP_DATA_OFFSET_OCTET
+   ``pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN`` and
+   ``pcapkit.protocols.transport.tcp.schema.TCP_DATA_OFFSET_OCTET``, now
+   :data:`pcapkit.corekit.const.tcpheader.TCP_MIN_HEADER_LEN` and
+   :data:`pcapkit.corekit.const.tcpheader.TCP_DATA_OFFSET_OCTET` (:issue:`2883`).
 
 .. autoclass:: pcapkit.protocols.transport.tcp.schema.TCP
    :members:

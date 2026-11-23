@@ -1,10 +1,22 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for global header of PCAP file format"""
+"""header schema for global header of PCAP file format
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER``,
+   ``pcapkit.protocols.misc.pcap.header.schema.RESOLUTION`` and
+   ``pcapkit.protocols.misc.pcap.header.schema.RESOLUTION_PLACES``, now
+   :data:`pcapkit.corekit.const.capture.MAGIC_NUMBER`,
+   :data:`pcapkit.corekit.const.capture.RESOLUTION` and
+   :data:`pcapkit.corekit.const.capture.RESOLUTION_PLACES` (:issue:`2883`).
+
+"""
 
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.const.capture import MAGIC_NUMBER
 from pcapkit.corekit.fields.numbers import EnumField, Int32Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema import Schema, schema_final
@@ -13,9 +25,7 @@ from pcapkit.utilities.exceptions import ProtocolError
 __all__ = ['Header']
 
 if TYPE_CHECKING:
-    from typing import Any, Dict
-
-    from typing_extensions import Literal
+    from typing import Any
 
     from pcapkit.corekit.fields.numbers import NumberField
 
@@ -24,41 +34,6 @@ if TYPE_CHECKING:
 #:
 #: .. versionadded:: 1.5.0
 GLOBAL_HEADER_LEN = 24
-
-#: PCAP magic numbers, as the octets open the file, mapped to the byte order
-#: (``'big'`` or ``'little'``) and the timestamp resolution (:data:`True` for
-#: nanoseconds, :data:`False` for microseconds) each one declares. The one home
-#: of these values (:issue:`1739`); the format fixes them, so they are never
-#: configurable.
-#:
-#: .. versionadded:: 1.5.0
-MAGIC_NUMBER = {
-    b'\xa1\xb2\x3c\x4d': ('big', True),
-    b'\xa1\xb2\xc3\xd4': ('big', False),
-    b'\x4d\x3c\xb2\xa1': ('little', True),
-    b'\xd4\xc3\xb2\xa1': ('little', False),
-}  # type: Dict[bytes, tuple[Literal['big', 'little'], bool]]
-
-#: Units per second of a record's ``ts_usec`` field, keyed by the nanosecond
-#: flag its file's magic number declares (:data:`MAGIC_NUMBER`): microseconds,
-#: or nanoseconds. The one home of these values (:issue:`1739`); the format
-#: fixes them, so they are never configurable.
-#:
-#: .. versionadded:: 1.5.0
-RESOLUTION = {
-    False: 1_000_000,
-    True: 1_000_000_000,
-}  # type: Dict[bool, int]
-
-#: Decimal places of a ``ts_usec`` fraction at each resolution of
-#: :data:`RESOLUTION`, keyed the same way -- six for microseconds, nine for
-#: nanoseconds -- and derived from it, so that an epoch rounded to its file's
-#: resolution follows the one home (:issue:`1739`).
-#:
-#: .. versionadded:: 1.5.0
-RESOLUTION_PLACES = {
-    flag: len(str(units)) - 1 for flag, units in RESOLUTION.items()
-}  # type: Dict[bool, int]
 
 
 def magic_number_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':

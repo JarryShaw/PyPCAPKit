@@ -92,6 +92,13 @@ PURE = (
     ('pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
     ('pcapkit.protocols.schema', 'keep_short_read'),
     ('pcapkit.protocols.schema', 'replay_short_read'),
+    # #2883: format constants read beyond their own protocol, moved to
+    # pcapkit.corekit.const.
+    ('pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION'),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION_PLACES'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'DEFAULT_RESOLUTION'),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_NEXT_HEADER_OFFSET'),
+    ('pcapkit.protocols.transport.tcp.schema', 'TCP_DATA_OFFSET_OCTET'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -107,6 +114,17 @@ USED = (
     ('pcapkit.corekit.fields.ipaddress', '_reraise_as_field_value_error',
      'pcapkit.corekit.schema.ipaddress'),
     ('pcapkit.protocols.internet.ipv6.schema', 'jumbo_payload_length', 'pcapkit.corekit.schema.jumbogram'),
+    # #2883: the format constants the old modules still read.
+    ('pcapkit.protocols.misc.pcap.header.schema', 'MAGIC_NUMBER', 'pcapkit.corekit.const.capture'),
+    ('pcapkit.protocols.misc.pcap.frame.schema', 'RECORD_HEADER_LEN', 'pcapkit.corekit.const.capture'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'BYTE_ORDER_MAGIC', 'pcapkit.corekit.const.capture'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'GENERIC_BLOCK_MINIMUM', 'pcapkit.corekit.const.capture'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'BLOCK_MINIMUM', 'pcapkit.corekit.const.capture'),
+    ('pcapkit.protocols.internet.ipv6.schema', 'IP_MAX_LENGTH', 'pcapkit.corekit.const.ipheader'),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
+    ('pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
+    ('pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN', 'pcapkit.corekit.const.ipheader'),
+    ('pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN', 'pcapkit.corekit.const.tcpheader'),
 )
 
 #: Every removed ``(old module, name)`` pair.
@@ -161,6 +179,37 @@ SHIPPED = (
      'pcapkit/protocols/schema.py', 'pcapkit/protocols/index.rst', '1.6.0'),
     ('pcapkit.protocols.schema.internet.ipv6', 'jumbo_payload_length',
      'pcapkit/protocols/internet/ipv6/schema.py', 'pcapkit/protocols/internet/ipv6.rst', '1.6.0'),
+    # #2883: shipped in 1.6.x, moved to pcapkit.corekit.const.
+    ('pcapkit.protocols.misc.pcap.header.schema', 'MAGIC_NUMBER',
+     'pcapkit/protocols/misc/pcap/header/schema.py', 'pcapkit/protocols/misc/pcap.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION',
+     'pcapkit/protocols/misc/pcap/header/schema.py', 'pcapkit/protocols/misc/pcap.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION_PLACES',
+     'pcapkit/protocols/misc/pcap/header/schema.py', 'pcapkit/protocols/misc/pcap.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcap.frame.schema', 'RECORD_HEADER_LEN',
+     'pcapkit/protocols/misc/pcap/frame/schema.py', 'pcapkit/protocols/misc/pcap.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'BYTE_ORDER_MAGIC',
+     'pcapkit/protocols/misc/pcapng/schema.py', 'pcapkit/protocols/misc/pcapng.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'GENERIC_BLOCK_MINIMUM',
+     'pcapkit/protocols/misc/pcapng/schema.py', 'pcapkit/protocols/misc/pcapng.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'BLOCK_MINIMUM',
+     'pcapkit/protocols/misc/pcapng/schema.py', 'pcapkit/protocols/misc/pcapng.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'DEFAULT_RESOLUTION',
+     'pcapkit/protocols/misc/pcapng/schema.py', 'pcapkit/protocols/misc/pcapng.rst', '1.7.0'),
+    ('pcapkit.protocols.internet.ipv6.schema', 'IP_MAX_LENGTH',
+     'pcapkit/protocols/internet/ipv6/schema.py', 'pcapkit/protocols/internet/ipv6.rst', '1.7.0'),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN',
+     'pcapkit/protocols/internet/ipv6/protocol.py', 'pcapkit/protocols/internet/ipv6.rst', '1.7.0'),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_NEXT_HEADER_OFFSET',
+     'pcapkit/protocols/internet/ipv6/protocol.py', 'pcapkit/protocols/internet/ipv6.rst', '1.7.0'),
+    ('pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN',
+     'pcapkit/protocols/internet/ipv4/schema.py', 'pcapkit/protocols/internet/ipv4.rst', '1.7.0'),
+    ('pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN',
+     'pcapkit/protocols/internet/ah/schema.py', 'pcapkit/protocols/internet/ah.rst', '1.7.0'),
+    ('pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN',
+     'pcapkit/protocols/transport/tcp/schema.py', 'pcapkit/protocols/transport/tcp.rst', '1.7.0'),
+    ('pcapkit.protocols.transport.tcp.schema', 'TCP_DATA_OFFSET_OCTET',
+     'pcapkit/protocols/transport/tcp/schema.py', 'pcapkit/protocols/transport/tcp.rst', '1.7.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its

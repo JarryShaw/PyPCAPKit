@@ -62,6 +62,8 @@ from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.const.capture import (BLOCK_MINIMUM, BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
+                                           GENERIC_BLOCK_MINIMUM, RESOLUTION)
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.strings import DecodedString
 from pcapkit.corekit.infoclass import OrderedMultiInfo
@@ -72,7 +74,6 @@ from pcapkit.corekit.schema.byteorder import packet_byteorder
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data import Packet as Data_Packet
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 from pcapkit.protocols.misc.pcapng.data import PCAPNG as Data_PCAPNG
 from pcapkit.protocols.misc.pcapng.data import CommentOption as Data_CommentOption
 from pcapkit.protocols.misc.pcapng.data import CustomBlock as Data_CustomBlock
@@ -139,8 +140,6 @@ from pcapkit.protocols.misc.pcapng.data import UnknownSecrets as Data_UnknownSec
 from pcapkit.protocols.misc.pcapng.data import WireGuardKeyLog as Data_WireGuardKeyLog
 from pcapkit.protocols.misc.pcapng.data import ZigBeeAPSKey as Data_ZigBeeAPSKey
 from pcapkit.protocols.misc.pcapng.data import ZigBeeNWKKey as Data_ZigBeeNWKKey
-from pcapkit.protocols.misc.pcapng.schema import (BLOCK_MINIMUM, BYTE_ORDER_MAGIC,
-                                                  DEFAULT_RESOLUTION, GENERIC_BLOCK_MINIMUM)
 from pcapkit.protocols.misc.pcapng.schema import PCAPNG as Schema_PCAPNG
 from pcapkit.protocols.misc.pcapng.schema import BlockType as Schema_BlockType
 from pcapkit.protocols.misc.pcapng.schema import CommentOption as Schema_CommentOption
@@ -771,7 +770,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     #: Header blocks mapped to the octets their fixed fields span, so that a
     #: shorter Block Total Length is kept as captured (see
     #: :meth:`_read_block_short_header`). The lengths are read from their one
-    #: home, :data:`pcapkit.protocols.misc.pcapng.schema.BLOCK_MINIMUM`
+    #: home, :data:`pcapkit.corekit.const.capture.BLOCK_MINIMUM`
     #: (:issue:`1739`).
     SHORT_HEADER_TYPES = {
         block: BLOCK_MINIMUM[block] for block in (Enum_BlockType.Section_Header_Block,

@@ -48,6 +48,7 @@ from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
+from pcapkit.corekit.const.tcpheader import TCP_MIN_HEADER_LEN
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
@@ -98,7 +99,6 @@ from pcapkit.protocols.transport.tcp.schema import CC as Schema_CC
 from pcapkit.protocols.transport.tcp.schema import MPTCPDSS as Schema_MPTCPDSS
 from pcapkit.protocols.transport.tcp.schema import SACK as Schema_SACK
 from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
-from pcapkit.protocols.transport.tcp.schema import TCP_MIN_HEADER_LEN
 from pcapkit.protocols.transport.tcp.schema import \
     AlternateChecksumData as Schema_AlternateChecksumData
 from pcapkit.protocols.transport.tcp.schema import \

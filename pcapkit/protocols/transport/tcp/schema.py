@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for transmission control protocol"""
+"""header schema for transmission control protocol
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN`` and
+   ``pcapkit.protocols.transport.tcp.schema.TCP_DATA_OFFSET_OCTET``, now
+   :data:`pcapkit.corekit.const.tcpheader.TCP_MIN_HEADER_LEN` and
+   :data:`pcapkit.corekit.const.tcpheader.TCP_DATA_OFFSET_OCTET` (:issue:`2883`).
+
+"""
 
 import collections
 from typing import TYPE_CHECKING
@@ -10,6 +19,7 @@ from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtoco
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
+from pcapkit.corekit.const.tcpheader import TCP_MIN_HEADER_LEN
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
@@ -45,22 +55,6 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase
-
-#: Minimum length of a TCP header, i.e. the fixed part with no options,
-#: :rfc:`9293#section-3.1`. The one home of this value (:issue:`1739`), here so
-#: that the schema's option length and the protocol modules read the same one;
-#: it is fixed by the RFC, so it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-TCP_MIN_HEADER_LEN = 20
-
-#: Offset of the octet whose high four bits are the Data Offset field -- the
-#: header length in 32-bit words -- within a TCP header, :rfc:`9293#section-3.1`.
-#: The one home of this value (:issue:`1739`), beside :data:`TCP_MIN_HEADER_LEN`;
-#: it is fixed by the RFC, so it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-TCP_DATA_OFFSET_OCTET = 12
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict

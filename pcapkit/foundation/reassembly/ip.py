@@ -19,12 +19,12 @@ import sys
 from functools import partial
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH
 from pcapkit.foundation.analysis.ip import _analyze_payload
 from pcapkit.foundation.reassembly.data.data import Completion
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                    Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
-from pcapkit.protocols.internet.ipv6.schema import IP_MAX_LENGTH
 from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
@@ -357,7 +357,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             received.
 
         A datagram is no longer than
-        :data:`~pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH` with its header, as
+        :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` with its header, as
         :meth:`_header_overhead` counts it: IPv4's Total Length counts the
         whole header, and IPv6's Payload Length every header but the fixed one.
         A longer datagram cannot be declared, so it is never complete, and

@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, NamedTuple, cast
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
+from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
@@ -32,7 +33,6 @@ from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.transport.tcp.protocol import TCP
-from pcapkit.protocols.transport.tcp.schema import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.protocols.transport.udp.protocol import UDP
 
 if TYPE_CHECKING:

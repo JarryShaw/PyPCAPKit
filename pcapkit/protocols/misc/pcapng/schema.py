@@ -1,6 +1,19 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for pcapng file format"""
+"""header schema for pcapng file format
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC``,
+   ``pcapkit.protocols.misc.pcapng.schema.GENERIC_BLOCK_MINIMUM``,
+   ``pcapkit.protocols.misc.pcapng.schema.BLOCK_MINIMUM`` and
+   ``pcapkit.protocols.misc.pcapng.schema.DEFAULT_RESOLUTION``, now
+   :data:`pcapkit.corekit.const.capture.BYTE_ORDER_MAGIC`,
+   :data:`pcapkit.corekit.const.capture.GENERIC_BLOCK_MINIMUM`,
+   :data:`pcapkit.corekit.const.capture.BLOCK_MINIMUM` and
+   :data:`pcapkit.corekit.const.capture.DEFAULT_RESOLUTION` (:issue:`2883`).
+
+"""
 
 import base64
 import collections
@@ -17,6 +30,7 @@ from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.const.capture import BLOCK_MINIMUM, BYTE_ORDER_MAGIC, GENERIC_BLOCK_MINIMUM
 from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
                                               IPv6AddressField, IPv6InterfaceField)
@@ -65,7 +79,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import IO, Any, Callable, DefaultDict, Dict, Iterable, Optional, Type, TypeVar
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Optional, Type, TypeVar
 
     from typing_extensions import Literal, Self
 
@@ -173,50 +187,9 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: Link-layer-dependent error - symbol error (bit 31).
         symbol_error: int
 
-#: Byte-Order Magic of a Section Header Block, read in the byte order of the
-#: section that wrote it. The one home of this value (:issue:`1739`); the format
-#: fixes it, so it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-BYTE_ORDER_MAGIC = 0x1A2B3C4D
-
-#: :data:`BYTE_ORDER_MAGIC` read in the other byte order, i.e. as a big-endian
-#: reader sees a little-endian section's.
+#: :data:`~pcapkit.corekit.const.capture.BYTE_ORDER_MAGIC` read in the other
+#: byte order, i.e. as a big-endian reader sees a little-endian section's.
 _SWAPPED_BYTE_ORDER_MAGIC = int.from_bytes(BYTE_ORDER_MAGIC.to_bytes(4, 'little'), 'big')
-
-#: The octets every block's fixed fields span -- Block Type and both copies of
-#: Block Total Length -- and so the shortest Block Total Length of any block, and
-#: the whole of it for a block not in :data:`BLOCK_MINIMUM`. The one home of
-#: this value (:issue:`1739`); the format fixes it, so it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-GENERIC_BLOCK_MINIMUM = 12
-
-#: Block types mapped to the octets their fixed fields span, Block Type and
-#: both copies of Block Total Length included; any other block spans
-#: :data:`GENERIC_BLOCK_MINIMUM`. The one home of these values (:issue:`1739`);
-#: the format fixes them, so they are never configurable.
-#:
-#: .. versionadded:: 1.5.0
-BLOCK_MINIMUM = {
-    Enum_BlockType.Section_Header_Block: 28,
-    Enum_BlockType.Interface_Description_Block: 20,
-    Enum_BlockType.Packet_Block: 32,
-    Enum_BlockType.Simple_Packet_Block: 16,
-    Enum_BlockType.Interface_Statistics_Block: 24,
-    Enum_BlockType.Enhanced_Packet_Block: 32,
-    Enum_BlockType.Decryption_Secrets_Block: 20,
-    Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 16,
-    Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 16,
-}  # type: Dict[int, int]
-
-#: Units per second of a timestamp on an interface that carries no
-#: ``if_tsresol`` option: microseconds, the default the format gives that
-#: option. The one home of this value (:issue:`1739`); the format fixes it, so
-#: it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-DEFAULT_RESOLUTION = 1_000_000
 
 
 def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':

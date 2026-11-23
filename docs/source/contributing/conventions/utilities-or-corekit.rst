@@ -12,12 +12,15 @@ The page's questions, as one decision:
 .. mermaid::
 
    flowchart TD
-       NEW["a new support module,<br/>helper or ContextVar"] --> LAYER{"a schema-layer<br/>helper used<br/>outside it?"}
+       NEW["a new support module,<br/>helper, constant<br/>or ContextVar"] --> CONST{"a constant the<br/>format or RFCs fix?"}
+       CONST -->|"referenced beyond its<br/>protocol or family"| SHARED["corekit.const<br/>one module per topic"]
+       CONST -->|"referenced by its<br/>protocol or family alone"| STAY["stays beside<br/>that schema"]
+       CONST -->|no| LAYER{"a schema-layer<br/>helper used<br/>outside it?"}
        LAYER -->|no| OWNED{"a helper in<br/>one protocol's<br/>schema?"}
        LAYER -->|yes| SCHEMA["corekit.schema<br/>one module per group"]
        OWNED -->|"used beyond that<br/>protocol, and generic"| SCHEMA
        OWNED -->|no| VAR{"a ContextVar?"}
-       OWNED -->|"used by that<br/>protocol alone"| STAY["stays beside<br/>that schema"]
+       OWNED -->|"used by that<br/>protocol alone"| STAY
        VAR -->|"set or read by<br/>several modules"| CTX["utilities.contextvars"]
        VAR -->|no| UTIL{"usable by any<br/>code, importing<br/>no pcapkit but<br/>utilities?"}
        VAR -->|"used by one<br/>module only"| PRIV["private, in<br/>that module"]
@@ -164,6 +167,47 @@ module that does, on a module outside the layer that refers to a function define
 a field module or in :mod:`pcapkit.protocols.schema`, and on a module outside
 a protocol that refers to a function defined in that protocol's schema module, by
 import or as an attribute of the module.
+
+Shared Constants
+~~~~~~~~~~~~~~~~
+
+**A constant the format or the RFCs fix that anything outside its own protocol
+references lives in** :mod:`pcapkit.corekit.const`, in the module for its topic, not
+in the protocol that first needed it. Ruled by the owner on :issue:`2883`, over a
+constants module beside each protocol's schema, which adds a fourth module kind and
+keeps the cross-layer imports. The package of topic modules, beside
+:mod:`pcapkit.corekit.schema` since most of its readers are not schema code, was
+ruled in review of :pr:`2895` (:issue:`2883`), over topic modules among the schema
+helpers and over one module holding every topic. :mod:`pcapkit.const` is no home,
+since :ref:`const-vendor-pairing` gives each of its modules a crawler; it holds the
+enumerations generated from the vendor registries.
+
+*  :mod:`pcapkit.corekit.const.capture` -- the PCAP and PCAP-NG values the
+   engines, the dumpers and the toolkit read: magic numbers, timestamp
+   resolutions, the record header length, the Byte-Order Magic and the block
+   minimums.
+*  :mod:`pcapkit.corekit.const.ipheader` -- the IPv4, IPv6 and IP
+   Authentication Header lengths and offsets, and
+   :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH`.
+*  :mod:`pcapkit.corekit.const.tcpheader` -- the TCP header's minimum length
+   and the octet holding its Data Offset.
+
+What counts as a reference was ruled in review of :pr:`2895` (:issue:`2883`) too. Any
+module counts -- another protocol, the engines, the dumpers, IP reassembly and the
+toolkit alike -- but a protocol's own ``protocol``, ``schema`` and ``data`` modules
+are one place, and so is a family. So a family base's constant that its members
+reference stays with the family, as the IPv6 option helpers do (:issue:`2674`):
+TLS and DTLS read SSL's record content types, and HTTP/1 and HTTP/2 the HTTP
+base's patterns. A constant only its own protocol references stays in that
+protocol's package, as
+:data:`~pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN` does.
+
+Every layer imports these modules, so they import nothing from :mod:`pcapkit` but
+:mod:`pcapkit.const` outside an ``if TYPE_CHECKING:`` block, and the package's
+``__init__.py`` imports none of them.
+:file:`tests/project/test_shared_format_constants_2883_unit.py` fails on a module
+there that does, and on a constant of a protocol's own modules that a module outside
+that protocol or its family references, by import or as an attribute of the module.
 
 Context Variables
 ~~~~~~~~~~~~~~~~~

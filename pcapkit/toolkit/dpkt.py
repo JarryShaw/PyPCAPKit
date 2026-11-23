@@ -16,12 +16,12 @@ import ipaddress
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.const.capture import RESOLUTION, RESOLUTION_PLACES
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION, RESOLUTION_PLACES
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:

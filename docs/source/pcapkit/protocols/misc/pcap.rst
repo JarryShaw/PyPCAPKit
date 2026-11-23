@@ -69,16 +69,16 @@ Header Schemas
    ``pcapkit.protocols.schema.misc.pcap.header``, with no alias: the module moved here
    (:issue:`2534`).
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER``,
+   ``pcapkit.protocols.misc.pcap.header.schema.RESOLUTION`` and
+   ``pcapkit.protocols.misc.pcap.header.schema.RESOLUTION_PLACES``, now
+   :data:`pcapkit.corekit.const.capture.MAGIC_NUMBER`,
+   :data:`pcapkit.corekit.const.capture.RESOLUTION` and
+   :data:`pcapkit.corekit.const.capture.RESOLUTION_PLACES` (:issue:`2883`).
+
 .. autodata:: pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN
-
-.. autodata:: pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER
-   :no-value:
-
-.. autodata:: pcapkit.protocols.misc.pcap.header.schema.RESOLUTION
-   :no-value:
-
-.. autodata:: pcapkit.protocols.misc.pcap.header.schema.RESOLUTION_PLACES
-   :no-value:
 
 .. autoclass:: pcapkit.protocols.misc.pcap.header.schema.Header
    :members:
@@ -167,7 +167,10 @@ Header Schemas
    ``pcapkit.protocols.schema.misc.pcap.frame``, with no alias: the module moved here
    (:issue:`2534`).
 
-.. autodata:: pcapkit.protocols.misc.pcap.frame.schema.RECORD_HEADER_LEN
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.misc.pcap.frame.schema.RECORD_HEADER_LEN``, now
+   :data:`pcapkit.corekit.const.capture.RECORD_HEADER_LEN` (:issue:`2883`).
 
 .. autoclass:: pcapkit.protocols.misc.pcap.frame.schema.Frame
    :members:

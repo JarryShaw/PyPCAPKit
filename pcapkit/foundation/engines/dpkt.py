@@ -15,11 +15,10 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.const.capture import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
+                                           GENERIC_BLOCK_MINIMUM, RESOLUTION)
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
-from pcapkit.protocols.misc.pcapng.schema import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
-                                                  GENERIC_BLOCK_MINIMUM)
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.logging import get_logger
@@ -107,7 +106,7 @@ logger = get_logger(__name__)
 #: either byte order, spelled once rather than per block read.
 _SHB_TYPE_OCTETS = Enum_BlockType.Section_Header_Block.to_bytes(4, 'big')
 
-#: :data:`~pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC` as a
+#: :data:`~pcapkit.corekit.const.capture.BYTE_ORDER_MAGIC` as a
 #: little-endian section writes it, spelled once rather than per block read.
 _LITTLE_BYTE_ORDER_OCTETS = BYTE_ORDER_MAGIC.to_bytes(4, 'little')
 

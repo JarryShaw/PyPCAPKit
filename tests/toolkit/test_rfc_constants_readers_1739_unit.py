@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 """Toolkit readers of the RFC-fixed constants behave at the constants' edges. C.f. #1739.
 
-The constants live in :mod:`pcapkit.protocols`; these pin the
-behaviour of the toolkit code that reads them, at exactly the value each one
-gives:
+The constants live in :mod:`pcapkit.corekit.const`; these pin the behaviour of
+the toolkit code that reads them, at exactly the value each one gives:
 
 * :func:`pcapkit.toolkit.pypcapfile._walk_extension_headers` steps over an AH of
-  exactly :data:`~pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN` octets -- one
+  exactly :data:`~pcapkit.corekit.const.ipheader.AH_HEADER_LEN` octets -- one
   carrying no Integrity Check Value -- and rejects a shorter one;
 * :class:`pcapkit.toolkit.dpkt.Timestamp` defaults to microseconds and
   :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp` to nanoseconds, the two
   resolutions of
-  :data:`~pcapkit.protocols.misc.pcap.header.schema.RESOLUTION`.
+  :data:`~pcapkit.corekit.const.capture.RESOLUTION`.
 
 Every value is built here and neither PyPCAPFile nor DPKT is imported, so the
 module is in the unit tier.
