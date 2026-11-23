@@ -43,9 +43,11 @@ HAS_PYSHARK = importlib.util.find_spec('pyshark') is not None
 PCAP = struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 65535, 1)
 
 
-def fake_trace(calls: 'list[str]') -> 'types.SimpleNamespace':
+def fake_trace(calls: 'list[str]') -> 'Any':
     """A flow tracer manager whose ``tcp.finish`` is recorded into ``calls``."""
-    return types.SimpleNamespace(tcp=types.SimpleNamespace(finish=lambda: calls.append('finish')))
+    from pcapkit.foundation.traceflow import TraceFlowManager  # pylint: disable=import-outside-toplevel
+
+    return TraceFlowManager(tcp=types.SimpleNamespace(finish=lambda: calls.append('finish')))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'pcapkit runtime dependencies are not installed')
@@ -209,7 +211,7 @@ class TestConstructorClosesEngine(unittest.TestCase):
         self.addCleanup(handle.close)
         vars(extractor).update(
             _ifile=handle, _ifnm=str(self.path), _flag_s=True, _flag_e=False, _flag_t=True,
-            _tcp=True, _frnum=0, _finalizer=None, _trace=fake_trace(calls),
+            _frnum=0, _finalizer=None, _trace=fake_trace(calls),
         )
 
         extractor._cleanup(failed=True)  # pylint: disable=protected-access

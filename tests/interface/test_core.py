@@ -111,9 +111,17 @@ class InterfaceCoreTests(unittest.TestCase):
             Reassembly.__name__ = name
             return Reassembly
 
+        def make_trace(name):
+            class TraceFlow:
+                def __init__(self, **kwargs):
+                    self.kwargs = kwargs
+            TraceFlow.__name__ = name
+            return TraceFlow
+
         class Extractor:
-            # NOTE: ``reassemble`` reaches every reassembler through this one lookup (#2814).
+            # NOTE: ``reassemble`` and ``trace`` reach every class through these lookups (#2814, #2843).
             __reassembly__ = {name.lower(): make_reassembly(name) for name in ('IPv4', 'IPv6', 'TCP')}
+            __traceflow__ = {'tcp': make_trace('TCP')}
 
             def __init__(self, fin, **kwargs):
                 self.fin = fin
@@ -125,6 +133,12 @@ class InterfaceCoreTests(unittest.TestCase):
                     raise sys.modules['pcapkit.utilities.exceptions'].FormatError(protocol)
                 return cls.__reassembly__[protocol.lower()](strict=strict, timeout=timeout)
 
+            @classmethod
+            def make_traceflow(cls, protocol, **kwargs):
+                if protocol.lower() not in cls.__traceflow__:
+                    raise sys.modules['pcapkit.utilities.exceptions'].FormatError(protocol)
+                return cls.__traceflow__[protocol.lower()](**kwargs)
+
         foundation_extraction.Extractor = Extractor
         sys.modules['pcapkit.foundation.extraction'] = foundation_extraction
 
@@ -133,28 +147,6 @@ class InterfaceCoreTests(unittest.TestCase):
         for name in ('DumpOptions', 'ReassemblyOptions', 'TraceFlowOptions', 'StreamOptions'):
             setattr(foundation_options, name, type(name, (), {}))
         sys.modules['pcapkit.foundation.options'] = foundation_options
-
-        def make_trace(name):
-            class TraceFlow:
-                def __init__(self, **kwargs):
-                    self.kwargs = kwargs
-            TraceFlow.__name__ = name
-            return TraceFlow
-
-        class ModuleDescriptor:
-            def __init__(self, klass):
-                self.klass = klass
-
-        # NOTE: ``trace`` reaches every flow tracer through ``TraceFlow.registry`` (#2837),
-        # a descriptor resolved to its class.
-        traceflow_module = types.ModuleType('pcapkit.foundation.traceflow.traceflow')
-        traceflow_module.TraceFlow = type('TraceFlow', (), {
-            'registry': {'tcp': make_trace('TCP'), 'udp-lazy': ModuleDescriptor(make_trace('UDP'))},
-        })
-        sys.modules['pcapkit.foundation.traceflow.traceflow'] = traceflow_module
-        module_module = types.ModuleType('pcapkit.corekit.module')
-        module_module.ModuleDescriptor = ModuleDescriptor
-        sys.modules['pcapkit.corekit.module'] = module_module
 
         protocol_module = types.ModuleType('pcapkit.protocols.protocol')
 
@@ -227,7 +219,6 @@ class InterfaceCoreTests(unittest.TestCase):
         result = module.trace(TCP, fout='class.pcap', format='pcap')
         self.assertEqual(type(result).__name__, 'TCP')
         self.assertEqual(result.kwargs['fout'], 'class.pcap')
-        self.assertEqual(type(module.trace('UDP-Lazy')).__name__, 'UDP')
 
     def test_interface_package_re_exports_core_symbols(self) -> None:
         module, _ = self._load_module()
@@ -239,9 +230,10 @@ class InterfaceCoreTests(unittest.TestCase):
 
     def test_unsupported_protocols_raise_format_error(self) -> None:
         module, _ = self._load_module()
-        with self.assertRaises(module.FormatError):
+        error = sys.modules['pcapkit.utilities.exceptions'].FormatError
+        with self.assertRaises(error):
             module.reassemble('UDP')
-        with self.assertRaises(module.FormatError):
+        with self.assertRaises(error):
             module.trace('UDP')
 
 

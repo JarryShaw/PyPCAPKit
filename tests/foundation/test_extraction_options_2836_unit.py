@@ -405,14 +405,21 @@ class NamesTests(_Case):
                 with self.subTest(keyword=keyword, value=value), self.assertRaises(RegistryError):
                     self.extract(sample_path('in.pcap'), **{keyword: value})
 
-    def test_a_tracer_no_engine_feeds_is_dropped_with_a_warning(self) -> None:
+    def test_a_tracer_the_engine_has_no_adapter_for_is_dropped_with_a_warning(self) -> None:
         from pcapkit import extract
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.traceflow.traceflow import TraceFlow
         from pcapkit.utilities.warnings import AttributeWarning
 
-        class Dummy(TraceFlow):  # pylint: disable=abstract-method
-            pass
+        class Dummy(TraceFlow):
+            def dump(self, packet: 'Any') -> None:
+                pass
+
+            def trace(self, packet: 'Any', *, output: bool = False) -> 'Any':
+                return 'dummy'
+
+            def submit(self) -> 'tuple[Any, ...]':
+                return ()
 
         Extractor.register_traceflow('dummy', Dummy)
         self.addCleanup(Extractor.__traceflow__.pop, 'dummy')
@@ -420,9 +427,11 @@ class NamesTests(_Case):
             warnings.simplefilter('always')
             extractor = extract(sample_path('in.pcap'), traceflow=['tcp', 'dummy'])
         self.addCleanup(close_extractor, extractor)
-        self.assertIn("'Extractor(engine=default)' object does not support dummy flow tracing; "
+        # the default engine has no ``dummy`` adapter, so drops it and traces TCP alone
+        self.assertIn("'Extractor(engine=default)' object does not support Dummy flow tracing; "
                       "so 'dummy' will be ignored",
                       [str(w.message) for w in caught if issubclass(w.category, AttributeWarning)])
+        self.assertEqual(list(extractor._trace), ['tcp'])  # pylint: disable=protected-access
         self.assertEqual(len(extractor.traceflow.tcp), 2)
 
     def test_follow_tcp_stream_traces_tcp(self) -> None:

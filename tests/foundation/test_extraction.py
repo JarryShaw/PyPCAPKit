@@ -104,6 +104,7 @@ class ExtractorTests(unittest.TestCase):
     def _bare_extractor(self):
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.reassembly import ReassemblyManager
+        from pcapkit.foundation.traceflow import TraceFlowManager
 
         extractor = object.__new__(Extractor)
         extractor._frnum = 3
@@ -115,7 +116,6 @@ class ExtractorTests(unittest.TestCase):
         extractor._flag_d = True
         extractor._flag_r = True
         extractor._flag_t = True
-        extractor._tcp = True
         extractor._frame = ['frame']
         extractor._reasm = ReassemblyManager(
             ipv4=types.SimpleNamespace(datagram=('ipv4',)),
@@ -126,7 +126,7 @@ class ExtractorTests(unittest.TestCase):
         # ``finish`` as well as ``index``: _cleanup tells the tracer the capture
         # has ended, which is where a flow nothing superseded is finalised, so a
         # stand-in for the tracer has to answer to it
-        extractor._trace = types.SimpleNamespace(
+        extractor._trace = TraceFlowManager(
             tcp=types.SimpleNamespace(index=('trace',), finish=lambda: None),
         )
         extractor._exeng = FakeEngine(extractor)
@@ -144,6 +144,7 @@ class ExtractorTests(unittest.TestCase):
     def test_properties_success_and_unsupported_paths(self) -> None:
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.reassembly import ReassemblyManager
+        from pcapkit.foundation.traceflow import TraceFlowManager
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         extractor = self._bare_extractor()
@@ -160,7 +161,7 @@ class ExtractorTests(unittest.TestCase):
         self.assertIs(extractor.engine, extractor._exeng)
         self.assertEqual(extractor.magic_number, b'fake')
 
-        extractor._tcp = False
+        extractor._trace = TraceFlowManager()
         extractor._reasm = ReassemblyManager()
         self.assertIsNone(extractor.reassembly.ipv4)
         self.assertIsNone(extractor.reassembly.dtls)
@@ -987,7 +988,7 @@ class ExtractorTests(unittest.TestCase):
         self.assertTrue(extractor._vfunc_default)
         # no ``reassembly`` and no ``trace``, so neither a reassembler nor a tracer
         self.assertFalse(extractor._reasm)
-        self.assertFalse(extractor._tcp)
+        self.assertFalse(extractor._trace)
         self.assertEqual(extractor.magic_number, b'\xa1\xb2\xc3\xd4')
 
     def test_auto_mode_call_raises_the_class_the_docstring_names(self) -> None:
@@ -1224,7 +1225,7 @@ class ExtractorTests(unittest.TestCase):
         # with the set the bullet names.
         from pcapkit.foundation.extraction import Extractor
 
-        documented = self._warns_bullet_engines('If using PCAP or PCAP-NG output for TCP flow tracing',
+        documented = self._warns_bullet_engines('If using PCAP or PCAP-NG output for flow tracing',
                                                 'extraction engine is ')
         for fmt in ('pcap', 'pcapng'):
             warned = set()

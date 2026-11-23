@@ -10,7 +10,7 @@ Library Foundation
   :mod:`~pcapkit.foundation.engines` it reads through;
 * the IP, TCP and DTLS :mod:`~pcapkit.foundation.reassembly`, and the
   :mod:`~pcapkit.foundation.analysis` of what it reassembles;
-* the TCP flow tracer :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`;
+* the TCP flow tracer of :mod:`~pcapkit.foundation.traceflow`, and any other registered one;
 * the :mod:`~pcapkit.foundation.registry` management APIs.
 
 .. toctree::

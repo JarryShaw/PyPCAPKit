@@ -688,7 +688,6 @@ class NoEOFStillRetriesAnInputThatGrows(unittest.TestCase):
         extractor._flag_n = True
         extractor._flag_e = False
         extractor._flag_t = False
-        extractor._tcp = False
         extractor._flag_s = False
         extractor._eof_mark = None
 
