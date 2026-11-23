@@ -120,6 +120,14 @@ disabled with an :class:`~pcapkit.utilities.warnings.AttributeWarning`, and an e
 with no entries at all, as :mod:`pcapkit.foundation.engines.pyshark`, disables
 reassembly (:issue:`2814`). DTLS has entries on the default engine alone.
 
+**Flow tracing takes the same shape.** Each engine's :attr:`EngineBase.__traceflow__
+<pcapkit.foundation.engines.engine.EngineBase.__traceflow__>` maps every flow tracer it
+supports to its toolkit adapter, written by :meth:`EngineBase.register_traceflow
+<pcapkit.foundation.engines.engine.EngineBase.register_traceflow>`. An enabled tracer
+with no entry is dropped with an :class:`~pcapkit.utilities.warnings.AttributeWarning`,
+and an engine with no entries, as :mod:`pcapkit.foundation.engines.pypcap` and
+:mod:`pcapkit.foundation.engines.pcap_ct`, disables flow tracing (:issue:`2843`).
+
 **Point 3 holds for every engine.**
 :func:`~pcapkit.foundation.analysis.ip.ip_datagram` parses a reassembled IPv4 or IPv6
 datagram's payload by its payload protocol type, through

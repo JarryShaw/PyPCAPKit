@@ -309,6 +309,12 @@ class Scapy(EngineBase['ScapyPacket']):
         'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
+    #: Flow tracing adapters, each called as ``adapter(packet, count=n)`` on the
+    #: Scapy packet and its frame number.
+    __traceflow__ = {
+        'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_traceflow'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -353,7 +359,7 @@ class Scapy(EngineBase['ScapyPacket']):
                 is provided, as the Scapy engine does not parse with :mod:`pcapkit`'s own
                 protocol implementations; or if a reassembler with no adapter in
                 :attr:`__reassembly__` is enabled, as DTLS's is not, for the same
-                reason.
+                reason, or a flow tracer with none in :attr:`__traceflow__`.
 
         """
         ext = self._extractor
@@ -370,6 +376,7 @@ class Scapy(EngineBase['ScapyPacket']):
                  AttributeWarning, stacklevel=stacklevel())
 
         self._setup_reassembly()
+        self._setup_traceflow()
 
         # setup verbose handler, unless the caller gave one of their own (#1874)
         if ext._vfunc_default:
@@ -402,7 +409,7 @@ class Scapy(EngineBase['ScapyPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.scapy import packet2dict, tcp_traceflow
+        from pcapkit.toolkit.scapy import packet2dict
         ext = self._extractor
 
         # fetch Scapy packet
@@ -428,10 +435,7 @@ class Scapy(EngineBase['ScapyPacket']):
 
         # trace flows
         if ext._flag_t:
-            if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
-                if data_tf_tcp is not None:
-                    ext._trace.tcp(data_tf_tcp)
+            self._traceflow(packet, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

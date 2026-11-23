@@ -144,9 +144,9 @@ class PCAP_CTEngineTests(unittest.TestCase):
 
     def make_extractor(self, **overrides):
         from pcapkit.foundation.reassembly import ReassemblyManager
+        from pcapkit.foundation.traceflow import TraceFlowManager
 
         sink = OutputSink()
-        trace = types.SimpleNamespace(tcp=mock.Mock())
         values = {
             '_ifile': io.BytesIO(b'capture'),
             '_ifnm': self.ifnm,
@@ -165,7 +165,6 @@ class PCAP_CTEngineTests(unittest.TestCase):
             '_ipv6': False,
             '_tcp': False,
             '_dtls': False,
-            '_trace': trace,
             '_frame': [],
             '_frnum': 0,
             '_exlyr': 'none',
@@ -180,6 +179,10 @@ class PCAP_CTEngineTests(unittest.TestCase):
         # builds it (#2814).
         values['_reasm'] = ReassemblyManager((name, mock.Mock()) for name in ('ipv4', 'ipv6', 'tcp', 'dtls')
                                              if values[f'_{name}'])
+        # NOTE: ``_trace`` holds the tracer ``_tcp`` enables, as the Extractor builds it (#2843);
+        # ``_tracers`` keeps it either way, so a test can check a disabled one was never fed.
+        values['_tracers'] = types.SimpleNamespace(tcp=mock.Mock())
+        values['_trace'] = TraceFlowManager(tcp=values['_tracers'].tcp if values['_tcp'] else None)
         return types.SimpleNamespace(**values), sink
 
     def engine(self, extractor):

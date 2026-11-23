@@ -207,7 +207,7 @@ class PCAPNGEngineTests(unittest.TestCase):
         extractor._mocks.ipv4.assert_called_once_with('ipv4')
         extractor._mocks.ipv6.assert_called_once_with('ipv6')
         extractor._mocks.tcp.assert_called_once_with('tcp')
-        extractor._trace.tcp.assert_called_once_with('trace')
+        extractor._tracers.tcp.assert_called_once_with('trace')
         self.assertEqual(extractor._frame, [block])
 
     def test_read_frame_supports_simple_and_deprecated_packet_blocks(self) -> None:
@@ -248,7 +248,7 @@ class PCAPNGEngineTests(unittest.TestCase):
         extractor._mocks.ipv4.assert_not_called()
         extractor._mocks.ipv6.assert_not_called()
         extractor._mocks.tcp.assert_not_called()
-        extractor._trace.tcp.assert_not_called()
+        extractor._tracers.tcp.assert_not_called()
 
         no_protocols, _ = make_extractor(_flag_q=True, _flag_r=True, _flag_t=True,
                                          _flag_d=False, _ipv4=False, _ipv6=False,
@@ -265,7 +265,7 @@ class PCAPNGEngineTests(unittest.TestCase):
                         with mock.patch('pcapkit.toolkit.pcapng.tcp_traceflow', return_value='unused'):
                             self.assertIs(engine.read_frame(), block)
         no_protocols._mocks.ipv4.assert_not_called()
-        no_protocols._trace.tcp.assert_not_called()
+        no_protocols._tracers.tcp.assert_not_called()
 
     def test_read_frame_rejects_invalid_interface_contexts(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType

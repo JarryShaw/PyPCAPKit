@@ -61,6 +61,7 @@ UNTAGGED = {
 #: ``wrapper -> its leading parameters that pick the registry written``.
 SELECTORS = {
     'register_engine_reassembly': ('engine',),
+    'register_engine_traceflow': ('engine',),
     'register_reassembly_callback': ('protocol',),
     'register_traceflow_callback': ('protocol',),
 }

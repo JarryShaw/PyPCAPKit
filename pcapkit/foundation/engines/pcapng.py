@@ -51,11 +51,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng.data import UnknownBlock as Data_UnknownBlock
     from pcapkit.protocols.misc.pcapng.protocol import Packet as Data_PCAPNG_Packet
 
-#: The flow tracing adapter :meth:`PCAPNG.read_frame` hands each frame to, resolved
-#: there rather than imported, as :attr:`PCAPNG.__reassembly__`'s are, so its first
-#: import holds :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
-_TOOLKIT = ModuleDescriptor('pcapkit.toolkit.pcapng', 'tcp_traceflow')  # type: ModuleDescriptor[Any]
-
 
 @info_final
 class Context(Info):
@@ -159,6 +154,12 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         'dtls': ModuleDescriptor('pcapkit.toolkit.pcapng', 'dtls_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
+    #: Flow tracing adapters, each called as ``adapter(block, nanosecond=flag)`` on
+    #: the packet block and whether its timestamp has nanosecond resolution.
+    __traceflow__ = {
+        'tcp': ModuleDescriptor('pcapkit.toolkit.pcapng', 'tcp_traceflow'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -189,6 +190,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         """
         ext = self._extractor
         self._setup_reassembly()
+        self._setup_traceflow()
 
         self._bound_read_ahead()
         shb = P_PCAPNG(ext._ifile, num=0, sct=1, ctx=None)
@@ -219,14 +221,13 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         - if yes, save the related information into the internal context storage;
         - write the parsed block into output file;
         - feed every enabled reassembler;
-        - trace TCP flows if any;
+        - feed every enabled flow tracer;
         - record frame information if any.
 
         Returns:
             Parsed PCAP-NG block.
 
         """
-        tcp_traceflow = _TOOLKIT.klass
         ext = self._extractor
 
         while True:
@@ -321,10 +322,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         # trace flows
         if ext._flag_t:
-            if ext._tcp:
-                data_tf_tcp = tcp_traceflow(block, nanosecond=block.nanosecond)
-                if data_tf_tcp is not None:
-                    ext._trace.tcp(data_tf_tcp)
+            self._traceflow(block, nanosecond=block.nanosecond)
 
         # record blocks
         if ext._flag_d:

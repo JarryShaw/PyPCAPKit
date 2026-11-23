@@ -171,9 +171,9 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
     def make_extractor(self, **overrides):
         from pcapkit.foundation.reassembly import ReassemblyManager
+        from pcapkit.foundation.traceflow import TraceFlowManager
 
         sink = OutputSink()
-        trace = types.SimpleNamespace(tcp=mock.Mock())
         values = {
             '_ifile': io.BytesIO(b'capture'),
             '_ifnm': 'capture.pcap',
@@ -192,7 +192,6 @@ class PyPCAPFileEngineTests(unittest.TestCase):
             '_ipv6': False,
             '_tcp': False,
             '_dtls': False,
-            '_trace': trace,
             '_frame': [],
             '_frnum': 0,
             '_exlyr': 'none',
@@ -210,6 +209,10 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         values['_mocks'] = mocks
         values['_reasm'] = ReassemblyManager((name, getattr(mocks, name)) for name in names
                                              if values[f'_{name}'])
+        # NOTE: ``_trace`` holds the tracer ``_tcp`` enables, as the Extractor builds it (#2843);
+        # ``_tracers`` keeps it either way, so a test can check a disabled one was never fed.
+        values['_tracers'] = types.SimpleNamespace(tcp=mock.Mock())
+        values['_trace'] = TraceFlowManager(tcp=values['_tracers'].tcp if values['_tcp'] else None)
         return types.SimpleNamespace(**values), sink
 
     def engine(self, extractor, savefile=None, decoder=FakeDecoded):
@@ -707,7 +710,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         trace.assert_called_once_with(frame, data_link=engine.dlink, count=1)
         extractor._mocks.ipv4.assert_called_once_with('ipv4')
         extractor._mocks.tcp.assert_called_once_with('tcp')
-        extractor._trace.tcp.assert_called_once_with('trace')
+        extractor._tracers.tcp.assert_called_once_with('trace')
         # IPv6 is unreachable for this engine, so it must never be consulted
         extractor._mocks.ipv6.assert_not_called()
         self.assertEqual(extractor._frame, [])
@@ -722,7 +725,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
         extractor._mocks.ipv4.assert_not_called()
         extractor._mocks.tcp.assert_not_called()
-        extractor._trace.tcp.assert_not_called()
+        extractor._tracers.tcp.assert_not_called()
 
     def test_read_frame_ignores_reassembly_and_tracing_when_flags_are_off(self) -> None:
         extractor, _, engine = self.prepared(_flag_q=True, _flag_r=False, _flag_t=False,
@@ -733,7 +736,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                     engine.read_frame()
 
         extractor._mocks.ipv4.assert_not_called()
-        extractor._trace.tcp.assert_not_called()
+        extractor._tracers.tcp.assert_not_called()
 
     def test_read_frame_feeds_a_registered_reassembler(self) -> None:
         # #2814: any reassembler with an adapter here is fed, clocked to the frame first
@@ -763,7 +766,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
         extractor._mocks.ipv4.assert_not_called()
         extractor._mocks.tcp.assert_not_called()
-        extractor._trace.tcp.assert_not_called()
+        extractor._tracers.tcp.assert_not_called()
 
 
 class PyPCAPFilePythonCeilingTests(unittest.TestCase):

@@ -454,6 +454,13 @@ class DPKT(EngineBase['DPKTPacket']):
         'tcp': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_reassembly'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
+    #: Flow tracing adapters, each called as
+    #: ``adapter(packet, timestamp, data_link=link, count=n)`` on the DPKT packet,
+    #: its capture timestamp, its link type and its frame number.
+    __traceflow__ = {
+        'tcp': ModuleDescriptor('pcapkit.toolkit.dpkt', 'tcp_traceflow'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -489,7 +496,7 @@ class DPKT(EngineBase['DPKTPacket']):
                 is provided, as the DPKT engine does not parse with :mod:`pcapkit`'s own
                 protocol implementations; or if a reassembler with no adapter in
                 :attr:`__reassembly__` is enabled, as DTLS's is not, for the same
-                reason.
+                reason, or a flow tracer with none in :attr:`__traceflow__`.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
@@ -513,6 +520,7 @@ class DPKT(EngineBase['DPKTPacket']):
                  AttributeWarning, stacklevel=stacklevel())
 
         self._setup_reassembly()
+        self._setup_traceflow()
 
         # setup verbose handler, unless the caller gave one of their own (#1874)
         if ext._vfunc_default:
@@ -547,8 +555,7 @@ class DPKT(EngineBase['DPKTPacket']):
             for more operational information.
 
         """
-        from pcapkit.toolkit.dpkt import (_capture_time, attach_buffer, attach_timestamp,
-                                          packet2dict, tcp_traceflow)
+        from pcapkit.toolkit.dpkt import _capture_time, attach_buffer, attach_timestamp, packet2dict
         ext = self._extractor
 
         reader = self._extmp
@@ -598,10 +605,7 @@ class DPKT(EngineBase['DPKTPacket']):
 
         # trace flows
         if ext._flag_t:
-            if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, timestamp, data_link=linktype, count=ext._frnum)
-                if data_tf_tcp is not None:
-                    ext._trace.tcp(data_tf_tcp)
+            self._traceflow(packet, timestamp, data_link=linktype, count=ext._frnum)
 
         # record frames
         if ext._flag_d:

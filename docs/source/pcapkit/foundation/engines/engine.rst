@@ -61,6 +61,11 @@ every extraction engine.
    .. automethod:: _setup_reassembly
    .. automethod:: _reassemble
 
+   .. autoattribute:: __traceflow__
+   .. automethod:: register_traceflow
+   .. automethod:: _setup_traceflow
+   .. automethod:: _traceflow
+
    .. automethod:: run
    .. automethod:: read_frame
    .. automethod:: close

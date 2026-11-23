@@ -33,11 +33,6 @@ if TYPE_CHECKING:
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
-#: The flow tracing adapter :meth:`PCAP.read_frame` hands each frame to, resolved
-#: there rather than imported, as :attr:`PCAP.__reassembly__`'s are, so its first
-#: import holds :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
-_TOOLKIT = ModuleDescriptor('pcapkit.toolkit.pcap', 'tcp_traceflow')  # type: ModuleDescriptor[Any]
-
 
 class PCAP(EngineBase[Frame]):
     """PCAP file extraction support.
@@ -79,6 +74,13 @@ class PCAP(EngineBase[Frame]):
         'ipv6': ModuleDescriptor('pcapkit.toolkit.pcap', 'ipv6_reassembly'),
         'tcp': ModuleDescriptor('pcapkit.toolkit.pcap', 'tcp_reassembly'),
         'dtls': ModuleDescriptor('pcapkit.toolkit.pcap', 'dtls_reassembly'),
+    }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
+
+    #: Flow tracing adapters, each called as ``adapter(frame, data_link=link)`` on
+    #: the :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` and the
+    #: capture's link type.
+    __traceflow__ = {
+        'tcp': ModuleDescriptor('pcapkit.toolkit.pcap', 'tcp_traceflow'),
     }  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
@@ -133,6 +135,7 @@ class PCAP(EngineBase[Frame]):
         # pylint: disable=attribute-defined-outside-init,protected-access
         ext = self._extractor
         self._setup_reassembly()
+        self._setup_traceflow()
 
         self._gbhdr = Header(ext._ifile)
         self._vinfo = self._gbhdr.version
@@ -166,14 +169,13 @@ class PCAP(EngineBase[Frame]):
         - make :class:`~pcapkit.corekit.infoclass.Info` object out of frame properties;
         - write to output file with corresponding dumper;
         - feed every enabled reassembler;
-        - trace TCP flows if any;
+        - feed every enabled flow tracer;
         - record frame :class:`~pcapkit.corekit.infoclass.Info` object to frame storage.
 
         Returns:
             Parsed frame instance.
 
         """
-        tcp_traceflow = _TOOLKIT.klass
         ext = self._extractor
 
         # read frame header
@@ -204,10 +206,7 @@ class PCAP(EngineBase[Frame]):
 
         # trace flows
         if ext._flag_t:
-            if ext._tcp:
-                data_tf_tcp = tcp_traceflow(frame, data_link=self._dlink)
-                if data_tf_tcp is not None:
-                    ext._trace.tcp(data_tf_tcp)
+            self._traceflow(frame, data_link=self._dlink)
 
         # record frames
         if ext._flag_d:
