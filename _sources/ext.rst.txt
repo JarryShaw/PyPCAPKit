@@ -502,6 +502,11 @@ A sketch of a new engine on :mod:`scapy`, modelled on
            'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_reassembly'),
        }
 
+       # NOTE: Likewise for each flow tracer, keyed by the name it is registered under.
+       __traceflow__ = {
+           'tcp': ModuleDescriptor('pcapkit.toolkit.scapy', 'tcp_traceflow'),
+       }
+
        def __init__(self, extractor: 'Extractor') -> 'None':
            # NOTE: Imported here, not at module level, so the engine's
            # library stays an optional dependency.
@@ -517,6 +522,7 @@ A sketch of a new engine on :mod:`scapy`, modelled on
        def run(self) -> 'None':
            ext = self._extractor  # get extractor instance
            self._setup_reassembly()  # drop enabled reassemblers with no adapter, warning
+           self._setup_traceflow()  # and enabled flow tracers likewise
 
            # NOTE: Replace the verbose handler only for ``verbose=True``; a
            # callable ``verbose=`` is the user's own, already in ``ext._vfunc``.
@@ -539,7 +545,7 @@ A sketch of a new engine on :mod:`scapy`, modelled on
        # NOTE: Return the next packet from ``self._extmp``, handling its
        # verbose output, file output, reassembly and flow tracing.
        def read_frame(self) -> 'Packet':
-           from pcapkit.toolkit.scapy import packet2dict, tcp_traceflow  # import utility functions
+           from pcapkit.toolkit.scapy import packet2dict  # import utility function
            ext = self._extractor  # get extractor instance
 
            packet = next(self._extmp)  # get next packet from the iterator
@@ -565,12 +571,10 @@ A sketch of a new engine on :mod:`scapy`, modelled on
            if ext._flag_r:
                self._reassemble(float(packet.time), packet, count=ext._frnum)
 
-           # NOTE: Flow tracing, likewise.
+           # NOTE: Feed every enabled flow tracer what its ``__traceflow__`` adapter
+           # makes of the packet, if anything.
            if ext._flag_t:
-               if ext._tcp:
-                   data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
-                   if data_tf_tcp is not None:
-                       ext._trace.tcp(data_tf_tcp)
+               self._traceflow(packet, count=ext._frnum)
 
            # NOTE: Store the frame when storing is on (``ext._flag_d``).
            if ext._flag_d:
@@ -769,8 +773,8 @@ A sketch of an IPv4 reassembly class, modelled on
            self._release(self._buffer.pop(info.bufid), bufid=info.bufid)
 
        # NOTE: Convert a complete ``Buffer`` into ``Datagram`` instances.
-       # ``expire()`` passes ``timeout`` as well, and stores what it returns.
-       def submit(self, buf: 'Buffer', *, bufid: 'BufferID', timeout: 'bool' = False,
+       # ``expire()`` passes ``expired`` as well, and stores what it returns.
+       def submit(self, buf: 'Buffer', *, bufid: 'BufferID', expired: 'bool' = False,
                   store: 'bool' = False) -> 'list[Datagram]':
            datagram = ...  # list of ``Datagram`` instances
 

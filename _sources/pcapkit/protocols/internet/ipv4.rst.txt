@@ -99,7 +99,10 @@ Header Schemas
    ``pcapkit.protocols.schema.internet.ipv4``, with no alias: the module moved here
    (:issue:`2534`).
 
-.. autodata:: pcapkit.protocols.internet.ipv4.schema.IPV4_HEADER_LEN
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.internet.ipv4.schema.IPV4_HEADER_LEN``, now
+   :data:`pcapkit.corekit.const.ipheader.IPV4_HEADER_LEN` (:issue:`2883`).
 
 .. autoclass:: pcapkit.protocols.internet.ipv4.schema.IPv4
    :members:

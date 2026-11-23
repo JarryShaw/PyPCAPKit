@@ -11,6 +11,13 @@ IPv6 - Internet Protocol Version 6
    in this module, and :mod:`pcapkit.protocols.internet.ipv6` exports the protocol class
    alone (:issue:`2534`).
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.internet.ipv6.protocol.IPV6_HEADER_LEN`` and
+   ``pcapkit.protocols.internet.ipv6.protocol.IPV6_NEXT_HEADER_OFFSET``, now
+   :data:`pcapkit.corekit.const.ipheader.IPV6_HEADER_LEN` and
+   :data:`pcapkit.corekit.const.ipheader.IPV6_NEXT_HEADER_OFFSET` (:issue:`2883`).
+
 :mod:`pcapkit.protocols.internet.ipv6.protocol` contains
 :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`,
 which implements the extractor for Internet Protocol
@@ -53,13 +60,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_ip_hextet
    .. automethod:: _import_next_layer
 
-Protocol Constants
-------------------
-
-.. autodata:: pcapkit.protocols.internet.ipv6.protocol.IPV6_HEADER_LEN
-
-.. autodata:: pcapkit.protocols.internet.ipv6.protocol.IPV6_NEXT_HEADER_OFFSET
-
 Header Schemas
 --------------
 
@@ -75,7 +75,10 @@ Header Schemas
    ``pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length``, now
    :func:`pcapkit.corekit.schema.jumbogram.jumbo_payload_length` (:issue:`2674`).
 
-.. autodata:: pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH``, now
+   :data:`pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` (:issue:`2883`).
 
 .. autoclass:: pcapkit.protocols.internet.ipv6.schema.IPv6
    :members:

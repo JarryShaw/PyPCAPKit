@@ -14,6 +14,8 @@ Core Utilities
      - the :class:`~pcapkit.corekit.fields.field.Field` family for data parsing
    * - :mod:`~pcapkit.corekit.checksum`
      - the checksum algorithms the protocols compute and verify
+   * - :mod:`~pcapkit.corekit.const`
+     - the format constants referenced beyond their own protocol
    * - :mod:`~pcapkit.corekit.context`
      - the :class:`~pcapkit.corekit.context.ContextRegistry` channel for
        caller-supplied information a protocol needs but the wire does not carry
@@ -51,6 +53,7 @@ Core Utilities
 
    fields/index
    checksum/index
+   const/index
    context
    decorators
    enum

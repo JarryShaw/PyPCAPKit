@@ -19,6 +19,7 @@ PCAP Support
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __reassembly__
+   .. autoattribute:: __traceflow__
 
    .. autoproperty:: header
    .. autoproperty:: version
@@ -48,6 +49,7 @@ by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __reassembly__
+   .. autoattribute:: __traceflow__
 
    .. automethod:: run
    .. automethod:: read_frame

@@ -74,3 +74,7 @@ Incompatible Changes
 **An incompatible signature change is made outright, with no shim.** A shim taking the
 old keywords hides what the call accepts from its signature, which these rules exist to
 show. :issue:`2594` set the precedent, for the keyword groups of ``make()``.
+
+**No default flip keeps a shim either**, :func:`~pcapkit.interface.core.reassemble`'s
+``strict`` included, over the one-release warning :issue:`2834` gave it. Ruled in review
+of :pr:`2894` (:issue:`2837`).

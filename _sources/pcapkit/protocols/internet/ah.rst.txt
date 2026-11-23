@@ -50,7 +50,10 @@ Header Schemas
    ``pcapkit.protocols.schema.internet.ah``, with no alias: the module moved here
    (:issue:`2534`).
 
-.. autodata:: pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN``, now
+   :data:`pcapkit.corekit.const.ipheader.AH_HEADER_LEN` (:issue:`2883`).
 
 .. autoclass:: pcapkit.protocols.internet.ah.schema.AH
    :members:

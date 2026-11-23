@@ -262,14 +262,16 @@ Header Schemas
    ``pcapkit.protocols.schema.misc.pcapng``, with no alias: the module moved here
    (:issue:`2534`).
 
-.. autodata:: pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC
+.. versionremoved:: 1.7.0
 
-.. autodata:: pcapkit.protocols.misc.pcapng.schema.GENERIC_BLOCK_MINIMUM
-
-.. autodata:: pcapkit.protocols.misc.pcapng.schema.BLOCK_MINIMUM
-   :no-value:
-
-.. autodata:: pcapkit.protocols.misc.pcapng.schema.DEFAULT_RESOLUTION
+   ``pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC``,
+   ``pcapkit.protocols.misc.pcapng.schema.GENERIC_BLOCK_MINIMUM``,
+   ``pcapkit.protocols.misc.pcapng.schema.BLOCK_MINIMUM`` and
+   ``pcapkit.protocols.misc.pcapng.schema.DEFAULT_RESOLUTION``, now
+   :data:`pcapkit.corekit.const.capture.BYTE_ORDER_MAGIC`,
+   :data:`pcapkit.corekit.const.capture.GENERIC_BLOCK_MINIMUM`,
+   :data:`pcapkit.corekit.const.capture.BLOCK_MINIMUM` and
+   :data:`pcapkit.corekit.const.capture.DEFAULT_RESOLUTION` (:issue:`2883`).
 
 .. autodata:: pcapkit.protocols.misc.pcapng.schema.PACKET_FLAGS
    :no-value:

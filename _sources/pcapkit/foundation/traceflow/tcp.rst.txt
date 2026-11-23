@@ -88,7 +88,7 @@ Terminology
            |                        |--> 'reset': (bool) whether a RST has been seen
            |                        |--> 'reassembly': (Optional[TCP]) the flow's own
            |                                            reassembler, or None when
-           |                                            analyse is off
+           |                                            analyze is off
            |--> (tuple) BUFID ...
 
        When tracing bidirectionally, the default, ``BUFID`` orders the endpoints
@@ -148,7 +148,7 @@ Terminology
            |     |                      tracing unidirectionally
            |     |--> 'packet': (Optional[tuple]) reassembled datagrams, one per
            |                    direction and acknowledgement number, or None
-           |                    when analyse is off
+           |                    when analyze is off
            |--> (Info) data ...
 
        ``forward`` and ``reverse`` partition ``index``, so

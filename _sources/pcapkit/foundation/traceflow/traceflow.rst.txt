@@ -85,7 +85,7 @@ built-in TCP flow tracing class derive from.
       :no-value:
    .. autoattribute:: _nnsecd
       :no-value:
-   .. autoattribute:: _analyse
+   .. autoattribute:: _analyze
       :no-value:
 
    .. automethod:: __call__
