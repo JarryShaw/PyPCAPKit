@@ -39,13 +39,12 @@ import time
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.const.capture import RECORD_HEADER_LEN, RESOLUTION
 from pcapkit.corekit.io import advance
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
 from pcapkit.protocols.misc.pcap.frame.schema import Frame as Schema_Frame
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.contextvars import frame_length

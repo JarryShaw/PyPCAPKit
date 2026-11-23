@@ -48,16 +48,14 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.const import ipheader as Module_IPHeader
+from pcapkit.corekit.const import tcpheader as Module_TCPHeader
+from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.internet.ah import schema as Schema_AH_Module
-from pcapkit.protocols.internet.ipv4 import schema as Schema_IPv4_Module
 from pcapkit.protocols.internet.ipv4.protocol import IPv4 as Protocol_IPv4
-from pcapkit.protocols.internet.ipv6 import protocol as Module_IPv6
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
-from pcapkit.protocols.transport.tcp import schema as Schema_TCP_Module
 from pcapkit.protocols.transport.tcp.protocol import TCP as Protocol_TCP
 from pcapkit.utilities import config
 from pcapkit.utilities.contextvars import beholding
@@ -324,8 +322,8 @@ def _network(packet: 'Packet') -> 'Optional[IP]':
     payload = getattr(link, 'payload', None)  # type: Any
     if type(payload).__name__ != 'IP':
         return None
-    if payload.hl * 4 > Schema_IPv4_Module.IPV4_HEADER_LEN and (
-            Schema_IPv4_Module.IPV4_HEADER_LEN + len(_maybe_unhex(bytes(payload.opt))) < payload.hl * 4):
+    if payload.hl * 4 > Module_IPHeader.IPV4_HEADER_LEN and (
+            Module_IPHeader.IPV4_HEADER_LEN + len(_maybe_unhex(bytes(payload.opt))) < payload.hl * 4):
         return None
     return payload
 
@@ -355,8 +353,8 @@ def _ipv6_carries_tcp(packet: 'Packet') -> 'bool':
         return False
 
     data = _maybe_unhex(bytes(payload))
-    return (len(data) >= Module_IPv6.IPV6_HEADER_LEN
-            and data[Module_IPv6.IPV6_NEXT_HEADER_OFFSET] == Enum_TransType.TCP)
+    return (len(data) >= Module_IPHeader.IPV6_HEADER_LEN
+            and data[Module_IPHeader.IPV6_NEXT_HEADER_OFFSET] == Enum_TransType.TCP)
 
 
 def _capture_of(packet: 'Packet') -> 'tuple[int, Any]':
@@ -452,8 +450,8 @@ def _transport(ipv4: 'IP') -> 'Optional[bytes]':
     segment = _maybe_unhex(bytes(segment))
     if ipv4.len:
         segment = segment[:max(ipv4.len - ipv4.hl * 4, 0)]
-    if (len(segment) < Schema_TCP_Module.TCP_MIN_HEADER_LEN
-            or (segment[Schema_TCP_Module.TCP_DATA_OFFSET_OCTET] >> 4) * 4 < Schema_TCP_Module.TCP_MIN_HEADER_LEN):
+    if (len(segment) < Module_TCPHeader.TCP_MIN_HEADER_LEN
+            or (segment[Module_TCPHeader.TCP_DATA_OFFSET_OCTET] >> 4) * 4 < Module_TCPHeader.TCP_MIN_HEADER_LEN):
         return None
     return segment
 
@@ -551,7 +549,7 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
         follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long
         (:rfc:`4302#section-2.2`), and no shorter than
-        :data:`~pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN`. Any other
+        :data:`~pcapkit.corekit.const.ipheader.AH_HEADER_LEN`. Any other
         is stepped over by the length :func:`_default_extension_header` gives,
         so one it keeps though cut short leaves no octets after it
         (:issue:`2695`).
@@ -563,8 +561,8 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
             return None
         depth += 1
         if protocol == Enum_TransType.AH:
-            length = (data[1] + 2) * 4 if len(data) >= Schema_AH_Module.AH_HEADER_LEN else 0
-            if length < Schema_AH_Module.AH_HEADER_LEN or len(data) < length:
+            length = (data[1] + 2) * 4 if len(data) >= Module_IPHeader.AH_HEADER_LEN else 0
+            if length < Module_IPHeader.AH_HEADER_LEN or len(data) < length:
                 return None
             protocol, data = data[0], data[length:]
             continue

@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for frame header of PCAP file format"""
+"""header schema for frame header of PCAP file format
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.misc.pcap.frame.schema.RECORD_HEADER_LEN``, now
+   :data:`pcapkit.corekit.const.capture.RECORD_HEADER_LEN` (:issue:`2883`).
+
+"""
 
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.const.capture import RECORD_HEADER_LEN
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import UInt32Field
 from pcapkit.corekit.schema.byteorder import byteorder_callback
@@ -14,13 +22,6 @@ __all__ = ['Frame']
 
 if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
-
-#: Length of a PCAP record header, which precedes each record's packet data.
-#: The one home of this value (:issue:`1739`); the format fixes it, so it is
-#: never configurable.
-#:
-#: .. versionadded:: 1.5.0
-RECORD_HEADER_LEN = 16
 
 
 @schema_final

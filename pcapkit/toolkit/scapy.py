@@ -31,17 +31,16 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.const.capture import RESOLUTION, RESOLUTION_PLACES
+from pcapkit.corekit.const.ipheader import IPV4_HEADER_LEN, IPV6_HEADER_LEN
+from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.foundation.engines.scapy import Scapy
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.internet.ipv4.schema import IPV4_HEADER_LEN
-from pcapkit.protocols.internet.ipv6.protocol import IPV6_HEADER_LEN
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION, RESOLUTION_PLACES
-from pcapkit.protocols.transport.tcp.schema import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,
                                         _walk_extension_headers)
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
@@ -353,7 +352,7 @@ def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | No
     Returns:
         The header, as many octets as the Data Offset counts, and the payload
         after it; or :data:`None` if there are fewer than
-        :data:`TCP_MIN_HEADER_LEN <pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN>`
+        :data:`TCP_MIN_HEADER_LEN <pcapkit.corekit.const.tcpheader.TCP_MIN_HEADER_LEN>`
         octets, the Data Offset counts fewer or more than were captured, or
         pcapkit's own TCP parser rejects the options (see
         :func:`~pcapkit.toolkit.pypcapfile._default_accepts`).

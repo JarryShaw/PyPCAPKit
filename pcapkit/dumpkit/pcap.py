@@ -13,10 +13,10 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.dumpkit.common import DumperBase
 from pcapkit.protocols.misc.pcap.header.data import Header as Data_Header
 from pcapkit.protocols.misc.pcap.header.protocol import Header
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibIntEnum

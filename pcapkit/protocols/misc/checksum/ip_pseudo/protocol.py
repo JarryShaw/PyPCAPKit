@@ -62,14 +62,14 @@ from pcapkit.const.ipv4.option_number import OptionNumber as Enum_IPv4Option
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH, IPV6_HEADER_LEN
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
-from pcapkit.protocols.internet.ipv6.protocol import IPV6_HEADER_LEN, IPv6
-from pcapkit.protocols.internet.ipv6.schema import IP_MAX_LENGTH
+from pcapkit.protocols.internet.ipv6.protocol import IPv6
 from pcapkit.protocols.misc.checksum.ip_pseudo.data import IP_Pseudo as Data_IP_Pseudo
 from pcapkit.protocols.misc.checksum.ip_pseudo.schema import IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN
 from pcapkit.protocols.misc.checksum.ip_pseudo.schema import IP_Pseudo as Schema_IP_Pseudo

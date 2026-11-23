@@ -76,7 +76,7 @@ SAMPLE = ROOT / 'examples' / 'captures'
 
 #: PCAP file magic numbers, keyed by endianness and nanosecond-resolution flag.
 #: The same values as
-#: :data:`pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER`, which the
+#: :data:`pcapkit.corekit.const.capture.MAGIC_NUMBER`, which the
 #: reader these fixtures are written for dispatches on; they are repeated
 #: rather than imported so that a fixture stays generatable without
 #: :mod:`pcapkit` importing cleanly.

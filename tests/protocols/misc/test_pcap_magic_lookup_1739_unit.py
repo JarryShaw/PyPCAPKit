@@ -2,7 +2,7 @@
 """The PCAP magic number is looked up in its one home, as a comparison would read it. C.f. #1739.
 
 The magic numbers live in
-:data:`pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER`, and the code
+:data:`pcapkit.corekit.const.capture.MAGIC_NUMBER`, and the code
 that reads them looks them up there, which pins two behaviours a comparison
 against literals has:
 

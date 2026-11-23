@@ -13,9 +13,9 @@ origin. Please refer to :doc:`ip` for more information.
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.const.ipheader import IPV6_HEADER_LEN, IPV6_NEXT_HEADER_OFFSET
 from pcapkit.corekit.schema.extlen import ext_len_to_octets
 from pcapkit.foundation.reassembly.ip import IP
-from pcapkit.protocols.internet.ipv6.protocol import IPV6_HEADER_LEN, IPV6_NEXT_HEADER_OFFSET
 from pcapkit.protocols.internet.ipv6.protocol import IPv6 as IPv6_Protocol
 
 if TYPE_CHECKING:

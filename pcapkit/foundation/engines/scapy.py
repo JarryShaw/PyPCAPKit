@@ -35,12 +35,10 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 import struct
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.corekit.const.capture import DEFAULT_RESOLUTION, RECORD_HEADER_LEN, RESOLUTION
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
-from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
-from pcapkit.protocols.misc.pcapng.schema import DEFAULT_RESOLUTION
 from pcapkit.utilities.exceptions import VersionError, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn

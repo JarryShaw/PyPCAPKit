@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for internet protocol version 4"""
+"""header schema for internet protocol version 4
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.internet.ipv4.schema.IPV4_HEADER_LEN``, now
+   :data:`pcapkit.corekit.const.ipheader.IPV4_HEADER_LEN` (:issue:`2883`).
+
+"""
 
 import collections
 import datetime
@@ -12,6 +19,7 @@ from pcapkit.const.ipv4.qs_function import QSFunction as Enum_QSFunction
 from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.const.ipheader import IPV4_HEADER_LEN
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
@@ -44,14 +52,6 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase
-
-#: Length of the fixed IPv4 header, i.e. with no options, :rfc:`791#section-3.1`.
-#: The one home of this value (:issue:`1739`), here so that the schema's option
-#: length and the protocol modules read the same one; it is fixed by the RFC, so
-#: it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-IPV4_HEADER_LEN = 20
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
