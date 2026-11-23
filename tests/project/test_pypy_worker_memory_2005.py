@@ -13,6 +13,10 @@ own script with a stub ``python``, as
 ``internet``, ``application`` and ``misc`` subpackages are shards of their own
 ahead of it, and it takes the remainder.
 
+#2899: the runs together passed half the leg's cap, so each PyPy leg is a job per
+``part``, and ``|`` cuts ``SHARDS`` into the parts each runs.
+:class:`TestThePartsAreTheRuns` checks they are the unsplit leg's runs, split.
+
 """
 
 from __future__ import annotations
@@ -29,8 +33,8 @@ from tests import _tiers
 from tests._support import bash_argv
 from tests.project.test_python_matrix_tiers_1633 import job, legs
 from tests.project.test_python_versions_1660 import ROOT, prose
-from tests.project.test_sweeps_on_latest_only_1732 import (JOB, RUNNER_TEMP, run_step_each, shards, step,
-                                                          step_env, unsharded)
+from tests.project.test_sweeps_on_latest_only_1732 import (JOB, PART_BREAK, RUNNER_TEMP, leg_shards, run_step_each,
+                                                          shards, step, step_env, unsharded)
 
 #: Test tier (#1958): checks the workflow's own shell.
 __tier__ = 'LATEST'
@@ -40,15 +44,17 @@ KTLO = ('unit-tests.yml', 'test-ktlo')
 #: The directories a PyPy leg runs on their own, in order; #2600 split ``tests/protocols``.
 SHARDS = ['tests/protocols/internet', 'tests/protocols/application', 'tests/protocols/misc', 'tests/protocols',
           'tests/corekit']
+#: #2899: the shards each part runs, in order; the last part runs the rest too.
+PARTS = [SHARDS[:4], SHARDS[4:]]
 #: The page that says how the legs run.
 DOC = ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst'
 
 
-def pypy_legs() -> 'list[dict[str, object]]':
-    """Each supported PyPy leg of ``test``, all of which block; the tier file may hold several."""
-    found = [leg for leg in legs(*JOB) if str(leg['python-version']).startswith('pypy')]
+def pypy_legs(where: 'tuple[str, str]' = JOB) -> 'list[dict[str, object]]':
+    """Each PyPy leg of job ``where``, a leg per part (#2899); the tier file may hold several versions."""
+    found = [leg for leg in legs(*where) if str(leg['python-version']).startswith('pypy')]
     if not found:
-        raise AssertionError('expected a PyPy leg of test, found none')
+        raise AssertionError(f'expected a PyPy leg of {where}, found none')
     return found
 
 
@@ -58,9 +64,9 @@ class TestOnlyPyPyShards(unittest.TestCase):
         every = legs(*JOB) + legs(*KTLO)
         self.assertTrue([leg for leg in legs(*KTLO) if str(leg['python-version']).startswith('pypy')])
         for leg in every:
-            with self.subTest(python=leg['python-version']):
+            with self.subTest(python=leg['python-version'], part=leg.get('part')):
                 pypy = str(leg['python-version']).startswith('pypy')
-                self.assertEqual(shards(leg), SHARDS if pypy else [])
+                self.assertEqual(shards(leg), [*PARTS[0], PART_BREAK, *PARTS[1]] if pypy else [])
 
     def test_the_ktlo_twin_runs_the_same_step(self) -> None:
         self.assertEqual(job(*KTLO)['steps'], job(*JOB)['steps'])
@@ -78,16 +84,20 @@ class TestOnlyPyPyShards(unittest.TestCase):
 @unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')
 class TestTheRunsCoverTheTier(unittest.TestCase):
 
-    def test_each_pypy_leg_runs_each_shard_then_the_rest(self) -> None:
+    def test_each_pypy_leg_runs_each_shard_of_its_part_then_the_rest(self) -> None:
+        """#2899: part 1 the shards before the ``|``, part 2 those after it and the rest."""
         for leg in pypy_legs():
-            with self.subTest(python=leg['python-version']):
+            part = int(str(leg['part']))
+            with self.subTest(python=leg['python-version'], part=part):
                 runs = run_step_each(leg)
-                self.assertEqual(len(runs), len(SHARDS) + 1)
+                last = part == len(PARTS)
+                self.assertEqual(len(runs), len(PARTS[part - 1]) + last)
                 common = unsharded(leg, runs)
                 self.assertEqual(common[:2], ['-m', 'pytest'])
                 self.assertIn(f'--junitxml={RUNNER_TEMP}/junit.xml', common)
-                self.assertEqual([run[-1] for run in runs[:-1]], SHARDS)
-                self.assertEqual(runs[-1][-len(SHARDS):], [f'--ignore={shard}' for shard in SHARDS])
+                self.assertEqual([run[-1] for run in runs[:len(PARTS[part - 1])]], PARTS[part - 1])
+                if last:
+                    self.assertEqual(runs[-1][-len(SHARDS):], [f'--ignore={shard}' for shard in SHARDS])
 
     def test_every_other_leg_runs_pytest_once(self) -> None:
         for leg in legs(*JOB):
@@ -97,9 +107,11 @@ class TestTheRunsCoverTheTier(unittest.TestCase):
                 self.assertEqual(len(run_step_each(leg)), 1)
 
     def test_a_shard_that_fails_fails_the_step_after_the_rest_ran(self) -> None:
-        """A failing run does not stop the others, and its status is the step's, on each PyPy leg."""
+        """A failing run does not stop the others, and its status is the step's, on each part of each PyPy leg."""
         for leg in pypy_legs():
-            with self.subTest(python=leg['python-version']), tempfile.TemporaryDirectory() as temp:
+            _, mine, rest = leg_shards(leg)
+            with self.subTest(python=leg['python-version'], part=leg['part']), \
+                    tempfile.TemporaryDirectory() as temp:
                 stub = pathlib.Path(temp, 'python')
                 # The first pytest run fails as pytest does on a failed test; `-c` asks the real interpreter.
                 stub.write_text('#!/bin/sh\ncase "$1" in -c|util/pytest_shards.py) exec "$REAL_PYTHON" "$@";; '
@@ -115,7 +127,39 @@ class TestTheRunsCoverTheTier(unittest.TestCase):
                 result = subprocess.run(bash_argv('-e', '-c', step()['run']), env=env, cwd=ROOT,  # nosec B603 B607
                                         capture_output=True, text=True, check=False, timeout=120)
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-                self.assertEqual(runs.read_text(encoding='utf-8').count('run'), len(SHARDS) + 1)
+                self.assertEqual(runs.read_text(encoding='utf-8').count('run'), len(mine) + rest)
+
+
+@unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')
+class TestThePartsAreTheRuns(unittest.TestCase):
+    """#2899: a PyPy leg's parts, a job each, run between them exactly the unsplit leg's runs."""
+
+    def test_each_version_runs_a_leg_per_part(self) -> None:
+        for where in (JOB, KTLO):
+            found = [(leg['python-version'], leg['part']) for leg in pypy_legs(where)]
+            versions = list(dict.fromkeys(version for version, _ in found))
+            with self.subTest(job=where[1]):
+                self.assertEqual(found, [(version, part) for version in versions
+                                         for part in range(1, len(PARTS) + 1)])
+
+    def test_the_parts_together_are_the_unsplit_runs(self) -> None:
+        """The runs of every part, in order, are the runs of the leg with no part."""
+        versions = list(dict.fromkeys(str(leg['python-version']) for leg in pypy_legs()))
+        for version in versions:
+            parts = [leg for leg in pypy_legs() if leg['python-version'] == version]
+            whole = dict(parts[0])
+            whole.pop('part')
+            with self.subTest(python=version):
+                split = [run for leg in parts for run in run_step_each(leg)]
+                self.assertEqual(split, run_step_each(whole, script=step()['run'].replace('--part "$PART" ', '')))
+                self.assertEqual(len(split), len(SHARDS) + 1)
+
+    def test_a_leg_without_its_part_fails_the_step(self) -> None:
+        """A PyPy leg the matrix gives no ``part`` stops at the script's usage error, rather than run every part."""
+        leg = dict(pypy_legs()[0])
+        leg.pop('part')
+        with self.assertRaisesRegex(AssertionError, r'--part takes a part from 1 to 2'):
+            run_step_each(leg)
 
 
 class TestTheTimingsAreUploaded(unittest.TestCase):
@@ -124,14 +168,16 @@ class TestTheTimingsAreUploaded(unittest.TestCase):
         upload = next(entry for entry in job(*JOB)['steps'] if entry.get('name') == 'Upload test timings')
         self.assertEqual(upload['with']['path'], '${{ runner.temp }}/junit*.xml')
         for leg in pypy_legs():
+            _, mine, _ = leg_shards(leg)
             runs = run_step_each(leg)
-            for shard, run in zip(SHARDS, runs):
-                with self.subTest(python=leg['python-version'], shard=shard):
+            for shard, run in zip(mine, runs):
+                with self.subTest(python=leg['python-version'], part=leg['part'], shard=shard):
                     self.assertIn(f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', run)
 
     def test_the_shards_run_through_the_graalpy_script(self) -> None:
-        """#2005 reuses #1963's util/pytest_shards.py, on the leg's interpreter, under the one file-size cap."""
-        self.assertIn('python util/cap_file_size.py python util/pytest_shards.py "$SHARDS" -- '
+        """#2005 reuses #1963's util/pytest_shards.py, on the leg's interpreter, under the one file-size cap;
+        #2899: for the leg's part alone."""
+        self.assertIn('python util/cap_file_size.py python util/pytest_shards.py --part "$PART" "$SHARDS" -- '
                       'python -m pytest "$@"', step()['run'])
 
 
@@ -139,14 +185,15 @@ class TestTheDocsSayIt(unittest.TestCase):
 
     def test_the_workflows_page_names_the_shards(self) -> None:
         page = prose(DOC)
-        for phrase in ('#2005', '``SHARDS``', '``Run unit tests``', *(f'``{shard}``' for shard in SHARDS)):
+        for phrase in ('#2005', '``SHARDS``', '``Run unit tests``', *(f'``{shard}``' for shard in SHARDS),
+                       ':issue:`2899`', '``--part``', '``in_parts()``'):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, page)
 
     def test_the_step_says_why(self) -> None:
         text = prose(ROOT / '.github' / 'workflows' / 'unit-tests.yml')
         for phrase in ('#2005:', 'A smaller `-n` only hands each worker more tests.',
-                       'every run starts its workers afresh'):
+                       'every run starts its workers afresh', '#2899:'):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, text)
 

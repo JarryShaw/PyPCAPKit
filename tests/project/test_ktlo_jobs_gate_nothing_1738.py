@@ -48,6 +48,8 @@ PREFIX = {'test': 'Python', 'integration': 'Integration Python', 'pypcap-parity'
 KTLO_OF = {'test': TESTED_KTLO, 'integration': TESTED_KTLO, 'pypcap-parity': tuple(v for v in PARITY if v in KTLO)}
 SUPPORTED_OF = {'test': TESTED_SUPPORTED, 'integration': TESTED_SUPPORTED,
                 'pypcap-parity': tuple(v for v in PARITY if v in SUPPORTED)}
+#: #2899: the jobs whose PyPy legs, and their KTLO twins', are each a leg per part.
+PARTED = {'test': (1, 2)}
 
 
 def jobs() -> 'dict[str, Any]':
@@ -82,11 +84,20 @@ def holds_ktlo(job_id: 'str') -> 'bool':
 
 
 def render(template: 'str', leg: 'dict[str, Any]') -> 'str':
-    """A leg's check name, for the two expression shapes these jobs' names have used."""
+    """A leg's check name, for the expression shapes these jobs' names have used, #2899's part among them."""
     name = template.replace("${{ matrix.ktlo && ' (KTLO)' || '' }}", ' (KTLO)' if leg.get('ktlo') is True else '')
+    name = name.replace("${{ matrix.part && ' (part ' || '' }}${{ matrix.part }}${{ matrix.part && ')' || '' }}",
+                        f' (part {leg["part"]})' if leg.get('part') else '')
     name = name.replace('${{ matrix.python-version }}', leg['python-version'])
     assert '${{' not in name, name
     return name
+
+
+def parts(job_id: 'str', version: 'str') -> 'list[str]':
+    """The part each leg of ``version`` names on ``job_id``, as its check name spells it (#2899)."""
+    if job_id in PARTED and version.startswith('pypy'):
+        return [f' (part {part})' for part in PARTED[job_id]]
+    return ['']
 
 
 def gating() -> 'list[str]':
@@ -122,7 +133,7 @@ class TestNothingGatingWaitsOnKTLO(unittest.TestCase):
             with self.subTest(job=job_id):
                 self.assertIn(job_id, gating())
                 self.assertIn(job_id, needs(jobs()['required-checks']))
-                self.assertEqual(sorted(leg['python-version'] for leg in matrix_legs(job_id)), sorted(versions))
+                self.assertEqual(sorted({leg['python-version'] for leg in matrix_legs(job_id)}), sorted(versions))
 
 
 class TestEachLegIsNamedForItsVersion(unittest.TestCase):
@@ -134,8 +145,10 @@ class TestEachLegIsNamedForItsVersion(unittest.TestCase):
                 found = {job: sorted(render(jobs()[job]['name'], leg) for leg in matrix_legs(job))
                          for job in (job_id, twin)}
                 self.assertEqual(found, {
-                    job_id: sorted(f'{PREFIX[job_id]} {v}' for v in SUPPORTED_OF[job_id]),
-                    twin: sorted(f'{PREFIX[job_id]} {v} (KTLO)' for v in KTLO_OF[job_id]),
+                    job_id: sorted(f'{PREFIX[job_id]} {v}{part}' for v in SUPPORTED_OF[job_id]
+                                   for part in parts(job_id, v)),
+                    twin: sorted(f'{PREFIX[job_id]} {v}{part} (KTLO)' for v in KTLO_OF[job_id]
+                                 for part in parts(job_id, v)),
                 })
 
     def test_no_ktlo_name_is_a_required_context(self) -> None:

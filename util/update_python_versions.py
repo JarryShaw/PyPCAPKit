@@ -487,13 +487,19 @@ def matrix_legs(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 'dict[
     return found
 
 
+#: The ``include``-only keys that tell apart legs of one version, and so key a leg
+#: too: a PyPy leg of ``test`` is a leg per ``part`` (#2899).
+LEG_KEYS = ('part',)
+
+
 def leg_names(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 'dict[tuple[str, str], dict[tuple, str]]':
-    """Each such job's check-run names, keyed by the leg's base-axis values."""
+    """Each such job's check-run names, keyed by the leg's base-axis values and :data:`LEG_KEYS`."""
     found = {}
     for (name, job_id), legs in matrix_legs(workflows, values).items():
         template = str(workflows[name]['jobs'][job_id].get('name', job_id))
         base = axes(matrix_spec(workflows, name, job_id, values) or {})
-        found[(name, job_id)] = {tuple((key, leg.get(key)) for key in base): render_name(template, leg)
+        keys = [*base, *(key for key in LEG_KEYS if key not in base)]
+        found[(name, job_id)] = {tuple((key, leg.get(key)) for key in keys): render_name(template, leg)
                                  for leg in legs}
     return found
 

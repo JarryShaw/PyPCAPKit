@@ -1173,6 +1173,24 @@ the kills into ``MemoryError``\ s. Each run but the last writes a JUnit file of 
 own beside ``junit.xml``, which ``Upload test timings`` takes too, and the step
 fails if any run did.
 
+Run that way, the tier came to 21.5 of a ``pypy3.11`` leg's 22.9 minutes on
+``5c20d06ab`` (job 137464940393), and the PyPy legs' p90 passed half their
+45-minute cap (:issue:`2899`). So each PyPy leg of ``test`` and ``test-ktlo`` is a
+job per ``part``, ``Python pypy3.11 (part 1)`` and so on, the KTLO one's ``(part 1)
+(KTLO)``, and the leg's runs are split between them. A ``|`` among the ``SHARDS``
+ends a part, and :file:`util/pytest_shards.py`'s ``--part`` runs one part's runs
+alone, the last part's with the rest: part 1 the runs under ``tests/protocols``,
+10.7 minutes in that job, and part 2 ``tests/corekit`` and the rest, 10.8. Each run
+is the one the unsplit leg made, ignoring every earlier shard, so the parts together
+run exactly its tests. :file:`util/python_versions.py`'s ``in_parts()`` writes a leg
+per entry of its ``PYPY_PARTS``, each an ``include`` entry of its own with its
+version off the ``python-version`` axis: on an axis leg the second part would replace
+the first, as "added matrix values can be overwritten" (`Workflow syntax
+<https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstrategymatrixinclude>`__,
+``jobs.<job_id>.strategy.matrix.include``). Each part uploads
+``junit-unit-<version>-part-<part>``, part 1 with no ``junit.xml``. No ruleset
+context names a PyPy leg, so the new names change no required check.
+
 Nothing below ``requires-python``'s 3.8 is in any matrix (:issue:`2051`):
 pip refuses such an
 interpreter at install, so a leg there could only prove the refusal. Nor are

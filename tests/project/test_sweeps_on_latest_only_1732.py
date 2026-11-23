@@ -181,9 +181,29 @@ def run_step_each(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB,
         return runs
 
 
+#: #2899: what ends a part of the shards, util/pytest_shards.py's ``PART_BREAK``.
+PART_BREAK = '|'
+
+
 def shards(leg: 'dict[str, Any]') -> 'list[str]':
-    """#2005: the directories the ``test`` step runs on their own on ``leg``, before the rest."""
+    """#2005: the directories the ``test`` step runs on their own on ``leg``, before the rest,
+    with :data:`PART_BREAK` where a part ends (#2899)."""
     return step_env(leg).get('SHARDS', '').split()
+
+
+def leg_shards(leg: 'dict[str, Any]') -> 'tuple[list[str], list[str], bool]':
+    """Every shard of ``leg``'s step, those its ``part`` runs, and whether it runs the rest (#2899)."""
+    groups = [[]]  # type: list[list[str]]
+    for shard in shards(leg):
+        if shard == PART_BREAK:
+            groups.append([])
+        else:
+            groups[-1].append(shard)
+    every = [shard for group in groups for shard in group]
+    part = leg.get('part')
+    if not part:  # none, or test-latest-tier's empty one
+        return every, every, True
+    return every, groups[int(part) - 1], int(part) == len(groups)
 
 
 def unsharded(leg: 'dict[str, Any]', runs: 'list[list[str]]') -> 'list[str]':
@@ -191,21 +211,31 @@ def unsharded(leg: 'dict[str, Any]', runs: 'list[list[str]]') -> 'list[str]':
 
     #2005: util/pytest_shards.py's run per directory :func:`shards` names adds its JUnit
     file, an ``--ignore`` of each earlier shard, and the directory, and the last run an
-    ``--ignore`` of each.
+    ``--ignore`` of each. #2899: a leg's ``part`` makes only its part's runs, each as
+    the whole leg would.
 
     """
-    named = shards(leg)
-    if len(runs) != len(named) + 1:
-        raise AssertionError(f'{len(runs)} runs on {leg} for the shards {named}')
-    rest = [f'--ignore={shard}' for shard in named]
-    common = runs[-1][:len(runs[-1]) - len(rest)]
-    if runs[-1][len(common):] != rest:
-        raise AssertionError(f'the last run on {leg} does not end by ignoring {named}: {runs[-1]}')
-    for index, (shard, run) in enumerate(zip(named, runs)):
-        own = [f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', *rest[:index], shard]
+    every, mine, rest_run = leg_shards(leg)
+    if len(runs) != len(mine) + rest_run or not runs:
+        raise AssertionError(f'{len(runs)} runs on {leg} for the shards {mine}, the rest {rest_run}')
+    rest = [f'--ignore={shard}' for shard in every]
+    owns = [[f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', *rest[:every.index(shard)], shard]
+            for shard in mine]
+    if rest_run:
+        common = runs[-1][:len(runs[-1]) - len(rest)]
+        if runs[-1][len(common):] != rest:
+            raise AssertionError(f'the last run on {leg} does not end by ignoring {every}: {runs[-1]}')
+    else:
+        common = runs[0][:len(runs[0]) - len(owns[0])]
+    for shard, own, run in zip(mine, owns, runs):
         if run != common + own:
             raise AssertionError(f'the {shard} run on {leg} is not the others\' arguments and {own}: {run}')
     return common
+
+
+def leg_name(leg: 'dict[str, Any]') -> 'str':
+    """``leg``'s version, and its part where it has one (#2899)."""
+    return str(leg['python-version']) + (f' (part {leg["part"]})' if leg.get('part') else '')
 
 
 def pytest_args(argv: 'list[str]') -> 'list[str]':
@@ -267,8 +297,9 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         cls.latest = live_outputs()['latest']
         # #2005: a PyPy leg of `test` runs pytest once a shard, each with the arguments the others share;
         # #1963: GraalPy's `experimental` leg through util/pytest_shards.py, whose last run is the rest.
-        cls.runs = {leg['python-version']: (leg, unsharded(leg, run_step_each(leg, where)) if where == JOB
-                                            else rest_unsharded(leg, where, run_step_each(leg, where)[-1]))
+        # #2899: and each part of a PyPy leg is a leg of its own.
+        cls.runs = {leg_name(leg): (leg, unsharded(leg, run_step_each(leg, where)) if where == JOB
+                                    else rest_unsharded(leg, where, run_step_each(leg, where)[-1]))
                     for where in (JOB, EXPERIMENTAL) for leg in legs(*where)}
         assert len(cls.runs) == len(legs(*JOB)) + len(legs(*EXPERIMENTAL)), 'a version runs in both jobs'
         # #2751: each half of the LATEST tier, on `latest`, by the same step.

@@ -546,6 +546,19 @@ class ProjectPinRuleTests(unittest.TestCase):
             'a computed script name': 'import importlib.util\ndef load(name):\n'
                                       '    importlib.util.spec_from_file_location(name, f"util/{name}.py")\n',
             'a module that imports it on import': 'from tests.project.test_pyshark_encap_map import ROOT\n',
+            # Its functions import it, and the whole module runs.
+            'a helper whose functions do, whole': 'import tests._support\nCALL = tests._support\n',
+            # #2899: a script handed to the function that runs it, as an argument.
+            'an argument a child runs': 'import subprocess, sys\ndef child(script):\n'
+                                        '    subprocess.run([sys.executable, "-c", script])\nchild("import pcapkit")\n',
+            # #2899: a name taken runs the top-level names its definition reads.
+            'a name whose definition reads one that does': 'from tests._support import skip_if_stand_in\n',
+            # #2899: a directory a child collects runs every file under it.
+            'a test directory a child collects': 'import subprocess, sys\n'
+                                                 'subprocess.run([sys.executable, "-m", "pytest", "tests/cli"])\n',
+            # #2899: a gate in a decorator, a call that also runs on import, still counts.
+            'a class taken whose decorator branches': 'from tests.project.test_release_tags_the_run_sha_1634 '
+                                                       'import TestTheCountsAreOfTheReleasedTiers\n',
             'unparsable': 'def broken(:\n',
         }
         for label, source in cases.items():
@@ -562,6 +575,11 @@ class ProjectPinRuleTests(unittest.TestCase):
                                                       'importlib.util.spec_from_file_location('
                                                       '"c", ROOT / "util" / "ci_timing.py")\n',
             'a helper whose other names would': 'from tests._tiers import ROOT, is_unit_tier\n',
+            # #2899: a function body runs when it is called, not on import, and of a
+            # module object only the attributes read run.
+            'a helper whose other functions would': 'from tests._support import bash_argv\n',
+            'an attribute of a helper module': 'from tests import _support as support\n'
+                                               'ARGV = support.bash_argv("-c", "true")\n',
             'a version only assigned': 'import types\nFAKE = types.SimpleNamespace()\nFAKE.version_info = (3, 5)\n',
         }
         for label, source in cases.items():
