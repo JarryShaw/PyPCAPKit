@@ -16,6 +16,7 @@ inside each test, after :func:`~tests._support.reimport_once_per_class`.
 import importlib.util
 import io
 import struct
+import tempfile
 import typing
 import unittest
 import warnings
@@ -147,6 +148,7 @@ class RegistryKeyTests(unittest.TestCase):
     def test_mixed_case_traceflow_is_enabled_and_reached(self) -> None:
         """A mixed-case flow tracer passes the extractor's name check and its callback reaches it."""
         from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.foundation.registry.foundation import register_traceflow_callback
         from pcapkit.utilities.warnings import AttributeWarning
 
@@ -157,10 +159,12 @@ class RegistryKeyTests(unittest.TestCase):
         register_traceflow_callback('SILENT', callback)
         self.assertEqual(Silent.__callback_fn__, [callback])
 
-        # NOTE: no engine feeds a tracer but TCP's, so the name passes and is then dropped.
+        # NOTE: the default engine has no ``silent`` adapter, so the name passes and is then dropped.
+        fout = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+        self.addCleanup(fout.cleanup)
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            Extractor(io.BytesIO(capture()), traceflow=['Silent'])
+            Extractor(io.BytesIO(capture()), traceflow=TraceFlowOptions(protocols=['Silent'], fout=fout.name))
         self.assertTrue(any(issubclass(warning.category, AttributeWarning)
                             and "'silent' will be ignored" in str(warning.message) for warning in caught))
 

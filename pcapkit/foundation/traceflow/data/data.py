@@ -184,10 +184,24 @@ def _frame_record(mapping: 'Mapping[str, Any]', packet: 'bytes',
 
 @info_final
 class TraceFlowData(Info):
-    """Data storage for flow tracing."""
+    """Data storage for flow tracing.
+
+    The built-in ``tcp`` field is :data:`None` when TCP flow tracing is disabled.
+    Every other enabled flow tracer adds a field of its own, under the name it is
+    registered by in :attr:`Extractor.__traceflow__
+    <pcapkit.foundation.extraction.Extractor.__traceflow__>`, iterated after
+    ``tcp`` in the order given.
+
+    .. versionchanged:: 1.7.0
+
+       Takes a field for each enabled flow tracer beyond TCP's (:issue:`2843`).
+
+    """
 
     #: TCP traced flows.
     tcp: 'tuple[TCP_Index, ...]'
 
-    if TYPE_CHECKING:
-        def __init__(self, tcp: 'Optional[tuple[TCP_Index, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+    def __init__(self, tcp: 'Optional[tuple[TCP_Index, ...]]' = None,  # pylint: disable=super-init-not-called
+                 **kwargs: 'Optional[tuple[Any, ...]]') -> 'None':
+        self.__update__(tcp=tcp, **kwargs)
+        self.__post_init__()

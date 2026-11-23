@@ -36,7 +36,7 @@ An extraction runs in this order; a third-party engine implements its own
        MAN["the caller drives it<br/>next(extractor) or extractor()"]
        RF["engine.read\_frame()"]
        EOF{"no\_eof, and the input<br/>still producing?"}
-       CLEAN["\_cleanup(): TCP flow tracing finished,<br/>the input closed if this class opened it,<br/>the engine closed"]
+       CLEAN["\_cleanup(): every flow tracer finished,<br/>the input closed if this class opened it,<br/>the engine closed"]
        FAIL["\_cleanup(failed=True), then re-raised<br/>input and engine released,<br/>tracing not finished"]
        NEXT["the frame: read on under auto,<br/>else returned to the caller"]
 
@@ -58,8 +58,8 @@ An extraction runs in this order; a third-party engine implements its own
            F3W["write it: a file per frame under files=,<br/>else the one output"]
            F4{"reassembly?"}
            F4R["the engine's toolkit adapters feed<br/>each enabled reassembler"]
-           F5{"traceflow names tcp?"}
-           F5T["toolkit tcp\_traceflow feeds<br/>the TCP flow tracer"]
+           F5{"traceflow?"}
+           F5T["the engine's toolkit adapters feed<br/>each enabled flow tracer"]
            F6{"store?"}
            F6S["kept in .frame"]
            F1 --> F2 --> F3
@@ -115,6 +115,7 @@ An extraction runs in this order; a third-party engine implements its own
    .. automethod:: register_traceflow
 
    .. automethod:: make_reassembly
+   .. automethod:: make_traceflow
 
    .. automethod:: run
 
@@ -162,7 +163,6 @@ An extraction runs in this order; a third-party engine implements its own
    .. autoattribute:: _frame
    .. autoattribute:: _reasm
    .. autoattribute:: _trace
-   .. autoattribute:: _tcp
 
    .. autoattribute:: _eof_mark
    .. autoattribute:: _vfunc

@@ -19,6 +19,7 @@ import importlib
 import inspect
 import io
 import os
+import sys
 import types
 import weakref
 from typing import TYPE_CHECKING, Generic, Literal, TypeVar, cast, get_args
@@ -62,7 +63,6 @@ if TYPE_CHECKING:
     from scapy.packet import Packet as ScapyPacket
 
     from pcapkit.corekit.context import ProtocolContext
-    from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
     from pcapkit.protocols.misc.pcap.frame.protocol import Frame
     from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
@@ -211,7 +211,8 @@ class Extractor(Generic[_P]):
        :class:`~pcapkit.foundation.options.StreamOptions`. ``reassembly``
        and ``traceflow`` also take a list of registered names, so any registered
        reassembler can be enabled, and each enabled one is fed every frame's
-       timestamp (:issue:`2814`). ``nofile``, ``fout``, ``format``,
+       timestamp (:issue:`2814`). Every enabled flow tracer is made and fed,
+       where TCP's alone was (:issue:`2843`). ``nofile``, ``fout``, ``format``,
        ``extension``, ``files``, ``ip``, ``ipv4``, ``ipv6``, ``tcp``,
        ``dtls``, the ``reasm_*``, ``trace_*`` and ``buffer_*`` parameters and
        ``no_eof`` are removed with no alias. Nothing is written without
@@ -255,7 +256,10 @@ class Extractor(Generic[_P]):
         #: :attr:`~pcapkit.foundation.extraction.Extractor._reasm`, and the
         #: engines that cannot reassemble clear it on startup.
         _flag_r: 'bool'
-        #: Trace flag. It indicates if the flow tracing is enabled.
+        #: Trace flag. It indicates if flow tracing is enabled. Every engine
+        #: reads it to decide whether to feed
+        #: :attr:`~pcapkit.foundation.extraction.Extractor._trace`, and clears it
+        #: on startup once it has dropped every enabled flow tracer.
         _flag_t: 'bool'
         #: Verbose flag. It indicates if verbose output is enabled, whether by
         #: ``verbose=True`` or by a callback, which
@@ -295,11 +299,9 @@ class Extractor(Generic[_P]):
         #: The enabled reassemblers, each fed every frame. An engine drops one it
         #: has no adapter for at startup.
         _reasm: 'ReassemblyManager'
-        #: Frame record for flow tracing.
+        #: The enabled flow tracers, each fed every frame. An engine drops one it
+        #: has no adapter for at startup.
         _trace: 'TraceFlowManager'
-
-        #: TCP flag. It indicates if TCP flow tracing is enabled.
-        _tcp: 'bool'
 
         #: Extract til protocol.
         _exptl: 'Protocols'
@@ -508,6 +510,10 @@ class Extractor(Generic[_P]):
 
         * ``tcp`` -- tuple of TCP flows (:term:`trace.tcp.index`)
 
+        It is :data:`None` when TCP flow tracing is disabled, and every other
+        enabled flow tracer adds the tuple of its flows, under the name it is
+        registered by.
+
         Raises:
             UnsupportedCall: If :attr:`self._flag_t <pcapkit.foundation.extraction.Extractor._flag_t>`
                 is :data:`False`, as flow tracing is disabled.
@@ -520,14 +526,12 @@ class Extractor(Generic[_P]):
         .. versionadded:: 1.7.0
 
            Renamed from ``trace``, with no alias, to match ``traceflow`` and
-           :attr:`reassembly` (:issue:`2836`).
+           :attr:`reassembly` (:issue:`2836`). Carries every enabled flow
+           tracer, not only TCP's (:issue:`2843`).
 
         """
         if self._flag_t:
-            data = TraceFlowData(
-                tcp=tuple(self._trace.tcp.index) if self._tcp else None,
-            )
-            return data
+            return TraceFlowData(**{name: tuple(tracer.index) for (name, tracer) in self._trace.items()})
         raise UnsupportedCall("'Extractor(traceflow=None)' object has no attribute 'traceflow'")
 
     @property
@@ -943,6 +947,69 @@ class Extractor(Generic[_P]):
             warn(f'traceflow {protocol} already registered, overwriting', RegistryWarning)
         cls.__traceflow__[protocol] = traceflow
 
+    @classmethod
+    def make_traceflow(cls, protocol: 'str', *, fout: 'str' = './tmp',
+                       format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
+                       byteorder: 'Literal["little", "big"]' = sys.byteorder,
+                       nanosecond: 'bool' = False, bidirectional: 'bool' = True,
+                       analyze: 'bool' = False) -> 'TraceFlowBase':
+        """Make the flow tracer registered under a protocol name.
+
+        Every caller reaches a flow tracer through this:
+        :class:`~pcapkit.foundation.extraction.Extractor` for each one it
+        enables, and :func:`~pcapkit.interface.core.trace`. Its keywords are
+        those of :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`.
+
+        Arguments:
+            protocol: protocol name, matched lower-cased, as
+                :meth:`register_traceflow` registers it
+            fout: output root path, made if missing
+            format: output format
+            byteorder: output file byte order
+            nanosecond: output nanosecond-resolution file flag
+            bidirectional: whether both halves of a conversation are traced as
+                one flow
+            analyze: whether each traced flow reassembles its application layer
+
+        Returns:
+            The flow tracer instance.
+
+        Raises:
+            FormatError: If no flow tracer is registered under ``protocol``.
+            RegistryError: If ``protocol`` is not a :obj:`str`.
+
+        .. versionadded:: 1.7.0
+
+        """
+        trace_cls = cls._traceflow_class(protocol)
+        return trace_cls(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond,
+                         bidirectional=bidirectional, analyze=analyze)
+
+    @classmethod
+    def _traceflow_class(cls, protocol: 'str') -> 'Type[TraceFlowBase]':
+        """The flow tracing class registered under a protocol name, imported.
+
+        Arguments:
+            protocol: protocol name, matched lower-cased
+
+        Returns:
+            The class, which replaces its module descriptor in
+            :attr:`__traceflow__`.
+
+        Raises:
+            FormatError: If no flow tracer is registered under ``protocol``.
+            RegistryError: If ``protocol`` is not a :obj:`str`.
+
+        """
+        name = _registry_key('traceflow', protocol)
+        trace_cls = cls.__traceflow__.get(name)
+        if trace_cls is None:
+            raise FormatError(f'unsupported flow tracing protocol: {protocol!r}')
+        if isinstance(trace_cls, ModuleDescriptor):
+            trace_cls = trace_cls.klass
+            cls.__traceflow__[name] = trace_cls  # update mapping upon import
+        return trace_cls
+
     def run(self) -> 'None':  # pylint: disable=inconsistent-return-statements
         """Start extraction.
 
@@ -1337,7 +1404,7 @@ class Extractor(Generic[_P]):
         Warns:
             pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:
 
-                * If using PCAP or PCAP-NG output for TCP flow tracing while the
+                * If using PCAP or PCAP-NG output for flow tracing while the
                   extraction engine is PyShark or PyPCAPFile.
                 * If using PCAP or PCAP-NG output while the extraction engine is a
                   third-party one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.
@@ -1355,8 +1422,8 @@ class Extractor(Generic[_P]):
                 ``traceflow`` names nothing, which turns it off; or if
                 ``traceflow`` asks for
                 :attr:`~pcapkit.foundation.options.TraceFlowOptions.analyze`
-                while the extraction engine is PyShark, or names a registered flow
-                tracer other than TCP's, which no engine feeds.
+                while the extraction engine is PyShark; or if the engine has no
+                adapter for an enabled reassembler or flow tracer, which it drops.
 
         Raises:
             UnsupportedCall: If ``fin`` is a stream without a :obj:`str` ``name``
@@ -1398,7 +1465,7 @@ class Extractor(Generic[_P]):
         for name in trace_opts.protocols if trace_opts is not None else ():
             if name not in self.__traceflow__:
                 raise FormatError(f'unsupported flow tracing protocol: {name!r}')
-        if trace_opts is not None and 'tcp' in trace_opts.protocols:
+        if trace_opts is not None:
             self._check_trace(trace_opts)
 
         if isinstance(layer, type) and issubclass(layer, ProtocolBase):
@@ -1484,9 +1551,8 @@ class Extractor(Generic[_P]):
                                                         timeout=reasm_opts.timeout)
         self._reasm = ReassemblyManager(reasm_objs)
 
-        self._tcp = False
+        trace_objs = {}  # type: dict[str, TraceFlowBase]
         if trace_opts is not None:
-            trace_obj_tcp = None
             trace_format = trace_opts.format
             trace_analyze = trace_opts.analyze
 
@@ -1505,29 +1571,14 @@ class Extractor(Generic[_P]):
                      stacklevel=stacklevel())
                 trace_analyze = False
 
-            # NOTE: every engine feeds the TCP tracer alone, so another registered one is dropped.
             for name in trace_opts.protocols:
-                if name != 'tcp':
-                    warn(f"'Extractor(engine={self._exnam})' object does not support {name} flow "
-                         f'tracing; so {name!r} will be ignored', AttributeWarning, stacklevel=stacklevel())
-
-            if 'tcp' in trace_opts.protocols:
-                logger.debug('TCP flow tracing enabled')
-                self._tcp = True
-
-                trace_cls_tcp = self.__traceflow__['tcp']
-                if isinstance(trace_cls_tcp, ModuleDescriptor):
-                    trace_cls_tcp = trace_cls_tcp.klass
-                    self.__traceflow__['tcp'] = trace_cls_tcp  # update mapping upon import
-                trace_obj_tcp = cast('TCP_TraceFlow', trace_cls_tcp(fout=trace_opts.fout, format=trace_format,
-                                                                    byteorder=trace_opts.byteorder,
-                                                                    nanosecond=trace_opts.nanosecond,
-                                                                    bidirectional=trace_opts.bidirectional,
-                                                                    analyze=trace_analyze))
-
-            self._trace = TraceFlowManager(
-                tcp=trace_obj_tcp,
-            )
+                logger.debug('%s flow tracing enabled', name)
+                trace_objs[name] = self.make_traceflow(name, fout=trace_opts.fout, format=trace_format,
+                                                       byteorder=trace_opts.byteorder,
+                                                       nanosecond=trace_opts.nanosecond,
+                                                       bidirectional=trace_opts.bidirectional,
+                                                       analyze=trace_analyze)
+        self._trace = TraceFlowManager(trace_objs)
 
         if self._flag_s:
             logger.debug('opening input file %s', ifnm)
@@ -1735,24 +1786,22 @@ class Extractor(Generic[_P]):
     ##########################################################################
 
     def _check_trace(self, trace: 'TraceFlowOptions') -> 'None':
-        """Check the TCP tracer's output settings, before its directory is made.
+        """Check each enabled flow tracer's output settings, before a directory is made.
 
         Arguments:
             trace: the flow tracing settings
 
         Raises:
-            FormatError: If no dumper is registered for ``trace.format``.
+            FormatError: If an enabled flow tracer has no dumper registered for
+                ``trace.format``.
             EndianError: If ``trace.byteorder`` is neither ``'big'`` nor ``'little'``.
 
         """
-        trace_cls = self.__traceflow__['tcp']
-        if isinstance(trace_cls, ModuleDescriptor):
-            trace_cls = trace_cls.klass
-            self.__traceflow__['tcp'] = trace_cls  # update mapping upon import
-        # NOTE: ``__output__`` is a defaultdict; subscripting would insert the unknown format.
-        entry = trace_cls.__output__.get(trace.format)
-        if entry is None or entry[1] is None:
-            raise FormatError(f'unknown flow tracing format: {trace.format!r}')
+        for name in trace.protocols:
+            # NOTE: ``__output__`` is a defaultdict; subscripting would insert the unknown format.
+            entry = self._traceflow_class(name).__output__.get(trace.format)
+            if entry is None or entry[1] is None:
+                raise FormatError(f'unknown flow tracing format: {trace.format!r}')
         if trace.byteorder not in ('big', 'little'):
             raise EndianError(f'unknown flow tracing byte order: {trace.byteorder!r}')
 
@@ -1909,16 +1958,18 @@ class Extractor(Generic[_P]):
         and a stream the caller supplied is left alone for the caller to close
         when it is done with it.
 
-        It also tells the flow tracer the capture has ended, via
+        It also tells every enabled flow tracer the capture has ended, via
         :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlow.finish>`.
         That is the point at which a traced flow nothing has superseded can be
         said to be over, so it is where such a flow is finalised and its callbacks
         run. This method can run more than once for one extraction -- each call to
         :meth:`__next__` or :meth:`__call__` that reaches the end of a
         caller-supplied stream runs it again -- so ``finish`` is required to be
-        idempotent rather than guarded here. Should ``finish`` raise, as a
-        raising flow tracing callback makes it, the input and the engine are
-        released as under ``failed``, and its error propagates (:issue:`2857`).
+        idempotent rather than guarded here. Every tracer is finished whatever
+        another's ``finish`` raises, as a raising flow tracing callback makes it:
+        the first :exc:`Exception` propagates once the last has run, and any
+        other :exc:`BaseException` at once. Either way the input and the engine
+        are released as under ``failed`` (:issue:`2857`, :issue:`2843`).
 
         Arguments:
             failed: whether the extraction stopped on an error instead, which is
@@ -1940,15 +1991,40 @@ class Extractor(Generic[_P]):
             return
 
         self._flag_e = True
-        if self._flag_t and self._tcp:
+        if self._flag_t:
             try:
-                self._trace.tcp.finish()
+                self._finish_traceflow()
             except BaseException:
                 # NOTE: a raising callback still releases input and engine (#2857); ``failed``
                 # logs an error from the engine's close, so the callback's is the one raised.
                 self._release(failed=True)
                 raise
         self._release()
+
+    def _finish_traceflow(self) -> 'None':
+        """Finish every enabled flow tracer, whatever another's ``finish`` raises.
+
+        So one tracer's raising callback leaves no other's flows unfinalised, as
+        :func:`~pcapkit.utilities.callbacks.run_callbacks` runs callbacks.
+
+        Raises:
+            Exception: The first :exc:`Exception` a tracer's ``finish`` raised,
+                once the last has run; a later one is logged at debug level. Any
+                other :exc:`BaseException` propagates at once.
+
+        """
+        error = None  # type: Optional[Exception]
+        for (name, tracer) in self._trace.items():
+            try:
+                tracer.finish()
+            except Exception as exc:  # pylint: disable=broad-except
+                if error is None:
+                    error = exc
+                    continue
+                # NOTE: logged rather than raised, so it cannot replace the first error.
+                logger.debug('%s flow tracer raised on finish after an earlier one', name, exc_info=True)
+        if error is not None:
+            raise error
 
     def _release(self, *, failed: 'bool' = False) -> 'None':
         """Close the input this class owns, and the engine.

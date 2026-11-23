@@ -121,7 +121,11 @@ disabled with an :class:`~pcapkit.utilities.warnings.AttributeWarning`, and an e
 with no entries at all, as :mod:`pcapkit.foundation.engines.pyshark`, disables
 reassembly (:issue:`2814`). DTLS has entries on the default engine alone.
 
-**Flow tracing takes the same shape.** Each engine's :attr:`EngineBase.__traceflow__
+**Flow tracing takes the same shape.** Every enabled flow tracer is made by the name it
+is registered under in :attr:`Extractor.__traceflow__
+<pcapkit.foundation.extraction.Extractor.__traceflow__>`, through
+:meth:`Extractor.make_traceflow <pcapkit.foundation.extraction.Extractor.make_traceflow>`,
+and finished at the end of the capture. Each engine's :attr:`EngineBase.__traceflow__
 <pcapkit.foundation.engines.engine.EngineBase.__traceflow__>` maps every flow tracer it
 supports to its toolkit adapter, written by :meth:`EngineBase.register_traceflow
 <pcapkit.foundation.engines.engine.EngineBase.register_traceflow>`. An enabled tracer

@@ -7,11 +7,11 @@ maps a tracer's registered name to the :mod:`pcapkit.toolkit` adapter feeding it
 written by ``EngineBase.register_traceflow``; ``_setup_traceflow`` drops an enabled
 tracer with no adapter, with a warning, and ``_traceflow`` feeds the rest.
 
-The adapter maps are checked against every registered flow tracer and engine. TCP is
-the one tracer :class:`~pcapkit.foundation.extraction.Extractor` builds, so the
-extraction cases trace TCP through a spy standing in for each engine's adapter. Their
-captures are built in memory, and an engine whose library is missing or unusable here
-is skipped. Classes are imported inside each test, after
+The adapter maps are checked against every registered flow tracer and engine. The
+extraction cases trace TCP through a spy standing in for each engine's adapter, and
+:file:`tests/foundation/test_extraction_tracers_2843_unit.py` traces a second tracer
+beside it. Their captures are built in memory, and an engine whose library is missing
+or unusable here is skipped. Classes are imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
 
 """
@@ -279,8 +279,8 @@ class SetupAndFeedTests(TraceflowAdapterTestCase):
         self.assertEqual([call.args for call in tracer.call_args_list], [('first',), ('second',), ('third',)])
 
     def test_only_the_unsupported_tracer_is_dropped(self) -> None:
-        # TraceFlowManager has a field for TCP alone, so a manager keyed by name
-        # stands in for it to hold a second tracer
+        # ReassemblyManager is keyed by name, as TraceFlowManager is, so it holds a
+        # second tracer beside TCP's
         from pcapkit.foundation.reassembly import ReassemblyManager
         from pcapkit.utilities.warnings import AttributeWarning
 

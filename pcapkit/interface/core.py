@@ -11,11 +11,9 @@ macros, which wrap the classes of :mod:`pcapkit.foundation`.
 import sys
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.foundation.traceflow.traceflow import TraceFlow
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.utilities.exceptions import FormatError, RegistryError
+from pcapkit.utilities.exceptions import RegistryError
 
 if TYPE_CHECKING:
     from typing import IO, Iterable, Mapping, Optional, Type
@@ -242,18 +240,15 @@ def trace(protocol: 'str | Type[ProtocolBase]', *, fout: 'str' = './tmp',
        exactly the keyword-only parameters of
        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, so
        ``analyze`` is added and ``fout`` and ``format`` default to ``'./tmp'``
-       and ``'pcap'`` (:issue:`2837`).
+       and ``'pcap'`` (:issue:`2837`). Makes it through
+       :meth:`Extractor.make_traceflow
+       <pcapkit.foundation.extraction.Extractor.make_traceflow>`, as the
+       extractor does (:issue:`2843`).
 
     """
     if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
         protocol = protocol.id()[0]
     if not isinstance(protocol, str):
         raise RegistryError(f'traceflow name must be a str, not {protocol!r}')
-
-    trace_cls = TraceFlow.registry.get(protocol.lower())
-    if trace_cls is None:
-        raise FormatError(f'unsupported flow tracing protocol: {protocol!r}')
-    if isinstance(trace_cls, ModuleDescriptor):
-        trace_cls = trace_cls.klass
-    return trace_cls(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond,
-                     bidirectional=bidirectional, analyze=analyze)
+    return Extractor.make_traceflow(protocol, fout=fout, format=format, byteorder=byteorder,
+                                    nanosecond=nanosecond, bidirectional=bidirectional, analyze=analyze)
