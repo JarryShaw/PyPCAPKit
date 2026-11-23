@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
 
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.utilities.callbacks import run_callbacks
 from pcapkit.utilities.exceptions import FieldValueError, UnsupportedCall
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.pickle import ReduceAsProtocol2
@@ -141,6 +142,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
     _flag_s: 'bool'
     _flag_d: 'bool'
     _flag_n: 'bool'
+    _flag_c: 'bool'
     _timeout: 'float'
 
     # Internal data storage for cached properties.
@@ -201,7 +203,17 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
     # total number of reassembled packets
     @property
     def count(self) -> 'int':
-        """Total number of reassembled packets."""
+        """Total number of reassembled packets.
+
+        Read from a callback, it counts the stored datagrams only, as
+        :attr:`datagram` reports them there.
+
+        """
+        # NOTE: a callback's read bypasses the cache, as its ``datagram`` lacks the outstanding
+        # buffers (#2867).
+        if self._flag_c:
+            return len(self.datagram)
+
         if self._flag_n:
             self.__cached__.clear()
             self._flag_n = False
@@ -217,6 +229,9 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
     @property
     def datagram(self) -> 'tuple[_DT, ...]':
         """Reassembled datagram.
+
+        Read from a callback, it holds the stored datagrams only, without
+        submitting the outstanding buffers; see :meth:`fetch`.
 
         Raises:
             UnsupportedCall: If :attr:`self._flag_d <_flag_d>` is
@@ -314,14 +329,25 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         Returns:
             ``datagrams``, for :meth:`submit` to return.
 
+        Every callback runs, through
+        :func:`~pcapkit.utilities.callbacks.run_callbacks`: the first
+        :exc:`Exception` one raises propagates once the last has run. While they
+        run, :meth:`fetch` returns what :attr:`_dtgram` holds, so a callback
+        reading :attr:`datagram` does not run them again.
+
         .. versionadded:: 1.7.0
 
         """
         # NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).
         if store:
             self._dtgram.extend(datagrams)
-        for callback in self.__callback_fn__:
-            callback(datagrams)
+
+        # NOTE: restored rather than cleared, as a callback feeding a packet nests a run (#2867).
+        held, self._flag_c = self._flag_c, True
+        try:
+            run_callbacks(self.__callback_fn__, datagrams, logger=logger, subject=f'{self.name} reassembly')
+        finally:
+            self._flag_c = held
         return datagrams
 
     # abandon timed-out buffers
@@ -436,7 +462,20 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
         will be returned.
 
+        Called from a callback, it returns what :attr:`_dtgram` holds and
+        submits nothing, since a submission would run the callbacks again.
+
+        .. versionchanged:: 1.7.0
+
+           A callback reading :attr:`datagram` while a buffer is outstanding
+           gets the stored datagrams, where it recursed until
+           :exc:`RecursionError` (:issue:`2867`).
+
         """
+        # NOTE: ahead of the caches, which are stale while ``expire`` runs its callbacks (#2867).
+        if self._flag_c:
+            return tuple(self._dtgram)
+
         if self._flag_n:
             self.__cached__.clear()
             self._flag_n = False
@@ -501,6 +540,14 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
                 default, the callback will be appended to the end
                 of the list
 
+        Every callback runs on each submission. One raising an
+        :exc:`Exception` does not stop the rest, and the first such error
+        propagates once they have run.
+
+        .. versionchanged:: 1.7.0
+
+           A callback that raises no longer stops the ones after it (:issue:`2881`).
+
         """
         if index is not None:
             cls.__callback_fn__.insert(index, callback)
@@ -555,6 +602,10 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         #: bool: New datagram flag. If set to :data:`True`, the
         #: :attr:`self._dtgram <_dtgram>` will be repopulated.
         self._flag_n = False
+        #: bool: Callback flag. Set while the callbacks run, so a callback
+        #: reading :attr:`datagram` gets :attr:`self._dtgram <_dtgram>`
+        #: rather than a submission that would run them again.
+        self._flag_c = False
 
         if timeout is None:
             timeout = self.__timeout__

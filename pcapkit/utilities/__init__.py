@@ -22,6 +22,7 @@ Module                                       Service
 :mod:`~pcapkit.utilities.contextvars`        context variables shared across modules
 :mod:`~pcapkit.utilities.importlib`          lazy imports of a package's exports
 :mod:`~pcapkit.utilities.inspect`            abstract-class check
+:mod:`~pcapkit.utilities.callbacks`          every callback run past a raise
 :mod:`~pcapkit.utilities.chardet`            `chardet`_ wrapper
 ============================================ ================================================
 

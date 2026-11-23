@@ -15,6 +15,7 @@ from pcapkit.foundation.traceflow.data.data import Deferred
 from pcapkit.foundation.traceflow.data.tcp import _AT, Buffer, BufferID, Index, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
+from pcapkit.utilities.callbacks import run_callbacks
 from pcapkit.utilities.logging import get_logger
 
 __all__ = ['TCP']
@@ -506,7 +507,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         The flow's file is closed and its entry stored before the callbacks run,
         so a callback that raises propagates and leaves the flow in the index.
         One raising an :exc:`Exception` does not stop the callbacks after it: the
-        first such error is re-raised once all have run, and a later one logged.
+        first such error is re-raised once all have run, and a later one logged,
+        by :func:`~pcapkit.utilities.callbacks.run_callbacks`.
 
         """
         buf = self._buffer.pop(bufid)
@@ -529,19 +531,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         # NOTE: stored before the callbacks run, so one that raises cannot drop the flow
         # from the index (#2827).
         self._stream.append(index)
-        error = None  # type: Optional[Exception]
-        for callback in self.__callback_fn__:
-            try:
-                callback(index)
-            except Exception as exc:  # pylint: disable=broad-except
-                if error is None:
-                    error = exc
-                    continue
-                # NOTE: logged rather than raised, so it cannot replace the first error (#2855).
-                logger.debug('TCP flow %s callback %r raised after an earlier one', label, callback,
-                             exc_info=True)
-        if error is not None:
-            raise error
+        run_callbacks(self.__callback_fn__, index, logger=logger, subject=f'TCP flow {label}')
         return index
 
     def finish(self) -> 'None':

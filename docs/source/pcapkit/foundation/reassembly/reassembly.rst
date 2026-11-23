@@ -73,6 +73,8 @@ follow :rfc:`791` and :rfc:`815`.
       :no-value:
    .. autoattribute:: _flag_n
       :no-value:
+   .. autoattribute:: _flag_c
+      :no-value:
    .. autoattribute:: _timeout
       :no-value:
 
