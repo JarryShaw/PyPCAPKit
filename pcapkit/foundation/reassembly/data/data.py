@@ -11,7 +11,7 @@ from pcapkit.utilities.pickle import ReduceAsProtocol2
 __all__ = ['ReassemblyData', 'Completion', 'Deferred']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator, Optional
+    from typing import Any, Callable, Optional
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
@@ -309,19 +309,10 @@ class ReassemblyData(Info):
     #: DTLS reassembled handshake messages.
     dtls: 'tuple[DTLS_Datagram, ...]'
 
-    #: The field names, in the order given, which iterating the record follows.
-    __additional__ = ['__order__']
-
     def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]' = None,  # pylint: disable=super-init-not-called
                  ipv6: 'Optional[tuple[IP_Datagram, ...]]' = None,
                  tcp: 'Optional[tuple[TCP_Datagram, ...]]' = None,
                  dtls: 'Optional[tuple[DTLS_Datagram, ...]]' = None,
                  **kwargs: 'Optional[tuple[Any, ...]]') -> 'None':
         self.__update__(ipv4=ipv4, ipv6=ipv6, tcp=tcp, dtls=dtls, **kwargs)
-        object.__setattr__(self, '__order__', ('ipv4', 'ipv6', 'tcp', 'dtls', *kwargs))
         self.__post_init__()
-
-    def __iter__(self) -> 'Iterator[str]':
-        # NOTE: PyPy may lay out an instance's ``__dict__`` in an earlier instance's order, so the
-        # order given is recorded (#2814); ``from_dict`` records none, and falls back.
-        return iter(self.__dict__.get('__order__') or super().__iter__())

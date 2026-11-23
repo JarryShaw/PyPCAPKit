@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.infoclass import Info, info_final
 
 if TYPE_CHECKING:
-    from typing import Iterable, Iterator, Mapping, Optional
+    from typing import Iterable, Mapping, Optional
 
     from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 
@@ -60,18 +60,9 @@ class ReassemblyManager(Info):
 
     """
 
-    #: The names held, in the order given, which iterating the manager follows.
-    __additional__ = ['__order__']
-
     def __init__(self, dict_: 'Optional[Mapping[str, Optional[ReassemblyBase]] | Iterable[tuple[str, Optional[ReassemblyBase]]]]' = None,  # pylint: disable=line-too-long,super-init-not-called
                  **kwargs: 'Optional[ReassemblyBase]') -> 'None':
         given = dict(dict_ or (), **kwargs)
         held = {name: reasm for (name, reasm) in given.items() if reasm is not None}
         self.__update__(held)
-        object.__setattr__(self, '__order__', tuple(held))
         self.__post_init__()
-
-    def __iter__(self) -> 'Iterator[str]':
-        # NOTE: PyPy may lay out an instance's ``__dict__`` in an earlier instance's order, so the
-        # order given is recorded (#2814); ``from_dict`` records none, and falls back.
-        return iter(self.__dict__.get('__order__') or super().__iter__())
