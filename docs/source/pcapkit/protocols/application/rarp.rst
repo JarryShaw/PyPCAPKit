@@ -47,7 +47,11 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Methods
+
    .. automethod:: id
+
+   .. rubric:: Data Models
 
    .. automethod:: __index__
 

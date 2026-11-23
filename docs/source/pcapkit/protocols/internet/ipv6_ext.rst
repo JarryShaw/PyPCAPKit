@@ -36,6 +36,8 @@ Octets      Bits        Name                    Description
 
    .. autoattribute:: _ipv6_aligned
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -44,12 +46,18 @@ Octets      Bits        Name                    Description
    .. autoproperty:: payload
    .. autoproperty:: protochain
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 

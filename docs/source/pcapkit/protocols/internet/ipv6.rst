@@ -40,6 +40,8 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
@@ -47,13 +49,19 @@ Octets      Bits        Name                    Description
    .. autoproperty:: dst
    .. autoproperty:: extension_headers
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
    .. automethod:: unpack
    .. automethod:: id
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
    .. automethod:: __post_init__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _decode_next_layer

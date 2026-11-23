@@ -13,10 +13,15 @@ origin, using the :rfc:`791` procedure described in :doc:`index`.
    :show-inheritance:
 
    .. autoattribute:: __discard_overlap__
+
+   .. rubric:: Methods
+
    .. automethod:: reassembly
-   .. automethod:: submit
+
    .. automethod:: _detect_conflicts
    .. automethod:: _find_overlap
+
+   .. automethod:: submit
 
 Data Models
 -----------

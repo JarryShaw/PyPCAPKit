@@ -49,13 +49,19 @@ Octets      Bits        Name                               Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: version
    .. autoproperty:: length
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _make_group_record

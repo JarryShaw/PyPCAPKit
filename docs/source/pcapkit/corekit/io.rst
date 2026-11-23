@@ -19,40 +19,37 @@ I/O Objects
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: raw
-   .. autoproperty:: closed
-
-   .. autoattribute:: _stream
    .. autoattribute:: _closed
+   .. autoattribute:: _stream
+   .. autoattribute:: _read_ahead_size
 
+   .. autoproperty:: closed
+   .. autoproperty:: raw
+
+   .. automethod:: _read_ahead
+
+   .. automethod:: close
+   .. automethod:: fileno
+   .. automethod:: flush
+   .. automethod:: isatty
+   .. automethod:: readable
+   .. automethod:: readline
+   .. automethod:: readlines
+   .. automethod:: seek
+   .. automethod:: seekable
+   .. automethod:: tell
+   .. automethod:: truncate
+
+   .. automethod:: _truncate_buffer
+
+   .. automethod:: writable
+   .. automethod:: detach
    .. automethod:: read
    .. automethod:: read1
    .. automethod:: readinto
    .. automethod:: readinto1
-   .. automethod:: readable
-   .. automethod:: readline
-   .. automethod:: readlines
-
-   .. automethod:: writable
    .. automethod:: write
-
-   .. automethod:: seekable
-   .. automethod:: seek
-   .. automethod:: tell
-   .. automethod:: truncate
-
-   .. automethod:: close
-   .. automethod:: flush
-
    .. automethod:: peek
-   .. automethod:: detach
-
-   .. automethod:: fileno
-   .. automethod:: isatty
-
-   .. autoattribute:: _read_ahead_size
-   .. automethod:: _read_ahead
-   .. automethod:: _truncate_buffer
 
 .. autoclass:: pcapkit.corekit.io.PeekableStream
    :no-members:
@@ -62,8 +59,8 @@ I/O Objects
 .. autoclass:: pcapkit.corekit.io.NamedStream
    :no-members:
 
-   .. autoattribute:: name
    .. automethod:: read
+   .. autoattribute:: name
 
 .. autofunction:: pcapkit.corekit.io.advance
 .. autofunction:: pcapkit.corekit.io.can_seek

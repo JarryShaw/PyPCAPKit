@@ -21,7 +21,11 @@ Transfer Protocol (FTP) [*]_, whose octets it keeps undissected.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
+
+   .. rubric:: Data Models
 
    .. automethod:: __index__
 

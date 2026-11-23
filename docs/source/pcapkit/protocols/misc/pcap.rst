@@ -41,6 +41,8 @@ of PCAP, whose structure is:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: version
@@ -50,11 +52,17 @@ of PCAP, whose structure is:
    .. autoproperty:: byteorder
    .. autoproperty:: nanosecond
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_protos
@@ -134,15 +142,21 @@ whose structure is:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
 
    .. autoattribute:: __proto_key__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: header
+
+   .. rubric:: Methods
 
    .. automethod:: register
    .. automethod:: index
@@ -151,8 +165,12 @@ whose structure is:
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _dispatch_linktype

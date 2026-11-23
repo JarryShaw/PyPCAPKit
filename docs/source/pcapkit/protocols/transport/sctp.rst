@@ -29,6 +29,8 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
 
@@ -44,12 +46,16 @@ Octets      Bits        Name                    Description
    .. autoattribute:: __cause__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
    .. autoproperty:: dst
    .. autoproperty:: ppid
    .. autoproperty:: checksum_valid
+
+   .. rubric:: Methods
 
    .. automethod:: read
    .. automethod:: make
@@ -61,7 +67,11 @@ Octets      Bits        Name                    Description
    .. automethod:: calculate_checksum
    .. automethod:: validate_checksum
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_sctp_chunks

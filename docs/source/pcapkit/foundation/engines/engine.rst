@@ -50,30 +50,45 @@ every extraction engine.
          :attr:`~pcapkit.foundation.extraction.Extractor.__engine__`, the one
          table every engine registration lands in.
 
-   .. autoproperty:: extractor
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
 
    .. autoattribute:: _extractor
 
-   .. automethod:: unsupported_reason
+   .. rubric:: Defaults
 
    .. autoattribute:: __reassembly__
+   .. autoattribute:: __traceflow__
+
+   .. rubric:: Properties
+
+   .. autoproperty:: extractor
+
+   .. rubric:: Availability
+
+   .. automethod:: unsupported_reason
+
+   .. rubric:: Reassembly
+
    .. automethod:: register_reassembly
    .. automethod:: _setup_reassembly
    .. automethod:: _reassemble
 
-   .. autoattribute:: __traceflow__
+   .. rubric:: Flow Tracing
+
    .. automethod:: register_traceflow
    .. automethod:: _setup_traceflow
    .. automethod:: _traceflow
 
-   .. automethod:: run
-   .. automethod:: read_frame
-   .. automethod:: close
+   .. rubric:: Data Models
 
    .. automethod:: __call__
 
-   .. autoattribute:: __engine_name__
-   .. autoattribute:: __engine_module__
+   .. rubric:: Methods
+
+   .. automethod:: run
+   .. automethod:: read_frame
+   .. automethod:: close
 
 Internal Definitions
 --------------------

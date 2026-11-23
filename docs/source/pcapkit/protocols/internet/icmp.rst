@@ -21,11 +21,17 @@ model it is handed (:issue:`2574`).
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: from_data
 
+   .. rubric:: Data Models
+
    .. automethod:: __init__
    .. automethod:: __new__
+
+   .. rubric:: Utilities
 
    .. automethod:: _member_of_version
 

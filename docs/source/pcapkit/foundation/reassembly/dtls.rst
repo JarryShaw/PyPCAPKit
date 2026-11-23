@@ -15,16 +15,22 @@ DTLS handshake message split across several records back to origin
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
+
+   .. rubric:: Properties
+
    .. autoproperty:: last
+
+   .. rubric:: Methods
 
    .. automethod:: reassembly
    .. automethod:: submit
    .. automethod:: _datagram_from_fragment
    .. automethod:: _received_runs
    .. automethod:: _update_hole_descriptors
-
-   .. autoattribute:: __protocol_name__
-   .. autoattribute:: __protocol_type__
 
 Algorithm
 =========

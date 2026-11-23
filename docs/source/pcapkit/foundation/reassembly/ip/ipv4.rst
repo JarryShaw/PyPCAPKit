@@ -11,10 +11,13 @@ fragmented IPv4 packets back to origin; see :doc:`ip`.
    :no-members:
    :show-inheritance:
 
-   .. autoattribute:: __protocol_name__
-   .. autoattribute:: __protocol_type__
    .. autoattribute:: __callback_fn__
       :no-value:
+
+   .. rubric:: Defaults
+
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
    .. autoattribute:: __timeout__
 
 Terminology

@@ -48,12 +48,18 @@ structure of an HTTP/1.* message is:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: alias
    .. autoproperty:: version
+
+   .. rubric:: Methods
 
    .. automethod:: read
    .. automethod:: make
    .. automethod:: id
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_http_header

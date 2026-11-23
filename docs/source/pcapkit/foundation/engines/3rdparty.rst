@@ -41,17 +41,24 @@ The `Scapy`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _expkg
+   .. autoattribute:: _extmp
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
 
+   .. rubric:: Data Models
+
    .. automethod:: __init__
+
+   .. rubric:: Methods
+
    .. automethod:: run
    .. automethod:: read_frame
-
-   .. autoattribute:: _expkg
-   .. autoattribute:: _extmp
 
 DPKT Support
 ============
@@ -78,16 +85,20 @@ The `DPKT`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _expkg
+   .. autoattribute:: _extmp
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
 
+   .. rubric:: Methods
+
    .. automethod:: run
    .. automethod:: read_frame
-
-   .. autoattribute:: _expkg
-   .. autoattribute:: _extmp
 
 .. autoclass:: pcapkit.foundation.engines.dpkt.PCAPNGReader
    :members: datalink
@@ -138,20 +149,26 @@ The `PyShark`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _expkg
+   .. autoattribute:: _extmp
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
    .. autoattribute:: PYTHON_CEILING
 
+   .. rubric:: Class Methods
+
    .. automethod:: unsupported_reason
+
+   .. rubric:: Methods
 
    .. automethod:: run
    .. automethod:: read_frame
    .. automethod:: close
-
-   .. autoattribute:: _expkg
-   .. autoattribute:: _extmp
 
 PyPCAP Support
 ==============
@@ -232,28 +249,38 @@ The `PyPCAP`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _expkg
+   .. autoattribute:: _extmp
+   .. autoattribute:: _dlink
+   .. autoattribute:: _closed
+   .. autoattribute:: _backend
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __engine_distribution__
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
 
+   .. rubric:: Class Methods
+
    .. automethod:: unsupported_reason
+
+   .. rubric:: Properties
 
    .. autoproperty:: dlink
    .. autoproperty:: backend
 
+   .. rubric:: Data Models
+
+   .. automethod:: __init__
+
+   .. rubric:: Methods
+
    .. automethod:: run
    .. automethod:: read_frame
    .. automethod:: close
-
-   .. autoattribute:: _expkg
-   .. autoattribute:: _extmp
-   .. autoattribute:: _backend
-   .. autoattribute:: _dlink
-   .. autoattribute:: _closed
-
-   .. automethod:: __init__
 
 pcap-ct Support
 ===============
@@ -377,28 +404,39 @@ The `pcap-ct`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _expkg
+   .. autoattribute:: _handle
+   .. autoattribute:: _extmp
+   .. autoattribute:: _dlink
+   .. autoattribute:: _closed
+   .. autoattribute:: _backend
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __engine_distribution__
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
 
+   .. rubric:: Class Methods
+
    .. automethod:: unsupported_reason
+
+   .. rubric:: Properties
 
    .. autoproperty:: dlink
    .. autoproperty:: backend
 
+   .. rubric:: Data Models
+
    .. automethod:: __init__
+
+   .. rubric:: Methods
+
    .. automethod:: run
    .. automethod:: read_frame
    .. automethod:: close
-
-   .. autoattribute:: _expkg
-   .. autoattribute:: _handle
-   .. autoattribute:: _extmp
-   .. autoattribute:: _backend
-   .. autoattribute:: _dlink
-   .. autoattribute:: _closed
 
 PyPCAPFile Support
 ==================
@@ -424,26 +462,35 @@ The `PyPCAPFile`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
-   .. autoattribute:: __engine_name__
-   .. autoattribute:: __engine_module__
-   .. autoattribute:: __reassembly__
-   .. autoattribute:: __traceflow__
-   .. autoattribute:: LAYERS
-   .. autoattribute:: PYTHON_CEILING
-
-   .. automethod:: unsupported_reason
-
-   .. autoproperty:: dlink
-
-   .. automethod:: run
-   .. automethod:: read_frame
-
    .. autoattribute:: _expkg
    .. autoattribute:: _extmp
    .. autoattribute:: _dlink
    .. autoattribute:: _declf
 
+   .. autoattribute:: LAYERS
+   .. autoattribute:: PYTHON_CEILING
+
+   .. automethod:: unsupported_reason
+
+   .. rubric:: Defaults
+
+   .. autoattribute:: __engine_name__
+   .. autoattribute:: __engine_module__
+   .. autoattribute:: __reassembly__
+   .. autoattribute:: __traceflow__
+
+   .. rubric:: Properties
+
+   .. autoproperty:: dlink
+
+   .. rubric:: Data Models
+
    .. automethod:: __init__
+
+   .. rubric:: Methods
+
+   .. automethod:: run
+   .. automethod:: read_frame
 
 Internal Definitions
 --------------------

@@ -78,6 +78,10 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
     if TYPE_CHECKING:
         protocol: 'Type[DTLS_Protocol]'
 
+        #: The message, if any, that the most recent call to :meth:`reassembly`
+        #: completed; see :attr:`last`.
+        _last: 'Optional[Datagram[_AT]]'
+
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -96,33 +100,6 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
     # DTLS handshake reassembly no timeout, so it inherits the base default,
     # :data:`math.inf`, and by default a buffer is held until its messages
     # complete or the capture ends.
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True,
-                 timeout: 'Optional[float]' = None) -> 'None':
-        """Initialise packet reassembly.
-
-        Args:
-            strict: if :data:`True`, report a message that is not completely
-                reassembled as the tuple of its received runs; otherwise as
-                one contiguous payload, its holes zero-filled
-            store: if store reassembled datagram in memory
-            timeout: reassembly timeout in seconds, on the capture's own clock;
-                :data:`None` selects
-                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`
-
-        Raises:
-            FieldValueError: If ``timeout`` is negative.
-
-        """
-        super().__init__(strict=strict, store=store, timeout=timeout)
-
-        #: Optional[Datagram[_AT]]: The message, if any, that the most recent
-        #: call to :meth:`reassembly` completed; see :attr:`last`.
-        self._last: 'Optional[Datagram[_AT]]' = None
 
     ##########################################################################
     # Properties.
@@ -368,3 +345,28 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             # step seven: go on to the next hole, since one fragment may span
             # several of them
         hdl[:] = new_hdl
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True,
+                 timeout: 'Optional[float]' = None) -> 'None':
+        """Initialise packet reassembly.
+
+        Args:
+            strict: if :data:`True`, report a message that is not completely
+                reassembled as the tuple of its received runs; otherwise as
+                one contiguous payload, its holes zero-filled
+            store: if store reassembled datagram in memory
+            timeout: reassembly timeout in seconds, on the capture's own clock;
+                :data:`None` selects
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`
+
+        Raises:
+            FieldValueError: If ``timeout`` is negative.
+
+        """
+        super().__init__(strict=strict, store=store, timeout=timeout)
+
+        self._last = None

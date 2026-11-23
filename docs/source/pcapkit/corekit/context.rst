@@ -59,9 +59,13 @@ Decoding an ESP tunnel end to end:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Methods
+
    .. automethod:: register
    .. automethod:: make
    .. automethod:: match
+
+   .. rubric:: Data Models
 
    .. automethod:: __getitem__
    .. automethod:: __iter__

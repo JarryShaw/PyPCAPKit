@@ -16,23 +16,29 @@ PCAP Support
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _gbhdr
+   .. autoattribute:: _vinfo
+   .. autoattribute:: _dlink
+   .. autoattribute:: _nnsec
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
+
+   .. rubric:: Properties
 
    .. autoproperty:: header
    .. autoproperty:: version
    .. autoproperty:: dlink
    .. autoproperty:: nanosecond
 
+   .. rubric:: Methods
+
    .. automethod:: run
    .. automethod:: read_frame
-
-   .. autoattribute:: _gbhdr
-   .. autoattribute:: _vinfo
-   .. autoattribute:: _dlink
-   .. autoattribute:: _nnsec
 
 PCAP-NG Support
 ===============
@@ -46,16 +52,20 @@ by :class:`pcapkit.foundation.extraction.Extractor`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _ctx
+   .. autoattribute:: _ctx_list
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __engine_name__
    .. autoattribute:: __engine_module__
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
 
+   .. rubric:: Methods
+
    .. automethod:: run
    .. automethod:: read_frame
-
-   .. autoattribute:: _ctx
-   .. autoattribute:: _ctx_list
 
 Internal Definitions
 --------------------

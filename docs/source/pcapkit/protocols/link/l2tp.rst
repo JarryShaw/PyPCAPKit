@@ -28,13 +28,21 @@ layout on all.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: info_name
+
+   .. rubric:: Methods
 
    .. automethod:: id
    .. automethod:: from_data
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
    .. automethod:: __new__
+
+   .. rubric:: Utilities
 
    .. automethod:: _member_of_version
 

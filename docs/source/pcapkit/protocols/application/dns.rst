@@ -64,22 +64,32 @@ How a parse reads a message:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __rdata__
       :no-value:
    .. autoattribute:: __option__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: rcode
+
+   .. rubric:: Methods
 
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register_option
    .. automethod:: register_rdata
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
    .. automethod:: __post_init__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_dns_question

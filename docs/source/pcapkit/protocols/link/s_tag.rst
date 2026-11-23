@@ -25,11 +25,17 @@ reached through different registry indices, ``0x88A8`` against ``0x8100``.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: info_name
 
+   .. rubric:: Methods
+
    .. automethod:: id
+
+   .. rubric:: Data Models
 
    .. automethod:: __index__
 
