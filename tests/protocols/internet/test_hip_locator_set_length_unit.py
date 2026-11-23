@@ -196,7 +196,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
 
         # And the callback in isolation, on both the key it reads and the value
         # that key is a snapshot of.
-        from pcapkit.protocols.internet.hip.schema import LOCATOR_SET_LEN
+        from pcapkit.protocols.internet.hip.const import LOCATOR_SET_LEN
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 9}), 3)
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 4}), 0)
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 0}), 4)
@@ -207,12 +207,12 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         """The packet context keeps the parameter's ``Length`` under its own key.
 
         After a pack the shared context's ``len`` is the last nested locator's,
-        while :data:`~pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN`
+        while :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN`
         still holds the parameter's.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
-        from pcapkit.protocols.internet.hip.schema import LOCATOR_SET_LEN
+        from pcapkit.protocols.internet.hip.const import LOCATOR_SET_LEN
 
         hip = object.__new__(HIP)
         schema = hip._make_param_locator_set(  # type: ignore[arg-type]

@@ -101,8 +101,11 @@ Header Schemas
 
 .. module:: pcapkit.protocols.misc.checksum.ip_pseudo.schema
 
-.. autodata:: pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV4_PSEUDO_LEN
-.. autodata:: pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV6_PSEUDO_LEN
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV4_PSEUDO_LEN``, now
+   :data:`pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN`
+   (:issue:`2896`).
 
 .. autoclass:: pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo
    :members:
@@ -123,3 +126,14 @@ Data Models
 .. autoclass:: pcapkit.protocols.misc.checksum.ip_pseudo.data.IP_Pseudo
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.misc.checksum.ip_pseudo.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN
+
+.. autodata:: pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV6_PSEUDO_LEN

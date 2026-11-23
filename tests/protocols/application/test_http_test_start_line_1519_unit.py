@@ -6,8 +6,9 @@ The predicate :meth:`HTTP._guess_version
 HTTP/1.* start line is :func:`~pcapkit.protocols.application.http.protocol.test_start_line`,
 not a private ``httpv1._test_start_line`` imported lazily, and the patterns it
 shares with the HTTP/1.* parser -- ``_RE_METHOD``, ``_RE_VERSION``,
-``_RE_STATUS`` and ``_HTTP2_PREFACE_HEADER`` -- live beside it, so ``httpv1/protocol.py``
-imports them from ``http/protocol.py`` rather than keeping a copy of its own.
+``_RE_STATUS`` and ``_HTTP2_PREFACE_HEADER`` -- live in the family base's
+``http/const.py`` (#2896), so both import them from there and ``httpv1/protocol.py``
+keeps no copy of its own.
 
 The predicate is imported inside each test, never at module level: pytest
 collects any module-level callable named ``test_*``, and would run the predicate
@@ -88,6 +89,7 @@ class StartLinePredicateTests(unittest.TestCase):
 
     def test_httpv1_parses_with_the_patterns_defined_in_http(self) -> None:
         """One copy of each pattern, so the predicate and the parser cannot drift."""
+        from pcapkit.protocols.application.http import const
         from pcapkit.protocols.application.http import protocol as http
         from pcapkit.protocols.application.httpv1 import protocol as httpv1
 
@@ -95,7 +97,8 @@ class StartLinePredicateTests(unittest.TestCase):
         self.assertFalse(hasattr(httpv1, '_test_start_line'))
         for name in ('_RE_METHOD', '_RE_VERSION', '_RE_STATUS', '_HTTP2_PREFACE_HEADER'):
             with self.subTest(name=name):
-                self.assertIs(getattr(httpv1, name), getattr(http, name))
+                self.assertIs(getattr(httpv1, name), getattr(const, name))
+                self.assertIs(getattr(http, name), getattr(const, name))
 
     def test_guess_version_calls_the_module_level_predicate(self) -> None:
         """The dispatcher calls ``http.test_start_line``, not a lazy import of it."""

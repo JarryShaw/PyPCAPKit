@@ -38,9 +38,9 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.const.capture import MAGIC_NUMBER
 from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
 from pcapkit.corekit.version import VersionInfo
+from pcapkit.protocols.misc.pcap.header.const import _DECLARED_MAGIC, GLOBAL_HEADER_LEN
 from pcapkit.protocols.misc.pcap.header.data import Header as Data_Header
 from pcapkit.protocols.misc.pcap.header.data import MagicNumber as Data_MagicNumber
-from pcapkit.protocols.misc.pcap.header.schema import GLOBAL_HEADER_LEN
 from pcapkit.protocols.misc.pcap.header.schema import Header as Schema_Header
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities.exceptions import EndianError, UnsupportedCall
@@ -51,12 +51,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
 __all__ = ['Header']
-
-#: The PCAP magic number for each byte order and nanosecond flag, the reverse of
-#: :data:`~pcapkit.corekit.const.capture.MAGIC_NUMBER`, so that
-#: :meth:`Header._make_magic` looks one up rather than searching for it -- an
-#: undeclared pair raises :exc:`KeyError`.
-_DECLARED_MAGIC = {declared: magic for magic, declared in MAGIC_NUMBER.items()}
 
 
 class Header(ProtocolBase[Data_Header, Schema_Header],

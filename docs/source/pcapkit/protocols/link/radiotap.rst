@@ -546,6 +546,13 @@ Data Models
    :members:
    :show-inheritance:
 
+Constants
+---------
+
+.. module:: pcapkit.protocols.link.radiotap.const
+
+.. versionadded:: 1.7.0
+
 .. rubric:: Footnotes
 
 .. [*] <https://www.radiotap.org/>, its field pages and its

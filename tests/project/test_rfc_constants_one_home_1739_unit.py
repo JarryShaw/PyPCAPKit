@@ -3,9 +3,9 @@
 
 Ruling 7 on GitHub issue #1726, tracked as #1739: a protocol constant that the
 RFC (or the file format) fixes, and that more than one module spelled out, is
-defined once, in the module that owns the protocol -- or that protocol's schema
-or :mod:`pcapkit.const` module, or :mod:`pcapkit.corekit.const` once code beyond
-the protocol reads it (#2883) -- and every reader imports it from there. Such a
+defined once, in that protocol's ``const`` module (#2896) or its
+:mod:`pcapkit.const` module, or in :mod:`pcapkit.corekit.const` once code beyond
+the protocol reads it (#2883), and every reader imports it from there. Such a
 constant is never configurable, and no other module re-exports it.
 
 These checks pin that:
@@ -60,8 +60,8 @@ HOMES = (
     ('pcapkit.corekit.const.ipheader', 'AH_HEADER_LEN', 12),
     ('pcapkit.corekit.const.tcpheader', 'TCP_MIN_HEADER_LEN', 20),
     ('pcapkit.corekit.const.tcpheader', 'TCP_DATA_OFFSET_OCTET', 12),
-    ('pcapkit.protocols.transport.dccp.schema', 'DCCP_MIN_HEADER_LEN', 12),
-    ('pcapkit.protocols.misc.pcap.header.schema', 'GLOBAL_HEADER_LEN', 24),
+    ('pcapkit.protocols.transport.dccp.const', 'DCCP_MIN_HEADER_LEN', 12),
+    ('pcapkit.protocols.misc.pcap.header.const', 'GLOBAL_HEADER_LEN', 24),
     ('pcapkit.corekit.const.capture', 'RECORD_HEADER_LEN', 16),
     ('pcapkit.corekit.const.capture', 'MAGIC_NUMBER', {
         b'\xa1\xb2\x3c\x4d': ('big', True),
@@ -175,13 +175,15 @@ READERS = (
      'RECORD_HEADER_LEN'),
     ('pcapkit/protocols/misc/pcap/frame/protocol.py', 'pcapkit.corekit.const.capture',
      'RECORD_HEADER_LEN'),
-    ('pcapkit/protocols/misc/pcap/header/protocol.py', 'pcapkit.protocols.misc.pcap.header.schema',
+    ('pcapkit/protocols/misc/pcap/header/protocol.py', 'pcapkit.protocols.misc.pcap.header.const',
      'GLOBAL_HEADER_LEN'),
     ('pcapkit/protocols/internet/ipv4/protocol.py', 'pcapkit.corekit.const.ipheader', 'IPV4_HEADER_LEN'),
     ('pcapkit/protocols/internet/ah/protocol.py', 'pcapkit.corekit.const.ipheader', 'AH_HEADER_LEN'),
     ('pcapkit/protocols/transport/tcp/protocol.py', 'pcapkit.corekit.const.tcpheader',
      'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/protocols/transport/dccp/protocol.py', 'pcapkit.protocols.transport.dccp.schema',
+    ('pcapkit/protocols/transport/dccp/protocol.py', 'pcapkit.protocols.transport.dccp.const',
+     'DCCP_MIN_HEADER_LEN'),
+    ('pcapkit/protocols/transport/dccp/schema.py', 'pcapkit.protocols.transport.dccp.const',
      'DCCP_MIN_HEADER_LEN'),
     # #2883: the old homes and the other protocols, reading the constants moved to
     # pcapkit.corekit.const.
@@ -257,7 +259,7 @@ NOT_A_COPY = {
         'an if_tsoffset option: 4 octets of header and 8 of value',
     ('pcapkit/foundation/engines/scapy.py', 'options[4:12]'):
         'the 8-octet value of an if_tsoffset option',
-    ('pcapkit/protocols/application/dtls/protocol.py', '_CIPHERTEXT_MIN_LENGTH = 16'):
+    ('pcapkit/protocols/application/dtls/const.py', '_CIPHERTEXT_MIN_LENGTH = 16'):
         "the shortest DTLS 1.3 ciphertext, the record-number sample length "
         '(:rfc:`9147#section-4.2.3`), not a pcap record header',
     ('pcapkit/protocols/application/dtls/schema.py', 'NumberField(length=6)'):
@@ -316,6 +318,12 @@ NOT_A_COPY = {
         "the 6-bit RU allocation offset of the HE field's data2, not the IPv6 Next Header offset",
     ('pcapkit/protocols/misc/pcap/frame/protocol.py', 'version == 6'):
         'the IP version number, not the decimal places of a resolution',
+    ('pcapkit/protocols/misc/pcapng/const.py', "{'crc_error': (24, 1)}"):
+        'an epb_flags bit offset, not an Interface Statistics Block',
+    ('pcapkit/protocols/misc/pcapng/const.py', "{'reserved': (12, 12)}"):
+        'an epb_flags bit-field: 12 reserved bits from bit 12',
+    ('pcapkit/protocols/misc/pcapng/const.py', "{'unaligned_error': (28, 1)}"):
+        'an epb_flags bit offset, not a Section Header Block',
     ('pcapkit/protocols/misc/pcapng/protocol.py', '(body + bytes(16))[4:16]'):
         'an epb_hash option body padded to its 16-octet MD5 digest',
     ('pcapkit/protocols/misc/pcapng/protocol.py', '(body + bytes(20))[:20]'):
@@ -363,12 +371,6 @@ NOT_A_COPY = {
     ('pcapkit/protocols/misc/pcapng/schema.py', "{'byteorder': (32, 32)}"):
         "a bit-field: a Section Header Block's Byte-Order Magic, the 32 bits after "
         'its Block Total Length, not a Packet Block',
-    ('pcapkit/protocols/misc/pcapng/schema.py', "{'crc_error': (24, 1)}"):
-        'an epb_flags bit offset, not an Interface Statistics Block',
-    ('pcapkit/protocols/misc/pcapng/schema.py', "{'reserved': (12, 12)}"):
-        'an epb_flags bit-field: 12 reserved bits from bit 12',
-    ('pcapkit/protocols/misc/pcapng/schema.py', "{'unaligned_error': (28, 1)}"):
-        'an epb_flags bit offset, not a Section Header Block',
     ('pcapkit/protocols/protocol.py', '2 ** 16'):
         "the exponent past the Quick-Start rate code's four bits, N = 16 "
         '(:rfc:`4782#section-3.1`), not a PCAP record header length',
@@ -436,13 +438,14 @@ NOT_A_COPY = {
 UNRELATED = {
     'pcapkit/foundation/engines/pypcapfile.py': ((12,), 'the Python 3.12 version ceiling of '
                                                  'PyPCAPFile, not a length'),
+    'pcapkit/protocols/application/dns/const.py': ((12,), 'the DNS header length'),
     'pcapkit/protocols/application/dns/protocol.py': ((6, 16, 20, 24, 32, 40),
                                                      'DNS RDATA, EDNS(0) option and OPT TTL field '
                                                      'sizes, offsets and shifts'),
-    'pcapkit/protocols/application/dns/schema.py': ((6, 9, 12), 'the DNS header length, a label '
-                                                   'type shift and header flag bit positions'),
-    'pcapkit/protocols/application/http/protocol.py': ((6, 9, 12), 'the length of an HTTP/1 version '
-                                              'token, and HTTP/2 frame types and flag masks'),
+    'pcapkit/protocols/application/dns/schema.py': ((6, 9, 12), 'a label type shift and header '
+                                                   'flag bit positions'),
+    'pcapkit/protocols/application/http/const.py': ((6, 9, 12), 'HTTP/2 frame types and flag masks'),
+    'pcapkit/protocols/application/http/protocol.py': ((9,), 'the length of an HTTP/2 frame header'),
     'pcapkit/protocols/application/httpv2/protocol.py': ((6, 9), 'HTTP/2 frame header and setting sizes'),
     'pcapkit/protocols/application/httpv2/schema.py': ((6, 32),
                                                        'an HTTP/2 setting size and a flag bit'),
@@ -522,9 +525,9 @@ UNRELATED = {
     'pcapkit/protocols/link/radiotap/protocol.py': ((65535,), "the max value of radiotap's own "
                                            '2-octet it_len field, not an IP total length'),
     'pcapkit/protocols/link/vlan/schema.py': ((12,), 'the 12-bit VLAN identifier'),
+    'pcapkit/protocols/misc/pcapng/const.py': ((9,), 'an epb_flags bit offset'),
     'pcapkit/protocols/misc/pcapng/protocol.py': ((65535,), 'a 16-bit mask'),
-    'pcapkit/protocols/misc/pcapng/schema.py': ((9, 65535), 'an epb_flags bit offset, and a '
-                                               '16-bit field default'),
+    'pcapkit/protocols/misc/pcapng/schema.py': ((65535,), 'a 16-bit field default'),
     'pcapkit/protocols/transport/dccp/protocol.py': ((6, 65535), 'DCCP option lengths, the 2-bit shift of '
                                             'an Ack Vector state, and the largest 2-octet '
                                             'Elapsed Time'),

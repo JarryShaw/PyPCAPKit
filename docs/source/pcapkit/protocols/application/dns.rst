@@ -170,16 +170,6 @@ protocol carrying domain names can call it.
 .. autofunction:: pcapkit.protocols.application.dns.schema.text_to_labels
 .. autofunction:: pcapkit.protocols.application.dns.schema.dns_body_length
 
-.. data:: HEADER_LENGTH
-   :value: 12
-
-   Length of the fixed header, before the sections.
-
-.. data:: POINTER_LIMIT
-   :value: 16383
-
-   Largest offset a compression pointer can carry, in its 14 bits.
-
 Data Models
 -----------
 
@@ -282,3 +272,12 @@ EDNS(0) Options
 .. autoclass:: pcapkit.protocols.application.dns.data.ExtendedError
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.application.dns.const
+
+.. autodata:: pcapkit.protocols.application.dns.const.HEADER_LENGTH
+
+.. autodata:: pcapkit.protocols.application.dns.const.POINTER_LIMIT

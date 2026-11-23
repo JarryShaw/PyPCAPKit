@@ -65,6 +65,7 @@ of PCAP, whose structure is:
    .. rubric:: Utilities
 
    .. automethod:: _make_data
+   .. automethod:: _make_magic
    .. automethod:: _read_protos
 
 Header Schemas
@@ -84,9 +85,9 @@ Header Schemas
    ``pcapkit.protocols.misc.pcap.header.schema.RESOLUTION_PLACES``, now
    :data:`pcapkit.corekit.const.capture.MAGIC_NUMBER`,
    :data:`pcapkit.corekit.const.capture.RESOLUTION` and
-   :data:`pcapkit.corekit.const.capture.RESOLUTION_PLACES` (:issue:`2883`).
-
-.. autodata:: pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN
+   :data:`pcapkit.corekit.const.capture.RESOLUTION_PLACES` (:issue:`2883`); and
+   ``pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN``, now
+   :data:`pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN` (:issue:`2896`).
 
 .. autoclass:: pcapkit.protocols.misc.pcap.header.schema.Header
    :members:
@@ -109,6 +110,15 @@ Data Models
 .. autoclass:: pcapkit.protocols.misc.pcap.header.data.MagicNumber
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.misc.pcap.header.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN
 
 Frame Header
 ============

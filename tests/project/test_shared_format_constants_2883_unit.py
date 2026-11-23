@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
-"""A constant or helper referenced beyond its protocol lives in :mod:`pcapkit.corekit` (#2883, #2897).
+"""Where a protocol's constants and helpers live (#2883, #2896, #2897).
 
 The owner took option 1 on #2883, and ruled in review of #2895 the package, what
-counts as a reference, and that a helper follows the same rule (#2897); the rule
-is written down on
+counts as a reference, that a helper follows the same rule (#2897), and that a
+protocol's other constants go in its own ``const`` module (#2896); the rule is
+written down on
 :file:`docs/source/contributing/conventions/utilities-or-corekit.rst`. A constant
 that any module outside its own protocol references -- another protocol, a
 foundation module, a dumper or the toolkit -- lives in the module of
 :mod:`pcapkit.corekit.const` for its topic, and such a helper -- a function or
 class of a protocol's own modules other than its own structures -- in the module
 of :mod:`pcapkit.corekit` or :mod:`pcapkit.utilities` for its topic. A protocol's
-own ``protocol``, ``schema`` and ``data`` modules count as one place, and so does
-a family: a family base's constant or helper that its members reference stays
-with the family.
+own ``protocol``, ``schema``, ``data`` and ``const`` modules count as one place,
+and so does a family: a family base's constant or helper that its members
+reference stays with the family. Every other constant of a protocol's own modules
+is in its package's ``const`` module, or its family base's.
 
 These checks pin that:
 
@@ -24,7 +26,12 @@ These checks pin that:
   not bind one it no longer reads;
 * :class:`TestRule` -- no constant or helper a protocol's own modules define is
   referenced from outside that protocol or its family, but the helpers
-  :data:`KEPT` names.
+  :data:`KEPT` names;
+* :class:`TestProtocolConstants` -- no ``protocol``, ``schema`` or ``data``
+  module of a protocol binds a constant (see :func:`not_a_constant`), and each
+  ``const`` module binds constants alone, defines no function or class, exports
+  its public constants and imports nothing from :mod:`pcapkit` but the registries
+  and the other constant modules.
 
 The moved names' readers and ``versionremoved`` notes are
 :mod:`tests.project.test_no_moved_name_re_exports_1744_unit`'s to check, and the
@@ -50,7 +57,7 @@ from tests.project.test_utilities_import_boundary_1735_unit import (ROOT, _modul
                                                                     _relative_base, imported_names)
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional
+    from typing import Callable, Iterator, Optional
 
 #: Test tier (#1958): reads the tree's import graph, a question about the tree.
 __tier__ = 'LATEST'
@@ -97,9 +104,9 @@ MOVED_HELPERS = (
 #: :mod:`tests.project.test_schema_helpers_boundary_2674_unit`.
 FAMILIES = {
     # HTTP/1 and HTTP/2 subclass HTTP, whose patterns and preface they share.
-    'pcapkit.protocols.application.http.protocol': ('application.httpv1', 'application.httpv2'),
+    'pcapkit.protocols.application.http.const': ('application.httpv1', 'application.httpv2'),
     # TLS and DTLS subclass SSL, whose record content types and versions they share.
-    'pcapkit.protocols.application.ssl.protocol': ('application.tls', 'application.dtls'),
+    'pcapkit.protocols.application.ssl.const': ('application.tls', 'application.dtls'),
     # HOPOPT and IPv6-Opts carry the IPv6 options [RFC 8200, section 4.2], whose
     # length callbacks they share.
     'pcapkit.protocols.internet.ipv6_ext.schema': ('internet.hopopt', 'internet.ipv6_opts'),
@@ -114,6 +121,13 @@ KEPT = {
     # the IP layers and the layers above them build their checksums through.
     'pcapkit.protocols.misc.checksum.ip_pseudo.protocol': ('compute_upper', 'pseudo_header',
                                                           'verify_upper'),
+}
+
+#: Names a protocol's own modules bind that :func:`not_a_constant` cannot tell
+#: from a constant but that hold run-time state, by module (#2896).
+STATE = {
+    # A lock the PDU decoder is held under, not a value.
+    'pcapkit.protocols.application.ngap.protocol': ('_PDU_LOCK',),
 }
 
 #: The bases of a protocol's own structures: its dissector, header schemas and
@@ -133,20 +147,26 @@ def _path(module: 'str') -> 'pathlib.Path':
     return ROOT / (module.replace('.', '/') + '.py')
 
 
-def _assigned(tree: 'ast.Module') -> 'set[str]':
-    """Names a module assigns at its top level, :class:`~typing.TypeVar` aside."""
-    names = set()  # type: set[str]
+def _bindings(tree: 'ast.Module') -> 'Iterator[tuple[str, Optional[ast.expr]]]':
+    """Each name a module assigns at its top level, a tuple's included, with the
+    value assigned, :class:`~typing.TypeVar` aside."""
     for node in tree.body:
         if isinstance(node, ast.Assign):
-            targets, value = node.targets, node.value
+            targets, value = node.targets, node.value  # type: list[ast.expr], Optional[ast.expr]
         elif isinstance(node, ast.AnnAssign):
             targets, value = [node.target], node.value
         else:
             continue
         if isinstance(value, ast.Call) and getattr(value.func, 'id', None) == 'TypeVar':
             continue
-        names.update(target.id for target in targets if isinstance(target, ast.Name))
-    return names
+        for target in targets:
+            elts = target.elts if isinstance(target, (ast.Tuple, ast.List)) else [target]
+            yield from ((elt.id, value) for elt in elts if isinstance(elt, ast.Name))
+
+
+def _assigned(tree: 'ast.Module') -> 'set[str]':
+    """Names a module assigns at its top level, :class:`~typing.TypeVar` aside."""
+    return {name for name, _ in _bindings(tree)}
 
 
 def _defined(body: 'list[ast.stmt]') -> 'set[str]':
@@ -180,16 +200,99 @@ def sources() -> 'dict[str, str]':
 
 
 def owned(module: 'str') -> 'bool':
-    """Whether ``module`` is a protocol's own ``protocol``, ``schema`` or ``data`` module."""
+    """Whether ``module`` is a protocol's own ``protocol``, ``schema``, ``data`` or ``const`` module."""
     parts = module.split('.')
     return parts[:2] == ['pcapkit', 'protocols'] and len(parts) > 3 \
-        and parts[-1] in ('protocol', 'schema', 'data')
+        and parts[-1] in ('protocol', 'schema', 'data', 'const')
+
+
+def const_module(module: 'str') -> 'bool':
+    """Whether ``module`` is a protocol's own ``const`` module (#2896)."""
+    return owned(module) and module.rpartition('.')[2] == 'const'
+
+
+def constant_source(name: 'str') -> 'bool':
+    """Whether a constant may be built from the module or name ``name`` imports: one
+    outside :mod:`pcapkit`, a registry, a shared constant or a protocol's constant."""
+    parts = name.split('.')
+    return parts[0] != 'pcapkit' or parts[:2] == ['pcapkit', 'const'] \
+        or parts[:3] == ['pcapkit', 'corekit', 'const'] \
+        or any(const_module('.'.join(parts[:end])) for end in range(4, len(parts) + 1))
 
 
 def constants(trees: 'dict[str, ast.Module]') -> 'dict[str, set[str]]':
     """Each protocol's own module mapped to the constants it defines."""
     return {module: {name for name in _assigned(tree) if CONSTANT.match(name)}
             for module, tree in trees.items() if owned(module)}
+
+
+def _top_level(body: 'list[ast.stmt]') -> 'Iterator[ast.stmt]':
+    """The statements of a module body, in its top-level ``if`` and ``try`` blocks too."""
+    for node in body:
+        yield node
+        if isinstance(node, (ast.If, ast.Try)):
+            yield from _top_level(node.body + node.orelse + getattr(node, 'finalbody', []))
+            for handler in getattr(node, 'handlers', ()):
+                yield from _top_level(handler.body)
+
+
+def _imports(module: 'str', tree: 'ast.Module') -> 'dict[str, str]':
+    """Each name ``tree`` binds by a top-level import mapped to what it imports."""
+    found = {}  # type: dict[str, str]
+    for node in _top_level(tree.body):
+        if isinstance(node, ast.Import):
+            found.update((alias.asname or alias.name.partition('.')[0],
+                          alias.name if alias.asname else alias.name.partition('.')[0])
+                         for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            target = node.module or ''
+            if node.level:
+                base = _relative_base(module, False, node.level)
+                target = f'{base}.{target}' if target else base
+            found.update((alias.asname or alias.name, f'{target}.{alias.name}') for alias in node.names)
+    return found
+
+
+def classify(module: 'str', tree: 'ast.Module') -> 'dict[str, Optional[str]]':
+    """Each name of :data:`CONSTANT`'s form ``module`` binds at its top level mapped
+    to why it is not a constant (#2896), or :data:`None` where it is one.
+
+    It is not one where its value is a lazy import, a
+    :class:`~pcapkit.corekit.module.ModuleDescriptor` call; where the module rebinds
+    it under ``global`` or :data:`STATE` lists it, as run-time state; or where its
+    value reads a function, a class or another name the module assigns that is not
+    a constant, or a name the module imports from :mod:`pcapkit` other than a
+    :func:`constant_source` -- a field, a schema, a data model -- which a ``const``
+    module could not import without importing its own protocol back.
+
+    """
+    readable = {name: constant_source(target) for name, target in _imports(module, tree).items()}
+    readable.update((name, False) for name in _defined(tree.body))
+    rebound = {name for node in ast.walk(tree) if isinstance(node, ast.Global) for name in node.names}
+    found = {}  # type: dict[str, Optional[str]]
+    for name, value in _bindings(tree):
+        reason = None  # type: Optional[str]
+        nodes = list(ast.walk(value)) if value is not None else []
+        local = {node.id for node in nodes if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)}
+        local.update(arg.arg for node in nodes if isinstance(node, ast.Lambda) for arg in node.args.args)
+        if any(isinstance(node, ast.Call) and _descriptor(node) is not None for node in nodes):
+            reason = 'a lazy import'
+        elif name in rebound or name in STATE.get(module, ()):
+            reason = 'run-time state'
+        else:
+            reason = next((f'built from {node.id}' for node in nodes if isinstance(node, ast.Name)
+                           and node.id not in local and not readable.get(node.id, True)), None)
+        readable[name] = reason is None and CONSTANT.match(name) is not None
+        if CONSTANT.match(name):
+            found[name] = reason
+    return found
+
+
+def own_constants(trees: 'dict[str, ast.Module]') -> 'dict[str, set[str]]':
+    """Each protocol's own ``protocol``, ``schema`` and ``data`` module mapped to the
+    constants it binds, which its package's ``const`` module should (#2896)."""
+    return {module: {name for name, reason in classify(module, tree).items() if reason is None}
+            for module, tree in trees.items() if owned(module) and not const_module(module)}
 
 
 def helpers(trees: 'dict[str, ast.Module]') -> 'dict[str, set[str]]':
@@ -402,10 +505,10 @@ class TestRule(unittest.TestCase):
             'pcapkit.protocols.internet.icmpv6.schema':
                 'from pcapkit.protocols.internet.ipv6 import schema\nschema.LIMIT\n',
             'pcapkit.protocols.internet.icmpv6.protocol': 'from ..ipv6.schema import RELATIVE\n',
-            'pcapkit.protocols.application.ssl.protocol': 'SHARED = 1\nTOOL = 2\n',
+            'pcapkit.protocols.application.ssl.const': 'SHARED = 1\nTOOL = 2\n',
             'pcapkit.protocols.application.tls.protocol':
-                'from pcapkit.protocols.application.ssl.protocol import SHARED\n',
-            'pcapkit.toolkit.pcap': 'import pcapkit.protocols.application.ssl.protocol as ssl\nssl.TOOL\n',
+                'from pcapkit.protocols.application.ssl.const import SHARED\n',
+            'pcapkit.toolkit.pcap': 'import pcapkit.protocols.application.ssl.const as ssl\nssl.TOOL\n',
             'pcapkit.protocols.transport.tcp.schema': 'WIDTH = 1\n',
             'pcapkit.foundation.reassembly.tcp':
                 'import pcapkit.protocols.transport.tcp.schema\npcapkit.protocols.transport.tcp.schema.WIDTH\n',
@@ -414,7 +517,7 @@ class TestRule(unittest.TestCase):
         }
         trees = {module: ast.parse(text) for module, text in texts.items()}
         self.assertEqual(offenders(trees, constants(trees)), [
-            'pcapkit.protocols.application.ssl.protocol.TOOL: read by pcapkit.toolkit.pcap',
+            'pcapkit.protocols.application.ssl.const.TOOL: read by pcapkit.toolkit.pcap',
             'pcapkit.protocols.internet.ipv6.schema.LIMIT: read by pcapkit.protocols.internet.icmpv6.schema',
             'pcapkit.protocols.internet.ipv6.schema.RELATIVE: read by pcapkit.protocols.internet.icmpv6.protocol',
             'pcapkit.protocols.misc.pcap.header.schema.MAGIC: read by pcapkit.dumpkit.pcap',
@@ -452,6 +555,94 @@ class TestRule(unittest.TestCase):
             'pcapkit.protocols.link.loopback.protocol.order: read by pcapkit.foundation.engines.dpkt',
             'pcapkit.protocols.link.loopback.protocol.own: read by pcapkit.protocols.internet.ipv4.protocol',
         ])
+
+
+class TestProtocolConstants(unittest.TestCase):
+    """A protocol's own constants are in its package's ``const`` module (#2896)."""
+
+    @classmethod
+    def setUpClass(cls) -> 'None':
+        cls.trees = {module: ast.parse(text) for module, text in sources().items()}
+        cls.homes = sorted(module for module in cls.trees if const_module(module))
+
+    def test_constants_are_in_const_modules(self) -> 'None':
+        found = sorted(f'{module}.{name}' for module, names in own_constants(self.trees).items()
+                       for name in names)
+        self.assertEqual(found, [], "move each to its package's const module, or its family "
+                                    "base's (#2896)")
+
+    def test_const_modules_bind_constants_alone(self) -> 'None':
+        self.assertTrue(self.homes)
+        for module in self.homes:
+            tree = self.trees[module]
+            with self.subTest(module=module):
+                self.assertEqual(_defined(tree.body), set())
+                self.assertEqual({name for name in _assigned(tree) if not CONSTANT.match(name)},
+                                 {'__all__'})
+                self.assertEqual({name: reason for name, reason in classify(module, tree).items()
+                                  if reason is not None}, {})
+
+    def test_const_modules_export_their_public_constants(self) -> 'None':
+        for module in self.homes:
+            with self.subTest(module=module):
+                public = sorted(name for name in _assigned(self.trees[module]) if not name.startswith('_'))
+                self.assertEqual(sorted(_all(module)), public)
+
+    def test_const_modules_import_only_constants(self) -> 'None':
+        # NOTE: their protocol, schema and data modules import them, so one
+        # importing any of those back would make a cycle.
+        found = []  # type: list[str]
+        for module in self.homes:
+            path = _path(module)
+            source = path.read_text(encoding='utf-8')
+            typing_only = _type_checking_lines(source)
+            for line, name in imported_names(source, module):
+                if line not in typing_only and not constant_source(name):
+                    found.append(f'{path.relative_to(ROOT)}:{line}: {name}')
+        self.assertEqual(found, [])
+
+    def test_every_state_entry_is_bound(self) -> 'None':
+        # NOTE: an entry for a name its module no longer binds exempts nothing.
+        for module, names in STATE.items():
+            for name in names:
+                with self.subTest(module=module, name=name):
+                    self.assertIn(name, _assigned(self.trees[module]))
+
+    def test_the_const_rule_flags_what_it_should(self) -> 'None':
+        texts = {
+            'pcapkit.protocols.link.ethernet.schema': (
+                'import re\n'
+                'from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType\n'
+                'from pcapkit.corekit.const.capture import MAGIC_NUMBER\n'
+                'from pcapkit.corekit.fields.numbers import EnumField\n'
+                'from pcapkit.corekit.module import ModuleDescriptor\n'
+                'from pcapkit.protocols.link.ethernet.data import Ethernet as Data_Ethernet\n'
+                'from pcapkit.protocols.link.vlan.const import WIDTH\n'
+                'LENGTH = 14\n'
+                'PAIR, OTHER = 1, 2\n'
+                'PATTERN = re.compile(rb"x")\n'
+                'TYPES = frozenset({Enum_EtherType.IPv4})\n'
+                'TABLE = {key: LENGTH + WIDTH for key in MAGIC_NUMBER}\n'
+                '_LAZY = ModuleDescriptor("pcapkit.protocols.misc.raw.protocol", "Raw")\n'
+                '_FIELD = EnumField(length=2, namespace=Enum_EtherType)\n'
+                '_DATA = Data_Ethernet\n'
+                '_FROM_FIELD = _FIELD.length\n'
+                '_CACHE = None\n'
+                'def load():\n    global _CACHE\n    _CACHE = 1\n'
+                'class Suite: ...\n'
+                'SUITES = {1: Suite()}\n'
+            ),
+            'pcapkit.protocols.link.ethernet.const': 'TAG = 6\n',
+            'pcapkit.protocols.application.ngap.protocol': 'import threading\n_PDU_LOCK = threading.Lock()\n',
+        }
+        trees = {module: ast.parse(text) for module, text in texts.items()}
+        self.assertEqual({module: sorted(names) for module, names in own_constants(trees).items()}, {
+            'pcapkit.protocols.application.ngap.protocol': [],
+            'pcapkit.protocols.link.ethernet.schema': ['LENGTH', 'OTHER', 'PAIR', 'PATTERN', 'TABLE', 'TYPES'],
+        })
+        self.assertEqual(classify('pcapkit.protocols.link.ethernet.schema',
+                                  trees['pcapkit.protocols.link.ethernet.schema'])['_FROM_FIELD'],
+                         'built from _FIELD')
 
 
 if __name__ == '__main__':

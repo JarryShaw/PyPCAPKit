@@ -168,6 +168,13 @@ See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``EncryptedExtensions``,
 ``ChangeCipherSpec``, shared verbatim with
 :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`.
 
+Constants
+---------
+
+.. module:: pcapkit.protocols.application.tls.const
+
+.. versionadded:: 1.7.0
+
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Transport_Layer_Security
