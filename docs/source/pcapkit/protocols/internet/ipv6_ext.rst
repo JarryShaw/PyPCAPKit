@@ -34,6 +34,8 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _ipv6_aligned
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -88,6 +90,15 @@ This table classifies by *wire format* alone, over every code
 :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates,
 which match IANA's *IPv6 Extension Header Types* registry exactly
 (:issue:`925`).
+
+Every header but ESP must be a multiple of 8 octets (:rfc:`8200#section-4`),
+which :meth:`IPv6.make <pcapkit.protocols.internet.ipv6.protocol.IPv6.make>`
+checks of the headers it is given as layers. Of the rules above, only AH's, in
+4-octet units, can break it: :meth:`AH.make
+<pcapkit.protocols.internet.ah.protocol.AH.make>` pads for IPv6 under
+``version=6`` or ``extension``, and rebuilds a captured header as captured. ESP
+runs to the end of the packet, padded to 4 octets (:rfc:`4303#section-2.4`), so
+it is not checked (:issue:`2886`).
 
 ``Shim6`` conforms to the generic rule but has no dedicated parser; it reaches
 this class as :ref:`ipv6-ext-entry-paths` describes.

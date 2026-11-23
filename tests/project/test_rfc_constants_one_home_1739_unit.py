@@ -433,8 +433,9 @@ UNRELATED = {
                                               '(RFC 2328 appendix A.3.1), not a PCAP record '
                                               'header'),
     'pcapkit/protocols/application/ospf/schema.py': ((24,), 'the OSPF header length'),
-    'pcapkit/protocols/internet/ah/protocol.py': ((20,), "AH's length estimate, its 12-octet fixed part "
-                                         'plus a minimal ICV, not the fixed part itself'),
+    'pcapkit/protocols/internet/ah/protocol.py': ((6, 20), 'the IP version number the ICV is padded '
+                                         "for (#2886), and AH's length estimate, its 12-octet "
+                                         'fixed part plus a minimal ICV, not the fixed part itself'),
     'pcapkit/protocols/internet/esp/protocol.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
     'pcapkit/protocols/internet/hip/protocol.py': ((6, 12, 16, 20, 32, 40, 65535),
                                           'HIP parameter fields and sizes; 65535 bounds the '

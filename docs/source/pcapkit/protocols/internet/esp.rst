@@ -58,6 +58,8 @@ Security Association (SA), negotiated out of band. So:
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _ipv6_aligned
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: protocol

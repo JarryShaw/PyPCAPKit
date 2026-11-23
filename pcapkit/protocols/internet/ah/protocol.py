@@ -33,7 +33,7 @@ from pcapkit.protocols.internet.ah.schema import AH_HEADER_LEN
 from pcapkit.protocols.internet.ipsec.protocol import IPsec
 from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from typing import IO, Any, NoReturn, Optional
@@ -220,8 +220,18 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
              seq: 'int' = 0,
              icv: 'bytes' = b'',
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             *, payload_length: 'Optional[int]' = None,
+             version: 'Literal[4, 6]' = 4,
+             extension: 'bool' = False,
              **kwargs: 'Any') -> 'Schema_AH':
         """Make (construct) packet data.
+
+        Without ``payload_length``, the ICV field is ``icv`` and the fewest
+        zero octets that make the header a multiple of 32 bits under IPv4 or
+        64 bits under IPv6 (:rfc:`4302#section-2.6`);
+        :rfc:`4302#section-3.3.3.2.1` leaves the padding's content to the
+        sender. Payload Length counts the padding (:rfc:`4302#section-2.2`),
+        and a parse reads it back as part of ``icv``.
 
         Args:
             next: Next header type.
@@ -229,8 +239,19 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
                 but written as given so that a parsed header rebuilds unchanged.
             spi: Security Parameters Index.
             seq: Sequence Number Field.
-            icv: Integrity Check Value (ICV).
+            icv: Integrity Check Value (ICV), with any padding already in it
+                kept as given.
             payload: Payload of current instance.
+            payload_length: Payload Length, in 32-bit words minus 2; computed
+                from the padded ICV when omitted. When given, it must describe
+                ``icv`` exactly, and no padding is added, so that
+                :meth:`_make_data` rebuilds a parsed header as captured,
+                aligned or not.
+            version: Version of the IP header carrying this one, which sets
+                the alignment :rfc:`4302#section-3.3.3.2.1` pads the ICV to.
+            extension: If the header is an IPv6 extension header, aligned for
+                IPv6 whatever ``version`` says, since :meth:`__post_init__`
+                always passes ``version`` its default of ``4``.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -238,16 +259,45 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
 
         Raises:
             ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member
-                or code that does not fit in one octet.
+                or code that does not fit in one octet, ``version`` is neither
+                ``4`` nor ``6``, the padded ICV is too long for Payload Length
+                to count, or ``payload_length`` does not fit in one octet or
+                does not describe ``icv`` exactly.
 
         .. versionchanged:: 1.5.0
 
            Takes ``reserved`` ahead of ``spi`` (:issue:`1327`), which shifts
            every later positional argument.
 
+        .. versionchanged:: 1.7.0
+
+           Pads ``icv`` to the alignment ``version`` and ``extension`` set,
+           where it cut the octets past a multiple of 32 bits, and refuses an
+           ICV too long for Payload Length, where it wrapped the field; takes
+           ``payload_length`` (:issue:`2886`).
+
         """
         next_value = self._make_index(next, Enum_TransType, bits=8, name='next header')
-        length = (len(icv) + AH_HEADER_LEN) // 4 - 2
+        if version not in (4, 6):
+            raise ProtocolError(f'{self.alias}: invalid version: must be 4 or 6, not {version!r}')
+
+        if payload_length is None:
+            # NOTE: RFC 4302 s2.6 pads the header to 4 octets under IPv4 and 8 under IPv6.
+            align = 8 if extension or version == 6 else 4
+            field = icv + bytes(-(AH_HEADER_LEN + len(icv)) % align)
+            length = (AH_HEADER_LEN + len(field)) // 4 - 2
+            if length > 0xff:
+                most = (0xff + 2) * 4 // align * align - AH_HEADER_LEN
+                raise ProtocolError(f'{self.alias}: invalid ICV length: must be at most {most} octets '
+                                    f'under IPv{6 if align == 8 else 4}, not {len(icv)}')
+        else:
+            # NOTE: RFC 4302 s3.3.3.2.1 prohibits padding past the minimum, so a given
+            # length adds none: it describes the field ``icv`` already is.
+            length = self._make_uint(payload_length, bits=8, name='payload length')
+            if (length + 2) * 4 - AH_HEADER_LEN != len(icv):
+                raise ProtocolError(f'{self.alias}: invalid payload length: must describe the '
+                                    f'{len(icv)}-octet ICV exactly, not {length}')
+            field = icv
 
         return Schema_AH(
             next=next_value,
@@ -255,7 +305,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
             reserved=reserved,
             spi=spi,
             seq=seq,
-            icv=icv,
+            icv=field,
             payload=payload,
         )
 
@@ -340,4 +390,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
             'seq': data.seq,
             'icv': data.icv,
             'payload': cls._make_payload(data),
+            # NOTE: Written as captured, so that a header not aligned for the IP version
+            # carrying it is not padded on a rebuild (#2886).
+            'payload_length': data.length // 4 - 2,
         }

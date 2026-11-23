@@ -253,6 +253,13 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     #: and drops it, as it does while parsing.
     __keywords__ = frozenset({'alias'})
 
+    #: Whether :rfc:`8200#section-4` makes this header's length a multiple of
+    #: 8 octets, which :meth:`IPv6.make
+    #: <pcapkit.protocols.internet.ipv6.protocol.IPv6.make>` checks of a chain
+    #: it is given; :class:`~pcapkit.protocols.internet.esp.protocol.ESP`
+    #: clears it.
+    _ipv6_aligned = True  # type: bool
+
     ##########################################################################
     # Properties.
     ##########################################################################
