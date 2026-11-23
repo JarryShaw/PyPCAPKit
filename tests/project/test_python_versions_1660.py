@@ -325,13 +325,37 @@ PYPY_KTLO = [{'python-version': version, 'ktlo': True}
              for version, entry in TIERS_AT_MAIN['versions']['pypy'].items() if entry['tier'] == 'ktlo']
 
 
+#: #2899: the job whose PyPy legs, and its KTLO twin's, are each a leg per part.
+PYPY_IN_PARTS = (('unit-tests.yml', 'test'),)
+PYPY_PARTS = (1, 2)
+
+
 def with_pypy(name: 'str', job_id: 'str', expected: 'list[dict[str, Any]]') -> 'list[dict[str, Any]]':
-    """``expected``, :data:`MAIN`'s legs of a job, with the PyPy legs #1958 added to it."""
+    """``expected``, :data:`MAIN`'s legs of a job, with the PyPy legs #1958 added to it,
+    in :data:`PYPY_PARTS` where #2899 split them."""
     if (name, job_id) not in PYPY_TESTED:
         return expected
     supported = [leg for leg in expected if leg.get('ktlo') is not True]
     ktlo = [leg for leg in expected if leg.get('ktlo') is True]
-    return supported + [dict(leg) for leg in PYPY_SUPPORTED] + ktlo + [dict(leg) for leg in PYPY_KTLO]
+    parts = PYPY_PARTS if (name, job_id) in PYPY_IN_PARTS else (None,)
+
+    def split(found: 'list[dict[str, Any]]') -> 'list[dict[str, Any]]':
+        return [dict(leg, **({} if part is None else {'part': part})) for leg in found for part in parts]
+
+    return supported + split(PYPY_SUPPORTED) + ktlo + split(PYPY_KTLO)
+
+
+#: #2899's one rename: a PyPy leg of ``test`` or ``test-ktlo`` names its part, before
+#: the KTLO suffix. No required context names a PyPy leg.
+PART_NAME = "${{ matrix.part && ' (part ' || '' }}${{ matrix.part }}${{ matrix.part && ')' || '' }}"
+
+
+def renamed(name: 'str', leg: 'dict[str, Any]') -> 'str':
+    """:data:`MAIN`'s name of ``leg``, with the part #2899 adds to it."""
+    if not leg.get('part'):
+        return name
+    head, ktlo, _ = name.partition(' (KTLO)')
+    return f'{head} (part {leg["part"]}){ktlo}'
 
 
 #: The experimental legs' job name (#1732), which ``test``'s was on those legs from #1660.
@@ -341,6 +365,7 @@ EXPERIMENTAL_TEMPLATE = 'Python ${{ matrix.python-version }} (experimental)'
 def render(template: 'str', leg: 'dict[str, Any]') -> 'str':
     """A matrix job's name for one leg, for the expression shapes these names use."""
     name = template.replace("${{ matrix.ktlo && ' (KTLO)' || '' }}", ' (KTLO)' if leg.get('ktlo') is True else '')
+    name = name.replace(PART_NAME, f' (part {leg["part"]})' if leg.get('part') else '')
     name = name.replace("${{ matrix.experimental && ' (experimental)' || '' }}",
                         ' (experimental)' if leg.get('experimental') is True else '')
     name = re.sub(r'\$\{\{ matrix\.([\w-]+) \}\}', lambda match: str(leg[match.group(1)]), name)
@@ -700,7 +725,8 @@ class TestNothingMovedButLatest(unittest.TestCase):
         ``test``'s template is :data:`MAIN`'s, its experimental legs being a
         job of their own (#1732). Each job of :data:`KTLO_TWINS` names its legs
         (#1738) with a template of its own, the KTLO job's ending `` (KTLO)``,
-        so what stays is each leg's rendered name.
+        so what stays is each leg's rendered name, but for the part a PyPy leg
+        of ``test`` names (#2899), which :func:`renamed` adds.
 
         """
         for (name, job_id), template in TEMPLATES_AT_MAIN.items():
@@ -709,7 +735,7 @@ class TestNothingMovedButLatest(unittest.TestCase):
                     self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
                     continue
                 spec = MAIN_MATRICES[(name, job_id)]
-                before = sorted(render(template, leg) for leg in with_pypy(name, job_id, legs(spec)))
+                before = sorted(renamed(render(template, leg), leg) for leg in with_pypy(name, job_id, legs(spec)))
                 after = sorted(render(workflow(name)['jobs'][job]['name'], leg)
                                for job in (job_id, KTLO_TWINS[(name, job_id)])
                                for leg in legs(matrix(name, job, self.values)))

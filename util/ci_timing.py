@@ -303,9 +303,14 @@ def projection(points: 'list[tuple[float, float]]', cap: 'float') -> 'dict[str, 
 
 
 def template_pattern(template: 'str') -> 're.Pattern[str]':
-    """A full-match pattern for a name that may carry ``${{ ... }}`` expressions."""
+    """A full-match pattern for a name that may carry ``${{ ... }}`` expressions.
+
+    An expression may render empty, as ``${{ matrix.part && ' (part ' || '' }}``
+    does on every leg but a PyPy one (#2899), so each matches any text, none too.
+
+    """
     parts = re.split(r'\$\{\{.*?\}\}', template)
-    return re.compile('.+'.join(re.escape(part) for part in parts))
+    return re.compile('.*'.join(re.escape(part) for part in parts))
 
 
 def _scalar(value: 'str') -> 'str':

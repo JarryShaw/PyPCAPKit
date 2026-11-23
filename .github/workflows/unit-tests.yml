@@ -82,7 +82,7 @@ jobs:
     # `github.event_name` is never 'workflow_call' inside a called workflow,
     # whose github context is the caller's, so an input is the only reliable
     # way for a reusable workflow to know how it was invoked.
-    name: Python ${{ matrix.python-version }}
+    name: Python ${{ matrix.python-version }}${{ matrix.part && ' (part ' || '' }}${{ matrix.part }}${{ matrix.part && ')' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -109,6 +109,10 @@ jobs:
       # `latest` leg alone, which with `test-latest-tier`, `integration`'s
       # `latest` leg and `project-tests` runs the whole suite. See
       # `required-checks`.
+      #
+      # #2899: a PyPy leg is a job per `part`, util/python_versions.py's
+      # in_parts(), each running its part of the leg's pytest runs; see
+      # `Run unit tests`.
       matrix: ${{ fromJSON(needs.changes.outputs.test-only == 'true' && needs.python-versions.outputs.test-latest || needs.python-versions.outputs.test) }}
 
     # `&test-steps`: `test-ktlo` and `test-latest-tier` run these same steps,
@@ -213,10 +217,15 @@ jobs:
         # 16 GB, and its tail stalled past tests._support.time_limit's 30 s. So
         # its internet, application and misc subpackages run first, each a shard
         # of its own, and `tests/protocols` then takes the remainder.
+        #
+        # #2899: the runs took 21.5 min of a PyPy leg's 22.9 on 5c20d06ab, past
+        # half its cap at p90, so `|` cuts them into two parts of 10.7 and 10.8
+        # min there, and each `part` of the leg, a job of its own, runs its own.
         env:
           COVERAGE: ${{ matrix.coverage }}
           HALF: ${{ matrix.half }}
-          SHARDS: ${{ startsWith(matrix.python-version, 'pypy') && 'tests/protocols/internet tests/protocols/application tests/protocols/misc tests/protocols tests/corekit' || '' }}
+          PART: ${{ matrix.part }}
+          SHARDS: ${{ startsWith(matrix.python-version, 'pypy') && 'tests/protocols/internet tests/protocols/application tests/protocols/misc tests/protocols | tests/corekit' || '' }}
         run: |
           skipped=
           selected=
@@ -250,7 +259,7 @@ jobs:
             python util/cap_file_size.py python -m coverage run --rcfile=.github/coverage.toml -m pytest "$@"
           elif [ -n "$SHARDS" ]; then
             # #2005: #1963's script, on the leg's interpreter, under the one cap.
-            python util/cap_file_size.py python util/pytest_shards.py "$SHARDS" -- python -m pytest "$@"
+            python util/cap_file_size.py python util/pytest_shards.py --part "$PART" "$SHARDS" -- python -m pytest "$@"
           else
             python util/cap_file_size.py python -m pytest "$@"
           fi
@@ -309,7 +318,7 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: junit-unit-${{ matrix.python-version }}${{ matrix.half && '-latest-half-' || '' }}${{ matrix.half }}
+          name: junit-unit-${{ matrix.python-version }}${{ matrix.half && '-latest-half-' || '' }}${{ matrix.half }}${{ matrix.part && '-part-' || '' }}${{ matrix.part }}
           path: ${{ runner.temp }}/junit*.xml
           retention-days: 14
 
@@ -343,7 +352,7 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          JOB_NAME: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}${{ matrix.half && ' (LATEST tier, half ' || '' }}${{ matrix.half }}${{ matrix.half && ')' || '' }}
+          JOB_NAME: Python ${{ matrix.python-version }}${{ matrix.part && ' (part ' || '' }}${{ matrix.part }}${{ matrix.part && ')' || '' }}${{ matrix.ktlo && ' (KTLO)' || '' }}${{ matrix.half && ' (LATEST tier, half ' || '' }}${{ matrix.half }}${{ matrix.half && ')' || '' }}
         run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
 
       - name: Upload the job summary
@@ -372,7 +381,7 @@ jobs:
   # setup-python builds them for. A brownout of a deprecated image fails the
   # leg before any step runs, which only the job-level guard contains.
   test-ktlo:
-    name: Python ${{ matrix.python-version }} (KTLO)
+    name: Python ${{ matrix.python-version }}${{ matrix.part && ' (part ' || '' }}${{ matrix.part }}${{ matrix.part && ')' || '' }} (KTLO)
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' && needs.changes.outputs.test-only != 'true' }}
     needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -406,14 +415,16 @@ jobs:
       ANNOTATION_LEVEL: error
     strategy:
       fail-fast: false
-      # `ktlo: false` names the key `test`'s steps read, which actionlint asks
-      # a matrix written out here to define.
+      # `ktlo: false` and `part: ''` name keys `test`'s steps read, which
+      # actionlint asks a matrix written out here to define; an empty `part`
+      # renders as none (#2899).
       matrix:
         python-version: ['${{ needs.python-versions.outputs.latest }}']
         half: [1, 2]
         include:
           - coverage: true
             ktlo: false
+            part: ''
     steps: *test-steps
 
   # #2751: the coverage legs' parts, combined into the one number
@@ -1289,7 +1300,8 @@ jobs:
   # dea098b15: the modules added between took 267 s, and those already there
   # 826 s rather than 525 s, more the later they ran in the one process.
   # Measured locally on dea098b15, the halves took 530 s and 484 s, the whole
-  # rest 1229 s.
+  # rest 1229 s. #2899: their modules took 335 s and 371 s on 5c20d06ab, so the
+  # cut moved to about 353 s each there.
   #
   # Every tests/ subdirectory is a leg except those below, and
   # tests/project/test_unittest_ordering_shards.py fails on a new one left out:

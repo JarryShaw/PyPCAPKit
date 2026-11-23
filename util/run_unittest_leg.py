@@ -182,10 +182,11 @@ STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
 
 #: The path below each leg at which ``--half`` cuts it (#2254): a module name for
 #: the flat ``project``, :data:`tests._tiers.PROJECT_BOUNDARY`, where the
-#: ``project-tests`` cells cut the pins too (#2798), and a path inside ``misc/`` for
-#: ``protocols``, whose cells also pass ``--exclude protocols/internet``. Move one to
-#: rebalance; the workflow's cells ask for a half and follow.
-SHARD_BOUNDARIES = {'project': PROJECT_BOUNDARY, 'protocols': 'misc/test_q'}
+#: ``project-tests`` cells cut the pins too (#2798), and a path inside ``schema/`` for
+#: ``protocols``, whose cells also pass ``--exclude protocols/internet``; that one
+#: moved from ``misc/test_q`` to even the halves' times on 5c20d06ab (#2899). Move one
+#: to rebalance; the workflow's cells ask for a half and follow.
+SHARD_BOUNDARIES = {'project': PROJECT_BOUNDARY, 'protocols': 'schema/test_schema_r'}
 
 #: Run a full :func:`gc.collect` after every this many tests; see the
 #: module docstring for the measurements behind it. ``--gc-every 0`` disables.

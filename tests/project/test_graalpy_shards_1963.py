@@ -261,8 +261,33 @@ class TestTheScript(unittest.TestCase):
         return subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True,  # nosec: B603
                               check=False, timeout=60)
 
+    def test_a_part_runs_its_shards_and_the_last_the_rest(self) -> None:
+        """#2899: ``|`` cuts the runs into parts, each run as it is with no part, so the parts are the runs."""
+        command = ['pytest', '--junitxml=t/junit.xml']
+        spec = ['tests/protocols', 'tests/const', '|', 'tests/corekit']
+        whole = pytest_shards.runs([shard for shard in spec if shard != '|'], command)
+        self.assertEqual(pytest_shards.parts(spec), 2)
+        self.assertEqual(pytest_shards.runs(spec, command), whole)
+        self.assertEqual(pytest_shards.runs(spec, command, 1), whole[:2])
+        self.assertEqual(pytest_shards.runs(spec, command, 2), whole[2:])
+        self.assertEqual([name for name, _ in whole[2:]], ['tests/corekit', 'the rest'])
+        # A later part still ignores what an earlier one took.
+        self.assertIn('--ignore=tests/protocols', whole[2][1])
+
+    def test_the_script_runs_one_part(self) -> None:
+        ran = self.run_script('--part', '1', 'a b | c', '--', 'echo', 'run')
+        self.assertEqual(ran.returncode, 0, ran.stderr)
+        self.assertEqual([line for line in ran.stdout.splitlines() if line.startswith('run')],
+                         ['run a', 'run --ignore=a b'])
+        ran = self.run_script('--part', '2', 'a b | c', '--', 'echo', 'run')
+        self.assertEqual([line for line in ran.stdout.splitlines() if line.startswith('run')],
+                         ['run --ignore=a --ignore=b c', 'run --ignore=a --ignore=b --ignore=c'])
+
     def test_a_bad_command_line_is_a_usage_error(self) -> None:
-        for args in ((), ('tests/a',), ('--', 'true'), ('tests/a', '--')):
+        for args in ((), ('tests/a',), ('--', 'true'), ('tests/a', '--'),
+                     # #2899: a part the shards do not have, or none, as an empty $PART gives.
+                     ('--part', '3', 'a | b', '--', 'true'), ('--part', '0', 'a', '--', 'true'),
+                     ('--part', '', 'a', '--', 'true'), ('--part', '--', 'true')):
             with self.subTest(args=args):
                 self.assertEqual(self.run_script(*args).returncode, pytest_shards.USAGE)
 

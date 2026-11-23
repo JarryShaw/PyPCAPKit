@@ -34,6 +34,17 @@ each; a shard's run also gets a ``--junitxml`` of its own, beside the command's,
 named after the shard -- ``junit-tests-protocols.xml`` beside ``junit.xml`` --
 and the last run keeps the command's.
 
+A ``|`` among ``SHARDS`` ends a part, and ``--part K`` runs part ``K`` alone, the
+runs of its shards, the last part's with the rest (#2899). A PyPy leg of
+unit-tests.yml's ``test`` runs a part per job, so each job takes about half its
+leg's time::
+
+    python util/pytest_shards.py --part "$PART" "$SHARDS" -- python -m pytest ...
+
+Each run is the one the whole command line would make, with the ``--ignore``\\ s
+of every earlier shard, so the parts together are exactly the runs without
+``--part``, which runs every part.
+
 On the GraalPy leg the runs share the step's one ``timeout``, scope and watcher,
 which run this script, so the step's caps hold over the whole tier rather than a shard. On
 ``SIGINT``, which ``timeout`` sends to its whole process group, the run then in
@@ -62,12 +73,15 @@ if TYPE_CHECKING:
     from types import FrameType
     from typing import Optional
 
-__all__ = ['junit_for', 'main', 'runs']
+__all__ = ['junit_for', 'main', 'parts', 'runs']
 
 #: Exit status for a bad command line, as :mod:`argparse` uses for a usage error.
 USAGE = 2
 #: The option pytest writes its JUnit file by.
 JUNIT = '--junitxml='
+#: What ends a part among the shards, and the option that picks one (#2899).
+PART_BREAK = '|'
+PART = '--part'
 #: What makes a shard a glob, as :func:`glob.has_magic` reads it.
 MAGIC = re.compile(r'[*?[]')
 
@@ -106,41 +120,69 @@ def select(shard: 'str') -> 'tuple[str, list[str], list[str]]':
     return directory, left, taken
 
 
-def runs(shards: 'list[str]', command: 'list[str]') -> 'list[tuple[str, list[str]]]':
-    """Every run's name and argv, in order: one per shard, then the rest; a shard that selects nothing is skipped."""
-    argvs = []
+def parts(shards: 'list[str]') -> 'int':
+    """How many parts :data:`PART_BREAK` cuts ``shards`` into (#2899)."""
+    return shards.count(PART_BREAK) + 1
+
+
+def runs(shards: 'list[str]', command: 'list[str]',
+         part: 'Optional[int]' = None) -> 'list[tuple[str, list[str]]]':
+    """Every run's name and argv, in order: one per shard, then the rest; a shard that selects nothing is skipped.
+
+    With ``part``, the runs of that part alone, each as it is without (#2899).
+
+    """
+    argvs = []  # type: list[tuple[int, str, list[str]]]
     taken = []  # type: list[str]
+    current = 1
     for shard in shards:
+        if shard == PART_BREAK:
+            current += 1
+            continue
+        mine = part in (None, current)
         try:
             path, ignores, took = select(shard)
         except ValueError as error:
-            print(f'pytest_shards: skipping {error}', flush=True)
+            if mine:
+                print(f'pytest_shards: skipping {error}', flush=True)
             continue
         took = [entry for entry in took if entry not in taken]
         if not took:
-            print(f'pytest_shards: skipping {shard}: an earlier shard took it', flush=True)
+            if mine:
+                print(f'pytest_shards: skipping {shard}: an earlier shard took it', flush=True)
             continue
         junit = junit_for(command, shard)
         ignored = [*taken, *(entry for entry in ignores if entry not in taken)]
-        argvs.append((shard, [*command, *([junit] if junit else []), *(f'--ignore={entry}' for entry in ignored),
-                              path]))
+        argvs.append((current, shard, [*command, *([junit] if junit else []),
+                                       *(f'--ignore={entry}' for entry in ignored), path]))
         taken.extend(took)
-    argvs.append(('the rest', [*command, *(f'--ignore={entry}' for entry in taken)]))
-    return argvs
+    argvs.append((current, 'the rest', [*command, *(f'--ignore={entry}' for entry in taken)]))
+    return [(name, argv) for index, name, argv in argvs if part in (None, index)]
 
 
 def main(argv: 'Optional[list[str]]' = None) -> 'int':
-    """Run ``SHARDS ... -- COMMAND ...`` as the module docstring says; the exit status."""
+    """Run ``[--part K] SHARDS ... -- COMMAND ...`` as the module docstring says; the exit status."""
     args = sys.argv[1:] if argv is None else argv
     if '--' not in args:
-        print(f'usage: {pathlib.Path(sys.argv[0]).name} SHARDS [SHARDS ...] -- COMMAND [ARGUMENT ...]',
+        print(f'usage: {pathlib.Path(sys.argv[0]).name} [{PART} K] SHARDS [SHARDS ...] -- COMMAND [ARGUMENT ...]',
               file=sys.stderr)
         return USAGE
     split = args.index('--')
-    shards = [shard for arg in args[:split] for shard in arg.split()]
-    command = args[split + 1:]
+    head, command = args[:split], args[split + 1:]
+    part = None  # type: Optional[int]
+    if head[:1] == [PART]:
+        try:
+            part = int(head[1])
+        except (IndexError, ValueError):
+            part = 0  # out of range below, as an empty $PART is
+        head = head[2:]
+    shards = [shard for arg in head for shard in arg.split()]
     if not shards or not command:
         print('pytest_shards: name at least one shard, and the command after --', file=sys.stderr)
+        return USAGE
+    if part is not None and not 1 <= part <= parts(shards):
+        print(f'pytest_shards: {PART} takes a part from 1 to {parts(shards)}, '
+              f'as {PART_BREAK!r} cuts the shards', file=sys.stderr)
         return USAGE
 
     interrupted = []
@@ -153,7 +195,7 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         signal.signal(signal.SIGINT, stop)
 
     status = 0
-    every = runs(shards, command)
+    every = runs(shards, command, part)
     for index, (name, run) in enumerate(every, 1):
         print(f'pytest_shards: run {index} of {len(every)}, {name}', flush=True)
         code = subprocess.call(run)  # nosec: B603 - the step's own command

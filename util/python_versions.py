@@ -21,14 +21,16 @@ actions/runner-images' READMEs at 2c421200c.
     docs-only or test-only pull request (#2243).
 ``test``, ``integration``
     The supported tier alone, CPython's then PyPy's (#1958); ``test`` marks the
-    ``latest`` leg ``coverage: true``.
+    ``latest`` leg ``coverage: true``, and runs each PyPy version as a leg per
+    :data:`PYPY_PARTS` entry, carrying it as ``part`` (#2899).
 ``test-latest``, ``integration-latest``
     The ``latest`` leg of each alone, as ``test`` and ``integration`` spell it,
     for a test-only pull request (#2243).
 ``test-ktlo``, ``integration-ktlo``
     Each KTLO version, CPython's then PyPy's, as a leg carrying ``ktlo: true``,
     and ``os`` as above, for unit-tests.yml's jobs of the same names, which
-    nothing gating waits on (#1738).
+    nothing gating waits on (#1738); ``test-ktlo``'s PyPy legs in parts, as
+    ``test``'s are.
 ``pypcap-parity-ktlo``
     The same, for CPython's KTLO versions below 3.12. Of the outputs
     unit-tests.yml reads, only the ``*-ktlo`` ones hold a KTLO version.
@@ -96,6 +98,9 @@ MANDATORY = ('cpython', 'pypy')
 #: their KTLO twins run, in this order: each runs the ``ALL`` test tier, and
 #: ``latest`` the whole suite (#1958).
 TESTED = ('cpython', 'pypy')
+#: The parts a PyPy leg of ``test`` and ``test-ktlo`` runs as, a job each (#2899):
+#: util/pytest_shards.py's ``--part``, of the ``SHARDS`` its ``Run unit tests`` names.
+PYPY_PARTS = (1, 2)
 TIERS = ('supported', 'ktlo', 'pre-release', 'experimental')
 #: The images a version may name as its ``runner``.
 RUNNER = re.compile(r'ubuntu-\d{2}\.04')
@@ -271,11 +276,28 @@ def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
     return found
 
 
+def in_parts(matrix: 'dict[str, Any]') -> 'dict[str, Any]':
+    """``matrix`` with each PyPy leg as a leg per part of :data:`PYPY_PARTS` (#2899).
+
+    Each part is an ``include`` entry of its own, its version off the axis:
+    GitHub merges an entry into the axis's legs alone, so a second part of a
+    version the axis held would overwrite the first rather than add a leg.
+
+    """
+    pypy = [version for version in matrix['python-version'] if version.startswith('pypy')]
+    marks = {entry['python-version']: entry for entry in matrix['include'] if entry['python-version'] in pypy}
+    include = [entry for entry in matrix['include'] if entry['python-version'] not in pypy]
+    include += [dict(marks.get(version, {'python-version': version}), part=part)
+                for version in pypy for part in PYPY_PARTS]
+    return {'python-version': [version for version in matrix['python-version'] if version not in pypy],
+            'include': include}
+
+
 def test_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """unit-tests.yml's ``test``: ``integration``'s legs, and the one coverage leg on ``latest``."""
+    """unit-tests.yml's ``test``: ``integration``'s legs, the one coverage leg on ``latest``, and PyPy's in parts."""
     matrix = supported_matrix(data)
     matrix['include'].insert(0, {'python-version': data['latest'], 'coverage': True})
-    return matrix
+    return in_parts(matrix)
 
 
 def on_latest_only(matrix: 'dict[str, Any]', latest: 'str') -> 'dict[str, Any]':
@@ -338,7 +360,7 @@ OUTPUTS = {
     'latest': lambda data: data['latest'],
     'test': test_matrix,
     'test-latest': lambda data: on_latest_only(test_matrix(data), data['latest']),
-    'test-ktlo': ktlo_matrix,
+    'test-ktlo': lambda data: in_parts(ktlo_matrix(data)),
     'experimental': experimental_matrix,
     'integration': supported_matrix,
     'integration-latest': lambda data: on_latest_only(supported_matrix(data), data['latest']),

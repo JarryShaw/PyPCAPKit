@@ -263,6 +263,16 @@ class TestWorkflowText(unittest.TestCase):
                 self.assertEqual(ci_timing.match_job(specs, name)['id'], 'test')
         test = next(spec for spec in specs if spec['id'] == 'test')
         self.assertIn(ci_timing.TESTS_STEP, [step['name'] for step in test['steps']])
+        # #2899: each leg's name as the API lists it, a PyPy part's too, is its own job's, and only
+        # the KTLO legs are non-blocking (#2230 was a rename the report then failed to match).
+        for job_id in ('test', 'test-ktlo'):
+            template = next(spec['name'] for spec in specs if spec['id'] == job_id)
+            for leg in matrix_legs(matrix('unit-tests.yml', job_id)):
+                name = interpolate(template, {'matrix': leg})
+                with self.subTest(job=name):
+                    self.assertEqual(ci_timing.match_job(specs, name)['id'], job_id)
+                    self.assertIs(ci_timing.non_blocking(ci_timing.UNIT_TESTS, name), job_id == 'test-ktlo')
+                    self.assertEqual(bool(leg.get('part')), name.startswith('Python pypy'))
         ordering = ci_timing.match_job(specs, 'Plain unittest ordering (protocols (rest, half 1))')
         self.assertEqual(ci_timing.step_cap(
             ordering, 'Run tests/protocols and the root-level modules under plain unittest'), 20)
@@ -1136,9 +1146,15 @@ class TestTimingArtifacts(unittest.TestCase):
     def test_every_unit_and_integration_leg_uploads_its_timings(self) -> 'None':
         blocks = step_blocks(self.text, 'Upload test timings')
         names = [re.search(r'(?m)^          name: (.+)$', block).group(1) for block in blocks]
-        # #2751: a half of the LATEST tier, which `test-latest-tier` runs by `test`'s steps, has its own.
-        unit = "junit-unit-${{ matrix.python-version }}${{ matrix.half && '-latest-half-' || '' }}${{ matrix.half }}"
+        # #2751: a half of the LATEST tier, which `test-latest-tier` runs by `test`'s steps, has its own;
+        # #2899: and so has each part of a PyPy leg.
+        unit = ("junit-unit-${{ matrix.python-version }}${{ matrix.half && '-latest-half-' || '' }}${{ matrix.half }}"
+                "${{ matrix.part && '-part-' || '' }}${{ matrix.part }}")
         self.assertEqual(names, [unit, 'junit-integration-${{ matrix.python-version }}'])
+        # A second upload of a name in one run fails, so no two legs sharing the steps share one.
+        every = [interpolate(unit, {'matrix': leg}) for job in ('test', 'test-ktlo', 'test-latest-tier')
+                 for leg in matrix_legs(matrix('unit-tests.yml', job))]
+        self.assertEqual(len(every), len(set(every)), every)
         legs = [leg for job in ('test', 'test-latest-tier') for leg in matrix_legs(matrix('unit-tests.yml', job))
                 if leg['python-version'] == ci_timing.LATEST_VERSION]
         self.assertEqual(sorted(interpolate(unit, {'matrix': leg}) for leg in legs),

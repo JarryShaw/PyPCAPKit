@@ -303,7 +303,8 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
         self.assertTrue(KTLO, 'the tier file lists no KTLO CPython')
         for name, job_id, versions in KTLO_LEGS:
             with self.subTest(workflow=name, job=job_id):
-                found = sorted(leg['python-version'] for leg in legs(name, job_id) if is_ktlo(leg))
+                # A version may run as several legs, as a PyPy one of `test-ktlo` does in parts (#2899).
+                found = sorted({leg['python-version'] for leg in legs(name, job_id) if is_ktlo(leg)})
                 self.assertEqual(found, sorted(versions))
 
     def test_each_runner_pinned_version_runs_on_its_pinned_runner(self) -> None:

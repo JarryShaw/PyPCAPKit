@@ -188,6 +188,7 @@ Nothing in this file is collected by :program:`pytest`: ``python_files`` in
 from __future__ import annotations
 
 import ast
+import collections
 import functools
 import pathlib
 import re
@@ -494,6 +495,12 @@ def _loadable_files() -> 'tuple[pathlib.Path, ...]':
     return tuple(sorted(files))
 
 
+@functools.lru_cache(maxsize=1)
+def _loadable_names() -> 'tuple[tuple[str, pathlib.Path], ...]':
+    """Each of :func:`_loadable_files` with its path below :data:`ROOT`, led by a ``/``."""
+    return tuple(('/' + path.relative_to(ROOT).as_posix(), path) for path in _loadable_files())
+
+
 @functools.lru_cache(maxsize=None)
 def _paths_named(text: 'str') -> 'frozenset[pathlib.Path]':
     """The loadable files a path string names: the files whose path ends with it,
@@ -507,19 +514,22 @@ def _paths_named(text: 'str') -> 'frozenset[pathlib.Path]':
     while relative.startswith('./'):
         relative = relative[2:]
     if relative.endswith('.py'):
-        return frozenset(path for path in _loadable_files()
-                         if ('/' + path.relative_to(ROOT).as_posix()).endswith('/' + relative))
+        return frozenset(path for name, path in _loadable_names() if name.endswith('/' + relative))
     directory = ROOT / relative
     if '/' not in relative or not directory.is_dir():
         return frozenset()
-    return frozenset(path for path in _loadable_files() if directory in path.parents)
+    # Compared as text, which pathlib has normalised: a file is under the directory.
+    below = '/' + directory.relative_to(ROOT).as_posix() + '/'
+    return frozenset(path for name, path in _loadable_names() if name.startswith(below))
 
 
+@functools.lru_cache(maxsize=None)
 def _module_file(name: 'str') -> 'Optional[pathlib.Path]':
     """The file of the repository module ``name``, e.g. ``tests._support``, if there is one.
 
     A ``util/`` script counts as a module too, as the tests that put :file:`util/`
-    on :data:`sys.path` import it: ``import run_unittest_leg``.
+    on :data:`sys.path` import it: ``import run_unittest_leg``. Cached, as
+    :func:`_region_reach`, its caller, already is.
 
     """
     for root in (ROOT, ROOT / 'util'):
@@ -530,12 +540,20 @@ def _module_file(name: 'str') -> 'Optional[pathlib.Path]':
     return None
 
 
-@functools.lru_cache(maxsize=None)
-def _parse_module(path: 'pathlib.Path') -> 'Optional[ast.Module]':
+def _read_module(path: 'pathlib.Path') -> 'Optional[tuple[str, ast.Module]]':
+    """The source of ``path`` and its tree, uncached; :data:`None` where either fails."""
     try:
-        return ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+        source = path.read_text(encoding='utf-8')
+        return source, ast.parse(source, filename=str(path))
     except (OSError, UnicodeDecodeError, SyntaxError, ValueError):
         return None
+
+
+@functools.lru_cache(maxsize=None)
+def _parse_module(path: 'pathlib.Path') -> 'Optional[ast.Module]':
+    """:func:`_read_module`'s tree, cached for :func:`varies_by_interpreter`'s search."""
+    read = _read_module(path)
+    return None if read is None else read[1]
 
 
 def _called(call: 'ast.Call') -> 'Optional[str]':
@@ -565,15 +583,40 @@ def _defined_names(node: 'ast.stmt') -> 'set[str]':
 
 
 @functools.lru_cache(maxsize=None)
+def _definitions(tree: 'ast.Module') -> 'dict[str, tuple[tuple[ast.stmt, tuple[str, ...]], ...]]':
+    """For each top-level name, the statements of ``tree`` that bind it, in file order,
+    each with the names it reads: :func:`_executed_nodes`' index."""
+    found = {}  # type: dict[str, list[tuple[ast.stmt, tuple[str, ...]]]]
+    for statement in tree.body:
+        defined = _defined_names(statement)
+        if not defined:
+            continue
+        reads = tuple(node.id for node in ast.walk(statement)
+                      if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load))
+        for name in defined:
+            found.setdefault(name, []).append((statement, reads))
+    return {name: tuple(entries) for name, entries in found.items()}
+
+
+@functools.lru_cache(maxsize=None)
 def _import_time_nodes(tree: 'ast.Module') -> 'tuple[ast.AST, ...]':
     """Every import and call of ``tree`` outside a function body, which run on import."""
-    inside = set()  # type: set[int]
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
-            for statement in node.body if isinstance(node.body, list) else [node.body]:
-                inside.update(id(child) for child in ast.walk(statement))
-    return tuple(node for node in ast.walk(tree)
-                 if isinstance(node, (ast.Import, ast.ImportFrom, ast.Call)) and id(node) not in inside)
+    # One walk, in ast.walk()'s order, that knows when it enters a function's
+    # body: walking each body on its own walked every nested one again.
+    found = []  # type: list[ast.AST]
+    todo = collections.deque([(tree, False)])  # type: collections.deque[tuple[ast.AST, bool]]
+    while todo:
+        node, inside = todo.popleft()
+        if not inside and isinstance(node, (ast.Import, ast.ImportFrom, ast.Call)):
+            found.append(node)
+        function = isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda))
+        for field, value in ast.iter_fields(node):
+            within = inside or (function and field == 'body')
+            if isinstance(value, ast.AST):
+                todo.append((value, within))
+            elif isinstance(value, list):
+                todo.extend((item, within) for item in value if isinstance(item, ast.AST))
+    return tuple(found)
 
 
 def _executed_nodes(tree: 'ast.Module',
@@ -590,16 +633,15 @@ def _executed_nodes(tree: 'ast.Module',
     on_import = list(_import_time_nodes(tree))
     nodes = []  # type: list[ast.AST]
     wanted, todo = set(), list(names)  # type: set[str], list[str]
+    index = _definitions(tree)
     while todo:
         name = todo.pop()
         if name in wanted:
             continue
         wanted.add(name)
-        for statement in tree.body:
-            if name in _defined_names(statement):
-                nodes.append(statement)
-                todo.extend(node.id for node in ast.walk(statement)
-                            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load))
+        for statement, reads in index.get(name, ()):
+            nodes.append(statement)
+            todo.extend(reads)
     return on_import, nodes
 
 
@@ -667,8 +709,11 @@ def _bindings(tree: 'ast.Module') -> 'dict[tuple[int, str], tuple[ast.AST, ...]]
                 found.setdefault((_SELF, node.attr), []).append(value)
 
     functions = {}  # type: dict[str, list[tuple[int, ast.arguments]]]
+    calls = []  # type: list[ast.Call]
     for node in ast.walk(tree):
-        if isinstance(node, ast.Assign):
+        if isinstance(node, ast.Call):
+            calls.append(node)
+        elif isinstance(node, ast.Assign):
             for target in node.targets:
                 bind(target, node.value)
         elif isinstance(node, (ast.AnnAssign, ast.AugAssign, ast.NamedExpr)) and node.value is not None:
@@ -679,9 +724,7 @@ def _bindings(tree: 'ast.Module') -> 'dict[tuple[int, str], tuple[ast.AST, ...]]
             functions.setdefault(node.name, []).append((id(node), node.args))
             for arg, default in zip(reversed(node.args.args), reversed(node.args.defaults)):
                 found.setdefault((id(node), arg.arg), []).append(default)
-    for call in ast.walk(tree):
-        if not isinstance(call, ast.Call):
-            continue
+    for call in calls:  # in the same walk's order, once every function is known
         for scope, arguments in functions.get(_called(call) or '', ()):
             params = [arg.arg for arg in arguments.posonlyargs + arguments.args]
             if params[:1] in (['self'], ['cls']) and isinstance(call.func, ast.Attribute):
@@ -801,9 +844,10 @@ def _attributes_used(tree: 'ast.Module', name: 'str') -> 'Optional[frozenset[str
 def _name_uses(tree: 'ast.Module') -> 'dict[str, Optional[frozenset[str]]]':
     """For each name ``tree`` reads, the attributes it reads off it, :data:`None` once it is
     used bare."""
-    values = {id(node.value) for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
+    nodes = [node for node in ast.walk(tree) if isinstance(node, (ast.Attribute, ast.Name))]
+    values = {id(node.value) for node in nodes if isinstance(node, ast.Attribute)}
     used = {}  # type: dict[str, Optional[set[str]]]
-    for node in ast.walk(tree):
+    for node in nodes:
         if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
             found = used.setdefault(node.value.id, set())
             if found is not None:
@@ -864,8 +908,18 @@ def _region_reach(path: 'pathlib.Path', names: 'Optional[frozenset[str]]') -> 't
     modules = []  # type: list[tuple[str, Optional[frozenset[str]]]]
     files = set()  # type: set[pathlib.Path]
     on_import, definitions = _executed_nodes(tree, names)
-    for root in on_import + definitions:
-        for node in ast.walk(root):
+    # The roots nest -- a call inside a call that runs on import -- and overlap,
+    # so each node is read once, a definition's first, the one place where a
+    # comparison counts.
+    seen = set()  # type: set[int]
+    for root, defined in [(root, True) for root in definitions] + [(root, False) for root in on_import]:
+        todo = collections.deque([root])  # type: collections.deque[ast.AST]
+        while todo:
+            node = todo.popleft()
+            if id(node) in seen:
+                continue
+            seen.add(id(node))
+            todo.extend(ast.iter_child_nodes(node))
             if isinstance(node, (ast.Import, ast.ImportFrom)):
                 modules.extend(_imports(node, path, tree))
             elif isinstance(node, ast.Call) and _called(node) in _IMPORTING_CALLS:
@@ -884,7 +938,7 @@ def _region_reach(path: 'pathlib.Path', names: 'Optional[frozenset[str]]') -> 't
                         modules.append((text, None))
                     elif _PATH_TEXT.match(text):
                         files.update(_paths_named(text))
-            elif _compares_interpreter(node) and root in definitions:
+            elif _compares_interpreter(node) and defined:
                 return True, frozenset()
             elif isinstance(node, (ast.List, ast.Tuple)):
                 # ``[sys.executable, '-m', 'pcapkit']``
@@ -993,8 +1047,22 @@ def _test_module(path: 'pathlib.Path | str') -> 'pathlib.Path':
 
 @functools.lru_cache(maxsize=None)
 def _declared_tier(candidate: 'pathlib.Path') -> 'Optional[str]':
-    tree = _parse_module(candidate)
-    if tree is None:
+    # Parsed here, not by _parse_module(), whose cache would keep every test
+    # module's tree: in a fresh interpreter, collecting and then freeing them all
+    # took longer than the scan itself (#2899). ASCII source binds the marker only
+    # where it spells it, so source spelling it nowhere needs no parse, and source
+    # spelling it once per top-level assignment no walk; other source may spell it
+    # otherwise, as identifiers are NFKC-normalised.
+    try:
+        source = candidate.read_text(encoding='utf-8')
+    except (OSError, ValueError):
+        return None
+    plain = source.isascii()
+    if plain and TIER_MARKER not in source:
+        return None
+    try:
+        tree = ast.parse(source, filename=str(candidate))
+    except (SyntaxError, ValueError):
         return None
     where = _display_path(candidate)
     top = [node for node in tree.body
@@ -1002,8 +1070,11 @@ def _declared_tier(candidate: 'pathlib.Path') -> 'Optional[str]':
                                                     for target in node.targets))
            or (isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
                and node.target.id == TIER_MARKER)]
-    stores = [node for node in ast.walk(tree)
-              if isinstance(node, ast.Name) and node.id == TIER_MARKER and isinstance(node.ctx, ast.Store)]
+    if plain and source.count(TIER_MARKER) == len(top):
+        stores = top  # type: list[ast.AST]
+    else:
+        stores = [node for node in ast.walk(tree)
+                  if isinstance(node, ast.Name) and node.id == TIER_MARKER and isinstance(node.ctx, ast.Store)]
     if len(stores) != len(top) or len(top) > 1:
         raise InvalidTierError(
             f'{where} assigns {TIER_MARKER} {len(stores)} times, {len(top)} of them at module level; '
@@ -1013,7 +1084,7 @@ def _declared_tier(candidate: 'pathlib.Path') -> 'Optional[str]':
         return None
     value = top[0].value
     if not (isinstance(value, ast.Constant) and isinstance(value.value, str) and value.value in TIERS):
-        shown = (ast.get_source_segment(candidate.read_text(encoding='utf-8'), value) or ast.dump(value)
+        shown = (ast.get_source_segment(source, value) or ast.dump(value)
                  if value is not None else 'nothing')
         raise InvalidTierError(
             f'{where}:{top[0].lineno}: {TIER_MARKER} is set to {shown}, which is not a test tier; '
@@ -1101,9 +1172,9 @@ def branches_on_interpreter(path: 'pathlib.Path | str') -> 'bool':
         ValueError: ``path`` is not a test module under :file:`tests/`.
 
     """
-    tree = _parse_module(_test_module(path))
-    return tree is not None and any(_compares_interpreter(node) or _probes_interpreter(node)
-                                    for node in ast.walk(tree))
+    read = _read_module(_test_module(path))  # uncached, as in _declared_tier()
+    return read is not None and any(_compares_interpreter(node) or _probes_interpreter(node)
+                                    for node in ast.walk(read[1]))
 
 
 def module_tier(path: 'pathlib.Path | str') -> 'str':
