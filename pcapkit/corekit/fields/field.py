@@ -635,9 +635,21 @@ class Field(FieldBase[_T], Generic[_T]):
         This method will return a new instance of :class:`Field` instead of
         updating the current instance.
 
+        Past the cut of a schema whose length ends with the data, which
+        ``__past_cut__`` in ``packet`` marks, a callable ``length`` resolving
+        below zero from the zeros the cut left resolves to zero instead; see
+        :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`.
+
+        .. versionchanged:: 1.7.0
+
+           Resolves a length below zero past such a cut to zero (:issue:`2880`).
+
         """
         new_self = self.__copy__()
         new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
+            # NOTE: Nothing is left past the cut (#2880).
+            if new_self._length < 0 and packet.get('__past_cut__'):
+                new_self._length = 0
         return new_self

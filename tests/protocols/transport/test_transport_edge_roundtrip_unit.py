@@ -120,7 +120,6 @@ MAKE_CASES = (
 
 REJECTED = {
     'tcp/offset-4': Reject('ProtocolError', 'resolved to a negative length'),
-    'tcp/offset-past-the-data': Reject('ProtocolError', 'TCP: header length 60 runs past the end of the data'),
     'sctp/data-no-user-data': Reject('ProtocolError', 'SCTP: [Chunk 0] invalid format'),
 }
 

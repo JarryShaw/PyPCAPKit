@@ -141,7 +141,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
             keeps one, its ``protocol`` the port looked up, as an :obj:`int`, as
             a frame's fallback records the port :meth:`_decode_next_layer`
-            looked up.
+            looked up. An empty payload is
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a
+            frame.
 
         Important:
             The annotation names the **base** registry because every transport
@@ -184,7 +186,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
            Its ``protocol`` is the port looked up, a refusal it absorbs is
            quiet, any other error is logged at :data:`logging.WARNING` rather
            than ``ERROR``, and the failed parse's warnings are dropped
-           (:issue:`2862`).
+           (:issue:`2862`). An empty payload is ``NoPayload`` (:issue:`2880`).
 
         """
         port = ports[0] if ports[0] in cls.__proto__ else ports[1]

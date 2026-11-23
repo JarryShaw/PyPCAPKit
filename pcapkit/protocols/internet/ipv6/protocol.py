@@ -37,6 +37,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
+from pcapkit.corekit.schema.shortread import cut_on_its_own
 from pcapkit.protocols.internet.ip.protocol import IP
 from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ipv6.schema import IP_MAX_LENGTH
@@ -213,6 +214,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             ProtocolError: If the version is not 6, or if the packet is one of
                 the errors :rfc:`2675#section-3` has a receiver detect (see
                 :func:`~pcapkit.protocols.internet.ipv6.schema.jumbogram_error`).
+                Parsed on its own, a version, Payload Length or Next Header the
+                cut left as zero is the short read's (:issue:`2880`).
 
         """
         if length is None:
@@ -221,14 +224,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         # NOTE: This class reads IPv6 only, as ``IPv4.read`` reads IPv4 only; telling the two
         # apart by the Version is left to the dispatchers (#1680).
-        if schema.hextet['version'] != 6:
+        if schema.hextet['version'] != 6 and not cut_on_its_own(schema, 'hextet', 1):
             raise ProtocolError(f"[IPv6] invalid version: {schema.hextet['version']}")
 
         # NOTE: A receiver treats each as an error (#1687), so the frame stops here, as in
         # ``IPv4.read``; a Fragment header beside a Jumbo Payload is caught on the walk.
         rest = schema.get_payload() + schema.trailer
         error = jumbogram_error(schema.length, schema.next, rest)
-        if error is not None:
+        if error is not None and not cut_on_its_own(schema, 'next'):
             raise ProtocolError(f'{self.alias}: {error}')
 
         ipv6 = Data_IPv6.from_dict({

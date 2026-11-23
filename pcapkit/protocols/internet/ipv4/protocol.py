@@ -60,6 +60,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.corekit.schema.shortread import cut_on_its_own, ends_inside_option, fill_short_options
 from pcapkit.protocols.internet.ip.protocol import IP
 from pcapkit.protocols.internet.ipv4.data import EOOLOption as Data_EOOLOption
 from pcapkit.protocols.internet.ipv4.data import ESECOption as Data_ESECOption
@@ -367,13 +368,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Raises:
             ProtocolError: If the version is not 4, if ``ihl`` declares
                 more header than the data holds, or if an option is malformed.
+                Parsed on its own, a version the cut left as zero and the end of
+                the data inside the header are the short read's, whose rebuild
+                cuts back to it, unless the data ends inside an option
+                (:issue:`2880`).
 
         """
         if length is None:
             length = len(self)
         schema = self.__header__
 
-        if schema.vihl['version'] != 4:
+        # NOTE: On its own, a version and IHL the cut left as zero are its short read's (#2880).
+        if schema.vihl['version'] != 4 and not cut_on_its_own(schema, 'vihl'):
             raise ProtocolError(f"[IPv4] invalid version: {schema.vihl['version']}")
 
         ipv4 = Data_IPv4(
@@ -403,13 +409,19 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         # NOTE: An ``ihl`` past the captured header reads zeros that ``from_data`` would rebuild;
         # rejecting it keeps the octets as captured inside the parent (#1404).
-        if len(self) < ipv4.hdr_len:
-            raise ProtocolError(f'{self.alias}: header length {ipv4.hdr_len} runs past the end of '
-                                f'the data ({len(self)} octets)')
+        overrun = len(self) < ipv4.hdr_len
+        error = f'{self.alias}: header length {ipv4.hdr_len} runs past the end of the data ({len(self)} octets)'
+        if overrun and not cut_on_its_own(schema):
+            raise ProtocolError(error)
 
+        # NOTE: An IHL the cut left as zero declares no options.
         _optl = ipv4.hdr_len - IPV4_HEADER_LEN
+        if _optl < 0 and cut_on_its_own(schema, 'vihl'):
+            _optl = 0
         if _optl:
             options = self._read_ipv4_options(_optl)
+            if overrun and ends_inside_option(options, len(self) - IPV4_HEADER_LEN):
+                raise ProtocolError(error)
             _used = sum(opt.length for _, opt in options.items(multi=True))
             ipv4.__update__([
                 ('options', options),
@@ -734,6 +746,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Key-value pairs for protocol construction.
 
         """
+        options, padding = getattr(data, 'options', None), getattr(data, 'padding', None)
+        if data.get('__short_read__') is not None:
+            # NOTE: An IHL the data ended before rebuilds as parsed (#2880).
+            kind = Data_OptionType.from_dict({'change': False, 'class': Enum_OptionClass.get(0), 'number': 0})
+            eool = Data_EOOLOption(code=cast('Enum_OptionNumber', Enum_OptionNumber.EOOL), length=1, type=kind)
+            options, padding = fill_short_options(data, options, data.hdr_len - IPV4_HEADER_LEN,
+                                                  (Enum_OptionNumber.EOOL, eool), padding)
         # NOTE: ``make`` takes ``offset`` in 8-octet units but ``data.offset`` is in octets, so
         # scale it down for an exact round trip, as ``IPv6_Frag._make_data`` does.
         return {
@@ -754,13 +773,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             'dst': data.dst,
             # NOTE: ``options`` is on ``data`` only when ``hdr_len`` exceeds the fixed header
             # (see :meth:`read`), so it is read defensively.
-            'options': getattr(data, 'options', None),
+            'options': options,
             # NOTE: Passed through rather than recomputed by ``make``, so a truncated capture
             # rebuilds with the length that was on the wire (#1155).
             'total_length': data.len,
             # NOTE: And the octets after End of Option List, which no option records. The header
             # length is not passed, so edited options recompute it.
-            'padding': getattr(data, 'padding', None),
+            'padding': padding,
             'payload': cls._make_payload(data),
             # NOTE: And the octets captured past the Total Length (#1209).
             'trailer': data.get('trailer', b''),

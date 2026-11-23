@@ -1966,14 +1966,16 @@ class IPv4UnitTests(unittest.TestCase):
         option's progress *after* its end-of-option-list break rather than before:
         checking first turns every such header into an error. C.f. #431.
 
-        :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` itself refuses the header
-        with :exc:`~pcapkit.utilities.exceptions.ProtocolError`, since the 20
-        missing octets would otherwise be rebuilt as zeros (#1404).
+        Inside a frame :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` itself
+        refuses the header with :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+        since the 20 missing octets would otherwise be rebuilt as zeros (#1404); on
+        its own the end of the data is a cut, and the rebuild cuts back to it (#2880).
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
+        from pcapkit.utilities.contextvars import frame_depth
         from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
@@ -1985,8 +1987,17 @@ class IPv4UnitTests(unittest.TestCase):
             [(OptionNumber.EOOL, 1)],
         )
 
-        with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
-            IPv4(raw, len(raw))
+        token = frame_depth.set(1)
+        try:
+            with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
+                IPv4(raw, len(raw))
+        finally:
+            frame_depth.reset(token)
+
+        # on its own the end of the data is a cut, which the rebuild cuts back to (#2880)
+        alone = IPv4(raw, len(raw))
+        self.assertEqual(alone.info.get('__short_read__'), ('options', 0))
+        self.assertEqual(IPv4.from_data(alone.info).data, raw)
 
     def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
         """A capture cut short mid-option is refused alone, and kept as captured in a frame. C.f. #431, #572, #1325.

@@ -126,15 +126,26 @@ class TestSSLv2FallbackWarnings(unittest.TestCase):
                 self.assertEqual([str(item.message) for item in caught], [])
 
     def test_both_trials_rejected_outside_beholder_report_tls_alone(self) -> None:
-        """A direct parse raises TLS's error and reports TLS's trial warning, not SSLv2's."""
+        """A direct parse raises TLS's error and reports TLS's trial warning, not SSLv2's.
+
+        On its own the record ends with the data, so its cut warns nothing at all (#2880).
+
+        """
         from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.utilities.contextvars import frame_depth
         from pcapkit.utilities.exceptions import ProtocolError
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            with self.assertRaisesRegex(ProtocolError, 'record length 65535 runs past'):
-                TLS(LONG_RECORD, len(LONG_RECORD))
-        self.assertEqual([str(item.message) for item in caught], ['packet length < 0: -65530'])
+        for depth, expected in ((1, ['packet length < 0: -65530']), (0, [])):
+            with self.subTest(depth=depth):
+                token = frame_depth.set(depth)
+                try:
+                    with warnings.catch_warnings(record=True) as caught:
+                        warnings.simplefilter('always')
+                        with self.assertRaisesRegex(ProtocolError, 'record length 65535 runs past'):
+                            TLS(LONG_RECORD, len(LONG_RECORD))
+                finally:
+                    frame_depth.reset(token)
+                self.assertEqual([str(item.message) for item in caught], expected)
 
 
 if __name__ == '__main__':

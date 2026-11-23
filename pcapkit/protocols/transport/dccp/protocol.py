@@ -48,6 +48,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.corekit.schema.shortread import cut_on_its_own, fill_short_options
 from pcapkit.protocols.schema import Schema
 from pcapkit.protocols.transport.dccp.data import DCCP as Data_DCCP
 from pcapkit.protocols.transport.dccp.data import AckVector as Data_AckVector
@@ -310,7 +311,9 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         Raises:
             ProtocolError: If the Data Offset is smaller than the header the
                 packet type has, or declares more header than the data holds
-                (:rfc:`4340#section-5.1`).
+                (:rfc:`4340#section-5.1`). Parsed on its own, a Data Offset or
+                Type the cut left as zero and the end of the data inside the
+                header are the short read's (:issue:`2880`).
 
         """
         if length is None:
@@ -331,11 +334,18 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             seq=schema.seq,
         )
 
-        fixed = header_length(schema.type)
-        if dccp.hdr_len < fixed:
+        # NOTE: On its own, a Type the cut left as zero says nothing of the header, so only a Data
+        # Offset below every type's is refused, and none the cut left as zero is (#2880).
+        fixed = least = header_length(schema.type)
+        what = f'a {dccp.type.name}'
+        if cut_on_its_own(schema, 'type'):
+            least = 0 if cut_on_its_own(schema, 'offset') else DCCP_MIN_HEADER_LEN
+            what = 'any packet type'
+        if dccp.hdr_len < least:
             raise ProtocolError(f'{self.alias}: header length {dccp.hdr_len} is shorter than the '
-                                f'{fixed} octets of a {dccp.type.name}')
-        if len(self) < dccp.hdr_len:
+                                f'{least} octets of {what}')
+        # NOTE: On its own the end of the data inside the header is its short read's too.
+        if len(self) < dccp.hdr_len and not cut_on_its_own(schema):
             raise ProtocolError(f'{self.alias}: header length {dccp.hdr_len} runs past the end of '
                                 f'the data ({len(self)} octets)')
 
@@ -539,6 +549,15 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             Key-value pairs for protocol construction.
 
         """
+        options, type_, x = data.get('options'), data.type, data.x
+        if data.get('__short_read__') is not None:
+            # NOTE: A Data Offset the data ended before rebuilds as parsed (#2880). Only a Type the
+            # cut left as zero has more header than it, and a DCCP-Data stands in, past the cut.
+            fixed = header_length({'reserved': data.reserved, 'type': int(type_), 'x': int(x)})
+            if DCCP_MIN_HEADER_LEN <= data.hdr_len < fixed:
+                type_, x, fixed = cast('Enum_PacketType', Enum_PacketType.DCCP_Data), False, DCCP_MIN_HEADER_LEN
+            padding = Data_Padding(type=cast('Enum_Option', Enum_Option.Padding), length=1)
+            options, _ = fill_short_options(data, options, data.hdr_len - fixed, (Enum_Option.Padding, padding))
         return {
             'srcport': data.srcport,
             'dstport': data.dstport,
@@ -546,8 +565,8 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             'cscov': data.cscov,
             'checksum': data.checksum,
             'reserved': data.reserved,
-            'type': data.type,
-            'x': data.x,
+            'type': type_,
+            'x': x,
             'seq_reserved': data.get('seq_reserved', 0),
             'seq': data.seq,
             'ack_reserved': data.get('ack_reserved', 0),
@@ -555,7 +574,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             'service_code': data.get('service_code', 0),
             'reset_code': data.get('reset_code', Enum_ResetCode.Unspecified),
             'reset_data': data.get('reset_data', bytes(3)),
-            'options': data.get('options'),
+            'options': options,
             'payload': cls._make_payload(data),
         }
 

@@ -14,10 +14,10 @@ Inside a parent layer the octets are kept as captured, as a
 for byte.
 
 An option that begins at the end of the data reads nothing at all, and is still
-left to the end-of-option-list handling an over-long option area relies on. An
-IPv4 or TCP header declaring an option area past the data is rejected before its
-options are read (GitHub issue #1404), and its parent likewise keeps it as
-captured.
+left to the end-of-option-list handling an over-long option area relies on. Inside
+a frame, an IPv4 or TCP header declaring an option area past the data is rejected
+before its options are read (GitHub issue #1404), and its parent likewise keeps it as
+captured; on its own, it is a short read (GitHub issue #2880).
 
 Every case builds its own octets in memory and reads no capture.
 
@@ -160,13 +160,23 @@ class TestDeclaredLengthOverrun(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.utilities.contextvars import frame_depth
         from pcapkit.utilities.exceptions import ProtocolError
 
         # ``ihl`` declares 20 octets of options with none present: reading the
         # option area would zero-fill all 20 of them on rebuild (issue #1404).
         data = bytes.fromhex('4a00001800010000400600000a0000010a000002')
-        with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
-            IPv4(data, len(data))
+        token = frame_depth.set(1)
+        try:
+            with self.assertRaisesRegex(ProtocolError, 'header length 40 runs past the end of the data'):
+                IPv4(data, len(data))
+        finally:
+            frame_depth.reset(token)
+
+        # on its own the end of the data is a cut, which the rebuild cuts back to (#2880)
+        alone = IPv4(data, len(data))
+        self.assertEqual(alone.info.get('__short_read__'), ('options', 0))
+        self.assertEqual(IPv4.from_data(alone.info).data, data)
 
         frame = bytes.fromhex('0123456789ab fedcba987654 0800') + data
         with warnings.catch_warnings():

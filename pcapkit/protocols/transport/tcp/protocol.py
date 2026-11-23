@@ -52,6 +52,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.corekit.schema.shortread import cut_on_its_own, ends_inside_option, fill_short_options
 from pcapkit.protocols.schema import Schema
 from pcapkit.protocols.transport.tcp.data import CC as Data_CC
 from pcapkit.protocols.transport.tcp.data import MPTCPDSS as Data_MPTCPDSS
@@ -572,7 +573,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         Raises:
             ProtocolError: If the Data Offset declares more header than the
-                data holds.
+                data holds. Parsed on its own, the end of the data is a cut and
+                the short read's, whose rebuild cuts back to it, unless it ends
+                inside an option (:issue:`2880`).
 
         """
         if length is None:
@@ -618,15 +621,21 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         # NOTE: Rejected rather than read as zeros, which ``from_data`` would
         # rebuild, so the parent keeps the octets as captured (#1404).
-        if len(self) < tcp.hdr_len:
-            raise ProtocolError(f'{self.alias}: header length {tcp.hdr_len} runs past the end of '
-                                f'the data ({len(self)} octets)')
+        overrun = len(self) < tcp.hdr_len
+        error = f'{self.alias}: header length {tcp.hdr_len} runs past the end of the data ({len(self)} octets)'
+        if overrun and not cut_on_its_own(schema):
+            raise ProtocolError(error)
 
+        # NOTE: A Data Offset the cut left as zero declares no options.
         _optl = tcp.hdr_len - TCP_MIN_HEADER_LEN
+        if _optl < 0 and cut_on_its_own(schema, 'offset'):
+            _optl = 0
         if _optl:
             # NOTE: Post-EOOL octets are kept so ``make`` rebuilds the parsed Data Offset;
             # sliced as IPv4 does, since a built schema keeps them in ``options`` (#2769).
             options = self._read_tcp_options(_optl)
+            if overrun and ends_inside_option(options, len(self) - TCP_MIN_HEADER_LEN):
+                raise ProtocolError(error)
             _used = sum(opt.length for _, opt in options.items(multi=True))
             tcp.__update__({
                 'options': options,
@@ -845,6 +854,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Key-value pairs for protocol construction.
 
         """
+        options, padding = getattr(data, 'options', None), getattr(data, 'padding', b'')
+        if data.get('__short_read__') is not None:
+            # NOTE: A Data Offset the data ended before rebuilds as parsed (#2880).
+            eool = Data_EndOfOptionList(kind=cast('Enum_Option', Enum_Option.End_of_Option_List), length=1)
+            options, padding = fill_short_options(data, options, data.hdr_len - TCP_MIN_HEADER_LEN,
+                                                  (Enum_Option.End_of_Option_List, eool), padding)
         return {
             'srcport': data.srcport,
             'dstport': data.dstport,
@@ -862,8 +877,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'window': data.window_size,
             'checksum': data.checksum,
             'urgent': data.urgent_pointer,
-            'options': getattr(data, 'options', None),
-            'padding': getattr(data, 'padding', b''),
+            'options': options,
+            'padding': padding,
             'reserved': data.flags.reserved,
             'payload': cls._make_payload(data),
         }
