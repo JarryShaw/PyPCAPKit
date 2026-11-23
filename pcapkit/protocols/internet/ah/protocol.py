@@ -27,6 +27,7 @@ Octets      Bits        Name                    Description
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.shortread import cut_on_its_own
 from pcapkit.protocols.internet.ah.data import AH as Data_AH
 from pcapkit.protocols.internet.ah.schema import AH as Schema_AH
 from pcapkit.protocols.internet.ah.schema import AH_HEADER_LEN
@@ -190,10 +191,20 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If Payload Length describes fewer octets than the
+                fixed fields (:rfc:`4302#section-2.2`). Parsed on its own, one
+                the cut left as zero is the short read's (:issue:`2880`).
+
         """
         if length is None:
             length = len(self)
         schema = self.__header__
+
+        # NOTE: A Payload Length read below the fixed fields is refused as a whole header's is;
+        # on its own, one the cut left as zero is the short read's (#2880).
+        if (schema.len + 2) * 4 < AH_HEADER_LEN and not cut_on_its_own(schema, 'len'):
+            raise ProtocolError(f'{self.alias}: invalid payload length: {schema.len}')
 
         ah = Data_AH(
             next=schema.next,
@@ -383,6 +394,10 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
             Key-value pairs for protocol construction.
 
         """
+        # NOTE: A Payload Length the cut left as zero is the short read's, not one read (#2880),
+        # so ``make`` computes one, and the cut back drops it with the octets past the capture.
+        record = data.get('__short_read__')
+        cut = record is not None and record[0] in ('next', 'len')
         return {
             'next': data.next,
             'reserved': data.reserved,
@@ -392,5 +407,5 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
             'payload': cls._make_payload(data),
             # NOTE: Written as captured, so that a header not aligned for the IP version
             # carrying it is not padded on a rebuild (#2886).
-            'payload_length': data.length // 4 - 2,
+            'payload_length': None if cut else data.length // 4 - 2,
         }
