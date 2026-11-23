@@ -18,6 +18,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.const.capture import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
                                            GENERIC_BLOCK_MINIMUM, RESOLUTION)
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.schema.byteorder import family_byteorder
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import FormatError, stacklevel
@@ -367,7 +368,7 @@ def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'T
     """A :class:`dpkt.loopback.Loopback` that reads the address family by link type.
 
     It reads the address family in the byte order
-    :func:`~pcapkit.protocols.link.loopback.protocol.family_byteorder` gives for
+    :func:`~pcapkit.corekit.schema.byteorder.family_byteorder` gives for
     ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for
     ``LINKTYPE_NULL`` -- and dispatches on families 2 (IPv4) and 24, 28 and 30
     (IPv6). Unlike `DPKT`_'s own, it names an IPv4 or IPv6 payload ``ip`` or
@@ -389,8 +390,6 @@ def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'T
 
     """
     import dpkt  # isort:skip
-
-    from pcapkit.protocols.link.loopback.protocol import family_byteorder  # isort:skip
 
     layers = {2: ip, 24: ip6, 28: ip6, 30: ip6}
 

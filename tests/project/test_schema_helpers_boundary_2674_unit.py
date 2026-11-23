@@ -263,7 +263,7 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
         shared = helpers(tuple(sorted(HELPERS.rglob('*.py'))))
         self.assertIn('pad_length', shared['pcapkit.corekit.schema.padding'][0])
         self.assertEqual(shared['pcapkit.corekit.schema.byteorder'][0],
-                         {'byteorder_callback', 'packet_byteorder'})
+                         {'byteorder_callback', 'family_byteorder', 'packet_byteorder'})
         self.assertIn('keep_short_read', shared['pcapkit.corekit.schema.shortread'][0])
         # No copy is left behind in a module the ruling checks.
         defined = {name for functions, _ in shared.values() for name in functions}

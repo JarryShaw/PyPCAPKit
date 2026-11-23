@@ -14,13 +14,14 @@ The page's questions, as one decision:
    flowchart TD
        NEW["a new support module,<br/>helper, constant<br/>or ContextVar"] --> CONST{"a constant the<br/>format or RFCs fix?"}
        CONST -->|"referenced beyond its<br/>protocol or family"| SHARED["corekit.const<br/>one module per topic"]
-       CONST -->|"referenced by its<br/>protocol or family alone"| STAY["stays beside<br/>that schema"]
+       CONST -->|"referenced by its<br/>protocol or family alone"| STAY["stays in its<br/>protocol or family"]
        CONST -->|no| LAYER{"a schema-layer<br/>helper used<br/>outside it?"}
-       LAYER -->|no| OWNED{"a helper in<br/>one protocol's<br/>schema?"}
+       LAYER -->|no| OWNED{"a helper in<br/>one protocol's<br/>own modules?"}
        LAYER -->|yes| SCHEMA["corekit.schema<br/>one module per group"]
-       OWNED -->|"used beyond that<br/>protocol, and generic"| SCHEMA
+       OWNED -->|"in its schema, used<br/>beyond its protocol<br/>or family"| SCHEMA
+       OWNED -->|"elsewhere, used<br/>beyond its protocol<br/>or family"| UTIL
        OWNED -->|no| VAR{"a ContextVar?"}
-       OWNED -->|"used by that<br/>protocol alone"| STAY
+       OWNED -->|"used by its protocol<br/>or family alone"| STAY
        VAR -->|"set or read by<br/>several modules"| CTX["utilities.contextvars"]
        VAR -->|no| UTIL{"usable by any<br/>code, importing<br/>no pcapkit but<br/>utilities?"}
        VAR -->|"used by one<br/>module only"| PRIV["private, in<br/>that module"]
@@ -139,9 +140,10 @@ the cut leaves nothing to decide by still refuses: the PCAP magic number, IGMP's
 classification by length, NGAP's PER decoding, and the TLS, DTLS and HTTP/2 framing.
 
 **A helper in one protocol's own schema module moves there too once code outside that
-protocol uses it and it is generic enough to reuse**, so other implementors can find
-it; a helper only its own protocol calls stays beside the schema. Ruled on
-:issue:`2674`. A protocol's own modules are its protocol, data and schema modules. So
+protocol or its family uses it**, so other implementors can find it; a helper only its
+own protocol calls stays beside the schema. Ruled on :issue:`2674`, and widened to the
+rest of a protocol's own modules on :issue:`2897` (`Shared Helpers`_). A protocol's
+own modules are its protocol, data and schema modules. So
 :func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length`, which the IPv6
 pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
 :mod:`pcapkit.corekit.schema.jumbogram`, while
@@ -208,6 +210,46 @@ Every layer imports these modules, so they import nothing from :mod:`pcapkit` bu
 :file:`tests/project/test_shared_format_constants_2883_unit.py` fails on a module
 there that does, and on a constant of a protocol's own modules that a module outside
 that protocol or its family references, by import or as an attribute of the module.
+
+Shared Helpers
+~~~~~~~~~~~~~~
+
+**A function or class of a protocol's own modules that anything outside its protocol
+or family references lives in a common home**: the module of :mod:`pcapkit.utilities`
+or :mod:`pcapkit.corekit` for its topic, as the questions above place it, and never a
+generic helpers module. Ruled by the owner in review of :pr:`2895` (:issue:`2883`)
+and recorded on :issue:`2897`. References and places count as for the constants, and
+so does a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the helper, as a
+lazy import does. So :func:`~pcapkit.corekit.schema.byteorder.family_byteorder`,
+which the `DPKT`_ engine reads as well as
+:class:`~pcapkit.protocols.link.loopback.protocol.Loopback`, is among the byte-order
+helpers of :mod:`pcapkit.corekit.schema.byteorder`: it reads
+:class:`~pcapkit.const.reg.linktype.LinkType`, so fails the ``utilities`` question.
+The next-layer and link-address checks that
+:class:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1` and
+:class:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2` share stay in their
+family base's :mod:`pcapkit.protocols.link.linux_sll.protocol`.
+
+**A protocol's own structures are not helpers**: the dissector, header schema and data
+model classes its modules hold (:ref:`protocol-family-grouping`), every subclass of
+:class:`~pcapkit.protocols.protocol.ProtocolBase`,
+:class:`~pcapkit.protocols.schema.Schema` or :class:`~pcapkit.corekit.infoclass.Info`
+there, stay in its package whoever references them, as the framework bases do. A field
+class, an enumeration or a context its modules define is a helper.
+
+**The IP pseudo-header's functions stay beside it.**
+:func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.pseudo_header`,
+:func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper` and
+:func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`, which the IP
+layers and the layers above them reach through a
+:class:`~pcapkit.corekit.module.ModuleDescriptor`, act on
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo` and through it
+on IPv4 and IPv6, which is what :issue:`2580` keeps in
+:mod:`pcapkit.protocols.misc.checksum`.
+
+:file:`tests/project/test_shared_format_constants_2883_unit.py` fails on a helper a
+module outside its protocol or family references, the pseudo-header functions aside,
+and imports a class to tell a structure from a helper.
 
 Context Variables
 ~~~~~~~~~~~~~~~~~

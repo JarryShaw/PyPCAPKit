@@ -63,7 +63,7 @@ comment: *"We do not know the endianness of the capture host, we have to
 guess."*): decode ``nlmsg_len`` both ways and keep whichever reading comes
 closer to the number of octets actually available, since a genuine message
 length is normally well under the size either misreading would imply. See
-:func:`~pcapkit.protocols.link.loopback.protocol.family_byteorder` for the same
+:func:`~pcapkit.corekit.schema.byteorder.family_byteorder` for the same
 problem solved the same way for ``LINKTYPE_NULL``.
 
 .. [*] :manpage:`netlink(7)`; :rfc:`3549#section-2.3.2`
