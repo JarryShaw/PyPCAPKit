@@ -42,7 +42,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
-        analyse: reassemble each flow's application layer, so that
+        analyze: reassemble each flow's application layer, so that
             :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
             can be read
 
@@ -76,7 +76,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         own, finalised on that direction's FIN. That mode ignores RST.
 
     Note:
-        With ``analyse=True`` a flow also carries its **application layer**:
+        With ``analyze=True`` a flow also carries its **application layer**:
         :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
         holds the flow's reassembled datagrams, each with its payload parsed on
         demand. The tracer does not reassemble the stream itself -- it feeds
@@ -136,7 +136,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
     if TYPE_CHECKING:
         #: The reassembly segment model, imported on the first flow that needs it
         #: and cached so that :meth:`_make_segment` does not import per packet. Set
-        #: only when ``analyse`` is on, which is the only time it is read.
+        #: only when ``analyze`` is on, which is the only time it is read.
         _reasm_packet: 'type[Any]'
         #: Every flow label this tracer has handed out, created with the first
         #: flow and read by :meth:`_unique_label` to keep labels unique.
@@ -382,7 +382,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         Returns:
             A :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler of this
-            flow's own, or :data:`None` when ``analyse`` is off.
+            flow's own, or :data:`None` when ``analyze`` is off.
 
         One reassembler **per flow** rather than one per tracer, so that
         :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
@@ -397,7 +397,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         -- no timeout -- so nothing here is evicted on a clock.
 
         """
-        if not self._analyse:
+        if not self._analyze:
             return None
 
         # NOTE: imported here, since at module scope this sibling-subpackage edge joins the
@@ -571,7 +571,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             flow. Such a flow is therefore reported here but has not fired its
             callback; :meth:`finish` is what does that, at the end of the capture.
 
-            With ``analyse=True`` that makes an open flow's
+            With ``analyze=True`` that makes an open flow's
             :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
             a **snapshot**, and a mid-capture one. The
             :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when

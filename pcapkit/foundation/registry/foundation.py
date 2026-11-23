@@ -122,7 +122,7 @@ def register_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dump
 
     """
     Extractor.register_dumper(format, dumper, ext)
-    TraceFlow.register_dumper(format, dumper, ext)
+    TraceFlow.register_dumper(format, dumper, ext=ext)
     logger.debug('registered output format: %s', format)
 
 
@@ -166,7 +166,7 @@ def register_traceflow_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] |
        ``ext`` is keyword-only.
 
     """
-    TraceFlow.register_dumper(format, dumper, ext)
+    TraceFlow.register_dumper(format, dumper, ext=ext)
     logger.debug('registered traceflow output: %s', format)
 
 
@@ -219,7 +219,7 @@ def register_reassembly_callback(protocol: 'str', callback: 'Reasm_CallbackFn', 
     The function will register the given callback function to the
     ``__callback_fn__`` list of the reassembly class registered under ``protocol``
     in :data:`pcapkit.foundation.extraction.Extractor.__reassembly__`, through its
-    :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.register`. It
+    :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.register_callback`. It
     reaches DTLS and a reassembler registered with
     :func:`register_extractor_reassembly` as it reaches IPv4, IPv6 and TCP.
 
@@ -241,7 +241,7 @@ def register_reassembly_callback(protocol: 'str', callback: 'Reasm_CallbackFn', 
     """
     reassembly = _registered_class(Extractor.__reassembly__, protocol, 'reassembly')
     _check_callback(callback)
-    reassembly.register(callback, index=index)
+    reassembly.register_callback(callback, index=index)
     logger.debug('registered %s reassembly callback: %r', reassembly.__name__, callback)
 
 

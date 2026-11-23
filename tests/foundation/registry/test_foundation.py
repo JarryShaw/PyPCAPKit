@@ -33,13 +33,13 @@ class FoundationRegistryTests(unittest.TestCase):
             with mock.patch.object(registry.TraceFlow, 'register_dumper') as traceflow:
                 registry.register_dumper('unit', dumper, ext='.unit')
         extractor.assert_called_once_with('unit', dumper, '.unit')
-        traceflow.assert_called_once_with('unit', dumper, '.unit')
+        traceflow.assert_called_once_with('unit', dumper, ext='.unit')
 
         with mock.patch.object(registry.Extractor, 'register_dumper') as extractor:
             with mock.patch.object(registry.TraceFlow, 'register_dumper') as traceflow:
                 registry.register_dumper('unit-class', NotImplementedIO, ext='.unit')
         extractor.assert_called_once_with('unit-class', NotImplementedIO, '.unit')
-        traceflow.assert_called_once_with('unit-class', NotImplementedIO, '.unit')
+        traceflow.assert_called_once_with('unit-class', NotImplementedIO, ext='.unit')
 
         with mock.patch.object(registry.Extractor, 'register_dumper') as extractor:
             registry.register_extractor_dumper('unit-ext', NotImplementedIO, ext='.unit')
@@ -51,11 +51,11 @@ class FoundationRegistryTests(unittest.TestCase):
 
         with mock.patch.object(registry.TraceFlow, 'register_dumper') as traceflow:
             registry.register_traceflow_dumper('unit-trace', dumper, ext='.unit')
-        traceflow.assert_called_once_with('unit-trace', dumper, '.unit')
+        traceflow.assert_called_once_with('unit-trace', dumper, ext='.unit')
 
         with mock.patch.object(registry.TraceFlow, 'register_dumper') as traceflow:
             registry.register_traceflow_dumper('unit-trace-class', NotImplementedIO, ext='.unit')
-        traceflow.assert_called_once_with('unit-trace-class', NotImplementedIO, '.unit')
+        traceflow.assert_called_once_with('unit-trace-class', NotImplementedIO, ext='.unit')
 
     def test_dumper_registrars_reject_a_non_class_with_registry_error(self) -> None:
         """GitHub issue #1021: every dumper registrar raises ``RegistryError``.
@@ -85,7 +85,7 @@ class FoundationRegistryTests(unittest.TestCase):
             'Extractor.register_dumper':
                 lambda value: Extractor.register_dumper('unit-bad', value, '.bad'),
             'TraceFlow.register_dumper':
-                lambda value: TraceFlow.register_dumper('unit-bad', value, '.bad'),
+                lambda value: TraceFlow.register_dumper('unit-bad', value, ext='.bad'),
             'register_extractor_dumper':
                 lambda value: registry.register_extractor_dumper('unit-bad', value, ext='.bad'),
             'register_traceflow_dumper':
@@ -111,8 +111,8 @@ class FoundationRegistryTests(unittest.TestCase):
             return None
 
         callback_routes = [
-            (registry.register_reassembly_callback, 'ipv4', IPv4_Reassembly, 'register'),
-            (registry.register_reassembly_callback, 'TCP', TCP_Reassembly, 'register'),
+            (registry.register_reassembly_callback, 'ipv4', IPv4_Reassembly, 'register_callback'),
+            (registry.register_reassembly_callback, 'TCP', TCP_Reassembly, 'register_callback'),
             (registry.register_traceflow_callback, 'tcp', TCP_TraceFlow, 'register_callback'),
         ]
         for func, protocol, target, method in callback_routes:

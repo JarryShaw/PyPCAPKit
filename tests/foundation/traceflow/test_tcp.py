@@ -45,12 +45,12 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.dumpkit.null import NotImplementedIO
         from pcapkit.foundation.traceflow.tcp import TCP
 
-        TCP.register_dumper('unit-null', NotImplementedIO, '.unit')
+        TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
         callbacks = []
         TCP.register_callback(callbacks.append)
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unit-null', bidirectional=False)
+            trace = TCP(fout=tempdir, format='unit-null', bidirectional=False)
             first = self._packet(index=1, syn=True)
             label = trace.trace(first)
             self.assertEqual(label, '192.0.2.1_12345-198.51.100.2_443-1.25')
@@ -88,10 +88,10 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.dumpkit.null import NotImplementedIO
         from pcapkit.foundation.traceflow.tcp import TCP
 
-        TCP.register_dumper('unit-null', NotImplementedIO, '.unit')
+        TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unit-null')
+            trace = TCP(fout=tempdir, format='unit-null')
 
             # the client opens the conversation, so its direction is "forward"
             label = trace.trace(self._packet(index=1, syn=True))
@@ -122,10 +122,10 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.dumpkit.null import NotImplementedIO
         from pcapkit.foundation.traceflow.tcp import TCP
 
-        TCP.register_dumper('unit-null', NotImplementedIO, '.unit')
+        TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unit-null')
+            trace = TCP(fout=tempdir, format='unit-null')
             trace.trace(self._packet(index=1, syn=True))
             trace.trace(self._reply(index=2, timestamp=1.5))
 
@@ -171,12 +171,12 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.dumpkit.null import NotImplementedIO
         from pcapkit.foundation.traceflow.tcp import TCP
 
-        TCP.register_dumper('unit-null', NotImplementedIO, '.unit')
+        TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
         callbacks = []
         TCP.register_callback(callbacks.append)
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unit-null')
+            trace = TCP(fout=tempdir, format='unit-null')
 
             # connection one: handshake, data, and a full four-way close
             trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
@@ -219,7 +219,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format')
+            trace = TCP(fout=tempdir, format='unknown-unit-format')
             trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
             trace.trace(self._reply(index=2, syn=True, timestamp=1.1))
 
@@ -237,7 +237,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format')
+            trace = TCP(fout=tempdir, format='unknown-unit-format')
             trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
             trace.trace(self._reply(index=2, rst=True, timestamp=1.1))
 
@@ -269,7 +269,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         TCP.register_callback(callbacks.append)
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format')
+            trace = TCP(fout=tempdir, format='unknown-unit-format')
             trace.trace(self._packet(index=1, syn=True, timestamp=1.0))
             trace.trace(self._reply(index=2, timestamp=1.1))
 
@@ -292,7 +292,7 @@ class TCPTraceFlowTests(unittest.TestCase):
             self.assertEqual(len(trace.index), 1)
 
     def test_the_application_layer_is_not_reassembled_unless_asked_for(self) -> None:
-        """``analyse`` is off by default, and off means nothing is buffered.
+        """``analyze`` is off by default, and off means nothing is buffered.
 
         Reassembling a flow's payload is a cost tracing does not otherwise pay, so
         a caller who only wanted frame numbers must not be charged for it.
@@ -301,7 +301,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format')
+            trace = TCP(fout=tempdir, format='unknown-unit-format')
             trace.trace(self._packet(index=1, syn=True, seq=0))
             trace.trace(self._reply(index=2, timestamp=1.5, seq=0, payload=b'hello'))
 
@@ -311,7 +311,7 @@ class TCPTraceFlowTests(unittest.TestCase):
             flow, = trace.index
             self.assertIsNone(flow.packet)
 
-    def test_analyse_gives_a_flow_its_application_layer_per_direction(self) -> None:
+    def test_analyze_gives_a_flow_its_application_layer_per_direction(self) -> None:
         """One reassembled datagram per direction, parsed on demand.
 
         The tracer does not reassemble the stream itself -- it feeds
@@ -328,7 +328,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+            trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
 
             # client: SYN, then the second half of its request before the first
             trace.trace(self._packet(index=1, syn=True, seq=100))
@@ -366,7 +366,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+            trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
 
             # three request/response round trips on one connection, with the
             # acknowledgement number advancing as it does on any real exchange
@@ -421,7 +421,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+            trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
 
             trace.trace(self._packet(index=1, syn=True, seq=100, ack=0))
             trace.trace(self._reply(index=2, syn=True, seq=500, ack=101, timestamp=1.1))
@@ -458,7 +458,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+            trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
             trace.trace(self._packet(index=1, syn=True, seq=100))
             trace.trace(self._packet(index=2, seq=101, payload=b'first', timestamp=1.5))
 
@@ -491,7 +491,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format', analyse=True)
+            trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
             trace.trace(self._packet(index=1, syn=True, seq=100))
             trace.trace(self._packet(index=2, seq=101, payload=b'hello', timestamp=1.5))
 
@@ -522,14 +522,14 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format')
+            trace = TCP(fout=tempdir, format='unknown-unit-format')
             forward = trace.make_bufid(self._packet(index=1))
             reverse = trace.make_bufid(self._reply(index=2))
             self.assertEqual(forward, reverse)
             self.assertIs(type(forward), tuple)
             hash(forward)  # a key that cannot be hashed is not a key
 
-            oneway = TCP(tempdir, 'unknown-unit-format', bidirectional=False)
+            oneway = TCP(fout=tempdir, format='unknown-unit-format', bidirectional=False)
             self.assertNotEqual(oneway.make_bufid(self._packet(index=1)),
                                 oneway.make_bufid(self._reply(index=2)))
 
@@ -537,7 +537,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         from pcapkit.foundation.traceflow.tcp import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unknown-unit-format')
+            trace = TCP(fout=tempdir, format='unknown-unit-format')
             packet = self._packet(index=1, src='2001:db8::1', dst='2001:db8::2',
                                   timestamp=3.5)
             label = trace.trace(packet)
@@ -565,10 +565,10 @@ class TCPTraceFlowTests(unittest.TestCase):
 
         from pcapkit.foundation.traceflow.tcp import TCP
 
-        TCP.register_dumper('unit-noext', JSON, '')
+        TCP.register_dumper('unit-noext', JSON, ext='')
 
         with tempfile.TemporaryDirectory() as tempdir:
-            trace = TCP(tempdir, 'unit-noext')
+            trace = TCP(fout=tempdir, format='unit-noext')
             label = trace.trace(self._packet(index=1, syn=True))
             expected = f'{tempdir}/{label}'
             self.assertTrue(pathlib.Path(expected).is_file())

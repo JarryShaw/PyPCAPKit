@@ -134,7 +134,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
-        analyse: reassemble each flow's application layer
+        analyze: reassemble each flow's application layer
 
     Note:
         This class is for internal use only. For customisation, please use
@@ -222,7 +222,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
     ##########################################################################
 
     @classmethod
-    def register_dumper(cls, format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dumper]', ext: 'str') -> 'None':
+    def register_dumper(cls, format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dumper]', *,  # pylint: disable=redefined-builtin
+                        ext: 'str') -> 'None':
         r"""Register a new dumper class.
 
         Notes:
@@ -273,6 +274,10 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
            ``dumper``, a module descriptor or a class, replaces the ``module``
            and ``class_`` name pair, with no alias.
 
+        .. versionchanged:: 1.7.0
+
+           ``ext`` is keyword-only (:issue:`2839`).
+
         """
         shipped = cls._shipped_output.get(format)
         if isinstance(dumper, ModuleDescriptor) and (shipped is None or dumper != shipped[0]):
@@ -317,29 +322,35 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             cls.__callback_fn__.append(callback)
 
     @classmethod
-    def make_fout(cls, fout: 'str' = './tmp', fmt: 'str' = 'pcap') -> 'tuple[Type[Dumper], str | None]':
+    def make_fout(cls, fout: 'str' = './tmp', *,
+                  format: 'str' = 'pcap') -> 'tuple[Type[Dumper], str | None]':  # pylint: disable=redefined-builtin
         """Make root path for output.
 
         Args:
             fout: root path for output
-            fmt: output format
+            format: output format
 
         Returns:
             Dumper of specified format and file extension of output file.
 
         Warns:
-            FormatWarning: If ``fmt`` is not supported.
-            FileWarning: If ``fout`` exists but is not a directory, and ``fmt``
-                is not supported.
+            FormatWarning: If ``format`` is not supported.
+            FileWarning: If ``fout`` exists but is not a directory, and
+                ``format`` is not supported.
 
         Raises:
-            FileExists: If ``fout`` exists but is not a directory, and ``fmt``
-                is supported.
+            FileExists: If ``fout`` exists but is not a directory, and
+                ``format`` is supported.
+
+        .. versionchanged:: 1.7.0
+
+           ``fmt`` is renamed ``format``, with no alias, and is keyword-only
+           (:issue:`2839`).
 
         """
-        output, ext = cls.__output__[fmt]
+        output, ext = cls.__output__[format]
         if ext is None:
-            warn(f'unsupported output format: {fmt!r}; disabled file output feature',
+            warn(f'unsupported output format: {format!r}; disabled file output feature',
                  FormatWarning, stacklevel=stacklevel())
         if isinstance(output, ModuleDescriptor):
             output = output.klass
@@ -355,7 +366,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         dumper = make_dumper(output)
         # NOTE: logs ``output``, not ``dumper`` -- make_dumper()'s subclass is
         # always called 'DictDumper'.
-        logger.debug('flow tracing output root %s, format %s via %s', fout, fmt, output.__name__)
+        logger.debug('flow tracing output root %s, format %s via %s', fout, format, output.__name__)
         return dumper, ext
 
     @abc.abstractmethod
@@ -490,15 +501,15 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
         return self
 
-    def __init__(self, fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
+    def __init__(self, *, fout: 'str' = './tmp', format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
                  byteorder: 'Literal["little", "big"]' = sys.byteorder,
-                 nanosecond: bool = False, bidirectional: 'bool' = True,
-                 analyse: 'bool' = False) -> 'None':
+                 nanosecond: 'bool' = False, bidirectional: 'bool' = True,
+                 analyze: 'bool' = False) -> 'None':
         """Initialise instance.
 
         Arguments:
-            fout: output path
-            format: output format
+            fout: output root path, made if missing
+            format: output format, a key of :attr:`__output__`
             byteorder: output file byte order
             nanosecond: output nanosecond-resolution file flag
             bidirectional: whether the two halves of a conversation are one flow.
@@ -506,16 +517,11 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
                 endpoints rather than on (source, destination), so a connection
                 is traced as the one thing it is; pass :data:`False` to trace
                 each direction as a flow of its own.
-            analyse: whether to reassemble each flow's application layer, so that
+            analyze: whether to reassemble each flow's application layer, so that
                 its ``packet`` can be read. Off by default: it buffers every
                 traced payload, a cost tracing does not otherwise pay.
 
         """
-        if fout is None:
-            fout = './tmp'
-        if format is None:
-            format = 'pcap'
-
         #: str: Output root path.
         self._fproot = fout
 
@@ -536,10 +542,10 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         #: flow reassembles the payload it carries so that its ``packet`` can be
         #: read; otherwise no payload is buffered and ``packet`` is
         #: :data:`None`.
-        self._analyse = analyse
+        self._analyze = analyze
 
         # dump I/O object
-        fio, ext = self.make_fout(fout, format)
+        fio, ext = self.make_fout(fout, format=format)
         #: ~typing.Type[Dumper]: Dumper class.
         self._foutio = fio
         #: Optional[str]: Output file extension.
@@ -553,8 +559,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         self._finalizer = weakref.finalize(self, _close_files, self._fopen)
 
         logger.debug('%s flow tracing initialised (root=%s, format=%s, byteorder=%s, '
-                     'nanosecond=%s, bidirectional=%s, analyse=%s)', self.name, fout,
-                     format, byteorder, nanosecond, bidirectional, analyse)
+                     'nanosecond=%s, bidirectional=%s, analyze=%s)', self.name, fout,
+                     format, byteorder, nanosecond, bidirectional, analyze)
 
     def __call__(self, packet: '_PT') -> 'None':
         """Dump frame to output files.
@@ -617,7 +623,7 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
-        analyse: reassemble each flow's application layer
+        analyze: reassemble each flow's application layer
 
     .. versionchanged:: 1.3.0
 
@@ -635,6 +641,13 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
        omitted (:issue:`514`). The ``bidirectional`` and ``analyse`` arguments
        are added, and a flow covers both directions of a conversation unless
        ``bidirectional=False`` is passed.
+
+    .. versionchanged:: 1.7.0
+
+       Every argument is keyword-only, with its real default in the signature,
+       where ``fout`` and ``format`` were required and took :data:`None` for
+       ``'./tmp'`` and ``'pcap'``; ``analyse`` is renamed ``analyze``, with no
+       alias (:issue:`2839`).
 
     """
 

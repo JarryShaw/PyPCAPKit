@@ -46,7 +46,7 @@ class TestMessageForm(unittest.TestCase):
         from pcapkit.utilities.exceptions import FormatError
 
         with self.assertRaises(FormatError) as context:
-            trace('foo', fout=None, format=None)
+            trace('foo')
         self.assertEqual(str(context.exception), "unsupported flow tracing protocol: 'foo'")
 
     def test_follow_tcp_stream_engine_fallback(self) -> None:
@@ -133,7 +133,7 @@ class TestMessageForm(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(TCP.__output__), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            TCP.make_fout(tmp, 'foo')
+            TCP.make_fout(tmp, format='foo')
         self.assertEqual([str(w.message) for w in caught if issubclass(w.category, FormatWarning)],
                          ["unsupported output format: 'foo'; disabled file output feature"])
 

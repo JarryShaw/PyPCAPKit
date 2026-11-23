@@ -382,7 +382,7 @@ class PyPCAPEngineTests(unittest.TestCase):
         self.assertNotIn('ipv6', extractor._reasm)
         self.assertNotIn('tcp', extractor._reasm)
         self.assertNotIn('dtls', extractor._reasm)
-        self.assertIsNone(extractor._trace.tcp)
+        self.assertEqual(dict(extractor._trace), {})
 
     def test_run_disables_reassembly_requested_for_dtls_alone(self) -> None:
         from pcapkit.utilities.warnings import AttributeWarning

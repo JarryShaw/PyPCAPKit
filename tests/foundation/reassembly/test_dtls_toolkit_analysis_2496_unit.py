@@ -237,15 +237,19 @@ class DTLSExtractorWiringTests(unittest.TestCase):
         self.assertIsNone(_extract(self, capture, reassembly=['ipv4', 'ipv6']).reassembly.dtls)
         self.assertEqual(len(_extract(self, capture, reassembly=['dtls']).reassembly.dtls), 1)
 
-    def test_the_reassembly_timeout_does_not_reach_dtls(self) -> None:
+    def test_only_a_given_reassembly_timeout_reaches_dtls(self) -> None:
         """The RFC gives DTLS handshake reassembly no timeout, so fragments a
-        second apart still complete under a half-second reassembly ``timeout``."""
+        second apart complete by default; a half-second ``timeout`` the caller
+        gives expires the first (#2839)."""
         from pcapkit.foundation.options import ReassemblyOptions
+        from pcapkit.foundation.reassembly.data.data import Completion
 
-        extractor = _extract(self, _pcap([_frame(record) for record in RECORDS]),
-                             reassembly=ReassemblyOptions(protocols=['dtls'], timeout=0.5))
-        datagram, = extractor.reassembly.dtls
-        self.assertTrue(datagram.completed)
+        capture = _pcap([_frame(record) for record in RECORDS])
+        datagram, = _extract(self, capture, reassembly=ReassemblyOptions(protocols=['dtls'])).reassembly.dtls
+        self.assertIs(datagram.completed, Completion.COMPLETE)
+        extractor = _extract(self, capture, reassembly=ReassemblyOptions(protocols=['dtls'], timeout=0.5))
+        self.assertEqual(sorted((datagram.index, datagram.completed) for datagram in extractor.reassembly.dtls),
+                         [((1,), Completion.TIMEOUT), ((2,), Completion.PARTIAL)])
 
     def test_the_shipped_reassembly_entry_names_the_dtls_engine(self) -> None:
         from pcapkit.foundation.extraction import Extractor

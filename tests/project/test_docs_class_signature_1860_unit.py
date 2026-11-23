@@ -88,8 +88,8 @@ RESTORED = {
     'pcapkit.protocols.application.ftp.protocol.FTP': '(file=None, length=None, **kwargs)',
     'pcapkit.dumpkit.pcap.PCAPIO': '(fname, *, protocol, byteorder=sys.byteorder, nanosecond=False, **kwargs)',
     'pcapkit.foundation.reassembly.ipv4.IPv4': '(*, strict=True, store=True, timeout=None)',
-    'pcapkit.foundation.traceflow.tcp.TCP': ('(fout, format, byteorder=sys.byteorder, nanosecond=False, '
-                                             'bidirectional=True, analyse=False)'),
+    'pcapkit.foundation.traceflow.tcp.TCP': ("(*, fout='./tmp', format='pcap', byteorder=sys.byteorder, "
+                                             'nanosecond=False, bidirectional=True, analyze=False)'),
     'pcapkit.corekit.infoclass.Info': '(dict_=None, **kwargs)',
     'pcapkit.corekit.infoclass.MultiInfo': '(mapping=None)',
     'pcapkit.interface.misc.Stream': '(filename, packets, conversations)',

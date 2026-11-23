@@ -144,7 +144,7 @@ class ReassemblerCases:
     def registered(self, klass: type, *callbacks: 'Callable[[list[Any]], None]') -> 'Iterator[None]':
         """Register ``callbacks`` on ``klass`` in order, for the block only."""
         for callback in callbacks:
-            klass.register(callback)  # type: ignore[attr-defined]
+            klass.register_callback(callback)  # type: ignore[attr-defined]
         try:
             yield
         finally:

@@ -45,7 +45,7 @@ class RuntimeExtractionTests(unittest.TestCase):
         self.assertEqual(type(reassemble('IPv4')).__name__, 'IPv4')
         self.assertEqual(type(reassemble('IPv6')).__name__, 'IPv6')
         self.assertEqual(type(reassemble('TCP')).__name__, 'TCP')
-        self.assertEqual(type(trace('TCP', fout=None, format=None)).__name__, 'TCP')
+        self.assertEqual(type(trace('TCP')).__name__, 'TCP')
 
 
 if __name__ == '__main__':

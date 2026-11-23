@@ -123,7 +123,7 @@ class DumpkitCommonTests(unittest.TestCase):
                     pass
 
         extractor.assert_called_once_with('custom', ExplicitDumper, '.custom')
-        traceflow.assert_called_once_with('custom', ExplicitDumper, '.custom')
+        traceflow.assert_called_once_with('custom', ExplicitDumper, ext='.custom')
 
         # ``ext`` is still inferred from ``fmt`` -- that is a default for a format
         # that *was* given, not a decision to register.
@@ -133,7 +133,7 @@ class DumpkitCommonTests(unittest.TestCase):
                     pass
 
         extractor.assert_called_once_with('fmtonly', FormatOnlyDumper, '.fmtonly')
-        traceflow.assert_called_once_with('fmtonly', FormatOnlyDumper, '.fmtonly')
+        traceflow.assert_called_once_with('fmtonly', FormatOnlyDumper, ext='.fmtonly')
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_dumper') as extractor:
             with mock.patch('pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper') as traceflow:

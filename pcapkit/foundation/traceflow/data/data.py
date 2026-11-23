@@ -35,7 +35,7 @@ class Deferred:
         with it. That one postpones a single ``analyze()`` call over bytes already
         in hand; this postpones a *submit* over a reassembler's buffers. The
         reassembly and flow tracing subpackages are siblings, and the flow tracer
-        reaches the reassembler only lazily, when ``analyse`` asks for one, so the
+        reaches the reassembler only lazily, when ``analyze`` asks for one, so the
         few lines are written in each rather than one importing the other -- the
         same reason their ``data.py`` modules mirror each other instead of
         merging.

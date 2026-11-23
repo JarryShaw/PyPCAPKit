@@ -82,7 +82,7 @@ class IPReassemblyTests(unittest.TestCase):
             __protocol_type__ = Analyzer
 
         callback_calls = []
-        TestIP.register(callback_calls.append)
+        TestIP.register_callback(callback_calls.append)
 
         reasm = TestIP()
         reasm(self._packet(num=1, fo=0, mf=True, payload=b'abcdefgh'))

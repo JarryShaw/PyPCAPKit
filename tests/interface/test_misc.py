@@ -79,7 +79,7 @@ class FollowTCPStreamTests(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.tmp_dir = tmp.name
 
-    def _follow(self, *, engine: 'Any' = None, **trace: 'Any') -> tuple:
+    def _follow(self, *, engine: 'Any' = 'default', **trace: 'Any') -> tuple:
         from pcapkit.foundation.options import TraceFlowOptions
         from pcapkit.interface.misc import follow_tcp_stream
 

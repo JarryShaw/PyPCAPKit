@@ -185,7 +185,8 @@ class TestRestoreBuiltin(unittest.TestCase):
                 register_extractor_traceflow('tcp', TCP)
                 register_dumper('json', JSON, ext='.json')
                 Extractor.register_dumper('json', *Extractor.__output__['json'])  # type: ignore[arg-type]
-                TraceFlow.register_dumper('json', *TraceFlow.__output__['json'])  # type: ignore[arg-type]
+                TraceFlow.register_dumper('json', TraceFlow.__output__['json'][0],  # type: ignore[arg-type]
+                                          ext=TraceFlow.__output__['json'][1])
             for table, snapshot in zip((Extractor.__engine__, Extractor.__reassembly__,
                                         Extractor.__traceflow__, Extractor.__output__,
                                         TraceFlow.__output__), saved):

@@ -70,18 +70,18 @@ class TraceFlowBaseTests(unittest.TestCase):
         self.assertEqual(PlainTrace.protocol.__name__, 'Raw')
 
         with self.assertRaises(RegistryError):
-            DummyTrace.register_dumper('bad', object, '.bad')  # type: ignore[arg-type]
+            DummyTrace.register_dumper('bad', object, ext='.bad')  # type: ignore[arg-type]
 
         with mock.patch('pcapkit.foundation.traceflow.traceflow.warn') as warn:
-            DummyTrace.register_dumper('json', NotImplementedIO, '.unit')
+            DummyTrace.register_dumper('json', NotImplementedIO, ext='.unit')
         warn.assert_called_once()
         DummyTrace.register_dumper('unit-descriptor',
                                    ModuleDescriptor('pcapkit.dumpkit', 'NotImplementedIO'),
-                                   '.unit')
+                                   ext='.unit')
 
         with tempfile.TemporaryDirectory() as tempdir:
             fout = pathlib.Path(tempdir) / 'flows'
-            dumper, ext = DummyTrace.make_fout(str(fout), 'json')
+            dumper, ext = DummyTrace.make_fout(str(fout), format='json')
             self.assertTrue(issubclass(dumper, NotImplementedIO))
             self.assertEqual(ext, '.unit')
             self.assertTrue(fout.is_dir())
@@ -89,22 +89,22 @@ class TraceFlowBaseTests(unittest.TestCase):
             file_path = pathlib.Path(tempdir) / 'file-output'
             file_path.write_text('not a directory')
             with self.assertRaises(FileExists):
-                DummyTrace.make_fout(str(file_path), 'json')
+                DummyTrace.make_fout(str(file_path), format='json')
 
             with mock.patch('pcapkit.foundation.traceflow.traceflow.warn') as warn:
-                dumper, ext = DummyTrace.make_fout(str(file_path), 'unknown-unit-format')
+                dumper, ext = DummyTrace.make_fout(str(file_path), format='unknown-unit-format')
             self.assertTrue(issubclass(dumper, NotImplementedIO))
             self.assertIsNone(ext)
             self.assertGreaterEqual(warn.call_count, 1)
 
             default_format = pathlib.Path(tempdir) / 'default-format'
-            default_trace = DummyTrace(str(default_format), None)
+            default_trace = DummyTrace(fout=str(default_format))
             self.assertEqual(default_trace._fdpext, '.pcap')
 
-        trace = DummyTrace(None, 'unknown-unit-format')
+        trace = DummyTrace(format='unknown-unit-format')
         self.assertEqual(trace.name, 'DummyTrace')
         self.assertIs(trace.protocol, NotImplementedIO)
-        plain = PlainTrace('./tmp', 'unknown-unit-format')
+        plain = PlainTrace(fout='./tmp', format='unknown-unit-format')
         self.assertEqual(plain.protocol.__name__, 'Raw')
         trace.__protocol_name__ = 'instance'
         trace.__protocol_type__ = NotImplementedIO
@@ -134,11 +134,11 @@ class TraceFlowBaseTests(unittest.TestCase):
             pass
 
         with mock.patch('pcapkit.foundation.traceflow.traceflow.warn'):
-            TraceFlowBase.register_dumper('unit-trace-dumper-identity', NotImplementedIO, '.unit-a')
+            TraceFlowBase.register_dumper('unit-trace-dumper-identity', NotImplementedIO, ext='.unit-a')
 
         # 1. Re-registering the same object is silent.
         with mock.patch('pcapkit.foundation.traceflow.traceflow.warn') as warn:
-            TraceFlowBase.register_dumper('unit-trace-dumper-identity', NotImplementedIO, '.unit-a')
+            TraceFlowBase.register_dumper('unit-trace-dumper-identity', NotImplementedIO, ext='.unit-a')
         warn.assert_not_called()
         # 3. The registry write still happens even when the guard stays quiet.
         self.assertEqual(TraceFlowBase.__output__['unit-trace-dumper-identity'],
@@ -146,7 +146,7 @@ class TraceFlowBaseTests(unittest.TestCase):
 
         # 2. Replacing with a different object still warns, message unchanged.
         with mock.patch('pcapkit.foundation.traceflow.traceflow.warn') as warn:
-            TraceFlowBase.register_dumper('unit-trace-dumper-identity', UnitTraceDumperIdentityB, '.unit-b')
+            TraceFlowBase.register_dumper('unit-trace-dumper-identity', UnitTraceDumperIdentityB, ext='.unit-b')
         warn.assert_called_once_with(
             'dumper unit-trace-dumper-identity already registered, overwriting', RegistryWarning)
         # 3. And the write happens on the warning path too.
@@ -188,7 +188,7 @@ class TraceFlowBaseTests(unittest.TestCase):
         CallbackTrace.register_callback(callback_calls.append)
         CallbackTrace.register_callback(leading_calls.append, index=0)
 
-        trace = CallbackTrace('./tmp', 'unknown-unit-format')
+        trace = CallbackTrace(fout='./tmp', format='unknown-unit-format')
         trace(DummyPacket(7))
         self.assertEqual(callback_calls[0].index, (7,))
         self.assertEqual(leading_calls[0].index, (7,))

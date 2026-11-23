@@ -47,7 +47,7 @@ NAMED = {
     'pcapkit.protocols.protocol.ProtocolBase.__registry__': 'register_protocol',
     'pcapkit.foundation.extraction.Extractor.__output__': 'register_dumper',
     'pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__': 'register_dumper',
-    'pcapkit.foundation.reassembly.reassembly.ReassemblyBase.__callback_fn__': 'register',
+    'pcapkit.foundation.reassembly.reassembly.ReassemblyBase.__callback_fn__': 'register_callback',
     'pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__callback_fn__': 'register_callback',
 }
 

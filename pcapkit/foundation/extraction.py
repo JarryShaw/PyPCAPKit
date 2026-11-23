@@ -820,8 +820,8 @@ class Extractor(Generic[_P]):
             store: if store reassembled datagrams
             timeout: reassembly timeout in seconds, on the capture's own clock;
                 :data:`None` selects the protocol's own default. A reassembly
-                whose constructor takes no ``timeout``, as DTLS's does not, is
-                made without one
+                class registered with no ``timeout`` in its constructor is made
+                without one
 
         Returns:
             The reassembly instance.
@@ -1523,7 +1523,7 @@ class Extractor(Generic[_P]):
                                                                     byteorder=trace_opts.byteorder,
                                                                     nanosecond=trace_opts.nanosecond,
                                                                     bidirectional=trace_opts.bidirectional,
-                                                                    analyse=trace_analyze))
+                                                                    analyze=trace_analyze))
 
             self._trace = TraceFlowManager(
                 tcp=trace_obj_tcp,

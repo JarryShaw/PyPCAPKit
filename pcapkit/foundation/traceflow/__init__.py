@@ -31,15 +31,36 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.infoclass import Info, info_final
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Iterable, Mapping, Optional
+
+    from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
 
 @info_final
 class TraceFlowManager(Info):
-    """TraceFlow Manager."""
+    """Flow tracing manager.
 
-    #: TCP flow tracing.
-    tcp: 'TCP_TraceFlow'
+    The enabled flow tracers, each under the name it is registered by in
+    :attr:`Extractor.__traceflow__
+    <pcapkit.foundation.extraction.Extractor.__traceflow__>`, in the order they
+    were given. A name given :data:`None` is left out, so the manager holds
+    exactly the tracers an engine feeds.
 
-    if TYPE_CHECKING:
-        def __init__(self, tcp: 'Optional[TCP_TraceFlow]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+    Args:
+        dict_: flow tracers by name, as a mapping or as ``(name, tracer)`` pairs
+        **kwargs: flow tracers by name
+
+    .. versionchanged:: 1.7.0
+
+       Holds any registered flow tracer, and only the enabled ones, as
+       :class:`~pcapkit.foundation.reassembly.ReassemblyManager` holds
+       reassemblers, where it had a ``tcp`` field, :data:`None` when disabled
+       (:issue:`2839`).
+
+    """
+
+    def __init__(self, dict_: 'Optional[Mapping[str, Optional[TraceFlowBase]] | Iterable[tuple[str, Optional[TraceFlowBase]]]]' = None,  # pylint: disable=line-too-long,super-init-not-called
+                 **kwargs: 'Optional[TraceFlowBase]') -> 'None':
+        given = dict(dict_ or (), **kwargs)
+        self.__update__({name: trace for (name, trace) in given.items() if trace is not None})
+        self.__post_init__()

@@ -346,8 +346,10 @@ class LookupTests(RegisteredReassemblerTestCase):
 
         self.assertIsInstance(reassemble(IPv4_Protocol), IPv4)
         self.assertIsInstance(reassemble('ipv4'), IPv4)
-        # DTLS takes no timeout, so none is passed, rather than one refused
-        self.assertIsInstance(reassemble('DTLS', timeout=7.0), DTLS)
+        # NOTE: DTLS takes a timeout as the others do (#2839).
+        dtls = reassemble('DTLS', timeout=7.0)
+        self.assertIsInstance(dtls, DTLS)
+        self.assertEqual(dtls.timeout, 7.0)
         with self.assertRaises(FormatError):
             reassemble('UDP')
 

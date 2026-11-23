@@ -583,7 +583,7 @@ class ReaderTests(unittest.TestCase):
         for limit, held in ((0, 0), (2, 2), (-1, 3)):
             with tempfile.TemporaryDirectory() as tmpdir, \
                     mock.patch.object(self.config, 'TRACE_OPEN_FILE_LIMIT', limit):
-                trace = TCP(tmpdir, 'json')
+                trace = TCP(fout=tmpdir, format='json')
                 for index in range(3):
                     trace(packet(index))
                 with self.subTest(limit=limit):

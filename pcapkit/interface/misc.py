@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.foundation.extraction import Packet
+    from pcapkit.foundation.extraction import Packet, VerboseHandler
     from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Data
 
     #: A toolkit's ``tcp_reassembly`` adapter. The pcapkit-native adapters take only
@@ -62,8 +62,8 @@ class Stream(Info):
         def __init__(self, filename: 'Optional[str]', packets: 'tuple[Packet, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
-def follow_tcp_stream(fin: 'str', *, verbose: 'bool' = False,           # Extractor options
-                      engine: 'Optional[Engines]' = None,
+def follow_tcp_stream(fin: 'str', *, verbose: 'bool | VerboseHandler' = False,  # Extractor options
+                      engine: 'Engines' = 'default',
                       traceflow: 'Optional[TraceFlowOptions]' = None) -> 'tuple[Stream, ...]':  # TraceFlow options
     """Follow TCP streams.
 
@@ -100,7 +100,10 @@ def follow_tcp_stream(fin: 'str', *, verbose: 'bool' = False,           # Extrac
        ``traceflow`` replaces ``fout``, ``format``, ``byteorder``, ``nanosecond``,
        ``trace_bidirectional`` and ``trace_analyse``, with no alias, and every
        parameter after ``fin`` is keyword-only. ``fin`` is required and opened
-       as named, so ``extension`` is removed (:issue:`2836`).
+       as named, so ``extension`` is removed (:issue:`2836`). ``verbose`` and
+       ``engine`` mirror those of
+       :class:`~pcapkit.foundation.extraction.Extractor`, so ``engine`` defaults
+       to ``'default'``, where :data:`None` stood for it (:issue:`2837`).
 
     """
     if traceflow is None:
@@ -110,12 +113,12 @@ def follow_tcp_stream(fin: 'str', *, verbose: 'bool' = False,           # Extrac
 
     # NOTE: PyShark has no TCP reassembly adapter, and PyPCAP and PCAP_CT disable
     # TCP flow tracing, so none of them can follow a stream.
-    if engine is not None and engine.lower() in ('pyshark', 'pypcap', 'pcap_ct'):
+    if isinstance(engine, str) and engine.lower() in ('pyshark', 'pypcap', 'pcap_ct'):
         warn(f'unsupported extraction engine: {engine!r}; using default engine instead',
              EngineWarning, stacklevel=stacklevel())
-        engine = None
+        engine = 'default'
 
-    extraction = Extractor(fin, verbose=verbose, engine=engine or 'default',
+    extraction = Extractor(fin, verbose=verbose, engine=engine,
                            traceflow=traceflow)  # type: ignore[var-annotated]
 
     # NOTE: dispatch on the engine instance with ``isinstance`` (#399), so a subclass

@@ -11,10 +11,11 @@ macros, which wrap the classes of :mod:`pcapkit.foundation`.
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
+from pcapkit.foundation.traceflow.traceflow import TraceFlow
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.utilities.exceptions import FormatError
+from pcapkit.utilities.exceptions import FormatError, RegistryError
 
 if TYPE_CHECKING:
     from typing import IO, Iterable, Mapping, Optional, Type
@@ -152,28 +153,29 @@ def extract(fin: 'str | IO[bytes]', *,
                      verbose=verbose)
 
 
-def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
+def reassemble(protocol: 'str | Type[ProtocolBase]', *, strict: 'bool' = True, store: 'bool' = True,
                timeout: 'Optional[float]' = None) -> 'ReassemblyBase':
     """Reassemble fragmented datagrams.
 
     Arguments:
         protocol: protocol to be reassembled, a name registered in
-            :attr:`Extractor.__reassembly__
-            <pcapkit.foundation.extraction.Extractor.__reassembly__>`, matched
-            lower-cased, or a protocol class, by the first of its
+            :attr:`Reassembly.registry
+            <pcapkit.foundation.reassembly.reassembly.Reassembly.registry>`,
+            matched lower-cased, or a protocol class, by the first of its
             :meth:`~pcapkit.protocols.protocol.ProtocolBase.id`
         strict: if :data:`True`, report a datagram that is not completely
             reassembled as the tuple of its received runs; otherwise as one
             contiguous payload
+        store: if store reassembled datagrams
         timeout: reassembly timeout in seconds, on the capture's own clock;
-            :data:`None` selects the protocol's own default; a reassembly that
-            takes none, as DTLS's, is made without it
+            :data:`None` selects the protocol's own default
 
     Returns:
         A :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` object of corresponding protocol.
 
     Raises:
         FormatError: If no reassembly is registered under ``protocol``.
+        RegistryError: If the protocol name is not a :obj:`str`.
 
     .. versionchanged:: 1.5.0
 
@@ -186,34 +188,47 @@ def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
        Makes any registered reassembly, through
        :meth:`Extractor.make_reassembly
        <pcapkit.foundation.extraction.Extractor.make_reassembly>`, where it
-       made IPv4, IPv6 and TCP only (:issue:`2814`).
+       made IPv4, IPv6 and TCP only (:issue:`2814`). Takes exactly the
+       keyword-only parameters of
+       :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`, so
+       ``store`` is added and ``strict`` defaults to :data:`True`, where it
+       defaulted to :data:`False` (:issue:`2837`).
 
     """
     if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
         protocol = protocol.id()[0]
-    return Extractor.make_reassembly(protocol, strict=strict, timeout=timeout)
+    if not isinstance(protocol, str):
+        raise RegistryError(f'reassembly name must be a str, not {protocol!r}')
+    return Extractor.make_reassembly(protocol, strict=strict, store=store, timeout=timeout)
 
 
-def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',
-          format: 'Optional[str]',  # pylint: disable=redefined-builtin
+def trace(protocol: 'str | Type[ProtocolBase]', *, fout: 'str' = './tmp',
+          format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
           byteorder: 'Literal["little", "big"]' = sys.byteorder,
-          nanosecond: bool = False, bidirectional: 'bool' = True) -> 'TraceFlowBase':
+          nanosecond: 'bool' = False, bidirectional: 'bool' = True,
+          analyze: 'bool' = False) -> 'TraceFlowBase':
     """Trace flows.
 
     Arguments:
-        protocol: protocol whose flows are to be traced
-        fout: output path
+        protocol: protocol whose flows are to be traced, a name registered in
+            :attr:`TraceFlow.registry
+            <pcapkit.foundation.traceflow.traceflow.TraceFlow.registry>`,
+            matched lower-cased, or a protocol class, by the first of its
+            :meth:`~pcapkit.protocols.protocol.ProtocolBase.id`
+        fout: output root path
         format: output format
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
         bidirectional: whether both halves of a conversation are traced as one
             flow, which is the default
+        analyze: whether each traced flow reassembles its application layer
 
     Returns:
         A :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` object.
 
     Raises:
-        FormatError: If ``protocol`` is **NOT** TCP.
+        FormatError: If no flow tracer is registered under ``protocol``.
+        RegistryError: If the protocol name is not a :obj:`str`.
 
     .. versionchanged:: 1.5.0
 
@@ -221,11 +236,24 @@ def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',
        conversation are traced as one flow; 1.4.x traced each direction as a
        flow of its own.
 
+    .. versionchanged:: 1.7.0
+
+       Makes any registered flow tracer, where it made TCP's only, and takes
+       exactly the keyword-only parameters of
+       :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, so
+       ``analyze`` is added and ``fout`` and ``format`` default to ``'./tmp'``
+       and ``'pcap'`` (:issue:`2837`).
+
     """
     if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
         protocol = protocol.id()[0]
+    if not isinstance(protocol, str):
+        raise RegistryError(f'traceflow name must be a str, not {protocol!r}')
 
-    if protocol == 'TCP':
-        return TCP_TraceFlow(fout=fout, format=format, byteorder=byteorder,
-                             nanosecond=nanosecond, bidirectional=bidirectional)
-    raise FormatError(f'unsupported flow tracing protocol: {protocol!r}')
+    trace_cls = TraceFlow.registry.get(protocol.lower())
+    if trace_cls is None:
+        raise FormatError(f'unsupported flow tracing protocol: {protocol!r}')
+    if isinstance(trace_cls, ModuleDescriptor):
+        trace_cls = trace_cls.klass
+    return trace_cls(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond,
+                     bidirectional=bidirectional, analyze=analyze)

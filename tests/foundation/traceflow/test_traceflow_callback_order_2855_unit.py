@@ -58,7 +58,7 @@ class CallbackOrderTests(unittest.TestCase):
         """A TCP tracer writing ``fmt`` files to a fresh directory."""
         from pcapkit.foundation.traceflow.tcp import TCP
 
-        return TCP(tempfile.mkdtemp(dir=self.tmpdir.name), fmt, byteorder='little', **kwargs)
+        return TCP(fout=tempfile.mkdtemp(dir=self.tmpdir.name), format=fmt, byteorder='little', **kwargs)
 
     def register(self, *callbacks: 'Callable[[Any], None]') -> None:
         """Register ``callbacks`` in order, removed again on cleanup."""
