@@ -1,5 +1,6 @@
 .. The changelog's index. Every entry is its own document under
-   ``changelog/``, one per version; this page holds the preamble, a one- or
+   ``changelog/``, one per final release (a pre- or post-release gets none);
+   this page holds the preamble, a one- or
    two-line summary of each entry linking its page, and the toctree behind them.
 
    ``CHANGELOG.md`` at the repository root holds only the version being
