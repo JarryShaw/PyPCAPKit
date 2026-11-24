@@ -55,6 +55,16 @@ a compatibility implementation nor a re-export, so it gets its own module:
 :mod:`pcapkit.utilities.datetime`, ruled in review of the timestamp fix for
 :issue:`2099`, whose thread does not hold it.
 
+:mod:`pcapkit.utilities` **stays flat**: a module there is named after the
+standard-library module it extends, as :mod:`~pcapkit.utilities.inspect` and
+:mod:`~pcapkit.utilities.datetime` are, or after its topic, as
+:mod:`~pcapkit.utilities.config` is, and one holding a single function is fine. The
+standard-library name tells a reader where to look; a ``helpers`` package nesting the
+small modules would move their import paths without reducing their number; and
+merging unrelated helpers into one module would break the one module per topic that
+`Shared Helpers`_ asks for. Ruled by the owner in session and recorded on
+:issue:`2908`.
+
 :mod:`pcapkit.corekit` **is for the types the packet model is built from**: what
 :mod:`pcapkit.protocols`, :mod:`pcapkit.const` and :mod:`pcapkit.foundation`
 subclass, instantiate or decorate with. Ask: *is this part of what a protocol or its
