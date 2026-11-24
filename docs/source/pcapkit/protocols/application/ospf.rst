@@ -63,15 +63,23 @@ First (OSPF) [*]_, whose structure is:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: type
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_encrypt_auth

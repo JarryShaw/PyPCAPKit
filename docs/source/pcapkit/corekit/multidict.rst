@@ -21,14 +21,13 @@ values per key, based on the `Werkzeug`_ project.
    .. automethod:: lists
    .. automethod:: values
    .. automethod:: listvalues
+   .. automethod:: deepcopy
    .. automethod:: to_dict
    .. automethod:: update
    .. automethod:: pop
    .. automethod:: popitem
    .. automethod:: poplist
    .. automethod:: popitemlist
-
-   .. automethod:: deepcopy
 
 .. autoclass:: pcapkit.corekit.multidict.OrderedMultiDict
    :no-members:

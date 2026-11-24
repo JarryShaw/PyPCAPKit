@@ -122,9 +122,13 @@ this is routine.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
+
+   .. rubric:: Methods
 
    .. automethod:: id
 
@@ -132,8 +136,12 @@ this is routine.
    .. automethod:: make
    .. automethod:: unpack
 
+   .. rubric:: Data Models
+
    .. automethod:: __length_hint__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 

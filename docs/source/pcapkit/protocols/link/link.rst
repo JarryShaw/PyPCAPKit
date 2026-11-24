@@ -13,6 +13,8 @@ and :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __layer__
    .. autoattribute:: __proto__
       :no-value:
@@ -20,9 +22,15 @@ and :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
    .. autoattribute:: __proto_key__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: layer
+
+   .. rubric:: Methods
 
    .. automethod:: register
    .. automethod:: from_data
+
+   .. rubric:: Data Models
 
    .. automethod:: __post_init__

@@ -17,8 +17,12 @@ extractor for Internet Group Management Protocol version 1 (IGMPv1)
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: version
    .. autoproperty:: alias
+
+   .. rubric:: Methods
 
    .. automethod:: id
 

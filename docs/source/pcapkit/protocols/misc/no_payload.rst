@@ -25,12 +25,18 @@ object whose payload is recursively
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
+
+   .. rubric:: Data Models
 
    .. automethod:: __post_init__
    .. automethod:: __index__

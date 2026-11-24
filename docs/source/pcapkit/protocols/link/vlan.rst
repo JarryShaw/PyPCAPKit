@@ -64,14 +64,22 @@ declares no :meth:`~pcapkit.protocols.protocol.Protocol.__index__`, so its
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: length
    .. autoproperty:: protocol
+
+   .. rubric:: Methods
 
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 

@@ -38,18 +38,28 @@ is kept as ``loopback.byteorder``.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
+
+   .. rubric:: Properties
 
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 

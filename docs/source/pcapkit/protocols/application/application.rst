@@ -22,13 +22,21 @@ which is a base class for application layer protocols, e.g.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __layer__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: layer
+
+   .. rubric:: Data Models
 
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer

@@ -10,23 +10,31 @@ packets.
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: protocol
+   .. autoattribute:: __callback_fn__
+      :no-value:
+
+   .. rubric:: Defaults
+
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
+
+   .. rubric:: Methods
 
    .. automethod:: dump
    .. automethod:: make_bufid
    .. automethod:: trace
+
+   .. automethod:: _unique_label
+   .. automethod:: _make_segment
+   .. automethod:: _ended
+
    .. automethod:: finish
    .. automethod:: submit
 
-   .. autoattribute:: __protocol_name__
-   .. autoattribute:: __protocol_type__
-   .. autoattribute:: __callback_fn__
-      :no-value:
+   .. rubric:: Properties
 
-   .. automethod:: _make_segment
-   .. automethod:: _unique_label
-   .. automethod:: _ended
+   .. autoproperty:: name
+   .. autoproperty:: protocol
 
 Terminology
 -----------

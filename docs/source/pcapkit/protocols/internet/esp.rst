@@ -60,17 +60,25 @@ Security Association (SA), negotiated out of band. So:
 
    .. autoattribute:: _ipv6_aligned
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: protocol
    .. autoproperty:: length
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
    .. automethod:: id
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _make_opaque
@@ -103,11 +111,15 @@ SA context is supplied through the protocol-keyed context channel of
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: encryption_key
    .. autoproperty:: salt
    .. autoproperty:: integrity_key
    .. autoproperty:: icv_length
    .. autoproperty:: authenticated
+
+   .. rubric:: Methods
 
    .. automethod:: matches
    .. automethod:: unavailable
@@ -115,7 +127,11 @@ SA context is supplied through the protocol-keyed context channel of
    .. automethod:: decrypt
    .. automethod:: encrypt
 
+   .. rubric:: Data Models
+
    .. automethod:: __repr__
+
+   .. rubric:: Utilities
 
    .. automethod:: _split_key
 
@@ -123,11 +139,18 @@ SA context is supplied through the protocol-keyed context channel of
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: associations
+
+   .. rubric:: Methods
 
    .. automethod:: protocol
    .. automethod:: register
    .. automethod:: match
+
+   .. rubric:: Data Models
+
    .. automethod:: __repr__
 
 Algorithm Registries

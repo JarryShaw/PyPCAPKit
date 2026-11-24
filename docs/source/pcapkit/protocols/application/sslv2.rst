@@ -71,13 +71,19 @@ a ``CLIENT-MASTER-KEY`` reads ``SSLv2:SSLv2``. The exceptions:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _make_sslv2_client_hello

@@ -80,10 +80,14 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: version
    .. autoproperty:: alias
    .. autoproperty:: length
+
+   .. rubric:: Methods
 
    .. automethod:: id
 
@@ -91,9 +95,13 @@ Octets      Bits        Name                    Description
    .. automethod:: make
    .. automethod:: from_data
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
    .. automethod:: __init__
    .. automethod:: __new__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _classify

@@ -65,6 +65,8 @@ The sum itself is in :mod:`pcapkit.corekit.checksum.internet`.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
@@ -72,11 +74,17 @@ The sum itself is in :mod:`pcapkit.corekit.checksum.internet`.
    .. autoproperty:: src
    .. autoproperty:: dst
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _source

@@ -33,21 +33,31 @@ IPv6CP, PAP and CHAP packets are read at header level, as
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
    .. autoattribute:: __control__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
+
+   .. rubric:: Methods
 
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register
    .. automethod:: register_control
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _lookup_control

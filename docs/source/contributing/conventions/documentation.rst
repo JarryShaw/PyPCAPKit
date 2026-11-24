@@ -321,6 +321,39 @@ When something is removed, its documentation entry goes too: with a deprecation 
 where a user could have depended on it, deleted outright where it never shipped, as the
 ``rarp`` entry was. Ruled on :issue:`719`.
 
+.. _documentation-member-lists:
+
+Class Member Lists
+~~~~~~~~~~~~~~~~~~
+
+**An** ``autoclass`` **lists its members in source order.** Where the ``automethod``,
+``autoattribute`` and ``autoproperty`` directives nested under it name members of one
+class body, they follow the order that body defines them, as :issue:`2772` ruled;
+:file:`tests/project/test_docs_protocol_member_order_2780_unit.py` fails on a list out
+of that order (:issue:`2780`).
+
+**Each section comment titles its members with a** ``.. rubric::``, the comment in
+Title Case without its period, so ``# Data models.`` gives *Data Models*. The sections
+run in the order the class's own comments give them. Ruled on :issue:`2907`:
+
+*  Members above a body's first section comment, and names no body binds, lead the
+   list untitled. A list that falls in one section takes no rubric.
+*  An inherited member joins its section after the class's own members, the bases
+   taken in method resolution order, and a section only a base has follows the
+   class's own. A member of a body with no section comments takes the section its
+   nearest base files it under.
+*  A class whose body has section comments takes an explicit list rather than
+   ``:members:``, which cannot carry the rubrics.
+*  A block with other content among its members, or with an order of its own, is a
+   ``HAND`` entry of :file:`util/member_sections.py`, with its reason, and is left as
+   written: the ``Protocol`` block on :doc:`/pcapkit/protocols/protocol` keeps its
+   order (:issue:`2772`).
+
+``python util/member_sections.py --write`` writes the lists and rubrics, and ``--check``
+prints what it would change. :file:`tests/project/test_docs_member_sections_2907_unit.py`
+fails on a page out of step, naming that command, and on a class body that repeats a
+section, which no page could show as one.
+
 Version Directives
 ~~~~~~~~~~~~~~~~~~
 

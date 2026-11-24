@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Protocol docs pages list their members in class source order (GitHub issue #2780).
+"""Docs pages list each class's members in class source order (GitHub issue #2780).
 
-A page under :file:`docs/source/pcapkit/protocols/` documents a class with an
-``autoclass`` directive and lists its members with ``automethod``,
-``autoattribute`` and ``autoproperty`` directives nested under it. #2779 put
-those lists in the order the class body defines the members, which
-``protocol-member-order.rst`` rules (#2772, item 5); without a guard, the next
+A page under :file:`docs/source/` documents a class with an ``autoclass``
+directive and lists its members with ``automethod``, ``autoattribute`` and
+``autoproperty`` directives nested under it. #2779 put those lists in the order
+the class body defines the members, as #2772 (item 5) ruled and
+``documentation.rst`` ("Class Member Lists") records; without a guard, the next
 member move desyncs a page unnoticed.
 
 * :class:`MemberOrderTests` -- each block lists the members a class body
@@ -14,22 +14,23 @@ member move desyncs a page unnoticed.
 
 A listed member the documented class inherits is held to the body of the class
 that defines it, found by method resolution order over the bases the source
-names: source order is a fact of one body, so how a page interleaves the members
-of two bodies is the page's choice. A name no body binds, such as an instance
-attribute set in a method, has no source position and is left out.
+names. How a block interleaves two bodies is not the page's choice: within a
+section, the class's own members come first, then its bases' in method
+resolution order, which ``util/member_sections.py`` writes and
+``test_docs_member_sections_2907_unit`` guards (#2907). A name no body binds, such
+as an instance attribute set in a method, has no source position and is left out.
 
 A block that keeps an order of its own is an entry in :data:`EXEMPT`, with its
 reason. The table is checked in both directions, as ``test-coverage.rst`` asks,
 so a realigned block deletes its entry in the same change.
 
-This module is unit-tier: it parses the pages and the source, and imports
-nothing it scans.
+This module is unit-tier: it parses the pages and the source, with the resolver
+:file:`util/member_sections.py` holds, and imports nothing it scans.
 
 """
 from __future__ import annotations
 
-import ast
-import functools
+import importlib.util
 import re
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
@@ -38,14 +39,15 @@ from tests._tiers import ROOT
 
 if TYPE_CHECKING:
     import pathlib
-    from typing import Iterable, Iterator, Optional
+    from types import ModuleType
+    from typing import Optional
 
-#: Test tier (#1958): parses the docs pages and the protocol sources for a
+#: Test tier (#1958): parses the docs pages and the class sources for a
 #: question about the tree, which does not differ by interpreter.
 __tier__ = 'LATEST'
 
 #: The directory of the pages the guard reads.
-PAGES = ROOT / 'docs' / 'source' / 'pcapkit' / 'protocols'
+PAGES = ROOT / 'docs' / 'source'
 
 #: A directive the guard reads: ``autoclass`` opens a block, and a member
 #: directive in its content lists a member. Captures the indent, the kind and
@@ -61,7 +63,19 @@ EXEMPT = {
         'source order (#2772, item 3)',
 }  # type: dict[tuple[str, str], str]
 
-_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+
+def _load_fixer() -> 'ModuleType':
+    """Load :file:`util/member_sections.py` by path, since :file:`util/` is not a package."""
+    spec = importlib.util.spec_from_file_location('member_sections', ROOT / 'util' / 'member_sections.py')
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+member_sections = _load_fixer()
+Class, locate, mro, bindings = member_sections.Class, member_sections.locate, member_sections.mro, \
+    member_sections.bindings
 
 
 class Block(NamedTuple):
@@ -73,15 +87,6 @@ class Block(NamedTuple):
     target: str
     #: The listed members, in page order.
     members: tuple[str, ...]
-
-
-class Class(NamedTuple):
-    """A class the repository defines."""
-
-    #: The module file.
-    path: pathlib.Path
-    #: The ``class`` statement.
-    node: ast.ClassDef
 
 
 def read_blocks(page: 'pathlib.Path') -> 'list[Block]':
@@ -116,123 +121,6 @@ def read_blocks(page: 'pathlib.Path') -> 'list[Block]':
     return found
 
 
-@functools.lru_cache(maxsize=None)
-def _parse(path: 'pathlib.Path') -> 'ast.Module':
-    """The AST of the module at ``path``, parsed once."""
-    return ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
-
-
-def _statements(body: 'Iterable[ast.stmt]') -> 'Iterator[ast.stmt]':
-    """The statements of ``body`` in source order, inside every block that opens no scope."""
-    for node in body:
-        yield node
-        if isinstance(node, _SCOPES):
-            continue
-        for field in ('body', 'orelse', 'finalbody'):
-            yield from _statements(getattr(node, field, ()))
-        for handler in getattr(node, 'handlers', ()):
-            yield from _statements(handler.body)
-
-
-def _module(dotted: 'str') -> 'Optional[pathlib.Path]':
-    """The file of the repository module ``dotted`` names, if there is one."""
-    base = ROOT.joinpath(*dotted.split('.'))
-    for path in (base.with_suffix('.py'), base / '__init__.py'):
-        if path.is_file():
-            return path
-    return None
-
-
-def _source(path: 'pathlib.Path', node: 'ast.ImportFrom') -> 'str':
-    """The module ``node`` imports from, made absolute against the module at ``path``."""
-    if not node.level:
-        return node.module or ''
-    package = path.parent.relative_to(ROOT).parts
-    package = package[:len(package) - node.level + 1]
-    return '.'.join(package + ((node.module,) if node.module else ()))
-
-
-def _lookup(path: 'pathlib.Path', name: 'str') -> 'Optional[Class]':
-    """The class ``name`` means in the module at ``path``, defined there or imported from the repository."""
-    for node in _statements(_parse(path).body):
-        if isinstance(node, ast.ClassDef) and node.name == name:
-            return Class(path, node)
-        if isinstance(node, ast.ImportFrom):
-            for alias in node.names:
-                if (alias.asname or alias.name) == name:
-                    module = _module(_source(path, node))
-                    return None if module is None else _lookup(module, alias.name)
-    return None
-
-
-def locate(target: 'str') -> 'Optional[Class]':
-    """The class the dotted ``target`` of an ``autoclass`` names, if the repository defines it."""
-    parts = target.split('.')
-    for cut in range(len(parts) - 1, 0, -1):
-        path = _module('.'.join(parts[:cut]))
-        if path is None:
-            continue
-        found = _lookup(path, parts[cut])
-        for name in parts[cut + 1:]:
-            if found is None:
-                break
-            found = next((Class(found.path, node) for node in _statements(found.node.body)
-                          if isinstance(node, ast.ClassDef) and node.name == name), None)
-        return found
-    return None
-
-
-def _bases(cls: 'Class') -> 'list[Class]':
-    """The bases of ``cls`` the repository defines, in declaration order."""
-    found = []  # type: list[Class]
-    for base in cls.node.bases:
-        if isinstance(base, ast.Subscript):
-            base = base.value
-        if isinstance(base, ast.Name):
-            resolved = _lookup(cls.path, base.id)
-            if resolved is not None:
-                found.append(resolved)
-    return found
-
-
-@functools.lru_cache(maxsize=None)
-def mro(cls: 'Class') -> 'tuple[Class, ...]':
-    """``cls`` and its repository bases in method resolution order, by C3 over the source."""
-    pending = [list(mro(base)) for base in _bases(cls)] + [_bases(cls)]
-    order = [cls]
-    while True:
-        pending = [chain for chain in pending if chain]
-        if not pending:
-            return tuple(order)
-        head = next(chain[0] for chain in pending if all(chain[0] not in other[1:] for other in pending))
-        order.append(head)
-        pending = [[base for base in chain if base != head] for chain in pending]
-
-
-@functools.lru_cache(maxsize=None)
-def bindings(cls: 'Class') -> 'dict[str, int]':
-    """Each name the body of ``cls`` binds, mapped to the position of its first binding.
-
-    A ``def``, a ``class`` and an assignment to a bare name bind, and so does one
-    under an ``if`` or a ``try`` in the body, where that statement stands, as the
-    member-order guard reads a ``TYPE_CHECKING`` member (#2490).
-
-    """
-    order = {}  # type: dict[str, int]
-    for node in _statements(cls.node.body):
-        if isinstance(node, _SCOPES):
-            names = [node.name]
-        elif isinstance(node, ast.Assign):
-            names = [target.id for target in node.targets if isinstance(target, ast.Name)]
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            names = [node.target.id]
-        else:
-            continue
-        for name in names:
-            order.setdefault(name, len(order))
-    return order
-
-
 def disorder(block: 'Block') -> 'list[str]':
     """Each pair of members ``block`` lists out of the order of the body that defines them."""
     cls = locate(block.target)
@@ -254,7 +142,7 @@ def disorder(block: 'Block') -> 'list[str]':
 
 
 class MemberOrderTests(unittest.TestCase):
-    """The member lists on the protocol pages follow class source order."""
+    """The member lists on the docs pages follow class source order."""
 
     blocks = [block for page in sorted(PAGES.rglob('*.rst')) for block in read_blocks(page)]
 

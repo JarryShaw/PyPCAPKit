@@ -48,21 +48,8 @@ built-in TCP flow tracing class derive from.
          table every flow tracing registration lands in. It is *not*
          :attr:`__output__`, the separate output-dumper table this class owns.
 
-   .. autoproperty:: index
-
-   .. automethod:: register_dumper
-   .. automethod:: register_callback
-   .. automethod:: make_fout
-
-   .. automethod:: dump
-   .. automethod:: trace
-   .. automethod:: finish
-   .. automethod:: close
-   .. automethod:: submit
-   .. automethod:: _write
-
-   .. autoattribute:: __output__
-      :no-value:
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
    .. autoattribute:: __callback_fn__
       :no-value:
 
@@ -88,11 +75,33 @@ built-in TCP flow tracing class derive from.
    .. autoattribute:: _analyze
       :no-value:
 
-   .. automethod:: __call__
-   .. automethod:: __init_subclass__
+   .. rubric:: Defaults
 
-   .. autoattribute:: __protocol_name__
-   .. autoattribute:: __protocol_type__
+   .. autoattribute:: __output__
+      :no-value:
+
+   .. rubric:: Properties
+
+   .. autoproperty:: index
+
+   .. rubric:: Methods
+
+   .. automethod:: register_dumper
+   .. automethod:: register_callback
+   .. automethod:: make_fout
+
+   .. automethod:: dump
+   .. automethod:: trace
+   .. automethod:: submit
+   .. automethod:: finish
+   .. automethod:: close
+
+   .. automethod:: _write
+
+   .. rubric:: Data Models
+
+   .. automethod:: __init_subclass__
+   .. automethod:: __call__
 
 Internal Definitions
 --------------------
