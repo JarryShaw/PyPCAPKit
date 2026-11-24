@@ -27,7 +27,7 @@ import pickle
 import unittest
 from unittest import mock
 
-from pcapkit.foundation.reassembly.data.data import Deferred as _Deferred
+from pcapkit.foundation.reassembly.data import Deferred as _Deferred
 from tests._support import reimport_once_per_class
 
 #: Test tier (#1958): cross-interpreter pickling behaviour belongs on ``ALL``, as in
@@ -79,7 +79,7 @@ class DeferredGraalPyPickleTests(unittest.TestCase):
 
     def test_protocol_0_1_survive_a_copyreg_reduce_ex_failure(self) -> None:
         """Protocol 0 and 1 round-trip while ``copyreg._reduce_ex`` raises GraalPy's error."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
 
@@ -100,7 +100,7 @@ class DeferredGraalPyPickleTests(unittest.TestCase):
         So the bypass above is specific to protocol 0 and 1, not a blanket detour.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
         with mock.patch.object(copyreg, '_reduce_ex',

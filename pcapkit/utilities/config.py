@@ -219,7 +219,7 @@ IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
     'each capture remembered pins one of its packets in memory'))
 
 #: int: Widest gap, in octets, that
-#: :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.TCP.reassembly>`
+#: :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly>`
 #: zero-fills to merge a segment into the payload buffer it is read against,
 #: :envvar:`PCAPKIT_TCP_GAP_LIMIT`; ``-1`` always merges.
 #:
@@ -230,7 +230,7 @@ IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
 #: windows are far smaller -- Linux's default ``net.ipv4.tcp_rmem`` ceiling is
 #: 6 MiB -- so the default of 16 MiB clears them with room to spare. Past it,
 #: the stream is split rather than padded, as :meth:`TCP.reassembly
-#: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` describes.
+#: <pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly>` describes.
 #:
 #: At ``-1`` only the sequence space bounds the gap: a sequence number is read
 #: within ``2 ** 31`` of the data buffered (:rfc:`9293#section-3.4`), so one

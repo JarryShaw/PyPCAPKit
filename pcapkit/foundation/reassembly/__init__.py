@@ -11,15 +11,15 @@ reassembly of IP packets, TCP segments and DTLS handshake messages.
 
 """
 # Reassembly for DTLS handshake messages
-from pcapkit.foundation.reassembly.dtls import DTLS as DTLS_Reassembly
-from pcapkit.foundation.reassembly.ip import IP as IP_Reassembly
+from pcapkit.foundation.reassembly.dtls.reassembly import DTLS as DTLS_Reassembly
+from pcapkit.foundation.reassembly.ip.reassembly import IP as IP_Reassembly
 # Reassembly for IP
-from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
-from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
+from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4 as IPv4_Reassembly
+from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6 as IPv6_Reassembly
 # Base Class for Reassembly
 from pcapkit.foundation.reassembly.reassembly import Reassembly
 # Reassembly for TCP
-from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
 
 __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly',   # IP Reassembly

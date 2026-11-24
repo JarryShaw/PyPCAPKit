@@ -342,7 +342,7 @@ class PCAPToolkitTests(unittest.TestCase):
         ``first`` and ``last`` mean.
 
         """
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
         from pcapkit.toolkit import pcap
 
         class Analyzer:

@@ -6,7 +6,7 @@ stream for TCP -- into fragments or segments, puts them on the wire in some
 order, writes them to an in-memory PCAP savefile and runs that through
 :func:`~pcapkit.interface.extract` with reassembly on. The round trip closes
 when exactly one datagram comes back per payload, it is
-:attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`, its octets
+:attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`, its octets
 are the payload's, and its ``index`` names the frames that carried it.
 
 The orders are the ones a capture produces: in order, reversed, the last piece

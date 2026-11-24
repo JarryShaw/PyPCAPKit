@@ -4,7 +4,7 @@
 GitHub issue #2743: ``sphinx-autodoc-typehints`` writes a generic class's type
 parameters after its name, and renders a legacy ``TypeVar``'s string bound or
 constraints verbatim, so each name in them is a bare reference.
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred` takes ``_KT``, whose
+:class:`~pcapkit.foundation.reassembly.data.Deferred` takes ``_KT``, whose
 constraints name ``TransType`` and ``HandshakeType``, as crawlers under
 :mod:`pcapkit.vendor` are also named: the build warned for both, and linked
 ``HandshakeType`` to the SSLv2 enumeration. ``qualify_type_parameters`` in
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 __tier__ = 'LATEST'
 
 #: The module declaring ``_KT``, and the class taking it.
-MODULE, CLASS = 'pcapkit.foundation.reassembly.data.data', 'Deferred'
+MODULE, CLASS = 'pcapkit.foundation.reassembly.data', 'Deferred'
 
 #: Every documented class a bare name in ``_KT``'s constraints suffix-matches.
 CANDIDATES = (

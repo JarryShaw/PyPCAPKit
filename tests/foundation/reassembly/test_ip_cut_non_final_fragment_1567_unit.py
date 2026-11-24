@@ -40,7 +40,7 @@ class TestIPReassemblyCutNonFinalFragment(unittest.TestCase):
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, tl: 'int | None' = None):
         """A fragment whose ``tl`` is, as the IPv6 adapters pass it, its captured length."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('2001:db8::1'), ip_address('2001:db8::2'), 9, TransType.UDP)
         return Packet(bufid, num, fo, 40, mf, 40 + len(payload) if tl is None else tl,
@@ -54,8 +54,8 @@ class TestIPReassemblyCutNonFinalFragment(unittest.TestCase):
         return datagram
 
     def test_a_cut_first_ipv6_fragment_leaves_a_hole(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         for cut in (60, 52):
             for strict in (True, False):
@@ -75,8 +75,8 @@ class TestIPReassemblyCutNonFinalFragment(unittest.TestCase):
     def test_a_non_final_ipv4_fragment_ending_mid_block_leaves_a_hole(self) -> None:
         # Total Length 100 declares 60 octets on a non-final fragment, all of
         # them captured: malformed rather than cut, but nobody sent 60-63.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -88,9 +88,9 @@ class TestIPReassemblyCutNonFinalFragment(unittest.TestCase):
                                  (DATA[:56], DATA[64:]) if strict else DATA[:60] + bytes(4) + DATA[64:])
 
     def test_an_uncut_datagram_completes_byte_exact_in_any_order(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         for cls in (IPv4, IPv6):
             for order in permutations(range(3)):

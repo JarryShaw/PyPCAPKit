@@ -2,12 +2,13 @@ IPv6 Datagram Reassembly
 ========================
 
 .. module:: pcapkit.foundation.reassembly.ipv6
+.. module:: pcapkit.foundation.reassembly.ipv6.reassembly
 
-:mod:`pcapkit.foundation.reassembly.ipv6` contains
-:class:`~pcapkit.foundation.reassembly.ipv6.IPv6` only, which reconstructs
+:mod:`pcapkit.foundation.reassembly.ipv6.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.ipv6.reassembly.IPv6` only, which reconstructs
 fragmented IPv6 packets back to origin; see :doc:`ip`.
 
-.. autoclass:: pcapkit.foundation.reassembly.ipv6.IPv6
+.. autoclass:: pcapkit.foundation.reassembly.ipv6.reassembly.IPv6
    :no-members:
    :show-inheritance:
 
@@ -149,7 +150,7 @@ Terminology
           payload, so running it eagerly would charge every caller for a result
           most never read. Reading the attribute, or any mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,
           ``repr()``), runs it and keeps the result; see
-          :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
+          :class:`~pcapkit.foundation.reassembly.data.Deferred`.
 
        .. note::
 
@@ -157,11 +158,11 @@ Terminology
           abandons its datagram, as :rfc:`8200#section-4.5` has a receiving
           node do, rather than overwriting the octets it overlaps as IPv4's
           :rfc:`791` procedure does. The datagram is reported as
-          :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`,
+          :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.Completion.OVERLAP>`,
           its ``payload`` the fragments merged before the overlapping one, and
           ``conflict`` where that fragment disagreed with them -- empty if it
           repeated their octets. So a
-          :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+          :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`
           IPv6 datagram never carries a conflict. An exact duplicate, with the
           same offset, length, **M** flag and data, is dropped as the RFC
           permits, its frame number kept in ``index``. A later fragment of an
@@ -207,7 +208,7 @@ Terminology
           ``conflict`` is only ever appended to, and is checked against
           ``datagram`` and ``RCVBT`` *before* an arriving fragment's own write
           and bookkeeping touch them -- see
-          :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`.
+          :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.reassembly.IP._detect_conflicts>`.
           ``RCVBT`` records receipt in 8-octet blocks, which is coarser than
           the octet a conflict needs; ``TDL`` is what recovers the exact
           extent for the one block marked received that can be partially real

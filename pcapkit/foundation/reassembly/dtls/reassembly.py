@@ -2,10 +2,10 @@
 """DTLS Handshake-Message Reassembly
 =======================================
 
-.. module:: pcapkit.foundation.reassembly.dtls
+.. module:: pcapkit.foundation.reassembly.dtls.reassembly
 
-:mod:`pcapkit.foundation.reassembly.dtls` contains
-:class:`~pcapkit.foundation.reassembly.dtls.DTLS` only, which reconstructs a
+:mod:`pcapkit.foundation.reassembly.dtls.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` only, which reconstructs a
 DTLS handshake message split across several records back to origin
 (:rfc:`6347#section-4.2.3`). A byte range is punched out of the message's
 hole list as each fragment arrives, and the message is whole once no hole
@@ -16,8 +16,8 @@ remains.
 """
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.foundation.reassembly.data.data import Completion, Deferred
-from pcapkit.foundation.reassembly.data.dtls import (_AT, Buffer, BufferID, Datagram, DatagramID,
+from pcapkit.foundation.reassembly.data import Completion, Deferred
+from pcapkit.foundation.reassembly.dtls.data import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                      Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 from pcapkit.protocols.application.dtls.protocol import DTLS as DTLS_Protocol
@@ -55,13 +55,13 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         :func:`pcapkit.toolkit.pcap.dtls_reassembly`, which reads the 4-tuple
         off the frame, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`
         decodes what it reassembles. A complete message's
-        :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.packet` holds
+        :attr:`~pcapkit.foundation.reassembly.dtls.data.Datagram.packet` holds
         the same decode, run on first read. Both call the protocol's
         :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake`; the
         ``packet`` calls that of :attr:`__protocol_type__` (:issue:`2622`).
 
     Example:
-        >>> from pcapkit.foundation.reassembly.dtls import DTLS
+        >>> from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
         # Initialise instance:
         >>> dtls_reassembly = DTLS()
         # Call reassembly:
@@ -223,10 +223,10 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
 
         Returns:
             Every message still held in ``buf``, each reported
-            :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+            :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`
             if its hole list is empty, otherwise
-            :attr:`~pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT`
-            or :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`.
+            :attr:`~pcapkit.foundation.reassembly.data.Completion.TIMEOUT`
+            or :attr:`~pcapkit.foundation.reassembly.data.Completion.PARTIAL`.
 
         .. versionchanged:: 1.7.0
 
@@ -274,8 +274,8 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
 
     def _datagram_from_fragment(self, frag: 'Fragment', bufid: 'BufferID', message_seq: 'int',
                                 completion: 'Completion') -> 'Datagram[_AT]':
-        """Build a :class:`~pcapkit.foundation.reassembly.data.dtls.Datagram`
-        from a message's buffered :class:`~pcapkit.foundation.reassembly.data.dtls.Fragment`.
+        """Build a :class:`~pcapkit.foundation.reassembly.dtls.data.Datagram`
+        from a message's buffered :class:`~pcapkit.foundation.reassembly.dtls.data.Fragment`.
 
         Arguments:
             frag: message-under-construction to report

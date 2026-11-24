@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-"""data models for TCP flow tracing"""
+"""data models for TCP flow tracing
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.traceflow.data.tcp``, with no alias: the module moved here
+   (:issue:`2882`).
+
+"""
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.packet import DeferredPacket
-from pcapkit.foundation.traceflow.data.data import Deferred
+from pcapkit.foundation.traceflow.data import Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = ['BufferID', 'Packet', 'Buffer', 'Index']
@@ -18,9 +25,9 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-    from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
-    from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
-    from pcapkit.foundation.traceflow.data.data import FrameRecord
+    from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
+    from pcapkit.foundation.traceflow.data import FrameRecord
     from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
@@ -35,7 +42,7 @@ _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 #: When tracing bidirectionally -- the default -- the two endpoints are ordered
 #: canonically rather than as (source, destination), so that both halves of one
 #: conversation produce the same key; see
-#: :meth:`TCP.make_bufid <pcapkit.foundation.traceflow.tcp.TCP.make_bufid>`. The
+#: :meth:`TCP.make_bufid <pcapkit.foundation.traceflow.tcp.traceflow.TCP.make_bufid>`. The
 #: shape is unchanged either way.
 BufferID: 'TypeAlias' = Tuple[_AT, int, _AT, int]
 
@@ -51,12 +58,12 @@ class Packet(Info, Generic[_AT]):
     .. versionchanged:: 1.6.0
 
        A third-party engine's :attr:`frame` is a
-       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, which
+       :class:`~pcapkit.foundation.traceflow.data.FrameRecord`, which
        :meth:`to_dict` exports as an
        :class:`~pcapkit.corekit.multidict.OrderedMultiDict`; so
        ``Packet.from_dict(packet.to_dict())`` holds the frame as an
        :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`, not a
-       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`
+       :class:`~pcapkit.foundation.traceflow.data.FrameRecord`
        (:issue:`2726`).
 
     """
@@ -67,7 +74,7 @@ class Packet(Info, Generic[_AT]):
     #: Frame number.
     index: 'int'
     #: Extracted frame info -- the default engine's frame, a third-party
-    #: engine's :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, or
+    #: engine's :class:`~pcapkit.foundation.traceflow.data.FrameRecord`, or
     #: the :obj:`dict` PyShark's adapter reports, which carries no frame record.
     frame: 'Data_Frame | FrameRecord | dict[str, Any]'
     #: TCP synchronise (SYN) flag.
@@ -91,7 +98,7 @@ class Packet(Info, Generic[_AT]):
     timestamp: 'float'
     #: TCP sequence number. Carried so that a tracer asked to analyse the
     #: application layer can hand the segment to
-    #: :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than reassemble the
+    #: :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` rather than reassemble the
     #: stream itself -- a tracer that simply concatenated payloads in capture order
     #: would be silently wrong on the first retransmission or reordering.
     seq: 'int'
@@ -125,7 +132,7 @@ class Buffer(Info, Generic[_AT]):
     #: subsequences of it.
     index: 'list[int]'
     #: Flow label, built from the packet that opened the flow, cf.
-    #: :meth:`TCP.trace <pcapkit.foundation.traceflow.tcp.TCP.trace>`.
+    #: :meth:`TCP.trace <pcapkit.foundation.traceflow.tcp.traceflow.TCP.trace>`.
     label: 'str'
     #: ``(address, port)`` of the endpoint whose packet opened this flow. It
     #: defines what "forward" means for the flow, and it is the endpoint the
@@ -147,11 +154,11 @@ class Buffer(Info, Generic[_AT]):
     #: connection at once (:rfc:`9293#section-3.5.3`), where a polite close needs
     #: a FIN from each side, so it is tracked as a flag rather than per endpoint.
     reset: 'bool'
-    #: The flow's own :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler,
+    #: The flow's own :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` reassembler,
     #: fed each segment as it is traced, or :data:`None` when the tracer was not
     #: asked to analyse the application layer. One per flow rather than one per
     #: tracer, so that
-    #: :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can
+    #: :attr:`Index.packet <pcapkit.foundation.traceflow.tcp.data.Index.packet>` can
     #: flush *this* conversation without disturbing any other.
     reassembly: 'Optional[TCP_Reassembly]'
 
@@ -185,7 +192,7 @@ class Index(DeferredPacket, Info):
     #: Tuple of frame index, **both directions**, in capture order.
     index: 'tuple[int, ...]'
     #: Flow label, built from the packet that opened the flow, cf.
-    #: :meth:`TCP.trace <pcapkit.foundation.traceflow.tcp.TCP.trace>`.
+    #: :meth:`TCP.trace <pcapkit.foundation.traceflow.tcp.traceflow.TCP.trace>`.
     label: 'str'
     #: Frame index of the packets travelling in the direction that opened the
     #: flow, in capture order. That endpoint is the one the :attr:`label` names
@@ -202,7 +209,7 @@ class Index(DeferredPacket, Info):
     #:
     #: Reassembled on the first read, not when the flow is finalised, and each
     #: datagram's own
-    #: :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed
+    #: :attr:`~pcapkit.foundation.reassembly.tcp.data.Datagram.packet` is parsed
     #: later still -- the same postponement at each layer, so a caller that only
     #: wanted frame numbers pays for none of it.
     packet: 'Optional[tuple[TCP_Datagram, ...]]'

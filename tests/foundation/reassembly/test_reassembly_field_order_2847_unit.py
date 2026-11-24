@@ -3,7 +3,7 @@
 through :class:`~pcapkit.corekit.infoclass.Info`'s own record of it.
 
 :class:`~pcapkit.foundation.reassembly.ReassemblyManager` and
-:class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` hold a field per
+:class:`~pcapkit.foundation.reassembly.data.ReassemblyData` hold a field per
 enabled reassembler, iterated in the order given. PyPy gives an instance the
 ``__dict__`` layout an earlier instance of its class used, which
 :class:`~pcapkit.corekit.infoclass.Info` handles since #2829, so neither class
@@ -49,7 +49,7 @@ class _OrderCase(unittest.TestCase):
 
         from pcapkit.corekit.infoclass import Info
         from pcapkit.foundation.reassembly import ReassemblyManager
-        from pcapkit.foundation.reassembly.data.data import ReassemblyData
+        from pcapkit.foundation.reassembly.data import ReassemblyData
 
         self.Info = Info
         self.Manager = ReassemblyManager
@@ -118,7 +118,7 @@ class ManagerOrderTests(_OrderCase):
 
 
 class DataOrderTests(_OrderCase):
-    """:class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` lists the built-ins, then the rest as given."""
+    """:class:`~pcapkit.foundation.reassembly.data.ReassemblyData` lists the built-ins, then the rest as given."""
 
     def pairs(self, **extra):  # type: ignore[no-untyped-def]
         """The record's pairs for ``ReassemblyData(tcp=('t',), **extra)``."""

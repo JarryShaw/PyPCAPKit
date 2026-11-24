@@ -84,10 +84,10 @@ class TestRestoreBuiltin(unittest.TestCase):
 
     def test_reassembly_restores_shipped_entries(self) -> None:
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
         from pcapkit.foundation.reassembly.reassembly import Reassembly
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
         from pcapkit.foundation.registry import register_extractor_reassembly
 
         class MyReassembly(Reassembly):
@@ -101,7 +101,7 @@ class TestRestoreBuiltin(unittest.TestCase):
     def test_traceflow_restores_shipped_entry(self) -> None:
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.registry import register_extractor_traceflow
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.foundation.traceflow.traceflow import TraceFlow
 
         class MyTraceFlow(TraceFlow):
@@ -170,11 +170,11 @@ class TestRestoreBuiltin(unittest.TestCase):
 
         from pcapkit.foundation.engines.dpkt import DPKT
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         from pcapkit.foundation.registry import (register_dumper, register_extractor_engine,
                                                  register_extractor_reassembly,
                                                  register_extractor_traceflow)
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.foundation.traceflow.traceflow import TraceFlow
 
         with self._registries() as saved:
@@ -196,11 +196,11 @@ class TestRestoreBuiltin(unittest.TestCase):
         from pcapkit.foundation.engines.dpkt import DPKT
         from pcapkit.foundation.engines.scapy import Scapy
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         from pcapkit.foundation.registry import (register_extractor_engine,
                                                  register_extractor_reassembly,
                                                  register_extractor_traceflow)
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.utilities.exceptions import RegistryError
 
         cases = (

@@ -58,7 +58,7 @@ class ReduceAsProtocol2:
     :class:`~pcapkit.corekit.infoclass.Info`,
     :class:`~pcapkit.protocols.schema.Schema`,
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` and
-    :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
+    :class:`~pcapkit.foundation.reassembly.data.Deferred`.
 
     .. versionadded:: 1.6.0
 

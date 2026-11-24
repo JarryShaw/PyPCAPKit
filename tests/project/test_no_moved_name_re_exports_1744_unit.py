@@ -71,8 +71,7 @@ PURE = (
     ('pcapkit.corekit.module', '_get_null'),
     ('pcapkit.protocols.protocol', 'AbsentType'),
     ('pcapkit.foundation.reassembly.data', 'DeferredPacket'),
-    ('pcapkit.foundation.reassembly.data.data', 'DeferredPacket'),
-    ('pcapkit.foundation.traceflow.data.data', 'DeferredPacket'),
+    ('pcapkit.foundation.traceflow.data', 'DeferredPacket'),
     ('pcapkit.protocols.application.ftp.protocol', 'FTP_DATA'),
     ('pcapkit.protocols.application.rarp.protocol', 'DRARP'),
     ('pcapkit.protocols.application.ngap.protocol', 'ProcedureCode'),
@@ -105,6 +104,34 @@ PURE = (
     ('pcapkit.protocols.application.ssl.protocol', 'DTLS13_VERSION'),
     ('pcapkit.protocols.misc.pcap.header.schema', 'GLOBAL_HEADER_LEN'),
     ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IPV4_PSEUDO_LEN'),
+    # #2882: the data models the data packages collected, now in each
+    # reassembler's or flow tracer's own package, and the loggers of the modules
+    # that became packages.
+    ('pcapkit.foundation.reassembly.data', 'IP_Packet'),
+    ('pcapkit.foundation.reassembly.data', 'IP_DatagramID'),
+    ('pcapkit.foundation.reassembly.data', 'IP_Datagram'),
+    ('pcapkit.foundation.reassembly.data', 'IP_Buffer'),
+    ('pcapkit.foundation.reassembly.data', 'IP_BufferID'),
+    ('pcapkit.foundation.reassembly.data', 'TCP_Packet'),
+    ('pcapkit.foundation.reassembly.data', 'TCP_DatagramID'),
+    ('pcapkit.foundation.reassembly.data', 'TCP_Datagram'),
+    ('pcapkit.foundation.reassembly.data', 'TCP_Buffer'),
+    ('pcapkit.foundation.reassembly.data', 'TCP_Fragment'),
+    ('pcapkit.foundation.reassembly.data', 'TCP_HoleDescriptor'),
+    ('pcapkit.foundation.reassembly.data', 'TCP_BufferID'),
+    ('pcapkit.foundation.reassembly.data', 'DTLS_Packet'),
+    ('pcapkit.foundation.reassembly.data', 'DTLS_DatagramID'),
+    ('pcapkit.foundation.reassembly.data', 'DTLS_Datagram'),
+    ('pcapkit.foundation.reassembly.data', 'DTLS_Buffer'),
+    ('pcapkit.foundation.reassembly.data', 'DTLS_Fragment'),
+    ('pcapkit.foundation.reassembly.data', 'DTLS_HoleDescriptor'),
+    ('pcapkit.foundation.reassembly.data', 'DTLS_BufferID'),
+    ('pcapkit.foundation.traceflow.data', 'TCP_Buffer'),
+    ('pcapkit.foundation.traceflow.data', 'TCP_BufferID'),
+    ('pcapkit.foundation.traceflow.data', 'TCP_Index'),
+    ('pcapkit.foundation.traceflow.data', 'TCP_Packet'),
+    ('pcapkit.foundation.reassembly.ip', 'logger'),
+    ('pcapkit.foundation.traceflow.tcp', 'logger'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -249,6 +276,11 @@ SHIPPED = (
      'pcapkit/protocols/misc/pcap/header/schema.py', 'pcapkit/protocols/misc/pcap.rst', '1.7.0'),
     ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IPV4_PSEUDO_LEN',
      'pcapkit/protocols/misc/checksum/ip_pseudo/schema.py', 'pcapkit/protocols/misc/checksum.rst', '1.7.0'),
+    # #2882: shipped in 1.6.x, bound by the modules that became packages.
+    ('pcapkit.foundation.reassembly.ip', 'logger',
+     'pcapkit/foundation/reassembly/ip/__init__.py', 'pcapkit/foundation/reassembly/ip/ip.rst', '1.7.0'),
+    ('pcapkit.foundation.traceflow.tcp', 'logger',
+     'pcapkit/foundation/traceflow/tcp/__init__.py', 'pcapkit/foundation/traceflow/tcp.rst', '1.7.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its
@@ -264,6 +296,20 @@ MOVED_MODULES = (
     # #2674: shipped in 1.5.x, moved whole into pcapkit.corekit.schema.
     ('pcapkit.corekit.fields.byteorder', 'pcapkit.corekit.schema.byteorder',
      'pcapkit/corekit/schema/byteorder.rst', '1.6.0'),
+    # #2882: shipped in 1.6.x, moved whole into each reassembler's or flow
+    # tracer's package, or beside its base.
+    ('pcapkit.foundation.reassembly.data.data', 'pcapkit.foundation.reassembly.data',
+     'pcapkit/foundation/reassembly/index.rst', '1.7.0'),
+    ('pcapkit.foundation.reassembly.data.ip', 'pcapkit.foundation.reassembly.ip.data',
+     'pcapkit/foundation/reassembly/ip/ip.rst', '1.7.0'),
+    ('pcapkit.foundation.reassembly.data.tcp', 'pcapkit.foundation.reassembly.tcp.data',
+     'pcapkit/foundation/reassembly/tcp.rst', '1.7.0'),
+    ('pcapkit.foundation.reassembly.data.dtls', 'pcapkit.foundation.reassembly.dtls.data',
+     'pcapkit/foundation/reassembly/dtls.rst', '1.7.0'),
+    ('pcapkit.foundation.traceflow.data.data', 'pcapkit.foundation.traceflow.data',
+     'pcapkit/foundation/traceflow/index.rst', '1.7.0'),
+    ('pcapkit.foundation.traceflow.data.tcp', 'pcapkit.foundation.traceflow.tcp.data',
+     'pcapkit/foundation/traceflow/tcp.rst', '1.7.0'),
 )
 
 

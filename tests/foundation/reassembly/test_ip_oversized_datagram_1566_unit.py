@@ -41,15 +41,15 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, tl: 'int | None' = None):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), 7, TransType.UDP)
         return Packet(bufid, num, fo, 20, mf, 20 + len(payload) if tl is None else tl,
                       b'H' * 20, bytearray(payload), 1000.0 + num)
 
     def _classes(self):
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         return IPv4, IPv6
 
@@ -58,8 +58,8 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
         # reads received once the long one declares a total data length past
         # the buffer: 65579 is the issue's, and 65536 the shortest -- which a
         # check of ``(TDL + 7) // 8`` against ``len(RCVBT)`` lets through.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for tdl in (65579, 65536):
             for strict in (True, False):
@@ -79,8 +79,8 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
         # Octets 0-65527, a malformed 7-octet non-final fragment at the largest
         # offset, then a final fragment at 64 declaring Total Length 65535,
         # of which 8 octets were captured.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -96,8 +96,8 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
         # In both cases above the long final fragment reaches into the one at
         # the largest offset, so RFC 8200 section 4.5 abandons the datagram on
         # its arrival, before the length bound is reached (#2547).
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         cases = {
             'final-past-buffer': [
@@ -126,7 +126,7 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
         # 8 octets at the largest offset are clipped to 7; 7 octets on a
         # non-final fragment were cut. Neither receives its block, and both
         # report the same datagram.
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for cls in self._classes():
             for strict in (True, False):
@@ -145,8 +145,8 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
         # Total Length 0 (#1555): 8 octets at the largest offset end one past
         # the preallocated buffer, which grows to hold them, so their block is
         # received and every block reads received with the length still unknown.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -162,7 +162,7 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
     def test_strict_mode_reports_a_datagram_with_no_run_received(self) -> None:
         # a non-final fragment whose capture holds 5 of its 8 octets fills no
         # whole block
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for cls in self._classes():
             for strict in (True, False):

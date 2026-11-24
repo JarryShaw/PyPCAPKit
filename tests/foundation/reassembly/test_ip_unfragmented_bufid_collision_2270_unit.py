@@ -33,7 +33,7 @@ class TestIPReassemblyUnfragmentedBufidCollision(unittest.TestCase):
     def _packet(self, *, v6: bool, num: int, fo: int, mf: bool, payload: bytes):
         """A fragment of the one BUFID every case shares."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         if v6:
             src, dst, ihl = ip_address('2001:db8::1'), ip_address('2001:db8::2'), 40
@@ -49,8 +49,8 @@ class TestIPReassemblyUnfragmentedBufidCollision(unittest.TestCase):
         return reasm, [(datagram.index, datagram.completed, datagram.payload) for datagram in reasm.datagram]
 
     def test_ipv4_flushes_the_buffer_and_reports_the_datagram(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         packets = [self._packet(v6=False, num=1, fo=0, mf=True, payload=b'A' * 16),
                    self._packet(v6=False, num=2, fo=0, mf=False, payload=b'B' * 16)]
@@ -63,8 +63,8 @@ class TestIPReassemblyUnfragmentedBufidCollision(unittest.TestCase):
                 self.assertEqual(reasm._buffer, {})
 
     def test_ipv6_atomic_fragment_leaves_the_buffer_alone(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         packets = [self._packet(v6=True, num=1, fo=0, mf=True, payload=b'A' * 16),
                    self._packet(v6=True, num=2, fo=0, mf=False, payload=b'B' * 16),

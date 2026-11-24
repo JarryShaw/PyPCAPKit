@@ -151,7 +151,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             of its own, such as :class:`~pcapkit.const.reg.apptype.tcp.TCP`. A
             caller that knows its transport gets the narrower type from
             whatever handed it the pair, e.g. :meth:`TCP._make_ports
-            <pcapkit.foundation.reassembly.tcp.TCP._make_ports>`.
+            <pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports>`.
 
             A bare :obj:`int` port still resolves: a member hashes as its port
             (:meth:`AppType.__hash__
@@ -175,8 +175,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
            ``ports`` is a pair of
            :class:`~pcapkit.const.reg.apptype.apptype.AppType` members rather
            than of bare :obj:`int` port numbers, so :meth:`TCP.submit
-           <pcapkit.foundation.reassembly.tcp.TCP.submit>`, through
-           :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, hands
+           <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>`, through
+           :class:`~pcapkit.foundation.reassembly.data.Deferred`, hands
            over the same named ports a parsed header carries (:issue:`2417`).
 
         .. versionchanged:: 1.7.0

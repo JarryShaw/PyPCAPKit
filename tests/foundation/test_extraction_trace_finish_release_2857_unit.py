@@ -64,7 +64,7 @@ class RaisingTraceCallbackReleasesTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         tmpdir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         self.addCleanup(tmpdir.cleanup)

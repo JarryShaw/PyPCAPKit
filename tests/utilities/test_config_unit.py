@@ -322,7 +322,7 @@ class LayoutTests(unittest.TestCase):
 
     def test_the_tcp_gap_limit_left_no_class_attribute(self) -> None:
         # #2546: TCP.__window__ moved here as TCP_GAP_LIMIT.
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         self.assertFalse(hasattr(TCP, '__window__'))
 
@@ -572,8 +572,8 @@ class ReaderTests(unittest.TestCase):
         from ipaddress import ip_address
 
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.traceflow.data.tcp import Packet
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.data import Packet
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         def packet(index: int) -> object:
             return Packet(LinkType.ETHERNET, index, {'frame': index}, False, False, False,

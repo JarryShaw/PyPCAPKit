@@ -3,7 +3,7 @@
 
 GitHub issues #2423 and #2425.
 
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred` declares
+:class:`~pcapkit.foundation.reassembly.data.Deferred` declares
 ``__slots__``, and :mod:`copyreg` refuses a slotted class with no
 ``__getstate__`` of its own under protocol 0 or 1, so :func:`pickle.dumps`
 raised :exc:`TypeError` for any instance (#2423). The review of that fix found
@@ -29,7 +29,7 @@ import copyreg
 import pickle
 import unittest
 
-from pcapkit.foundation.reassembly.data.data import Deferred as _Deferred
+from pcapkit.foundation.reassembly.data import Deferred as _Deferred
 from tests._support import reimport_once_per_class
 
 #: Test tier (#1958): pickling and copying behaviour belongs on ``ALL``, per
@@ -97,7 +97,7 @@ class DeferredPickleTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_pickles_under_every_protocol(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
         for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
@@ -111,7 +111,7 @@ class DeferredPickleTests(unittest.TestCase):
 
     def test_protocol_0_round_trips(self) -> None:
         """Protocol 0 specifically: the regression's own repro."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
         restored = pickle.loads(pickle.dumps(deferred, protocol=0))
@@ -120,7 +120,7 @@ class DeferredPickleTests(unittest.TestCase):
 
     def test_protocol_1_round_trips(self) -> None:
         """Protocol 1 specifically: the regression's other failing protocol."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
         restored = pickle.loads(pickle.dumps(deferred, protocol=1))
@@ -129,7 +129,7 @@ class DeferredPickleTests(unittest.TestCase):
 
     def test_getstate_shape_is_dict_state_and_slots_state(self) -> None:
         """The state is the native ``(dict_or_None, slots)`` pair, not a flat dict (#2425)."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
         state = _state(deferred)
@@ -183,7 +183,7 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
         self.assertEqual(state, (None, {'analyze': _analyze, 'proto': 42, 'payload': b'payload'}))
 
     def test_setstate_accepts_the_native_default_shape(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         state = self._native_default_state(_analyze, 99, b'old-data')
         restored = Deferred.__new__(Deferred)
@@ -198,7 +198,7 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
         Accepting it costs nothing and protects anyone who pickled against it.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         flat_state = {'analyze': _analyze, 'proto': 7, 'payload': b'flat'}
         restored = Deferred.__new__(Deferred)
@@ -215,7 +215,7 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
         restore goes through ``__setstate__``.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         self.assertNotIn('__getstate__', vars(Deferred))
         pre_fix = Deferred(_analyze, 7, b'released')
@@ -245,7 +245,7 @@ class DeferredPickleSubclassTests(unittest.TestCase):
 
     @staticmethod
     def _subclass_with_extra_slot():
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         class _WithExtraSlot(Deferred):
             __slots__ = ('extra',)
@@ -294,7 +294,7 @@ class DeferredGetstateEdgeCaseTests(unittest.TestCase):
 
     def test_getstate_skips_an_unset_slot(self) -> None:
         """A slot never assigned is omitted, as Python's own default does."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         partial = Deferred.__new__(Deferred)
         partial.proto = 1
@@ -307,7 +307,7 @@ class DeferredGetstateEdgeCaseTests(unittest.TestCase):
 
     def test_getstate_excludes_a_weakref_slot(self) -> None:
         """``__weakref__``, like ``__dict__``, is bookkeeping, not state."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         class _WithWeakrefSlot(Deferred):
             __slots__ = ('__weakref__',)
@@ -320,7 +320,7 @@ class DeferredGetstateEdgeCaseTests(unittest.TestCase):
 
     def test_getstate_and_setstate_carry_a_subclasss_bare_dict_too(self) -> None:
         """A subclass with no ``__slots__`` of its own gets a real ``__dict__``."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         class _WithBareDict(Deferred):
             pass  # no __slots__ declared here, so instances gain a __dict__

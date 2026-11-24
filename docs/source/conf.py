@@ -591,7 +591,7 @@ def qualify_type_parameters(app: 'Sphinx', doctree: 'document') -> None:  # pyli
     name, and renders a legacy :class:`~typing.TypeVar`'s string bound or
     constraints verbatim, so each name in them is a bare reference the Python
     domain suffix-matches. Only a string can name a ``TYPE_CHECKING`` import
-    there: ``_KT`` in :mod:`pcapkit.foundation.reassembly.data.data` names
+    there: ``_KT`` in :mod:`pcapkit.foundation.reassembly.data` names
     ``TransType`` and ``HandshakeType``, as crawlers under :mod:`pcapkit.vendor`
     are also named, so the build warned ``more than one target found`` for both
     and linked ``HandshakeType`` to the SSLv2 enumeration rather than the TLS one

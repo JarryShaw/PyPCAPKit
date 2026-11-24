@@ -56,7 +56,7 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]') -> 'dict[s
 
     """
     from pcapkit import extract
-    from pcapkit.foundation.reassembly.ipv4 import IPv4
+    from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
     seen = {}  # type: dict[int, dict[str, Any]]
     reassemble = IPv4.__call__

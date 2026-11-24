@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.pyshark import PyShark
-from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.utilities.exceptions import MissingKeyError, ProtocolError
 
 if TYPE_CHECKING:
@@ -587,7 +587,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             text.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.tcp.TCP`
+        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`
 
     .. versionchanged:: 1.5.0
 

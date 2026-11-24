@@ -252,7 +252,7 @@ class LoggerHierarchyTests(unittest.TestCase):
             'pcapkit.foundation.registry.foundation': 'pcapkit.foundation.registry.foundation',
             'pcapkit.foundation.reassembly.reassembly': 'pcapkit.foundation.reassembly.reassembly',
             'pcapkit.foundation.traceflow.traceflow': 'pcapkit.foundation.traceflow.traceflow',
-            'pcapkit.foundation.traceflow.tcp': 'pcapkit.foundation.traceflow.tcp',
+            'pcapkit.foundation.traceflow.tcp.traceflow': 'pcapkit.foundation.traceflow.tcp.traceflow',
             'pcapkit.foundation.engines.pcap': 'pcapkit.foundation.engines.pcap',
             'pcapkit.foundation.engines.pcapng': 'pcapkit.foundation.engines.pcapng',
             'pcapkit.utilities.exceptions': 'pcapkit.utilities.exceptions',
@@ -432,7 +432,7 @@ class RegistryLogLevelTests(unittest.TestCase):
         pristine()
 
     def test_registry_bookkeeping_is_logged_at_debug_not_info(self) -> None:
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         from pcapkit.foundation.registry.foundation import register_reassembly_callback
 
         def callback(datagrams: list) -> None:

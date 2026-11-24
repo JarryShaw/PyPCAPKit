@@ -36,10 +36,10 @@ from pcapkit.corekit.const.ipheader import IPV4_HEADER_LEN, IPV6_HEADER_LEN
 from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.foundation.engines.scapy import Scapy
-from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow.data.data import FrameRecord
-from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.data import FrameRecord
+from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,
                                         _walk_extension_headers)
@@ -531,7 +531,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
+        :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`
 
     """
     if (ipv4 := cast('IP | None', _fragment(packet, 'IP'))) is not None:
@@ -594,7 +594,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         ModuleNotFound: If `Scapy`_ is not installed.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
+        :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`
 
     Note:
         A later IPv4 fragment's data is a slice of the datagram's payload, with
@@ -669,7 +669,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCP`
+        :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`
 
     """
     if (found := _tcp_carrier(packet)) is not None:
@@ -715,7 +715,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         traced; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.tcp.TCP`
+        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`
 
     """
     if (found := _tcp_carrier(packet)) is not None:

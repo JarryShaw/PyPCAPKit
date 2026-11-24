@@ -287,7 +287,7 @@ class FrameClockTests(RegisteredReassemblerTestCase):
     """A stalled IPv6 buffer times out on later frames that are not IPv6 fragments."""
 
     def _ipv6_outcome(self, engine: str, gap: float) -> 'Any':
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         frames = [(TIMES[0], ipv6_first_fragment()), (TIMES[0] + gap, ipv4_udp())]
         path = self._capture(pcap(frames), '.pcap')
@@ -315,9 +315,9 @@ class FrameClockTests(RegisteredReassemblerTestCase):
 
     def test_advance_keeps_what_it_times_out(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         reasm = IPv6()
         reasm(Packet((ip_address('2001:db8::1'), ip_address('2001:db8::2'), 7, TransType.UDP), 1, 0,
@@ -333,8 +333,8 @@ class LookupTests(RegisteredReassemblerTestCase):
     """The extractor, its manager and :func:`~pcapkit.interface.core.reassemble` share one lookup."""
 
     def test_reassemble_makes_any_registered_reassembly(self) -> None:
-        from pcapkit.foundation.reassembly.dtls import DTLS
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         from pcapkit.interface.core import reassemble
         from pcapkit.protocols.internet.ipv4.protocol import IPv4 as IPv4_Protocol
         from pcapkit.utilities.exceptions import FormatError
@@ -366,7 +366,7 @@ class LookupTests(RegisteredReassemblerTestCase):
     def test_iteration_follows_the_order_given(self) -> None:
         # PyPy lays an instance's ``__dict__`` out in an earlier instance's order (#2814)
         from pcapkit.foundation.reassembly import ReassemblyManager
-        from pcapkit.foundation.reassembly.data.data import ReassemblyData
+        from pcapkit.foundation.reassembly.data import ReassemblyData
 
         tcp, dummy = object(), object()
         self.assertEqual(list(ReassemblyManager(tcp=tcp, dummy=dummy)), ['tcp', NAME])
@@ -379,7 +379,7 @@ class LookupTests(RegisteredReassemblerTestCase):
         self.assertEqual(list(ReassemblyData(early=(), late=())), ['ipv4', 'ipv6', 'tcp', 'dtls', 'early', 'late'])
 
     def test_data_keeps_the_built_in_fields(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import ReassemblyData
+        from pcapkit.foundation.reassembly.data import ReassemblyData
 
         data = ReassemblyData(tcp=(), dummy=('datagram',))
         self.assertEqual(list(data), ['ipv4', 'ipv6', 'tcp', 'dtls', NAME])

@@ -3,16 +3,16 @@
 """Follow TCP Streams
 ========================
 
-.. module:: pcapkit.foundation.traceflow.tcp
+.. module:: pcapkit.foundation.traceflow.tcp.traceflow
 
-:mod:`pcapkit.foundation.traceflow.tcp` is the interface to trace
+:mod:`pcapkit.foundation.traceflow.tcp.traceflow` is the interface to trace
 TCP flows from a series of packets and connections.
 
 """
 from typing import TYPE_CHECKING, Generic, overload
 
-from pcapkit.foundation.traceflow.data.data import Deferred
-from pcapkit.foundation.traceflow.data.tcp import _AT, Buffer, BufferID, Index, Packet
+from pcapkit.foundation.traceflow.data import Deferred
+from pcapkit.foundation.traceflow.tcp.data import _AT, Buffer, BufferID, Index, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 from pcapkit.utilities.callbacks import run_callbacks
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
 
-    from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+    from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
@@ -43,7 +43,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
         analyze: reassemble each flow's application layer, so that
-            :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
+            :attr:`Index.packet <pcapkit.foundation.traceflow.tcp.data.Index.packet>`
             can be read
 
     Note:
@@ -77,10 +77,10 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
     Note:
         With ``analyze=True`` a flow also carries its **application layer**:
-        :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
+        :attr:`Index.packet <pcapkit.foundation.traceflow.tcp.data.Index.packet>`
         holds the flow's reassembled datagrams, each with its payload parsed on
         demand. The tracer does not reassemble the stream itself -- it feeds
-        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, which already implements
+        :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`, which already implements
         :rfc:`815` and copes with the reordering and retransmission that a tracer
         concatenating payloads in capture order would silently corrupt.
 
@@ -111,7 +111,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         boundary. Where an exchange is one request and one reply, the two coincide
         and each datagram's payload is a single message that
         :attr:`Datagram.packet
-        <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>` can parse alone.
+        <pcapkit.foundation.reassembly.tcp.data.Datagram.packet>` can parse alone.
         Where a sender **pipelines** -- several requests in flight before any reply
         -- they all carry the same acknowledgement number, so they share a bucket
         and are concatenated after all, as
@@ -291,24 +291,24 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             callback; :meth:`finish` is what does that, at the end of the capture.
 
             With ``analyze=True`` that makes an open flow's
-            :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
+            :attr:`Index.packet <pcapkit.foundation.traceflow.tcp.data.Index.packet>`
             a **snapshot**, and a mid-capture one. The
-            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when
+            :class:`~pcapkit.foundation.traceflow.data.Deferred` resolves when
             it is first read and is then fixed in place, so it holds the flow as it
             stood at *that read* -- not as it stood when this method returned, and
             not as it will stand once the conversation ends. Read it while the flow
             is open and the datagrams cover only the segments seen so far; segments
             arriving afterwards are reassembled into the buffer but cannot reach an
             already-resolved snapshot, and nothing on the returned
-            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`
+            :class:`~pcapkit.foundation.traceflow.tcp.data.Index`
             distinguishes one from the final result that :meth:`finish` produces.
 
             This call's own cache is not the cause and does not soften it: both
             :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a
             later call rebuilds the tuple with fresh
-            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is
+            :class:`~pcapkit.foundation.traceflow.data.Deferred` objects. It is
             the *previously returned*
-            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`, if a caller kept
+            :class:`~pcapkit.foundation.traceflow.tcp.data.Index`, if a caller kept
             one, that cannot catch up. For a result that is final, read after
             :meth:`finish`.
 
@@ -465,11 +465,11 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         """Build the reassembler a new flow will feed, if analysis was asked for.
 
         Returns:
-            A :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler of this
+            A :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` reassembler of this
             flow's own, or :data:`None` when ``analyze`` is off.
 
         One reassembler **per flow** rather than one per tracer, so that
-        :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
+        :attr:`Index.packet <pcapkit.foundation.traceflow.tcp.data.Index.packet>`
         can flush this conversation's buffers without touching another's -- a
         shared instance would have to be asked for its datagrams by endpoint, and
         flushing it early would finalise flows that are still open.
@@ -477,7 +477,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         It is constructed with ``strict=False`` so that each datagram comes back
         as one contiguous payload, which is what an application-layer parse needs,
         and it inherits
-        :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.TCP.__timeout__>`
+        :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.reassembly.TCP.__timeout__>`
         -- no timeout -- so nothing here is evicted on a clock.
 
         """
@@ -486,8 +486,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         # NOTE: imported here, since at module scope this sibling-subpackage edge joins the
         # ``foundation.extraction`` import cycle; cached per flow, not per packet.
-        from pcapkit.foundation.reassembly.data.tcp import Packet as Reasm_Packet
-        from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+        from pcapkit.foundation.reassembly.tcp.data import Packet as Reasm_Packet
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
 
         self._reasm_packet = Reasm_Packet
         return TCP_Reassembly(strict=False)
@@ -499,11 +499,11 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             packet: a flow packet (:term:`trace.tcp.packet`)
 
         Returns:
-            A :class:`reassembly packet <pcapkit.foundation.reassembly.data.tcp.Packet>`
+            A :class:`reassembly packet <pcapkit.foundation.reassembly.tcp.data.Packet>`
             for the same segment.
 
         The tracer does not reassemble anything itself -- it hands the segment to
-        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, which already implements
+        :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`, which already implements
         the :rfc:`815` hole-descriptor algorithm and handles the out-of-order and
         retransmitted segments a tracer concatenating payloads in capture order
         would silently corrupt. This is the whole of the translation.
@@ -513,7 +513,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             is what makes each direction of the conversation reassemble separately
             even though the *flow* is keyed on the pair. The sequence number is
             passed through untouched: a SYN occupies one of its own, and
-            :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.TCP.reassembly>`
+            :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly>`
             is where that is accounted for.
 
         """

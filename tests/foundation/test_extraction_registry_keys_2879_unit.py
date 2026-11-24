@@ -114,7 +114,7 @@ class RegistryKeyTests(unittest.TestCase):
         """#2879: the issue's ``MyProto``, registered mixed-case, is made however it is spelt."""
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.reassembly.reassembly import Reassembly
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         class MyProto(TCP, Reassembly):
             pass
@@ -189,8 +189,8 @@ class RegistryKeyTests(unittest.TestCase):
         """The internal doors, which every class hook reaches, lower-case as the public ones do."""
         from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         cases = (
             (Extractor._register_internal_engine, Extractor.__engine__, PCAP_Engine),
@@ -206,8 +206,8 @@ class RegistryKeyTests(unittest.TestCase):
     def test_shipped_name_in_any_case_restores_the_shipped_entry(self) -> None:
         """A built-in handed back under its name in capitals restores, rather than being refused."""
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.utilities.warnings import RegistryWarning
 
         cases = (
@@ -240,8 +240,8 @@ class RegistryKeyTests(unittest.TestCase):
     def test_a_name_must_be_a_str(self) -> None:
         """A name that is not a :obj:`str` is refused, writing nothing, rather than stored unreachable."""
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.utilities.exceptions import RegistryError
 
         cases = (

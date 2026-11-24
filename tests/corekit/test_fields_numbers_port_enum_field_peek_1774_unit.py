@@ -103,7 +103,7 @@ class PortEnumFieldPeekTests(unittest.TestCase):
         ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP`` on read-back.
         That was a defect rather than a distinction -- reassembly dispatches on
         these members, so an unresolved
-        :class:`~pcapkit.foundation.reassembly.data.data.Deferred` could not be
+        :class:`~pcapkit.foundation.reassembly.data.Deferred` could not be
         pickled for most of the port space -- and :issue:`2417` fixed it by
         giving :meth:`AppType._unregistered_member
         <pcapkit.const.reg.apptype.apptype.AppType._unregistered_member>` the

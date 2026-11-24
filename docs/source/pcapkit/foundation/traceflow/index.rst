@@ -40,7 +40,7 @@ flows of extracted packets:
        click C "traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow"
        click D "../../../ext.html#reassembly-and-flow-tracing"
 
-       click TCP "tcp.html#pcapkit.foundation.traceflow.tcp.TCP"
+       click TCP "tcp.html#pcapkit.foundation.traceflow.tcp.traceflow.TCP"
 
 Auxiliary Data
 --------------
@@ -50,17 +50,24 @@ Auxiliary Data
    :show-inheritance:
 
 .. module:: pcapkit.foundation.traceflow.data
-.. module:: pcapkit.foundation.traceflow.data.data
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.traceflow.data.data``, with no alias: the module moved here.
+   The ``TCP_*`` data models ``pcapkit.foundation.traceflow.data`` collected, with no
+   alias: they are in :mod:`pcapkit.foundation.traceflow.tcp.data`
+   (:issue:`2882`).
+
 .. currentmodule:: pcapkit.foundation.traceflow
 
-.. autoclass:: pcapkit.foundation.traceflow.data.data.TraceFlowData
+.. autoclass:: pcapkit.foundation.traceflow.data.TraceFlowData
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.traceflow.data.data.Deferred
+.. autoclass:: pcapkit.foundation.traceflow.data.Deferred
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.traceflow.data.data.FrameRecord
+.. autoclass:: pcapkit.foundation.traceflow.data.FrameRecord
    :members:
    :show-inheritance:

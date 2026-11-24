@@ -2,12 +2,13 @@ IPv4 Datagram Reassembly
 ========================
 
 .. module:: pcapkit.foundation.reassembly.ipv4
+.. module:: pcapkit.foundation.reassembly.ipv4.reassembly
 
-:mod:`pcapkit.foundation.reassembly.ipv4` contains
-:class:`~pcapkit.foundation.reassembly.ipv4.IPv4` only, which reconstructs
+:mod:`pcapkit.foundation.reassembly.ipv4.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.ipv4.reassembly.IPv4` only, which reconstructs
 fragmented IPv4 packets back to origin; see :doc:`ip`.
 
-.. autoclass:: pcapkit.foundation.reassembly.ipv4.IPv4
+.. autoclass:: pcapkit.foundation.reassembly.ipv4.reassembly.IPv4
    :no-members:
    :show-inheritance:
 
@@ -106,12 +107,12 @@ Terminology
           charge every caller for a result most never read. Reading the attribute, or any
           mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,
           ``repr()``), runs it and keeps the result; see
-          :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
+          :class:`~pcapkit.foundation.reassembly.data.Deferred`.
 
        .. note::
 
           ``completed`` and ``conflict`` are independent signals: a datagram
-          can be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+          can be :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`
           and still carry a non-empty ``conflict``. :rfc:`791` resolves an
           overlapping fragment's disagreement itself -- "this procedure will
           use the more recently arrived copy in the data buffer" -- the
@@ -158,7 +159,7 @@ Terminology
           ``conflict`` is only ever appended to, and is checked against
           ``datagram`` and ``RCVBT`` *before* an arriving fragment's own write
           and bookkeeping touch them -- see
-          :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`.
+          :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.reassembly.IP._detect_conflicts>`.
           ``RCVBT`` records receipt in 8-octet blocks, which is coarser than
           the octet a conflict needs; ``TDL`` is what recovers the exact
           extent for the one block marked received that can be partially real
@@ -176,9 +177,9 @@ Terminology
           :rfc:`1122#section-3.3.2` for IPv4 and :rfc:`8200#section-4.5` for
           IPv6, counted from the first-arriving fragment. Its datagram is
           reported with ``completed`` set to
-          :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+          :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.Completion.TIMEOUT>`
           rather than
-          :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`,
+          :attr:`~pcapkit.foundation.reassembly.data.Completion.PARTIAL`,
           which is what tells "these fragments are gone" apart from "these
           fragments had not arrived yet". See
           :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`.

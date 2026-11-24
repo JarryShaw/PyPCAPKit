@@ -4,7 +4,7 @@
 :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` stays a parser: the default
 engine reads each frame's fragmented handshake messages with
 :func:`pcapkit.toolkit.pcap.dtls_reassembly` (or its PCAP-NG twin),
-:class:`~pcapkit.foundation.reassembly.dtls.DTLS` reassembles them, and
+:class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` reassembles them, and
 :func:`pcapkit.foundation.analysis.dtls.dtls_handshake` decodes the result. The
 engines that do not parse with pcapkit's own protocols turn DTLS reassembly off.
 
@@ -143,8 +143,8 @@ class DTLSAnalysisTests(unittest.TestCase):
     def _datagram(body: 'bytes | tuple[bytes, ...]', *, msg_type: int = 1,
                   completed: str = 'COMPLETE', length: 'int | None' = None) -> 'Any':
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.dtls import Datagram, DatagramID
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.dtls.data import Datagram, DatagramID
 
         return Datagram(completed=Completion[completed], id=DatagramID(*FLOW, 0), index=(1, 2),
                         message_seq=4, msg_type=HandshakeType.get(msg_type),
@@ -242,7 +242,7 @@ class DTLSExtractorWiringTests(unittest.TestCase):
         second apart complete by default; a half-second ``timeout`` the caller
         gives expires the first (#2839)."""
         from pcapkit.foundation.options import ReassemblyOptions
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         capture = _pcap([_frame(record) for record in RECORDS])
         datagram, = _extract(self, capture, reassembly=ReassemblyOptions(protocols=['dtls'])).reassembly.dtls
@@ -253,7 +253,7 @@ class DTLSExtractorWiringTests(unittest.TestCase):
 
     def test_the_shipped_reassembly_entry_names_the_dtls_engine(self) -> None:
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.dtls import DTLS
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
 
         self.assertIs(Extractor._shipped_reassembly['dtls'].klass, DTLS)
 

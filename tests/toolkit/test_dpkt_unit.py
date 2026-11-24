@@ -625,7 +625,7 @@ class DPKTIPv4ReassemblyFieldTests(unittest.TestCase):
 
     def test_reassembly_reconstructs_a_fragmented_datagram(self) -> None:
         """End to end: two IPv4 fragments come back as the original payload."""
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         from pcapkit.toolkit import dpkt as toolkit
 
         body = bytes(range(256)) * 6          # 1536 octets, a multiple of 8
@@ -766,7 +766,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         """
         import dpkt
 
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
         from pcapkit.toolkit import dpkt as toolkit
 
         first, second = b'E' * 64, b'F' * 64
@@ -800,7 +800,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
     def test_reassembly_reconstructs_a_fragmented_datagram(self) -> None:
         import dpkt
 
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
         from pcapkit.toolkit import dpkt as toolkit
 
         body = bytes(range(256)) * 6          # 1536 octets, a multiple of 8

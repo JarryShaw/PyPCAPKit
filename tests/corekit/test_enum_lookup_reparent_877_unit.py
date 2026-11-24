@@ -11,7 +11,7 @@ pins that the half of the tree that is not blocked by #913 or #904 derives
 from the base -- :class:`TransportProtocol
 <pcapkit.const.reg.apptype.apptype.TransportProtocol>`,
 :class:`FinalisedState <pcapkit.corekit.infoclass.FinalisedState>`,
-:class:`Completion <pcapkit.foundation.reassembly.data.data.Completion>`,
+:class:`Completion <pcapkit.foundation.reassembly.data.Completion>`,
 :class:`ftp.Type <pcapkit.protocols.application.ftp.protocol.Type>`,
 :class:`httpv1.Type <pcapkit.protocols.application.httpv1.protocol.Type>`,
 :class:`Criticality <pcapkit.protocols.application.ngap.protocol.Criticality>`,
@@ -91,7 +91,7 @@ class ReparentedBasesTests(unittest.TestCase):
 
     def test_completion(self) -> None:
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
         from pcapkit.utilities.compat import StrEnum
 
         self.assertEqual(Completion.__bases__, (EnumLookup, StrEnum))
@@ -215,7 +215,7 @@ class PureReparentGetTests(unittest.TestCase):
         self.assertEqual(len(FinalisedState.get_all('BASE')), 1)
 
     def test_completion_get(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         self.assertIs(Completion.get('complete'), Completion.COMPLETE)
         self.assertIs(Completion.get('timeout'), Completion.TIMEOUT)

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """:class:`Deferred`'s ``proto`` annotation admits what both reassemblers pass.
 
-GitHub issue #2417. :meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>`
+GitHub issue #2417. :meth:`IP.submit <pcapkit.foundation.reassembly.ip.reassembly.IP.submit>`
 passes a :class:`~pcapkit.const.reg.transtype.TransType`, but
-:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` passes a
+:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` passes a
 ``(source, destination)`` port pair, as :meth:`Transport.analyze
 <pcapkit.protocols.transport.transport.Transport.analyze>` takes; mypy reported
 a ``TransType``-only annotation as ``[arg-type]`` at ``TCP.submit``.
 
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred` is **generic** over
+:class:`~pcapkit.foundation.reassembly.data.Deferred` is **generic** over
 that value's type rather than a union, so each instance's ``proto`` and the
 parameter its ``analyze`` expects are one type: ``proto`` is annotated with the
 type variable, and what it admits is that variable's constraints. mypy rejects a
@@ -123,7 +123,7 @@ def tcp_proto(bufid=TCP_BUFID):
 
     One segment with a FIN, which closes the stream and so submits it complete:
     the partial branch of ``submit`` reports ``packet=None`` and builds no
-    :class:`~pcapkit.foundation.reassembly.data.data.Deferred` to read.
+    :class:`~pcapkit.foundation.reassembly.data.Deferred` to read.
 
     Args:
         bufid: The buffer identifier to reassemble under, i.e. where the ports
@@ -133,8 +133,8 @@ def tcp_proto(bufid=TCP_BUFID):
         The placeholder's ``proto``, unresolved.
 
     """
-    from pcapkit.foundation.reassembly.data.tcp import Packet
-    from pcapkit.foundation.reassembly.tcp import TCP
+    from pcapkit.foundation.reassembly.tcp.data import Packet
+    from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
     reasm = TCP()
     reasm(Packet(bufid, 1, 500, 1, False, True, False, 5, 1, 5,
@@ -178,7 +178,7 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         :exc:`AttributeError` from a class that has no type parameters at all.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         annotation = Deferred.__init__.__annotations__['proto']
         by_name = {variable.__name__: variable
@@ -223,8 +223,8 @@ class DeclaredProtoTypeTests(unittest.TestCase):
     def _ip_proto(self):
         """The ``proto`` ``IP.submit`` hands to :class:`Deferred`."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4()
         reasm(Packet((ip_address('192.0.2.1'), ip_address('198.51.100.2'), 42, TransType.UDP),
@@ -240,8 +240,8 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         """The ``proto`` DTLS reassembly hands :class:`Deferred` for a complete
         message (#2531): its ``(msg_type, length, message_seq)``."""
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.foundation.reassembly.data.dtls import Packet
-        from pcapkit.foundation.reassembly.dtls import DTLS
+        from pcapkit.foundation.reassembly.dtls.data import Packet
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
 
         reasm = DTLS()
         reasm(Packet((ip_address('192.0.2.1'), 1234, ip_address('198.51.100.2'), 5684, 0), 1,
@@ -287,7 +287,7 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         which would break on any reformatting of it.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         callable_ = ast.parse(Deferred.__init__.__annotations__['analyze'], mode='eval').body
         parameters, _ = callable_.slice.elts  # ``Callable[[...], ProtocolBase]``
@@ -321,9 +321,9 @@ class DeclaredProtoTypeTests(unittest.TestCase):
 
     def test_the_held_analyser_is_not_called_to_learn_this(self) -> None:
         """``packet`` is still deferred after ``proto`` has been read."""
-        from pcapkit.foundation.reassembly.data.data import Deferred
-        from pcapkit.foundation.reassembly.data.tcp import Packet
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.data import Deferred
+        from pcapkit.foundation.reassembly.tcp.data import Packet
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP()
         reasm(Packet(TCP_BUFID, 1, 500, 1, False, True, False, 5, 1, 5,
@@ -499,8 +499,8 @@ class ResolvedPortTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.apptype import AppType
-        from pcapkit.foundation.reassembly.data.tcp import Packet
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.data import Packet
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         class Analyzer:  # pylint: disable=too-few-public-methods
             """Everything ``__protocol_type__`` is required to be."""

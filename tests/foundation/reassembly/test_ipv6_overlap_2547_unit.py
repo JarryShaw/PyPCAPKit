@@ -39,7 +39,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
                 header: bytes = b''):
         """A fragment of the one BUFID every case shares."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         if v6:
             src, dst, ihl = ip_address('2001:db8::1'), ip_address('2001:db8::2'), 40
@@ -50,8 +50,8 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
                       len(header) + len(payload), header, bytearray(payload), 1000.0)
 
     def _reassemble(self, packets, *, strict: bool = True, v6: bool = True):
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         reasm = (IPv6 if v6 else IPv4)(strict=strict)
         for packet in packets:
@@ -60,7 +60,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
 
     def test_an_overlapping_first_fragment_abandons_the_datagram(self) -> None:
         # the offset-zero fragment arrives last and reaches into the one at 8
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         reasm = self._reassemble([
             self._packet(num=1, fo=8, mf=True, payload=DATA[8:16]),
@@ -78,7 +78,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
 
     def test_an_overlapping_middle_fragment_abandons_the_datagram(self) -> None:
         # the octets it overlaps are the same, which RFC 8200 does not excuse
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         reasm = self._reassemble([
             self._packet(num=1, fo=0, mf=True, payload=DATA[:16]),
@@ -92,7 +92,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
         self.assertEqual(datagram.conflict, ())
 
     def test_an_overlapping_last_fragment_abandons_the_datagram(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         other = bytes(b ^ 0xFF for b in DATA[8:20])
         for strict in (True, False):
@@ -111,7 +111,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
     def test_the_issues_repro_is_abandoned_and_its_last_fragment_starts_anew(self) -> None:
         # two different copies of the offset-zero fragment; the final fragment
         # comes after the abandonment, so it opens a buffer of its own
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         reasm = self._reassemble([
             self._packet(num=1, fo=0, mf=True, payload=b'A' * 8),
@@ -128,7 +128,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
         self.assertEqual(late.payload, (b'ZZZZ',))
 
     def test_the_same_extent_with_another_m_flag_is_not_a_duplicate(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         reasm = self._reassemble([
             self._packet(num=1, fo=8, mf=True, payload=DATA[8:16]),
@@ -144,7 +144,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
     def test_exact_duplicates_are_dropped_and_the_datagram_completes(self) -> None:
         # a duplicate of the first, a middle and the last fragment, each while
         # the datagram is still open
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -166,7 +166,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
     def test_a_dropped_duplicate_does_not_replace_the_kept_header(self) -> None:
         # RFC 8200 retains only the offset-zero fragment's headers, and those
         # before the Fragment header may differ between copies
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         kept, other = b'K' * 40, b'D' * 40
         reasm = self._reassemble([
@@ -180,7 +180,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
 
     def test_fragments_that_only_abut_complete_the_datagram(self) -> None:
         # the control: out of order, touching but never sharing an octet
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -196,7 +196,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
 
     def test_a_fragment_carrying_no_data_overlaps_nothing(self) -> None:
         # an empty final fragment shares no octet, even with a duplicate of itself
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         reasm = self._reassemble([
             self._packet(num=1, fo=8, mf=True, payload=DATA[8:16]),
@@ -209,7 +209,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
         self.assertEqual(datagram.payload, DATA[:16])
 
     def test_the_abandonment_is_logged(self) -> None:
-        with self.assertLogs('pcapkit.foundation.reassembly.ip', level='DEBUG') as logs:
+        with self.assertLogs('pcapkit.foundation.reassembly.ip.reassembly', level='DEBUG') as logs:
             self._reassemble([
                 self._packet(num=1, fo=0, mf=True, payload=DATA[:16]),
                 self._packet(num=2, fo=8, mf=True, payload=DATA[8:16]),
@@ -218,7 +218,7 @@ class TestIPv6OverlapAbandonsDatagram(unittest.TestCase):
         self.assertIn('on frame 2, which overlaps octets 0-15', logs.output[0])
 
     def test_ipv4_still_overwrites_as_rfc_791_asks(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         reasm = self._reassemble([
             self._packet(num=1, fo=0, mf=True, payload=b'A' * 8, v6=False),

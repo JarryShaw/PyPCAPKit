@@ -53,10 +53,10 @@ import dictdumper
 import pcapkit
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.dumpkit.common import make_dumper
-from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-from pcapkit.foundation.reassembly.ipv4 import IPv4
-from pcapkit.foundation.reassembly.tcp import TCP
+from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
 SRC, DST = ip_address('192.0.2.1'), ip_address('198.51.100.2')
 UDP = struct.pack('!HHHH', 1234, 9, 32, 0) + bytes(range(24))
@@ -234,8 +234,8 @@ class DeferredPacketDumpTests(DumpTestCase):
     @staticmethod
     def tcp_datagram() -> 'object':
         """One complete TCP datagram, its ``packet`` deferred."""
-        from pcapkit.foundation.reassembly.data.tcp import Packet
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.data import Packet
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP()
         reasm(Packet((ip_address('192.0.2.1'), 50000, ip_address('198.51.100.2'), 65535),
@@ -249,7 +249,7 @@ class DeferredPacketDumpTests(DumpTestCase):
         return model.__dict__[model.__map__['packet']]  # type: ignore[attr-defined]
 
     def test_a_reassembled_tcp_datagram_dumps_its_packet(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         for writer in WRITERS:
             for label in ('info', 'export'):
@@ -273,13 +273,13 @@ class DeferredPacketDumpTests(DumpTestCase):
 
     def test_the_dump_resolves_a_deferred_packet_once(self) -> None:
         """Every model with a deferred ``packet``, IP, TCP and DTLS reassembly's and a traced flow's."""
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.data import Deferred as ReassemblyDeferred
-        from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
-        from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
-        from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
-        from pcapkit.foundation.traceflow.data.data import Deferred as TraceFlowDeferred
-        from pcapkit.foundation.traceflow.data.tcp import Index
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.data import Deferred as ReassemblyDeferred
+        from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
+        from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
+        from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
+        from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
+        from pcapkit.foundation.traceflow.tcp.data import Index
 
         def datagram(cls: 'type', counting: 'Counting') -> 'object':
             return cls(completed=Completion.COMPLETE, id=None, index=(1,), header=b'', payload=b'payload',

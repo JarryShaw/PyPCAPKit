@@ -2,10 +2,10 @@
 """IP Datagram Reassembly
 ============================
 
-.. module:: pcapkit.foundation.reassembly.ip
+.. module:: pcapkit.foundation.reassembly.ip.reassembly
 
-:mod:`pcapkit.foundation.reassembly.ip` contains
-:class:`~pcapkit.foundation.reassembly.ip.IP`
+:mod:`pcapkit.foundation.reassembly.ip.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.ip.reassembly.IP`
 only, which reconstructs fragmented IP packets back to
 origin. The implementation follows the IP reassembly
 procedure introduced in :rfc:`791`, using ``RCVBT``
@@ -21,8 +21,8 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.corekit.const.ipheader import IP_MAX_LENGTH
 from pcapkit.foundation.analysis.ip import _analyze_payload
-from pcapkit.foundation.reassembly.data.data import Completion
-from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
+from pcapkit.foundation.reassembly.data import Completion
+from pcapkit.foundation.reassembly.ip.data import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                    Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 from pcapkit.utilities.logging import get_logger
@@ -73,7 +73,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
        An overlapping fragment that disagrees with octets already received
        overwrites them, as :rfc:`791` asks, and the disagreement is recorded in
        :attr:`Datagram.conflict
-       <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>`
+       <pcapkit.foundation.reassembly.ip.data.Datagram.conflict>`
        (:issue:`477`). An incomplete buffer expires
        after ``timeout`` seconds of capture time, 60 by default for both IPv4
        and IPv6. A datagram with fragment offset zero and **MF** (**M** in
@@ -84,7 +84,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
        A subclass setting :attr:`__discard_overlap__` abandons a datagram on an
        overlapping fragment instead of overwriting, and
-       :class:`~pcapkit.foundation.reassembly.ipv6.IPv6` does (:issue:`2547`).
+       :class:`~pcapkit.foundation.reassembly.ipv6.reassembly.IPv6` does (:issue:`2547`).
 
     """
     if TYPE_CHECKING:
@@ -99,7 +99,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
     #: bool: Whether a fragment overlapping another of its datagram abandons
     #: that datagram, reported as
-    #: :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`,
+    #: :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.Completion.OVERLAP>`,
     #: rather than overwriting the octets it overlaps. IPv4 overwrites them
     #: (:rfc:`791#section-3.2`); IPv6 overrides this, since
     #: :rfc:`8200#section-4.5` discards the datagram (:issue:`2547`).
@@ -322,13 +322,13 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout, which is what
                 separates
-                :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+                :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.Completion.TIMEOUT>`
                 from
-                :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.data.Completion.PARTIAL>`
+                :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.Completion.PARTIAL>`
             overlap: whether this buffer is being submitted because an
                 overlapping fragment abandoned it (:attr:`__discard_overlap__`),
                 reported as :attr:`Completion.OVERLAP
-                <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`
+                <pcapkit.foundation.reassembly.data.Completion.OVERLAP>`
                 and never as complete
             store: whether ``buf`` has left
                 :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`
@@ -542,11 +542,11 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         """Find where an arriving fragment disagrees with already-received bytes.
 
         Arguments:
-            rcvbt: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT`
+            rcvbt: this buffer's :attr:`~pcapkit.foundation.reassembly.ip.data.Buffer.RCVBT`
                 as it stood *before* the arriving fragment's own bits are set,
                 i.e. what earlier fragments had already claimed, in 8-octet
                 blocks.
-            tdl: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.TDL`
+            tdl: this buffer's :attr:`~pcapkit.foundation.reassembly.ip.data.Buffer.TDL`
                 as it stood *before* the arriving fragment's own update --
                 ``-1`` while the final fragment (``MF=0``) has not yet
                 arrived.
@@ -575,7 +575,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         So once ``tdl`` is known, an octet at or past it is excluded here
         regardless of its block's bit -- comparing it would manufacture a
         conflict against a byte nothing ever really sent, over a distinction
-        :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need
+        :meth:`~pcapkit.foundation.reassembly.ip.reassembly.IP.submit` does not need
         anyway, since it never reports a payload past ``tdl``. Before ``tdl``
         is known (``tdl < 0``), every set ``rcvbt`` bit came from a non-final
         fragment's whole block and is exact on its own, with nothing to clip.
@@ -620,7 +620,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
         Arguments:
             extent: this buffer's
-                :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.extent`,
+                :attr:`~pcapkit.foundation.reassembly.ip.data.Buffer.extent`,
                 sorted and pairwise disjoint.
             start: the arriving fragment's first octet, i.e. its ``FO``.
             stop: one past the arriving fragment's last octet.

@@ -91,7 +91,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def tracer(self, fmt: 'str' = 'json', **kwargs: 'Any') -> 'tuple[Any, list[tuple[str, Any]], Any]':
         """A TCP tracer, the files it opens, and its ``close()`` calls by output file."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         root = tempfile.mkdtemp(dir=self.tmpdir.name)
         recorder = self.opened(root)
@@ -113,7 +113,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def refuse(self, *calls: 'int') -> 'list[tuple[str, bytes]]':
         """Register a callback raising on its ``calls``-th calls; returns each flow's label and file."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         seen = []  # type: list[tuple[str, bytes]]
 
@@ -131,7 +131,7 @@ class RaisingCallbackTests(unittest.TestCase):
                rst: 'bool' = False, reverse: 'bool' = False) -> 'Any':
         """A flow packet of a JSON-dumpable frame, between port ``sport`` and 9."""
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.traceflow.data.tcp import Packet
+        from pcapkit.foundation.traceflow.tcp.data import Packet
 
         near, far = (ip_address('192.0.2.1'), sport), (ip_address('198.51.100.2'), 9)
         if reverse:
@@ -184,7 +184,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def test_a_callback_finds_its_flow_in_the_index(self) -> None:
         """#2827: the flow is stored before, not after, its callbacks, so each finds the flow it is handed."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         trace, _, _ = self.tracer()
         for flow in range(2):
@@ -231,7 +231,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def closed_once_and_whole(self, fmt: 'str') -> 'tuple[Any, bytes]':
         """Finish a ``fmt`` trace of :func:`_frames` whose first callback raises; the flow and its file."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         packets = self.packets()
         reference = TCP(fout=tempfile.mkdtemp(dir=self.tmpdir.name), format=fmt, byteorder='little')

@@ -34,7 +34,7 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, timestamp: float,
                 id: int = 42):  # pylint: disable=redefined-builtin
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
@@ -52,9 +52,9 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         ``MAX(TIMER,TTL)`` then raises, and RFC 1122 supersedes it.
 
         """
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         self.assertEqual(IPv4.__timeout__, 60.0)
         self.assertEqual(IPv6.__timeout__, 60.0)
@@ -65,8 +65,8 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         self.assertTrue(math.isinf(TCP().timeout))
 
     def test_a_stalled_datagram_is_abandoned_once_the_capture_clock_passes_it(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4()
         # a first fragment that is never completed
@@ -94,8 +94,8 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         :obj:`bool`.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         # left unfinished when the capture ended
         unfinished = IPv4()
@@ -126,8 +126,8 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         exhaustion the timeout exists to bound.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         # exactly at the limit: still within it
         boundary = IPv4()
@@ -153,8 +153,8 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         self.assertEqual(expired.index, (1, 2))
 
     def test_a_datagram_that_completes_in_time_is_untouched(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4()
         reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 8, timestamp=T0))
@@ -165,7 +165,7 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         self.assertEqual(datagram.payload, b'A' * 8 + b'B' * 8)
 
     def test_an_infinite_timeout_disables_expiry(self) -> None:
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(timeout=math.inf)
         reasm(self._packet(num=1, fo=0, mf=True, payload=b'abcdefgh', timestamp=T0))
@@ -173,7 +173,7 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         self.assertEqual(len(reasm._buffer), 1)
 
     def test_an_explicit_timeout_overrides_the_protocol_default(self) -> None:
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(timeout=5.0)
         self.assertEqual(reasm.timeout, 5.0)
@@ -182,14 +182,14 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         self.assertEqual(len(reasm._buffer), 0)
 
     def test_a_negative_timeout_is_refused(self) -> None:
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         from pcapkit.utilities.exceptions import FieldValueError
 
         with self.assertRaises(FieldValueError):
             IPv4(timeout=-1.0)
 
     def test_expire_on_an_empty_buffer_is_a_no_op(self) -> None:
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         self.assertEqual(IPv4().expire(T0), [])
         self.assertEqual(IPv4(timeout=math.inf).expire(T0), [])
@@ -202,7 +202,7 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
         a capture reassembles identically today, tomorrow and on another machine.
 
         """
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         def run() -> list:
             reasm = IPv4()
@@ -236,7 +236,7 @@ class IPLooseModeTests(unittest.TestCase):
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
@@ -253,8 +253,8 @@ class IPLooseModeTests(unittest.TestCase):
         payload gets, and the datagram is reported incomplete.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(strict=False)
         # 16 octets at offset 0, then nothing -- MF set throughout, so the total
@@ -275,7 +275,7 @@ class IPLooseModeTests(unittest.TestCase):
         misrepresent it as starting at the datagram's beginning.
 
         """
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(strict=False)
         reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 16))
@@ -299,8 +299,8 @@ class IPLooseModeTests(unittest.TestCase):
         whole.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(strict=False)
         # a 24-octet datagram missing its middle 8 octets
@@ -312,8 +312,8 @@ class IPLooseModeTests(unittest.TestCase):
         self.assertEqual(datagram.payload, b'A' * 8 + bytes(8) + b'C' * 8)
 
     def test_a_complete_datagram_is_unaffected_by_loose_mode(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(strict=False)
         reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 8))
@@ -331,7 +331,7 @@ class TCPReassemblyTimeoutTests(unittest.TestCase):
 
     def _segment(self, *, num: int, seq: int, payload: bytes, timestamp: float,
                  fin: bool = False):
-        from pcapkit.foundation.reassembly.data.tcp import Packet
+        from pcapkit.foundation.reassembly.tcp.data import Packet
 
         bufid = (ip_address('192.0.2.1'), 12345, ip_address('198.51.100.2'), 443)
         return Packet(bufid, seq, 500, num, False, fin, False, len(payload),
@@ -340,7 +340,7 @@ class TCPReassemblyTimeoutTests(unittest.TestCase):
 
     def test_tcp_holds_its_buffer_by_default(self) -> None:
         """An idle connection is ordinary, so nothing evicts it unasked."""
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP()
         reasm(self._segment(num=1, seq=0, payload=b'A' * 10, timestamp=T0))
@@ -348,8 +348,8 @@ class TCPReassemblyTimeoutTests(unittest.TestCase):
         self.assertEqual(len(reasm._buffer), 1)
 
     def test_tcp_honours_a_timeout_when_one_is_asked_for(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP(timeout=120.0)
         self.assertEqual(reasm.timeout, 120.0)

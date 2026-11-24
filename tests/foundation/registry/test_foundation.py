@@ -246,8 +246,8 @@ class FoundationRegistryTests(unittest.TestCase):
         # own ``pcapkit`` import in ``sys.modules``.
         from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
-        from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4 as IPv4_Reassembly
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP as TCP_TraceFlow
         from pcapkit.utilities.exceptions import RegistryError
 
         cases = (
@@ -296,11 +296,11 @@ class FoundationRegistryTests(unittest.TestCase):
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4 as IPv4_Reassembly
         from pcapkit.foundation.registry.foundation import (register_extractor_engine,
                                                             register_extractor_reassembly,
                                                             register_extractor_traceflow)
-        from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP as TCP_TraceFlow
         from pcapkit.utilities.exceptions import RegistryError
 
         with mock.patch.dict(Extractor.__engine__), \

@@ -40,12 +40,12 @@ How pcapkit's TCP reassembly shapes these captures
 --------------------------------------------------
 
 The layouts above are not arbitrary. These properties of
-:class:`pcapkit.foundation.reassembly.tcp.TCP` decide what a capture has to
+:class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP` decide what a capture has to
 look like for a datagram to come out of it at all:
 
 1. A buffer is keyed by the connection's four-tuple *including direction*, so
    each direction is a buffer of its own.
-   :meth:`~pcapkit.foundation.reassembly.tcp.TCP.submit` runs on that
+   :meth:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit` runs on that
    direction's RST; once its FIN has been seen and every octet below the FIN
    has arrived; when a SYN, or a segment farther than
    :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT` from the buffer, opens a

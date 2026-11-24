@@ -17,10 +17,10 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.const.capture import RESOLUTION, RESOLUTION_PLACES
-from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow.data.data import FrameRecord
-from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.data import FrameRecord
+from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -609,7 +609,7 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         (:issue:`1616`).
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
+        :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`
 
     .. versionchanged:: 1.5.0
 
@@ -690,7 +690,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         packet itself is left untouched either way.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
+        :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`
 
     .. versionchanged:: 1.5.0
 
@@ -795,7 +795,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         either way.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCP`
+        :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`
 
     .. versionchanged:: 1.5.0
 
@@ -874,7 +874,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         either way.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.tcp.TCP`
+        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`
 
     """
     ip = _network(packet)

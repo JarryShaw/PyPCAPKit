@@ -87,8 +87,8 @@ def resolve(name: 'str') -> 'Any':
 RESTORED = {
     'pcapkit.protocols.application.ftp.protocol.FTP': '(file=None, length=None, **kwargs)',
     'pcapkit.dumpkit.pcap.PCAPIO': '(fname, *, protocol, byteorder=sys.byteorder, nanosecond=False, **kwargs)',
-    'pcapkit.foundation.reassembly.ipv4.IPv4': '(*, strict=True, store=True, timeout=None)',
-    'pcapkit.foundation.traceflow.tcp.TCP': ("(*, fout='./tmp', format='pcap', byteorder=sys.byteorder, "
+    'pcapkit.foundation.reassembly.ipv4.reassembly.IPv4': '(*, strict=True, store=True, timeout=None)',
+    'pcapkit.foundation.traceflow.tcp.traceflow.TCP': ("(*, fout='./tmp', format='pcap', byteorder=sys.byteorder, "
                                              'nanosecond=False, bidirectional=True, analyze=False)'),
     'pcapkit.corekit.infoclass.Info': '(dict_=None, **kwargs)',
     'pcapkit.corekit.infoclass.MultiInfo': '(mapping=None)',
@@ -183,7 +183,7 @@ class ClassSignatureTests(unittest.TestCase):
 
     def test_library_handler_still_runs(self) -> 'None':
         """From 3.14 it records the class, and only a recorded class gets its type parameters."""
-        name = 'pcapkit.foundation.reassembly.ipv4.IPv4'
+        name = 'pcapkit.foundation.reassembly.ipv4.reassembly.IPv4'
         self.restore(name)
         self.library.assert_called_once_with(self.app, 'class', name, resolve(name), {}, CATCH_ALL, None)
 
@@ -216,7 +216,8 @@ class ConstructorTypesTests(unittest.TestCase):
 
     def test_init_behind_a_pass_through_new_is_read(self) -> 'None':
         """Each class docstring lists the ``__init__`` parameters, which otherwise lose their types."""
-        for name in ('pcapkit.foundation.reassembly.ipv4.IPv4', 'pcapkit.foundation.traceflow.tcp.TCP',
+        for name in ('pcapkit.foundation.reassembly.ipv4.reassembly.IPv4',
+                     'pcapkit.foundation.traceflow.tcp.traceflow.TCP',
                      'pcapkit.corekit.infoclass.Info', 'pcapkit.corekit.infoclass.MultiInfo'):
             cls = resolve(name)
             with self.subTest(name=name):
@@ -239,7 +240,7 @@ class ConstructorTypesTests(unittest.TestCase):
     def test_builder_inited_points_the_library_at_it(self) -> 'None':
         """Each module that reads the choice for the docstring types reads this one."""
         modules = (self.conf.typehints_docstring_handler, self.conf.typehints_hints)
-        cls = resolve('pcapkit.foundation.reassembly.ipv4.IPv4')
+        cls = resolve('pcapkit.foundation.reassembly.ipv4.reassembly.IPv4')
         with mock.patch.object(modules[0], 'constructor_name', modules[0].constructor_name), \
                 mock.patch.object(modules[1], 'constructor_name', modules[1].constructor_name):
             self.conf.read_constructor_types_from_init(None)

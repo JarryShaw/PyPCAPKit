@@ -149,7 +149,7 @@ class TraceOpenFileTests(unittest.TestCase):
 
     def test_no_more_files_are_open_than_the_limit(self) -> None:
         """#2815: at limit 2, two flow files are open at most, and two at once."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         peak = []
         real = TCP._write
@@ -173,14 +173,14 @@ class TraceOpenFileTests(unittest.TestCase):
     def packet(self, index: 'int', sport: 'int', *, syn: 'bool' = False, fin: 'bool' = False) -> 'Any':
         """A flow packet of a JSON-dumpable frame, from port ``sport`` to 9."""
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.traceflow.data.tcp import Packet
+        from pcapkit.foundation.traceflow.tcp.data import Packet
 
         return Packet(LinkType.ETHERNET, index, {'frame': index}, syn, fin, False, ip_address('192.0.2.1'),
                       ip_address('198.51.100.2'), sport, 9, SECOND + index, 0, 0, b'', bytearray())
 
     def tracer(self, **kwargs: 'Any') -> 'tuple[Any, list[tuple[str, Any]]]':
         """A JSON TCP tracer fed two flows, and the files it opened."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         root = tempfile.mkdtemp(dir=self.tmpdir.name)
         recorder = self.opened(root)
@@ -230,7 +230,7 @@ class TraceOpenFileTests(unittest.TestCase):
 
     def test_a_finalised_flow_is_closed_before_its_callback(self) -> None:
         """#2815: a callback finds its flow's file whole and no longer kept open."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         trace, _ = self.tracer()
         seen = []
@@ -247,7 +247,7 @@ class TraceOpenFileTests(unittest.TestCase):
 
     def test_a_raising_callback_leaves_no_file_open(self) -> None:
         """#2815: ``finish()`` closes every flow's file though a callback aborts its loop."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         trace, handles = self.tracer()
         trace(self.packet(3, 40002, syn=True))

@@ -15,7 +15,7 @@ round trip closes when
 * every TCP frame of the input lands in exactly one flow, and no other frame
   lands in any.
 
-The conversations cover the shapes :mod:`pcapkit.foundation.traceflow.tcp`
+The conversations cover the shapes :mod:`pcapkit.foundation.traceflow.tcp.traceflow`
 distinguishes: a whole connection, two interleaved, one mixed with UDP, one over
 IPv6, a port pair reused after a close, a reset, one left half-open, and the
 per-direction ``bidirectional=False`` mode. Each runs in every byte order

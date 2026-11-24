@@ -342,7 +342,7 @@ class FirstLineTests(unittest.TestCase):
         """A class is an enumeration through :mod:`enum`, ``aenum`` or a module re-exporting one."""
         assert self.package is not None
         self.assertTrue(self.package.is_enum('pcapkit.corekit.checksum.internet', 'ChecksumStatus'))
-        self.assertTrue(self.package.is_enum('pcapkit.foundation.reassembly.data.data', 'Completion'))
+        self.assertTrue(self.package.is_enum('pcapkit.foundation.reassembly.data', 'Completion'))
         self.assertTrue(self.package.is_enum('pcapkit.const.sctp.payload_protocol_identifier',
                                              'PayloadProtocolIdentifier'))
         self.assertFalse(self.package.is_enum('pcapkit.protocols.internet.igmp.data', 'IGMP'))

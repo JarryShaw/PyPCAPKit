@@ -194,7 +194,7 @@ class TestInfoFromDictRoundTrip(unittest.TestCase):
         type)``, so an unguarded :func:`issubclass` raised :exc:`TypeError` out
         of :meth:`~pcapkit.corekit.infoclass.Info.from_dict` -- measured on
         3.10 for 26 of 487 :class:`~pcapkit.corekit.infoclass.Info` classes,
-        including :class:`~pcapkit.foundation.reassembly.data.ip.Packet`.
+        including :class:`~pcapkit.foundation.reassembly.ip.data.Packet`.
 
         """
         from typing import Dict, List
@@ -218,7 +218,7 @@ class TestInfoFromDictRoundTrip(unittest.TestCase):
         self.assertIsInstance(info.builtin[0], In)
 
     def test_reassembly_packet_from_dict_still_works(self) -> None:
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         self.assertEqual(Packet.from_dict({'bufid': 1}).bufid, 1)
 

@@ -36,7 +36,7 @@ class TestIPReassemblyRoundTrip(unittest.TestCase):
     @staticmethod
     def _packet(num, fo, mf, payload, *, tl=None):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         tl = 20 + len(payload) if tl is None else tl
         bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), 42, TransType.UDP)
@@ -45,7 +45,7 @@ class TestIPReassemblyRoundTrip(unittest.TestCase):
 
     @staticmethod
     def _reassembler(strict):
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         return IPv4(strict=strict)
 

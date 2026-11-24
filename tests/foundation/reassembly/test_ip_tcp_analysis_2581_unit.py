@@ -138,8 +138,8 @@ class AnalysisFunctionTests(unittest.TestCase):
     def _ip(payload: 'bytes | tuple[bytes, ...]', *, v6: bool = False,
             completed: str = 'COMPLETE') -> 'Any':
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.ip import Datagram, DatagramID
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ip.data import Datagram, DatagramID
 
         src, dst = (V6_SRC, V6_DST) if v6 else (V4_SRC, V4_DST)
         return Datagram(completed=Completion[completed],
@@ -149,8 +149,8 @@ class AnalysisFunctionTests(unittest.TestCase):
     @staticmethod
     def _tcp(payload: 'bytes | tuple[bytes, ...]', *, dport: int = 80,
              completed: str = 'COMPLETE') -> 'Any':
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.tcp import Datagram, DatagramID
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.tcp.data import Datagram, DatagramID
 
         return Datagram(completed=Completion[completed],
                         id=DatagramID(src=(V4_SRC, 1234), dst=(V4_DST, dport), ack=1),
@@ -258,7 +258,7 @@ class ExtractorReassemblyTests(unittest.TestCase):
 
     def test_a_custom_protocol_type_parses_the_packet(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         for kind in FRAMES:
             function, _, engine = _analysis(kind)
@@ -289,7 +289,7 @@ class ExtractorReassemblyTests(unittest.TestCase):
                         self.assertEqual(_parsed(packet), _parsed(function(datagram)))
 
     def test_an_incomplete_datagram_is_parsed_unless_strict(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         for kind in FRAMES:
             function, _, _ = _analysis(kind)
@@ -304,7 +304,7 @@ class ExtractorReassemblyTests(unittest.TestCase):
                         self.assertEqual(datagram.packet is None, strict)
 
     def test_a_deferred_datagram_pickles_and_still_parses(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         for kind in FRAMES:
             function, _, engine = _analysis(kind)

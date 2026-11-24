@@ -18,7 +18,7 @@ from pcapkit.foundation.engines.pypcapfile import PyPCAPFile as PyPCAPFile_Engin
 from pcapkit.foundation.engines.scapy import Scapy as Scapy_Engine
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.options import TraceFlowOptions
-from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import EngineWarning, warn
 
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.foundation.extraction import Packet, VerboseHandler
-    from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Data
+    from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Data
 
     #: A toolkit's ``tcp_reassembly`` adapter. The pcapkit-native adapters take only
     #: the frame; the third-party ones also accept a ``count`` keyword -- hence the
@@ -76,7 +76,7 @@ def follow_tcp_stream(fin: 'str', *, verbose: 'bool | VerboseHandler' = False,  
             :attr:`~pcapkit.foundation.options.TraceFlowOptions.protocols` name
             ``'tcp'``; :data:`None` takes their defaults. With
             :attr:`~pcapkit.foundation.options.TraceFlowOptions.analyze`,
-            :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can be read off
+            :attr:`Index.packet <pcapkit.foundation.traceflow.tcp.data.Index.packet>` can be read off
             :attr:`Extractor.traceflow <pcapkit.foundation.extraction.Extractor.traceflow>`;
             the returned ``conversations`` come from the TCP reassembly this
             function always runs. With

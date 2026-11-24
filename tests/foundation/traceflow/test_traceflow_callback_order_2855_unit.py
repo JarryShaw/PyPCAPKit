@@ -56,13 +56,13 @@ class CallbackOrderTests(unittest.TestCase):
 
     def tracer(self, fmt: 'str' = 'json', **kwargs: 'Any') -> 'Any':
         """A TCP tracer writing ``fmt`` files to a fresh directory."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         return TCP(fout=tempfile.mkdtemp(dir=self.tmpdir.name), format=fmt, byteorder='little', **kwargs)
 
     def register(self, *callbacks: 'Callable[[Any], None]') -> None:
         """Register ``callbacks`` in order, removed again on cleanup."""
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         for callback in callbacks:
             TCP.register_callback(callback)
@@ -85,7 +85,7 @@ class CallbackOrderTests(unittest.TestCase):
                rst: 'bool' = False, reverse: 'bool' = False) -> 'Any':
         """A flow packet of a JSON-dumpable frame, between port ``sport`` and 9."""
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.traceflow.data.tcp import Packet
+        from pcapkit.foundation.traceflow.tcp.data import Packet
 
         near, far = (ip_address('192.0.2.1'), sport), (ip_address('198.51.100.2'), 9)
         if reverse:
@@ -160,7 +160,7 @@ class CallbackOrderTests(unittest.TestCase):
 
     def test_an_exception_does_not_stop_the_callbacks_after_it(self) -> None:
         """#2855: every callback runs, the first error propagates; a ``KeyboardInterrupt`` stops them."""
-        from pcapkit.foundation.traceflow.tcp import TCP, logger
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP, logger
 
         first, second = RuntimeError('first refused'), ValueError('second refused')
         calls = []  # type: list[str]

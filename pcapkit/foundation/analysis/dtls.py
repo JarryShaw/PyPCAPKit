@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.foundation.analysis.dtls` contains
 :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` only, which decodes a
-DTLS handshake message that :class:`~pcapkit.foundation.reassembly.dtls.DTLS`
+DTLS handshake message that :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS`
 reassembled (:rfc:`6347#section-4.2.3`). The decode itself is
 :meth:`DTLS.analyze_handshake
 <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>` (:issue:`2622`).
@@ -21,7 +21,7 @@ from pcapkit.protocols.application.dtls.protocol import DTLS
 if TYPE_CHECKING:
     from typing import Optional
 
-    from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
+    from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
     from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 
 __all__ = ['dtls_handshake']
@@ -29,7 +29,7 @@ __all__ = ['dtls_handshake']
 
 def dtls_handshake(datagram: 'DTLS_Datagram') -> 'Optional[Data_DTLSHandshake]':
     """Parse a DTLS handshake message reassembled by
-    :class:`~pcapkit.foundation.reassembly.dtls.DTLS`.
+    :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS`.
 
     The message is decoded by :meth:`DTLS.analyze_handshake
     <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`, which reads
@@ -48,7 +48,7 @@ def dtls_handshake(datagram: 'DTLS_Datagram') -> 'Optional[Data_DTLSHandshake]':
         incomplete, as its missing octets cannot be decoded.
 
     Note:
-        :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.dtls.Datagram.packet>`
+        :attr:`Datagram.packet <pcapkit.foundation.reassembly.dtls.data.Datagram.packet>`
         holds the same result, decoded on its first read, unless the
         reassembly's ``__protocol_type__`` names another protocol, whose
         ``analyze_handshake`` then decodes it instead.

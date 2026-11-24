@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-"""data models for TCP reassembly"""
+"""data models for TCP reassembly
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.tcp``, with no alias: the module moved here
+   (:issue:`2882`).
+
+"""
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.packet import DeferredPacket
-from pcapkit.foundation.reassembly.data.data import Completion, Deferred
+from pcapkit.foundation.reassembly.data import Completion, Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -76,7 +83,7 @@ class Packet(Info):
     #: Capture timestamp of the segment, in seconds since the Unix epoch, i.e.
     #: the *capture's* clock rather than the host's. It drives the reassembly
     #: timeout, which for TCP is off by default -- see
-    #: :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.TCP.__timeout__>`.
+    #: :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.reassembly.TCP.__timeout__>`.
     timestamp: 'float'
 
     if TYPE_CHECKING:
@@ -89,8 +96,8 @@ class DatagramID(Info, Generic[_AT]):
 
     Note:
         The ports here stay bare :obj:`int` port numbers, where the pair
-        :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` hands
-        :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is one of
+        :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` hands
+        :class:`~pcapkit.foundation.reassembly.data.Deferred` is one of
         :class:`~pcapkit.const.reg.apptype.tcp.TCP` members
         (:issue:`2417`). The two are not the same thing to name: this is the
         flow's identity, split out of :data:`BufferID`, which every
@@ -122,9 +129,9 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     """Data model for :term:`TCP <reasm.tcp.datagram>` reassembled datagram."""
 
     #: How completely the datagram was reassembled, and why reassembly stopped;
-    #: see :class:`~pcapkit.foundation.reassembly.data.data.Completion`. Only
+    #: see :class:`~pcapkit.foundation.reassembly.data.Completion`. Only
     #: :attr:`Completion.COMPLETE
-    #: <pcapkit.foundation.reassembly.data.data.Completion.COMPLETE>` is truthy, so
+    #: <pcapkit.foundation.reassembly.data.Completion.COMPLETE>` is truthy, so
     #: ``if datagram.completed:`` reads as it would for a :obj:`bool`.
     completed: 'Completion'
     #: Listing ``packet`` here is what makes it lazy -- see
@@ -133,7 +140,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Placeholder class :attr:`packet` may hold, for
     #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted
     #: for the reason given on
-    #: :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`'s own
+    #: :class:`~pcapkit.foundation.reassembly.ip.data.Datagram`'s own
     #: ``__deferred__``: :func:`isinstance` rejects a parameterized generic.
     __deferred__ = Deferred
 
@@ -148,7 +155,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Parsed TCP payload, as :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`
     #: returns it unless the reassembly's ``__protocol_type__`` names another
     #: protocol, which then parses it. Analysed on first read rather than at
-    #: construction; a :class:`~pcapkit.foundation.reassembly.data.data.Deferred`
+    #: construction; a :class:`~pcapkit.foundation.reassembly.data.Deferred`
     #: may be passed in its place, and reading this attribute then runs it and
     #: keeps the result.
     packet: 'Optional[ProtocolBase]'
@@ -169,7 +176,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
 
     if TYPE_CHECKING:
         # NOTE: one signature, no ``@overload`` pair keyed on ``completed``, as on
-        # :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`.
+        # :class:`~pcapkit.foundation.reassembly.ip.data.Datagram`.
         def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred[tuple[AppType_TCP, AppType_TCP]]]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
@@ -196,7 +203,7 @@ class HoleDescriptor(Info):
 
        ``HoleDiscriptor``, and its re-export
        ``pcapkit.foundation.reassembly.data.TCP_HoleDiscriptor``, with no
-       alias; import :class:`~pcapkit.foundation.reassembly.data.tcp.HoleDescriptor` and ``TCP_HoleDescriptor`` instead.
+       alias; import :class:`~pcapkit.foundation.reassembly.tcp.data.HoleDescriptor` instead.
 
     """
 
@@ -230,7 +237,7 @@ class Fragment(Info):
     #: Sequence ranges, absolute and inclusive, still zero-fill placeholder in
     #: :attr:`raw` rather than an actually-received byte *of this fragment*.
     #: Only the gap-creating sites in :meth:`TCP.reassembly
-    #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` -- the forward
+    #: <pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly>` -- the forward
     #: append and the reach-back prepend, the only places that ever splice a
     #: ``bytearray(GAP)`` filler into :attr:`raw` -- add an entry; an overlap
     #: merge only ever shrinks or removes one, filling it from the arriving
@@ -241,7 +248,7 @@ class Fragment(Info):
     #: incomplete.
     #:
     #: This is deliberately **not** derived from
-    #: :attr:`Buffer.hdl <pcapkit.foundation.reassembly.data.tcp.Buffer.hdl>`.
+    #: :attr:`Buffer.hdl <pcapkit.foundation.reassembly.tcp.data.Buffer.hdl>`.
     #: ``hdl`` is one list shared by every acknowledgement number under the
     #: same buffer ID, so a segment landing in a *different* fragment can
     #: close a hole in ``hdl`` that this fragment's own :attr:`raw` never
@@ -249,13 +256,13 @@ class Fragment(Info):
     #: position here was "already received" then answers a question about
     #: the wrong fragment. Tracking gaps on the fragment itself is what keeps
     #: the merge in :meth:`TCP.reassembly
-    #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` from discarding
+    #: <pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly>` from discarding
     #: this fragment's own real bytes because some *other* fragment happened
     #: to have received something at the same absolute sequence numbers.
     #:
     #: Absolute sequence numbers rather than offsets into :attr:`raw` --
     #: :attr:`conflict` below uses the same convention -- because it is what
-    #: :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.TCP.reassembly>`
+    #: :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly>`
     #: already computes (``GAP = PSN - (ISN + LEN)`` and its mirror), so this
     #: reuses an existing concept rather than adding a second one; and because a
     #: gap entry then never needs shifting when :attr:`isn` is revised downward by the
@@ -269,7 +276,7 @@ class Fragment(Info):
     #: disagreed with bytes already held in :attr:`raw`. Accumulated across
     #: every merge into this fragment, in the order the conflicts were found;
     #: carried onto :attr:`Datagram.conflict
-    #: <pcapkit.foundation.reassembly.data.tcp.Datagram.conflict>` verbatim
+    #: <pcapkit.foundation.reassembly.tcp.data.Datagram.conflict>` verbatim
     #: when the buffer is submitted.
     conflict: 'list[tuple[int, int]]'
 

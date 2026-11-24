@@ -84,7 +84,7 @@ Known Limitations
 octets, flagged
 :attr:`~pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented`.
 ``Extractor(fin, reassembly=['dtls'])`` reassembles the message
-(:class:`~pcapkit.foundation.reassembly.dtls.DTLS`), and
+(:class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS`), and
 :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it with
 :meth:`DTLS.analyze_handshake`, which reads it with :meth:`DTLS.read_handshake`.
 Only the first record of each datagram is reassembled.
@@ -701,8 +701,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         """Analyse a reassembled handshake message from its header and body.
 
         :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs this, and
-        so does the :class:`~pcapkit.foundation.reassembly.data.data.Deferred`
-        that :class:`~pcapkit.foundation.reassembly.dtls.DTLS` stores as a
+        so does the :class:`~pcapkit.foundation.reassembly.data.Deferred`
+        that :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` stores as a
         complete message's ``packet`` (:issue:`2622`).
 
         The message is read by :meth:`read_handshake` as if it had arrived

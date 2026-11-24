@@ -3,15 +3,16 @@ DTLS Handshake-Message Reassembly
 =================================
 
 .. module:: pcapkit.foundation.reassembly.dtls
+.. module:: pcapkit.foundation.reassembly.dtls.reassembly
 
-:mod:`pcapkit.foundation.reassembly.dtls` contains
-:class:`~pcapkit.foundation.reassembly.dtls.DTLS` only, which reconstructs a
+:mod:`pcapkit.foundation.reassembly.dtls.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` only, which reconstructs a
 DTLS handshake message split across several records back to origin
 (:rfc:`6347#section-4.2.3`).
 
 .. versionadded:: 1.6.0
 
-.. autoclass:: pcapkit.foundation.reassembly.dtls.DTLS
+.. autoclass:: pcapkit.foundation.reassembly.dtls.reassembly.DTLS
    :no-members:
    :show-inheritance:
 
@@ -62,8 +63,8 @@ Terminology
 
    reasm.dtls.packet
        Data structure for **DTLS handshake-fragment reassembly**
-       (:meth:`DTLS.reassembly <pcapkit.foundation.reassembly.dtls.DTLS.reassembly>`)
-       is :class:`~pcapkit.foundation.reassembly.data.dtls.Packet` -- one
+       (:meth:`DTLS.reassembly <pcapkit.foundation.reassembly.dtls.reassembly.DTLS.reassembly>`)
+       is :class:`~pcapkit.foundation.reassembly.dtls.data.Packet` -- one
        fragment's own ``bufid``, ``message_seq``, ``fragment_offset``,
        ``fragment_length`` and raw ``payload``, built by
        :func:`pcapkit.toolkit.pcap.dtls_reassembly` or
@@ -73,7 +74,7 @@ Terminology
    reasm.dtls.datagram
        Data structure for **reassembled DTLS handshake message** (element of
        :attr:`DTLS.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`)
-       is :class:`~pcapkit.foundation.reassembly.data.dtls.Datagram` --
+       is :class:`~pcapkit.foundation.reassembly.dtls.data.Datagram` --
        ``completed``, the original packet identifier, the packet numbers
        that built it, ``body``, the reassembled payload (a contiguous
        :obj:`bytes`, or -- under ``strict=True`` and an incomplete message --
@@ -85,45 +86,51 @@ Terminology
    reasm.dtls.buffer
        Data structure for internal buffering
        (:attr:`DTLS._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
-       is :class:`~pcapkit.foundation.reassembly.data.dtls.Buffer` -- every
+       is :class:`~pcapkit.foundation.reassembly.dtls.data.Buffer` -- every
        message under reconstruction for one
-       :data:`~pcapkit.foundation.reassembly.data.dtls.BufferID` (one UDP
+       :data:`~pcapkit.foundation.reassembly.dtls.data.BufferID` (one UDP
        association at one DTLS epoch), each keyed by its
-       :attr:`~pcapkit.foundation.reassembly.data.dtls.Packet.message_seq` and
-       held as a :class:`~pcapkit.foundation.reassembly.data.dtls.Fragment` --
+       :attr:`~pcapkit.foundation.reassembly.dtls.data.Packet.message_seq` and
+       held as a :class:`~pcapkit.foundation.reassembly.dtls.data.Fragment` --
        its hole descriptor list
-       (:class:`~pcapkit.foundation.reassembly.data.dtls.HoleDescriptor`) and
+       (:class:`~pcapkit.foundation.reassembly.dtls.data.HoleDescriptor`) and
        its zero-filled payload buffer.
 
 Data Models
 ===========
 
-.. module:: pcapkit.foundation.reassembly.data.dtls
-.. currentmodule:: pcapkit.foundation.reassembly.dtls
+.. module:: pcapkit.foundation.reassembly.dtls.data
 
-.. autoclass:: pcapkit.foundation.reassembly.data.dtls.Packet
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.dtls``, with no alias: the module moved here
+   (:issue:`2882`).
+
+.. currentmodule:: pcapkit.foundation.reassembly.dtls.reassembly
+
+.. autoclass:: pcapkit.foundation.reassembly.dtls.data.Packet
    :members:
    :show-inheritance:
 
-.. autodata:: pcapkit.foundation.reassembly.data.dtls.BufferID
+.. autodata:: pcapkit.foundation.reassembly.dtls.data.BufferID
 
-.. autoclass:: pcapkit.foundation.reassembly.data.dtls.DatagramID
+.. autoclass:: pcapkit.foundation.reassembly.dtls.data.DatagramID
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.dtls.Datagram
+.. autoclass:: pcapkit.foundation.reassembly.dtls.data.Datagram
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.dtls.HoleDescriptor
+.. autoclass:: pcapkit.foundation.reassembly.dtls.data.HoleDescriptor
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.dtls.Fragment
+.. autoclass:: pcapkit.foundation.reassembly.dtls.data.Fragment
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.dtls.Buffer
+.. autoclass:: pcapkit.foundation.reassembly.dtls.data.Buffer
    :members:
    :show-inheritance:
 
@@ -131,7 +138,7 @@ Type Variables
 ==============
 
 .. data:: _AT
-   :module: pcapkit.foundation.reassembly.data.dtls
+   :module: pcapkit.foundation.reassembly.dtls.data
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
    IP address type.

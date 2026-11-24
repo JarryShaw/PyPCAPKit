@@ -5,10 +5,10 @@
 IP and TCP once #2528 routed it through the toolkit and the analysis:
 
 * a reassembled message carried no ``packet``, where an IP or TCP datagram's is a
-  :class:`~pcapkit.foundation.reassembly.data.data.Deferred` parse run on first
+  :class:`~pcapkit.foundation.reassembly.data.Deferred` parse run on first
   read -- for DTLS, the decoding
   :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` does;
-* :class:`~pcapkit.foundation.reassembly.dtls.DTLS` set no ``__protocol_type__``,
+* :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` set no ``__protocol_type__``,
   so its protocol was looked up in the protocol registry by name.
 
 Each case runs the default engine over a capture built in memory, as PCAP and as
@@ -77,7 +77,7 @@ class DeferredPacketTests(unittest.TestCase):
 
     def test_a_complete_message_holds_a_deferred_decode(self) -> None:
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         for container, write in CONTAINERS:
             with self.subTest(container=container):
@@ -131,7 +131,7 @@ class DeferredPacketTests(unittest.TestCase):
 
     def test_a_deferred_datagram_pickles_and_still_decodes(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         for container, write in CONTAINERS:
             for protocol in range(pickle.HIGHEST_PROTOCOL + 1):

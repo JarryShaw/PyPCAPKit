@@ -342,7 +342,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` bounds how many frames
   are dissected.
 
-* **Added** -- :class:`pcapkit.foundation.reassembly.dtls.DTLS`, exported as
+* **Added** -- :class:`pcapkit.foundation.reassembly.dtls.reassembly.DTLS`, exported as
   ``DTLS_Reassembly``, which reassembles a DTLS handshake message fragmented
   across records (:rfc:`6347#section-4.2.3`), keyed by the UDP 4-tuple and the
   epoch, accepting overlapping fragments and holding a buffer until it
@@ -354,7 +354,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   datagram only; any other engine turns it off with a warning.
   :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a
   reassembled message (:issue:`2496`, :pr:`2528`). A reassembled
-  :class:`Datagram <pcapkit.foundation.reassembly.data.dtls.Datagram>` holds
+  :class:`Datagram <pcapkit.foundation.reassembly.dtls.data.Datagram>` holds
   that decode as ``packet``, run on its first read as an IP or TCP datagram's
   is, and :data:`None` for an incomplete message (:issue:`2531`, :pr:`2605`).
   Both run the classmethod
@@ -824,7 +824,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Changed** -- **a breaking change to** the mapping values a caller reads as a
   :class:`dict`: each is an :class:`~pcapkit.corekit.infoclass.Info` or a data
   model, not a :class:`dict` (:issue:`2726`, :pr:`2734`).
-  :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, the frame a
+  :class:`~pcapkit.foundation.traceflow.data.FrameRecord`, the frame a
   third-party engine's flow tracing reports, is an ``Info`` where 1.5.x
   subclassed :class:`dict`, so ``isinstance(record, dict)`` is false, setting a
   key raises :exc:`TypeError`, and ``to_dict()`` exports the engine's mapping
@@ -880,10 +880,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Changed** -- **a breaking change to** IPv6 reassembly: a fragment
   overlapping another of its datagram, other than an exact duplicate, abandons
   the datagram, reported as
-  :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`,
+  :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.Completion.OVERLAP>`,
   as :rfc:`8200#section-4.5` requires; 1.5.x overwrote the octets it overlapped,
   as IPv4 still does under :rfc:`791` (:issue:`2547`, :pr:`2569`).
-  :class:`~pcapkit.foundation.reassembly.data.ip.Buffer` gains a required
+  :class:`~pcapkit.foundation.reassembly.ip.data.Buffer` gains a required
   ``extent`` field.
 
 * **Changed** -- **a breaking change to** TCP reassembly's gap cap:
@@ -891,7 +891,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   alias, and the cap is :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`, set
   by ``PCAPKIT_TCP_GAP_LIMIT``, 16 MiB by default as before and ``-1`` for no
   limit (:issue:`2546`, :pr:`2579`). It is a safety limit, read each time
-  :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.TCP.reassembly>`
+  :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly>`
   runs, and ``-1`` or a value above the default warns with
   :exc:`~pcapkit.utilities.warnings.ConfigWarning`.
 

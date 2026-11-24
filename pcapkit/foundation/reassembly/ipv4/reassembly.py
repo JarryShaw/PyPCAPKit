@@ -2,15 +2,15 @@
 """IPv4 Datagram Reassembly
 ==============================
 
-.. module:: pcapkit.foundation.reassembly.ipv4
+.. module:: pcapkit.foundation.reassembly.ipv4.reassembly
 
-:mod:`pcapkit.foundation.reassembly.ipv4` contains
-:class:`~pcapkit.foundation.reassembly.ipv4.IPv4`
+:mod:`pcapkit.foundation.reassembly.ipv4.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`
 only, which reconstructs fragmented IPv4 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
 """
-from pcapkit.foundation.reassembly.ip import IP
+from pcapkit.foundation.reassembly.ip.reassembly import IP
 from pcapkit.protocols.internet.ipv4.protocol import IPv4 as IPv4_Protocol
 
 __all__ = ['IPv4']
@@ -34,7 +34,7 @@ class IPv4(IP):
             :data:`None` selects :attr:`__timeout__`
 
     Example:
-        >>> from pcapkit.foundation.reassembly.ipv4 import IPv4
+        >>> from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         # Initialise instance:
         >>> ipv4_reassembly = IPv4()
         # Call reassembly:
@@ -69,7 +69,7 @@ class IPv4(IP):
     #: seconds" -- an initial lower bound that a later fragment's TTL raises,
     #: up to the 4.25-minute TTL ceiling, not a 15-second deadline. It is ruled
     #: out here: the recommendation is superseded, and TTL is not in
-    #: :class:`~pcapkit.foundation.reassembly.data.ip.Packet` at all, so the
+    #: :class:`~pcapkit.foundation.reassembly.ip.data.Packet` at all, so the
     #: fragment model would have to grow a field to express a scheme RFC 1122
     #: asks implementations not to use.
     #:

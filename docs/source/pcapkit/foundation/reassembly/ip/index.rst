@@ -109,7 +109,7 @@ Departures from the procedure above:
 * An IPv6 fragment that overlaps another, other than an exact duplicate,
   abandons its datagram rather than overwriting the octets it overlaps, per
   :rfc:`8200#section-4.5`; the datagram is reported as
-  :attr:`~pcapkit.foundation.reassembly.data.data.Completion.OVERLAP`
+  :attr:`~pcapkit.foundation.reassembly.data.Completion.OVERLAP`
   (:issue:`2547`).
 * ``TDL`` starts at ``-1`` rather than ``0``, so that a datagram carrying no
   data can complete (:issue:`1359`).
