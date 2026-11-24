@@ -196,7 +196,8 @@ Board Sweep
    removes every label -- reading them back from the item rather than from the search
    index, which lags. Beyond the one a worker sets on opening its pull request,
    milestones are left to their automation.
-#. **Prune spent worktrees** (`Worktree Cleanup`_).
+#. **Prune spent worktrees and branches** (`Worktree Cleanup`_,
+   `Remote Branch Cleanup`_).
 #. **Lead the report with what is ready to merge**: ``review: good-to-go`` at the
    current head, every required check run completed, none failed. Experimental legs
    count against neither condition; a :ref:`KTLO <ktlo-tier>` leg is left out of the
@@ -354,6 +355,12 @@ The steps that the graph compresses:
    Kinds refresh, every number it adds has its kind confirmed on GitHub. A Python
    Versions proposal's new line enters ``supported``, so its legs block and are read
    green before merge.
+*  **Dependabot's paired docs bumps get one review.** Where a root ``pip`` pull request
+   bumps both :file:`docs/requirements.txt` and the :file:`pyproject.toml` ``docs``
+   extra, and a ``/docs`` one bumps only the requirements file, which fails
+   :file:`tests/project/test_docs_typehints_pin_1856_unit.py` on its own, the root one
+   is reviewed. The ``/docs`` one is labelled ``duplicate`` and its CI cancelled, and
+   Dependabot closes it once the root one merges, as with :pr:`2931` and :pr:`2932`.
 
 The Decision Loop
 -----------------
@@ -433,14 +440,16 @@ After every merge the sweep runs, in order:
    behind, and the owner merges through the bypass.
 #. **The changelog fold**: the merged pull request's entry is written into the
    release's central changelog pull request (:ref:`release-lines`).
-#. **Worktrees**: the merged pull request's worktrees become prunable.
+#. **Worktrees and branch**: the merged pull request's worktrees become prunable, and
+   its branch is deleted (`Remote Branch Cleanup`_).
 
 On a pull request no run is cancelled: a cancelled run leaves a red mark on its
 commit that reads as a failure, which is why the owner ruled out cancelling
-superseded runs on :issue:`2243`. A ``review: needs-changes`` head is the exception --
-every run on it is cancelled except the board-sync ones, Project Status and Milestone,
-since that head is going to be replaced. Experimental Tests lets a newer commit
-supersede its run, which it skips or stops rather than cancels (:doc:`workflows`).
+superseded runs on :issue:`2243`. A ``review: needs-changes`` head and a ``duplicate``
+Dependabot pull request are the exceptions -- every run on them is cancelled except the
+board-sync ones, Project Status and Milestone, since the head is going to be replaced
+or the pull request closed. Experimental Tests lets a newer commit supersede its run,
+which it skips or stops rather than cancels (:doc:`workflows`).
 
 .. mermaid::
 
@@ -543,6 +552,17 @@ conservative:
    never force past a lock: the lock is the signal.
 *  **Never commit inside a live agent's worktree**; copy its diff out to a tree of your
    own. A state change the agent did not make looks to it like a fault.
+
+Remote Branch Cleanup
+~~~~~~~~~~~~~~~~~~~~~
+
+*  **A pull request's branch is deleted once it merges or closes.** The repository does
+   not delete it on merge.
+*  **One branch per call, through the REST API**:
+   ``gh api -X DELETE repos/JarryShaw/PyPCAPKit/git/refs/heads/<branch>``. A
+   ``git push --delete`` naming more than five refs is refused: a repository rule
+   caps a push at five branch or tag updates (``GH013``).
+*  **Branches under** ``test/`` **are kept.**
 
 Briefs
 ------
@@ -745,6 +765,8 @@ Failure Modes and Their Guards
      - commented holds (`Throttles and Guards`_)
    * - A prune selected live agents' trees
      - keep rules (`Worktree Cleanup`_)
+   * - A multi-ref ``git push --delete`` was refused
+     - one REST delete per branch (`Remote Branch Cleanup`_)
    * - A measurement read the shared checkout
      - ``pcapkit.__file__`` assert (`Briefs`_)
    * - A cross-review likely ran on the author's model

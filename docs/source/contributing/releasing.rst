@@ -19,7 +19,13 @@ Release Lines
 A minor release, ``X.Y.0``, carries the roadmap work (:doc:`pep`) its milestone
 tracks; a patch release, ``X.Y.Z``, ships fixes and vendor refreshes; and a vendor bump
 between releases is a ``.postN`` of the release before it. A line is planned on its
-milestone and its *Release X.Y* view on the project board (:ref:`process`).
+milestone, its scope issue and its *Release X.Y* view on the project board, set up as
+:ref:`a new line opens <process-release-scope>`.
+
+**A major release,** ``X.0.0``, **isolates one change to the core model** and carries
+nothing else. The roadmap work that can or should be done ships first, a batch per
+minor, so the major lands on a mostly closed-out roadmap. Ruled on :issue:`2805`; which
+work goes in which version is in the milestones and their scope issues.
 
 A final release, ``X.Y.0`` or ``X.Y.Z``, runs these steps in order, ruled on
 :issue:`2805`:
@@ -85,11 +91,26 @@ The steps of a ``vendor-update`` run, from the crawl to the push:
        DOCS -->|committed| PUSH["Push changes to main<br/>not on a manual run"]
        COMMIT --> PUSH
 
-The same script is the manual entry point: run ``python util/bump_version.py`` and
-commit the result to ``main`` for a release that is not a vendor-registry refresh.
-While ``main``'s version is a ``.devN`` one it only advances that counter
-(``1.6.0.dev2`` to ``1.6.0.dev3``), producing another blocked dev version, not a
-release (see the dev-release note below).
+.. note::
+
+   **A scheduled bump ships whatever** ``main`` **holds.** While ``main`` carries
+   unreleased minor work, a Vendor Update whose crawl changed code bumps the released
+   line to its next ``.postN``, and that release would publish the unreleased work
+   under the old line's number. Until :issue:`2942` moves that work onto ``develop``,
+   the owner rejects such a run's ``github-release`` approval (:issue:`2805`).
+
+**A new minor or patch release is a hand edit.** The script takes no target version: it
+advances a ``devN``, pre-release or ``postN`` counter, and gives a final release
+``.post1``, so ``1.6.2`` becomes ``1.6.2.post1``. So ``X.Y.0`` or ``X.Y.Z`` is one
+commit to ``main`` that sets ``__version__`` in :file:`pcapkit/__init__.py` and
+:file:`CITATION.cff`'s ``version`` and ``date-released``, the latter to the commit's
+UTC date, and checks that :file:`conda/build` reads ``0``, as the script would leave it.
+
+The script is the manual entry point for the next counter: run
+``python util/bump_version.py`` and commit the result to ``main``. While ``main``'s
+version is a ``.devN`` one it only advances that counter (``1.6.0.dev2`` to
+``1.6.0.dev3``), producing another blocked dev version, not a release (see the
+dev-release note below).
 
 Editing ``__version__`` by hand without moving :file:`CITATION.cff`'s ``version``
 field to match **blocks the release**.

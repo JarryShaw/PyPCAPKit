@@ -109,16 +109,29 @@ Both are measurable:
        --search 'shared 1.5.0 changelog in:title' \
        --json commits -q '.[].commits|length'
 
-The grouping scheme was settled on :issue:`918`: **a section per top-level module, with**
-``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
-per-file and not per-subpackage. No entry in the file carries an inline kind label::
+**Every final release has a page of its own**, :file:`docs/source/changelog/X.Y.Z.rst`.
+A pre- or post-release gets none: its changes fold into the page of the final release
+that follows it, as 1.5.0's pre-releases and ``1.6.1.post1``'s refresh do. The owner
+kept that rule on :issue:`2805`.
 
-   $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
-   0
+**How a page groups its entries depends on its size**, ruled on :issue:`2805`:
 
-Each section names a module except *Project infrastructure*, which is for what
-belongs to none. The map is one-to-one with the package list below -- every package,
-:mod:`pcapkit.interface` included, has a section of its own:
+*  **Many entries** -- more than about 15, or spanning three or more top-level
+   modules -- take the scheme settled on :issue:`918`: **a section per top-level
+   module, with** ``Added``/``Changed``/``Fixed`` **nested inside each** -- module
+   granularity, not per-file and not per-subpackage -- and no inline kind label, as
+   in 1.5.0::
+
+      $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
+      0
+
+*  **Few entries**, as in a patch release or a small minor, take flat bullets led by
+   their kind -- ``* **Added** --``, ``* **Changed** --``, ``* **Fixed** --`` -- as
+   1.6.1 and 1.6.2 do.
+
+Under the module scheme each section names a module except *Project infrastructure*,
+which is for what belongs to none. The map is one-to-one with the package list below --
+every package, :mod:`pcapkit.interface` included, has a section of its own:
 
 .. code-block:: shell
 
@@ -128,10 +141,9 @@ belongs to none. The map is one-to-one with the package list below -- every pack
 
 .. note::
 
-   One case the rule does not settle by itself: an entry whose change spans modules --
-   the reassembly and extraction ones touch :mod:`pcapkit.foundation` and
-   :mod:`pcapkit.protocols` together. Ruled on
-   :issue:`952`: file it under the
+   One case the module scheme does not settle by itself: an entry whose change spans
+   modules -- the reassembly and extraction ones touch :mod:`pcapkit.foundation` and
+   :mod:`pcapkit.protocols` together. Ruled on :issue:`952`: file it under the
    module the change is *about*, name the others in the entry's own text, and do
    **not** duplicate the entry into each section. A reader scanning one module's
    section wants that module's changes; the same prose appearing twice reads as two
@@ -339,10 +351,12 @@ Milestones and the Project Board
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Milestones are release lines**, titled by minor version (``PyPCAPKit v1.4``,
-``PyPCAPKit v1.5``). An issue or pull request belongs to the line it ships in: the
-open milestone collects work targeting the next release, and it is closed when that release's final tag is cut,
-with ``due_on`` set to the tag date. Work closed without shipping -- an unmerged pull
-request, an issue closed as not planned -- takes no milestone.
+``PyPCAPKit v1.5``). An issue or pull request belongs to the line it ships in: a
+milestone collects the work of its line's ``X.Y.0`` release **and of its patch
+releases**, as v1.6 stayed open through 1.6.2 (:issue:`2805`), and it is closed when the
+line's last final tag is cut, with ``due_on`` set to that tag's date. Work closed
+without shipping -- an unmerged pull request, an issue closed as not planned -- takes
+no milestone.
 :file:`.github/workflows/milestone.yml` gives an item the open milestone as it opens,
 and settles it as the item closes; a milestone already set by hand to another
 release is kept, and a manual run backfills the items without one
@@ -397,14 +411,32 @@ The board has these views: *All items*; *Board*, the open items in one column pe
 Status; *Needs decision* and *Blocked*, each the open items in that state; *Open
 pull requests*; *History*, everything *Done*; and a *Release X.Y* board for each
 milestone, grouped by Status, filtered on it and showing the earlier release views'
-fields. A new line gets both: the milestone ``PyPCAPKit vX.Y``, described *Changes for
-the vX.Y.0 release.*, and its view; :ref:`release-lines` has the steps that follow.
-Sorting and grouping are set in the web interface; names, layouts, filters and columns
-can also be set through the GraphQL API (``updateProjectV2View``).
+fields. Sorting and grouping are set in the web interface. Through the GraphQL API,
+``createProjectV2View`` creates a view, and ``updateProjectV2View`` sets its name,
+layout, filter and columns.
 
-Link neither from docstrings, code comments or Markdown files. Both are tracking
-metadata that changes as work moves, and a link to them goes stale the way a line
-number does; the changelog's ``:issue:`` and ``:pr:`` roles are the durable trail.
+.. _process-release-scope:
+
+**A new line is set up in full as it opens**, on the owner's ask on :issue:`2805`:
+
+#. **the milestone** ``PyPCAPKit vX.Y``, described *Changes for the vX.Y.0 release and
+   its vX.Y.x patch releases.*, with the line's issues and open pull requests attached;
+#. **its** *Release X.Y* **view**;
+#. **its scope issue**, ``release: X.Y.0 scope``, in the milestone and labelled
+   ``release``.
+
+:ref:`release-lines` has the steps that follow.
+
+**The scope issue is the line's plan**, ruled on :issue:`2805`, which is 1.7.0's
+own. Every other issue in the milestone is one of its sub-issues, or a sub-issue of
+one, and its body lists the items, what moved out, and the closing steps with the
+status of each. An issue has one parent, so an issue that moves milestone is
+re-parented under its new line's scope issue as it moves.
+
+Link neither the board nor a milestone from docstrings, code comments or Markdown
+files. Both are tracking metadata that changes as work moves, and a link to them goes
+stale the way a line number does; the changelog's ``:issue:`` and ``:pr:`` roles are
+the durable trail.
 The repository wiki is disabled -- contributor documentation lives on these pages.
 
 CI Timing Review
