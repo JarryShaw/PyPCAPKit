@@ -9,7 +9,9 @@ time the name is reached, rather than with the package itself. Every package und
 :mod:`pcapkit.const` imports its enumerations that way (:issue:`2729`), so a caller
 pays only for the enumerations it uses. Those first imports, and that of a
 :class:`~pcapkit.corekit.module.ModuleDescriptor`, hold :data:`import_lock`, one
-thread at a time (:issue:`2771`). This module imports nothing from :mod:`pcapkit`;
+thread at a time (:issue:`2771`), as does a class's first
+:meth:`Info.from_dict <pcapkit.corekit.infoclass.Info.from_dict>`, which copies
+namespaces they write (:issue:`2870`). This module imports nothing from :mod:`pcapkit`;
 see :ref:`utilities-or-corekit`.
 
 .. versionadded:: 1.6.0

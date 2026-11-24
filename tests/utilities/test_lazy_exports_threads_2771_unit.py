@@ -53,8 +53,9 @@ DEADLINE = 60
 #: each of ``names``; parse each of ``frames`` from an Ethernet header; look up each
 #: protocol not imported yet with ``get_protocol`` if ``registry`` is set; and, given a
 #: ``capture``, make each of its ``calls``. Then print what failed, with its traceback,
-#: hung, was left unbound, parsed or resolved to the wrong class, or was imported for
-#: the first time without the lock held.
+#: hung, was left unbound, parsed or resolved to the wrong class -- a frame with the
+#: error its first ``Raw`` layer was kept for -- or was imported for the first time
+#: without the lock held.
 CHILD = '''
 import importlib, io, json, os, sys, threading, time, traceback
 
@@ -131,12 +132,14 @@ def run(kind, key, arg):
     if kind == 'attr':
         values[key, arg] = getattr(importlib.import_module(key), arg)
     elif kind == 'parse':
-        layer, names = Ethernet(io.BytesIO(bytes.fromhex(arg)), len(arg) // 2), []
+        layer, names, why = Ethernet(io.BytesIO(bytes.fromhex(arg)), len(arg) // 2), [], None
         for _ in range(8):
             names.append(type(layer).__name__)
+            if why is None and names[-1] == 'Raw':
+                why = layer.info.error
             layer = layer.payload
         if key not in names:
-            wrong.append(f'{key}: {names}')
+            wrong.append(f'{key}: {names}, kept raw for {why!r}')
     elif kind == 'call':
         calls[key]()
     elif ProtocolBase.get_protocol(key) is not getattr(sys.modules[arg.module], arg.name):

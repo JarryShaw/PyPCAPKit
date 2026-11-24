@@ -10,7 +10,8 @@ the first time the name is reached, rather than with the package itself. The
 :mod:`pcapkit.const` packages (:issue:`2729`) and the :mod:`pcapkit.protocols`
 packages (:issue:`2730`) import their exports that way. It also holds
 :data:`import_lock`, under which every such first import, and that of a
-:class:`~pcapkit.corekit.module.ModuleDescriptor`, is made.
+:class:`~pcapkit.corekit.module.ModuleDescriptor`, is made, and the namespaces
+those imports write are copied.
 
 .. versionadded:: 1.6.0
 
@@ -25,13 +26,16 @@ if TYPE_CHECKING:
 
 __all__ = ['lazy_exports', 'import_lock']
 
-# NOTE: no pcapkit module resolves a lazy name or a descriptor on import: imported directly,
-# it would wait on this lock holding its own import lock, which the holder may need (#2771).
+# NOTE: no pcapkit module resolves a lazy name, a descriptor or an Info's nested types on import: imported
+# directly, it would wait on this lock holding its own import lock, which the holder may need (#2771).
 #: threading.RLock: Held by every first import :func:`lazy_exports`
 #: makes, and by :attr:`ModuleDescriptor.klass
 #: <pcapkit.corekit.module.ModuleDescriptor.klass>` when its module is not imported
 #: yet, so threads make them one at a time; unserialised, they deadlock the import
-#: system (:issue:`2771`). Re-entrant, as one first import can nest another.
+#: system (:issue:`2771`). Re-entrant, as one first import can nest another. Also
+#: held by the first :meth:`Info.from_dict <pcapkit.corekit.infoclass.Info.from_dict>`
+#: of a class, which copies namespaces those imports and its own cache write
+#: (:issue:`2870`).
 import_lock = threading.RLock()
 
 
