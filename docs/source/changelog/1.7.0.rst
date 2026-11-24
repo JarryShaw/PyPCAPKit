@@ -41,8 +41,8 @@ Changed
   :func:`~pcapkit.corekit.schema.byteorder.family_byteorder` moves from
   ``pcapkit.protocols.link.loopback.protocol`` to
   :mod:`pcapkit.corekit.schema.byteorder`. The ``versionremoved`` note of each
-  old module in the API reference lists each name that left it and its new
-  home. A name its old module still imports for its own use resolves there
+  old module in the API reference lists each moved name that no longer
+  resolves there, with its new home. A name its old module still imports for its own use resolves there
   incidentally; the rest raise :exc:`ImportError`. To migrate, import each name
   from its new module, as
   ``from pcapkit.corekit.const.capture import MAGIC_NUMBER``.
@@ -113,7 +113,7 @@ Changed
   ``nofile``, ``fout``, ``format``, ``extension``, ``files``, ``ip``,
   ``ipv4``, ``ipv6``, ``tcp``, ``dtls``, the ``reasm_*``, ``trace_*`` and
   ``buffer_*`` parameters and ``no_eof`` are removed with no alias, and passing
-  one raises :exc:`TypeError`. Nothing is written without ``dump``, where 1.6.x
+  one raises :exc:`TypeError`. No report is written without ``dump``, where 1.6.x
   wrote ``out.txt``, and ``fin`` is opened as named, with no ``.pcap``
   appended. ``engine`` defaults to ``'default'`` and refuses :data:`None`, which
   stood for it, with :exc:`~pcapkit.utilities.exceptions.RegistryError`; an
