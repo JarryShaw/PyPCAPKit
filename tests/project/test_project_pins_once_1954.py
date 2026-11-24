@@ -81,7 +81,7 @@ class TestEveryPinStillRunsWhereTheMatrixDoesNot(unittest.TestCase):
                          'python util/cap_file_size.py python -m pytest -q -n logical --dist load')
 
     def test_the_ordering_cell_runs_every_pin(self) -> None:
-        """#2254: the ``project`` cells between them, as they cut ``tests/project`` in two."""
+        """#2254, #2913: the ``project`` cells between them, as they cut ``tests/project`` in parts."""
         matrix = job('unit-tests.yml', 'unittest-ordering')['strategy']['matrix']
         cells = [{'leg': name} for name in matrix['leg']] + list(matrix.get('include') or [])
         modules = set()
@@ -89,7 +89,7 @@ class TestEveryPinStillRunsWhereTheMatrixDoesNot(unittest.TestCase):
             if cell['leg'] == 'project':
                 words = str(cell.get('shard', '')).split()
                 flags = dict(zip(words[::2], words[1::2]))
-                cut = run_unittest_leg.half_bounds('project', int(flags['--half'])) if '--half' in flags else {}
+                cut = run_unittest_leg.part_bounds('project', int(flags['--part'])) if '--part' in flags else {}
                 modules.update(run_unittest_leg.leg_modules('project', **cut))
         self.assertTrue(modules, 'no unittest-ordering cell runs tests/project')
         pins = {pin[:-len('.py')].replace('/', '.') for pin in _tiers.project_pin_paths()}

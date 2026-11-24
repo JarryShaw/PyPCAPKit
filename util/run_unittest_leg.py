@@ -86,15 +86,18 @@ pollution between them is invisible; the workflow comment records which
 pairs that loses.
 
 GitHub issue #2254 -- sharding a flat leg: :mod:`tests.project` has no
-subdirectories to exclude, so ``--half 1`` and ``--half 2`` cut it at the module
-name :data:`SHARD_BOUNDARIES` holds for it: half 1 is every module sorting before
-it, half 2 the rest, so a new module lands in exactly one half. Every caller asks
-for a half rather than naming the boundary, so they cannot cut in different
-places. ``--before NAME`` and ``--from NAME`` cut at any other name, by hand.
-The name is compared with each module's path below the leg, so it can sit
-inside a subdirectory as well: ``protocols --exclude protocols/internet
---half 1`` and ``--half 2`` halve the rest of :mod:`tests.protocols` at its
-entry, the same ``--exclude`` on both.
+subdirectories to exclude, so ``--part N`` cuts it at the module names
+:data:`SHARD_BOUNDARIES` holds for it, in ascending order: part 1 is every module
+sorting before the first, each later part runs from its predecessor's name to its
+own, and the last takes the rest, so a new module lands in exactly one part
+(#2913). ``--half 1`` and ``--half 2`` cut at the one name :data:`HALF_BOUNDARIES`
+holds instead, which is ``project-tests``' cut. Every caller asks for a part or a
+half rather than naming a boundary, so the cells of one job cannot cut in
+different places. ``--before NAME`` and ``--from NAME`` cut at any other name, by
+hand. A name is compared with each module's path below the leg, so it can sit
+inside a subdirectory as well: ``protocols --exclude protocols/internet --part 1``
+to ``--part 3`` cut the rest of :mod:`tests.protocols` at its entry, the same
+``--exclude`` on each.
 
 What this still does not catch: a defect running the *other* direction (a
 root module polluting a directory module), interference between two
@@ -180,13 +183,21 @@ DEFAULT_STALL_DUMP = 1080
 #: Environment override for :data:`DEFAULT_STALL_DUMP`; ``--stall-dump`` wins.
 STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
 
-#: The path below each leg at which ``--half`` cuts it (#2254): a module name for
-#: the flat ``project``, :data:`tests._tiers.PROJECT_BOUNDARY`, where the
-#: ``project-tests`` cells cut the pins too (#2798), and a path inside ``schema/`` for
-#: ``protocols``, whose cells also pass ``--exclude protocols/internet``; that one
-#: moved from ``misc/test_q`` to even the halves' times on 5c20d06ab (#2899). Move one
-#: to rebalance; the workflow's cells ask for a half and follow.
-SHARD_BOUNDARIES = {'project': PROJECT_BOUNDARY, 'protocols': 'schema/test_schema_r'}
+#: The paths below each leg at which ``--part`` cuts it, ascending (#2254, #2913):
+#: module names for the flat ``project``, and for ``protocols``, whose cells also pass
+#: ``--exclude protocols/internet``, a path inside ``misc/`` and a name among the
+#: modules directly in :file:`tests/protocols`. Each is chosen so the parts take about
+#: the same CI time; move one to rebalance, and the workflow's cells, which ask for a
+#: part, follow.
+SHARD_BOUNDARIES = {
+    'project': ('test_m', 'test_release_t'),
+    'protocols': ('misc/test_pcapng_u', 'test_pc'),
+}
+
+#: The path below each leg at which ``--half`` cuts it in two: for ``project``,
+#: :data:`tests._tiers.PROJECT_BOUNDARY`, where the ``project-tests`` cells cut the
+#: pins too (#2798), so that job's docs-only path runs the leg in the same halves.
+HALF_BOUNDARIES = {'project': PROJECT_BOUNDARY}
 
 #: Run a full :func:`gc.collect` after every this many tests; see the
 #: module docstring for the measurements behind it. ``--gc-every 0`` disables.
@@ -280,19 +291,47 @@ def leg_modules(directory: 'str', exclude: 'Sequence[str]' = (), *,
     )
 
 
+def _cut(names: 'Sequence[str]', number: 'int', flag: 'str', directory: 'str') -> 'dict[str, str]':
+    """:func:`leg_modules`'s ``before`` and ``start`` for part ``number`` of a cut at ``names``.
+
+    Raises:
+        SystemExit: ``number`` is not one of the ``len(names) + 1`` parts.
+
+    """
+    if not 1 <= number <= len(names) + 1:
+        raise SystemExit(f'{flag}: tests/{directory} has parts 1 to {len(names) + 1}, not {number}')
+    bounds: 'dict[str, str]' = {}
+    if number > 1:
+        bounds['start'] = names[number - 2]
+    if number <= len(names):
+        bounds['before'] = names[number - 1]
+    return bounds
+
+
+def part_bounds(directory: 'str', part: 'int') -> 'dict[str, str]':
+    """:func:`leg_modules`'s ``before`` and ``start`` for part ``part`` of ``directory`` (#2913).
+
+    Raises:
+        SystemExit: ``directory`` has no :data:`SHARD_BOUNDARIES` entry, or ``part``
+            is not one of its parts.
+
+    """
+    if directory not in SHARD_BOUNDARIES:
+        raise SystemExit(f'--part: tests/{directory} has no boundary in SHARD_BOUNDARIES')
+    return _cut(SHARD_BOUNDARIES[directory], part, '--part', directory)
+
+
 def half_bounds(directory: 'str', half: 'int') -> 'dict[str, str]':
     """:func:`leg_modules`'s ``before`` or ``start`` for half ``half`` of ``directory``.
 
     Raises:
-        SystemExit: ``directory`` has no :data:`SHARD_BOUNDARIES` entry, or
+        SystemExit: ``directory`` has no :data:`HALF_BOUNDARIES` entry, or
             ``half`` is neither 1 nor 2.
 
     """
-    if directory not in SHARD_BOUNDARIES:
-        raise SystemExit(f'--half: tests/{directory} has no boundary in SHARD_BOUNDARIES')
-    if half not in (1, 2):
-        raise SystemExit(f'--half is 1 or 2, not {half}')
-    return {'before' if half == 1 else 'start': SHARD_BOUNDARIES[directory]}
+    if directory not in HALF_BOUNDARIES:
+        raise SystemExit(f'--half: tests/{directory} has no boundary in HALF_BOUNDARIES')
+    return _cut((HALF_BOUNDARIES[directory],), half, '--half', directory)
 
 
 def build_suite(directory: 'str', exclude: 'Sequence[str]' = (), *,
@@ -325,8 +364,12 @@ def main(argv: 'list[str] | None' = None) -> 'int':
              "repeatable. Used to run the remainder of a sharded leg.",
     )
     parser.add_argument(
+        '--part', type=int, metavar='N',
+        help='run part N of DIRECTORY, cut at its SHARD_BOUNDARIES names',
+    )
+    parser.add_argument(
         '--half', type=int, choices=(1, 2),
-        help='run half 1 or 2 of DIRECTORY, cut at its SHARD_BOUNDARIES name',
+        help='run half 1 or 2 of DIRECTORY, cut at its HALF_BOUNDARIES name',
     )
     parser.add_argument(
         '--before', metavar='NAME',
@@ -351,10 +394,14 @@ def main(argv: 'list[str] | None' = None) -> 'int':
         help=f'run gc.collect() after every N tests (default {DEFAULT_GC_EVERY}); 0 disables',
     )
     args = parser.parse_args(argv)
-    if args.half is not None:
+    if args.part is not None and args.half is not None:
+        parser.error('--part and --half cut at different names; pass one')
+    for flag, number, bounds in (('--part', args.part, part_bounds), ('--half', args.half, half_bounds)):
+        if number is None:
+            continue
         if args.before is not None or args.start is not None:
-            parser.error('--half sets the boundary itself; drop --before and --from')
-        for key, value in half_bounds(args.directory, args.half).items():
+            parser.error(f'{flag} sets the boundary itself; drop --before and --from')
+        for key, value in bounds(args.directory, number).items():
             setattr(args, key, value)
     stall_dump = args.stall_dump
     if stall_dump is None:
@@ -400,10 +447,10 @@ def _run(args: 'argparse.Namespace', start: 'float') -> 'int':
                  f'{result.testsRun} test(s), {len(result.failures)} failure(s), '
                  f'{len(result.errors)} error(s)')
         left_out = ''.join(f' (without tests/{spec})' for spec in args.exclude)
-        if cut['before'] is not None:
-            left_out += f" (before {cut['before']})"
         if cut['start'] is not None:
             left_out += f" (from {cut['start']})"
+        if cut['before'] is not None:
+            left_out += f" (before {cut['before']})"
         print(f'tests/{args.directory}{left_out} + {len(root_modules())} root module(s): '
               f'{tally}, {elapsed:.1f}s elapsed')
 

@@ -1286,22 +1286,29 @@ jobs:
   # stay in the rest, as moving them would split more pairs than it joins.
   #
   # #2254: the project cell's run step ran near its step cap, so tests/project,
-  # which has no subdirectories, is cut at a module name: `--half 1` and
-  # `--half 2`, at tests/_tiers.py's PROJECT_BOUNDARY, which SHARD_BOUNDARIES
-  # in util/run_unittest_leg.py holds for it and `project-tests`'s cells cut
-  # at too (#2798), so every module, a new one included, runs in exactly one
-  # half. The boundary is chosen so the halves take about the same CI time;
-  # both also run the root-level modules. Move it to rebalance. The same cost
-  # as #1029's: a pair split between the two cells does not share a process.
+  # which has no subdirectories, is cut at module names: `--part 1` to
+  # `--part 3`, at the names SHARD_BOUNDARIES in util/run_unittest_leg.py holds
+  # for it, so every module, a new one included, runs in exactly one part. The
+  # names are chosen so the parts take about the same CI time; each part also
+  # runs the root-level modules. Move one to rebalance. The same cost as
+  # #1029's: a pair split between two cells does not share a process.
   #
-  # The rest of protocols is halved the same way, at its SHARD_BOUNDARIES
-  # entry, with the `--exclude` in both halves. Its run step took 527 s on
+  # The rest of protocols is cut the same way, at its SHARD_BOUNDARIES
+  # entry, with the `--exclude` in every part. Its run step took 527 s on
   # a25eb0e39 and 1096 s on ab7be2fb0, and reached its 20-minute cap on
   # dea098b15: the modules added between took 267 s, and those already there
   # 826 s rather than 525 s, more the later they ran in the one process.
   # Measured locally on dea098b15, the halves took 530 s and 484 s, the whole
   # rest 1229 s. #2899: their modules took 335 s and 371 s on 5c20d06ab, so the
   # cut moved to about 353 s each there.
+  #
+  # #2913: the slower half of each reached 50% of the step cap at p90 in CI
+  # Timing run 45288959672, 12.5 and 11.0 min: project's once #2798 moved its
+  # cut, the rest of protocols' as its registry-wide sweeps grew with each
+  # protocol. So each is cut in three. On the --verbose logs of ab14cd8f0,
+  # 6b5fda6e9 and 4da6f2e6c, the modules' mean CI time splits 225, 214 and
+  # 228 s for project and 258, 252 and 265 s for the rest of protocols, and
+  # the root-level modules took about 113 s a cell.
   #
   # Every tests/ subdirectory is a leg except those below, and
   # tests/project/test_unittest_ordering_shards.py fails on a new one left out:
@@ -1346,23 +1353,30 @@ jobs:
           - utilities
           - vendor
         include:
-          # The remainder of tests/protocols, cut at one name -- see the #1029
-          # note above and the one on the rest's halves.
+          # The remainder of tests/protocols, cut at two names -- see the #1029
+          # note above and the one on the rest's parts.
           - leg: protocols
             exclude: --exclude protocols/internet
-            shard: --half 1
-            label: protocols (rest, half 1)
+            shard: --part 1
+            label: protocols (rest, part 1)
           - leg: protocols
             exclude: --exclude protocols/internet
-            shard: --half 2
-            label: protocols (rest, half 2)
-          # tests/project, cut at one module name -- see the #2254 note above.
+            shard: --part 2
+            label: protocols (rest, part 2)
+          - leg: protocols
+            exclude: --exclude protocols/internet
+            shard: --part 3
+            label: protocols (rest, part 3)
+          # tests/project, cut at two module names -- see the #2254 note above.
           - leg: project
-            shard: --half 1
-            label: project (half 1)
+            shard: --part 1
+            label: project (part 1)
           - leg: project
-            shard: --half 2
-            label: project (half 2)
+            shard: --part 2
+            label: project (part 2)
+          - leg: project
+            shard: --part 3
+            label: project (part 3)
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -1486,12 +1500,13 @@ jobs:
   #
   # #2798: the docs-only path held the job's p90 near its cap, so the job runs
   # as two cells, one per half of tests/project, cut at tests/_tiers.py's
-  # PROJECT_BOUNDARY, where `unittest-ordering`'s `project` cells cut it too.
+  # PROJECT_BOUNDARY, which HALF_BOUNDARIES in util/run_unittest_leg.py holds;
+  # `unittest-ordering` cuts the leg in three at names of its own (#2913).
   # On a code diff each cell runs its half of the pins; on a docs-only one, its
-  # half of the leg, as each ordering cell does, and half 1 the other docs
-  # readers too. Between them the cells run each pin, each tests/project module
-  # and each other docs reader once; tests/project/test_unittest_ordering_shards.py
-  # pins that. On d248be1f8's docs-only run the leg's tests/project modules took
+  # half of the leg, and half 1 the other docs readers too. Between them the
+  # cells run each pin, each tests/project module and each other docs reader
+  # once; tests/project/test_unittest_ordering_shards.py pins that. On
+  # d248be1f8's docs-only run the leg's tests/project modules took
   # 363 s and 419 s on either side of this boundary, and the root-level modules
   # 123-148 s in each half.
   project-tests:

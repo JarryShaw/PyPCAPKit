@@ -312,8 +312,9 @@ PROJECT_HALVES = (1, 2)
 #: whose path below that directory sorts before it, half 2 the rest, so a new module
 #: lands in exactly one half. :func:`project_pin_half` cuts the pins here and
 #: :file:`util/run_unittest_leg.py`'s ``--half`` cuts the ``project`` leg here, so
-#: ``project-tests`` and ``unittest-ordering`` cut in one place. It is chosen so the
-#: halves take about the same CI time; move it to rebalance, and the cells follow.
+#: the ``project-tests`` cells cut both in one place; ``unittest-ordering`` cuts the
+#: leg in three at its own names (#2913). It is chosen so the halves take about the
+#: same CI time; move it to rebalance, and the cells follow.
 PROJECT_BOUNDARY = 'test_pypy_w'
 #: The selector each cell of the ``project-tests`` job asks for its half of the pins,
 #: verbatim from the workflow, with the half as its one argument. Asked at run time,
