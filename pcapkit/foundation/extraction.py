@@ -680,38 +680,6 @@ class Extractor(Generic[_P]):
         cls._register_internal_engine(name, engine)
 
     @classmethod
-    def _register_internal_engine(cls, name: 'str', engine: 'ModuleDescriptor[EngineBase] | Type[EngineBase]') -> 'None':
-        """Register an engine for pcapkit's own use, bypassing the public guard.
-
-        Unlike :meth:`register_engine`, accepts a class deriving only from
-        :class:`~pcapkit.foundation.engines.engine.EngineBase`, which is how every
-        built-in engine is written. Not part of the public API.
-
-        Arguments:
-            name: engine name, lower-cased
-            engine: module descriptor or an
-                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
-
-        Raises:
-            RegistryError: If ``name`` is not a :obj:`str`, or ``engine`` is not an
-                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
-
-        Warns:
-            RegistryWarning: If a different class is already registered under
-                ``name``; it is overwritten.
-
-        """
-        name = _registry_key('engine', name)
-        if isinstance(engine, ModuleDescriptor):
-            engine = engine.klass
-        if not issubclass(engine, EngineBase):
-            raise RegistryError(f'Extractor._register_internal_engine: engine must be an EngineBase subclass, not {engine!r}')
-        incumbent = cls.__engine__.get(name)
-        if incumbent is not None and incumbent is not engine:
-            warn(f'engine {name} already registered, overwriting', RegistryWarning)
-        cls.__engine__[name] = engine
-
-    @classmethod
     def register_reassembly(cls, protocol: 'str', reassembly: 'ModuleDescriptor[Reassembly] | Type[Reassembly]') -> 'None':
         r"""Register a new reassembly engine.
 
@@ -774,39 +742,6 @@ class Extractor(Generic[_P]):
         if not issubclass(reassembly, Reassembly):
             raise RegistryError(f'reassembly must be a Reassembly subclass, not {reassembly!r}')
         cls._register_internal_reassembly(protocol, reassembly)
-
-    @classmethod
-    def _register_internal_reassembly(cls, protocol: 'str', reassembly: 'ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]') -> 'None':
-        """Register a reassembly class for pcapkit's own use, bypassing the public guard.
-
-        Unlike :meth:`register_reassembly`, accepts a class deriving only from
-        :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, which is how every
-        built-in is written. Not part of the public API.
-
-        Arguments:
-            protocol: protocol name, lower-cased
-            reassembly: module descriptor or a
-                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass
-
-        Raises:
-            RegistryError: If ``protocol`` is not a :obj:`str`, or ``reassembly``
-                is not a
-                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass.
-
-        Warns:
-            RegistryWarning: If a different class is already registered under
-                ``protocol``; it is overwritten.
-
-        """
-        protocol = _registry_key('reassembly', protocol)
-        if isinstance(reassembly, ModuleDescriptor):
-            reassembly = reassembly.klass
-        if not issubclass(reassembly, ReassemblyBase):
-            raise RegistryError(f'Extractor._register_internal_reassembly: reassembly must be a ReassemblyBase subclass, not {reassembly!r}')
-        incumbent = cls.__reassembly__.get(protocol)
-        if incumbent is not None and incumbent is not reassembly:
-            warn(f'reassembly {protocol} already registered, overwriting', RegistryWarning)
-        cls.__reassembly__[protocol] = reassembly
 
     @classmethod
     def make_reassembly(cls, protocol: 'str', *, strict: 'bool' = True, store: 'bool' = True,
@@ -915,39 +850,6 @@ class Extractor(Generic[_P]):
         cls._register_internal_traceflow(protocol, traceflow)
 
     @classmethod
-    def _register_internal_traceflow(cls, protocol: 'str', traceflow: 'ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]') -> 'None':
-        """Register a traceflow class for pcapkit's own use, bypassing the public guard.
-
-        Unlike :meth:`register_traceflow`, accepts a class deriving only from
-        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, which is how every
-        built-in is written. Not part of the public API.
-
-        Arguments:
-            protocol: protocol name, lower-cased
-            traceflow: module descriptor or a
-                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass
-
-        Raises:
-            RegistryError: If ``protocol`` is not a :obj:`str`, or ``traceflow``
-                is not a
-                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass.
-
-        Warns:
-            RegistryWarning: If a different class is already registered under
-                ``protocol``; it is overwritten.
-
-        """
-        protocol = _registry_key('traceflow', protocol)
-        if isinstance(traceflow, ModuleDescriptor):
-            traceflow = traceflow.klass
-        if not issubclass(traceflow, TraceFlowBase):
-            raise RegistryError(f'Extractor._register_internal_traceflow: traceflow must be a TraceFlowBase subclass, not {traceflow!r}')
-        incumbent = cls.__traceflow__.get(protocol)
-        if incumbent is not None and incumbent is not traceflow:
-            warn(f'traceflow {protocol} already registered, overwriting', RegistryWarning)
-        cls.__traceflow__[protocol] = traceflow
-
-    @classmethod
     def make_traceflow(cls, protocol: 'str', *, fout: 'str' = './tmp',
                        format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
                        byteorder: 'Literal["little", "big"]' = sys.byteorder,
@@ -984,31 +886,6 @@ class Extractor(Generic[_P]):
         trace_cls = cls._traceflow_class(protocol)
         return trace_cls(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond,
                          bidirectional=bidirectional, analyze=analyze)
-
-    @classmethod
-    def _traceflow_class(cls, protocol: 'str') -> 'Type[TraceFlowBase]':
-        """The flow tracing class registered under a protocol name, imported.
-
-        Arguments:
-            protocol: protocol name, matched lower-cased
-
-        Returns:
-            The class, which replaces its module descriptor in
-            :attr:`__traceflow__`.
-
-        Raises:
-            FormatError: If no flow tracer is registered under ``protocol``.
-            RegistryError: If ``protocol`` is not a :obj:`str`.
-
-        """
-        name = _registry_key('traceflow', protocol)
-        trace_cls = cls.__traceflow__.get(name)
-        if trace_cls is None:
-            raise FormatError(f'unsupported flow tracing protocol: {protocol!r}')
-        if isinstance(trace_cls, ModuleDescriptor):
-            trace_cls = trace_cls.klass
-            cls.__traceflow__[name] = trace_cls  # update mapping upon import
-        return trace_cls
 
     def run(self) -> 'None':  # pylint: disable=inconsistent-return-statements
         """Start extraction.
@@ -1067,70 +944,6 @@ class Extractor(Generic[_P]):
 
         # start iteration
         self.record_frames()
-
-    def _select_engine(self) -> 'Optional[Type[EngineBase]]':
-        """Settle which extraction engine will actually run.
-
-        An engine that is unknown, not installed, or rules itself out via
-        :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
-        is replaced by the :term:`default engine`, and :attr:`self._exnam
-        <pcapkit.foundation.extraction.Extractor._exnam>` is updated to match.
-        :meth:`__init__` calls this before choosing the output format, so that
-        the choice reflects the engine that runs rather than the one requested.
-
-        Calling it again is silent: a fallback has already set the name to
-        ``'default'``, and an engine that passed the checks passes them again.
-
-        Warns:
-            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not
-                available: its dependency is not installed, its
-                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
-                rules it out, or the supplied engine is unknown.
-
-        Returns:
-            The engine class to run, or :data:`None` for the default engine,
-            which :meth:`run` picks from the input's magic number.
-
-        """
-        logger.debug('requested extraction engine: %s', self._exnam)
-
-        if self._exnam in self.__engine__:  # check if engine is supported
-            eng = self.__engine__[self._exnam]
-            if isinstance(eng, ModuleDescriptor):
-                eng = eng.klass
-
-            # An engine may rule itself out before the import is even attempted.
-            # Asking it is necessary because ``import_test`` can only see whether
-            # the top-level module imports, which is not the same question: a
-            # package whose *submodules* fail leaves the guard satisfied and the
-            # failure to escape from the engine's constructor instead. The base
-            # class answers :data:`None`, so only engines with a real limitation
-            # override it.
-            #
-            # NOTE: one probe serves both calls of this method and the engine's
-            # constructor in ``run``, rather than one each (#2113).
-            if not hasattr(self, '_exprb'):
-                self._exprb = _pcap_backend.Memo()
-            with self._exprb:
-                reason = eng.unsupported_reason()
-            if reason is not None:
-                logger.debug('engine %s is unavailable: %s', eng.name, reason)
-                warn(f'engine {eng.name} is not supported on this interpreter '
-                     f'({reason}); using default engine instead',
-                     EngineWarning, stacklevel=stacklevel())
-                self._exnam = 'default'
-            elif self.import_test(eng.module, name=eng.name) is not None:  # type: ignore[arg-type]
-                return eng
-            else:
-                # ``import_test`` has already warned that the package is absent;
-                # warning again here would report one problem twice.
-                self._exnam = 'default'  # using default/pcapkit engine
-
-        if self._exnam not in ('default', 'pcapkit'):
-            warn(f'unsupported extraction engine: {self._exnam!r}; '
-                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
-            self._exnam = 'default'  # using default/pcapkit engine
-        return None
 
     @staticmethod
     def import_test(engine: 'str', *, name: 'Optional[str]' = None) -> 'Optional[ModuleType]':
@@ -1284,37 +1097,6 @@ class Extractor(Generic[_P]):
             return engine  # type: ignore[return-value]
 
         raise FormatError(f'unknown file format: {self._magic!r}')
-
-    def _open_output(self, **kwargs: 'Any') -> 'None':
-        """Create the output writer.
-
-        The built-in engines call this at their global-header step. The PCAP
-        engine passes the header's fields as ``protocol``, ``byteorder``,
-        ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:
-        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from
-        them, :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` its section and interface
-        from those it takes, and the other writers ignore them. The PCAP-NG
-        engine passes its first section's ``byteorder``.
-        :meth:`run` calls it again, without arguments, after the engine has
-        started, for the engines that have no such step. Only the first call has
-        an effect.
-
-        Under split mode, i.e. :attr:`self._flag_f <Extractor._flag_f>` is
-        :data:`True`, :attr:`self._ofile <Extractor._ofile>` stays a factory,
-        with ``kwargs`` bound, that the engines call once per output file.
-
-        Args:
-            **kwargs: Global header fields for the writer.
-
-        """
-        if self._flag_q or self._flag_o:
-            return
-        self._flag_o = True
-
-        if self._flag_f:
-            self._ofile = functools.partial(self._ofile, **kwargs)  # type: ignore[misc]
-        else:
-            self._ofile = self._ofile(self._ofnm, **kwargs)
 
     def record_frames(self) -> 'None':
         """Read packet frames.
@@ -1784,6 +1566,224 @@ class Extractor(Generic[_P]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _register_internal_engine(cls, name: 'str', engine: 'ModuleDescriptor[EngineBase] | Type[EngineBase]') -> 'None':
+        """Register an engine for pcapkit's own use, bypassing the public guard.
+
+        Unlike :meth:`register_engine`, accepts a class deriving only from
+        :class:`~pcapkit.foundation.engines.engine.EngineBase`, which is how every
+        built-in engine is written. Not part of the public API.
+
+        Arguments:
+            name: engine name, lower-cased
+            engine: module descriptor or an
+                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
+
+        Raises:
+            RegistryError: If ``name`` is not a :obj:`str`, or ``engine`` is not an
+                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``name``; it is overwritten.
+
+        """
+        name = _registry_key('engine', name)
+        if isinstance(engine, ModuleDescriptor):
+            engine = engine.klass
+        if not issubclass(engine, EngineBase):
+            raise RegistryError(f'Extractor._register_internal_engine: engine must be an EngineBase subclass, not {engine!r}')
+        incumbent = cls.__engine__.get(name)
+        if incumbent is not None and incumbent is not engine:
+            warn(f'engine {name} already registered, overwriting', RegistryWarning)
+        cls.__engine__[name] = engine
+
+    @classmethod
+    def _register_internal_reassembly(cls, protocol: 'str', reassembly: 'ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]') -> 'None':
+        """Register a reassembly class for pcapkit's own use, bypassing the public guard.
+
+        Unlike :meth:`register_reassembly`, accepts a class deriving only from
+        :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, which is how every
+        built-in is written. Not part of the public API.
+
+        Arguments:
+            protocol: protocol name, lower-cased
+            reassembly: module descriptor or a
+                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass
+
+        Raises:
+            RegistryError: If ``protocol`` is not a :obj:`str`, or ``reassembly``
+                is not a
+                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``protocol``; it is overwritten.
+
+        """
+        protocol = _registry_key('reassembly', protocol)
+        if isinstance(reassembly, ModuleDescriptor):
+            reassembly = reassembly.klass
+        if not issubclass(reassembly, ReassemblyBase):
+            raise RegistryError(f'Extractor._register_internal_reassembly: reassembly must be a ReassemblyBase subclass, not {reassembly!r}')
+        incumbent = cls.__reassembly__.get(protocol)
+        if incumbent is not None and incumbent is not reassembly:
+            warn(f'reassembly {protocol} already registered, overwriting', RegistryWarning)
+        cls.__reassembly__[protocol] = reassembly
+
+    @classmethod
+    def _register_internal_traceflow(cls, protocol: 'str', traceflow: 'ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]') -> 'None':
+        """Register a traceflow class for pcapkit's own use, bypassing the public guard.
+
+        Unlike :meth:`register_traceflow`, accepts a class deriving only from
+        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, which is how every
+        built-in is written. Not part of the public API.
+
+        Arguments:
+            protocol: protocol name, lower-cased
+            traceflow: module descriptor or a
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass
+
+        Raises:
+            RegistryError: If ``protocol`` is not a :obj:`str`, or ``traceflow``
+                is not a
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass.
+
+        Warns:
+            RegistryWarning: If a different class is already registered under
+                ``protocol``; it is overwritten.
+
+        """
+        protocol = _registry_key('traceflow', protocol)
+        if isinstance(traceflow, ModuleDescriptor):
+            traceflow = traceflow.klass
+        if not issubclass(traceflow, TraceFlowBase):
+            raise RegistryError(f'Extractor._register_internal_traceflow: traceflow must be a TraceFlowBase subclass, not {traceflow!r}')
+        incumbent = cls.__traceflow__.get(protocol)
+        if incumbent is not None and incumbent is not traceflow:
+            warn(f'traceflow {protocol} already registered, overwriting', RegistryWarning)
+        cls.__traceflow__[protocol] = traceflow
+
+    @classmethod
+    def _traceflow_class(cls, protocol: 'str') -> 'Type[TraceFlowBase]':
+        """The flow tracing class registered under a protocol name, imported.
+
+        Arguments:
+            protocol: protocol name, matched lower-cased
+
+        Returns:
+            The class, which replaces its module descriptor in
+            :attr:`__traceflow__`.
+
+        Raises:
+            FormatError: If no flow tracer is registered under ``protocol``.
+            RegistryError: If ``protocol`` is not a :obj:`str`.
+
+        """
+        name = _registry_key('traceflow', protocol)
+        trace_cls = cls.__traceflow__.get(name)
+        if trace_cls is None:
+            raise FormatError(f'unsupported flow tracing protocol: {protocol!r}')
+        if isinstance(trace_cls, ModuleDescriptor):
+            trace_cls = trace_cls.klass
+            cls.__traceflow__[name] = trace_cls  # update mapping upon import
+        return trace_cls
+
+    def _select_engine(self) -> 'Optional[Type[EngineBase]]':
+        """Settle which extraction engine will actually run.
+
+        An engine that is unknown, not installed, or rules itself out via
+        :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
+        is replaced by the :term:`default engine`, and :attr:`self._exnam
+        <pcapkit.foundation.extraction.Extractor._exnam>` is updated to match.
+        :meth:`__init__` calls this before choosing the output format, so that
+        the choice reflects the engine that runs rather than the one requested.
+
+        Calling it again is silent: a fallback has already set the name to
+        ``'default'``, and an engine that passed the checks passes them again.
+
+        Warns:
+            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not
+                available: its dependency is not installed, its
+                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
+                rules it out, or the supplied engine is unknown.
+
+        Returns:
+            The engine class to run, or :data:`None` for the default engine,
+            which :meth:`run` picks from the input's magic number.
+
+        """
+        logger.debug('requested extraction engine: %s', self._exnam)
+
+        if self._exnam in self.__engine__:  # check if engine is supported
+            eng = self.__engine__[self._exnam]
+            if isinstance(eng, ModuleDescriptor):
+                eng = eng.klass
+
+            # An engine may rule itself out before the import is even attempted.
+            # Asking it is necessary because ``import_test`` can only see whether
+            # the top-level module imports, which is not the same question: a
+            # package whose *submodules* fail leaves the guard satisfied and the
+            # failure to escape from the engine's constructor instead. The base
+            # class answers :data:`None`, so only engines with a real limitation
+            # override it.
+            #
+            # NOTE: one probe serves both calls of this method and the engine's
+            # constructor in ``run``, rather than one each (#2113).
+            if not hasattr(self, '_exprb'):
+                self._exprb = _pcap_backend.Memo()
+            with self._exprb:
+                reason = eng.unsupported_reason()
+            if reason is not None:
+                logger.debug('engine %s is unavailable: %s', eng.name, reason)
+                warn(f'engine {eng.name} is not supported on this interpreter '
+                     f'({reason}); using default engine instead',
+                     EngineWarning, stacklevel=stacklevel())
+                self._exnam = 'default'
+            elif self.import_test(eng.module, name=eng.name) is not None:  # type: ignore[arg-type]
+                return eng
+            else:
+                # ``import_test`` has already warned that the package is absent;
+                # warning again here would report one problem twice.
+                self._exnam = 'default'  # using default/pcapkit engine
+
+        if self._exnam not in ('default', 'pcapkit'):
+            warn(f'unsupported extraction engine: {self._exnam!r}; '
+                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            self._exnam = 'default'  # using default/pcapkit engine
+        return None
+
+    def _open_output(self, **kwargs: 'Any') -> 'None':
+        """Create the output writer.
+
+        The built-in engines call this at their global-header step. The PCAP
+        engine passes the header's fields as ``protocol``, ``byteorder``,
+        ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:
+        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from
+        them, :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` its section and interface
+        from those it takes, and the other writers ignore them. The PCAP-NG
+        engine passes its first section's ``byteorder``.
+        :meth:`run` calls it again, without arguments, after the engine has
+        started, for the engines that have no such step. Only the first call has
+        an effect.
+
+        Under split mode, i.e. :attr:`self._flag_f <Extractor._flag_f>` is
+        :data:`True`, :attr:`self._ofile <Extractor._ofile>` stays a factory,
+        with ``kwargs`` bound, that the engines call once per output file.
+
+        Args:
+            **kwargs: Global header fields for the writer.
+
+        """
+        if self._flag_q or self._flag_o:
+            return
+        self._flag_o = True
+
+        if self._flag_f:
+            self._ofile = functools.partial(self._ofile, **kwargs)  # type: ignore[misc]
+        else:
+            self._ofile = self._ofile(self._ofnm, **kwargs)
 
     def _check_trace(self, trace: 'TraceFlowOptions') -> 'None':
         """Check each enabled flow tracer's output settings, before a directory is made.

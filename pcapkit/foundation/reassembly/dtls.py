@@ -243,6 +243,35 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
 
         return self._notify(ret, store=store)
 
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True,
+                 timeout: 'Optional[float]' = None) -> 'None':
+        """Initialise packet reassembly.
+
+        Args:
+            strict: if :data:`True`, report a message that is not completely
+                reassembled as the tuple of its received runs; otherwise as
+                one contiguous payload, its holes zero-filled
+            store: if store reassembled datagram in memory
+            timeout: reassembly timeout in seconds, on the capture's own clock;
+                :data:`None` selects
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`
+
+        Raises:
+            FieldValueError: If ``timeout`` is negative.
+
+        """
+        super().__init__(strict=strict, store=store, timeout=timeout)
+
+        self._last = None
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
     def _datagram_from_fragment(self, frag: 'Fragment', bufid: 'BufferID', message_seq: 'int',
                                 completion: 'Completion') -> 'Datagram[_AT]':
         """Build a :class:`~pcapkit.foundation.reassembly.data.dtls.Datagram`
@@ -345,28 +374,3 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             # step seven: go on to the next hole, since one fragment may span
             # several of them
         hdl[:] = new_hdl
-
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True,
-                 timeout: 'Optional[float]' = None) -> 'None':
-        """Initialise packet reassembly.
-
-        Args:
-            strict: if :data:`True`, report a message that is not completely
-                reassembled as the tuple of its received runs; otherwise as
-                one contiguous payload, its holes zero-filled
-            store: if store reassembled datagram in memory
-            timeout: reassembly timeout in seconds, on the capture's own clock;
-                :data:`None` selects
-                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`
-
-        Raises:
-            FieldValueError: If ``timeout`` is negative.
-
-        """
-        super().__init__(strict=strict, store=store, timeout=timeout)
-
-        self._last = None

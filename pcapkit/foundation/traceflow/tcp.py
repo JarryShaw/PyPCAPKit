@@ -253,6 +253,90 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             self._finalise(bufid)
         return buffer.fpout if output else buffer.label
 
+    def finish(self) -> 'None':
+        """Finalise every flow still being traced.
+
+        The end of the capture can prove a bidirectional flow is over, as a new
+        connection on the same endpoints can. Draining the buffer here is what lets a flow keep the
+        acknowledgement that completes its close and *still* have its callback
+        fired, rather than having to choose between the two.
+
+        Idempotent: it drains the buffer, so a second call finds nothing to do.
+        It also closes every output file still kept open, as
+        :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlow.finish>`
+        does, even when a callback raises: the flow it was handed is finalised,
+        and the flows after it stay in the buffer, unfinalised, for a later call.
+
+        """
+        try:
+            for bufid in list(self._buffer):
+                self._finalise(bufid)
+        finally:
+            self.__cached__['submit'] = None
+            super().finish()
+
+    def submit(self) -> 'tuple[Index, ...]':
+        """Submit traced TCP flows.
+
+        Returns:
+            Traced TCP flow (:term:`trace.tcp.index`).
+
+        Note:
+            This reports flows still being traced **without** finalising them, so
+            that reading
+            :attr:`TraceFlow.index <pcapkit.foundation.traceflow.traceflow.TraceFlow.index>`
+            part-way through a capture cannot disturb the tracing -- popping a
+            buffer there would strand the rest of its conversation in a second
+            flow. Such a flow is therefore reported here but has not fired its
+            callback; :meth:`finish` is what does that, at the end of the capture.
+
+            With ``analyze=True`` that makes an open flow's
+            :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
+            a **snapshot**, and a mid-capture one. The
+            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when
+            it is first read and is then fixed in place, so it holds the flow as it
+            stood at *that read* -- not as it stood when this method returned, and
+            not as it will stand once the conversation ends. Read it while the flow
+            is open and the datagrams cover only the segments seen so far; segments
+            arriving afterwards are reassembled into the buffer but cannot reach an
+            already-resolved snapshot, and nothing on the returned
+            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`
+            distinguishes one from the final result that :meth:`finish` produces.
+
+            This call's own cache is not the cause and does not soften it: both
+            :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a
+            later call rebuilds the tuple with fresh
+            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is
+            the *previously returned*
+            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`, if a caller kept
+            one, that cannot catch up. For a result that is final, read after
+            :meth:`finish`.
+
+        """
+        if (cached := self.__cached__.get('submit')) is not None:
+            return cached
+
+        ret = []  # type: list[Index]
+        for buf in self._buffer.values():
+            ret.append(Index(fpout=self._output_path(buf.label),
+                             index=tuple(buf.index),
+                             label=buf.label,
+                             forward=tuple(buf.forward),
+                             reverse=tuple(buf.reverse),
+                             packet=None if buf.reassembly is None else Deferred(buf.reassembly),))
+        ret.extend(self._stream)
+        ret_submit = tuple(ret)
+
+        logger.debug('submitted %d TCP flow(s), %d still open',
+                     len(ret_submit), len(self._buffer))
+
+        self.__cached__['submit'] = ret_submit
+        return ret_submit
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
     def _record(self, packet: 'Packet[_AT]') -> 'tuple[BufferID, bool]':
         """Record a packet in its flow, opening the flow or superseding an ended one.
 
@@ -533,83 +617,3 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         self._stream.append(index)
         run_callbacks(self.__callback_fn__, index, logger=logger, subject=f'TCP flow {label}')
         return index
-
-    def finish(self) -> 'None':
-        """Finalise every flow still being traced.
-
-        The end of the capture can prove a bidirectional flow is over, as a new
-        connection on the same endpoints can. Draining the buffer here is what lets a flow keep the
-        acknowledgement that completes its close and *still* have its callback
-        fired, rather than having to choose between the two.
-
-        Idempotent: it drains the buffer, so a second call finds nothing to do.
-        It also closes every output file still kept open, as
-        :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlow.finish>`
-        does, even when a callback raises: the flow it was handed is finalised,
-        and the flows after it stay in the buffer, unfinalised, for a later call.
-
-        """
-        try:
-            for bufid in list(self._buffer):
-                self._finalise(bufid)
-        finally:
-            self.__cached__['submit'] = None
-            super().finish()
-
-    def submit(self) -> 'tuple[Index, ...]':
-        """Submit traced TCP flows.
-
-        Returns:
-            Traced TCP flow (:term:`trace.tcp.index`).
-
-        Note:
-            This reports flows still being traced **without** finalising them, so
-            that reading
-            :attr:`TraceFlow.index <pcapkit.foundation.traceflow.traceflow.TraceFlow.index>`
-            part-way through a capture cannot disturb the tracing -- popping a
-            buffer there would strand the rest of its conversation in a second
-            flow. Such a flow is therefore reported here but has not fired its
-            callback; :meth:`finish` is what does that, at the end of the capture.
-
-            With ``analyze=True`` that makes an open flow's
-            :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
-            a **snapshot**, and a mid-capture one. The
-            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when
-            it is first read and is then fixed in place, so it holds the flow as it
-            stood at *that read* -- not as it stood when this method returned, and
-            not as it will stand once the conversation ends. Read it while the flow
-            is open and the datagrams cover only the segments seen so far; segments
-            arriving afterwards are reassembled into the buffer but cannot reach an
-            already-resolved snapshot, and nothing on the returned
-            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`
-            distinguishes one from the final result that :meth:`finish` produces.
-
-            This call's own cache is not the cause and does not soften it: both
-            :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a
-            later call rebuilds the tuple with fresh
-            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is
-            the *previously returned*
-            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`, if a caller kept
-            one, that cannot catch up. For a result that is final, read after
-            :meth:`finish`.
-
-        """
-        if (cached := self.__cached__.get('submit')) is not None:
-            return cached
-
-        ret = []  # type: list[Index]
-        for buf in self._buffer.values():
-            ret.append(Index(fpout=self._output_path(buf.label),
-                             index=tuple(buf.index),
-                             label=buf.label,
-                             forward=tuple(buf.forward),
-                             reverse=tuple(buf.reverse),
-                             packet=None if buf.reassembly is None else Deferred(buf.reassembly),))
-        ret.extend(self._stream)
-        ret_submit = tuple(ret)
-
-        logger.debug('submitted %d TCP flow(s), %d still open',
-                     len(ret_submit), len(self._buffer))
-
-        self.__cached__['submit'] = ret_submit
-        return ret_submit

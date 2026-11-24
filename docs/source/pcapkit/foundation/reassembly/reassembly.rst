@@ -84,8 +84,6 @@ follow :rfc:`791` and :rfc:`815`.
 
    .. automethod:: reassembly
    .. automethod:: submit
-   .. automethod:: _release
-   .. automethod:: _notify
    .. automethod:: expire
    .. automethod:: advance
    .. automethod:: fetch
@@ -97,6 +95,11 @@ follow :rfc:`791` and :rfc:`815`.
 
    .. automethod:: __init_subclass__
    .. automethod:: __call__
+
+   .. rubric:: Utilities
+
+   .. automethod:: _release
+   .. automethod:: _notify
 
 Internal Definitions
 --------------------

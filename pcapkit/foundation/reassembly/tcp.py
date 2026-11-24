@@ -322,6 +322,155 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         if RST or self._stream_whole(BUFID):
             self._release(self._buffer.pop(BUFID), bufid=BUFID)
 
+    def submit(self, buf: 'Buffer', *, bufid: 'BufferID',  # type: ignore[override] # pylint: disable=arguments-differ
+               expired: 'bool' = False, store: 'bool' = False) -> 'list[Datagram]':
+        """Submit reassembled payload.
+
+        Arguments:
+            buf: :term:`buffer <reasm.tcp.buffer>` dict of reassembled packets
+            bufid: buffer identifier
+            expired: whether this buffer is being submitted because
+                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
+                abandoned it under the reassembly timeout
+            store: whether ``buf`` has left
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`
+                for good, so its datagrams join
+                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
+                before the callbacks run, and one that raises cannot lose them
+
+        Returns:
+            Reassembled :term:`packets <reasm.tcp.datagram>`. Where the payload
+            is one contiguous run, its ``packet`` is the parse
+            :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, by this
+            reassembly's own
+            :attr:`protocol <pcapkit.foundation.reassembly.reassembly.Reassembly.protocol>`,
+            deferred to its first read.
+
+        Important:
+            The ``(source, destination)`` pair handed to
+            :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is a pair
+            of :class:`~pcapkit.const.reg.apptype.tcp.TCP` members rather than
+            of the bare port numbers :data:`BufferID` holds (:issue:`2417`), so
+            a deferred analysis dispatches on the named service rather than on a
+            number. The resolution is :meth:`Transport._make_port
+            <pcapkit.protocols.transport.transport.Transport._make_port>`, so it
+            is the one the maker path uses and cannot drift from it. See
+            :meth:`_make_ports` for why it is reached through
+            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through
+            :attr:`self.protocol
+            <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`.
+
+            For a *registered* port that is the very member
+            :attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>` reads off
+            a parsed header. For an unassigned one the two are **equal but not
+            identical**, and not even equally named: the parse path builds its
+            member through :meth:`EnumField._unregistered_member
+            <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`,
+            whose ``.name`` is ``'<unassigned>'``, where ``get`` builds its own,
+            named ``'unknown'`` -- measured on port ``50000``. Both are real
+            members of the same registry carrying the same :attr:`AppType.port
+            <pcapkit.const.reg.apptype.apptype.AppType.port>`, which is what
+            every reader of this pair goes on to use, so the distinction costs
+            nothing here; it is recorded because "the same member the header
+            carries" would be an overstatement of it.
+
+        .. versionchanged:: 1.7.0
+
+           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).
+
+        """
+        datagram = []  # type: list[Datagram] # reassembled datagram
+
+        # check through every buffer with ACK
+        for (ack, buffer) in buf.ack.items():
+            # Translate this payload buffer's own gap list, kept in unwrapped
+            # sequence numbers, into offsets into the buffer, which is indexed
+            # from its own initial sequence number. The buffer-wide hole
+            # descriptor list cannot answer this: it is shared by every
+            # acknowledgement number, so another payload buffer filling a hole
+            # there says nothing about this one, and it never learns of a gap
+            # opened below the first segment to arrive. Entries are clipped to
+            # the buffer rather than being allowed to index from its far end.
+            length = len(buffer.raw)
+            holes = []  # type: list[tuple[int, int]]
+            for (first, last) in buffer.gap:
+                start = first - buffer.isn            # inclusive lower bound
+                stop = last - buffer.isn + 1          # exclusive upper bound
+                if stop <= 0 or start >= length:
+                    continue                          # gap lies outside the buffer
+                holes.append((max(start, 0), min(stop, length)))
+            holes.sort()
+            # reported in sequence space proper, i.e. modulo 2**32
+            conflict = tuple((first & 0xFFFFFFFF, last & 0xFFFFFFFF)
+                             for (first, last) in buffer.conflict)
+
+            # How completely this buffer came out, and why it stopped. Derived
+            # once per buffer, so the two branches cannot disagree about it.
+            # Any gap entry counts, including one lying wholly outside ``raw``:
+            # that is the range a split stream left out (see ``reassembly``).
+            completion = Completion.COMPLETE if not buffer.gap else (
+                Completion.TIMEOUT if expired else Completion.PARTIAL
+            )
+
+            # if this buffer is incomplete
+            # go through every hole and extract received payload
+            if completion is not Completion.COMPLETE and self._flag_s:
+                data = []  # type: list[bytes]
+                start = 0
+                for (hole_start, hole_stop) in holes:
+                    byte = buffer.raw[start:hole_start]
+                    if byte:    # strip empty payload
+                        data.append(bytes(byte))
+                    start = max(start, hole_stop)
+                byte = buffer.raw[start:]
+                if byte:    # strip empty payload
+                    data.append(bytes(byte))
+                if data:    # strip empty buffer
+                    packet = Datagram(
+                        completed=completion,
+                        id=DatagramID(
+                            src=(bufid[0], bufid[1]),
+                            dst=(bufid[2], bufid[3]),
+                            ack=ack,
+                        ),
+                        index=tuple(buffer.ind),
+                        header=buf.hdr,
+                        payload=tuple(data),
+                        packet=None,
+                        conflict=conflict,
+                    )
+                    datagram.append(packet)
+
+            # if this buffer is complete -- or if it is not, and ``strict``
+            # asked for one contiguous payload rather than the received runs
+            #
+            # NOTE: ``strict=False`` reports the buffer with holes zero-filled, as
+            # :func:`~pcapkit.interface.misc.follow_tcp_stream` wants, and ``completed`` says so.
+            else:
+                payload = buffer.raw
+                if payload:    # strip empty buffer
+                    packet = Datagram(
+                        completed=completion,
+                        id=DatagramID(
+                            src=(bufid[0], bufid[1]),
+                            dst=(bufid[2], bufid[3]),
+                            ack=ack,
+                        ),
+                        index=tuple(buffer.ind),
+                        header=buf.hdr,
+                        payload=bytes(payload),
+                        packet=Deferred(partial(_analyze_payload, self.protocol),
+                                        self._make_ports(bufid), bytes(payload)),
+                        conflict=conflict,
+                    )
+                    datagram.append(packet)
+
+        return self._notify(datagram, store=store)
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
     @staticmethod
     def _unwrap(seq: 'int', ref: 'int') -> 'int':
         """Place a 32-bit sequence number on the unwrapped line near ``ref``.
@@ -726,148 +875,3 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         # normaliser drifts from the maker path's; it is idempotent on members.
         return (TCP_Protocol._make_port(bufid[1], Enum_TransportProtocol.tcp),  # pylint: disable=protected-access
                 TCP_Protocol._make_port(bufid[3], Enum_TransportProtocol.tcp))  # pylint: disable=protected-access
-
-    def submit(self, buf: 'Buffer', *, bufid: 'BufferID',  # type: ignore[override] # pylint: disable=arguments-differ
-               expired: 'bool' = False, store: 'bool' = False) -> 'list[Datagram]':
-        """Submit reassembled payload.
-
-        Arguments:
-            buf: :term:`buffer <reasm.tcp.buffer>` dict of reassembled packets
-            bufid: buffer identifier
-            expired: whether this buffer is being submitted because
-                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
-                abandoned it under the reassembly timeout
-            store: whether ``buf`` has left
-                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`
-                for good, so its datagrams join
-                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
-                before the callbacks run, and one that raises cannot lose them
-
-        Returns:
-            Reassembled :term:`packets <reasm.tcp.datagram>`. Where the payload
-            is one contiguous run, its ``packet`` is the parse
-            :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, by this
-            reassembly's own
-            :attr:`protocol <pcapkit.foundation.reassembly.reassembly.Reassembly.protocol>`,
-            deferred to its first read.
-
-        Important:
-            The ``(source, destination)`` pair handed to
-            :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is a pair
-            of :class:`~pcapkit.const.reg.apptype.tcp.TCP` members rather than
-            of the bare port numbers :data:`BufferID` holds (:issue:`2417`), so
-            a deferred analysis dispatches on the named service rather than on a
-            number. The resolution is :meth:`Transport._make_port
-            <pcapkit.protocols.transport.transport.Transport._make_port>`, so it
-            is the one the maker path uses and cannot drift from it. See
-            :meth:`_make_ports` for why it is reached through
-            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through
-            :attr:`self.protocol
-            <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`.
-
-            For a *registered* port that is the very member
-            :attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>` reads off
-            a parsed header. For an unassigned one the two are **equal but not
-            identical**, and not even equally named: the parse path builds its
-            member through :meth:`EnumField._unregistered_member
-            <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`,
-            whose ``.name`` is ``'<unassigned>'``, where ``get`` builds its own,
-            named ``'unknown'`` -- measured on port ``50000``. Both are real
-            members of the same registry carrying the same :attr:`AppType.port
-            <pcapkit.const.reg.apptype.apptype.AppType.port>`, which is what
-            every reader of this pair goes on to use, so the distinction costs
-            nothing here; it is recorded because "the same member the header
-            carries" would be an overstatement of it.
-
-        .. versionchanged:: 1.7.0
-
-           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).
-
-        """
-        datagram = []  # type: list[Datagram] # reassembled datagram
-
-        # check through every buffer with ACK
-        for (ack, buffer) in buf.ack.items():
-            # Translate this payload buffer's own gap list, kept in unwrapped
-            # sequence numbers, into offsets into the buffer, which is indexed
-            # from its own initial sequence number. The buffer-wide hole
-            # descriptor list cannot answer this: it is shared by every
-            # acknowledgement number, so another payload buffer filling a hole
-            # there says nothing about this one, and it never learns of a gap
-            # opened below the first segment to arrive. Entries are clipped to
-            # the buffer rather than being allowed to index from its far end.
-            length = len(buffer.raw)
-            holes = []  # type: list[tuple[int, int]]
-            for (first, last) in buffer.gap:
-                start = first - buffer.isn            # inclusive lower bound
-                stop = last - buffer.isn + 1          # exclusive upper bound
-                if stop <= 0 or start >= length:
-                    continue                          # gap lies outside the buffer
-                holes.append((max(start, 0), min(stop, length)))
-            holes.sort()
-            # reported in sequence space proper, i.e. modulo 2**32
-            conflict = tuple((first & 0xFFFFFFFF, last & 0xFFFFFFFF)
-                             for (first, last) in buffer.conflict)
-
-            # How completely this buffer came out, and why it stopped. Derived
-            # once per buffer, so the two branches cannot disagree about it.
-            # Any gap entry counts, including one lying wholly outside ``raw``:
-            # that is the range a split stream left out (see ``reassembly``).
-            completion = Completion.COMPLETE if not buffer.gap else (
-                Completion.TIMEOUT if expired else Completion.PARTIAL
-            )
-
-            # if this buffer is incomplete
-            # go through every hole and extract received payload
-            if completion is not Completion.COMPLETE and self._flag_s:
-                data = []  # type: list[bytes]
-                start = 0
-                for (hole_start, hole_stop) in holes:
-                    byte = buffer.raw[start:hole_start]
-                    if byte:    # strip empty payload
-                        data.append(bytes(byte))
-                    start = max(start, hole_stop)
-                byte = buffer.raw[start:]
-                if byte:    # strip empty payload
-                    data.append(bytes(byte))
-                if data:    # strip empty buffer
-                    packet = Datagram(
-                        completed=completion,
-                        id=DatagramID(
-                            src=(bufid[0], bufid[1]),
-                            dst=(bufid[2], bufid[3]),
-                            ack=ack,
-                        ),
-                        index=tuple(buffer.ind),
-                        header=buf.hdr,
-                        payload=tuple(data),
-                        packet=None,
-                        conflict=conflict,
-                    )
-                    datagram.append(packet)
-
-            # if this buffer is complete -- or if it is not, and ``strict``
-            # asked for one contiguous payload rather than the received runs
-            #
-            # NOTE: ``strict=False`` reports the buffer with holes zero-filled, as
-            # :func:`~pcapkit.interface.misc.follow_tcp_stream` wants, and ``completed`` says so.
-            else:
-                payload = buffer.raw
-                if payload:    # strip empty buffer
-                    packet = Datagram(
-                        completed=completion,
-                        id=DatagramID(
-                            src=(bufid[0], bufid[1]),
-                            dst=(bufid[2], bufid[3]),
-                            ack=ack,
-                        ),
-                        index=tuple(buffer.ind),
-                        header=buf.hdr,
-                        payload=bytes(payload),
-                        packet=Deferred(partial(_analyze_payload, self.protocol),
-                                        self._make_ports(bufid), bytes(payload)),
-                        conflict=conflict,
-                    )
-                    datagram.append(packet)
-
-        return self._notify(datagram, store=store)
