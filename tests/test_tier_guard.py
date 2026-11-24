@@ -1588,7 +1588,7 @@ class SuiteIsCleanTests(unittest.TestCase):
         if reason is not None:
             self.skipTest(f'git cannot answer here: {reason}')
 
-        # Where the tier lock is a no-op, the probe on disk may be another
+        # Where the reader's hold is a no-op, the probe on disk may be another
         # worker's live one, a violation nobody committed (#2114). Under the
         # lock it is only ever a leftover, so it is scanned there.
         unlocked = _conftest.fcntl is None
@@ -1604,8 +1604,8 @@ class ProbeModuleTests(unittest.TestCase):
     """The xdist probe never reaches a tier listing, on disk or just gone (#2114).
 
     :class:`tests.test_tier_guard_xdist.XdistSubprocessTests` writes the probe
-    and removes it under a lock that is a no-op off POSIX, so on Windows a
-    listing can see it and :func:`~tests._tiers.module_tier` then find it gone.
+    and removes it under a lock whose reader's hold is a no-op off POSIX, so on
+    Windows a listing can see it and :func:`~tests._tiers.module_tier` then find it gone.
     Each test builds its own :file:`tests/` in a temporary directory, so none
     touches the tree or contends with a real probe.
 

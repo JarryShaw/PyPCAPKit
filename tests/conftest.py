@@ -65,6 +65,11 @@ try:
 except ImportError:  # pragma: no cover -- POSIX-only
     fcntl = None  # type: ignore[assignment]
 
+try:
+    import msvcrt
+except ImportError:  # off Windows
+    msvcrt = None  # type: ignore[assignment]
+
 if TYPE_CHECKING:
     from typing import Iterable, Iterator, Optional
 
@@ -551,8 +556,8 @@ _LOCK_MANAGED_ELSEWHERE = frozenset({PROBE_MODULE_NAME, 'test_tier_guard_xdist.p
 TIER_GUARD_LOCK_POLLS = sys.implementation.name == 'graalpy'
 
 #: Seconds :func:`_tier_guard_flock` sleeps between non-blocking attempts, when
-#: :data:`TIER_GUARD_LOCK_POLLS` is set. :func:`time.sleep` releases the GIL on
-#: GraalPy as on CPython.
+#: :data:`TIER_GUARD_LOCK_POLLS` is set, and :func:`_tier_guard_msvcrt_lock`
+#: always. :func:`time.sleep` releases the GIL on GraalPy as on CPython.
 TIER_GUARD_LOCK_POLL = 0.05
 
 #: Set, to :func:`_tier_guard_lock_path`, while :func:`_tier_guard_reader_hold`
@@ -603,6 +608,40 @@ def _tier_guard_flock(fd: 'int', operation: 'int') -> None:
 
 
 @contextlib.contextmanager
+def _tier_guard_msvcrt_lock() -> 'Iterator[None]':
+    """The writer's hold where :data:`fcntl` is :data:`None`, by :func:`msvcrt.locking` (#2927).
+
+    Locks the first byte of :func:`_tier_guard_lock_path` through a descriptor
+    of its own, which conflicts with any other descriptor's hold, in this
+    process or another, as a :func:`fcntl.flock` does. It asks with
+    ``LK_NBLCK`` and retries after a :data:`TIER_GUARD_LOCK_POLL` sleep, since
+    ``LK_LOCK`` gives up after ten one-second tries and a writer holds the lock
+    for a whole nested :program:`pytest` run. Only "already locked",
+    ``EACCES``, is retried; any other error propagates. Windows drops the lock
+    with a dying process, so the wait is unbounded, as on POSIX.
+
+    """
+    # Opened without O_APPEND, so the position, where the range starts, stays 0.
+    fd = os.open(_tier_guard_lock_path(), os.O_RDWR | os.O_CREAT)
+    try:
+        while True:
+            try:
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+            except OSError as exc:
+                if exc.errno != errno.EACCES:
+                    raise
+                time.sleep(TIER_GUARD_LOCK_POLL)
+            else:
+                break
+        try:
+            yield
+        finally:
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+    finally:
+        os.close(fd)
+
+
+@contextlib.contextmanager
 def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     """Hold the probe/scan mutex, shared or exclusive, for the block's duration.
 
@@ -629,14 +668,17 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     well as threads of one process, which is what makes the two truly unable to
     overlap rather than merely unlikely to.
 
-    A no-op wherever :data:`fcntl` is :data:`None` -- true only off POSIX, such
-    as the Windows leg of :file:`.github/workflows/experimental.yml`, which runs
-    ``--dist load`` too. Nothing that has to stay correct there relies on the lock
-    (#2114): :func:`tests._tiers.suite_modules` never lists the probe,
-    :class:`~tests.test_tier_guard.FixtureTierSelectionTests`'s grep-based scan
-    never reads it, and :class:`~tests.test_tier_guard.SuiteIsCleanTests` skips
-    it where this is a no-op. :func:`msvcrt.locking` is no substitute, since it
-    has no shared mode.
+    Where :data:`fcntl` is :data:`None` -- off POSIX, such as the Windows leg of
+    :file:`.github/workflows/experimental.yml`, which runs ``--dist load`` too --
+    only the writer's hold is taken, by :func:`_tier_guard_msvcrt_lock`, so the
+    probe writers still exclude each other (#2927). A reader's is a no-op there:
+    :func:`msvcrt.locking` has no shared mode, and an exclusive hold per test
+    would serialise every worker. Nothing that has to stay correct relies on a
+    reader's hold (#2114): :func:`tests._tiers.suite_modules` never lists the
+    probe, :class:`~tests.test_tier_guard.FixtureTierSelectionTests`'s grep-based
+    scan never reads it, and :class:`~tests.test_tier_guard.SuiteIsCleanTests`
+    skips it where :data:`fcntl` is :data:`None`. Without :mod:`msvcrt` either,
+    both holds are no-ops.
 
     Linux :func:`fcntl.flock` grants a shared request whenever no exclusive
     hold is *granted*, however long a writer has been waiting, so readers whose
@@ -656,7 +698,11 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
 
     """
     if fcntl is None:
-        yield
+        if exclusive and msvcrt is not None:
+            with _tier_guard_msvcrt_lock():
+                yield
+        else:
+            yield
         return
     path = _tier_guard_lock_path()
     gate_path = path.with_name(f'{path.name}.gate')

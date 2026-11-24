@@ -1023,9 +1023,9 @@ def suite_modules() -> 'tuple[str, ...]':
     :func:`probe module <is_probe_module>`, which pytest never collects either.
 
     """
-    # The probe comes and goes under another worker's feet, and the tier lock
-    # that serialises it is a no-op off POSIX: listed, it fails module_tier()
-    # once it has gone (#2114).
+    # The probe comes and goes under another worker's feet, and the tier lock's
+    # reader hold, which a listing takes, is a no-op off POSIX: listed, it fails
+    # module_tier() once it has gone (#2114).
     return tuple(sorted(path.relative_to(ROOT).as_posix() for path in TESTS_ROOT.rglob('test_*.py')
                         if '__pycache__' not in path.parts and not is_probe_module(path)))
 

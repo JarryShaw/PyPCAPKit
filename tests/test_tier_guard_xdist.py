@@ -51,12 +51,18 @@ a blocking lock deadlocks :class:`ProbeWriteLockTests`'s own process and queues
 every worker behind it. On GraalPy the lock polls with ``LOCK_NB``, and
 :class:`ProbeLockNonBlockingTests` pins that it never makes a blocking call.
 
+A sixth (#2927): where :mod:`fcntl` is missing, as on Windows, the lock was a
+no-op, so two probe writers on two workers met at the probe and one failed with
+"already exists". There the writer's hold is :func:`msvcrt.locking`, and
+:class:`ProbeWriterMutexTests` pins it on every platform.
+
 Kept separate from :mod:`tests.test_tier_guard`: this module exercises
 :mod:`tests.conftest`, and none of :mod:`tests.test_tier_guard`'s code.
 
 """
 from __future__ import annotations
 
+import contextlib
 import errno
 import importlib.util
 import os
@@ -75,8 +81,13 @@ from typing import TYPE_CHECKING
 
 from tests import _tiers, conftest as _conftest
 
+try:
+    import msvcrt
+except ImportError:  # off Windows
+    msvcrt = None  # type: ignore[assignment]
+
 if TYPE_CHECKING:
-    from typing import Callable, ContextManager
+    from typing import Callable, ContextManager, Iterator
 
 #: Test tier (#1958): checks the guard in xdist workers on each leg's interpreter.
 __tier__ = 'ALL'
@@ -795,3 +806,112 @@ class ProbeLockNestedRunTests(unittest.TestCase):
                                     'the hold did not take the lock')
                 self.assertEqual(os.environ.get(name), before)
                 self.assertFalse(self._held('', _conftest.fcntl.LOCK_EX))
+
+
+class _FlockMsvcrt:
+    """:mod:`msvcrt` off Windows: its :func:`~msvcrt.locking` on :func:`fcntl.flock` (#2927).
+
+    Both lock per descriptor, so two descriptors conflict whether one process
+    holds them or two. The modes and errors are Windows' own: ``LK_NBLCK``
+    raises ``EACCES`` while the lock is held, and ``LK_LOCK`` tries ten times,
+    :data:`RETRY` apart rather than a second, then raises ``EDEADLK``.
+
+    """
+
+    LK_UNLCK, LK_LOCK, LK_NBLCK, LK_RLCK, LK_NBRLCK = range(5)
+
+    #: Seconds between ``LK_LOCK``'s tries.
+    RETRY = 0.01
+
+    def __init__(self, flock: 'types.ModuleType') -> None:
+        self._fcntl = flock
+
+    def locking(self, fd: 'int', mode: 'int', nbytes: 'int') -> None:
+        del nbytes
+        fcntl = self._fcntl
+        if mode == self.LK_UNLCK:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            return
+        tries = 10 if mode in (self.LK_LOCK, self.LK_RLCK) else 1
+        for attempt in range(tries):
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                if attempt + 1 < tries:
+                    time.sleep(self.RETRY)
+            else:
+                return
+        code = errno.EDEADLK if tries > 1 else errno.EACCES
+        raise OSError(code, os.strerror(code))
+
+
+@contextlib.contextmanager
+def _as_on_windows(lock_path: 'pathlib.Path') -> 'Iterator[None]':
+    """:func:`tests.conftest._tier_guard_lock` without :mod:`fcntl`, on ``lock_path``.
+
+    :mod:`msvcrt` is the real one where it exists, and a :class:`_FlockMsvcrt`
+    elsewhere.
+
+    """
+    stand_in = msvcrt if msvcrt is not None else _FlockMsvcrt(_conftest.fcntl)
+    with unittest.mock.patch.object(_conftest, 'fcntl', None), \
+            unittest.mock.patch.object(_conftest, 'msvcrt', stand_in, create=True), \
+            unittest.mock.patch.object(_conftest, '_tier_guard_lock_path', return_value=lock_path):
+        yield
+
+
+#: The second writer :class:`ProbeWriterMutexTests` starts, in a process of its
+#: own as on another worker: it touches ``asking`` in the directory
+#: ``sys.argv[1]`` names, then ``in`` once its hold is granted.
+_SECOND_WRITER = '''
+import pathlib, sys
+from tests import conftest, test_tier_guard_xdist as module
+root = pathlib.Path(sys.argv[1])
+with module._as_on_windows(root / 'tier-guard.lock'):
+    (root / 'asking').touch()
+    with conftest._tier_guard_lock(exclusive=True):
+        (root / 'in').touch()
+'''
+
+
+@unittest.skipIf(_conftest.fcntl is None and msvcrt is None, 'neither fcntl nor msvcrt on this platform')
+class ProbeWriterMutexTests(unittest.TestCase):
+    """Probe writers exclude each other where :mod:`fcntl` is missing (#2927).
+
+    Runs the Windows path on every platform, with :func:`_as_on_windows`: the
+    real :mod:`msvcrt` on Windows, :class:`_FlockMsvcrt` elsewhere. A process
+    stands in for the second worker, on a lock file of the test's own.
+
+    """
+
+    #: Seconds the first writer holds on once the second has asked: past
+    #: :class:`_FlockMsvcrt`'s ten ``LK_LOCK`` tries.
+    HOLD = 0.5
+
+    def setUp(self) -> None:
+        self.root = pathlib.Path(tempfile.mkdtemp(prefix='pcapkit-2927-'))
+        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+
+    def test_a_second_writer_waits_for_the_first(self) -> None:
+        """Without the fix, the lock is a no-op and the second writer gets in at once."""
+        asking, inside = self.root / 'asking', self.root / 'in'
+        with _as_on_windows(self.root / 'tier-guard.lock'):
+            with _conftest._tier_guard_lock(exclusive=True):
+                child = subprocess.Popen(  # nosec: B603
+                    [sys.executable, '-c', _SECOND_WRITER, str(self.root)],
+                    cwd=str(_tiers.ROOT), env=_child_environ(), stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE, text=True,
+                )
+                # LIFO, as in XdistSubprocessTests: a child the test left running
+                # is killed first, then its pipe closed and its exit waited for.
+                self.addCleanup(child.__exit__, None, None, None)
+                self.addCleanup(child.kill)
+                end = time.monotonic() + 120
+                while not asking.exists() and child.poll() is None:
+                    self.assertLess(time.monotonic(), end, 'the second writer never asked for the lock')
+                    time.sleep(0.01)
+                time.sleep(self.HOLD)
+                self.assertFalse(inside.exists(), 'a second writer got the lock while the first held it')
+            _, stderr = child.communicate(timeout=120)
+        self.assertEqual(child.returncode, 0, stderr)
+        self.assertTrue(inside.exists(), 'the second writer never got the lock once the first let go')
