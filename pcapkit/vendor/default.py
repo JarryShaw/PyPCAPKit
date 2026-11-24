@@ -80,6 +80,38 @@ PROJECT_URL = 'https://github.com/JarryShaw/PyPCAPKit'
 #: before Python 3.12, and this package still builds on 3.8.
 PROTO_DEST_IMPORT = 'from pcapkit.corekit.module import ModuleDescriptor\n'
 
+# NOTE: docutils' ``enum``, ``optarg`` and ``option`` pattern fragments.
+_ENUM = r'(?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)'
+_OPTARG = r'(?:[a-zA-Z][a-zA-Z0-9_-]*|<[^<>]+>)'
+_OPTION = rf'(?:[-+][a-zA-Z0-9](?: ?{_OPTARG})?|(?:--|/)[a-zA-Z0-9][a-zA-Z0-9_-]*(?:[ =]{_OPTARG})?)'
+
+#: re.Pattern: The start of a comment's text that docutils opens a list, a
+#: block, a table or a transition with instead of a paragraph, which
+#: :meth:`Vendor.wrap_comment` backslash-escapes (:issue:`3049`). It follows the
+#: initial transitions of docutils' ``Body`` state, matched against the text
+#: before it is wrapped:
+#:
+#: * a bullet, an enumerator, a doctest's ``>>>``, a line block's ``|``,
+#:   explicit markup's ``..`` or an anonymous target's ``__``, followed by a
+#:   space or nothing;
+#: * a field marker, such as ``:Name:``, followed by a space or nothing;
+#: * an option marker, such as ``-v``, ``--long=arg`` or ``/V``, followed by two
+#:   spaces. After one space or none it opens no list, as no description
+#:   follows;
+#: * a text of one punctuation character repeated four times or more, a
+#:   transition or section adornment, or a simple or grid table's top border,
+#:   such as ``=== ===`` or ``+---+``.
+#:
+#: .. versionadded:: 1.7.0
+BLOCK_MARKER = re.compile('|'.join((
+    rf'(?:[-*+\u2022\u2023\u2043]|\({_ENUM}\)|{_ENUM}[.)]|>>>|\||\.\.|__)(?: |\Z)',
+    r':(?![: ])(?:[^:\\]|\\.|:(?![ `]|\Z))*(?<! ):(?: |\Z)',
+    rf'{_OPTION}(?:, {_OPTION})*  ',
+    r'(?P<adornment>[!-/:-@[-`{-~])(?P=adornment){3,}\Z',
+    r'=+(?: +=+)+\Z',
+    r'\+-[-+]+-\+\Z',
+)))
+
 
 def render_proto_dest(descriptors: 'tuple[ModuleDescriptor[Any], ...]') -> 'str':
     """Render the generated class's ``__proto_dest__`` declaration.
@@ -351,8 +383,10 @@ class Vendor(metaclass=VendorMeta):
           directly, as in ``[http://ele2.io][Damir Franusic]``. docutils reads
           ``]`` and ``[`` as URL characters, so the autolink would run on into
           the next citation;
-        * a leading enumerator, such as the ``(S)`` of ``(S) flag``, is
-          backslash-escaped, since reST would render it as an enumerated list.
+        * a leading block marker, which :data:`BLOCK_MARKER` matches, is
+          backslash-escaped, since reST would render the text as a list, a
+          block, a table or a transition: an enumerator, such as the ``(S)`` of
+          ``(S) flag``, or a bullet, such as DNS's ``*`` record type.
 
         A line never breaks at a hyphen, which would render ``run-time`` as
         ``run- time``. Only a word longer than a whole line is split inside.
@@ -363,6 +397,11 @@ class Vendor(metaclass=VendorMeta):
            leading enumerator (:issue:`1846`), and no longer breaks a line at a
            hyphen (:issue:`1847`).
 
+        .. versionchanged:: 1.7.0
+
+           Escapes every leading block marker of :data:`BLOCK_MARKER`, not an
+           enumerator alone (:issue:`3049`).
+
         Args:
             text: Source text.
 
@@ -371,10 +410,8 @@ class Vendor(metaclass=VendorMeta):
 
         """
         text = re.sub(r'(://[^\s\[\]]*\])(?=\[)', r'\1 ', text.strip())
-        # NOTE: the enumerator forms docutils recognises -- ``1.``, ``(a)``,
-        # ``iv)``, ``#.`` and so on -- each followed by a space or nothing.
-        text = re.sub(r'\A(?=(?:\((?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)\)'
-                      r'|(?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)[.)])(?: |\Z))', r'\\', text)
+        if BLOCK_MARKER.match(text) is not None:
+            text = f'\\{text}'
         return '\n    #: '.join(textwrap.wrap(text, 76, break_on_hyphens=False))
 
     @staticmethod

@@ -144,6 +144,9 @@ Internal Definitions
 
 .. autodata:: pcapkit.vendor.default.PROTO_DEST_IMPORT
 
+.. autodata:: pcapkit.vendor.default.BLOCK_MARKER
+   :no-value:
+
 .. autofunction:: pcapkit.vendor.default.render_proto_dest
 
 .. autofunction:: pcapkit.vendor.default.get_proxies
