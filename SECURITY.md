@@ -11,10 +11,11 @@ one is in pre-release. Older lines are not patched; upgrade instead.
 | 1.5.x and older | :x:                | no longer patched                       |
 | 0.x             | :x:                | no longer patched                       |
 
-Supported interpreters are the test matrix's blocking tier: CPython 3.11
-through 3.15. `pyproject.toml` declares `requires-python = ">=3.8"`, but 3.8 to 3.10 are
-best-effort (tested, never blocking). A report that only reproduces outside the tested range is
-still welcome; it may be fixed by raising the floor rather than by patching.
+Supported interpreters are the test matrix's blocking tier: CPython 3.11 through 3.15,
+and PyPy 3.11 and 3.12. `pyproject.toml` declares `requires-python = ">=3.8"`, but
+3.8 to 3.10 are best-effort (tested, never blocking). A report that only reproduces
+outside the tested range is still welcome; it may be fixed by raising the floor rather
+than by patching.
 
 ## Reporting a Vulnerability
 

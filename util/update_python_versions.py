@@ -986,6 +986,14 @@ def span(tier: 'list[str]') -> 'Optional[tuple[str, str]]':
     return (tier[0], tier[-1]) if consecutive([pv.key(version)[1] for version in tier]) else None
 
 
+def listed(tier: 'list[str]') -> 'Optional[tuple[str]]':
+    """A tier's versions, each named: ``'3.11 and 3.12'``, PyPy's without the ``pypy`` prefix."""
+    names = ['.'.join(map(str, pv.key(version))) for version in tier]
+    if not names:
+        return None
+    return (names[0] if len(names) == 1 else f'{", ".join(names[:-1])} and {names[-1]}',)
+
+
 #: The sentences restating the tiers, by file. Never a workflow (see the module docstring).
 CLAIMS = {
     'pyproject.toml': (
@@ -1018,6 +1026,8 @@ CLAIMS = {
     ),
     'SECURITY.md': (
         Claim(r'blocking tier: CPython (3\.\d+) through (3\.\d+)', lambda f: span(f['supported'])),
+        Claim(r'blocking tier: CPython 3\.\d+ through 3\.\d+, and PyPy (3\.\d+(?:(?:, | and )3\.\d+)*)\.',
+              lambda f: listed(f['pypy-supported'])),
         Claim(r'but (3\.\d+) to (3\.\d+) are best-effort', lambda f: span(f['ktlo'])),
     ),
     '.github/coverage.toml': (
@@ -1094,6 +1104,7 @@ def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dic
         'latest': data['latest'],
         'supported': pv.tier(data, 'cpython', 'supported'),
         'ktlo': pv.tier(data, 'cpython', 'ktlo'),
+        'pypy-supported': pv.tier(data, 'pypy', 'supported'),
         'experimental': [version for impl in data['versions'] for version in pv.tier(data, impl, 'experimental')],
         'required': required_contexts(workflows, values),
     }

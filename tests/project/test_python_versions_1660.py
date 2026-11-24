@@ -1015,6 +1015,7 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         cls.latest = data['latest']
         cls.supported = script().tier(data, 'cpython', 'supported')
         cls.ktlo = script().tier(data, 'cpython', 'ktlo')
+        cls.pypy = script().tier(data, 'pypy', 'supported')
 
     def test_the_classifiers_name_the_supported_tier_and_both_implementations(self) -> None:
         text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
@@ -1051,6 +1052,13 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
             with self.subTest(tier=name):
                 self.assertEqual(minors, list(range(minors[0], minors[0] + len(minors))),
                                  f'a range cannot state the {name} tier {versions}; reword the claims by hand')
+
+    def test_the_security_policy_names_each_blocking_pypy_version(self) -> None:
+        """PyPy's supported legs block through ``required-checks`` too (#1633, #3048)."""
+        found = re.findall(r'blocking tier: CPython 3\.\d+ through 3\.\d+, and PyPy (.+?)\.(?!\d)',
+                           prose(ROOT / 'SECURITY.md'))
+        self.assertEqual(len(found), 1, found)
+        self.assertEqual(re.findall(r'3\.\d+', found[0]), [version[len('pypy'):] for version in self.pypy])
 
     def test_the_required_contexts_table_is_the_supported_tier(self) -> None:
         """The docs' copy of ruleset 23497679, which a tier change edits with it."""
