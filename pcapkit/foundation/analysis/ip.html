@@ -595,8 +595,8 @@
 <p><a class="reference internal" href="#module-pcapkit.foundation.analysis.ip" title="pcapkit.foundation.analysis.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis.ip</span></code></a> contains
 <a class="reference internal" href="#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a> only, which parses the
 payload of an IPv4 or IPv6 datagram that
-<a class="reference internal" href="../reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4" title="pcapkit.foundation.reassembly.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> or
-<a class="reference internal" href="../reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6" title="pcapkit.foundation.reassembly.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> reassembled.</p>
+<a class="reference internal" href="../reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.reassembly.IPv4" title="pcapkit.foundation.reassembly.ipv4.reassembly.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> or
+<a class="reference internal" href="../reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.reassembly.IPv6" title="pcapkit.foundation.reassembly.ipv6.reassembly.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> reassembled.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
@@ -604,8 +604,8 @@ payload of an IPv4 or IPv6 datagram that
 <dt class="sig sig-object py" id="pcapkit.foundation.analysis.ip.ip_datagram">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.ip.</span></span><span class="sig-name descname"><span class="pre">ip_datagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datagram</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/analysis/ip.html#ip_datagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis.ip.ip_datagram" title="Link to this definition">¶</a></dt>
 <dd><p>Parse the payload of an IP datagram reassembled by
-<a class="reference internal" href="../reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4" title="pcapkit.foundation.reassembly.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> or
-<a class="reference internal" href="../reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6" title="pcapkit.foundation.reassembly.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>.</p>
+<a class="reference internal" href="../reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.reassembly.IPv4" title="pcapkit.foundation.reassembly.ipv4.reassembly.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> or
+<a class="reference internal" href="../reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.reassembly.IPv6" title="pcapkit.foundation.reassembly.ipv6.reassembly.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>.</p>
 <p>The payload is dispatched on the datagram’s payload protocol type – the
 <strong>Protocol</strong> field for IPv4, the Fragment header’s <strong>Next Header</strong> for
 IPv6 – by <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a> of
@@ -614,7 +614,7 @@ IPv6 – by <a class="reference internal" href="../../protocols/protocol.html#pc
 addresses belong to.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>datagram</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram" title="pcapkit.foundation.reassembly.data.ip.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a></span>) – Reassembled datagram (<a class="reference internal" href="../reassembly/ip/ipv4.html#term-reasm.ipv4.datagram"><span class="xref std std-term">reasm.ipv4.datagram</span></a> or
+<dd class="field-odd"><p><strong>datagram</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram" title="pcapkit.foundation.reassembly.ip.data.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a></span>) – Reassembled datagram (<a class="reference internal" href="../reassembly/ip/ipv4.html#term-reasm.ipv4.datagram"><span class="xref std std-term">reasm.ipv4.datagram</span></a> or
 <a class="reference internal" href="../reassembly/ip/ipv6.html#term-reasm.ipv6.datagram"><span class="xref std std-term">reasm.ipv6.datagram</span></a>).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -629,7 +629,7 @@ received, as <code class="docutils literal notranslate"><span class="pre">strict
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><a class="reference internal" href="../reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram.packet" title="pcapkit.foundation.reassembly.data.ip.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>
+<p><a class="reference internal" href="../reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram.packet" title="pcapkit.foundation.reassembly.ip.data.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>
 holds the same result, parsed on its first read, unless the
 reassembly’s <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another protocol, which then
 parses it instead.</p>

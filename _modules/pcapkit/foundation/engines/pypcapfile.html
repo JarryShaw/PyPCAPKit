@@ -697,34 +697,6 @@
     <span class="c1">#: ``pcapfile.linklayer``, and :mod:`imp` was removed in Python 3.12.</span>
     <span class="n">PYTHON_CEILING</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PyPCAPFile.unsupported_reason">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.unsupported_reason">[docs]</a>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Why this engine cannot run here, or :data:`None` when it can.</span>
-
-<span class="sd">        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles</span>
-<span class="sd">        its engine, *before* the import test, which cannot answer this.</span>
-<span class="sd">        |pcapfile|_'s top-level package imports on Python 3.12 and newer; it is</span>
-<span class="sd">        ``pcapfile.linklayer`` that fails, imported by ``pcapfile.savefile``. So</span>
-<span class="sd">        ``import pcapfile`` succeeds and the :exc:`ModuleNotFoundError` escapes</span>
-<span class="sd">        from :meth:`__init__` as a hard error instead of degrading to the default</span>
-<span class="sd">        engine with a warning.</span>
-
-<span class="sd">        The version is checked rather than the import attempted, so the answer</span>
-<span class="sd">        does not depend on which submodule happens to be imported first.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">PYTHON_CEILING</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'pypcapfile does not support Python '</span>
-                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">; '</span>
-                    <span class="s1">'its linklayer module imports `imp`, removed in Python 3.12'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
-
-
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
@@ -759,6 +731,38 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">dlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Data link layer protocol, as reported by the savefile header."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Availability.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="PyPCAPFile.unsupported_reason">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.unsupported_reason">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unsupported_reason</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Why this engine cannot run here, or :data:`None` when it can.</span>
+
+<span class="sd">        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles</span>
+<span class="sd">        its engine, *before* the import test, which cannot answer this.</span>
+<span class="sd">        |pcapfile|_'s top-level package imports on Python 3.12 and newer; it is</span>
+<span class="sd">        ``pcapfile.linklayer`` that fails, imported by ``pcapfile.savefile``. So</span>
+<span class="sd">        ``import pcapfile`` succeeds and the :exc:`ModuleNotFoundError` escapes</span>
+<span class="sd">        from :meth:`__init__` as a hard error instead of degrading to the default</span>
+<span class="sd">        engine with a warning.</span>
+
+<span class="sd">        The version is checked rather than the import attempted, so the answer</span>
+<span class="sd">        does not depend on which submodule happens to be imported first.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">PYTHON_CEILING</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'pypcapfile does not support Python '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">; '</span>
+                    <span class="s1">'its linklayer module imports `imp`, removed in Python 3.12'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>

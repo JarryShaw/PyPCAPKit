@@ -809,7 +809,7 @@ to store reassembled datagrams.</p>
 <span class="sig-name descname"><span class="pre">__timeout__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">inf</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__" title="Link to this definition">¶</a></dt>
 <dd><p>Default reassembly timeout, in seconds, for this protocol –
 overridden per protocol, e.g.
-<a class="reference internal" href="ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__" title="pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.__timeout__</span></code></a>.
+<a class="reference internal" href="ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.reassembly.IPv6.__timeout__" title="pcapkit.foundation.reassembly.ipv6.reassembly.IPv6.__timeout__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.__timeout__</span></code></a>.
 <a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> means “never expire”, which is the base default because
 nothing here knows what a protocol’s specification asks for.</p>
 <dl class="field-list simple">
@@ -908,7 +908,7 @@ handed to <a class="reference internal" href="#pcapkit.foundation.reassembly.rea
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Datagrams of the buffers abandoned, reported with
-<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT" title="pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code></a>
+<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.Completion.TIMEOUT" title="pcapkit.foundation.reassembly.data.Completion.TIMEOUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code></a>
 and already stored in <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a>, through <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._release" title="pcapkit.foundation.reassembly.reassembly.Reassembly._release"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_release()</span></code></a>.
 Empty when nothing expired, which is the overwhelmingly common case.</p>
 </dd>
@@ -926,7 +926,7 @@ deadline.</p>
 parser has that time has moved on. Fed by hand, a reassembly object
 sees only the packets handed to it, so a buffer followed by none is
 reported as
-<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL" title="pcapkit.foundation.reassembly.data.data.Completion.PARTIAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.PARTIAL</span></code></a>
+<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.Completion.PARTIAL" title="pcapkit.foundation.reassembly.data.Completion.PARTIAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.PARTIAL</span></code></a>
 at the end of the capture. The
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> calls
 <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.advance" title="pcapkit.foundation.reassembly.reassembly.Reassembly.advance"><code class="xref py py-meth docutils literal notranslate"><span class="pre">advance()</span></code></a> with every frame’s timestamp, so there a buffer

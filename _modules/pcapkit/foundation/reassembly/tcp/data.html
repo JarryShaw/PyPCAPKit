@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.foundation.traceflow.data.tcp - PyPCAPKit</title>
+        <title>pcapkit.foundation.reassembly.tcp.data - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -573,227 +573,327 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.foundation.traceflow.data.tcp</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.foundation.reassembly.tcp.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""data models for TCP flow tracing"""</span>
+<span class="sd">"""data models for TCP reassembly</span>
+
+<span class="sd">.. versionremoved:: 1.7.0</span>
+
+<span class="sd">   ``pcapkit.foundation.reassembly.data.tcp``, with no alias: the module moved here</span>
+<span class="sd">   (:issue:`2882`).</span>
+
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferredPacket</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deferred</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span><span class="p">,</span> <span class="n">Deferred</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'BufferID'</span><span class="p">,</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'Index'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'HoleDescriptor'</span><span class="p">,</span>
+    <span class="s1">'Fragment'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="s1">'HOLE_OPEN_BOUND'</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeAlias</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
 
-<span class="c1">#: Buffer ID, i.e. ``(address, port, address, port)``.</span>
-<span class="c1">#:</span>
-<span class="c1">#: A plain :obj:`tuple` rather than an :class:`~pcapkit.corekit.infoclass.Info`</span>
-<span class="c1">#: **deliberately**: :class:`~pcapkit.corekit.infoclass.Info` inherits</span>
-<span class="c1">#: :class:`collections.abc.Mapping`, which sets ``__hash__ = None``, so an</span>
-<span class="c1">#: :class:`~pcapkit.corekit.infoclass.Info` cannot be a :obj:`dict` key at all.</span>
-<span class="c1">#:</span>
-<span class="c1">#: When tracing bidirectionally -- the default -- the two endpoints are ordered</span>
-<span class="c1">#: canonically rather than as (source, destination), so that both halves of one</span>
-<span class="c1">#: conversation produce the same key; see</span>
-<span class="c1">#: :meth:`TCP.make_bufid &lt;pcapkit.foundation.traceflow.tcp.TCP.make_bufid&gt;`. The</span>
-<span class="c1">#: shape is unchanged either way.</span>
+<span class="c1">#: Buffer ID.</span>
 <span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+<span class="c1">#: Open bound of the :class:`HoleDescriptor` list. A hole whose ``last`` is</span>
+<span class="c1">#: this value is still open above, and one whose ``first`` is its negation</span>
+<span class="c1">#: stands for whatever preceded a capture that missed the handshake.</span>
+<span class="c1">#:</span>
+<span class="c1">#: It is ``2 ** 63 - 1`` on every platform, not :data:`sys.maxsize`, which is</span>
+<span class="c1">#: ``2 ** 31 - 1`` on GraalPy and 32-bit builds and so falls inside the</span>
+<span class="c1">#: ``2 ** 32`` sequence space. The unwrapped sequence line reaches it only</span>
+<span class="c1">#: after ``2 ** 31`` wraps. It stays an :class:`int`, like the descriptor's</span>
+<span class="c1">#: own fields, and in both signs fits a standard JSON number and a</span>
+<span class="c1">#: :mod:`plistlib` integer, which :data:`math.inf` does not.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">HOLE_OPEN_BOUND</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">63</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
 
 <div class="viewcode-block" id="Packet">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Packet">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data structure for a packet submitted to **TCP flow tracing**.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.packet&gt;` packet representation."""</span>
 
-<span class="sd">    See Also:</span>
-<span class="sd">        * :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.dump`</span>
-<span class="sd">        * :term:`trace.tcp.packet`</span>
+    <span class="c1">#: Buffer ID.</span>
+    <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span>
+    <span class="c1">#: Data sequence number.</span>
+    <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Acknowledgment number.</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Original packet range number.</span>
+    <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Synchronise flag.</span>
+    <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Finish flag.</span>
+    <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Reset connection flag.</span>
+    <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Payload length, header excluded.</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Sequence number of the first octet of :attr:`payload`, i.e. the segment's</span>
+    <span class="c1">#: own sequence number. Absolute, not an offset into any payload buffer.</span>
+    <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Sequence number of the last octet of :attr:`payload`, i.e. ``first +</span>
+    <span class="c1">#: len - 1``. **Inclusive**, so a segment carrying no payload at all has</span>
+    <span class="c1">#: :attr:`last` one below :attr:`first`.</span>
+    <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Raw :obj:`bytes` type header.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Raw :obj:`bytearray` type payload.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Capture timestamp of the segment, in seconds since the Unix epoch, i.e.</span>
+    <span class="c1">#: the *capture's* clock rather than the host's. It drives the reassembly</span>
+    <span class="c1">#: timeout, which for TCP is off by default -- see</span>
+    <span class="c1">#: :attr:`TCP.__timeout__ &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.__timeout__&gt;`.</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
 
-<span class="sd">    .. versionchanged:: 1.6.0</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
-<span class="sd">       A third-party engine's :attr:`frame` is a</span>
-<span class="sd">       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, which</span>
-<span class="sd">       :meth:`to_dict` exports as an</span>
-<span class="sd">       :class:`~pcapkit.corekit.multidict.OrderedMultiDict`; so</span>
-<span class="sd">       ``Packet.from_dict(packet.to_dict())`` holds the frame as an</span>
-<span class="sd">       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`, not a</span>
-<span class="sd">       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`</span>
-<span class="sd">       (:issue:`2726`).</span>
+
+
+<div class="viewcode-block" id="DatagramID">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.DatagramID">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;` original packet identifier.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The ports here stay bare :obj:`int` port numbers, where the pair</span>
+<span class="sd">        :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit&gt;` hands</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.data.Deferred` is one of</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.tcp.TCP` members</span>
+<span class="sd">        (:issue:`2417`). The two are not the same thing to name: this is the</span>
+<span class="sd">        flow's identity, split out of :data:`BufferID`, which every</span>
+<span class="sd">        :mod:`pcapkit.toolkit` adapter builds from a plain port number -- the</span>
+<span class="sd">        native ones by reading :attr:`AppType.port</span>
+<span class="sd">        &lt;pcapkit.const.reg.apptype.apptype.AppType.port&gt;` off the parsed header,</span>
+<span class="sd">        the third-party ones from whatever their own engine exposes -- and which</span>
+<span class="sd">        is then used as a :class:`dict` key and dumped as part of the report.</span>
+<span class="sd">        The deferred pair is a *dispatch* key for</span>
+<span class="sd">        :meth:`Transport.analyze</span>
+<span class="sd">        &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;`, which is</span>
+<span class="sd">        what gains from carrying the service name.</span>
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Data link type -- the PCAP global header's, or that of the PCAP-NG</span>
-    <span class="c1">#: interface the packet was captured on.</span>
-    <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span>
-    <span class="c1">#: Frame number.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Extracted frame info -- the default engine's frame, a third-party</span>
-    <span class="c1">#: engine's :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, or</span>
-    <span class="c1">#: the :obj:`dict` PyShark's adapter reports, which carries no frame record.</span>
-    <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | FrameRecord | dict[str, Any]'</span>
-    <span class="c1">#: TCP synchronise (SYN) flag.</span>
-    <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: TCP finish (FIN) flag.</span>
-    <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: TCP reset (RST) flag. A connection can end abruptly as well as politely</span>
-    <span class="c1">#: (:rfc:`9293#section-3.5.3`), and the tracer cannot notice that unless the</span>
-    <span class="c1">#: flag reaches it, otherwise a reset connection looks merely idle and a later</span>
-    <span class="c1">#: connection reusing the same endpoints merges into it.</span>
-    <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: Source IP.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span>
-    <span class="c1">#: Destination IP.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span>
-    <span class="c1">#: TCP source port.</span>
-    <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: TCP destination port.</span>
-    <span class="n">dstport</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Frame timestamp.</span>
-    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
-    <span class="c1">#: TCP sequence number. Carried so that a tracer asked to analyse the</span>
-    <span class="c1">#: application layer can hand the segment to</span>
-    <span class="c1">#: :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than reassemble the</span>
-    <span class="c1">#: stream itself -- a tracer that simply concatenated payloads in capture order</span>
-    <span class="c1">#: would be silently wrong on the first retransmission or reordering.</span>
-    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: TCP acknowledgement number, which is what the reassembler keys a payload</span>
-    <span class="c1">#: buffer on.</span>
+    <span class="c1">#: Source address.</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span>
+    <span class="c1">#: Destination address.</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span>
+    <span class="c1">#: Original packet ACK number.</span>
     <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Raw :obj:`bytes` type TCP header.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Raw :obj:`bytearray` type TCP payload, i.e. the application-layer octets</span>
-    <span class="c1">#: this segment carries.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | FrameRecord | dict[str, Any]'</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+
+<div class="viewcode-block" id="Datagram">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Datagram">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">DeferredPacket</span><span class="p">,</span> <span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;` reassembled datagram."""</span>
+
+    <span class="c1">#: How completely the datagram was reassembled, and why reassembly stopped;</span>
+    <span class="c1">#: see :class:`~pcapkit.foundation.reassembly.data.Completion`. Only</span>
+    <span class="c1">#: :attr:`Completion.COMPLETE</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.data.Completion.COMPLETE&gt;` is truthy, so</span>
+    <span class="c1">#: ``if datagram.completed:`` reads as it would for a :obj:`bool`.</span>
+    <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span>
+    <span class="c1">#: Listing ``packet`` here is what makes it lazy -- see</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket`.</span>
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
+    <span class="c1">#: Placeholder class :attr:`packet` may hold, for</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted</span>
+    <span class="c1">#: for the reason given on</span>
+    <span class="c1">#: :class:`~pcapkit.foundation.reassembly.ip.data.Datagram`'s own</span>
+    <span class="c1">#: ``__deferred__``: :func:`isinstance` rejects a parameterized generic.</span>
+    <span class="n">__deferred__</span> <span class="o">=</span> <span class="n">Deferred</span>
+
+    <span class="c1">#: Original packet identifier.</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span>
+    <span class="c1">#: Packet numbers.</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
+    <span class="c1">#: Initial TCP header.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Reassembled payload (application layer data).</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span>
+    <span class="c1">#: Parsed TCP payload, as :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`</span>
+    <span class="c1">#: returns it unless the reassembly's ``__protocol_type__`` names another</span>
+    <span class="c1">#: protocol, which then parses it. Analysed on first read rather than at</span>
+    <span class="c1">#: construction; a :class:`~pcapkit.foundation.reassembly.data.Deferred`</span>
+    <span class="c1">#: may be passed in its place, and reading this attribute then runs it and</span>
+    <span class="c1">#: keeps the result.</span>
+    <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase]'</span>
+    <span class="c1">#: Sequence ranges on which two segments disagreed, i.e. where an arriving</span>
+    <span class="c1">#: segment overlapped bytes already buffered but did not repeat them.</span>
+    <span class="c1">#: Each entry is ``(first, last)``, absolute TCP sequence numbers and both</span>
+    <span class="c1">#: **inclusive** -- the same convention as :attr:`Packet.first` and</span>
+    <span class="c1">#: :attr:`Packet.last`. Empty when the stream never saw a contested byte.</span>
+    <span class="c1">#: A range that crosses ``2 ** 32`` therefore has ``last &lt; first``.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Resolution keeps the already-buffered bytes and discards the</span>
+    <span class="c1">#: conflicting portion of whichever segment arrived later, per</span>
+    <span class="c1">#: :rfc:`9293#section-3.10` ("we reconstruct the segment to contain just</span>
+    <span class="c1">#: the new data"); this field is what lets a caller tell a clean stream</span>
+    <span class="c1">#: from a contested one, since a contested range does not, on its own, leave a</span>
+    <span class="c1">#: hole for :attr:`completed` to report.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1"># NOTE: one signature, no ``@overload`` pair keyed on ``completed``, as on</span>
+        <span class="c1"># :class:`~pcapkit.foundation.reassembly.ip.data.Datagram`.</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred[tuple[AppType_TCP, AppType_TCP]]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+
+<div class="viewcode-block" id="HoleDescriptor">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.HoleDescriptor">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HoleDescriptor</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` hole descriptor.</span>
+
+<span class="sd">    Both bounds are **unwrapped TCP sequence numbers** -- read modulo</span>
+<span class="sd">    ``2 ** 32`` relative to the data already buffered, so a stream crossing</span>
+<span class="sd">    ``2 ** 32`` continues past it -- and both are **inclusive**, so a hole</span>
+<span class="sd">    covers ``last - first + 1`` octets. They are not offsets into</span>
+<span class="sd">    :attr:`Fragment.raw`: the descriptor list is kept once per buffer ID,</span>
+<span class="sd">    across every acknowledgement number's payload buffer, and describes the</span>
+<span class="sd">    stream as a whole. It decides when a stream whose FIN has been seen is</span>
+<span class="sd">    whole. A hole whose ``first`` is ``-HOLE_OPEN_BOUND`` stands for whatever</span>
+<span class="sd">    preceded a capture that missed the handshake, and does not count; one</span>
+<span class="sd">    whose ``last`` is :data:`HOLE_OPEN_BOUND` is still open above.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">       Replaces the misspelt ``HoleDiscriptor``.</span>
+
+<span class="sd">    .. versionremoved:: 1.5.0</span>
+
+<span class="sd">       ``HoleDiscriptor``, and its re-export</span>
+<span class="sd">       ``pcapkit.foundation.reassembly.data.TCP_HoleDiscriptor``, with no</span>
+<span class="sd">       alias; import :class:`~pcapkit.foundation.reassembly.tcp.data.HoleDescriptor` instead.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Sequence number of the first missing octet.</span>
+    <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Sequence number of the last missing octet, inclusive.</span>
+    <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+
+<div class="viewcode-block" id="Fragment">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Fragment">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Fragment</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` ACK list fragment item."""</span>
+
+    <span class="c1">#: Numbers of the packets merged into this fragment.</span>
+    <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span>
+    <span class="c1">#: Sequence number of the octet held in ``raw[0]``, i.e. the origin this</span>
+    <span class="c1">#: buffer is indexed from: ``raw[n]`` holds the octet whose sequence number</span>
+    <span class="c1">#: is ``isn + n``. Revised downwards whenever a segment turns up below the</span>
+    <span class="c1">#: data already buffered, so it is not necessarily the connection's own</span>
+    <span class="c1">#: initial sequence number. Like every sequence number held in this</span>
+    <span class="c1">#: fragment -- :attr:`gap` and :attr:`conflict` included -- it is</span>
+    <span class="c1">#: unwrapped, and so may exceed ``2 ** 32`` on a stream that crossed it.</span>
+    <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Length of payload buffer.</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Reassembled payload, holes set to ``b'\x00'``.</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Sequence ranges, absolute and inclusive, still zero-fill placeholder in</span>
+    <span class="c1">#: :attr:`raw` rather than an actually-received byte *of this fragment*.</span>
+    <span class="c1">#: Only the gap-creating sites in :meth:`TCP.reassembly</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly&gt;` -- the forward</span>
+    <span class="c1">#: append and the reach-back prepend, the only places that ever splice a</span>
+    <span class="c1">#: ``bytearray(GAP)`` filler into :attr:`raw` -- add an entry; an overlap</span>
+    <span class="c1">#: merge only ever shrinks or removes one, filling it from the arriving</span>
+    <span class="c1">#: segment. The one exception lies wholly *outside* :attr:`raw`: when a</span>
+    <span class="c1">#: stream whose SYN was captured is split rather than padded across a gap</span>
+    <span class="c1">#: wider than :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`, both halves</span>
+    <span class="c1">#: record the range left between them. Any entry at all makes the fragment</span>
+    <span class="c1">#: incomplete.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: This is deliberately **not** derived from</span>
+    <span class="c1">#: :attr:`Buffer.hdl &lt;pcapkit.foundation.reassembly.tcp.data.Buffer.hdl&gt;`.</span>
+    <span class="c1">#: ``hdl`` is one list shared by every acknowledgement number under the</span>
+    <span class="c1">#: same buffer ID, so a segment landing in a *different* fragment can</span>
+    <span class="c1">#: close a hole in ``hdl`` that this fragment's own :attr:`raw` never</span>
+    <span class="c1">#: filled -- and consulting ``hdl`` to decide whether an overlapping</span>
+    <span class="c1">#: position here was "already received" then answers a question about</span>
+    <span class="c1">#: the wrong fragment. Tracking gaps on the fragment itself is what keeps</span>
+    <span class="c1">#: the merge in :meth:`TCP.reassembly</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly&gt;` from discarding</span>
+    <span class="c1">#: this fragment's own real bytes because some *other* fragment happened</span>
+    <span class="c1">#: to have received something at the same absolute sequence numbers.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Absolute sequence numbers rather than offsets into :attr:`raw` --</span>
+    <span class="c1">#: :attr:`conflict` below uses the same convention -- because it is what</span>
+    <span class="c1">#: :meth:`TCP.reassembly &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly&gt;`</span>
+    <span class="c1">#: already computes (``GAP = PSN - (ISN + LEN)`` and its mirror), so this</span>
+    <span class="c1">#: reuses an existing concept rather than adding a second one; and because a</span>
+    <span class="c1">#: gap entry then never needs shifting when :attr:`isn` is revised downward by the</span>
+    <span class="c1">#: reach-back path, unlike an offset-based or a per-octet representation.</span>
+    <span class="c1">#: A typical fragment carries zero or a handful of entries, against a</span>
+    <span class="c1">#: per-octet marker the length of the whole payload -- the difference</span>
+    <span class="c1">#: that matters on a clean stream, where the per-octet form pays a</span>
+    <span class="c1">#: buffer-sized cost to record that nothing is missing at all.</span>
+    <span class="n">gap</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span>
+    <span class="c1">#: Sequence ranges, absolute and inclusive, on which an arriving segment</span>
+    <span class="c1">#: disagreed with bytes already held in :attr:`raw`. Accumulated across</span>
+    <span class="c1">#: every merge into this fragment, in the order the conflicts were found;</span>
+    <span class="c1">#: carried onto :attr:`Datagram.conflict</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.data.Datagram.conflict&gt;` verbatim</span>
+    <span class="c1">#: when the buffer is submitted.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">gap</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
 <div class="viewcode-block" id="Buffer">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Buffer">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Buffer">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data structure for a **TCP flow tracing** buffer.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.buffer&gt;` buffer entry."""</span>
 
-<span class="sd">    See Also:</span>
-<span class="sd">        * :attr:`pcapkit.foundation.traceflow.traceflow.TraceFlow.index`</span>
-<span class="sd">        * :term:`trace.tcp.buffer`</span>
-
-<span class="sd">    """</span>
-
-    <span class="c1">#: Output dumper object.</span>
-    <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Dumper'</span>
-    <span class="c1">#: List of frame index, **both directions**, in capture order. This is the</span>
-    <span class="c1">#: authoritative ordering; :attr:`forward` and :attr:`reverse` are</span>
-    <span class="c1">#: subsequences of it.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span>
-    <span class="c1">#: Flow label, built from the packet that opened the flow, cf.</span>
-    <span class="c1">#: :meth:`TCP.trace &lt;pcapkit.foundation.traceflow.tcp.TCP.trace&gt;`.</span>
-    <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span>
-    <span class="c1">#: ``(address, port)`` of the endpoint whose packet opened this flow. It</span>
-    <span class="c1">#: defines what "forward" means for the flow, and it is the endpoint the</span>
-    <span class="c1">#: :attr:`label` names first.</span>
-    <span class="n">origin</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span>
-    <span class="c1">#: List of frame index sent **by** :attr:`origin`, in capture order.</span>
-    <span class="n">forward</span><span class="p">:</span> <span class="s1">'list[int]'</span>
-    <span class="c1">#: List of frame index sent **to** :attr:`origin`, in capture order. Always</span>
-    <span class="c1">#: empty when tracing unidirectionally, since the reverse half of the</span>
-    <span class="c1">#: conversation is then a flow of its own.</span>
-    <span class="n">reverse</span><span class="p">:</span> <span class="s1">'list[int]'</span>
-    <span class="c1">#: Endpoints observed to have sent a TCP **FIN**. A bidirectional flow is a</span>
-    <span class="c1">#: whole connection, and a connection closes only once *both* halves have</span>
-    <span class="c1">#: finished (:rfc:`9293#section-3.6`), so the set has to be tracked rather</span>
-    <span class="c1">#: than a single flag: submitting on the first FIN would cut the peer's FIN</span>
-    <span class="c1">#: and the final acknowledgement out of the flow.</span>
-    <span class="n">fin</span><span class="p">:</span> <span class="s1">'set[tuple[_AT, int]]'</span>
-    <span class="c1">#: Whether a TCP **RST** has been seen on this flow. A reset ends the</span>
-    <span class="c1">#: connection at once (:rfc:`9293#section-3.5.3`), where a polite close needs</span>
-    <span class="c1">#: a FIN from each side, so it is tracked as a flag rather than per endpoint.</span>
-    <span class="n">reset</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: The flow's own :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler,</span>
-    <span class="c1">#: fed each segment as it is traced, or :data:`None` when the tracer was not</span>
-    <span class="c1">#: asked to analyse the application layer. One per flow rather than one per</span>
-    <span class="c1">#: tracer, so that</span>
-    <span class="c1">#: :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;` can</span>
-    <span class="c1">#: flush *this* conversation without disturbing any other.</span>
-    <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'Optional[TCP_Reassembly]'</span>
+    <span class="c1">#: Hole descriptor list.</span>
+    <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDescriptor]'</span>
+    <span class="c1">#: Initial TCP header.</span>
+    <span class="n">hdr</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: ACK list.</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span>
+    <span class="c1">#: Capture timestamp of the **first** segment buffered under this buffer ID,</span>
+    <span class="c1">#: in seconds since the Unix epoch. Origin of the reassembly timer, and never</span>
+    <span class="c1">#: revised: a later segment does not extend the deadline.</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1"># NOTE: one line, however long: ``# pylint: disable`` is line-scoped and</span>
-        <span class="c1"># ``unused-argument`` is reported against the ``def``.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Dumper'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span><span class="p">,</span> <span class="n">forward</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">reverse</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'set[tuple[_AT, int]]'</span><span class="p">,</span> <span class="n">reset</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'Optional[TCP_Reassembly]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
-
-
-
-<div class="viewcode-block" id="Index">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Index</span><span class="p">(</span><span class="n">DeferredPacket</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data structure for a traced **TCP flow**, as an index entry.</span>
-
-<span class="sd">    See Also:</span>
-<span class="sd">        * element from :attr:`pcapkit.foundation.traceflow.traceflow.TraceFlow.index`</span>
-<span class="sd">          *tuple*</span>
-<span class="sd">        * :term:`trace.tcp.index`</span>
-
-<span class="sd">    """</span>
-
-    <span class="c1">#: Listing ``packet`` here is what makes :attr:`packet` lazy -- see</span>
-    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket`.</span>
-    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
-    <span class="c1">#: Placeholder class :attr:`packet` may hold, for</span>
-    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.</span>
-    <span class="n">__deferred__</span> <span class="o">=</span> <span class="n">Deferred</span>
-
-    <span class="c1">#: Path of the flow's output file, or :data:`None` when the output format</span>
-    <span class="c1">#: writes no file. Open and finalised flows report the same path.</span>
-    <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
-    <span class="c1">#: Tuple of frame index, **both directions**, in capture order.</span>
-    <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
-    <span class="c1">#: Flow label, built from the packet that opened the flow, cf.</span>
-    <span class="c1">#: :meth:`TCP.trace &lt;pcapkit.foundation.traceflow.tcp.TCP.trace&gt;`.</span>
-    <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span>
-    <span class="c1">#: Frame index of the packets travelling in the direction that opened the</span>
-    <span class="c1">#: flow, in capture order. That endpoint is the one the :attr:`label` names</span>
-    <span class="c1">#: first, so ``frame_number in index.forward`` answers "which way did this</span>
-    <span class="c1">#: packet go" without having to take the label apart.</span>
-    <span class="n">forward</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
-    <span class="c1">#: Frame index of the packets travelling the other way, in capture order.</span>
-    <span class="c1">#: Empty when tracing unidirectionally, in which case</span>
-    <span class="c1">#: :attr:`forward` ``==`` :attr:`index`.</span>
-    <span class="n">reverse</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
-    <span class="c1">#: Reassembled datagrams of the conversation's **application layer**, one</span>
-    <span class="c1">#: per direction and acknowledgement number, or :data:`None` when the tracer</span>
-    <span class="c1">#: was not asked for it (``analyze=False``, the default).</span>
-    <span class="c1">#:</span>
-    <span class="c1">#: Reassembled on the first read, not when the flow is finalised, and each</span>
-    <span class="c1">#: datagram's own</span>
-    <span class="c1">#: :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed</span>
-    <span class="c1">#: later still -- the same postponement at each layer, so a caller that only</span>
-    <span class="c1">#: wanted frame numbers pays for none of it.</span>
-    <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Datagram, ...]]'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1"># NOTE: on one line, for the reason given on :class:`Buffer` above.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">forward</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">reverse</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Datagram, ...] | Deferred]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDescriptor]'</span><span class="p">,</span> <span class="n">hdr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

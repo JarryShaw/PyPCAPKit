@@ -968,10 +968,10 @@
     <span class="c1">#: ``register_reassembly`` additionally admits only</span>
     <span class="c1">#: :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclasses.</span>
     <span class="n">__reassembly__</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">'ipv4'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.ipv4'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
-        <span class="s1">'ipv6'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.ipv6'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
-        <span class="s1">'tcp'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">),</span>
-        <span class="s1">'dtls'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.dtls'</span><span class="p">,</span> <span class="s1">'DTLS'</span><span class="p">),</span>
+        <span class="s1">'ipv4'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.ipv4.reassembly'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
+        <span class="s1">'ipv6'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.ipv6.reassembly'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
+        <span class="s1">'tcp'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.tcp.reassembly'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">),</span>
+        <span class="s1">'dtls'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.reassembly.dtls.reassembly'</span><span class="p">,</span> <span class="s1">'DTLS'</span><span class="p">),</span>
     <span class="p">}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]</span>
 
     <span class="c1">#: Flow tracing support mapping for extracting frames, keyed by lower-cased protocol</span>
@@ -981,7 +981,7 @@
     <span class="c1">#: ``register_traceflow`` additionally admits only</span>
     <span class="c1">#: :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclasses.</span>
     <span class="n">__traceflow__</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">'tcp'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.traceflow.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">),</span>
+        <span class="s1">'tcp'</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.foundation.traceflow.tcp.traceflow'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">),</span>
     <span class="p">}</span>  <span class="c1"># type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]</span>
 
     <span class="c1"># Read-only copies of the registries as shipped. A public registrar</span>

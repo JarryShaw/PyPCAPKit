@@ -616,14 +616,14 @@ algorithms described in <span class="target" id="index-0"></span><a class="rfc r
 <li class="toctree-l1"><a class="reference internal" href="tcp.html">TCP Datagram Reassembly</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#algorithm">Algorithm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#terminology">Terminology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.foundation.reassembly.data.tcp">Data Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.foundation.reassembly.tcp.data">Data Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#type-variables">Type Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dtls.html">DTLS Handshake-Message Reassembly</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dtls.html#algorithm">Algorithm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dtls.html#terminology">Terminology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dtls.html#module-pcapkit.foundation.reassembly.data.dtls">Data Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dtls.html#module-pcapkit.foundation.reassembly.dtls.data">Data Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dtls.html#type-variables">Type Variables</a></li>
 </ul>
 </li>
@@ -648,11 +648,11 @@ extracted fragments into whole datagrams:</p>
     click C &quot;reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly&quot;
     click D &quot;../../../ext.html#reassembly-and-flow-tracing&quot;
 
-    click IP &quot;ip/ip.html#pcapkit.foundation.reassembly.ip.IP&quot;
-    click IPv4 &quot;ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4&quot;
-    click IPv6 &quot;ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6&quot;
-    click TCP &quot;tcp.html#pcapkit.foundation.reassembly.tcp.TCP&quot;
-    click DTLS &quot;dtls.html#pcapkit.foundation.reassembly.dtls.DTLS&quot;
+    click IP &quot;ip/ip.html#pcapkit.foundation.reassembly.ip.reassembly.IP&quot;
+    click IPv4 &quot;ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.reassembly.IPv4&quot;
+    click IPv6 &quot;ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.reassembly.IPv6&quot;
+    click TCP &quot;tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP&quot;
+    click DTLS &quot;dtls.html#pcapkit.foundation.reassembly.dtls.reassembly.DTLS&quot;
     </pre><section id="auxiliary-data">
 <h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -679,9 +679,16 @@ a field for each built-in, <a class="reference external" href="https://docs.pyth
 </div>
 </dd></dl>
 
-<dl class="py class" id="module-pcapkit.foundation.reassembly.data.data">
-<span id="module-pcapkit.foundation.reassembly.data"></span><dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.ReassemblyData">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.data.</span></span><span class="sig-name descname"><span class="pre">ReassemblyData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipv6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#ReassemblyData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.ReassemblyData" title="Link to this definition">¶</a></dt>
+<div class="versionremoved" id="module-pcapkit.foundation.reassembly.data">
+<p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.data.data</span></code>, with no alias: the module moved here.
+The <code class="docutils literal notranslate"><span class="pre">IP_*</span></code>, <code class="docutils literal notranslate"><span class="pre">TCP_*</span></code> and <code class="docutils literal notranslate"><span class="pre">DTLS_*</span></code> data models
+<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.data</span></code> collected, with no alias: each reassembly
+class’s are in the <code class="docutils literal notranslate"><span class="pre">data</span></code> module of its own package, such as
+<a class="reference internal" href="tcp.html#module-pcapkit.foundation.reassembly.tcp.data" title="pcapkit.foundation.reassembly.tcp.data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.tcp.data</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2882">#2882</a>).</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.</span></span><span class="sig-name descname"><span class="pre">ReassemblyData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipv6</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#ReassemblyData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Data storage for reassembly.</p>
 <p>Each built-in field is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when its reassembly is disabled. Every
@@ -693,33 +700,33 @@ the built-ins in the order given.</p>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2814">#2814</a>).</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.ReassemblyData.ipv4">
-<span class="sig-name descname"><span class="pre">ipv4</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram" title="pcapkit.foundation.reassembly.data.ip.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.ReassemblyData.ipv4" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData.ipv4">
+<span class="sig-name descname"><span class="pre">ipv4</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram" title="pcapkit.foundation.reassembly.ip.data.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData.ipv4" title="Link to this definition">¶</a></dt>
 <dd><p>IPv4 reassembled data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.ReassemblyData.ipv6">
-<span class="sig-name descname"><span class="pre">ipv6</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram" title="pcapkit.foundation.reassembly.data.ip.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.ReassemblyData.ipv6" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData.ipv6">
+<span class="sig-name descname"><span class="pre">ipv6</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram" title="pcapkit.foundation.reassembly.ip.data.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData.ipv6" title="Link to this definition">¶</a></dt>
 <dd><p>IPv6 reassembled data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.ReassemblyData.tcp">
-<span class="sig-name descname"><span class="pre">tcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.ReassemblyData.tcp" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData.tcp">
+<span class="sig-name descname"><span class="pre">tcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.data.Datagram" title="pcapkit.foundation.reassembly.tcp.data.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData.tcp" title="Link to this definition">¶</a></dt>
 <dd><p>TCP reassembled data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.ReassemblyData.dtls">
-<span class="sig-name descname"><span class="pre">dtls</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="dtls.html#pcapkit.foundation.reassembly.data.dtls.Datagram" title="pcapkit.foundation.reassembly.data.dtls.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.ReassemblyData.dtls" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ReassemblyData.dtls">
+<span class="sig-name descname"><span class="pre">dtls</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="dtls.html#pcapkit.foundation.reassembly.dtls.data.Datagram" title="pcapkit.foundation.reassembly.dtls.data.Datagram"><span class="pre">Datagram</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ReassemblyData.dtls" title="Link to this definition">¶</a></dt>
 <dd><p>DTLS reassembled handshake messages.</p>
 </dd></dl>
 
 </dd></dl>
 
 <p id="reassembly-submissions">What submits a buffer, and how its holes at that point pick the
-<a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Completion" title="pcapkit.foundation.reassembly.data.data.Completion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Completion</span></code></a> it reports:</p>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.Completion" title="pcapkit.foundation.reassembly.data.Completion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Completion</span></code></a> it reports:</p>
 <pre  class="mermaid">
         flowchart TD
     subgraph trig [&quot;What submits a buffer&quot;]
@@ -758,27 +765,27 @@ the built-ins in the order given.</p>
     click SUB &quot;reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.submit&quot;
     click T6 &quot;reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.expire&quot;
     click T7 &quot;reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.fetch&quot;
-    click OV &quot;index.html#pcapkit.foundation.reassembly.data.data.Completion.OVERLAP&quot;
-    click CO &quot;index.html#pcapkit.foundation.reassembly.data.data.Completion.COMPLETE&quot;
-    click TO &quot;index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT&quot;
-    click PA &quot;index.html#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL&quot;
+    click OV &quot;index.html#pcapkit.foundation.reassembly.data.Completion.OVERLAP&quot;
+    click CO &quot;index.html#pcapkit.foundation.reassembly.data.Completion.COMPLETE&quot;
+    click TO &quot;index.html#pcapkit.foundation.reassembly.data.Completion.TIMEOUT&quot;
+    click PA &quot;index.html#pcapkit.foundation.reassembly.data.Completion.PARTIAL&quot;
     </pre><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Completion">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.data.</span></span><span class="sig-name descname"><span class="pre">Completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Completion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Completion" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Completion">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.</span></span><span class="sig-name descname"><span class="pre">Completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#Completion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Completion" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
 <p>How completely a datagram was reassembled, and why it stopped.</p>
 <p>Derives from <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub issue
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s ruling that every non-registry enumeration shares that lookup
 contract; the class defines neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own.</p>
 <p>This is the value of
-<a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram.completed" title="pcapkit.foundation.reassembly.data.ip.Datagram.completed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.completed</span></code></a>,
+<a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram.completed" title="pcapkit.foundation.reassembly.ip.data.Datagram.completed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.completed</span></code></a>,
 which widens a plain <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> rather than adding a second channel beside
 it: reassembly has more outcomes to report than a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> can hold, since
 a buffer abandoned under the <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html"><strong>RFC 1122</strong></a> / <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> reassembly timeout is
 a different event from one that simply had not finished when the capture
 did. An expired datagram says “these fragments are gone”, a partial one says
 “these fragments had not arrived yet”.</p>
-<p>Truthiness is that of a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>: <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a> is the only truthy
+<p>Truthiness is that of a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>: <a class="reference internal" href="#pcapkit.foundation.reassembly.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a> is the only truthy
 member, so <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">datagram.completed:</span></code> reads as it would for a boolean.
 Equality against <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> and <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a> is <em>not</em> preserved –
 <code class="docutils literal notranslate"><span class="pre">datagram.completed</span> <span class="pre">==</span> <span class="pre">True</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a> even for a complete datagram –
@@ -801,7 +808,7 @@ subclass, but <code class="docutils literal notranslate"><span class="pre">isins
 where that name is the stdlib <code class="docutils literal notranslate"><span class="pre">enum.StrEnum</span></code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Being a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> whose members other than <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a> are
+<p>Being a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> whose members other than <a class="reference internal" href="#pcapkit.foundation.reassembly.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a> are
 <strong>falsy</strong> makes this a non-empty string that tests false, so <code class="docutils literal notranslate"><span class="pre">bool(x)</span></code>
 and <code class="docutils literal notranslate"><span class="pre">bool(str(x))</span></code> disagree. That is deliberate – the truthiness above
 is what lets <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">datagram.completed:</span></code> read as a boolean test – but code
@@ -809,14 +816,14 @@ that takes this for an ordinary string and tests it for truth will read it
 backwards.</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Completion.COMPLETE">
-<span class="sig-name descname"><span class="pre">COMPLETE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'complete'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Completion.COMPLETE" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Completion.COMPLETE">
+<span class="sig-name descname"><span class="pre">COMPLETE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'complete'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Completion.COMPLETE" title="Link to this definition">¶</a></dt>
 <dd><p>Reassembled in whole: every octet of the datagram was received.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Completion.PARTIAL">
-<span class="sig-name descname"><span class="pre">PARTIAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'partial'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Completion.PARTIAL">
+<span class="sig-name descname"><span class="pre">PARTIAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'partial'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Completion.PARTIAL" title="Link to this definition">¶</a></dt>
 <dd><p>Fragments were still outstanding when the buffer was flushed – at the end
 of the capture, or when the session was torn down (a TCP RST, a TCP SYN on
 a 4-tuple already buffered, or an IPv4 datagram whose identifier was
@@ -825,8 +832,8 @@ The missing octets may simply not have been captured.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT">
-<span class="sig-name descname"><span class="pre">TIMEOUT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'timeout'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Completion.TIMEOUT">
+<span class="sig-name descname"><span class="pre">TIMEOUT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'timeout'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Completion.TIMEOUT" title="Link to this definition">¶</a></dt>
 <dd><p>Reassembly was <strong>abandoned</strong> under the reassembly timeout, i.e. the
 capture clock advanced past the deadline of
 <a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.timeout" title="pcapkit.foundation.reassembly.reassembly.Reassembly.timeout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Reassembly.timeout</span></code></a>
@@ -836,8 +843,8 @@ discarded, so no further fragment will ever be added to this datagram.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Completion.OVERLAP">
-<span class="sig-name descname"><span class="pre">OVERLAP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'overlap'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Completion.OVERLAP" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Completion.OVERLAP">
+<span class="sig-name descname"><span class="pre">OVERLAP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'overlap'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Completion.OVERLAP" title="Link to this definition">¶</a></dt>
 <dd><p>Reassembly was <strong>abandoned</strong> because a fragment overlapped another of the
 same datagram without being an exact duplicate of it, which
 <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> discards an IPv6 datagram for. The overlapping
@@ -849,10 +856,10 @@ they disagreed with the octets kept.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Completion.__bool__">
-<span class="sig-name descname"><span class="pre">__bool__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Completion.__bool__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Completion.__bool__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Completion.__bool__">
+<span class="sig-name descname"><span class="pre">__bool__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#Completion.__bool__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Completion.__bool__" title="Link to this definition">¶</a></dt>
 <dd><p>Whether the datagram was reassembled in whole.</p>
-<p>Only <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a> is truthy; every other member describes an
+<p>Only <a class="reference internal" href="#pcapkit.foundation.reassembly.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a> is truthy; every other member describes an
 incomplete datagram.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -872,31 +879,31 @@ renders a member as its value.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_KT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="n"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="p"><span class="pre">)</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Deferred">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_KT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="n"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><span class="pre">AppType_TCP</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="p"><span class="pre">)</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Deferred" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../utilities/pickle.html#pcapkit.utilities.pickle.ReduceAsProtocol2" title="pcapkit.utilities.pickle.ReduceAsProtocol2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceAsProtocol2</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_KT</span></code>]</p>
 <p>A postponed analysis of a reassembled payload.</p>
 <p>A reassembled datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code> is a second, full parse of the payload
 the datagram just reassembled. Nothing about postponing it is specific to any
 one reassembler, which is why this lives beside
-<a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.ReassemblyData" title="pcapkit.foundation.reassembly.data.data.ReassemblyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyData</span></code></a> rather than in
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ReassemblyData" title="pcapkit.foundation.reassembly.data.ReassemblyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyData</span></code></a> rather than in
 any one protocol’s data module.</p>
 <p>IP reassembly is the case that made it necessary. IPv4 reassembly submits a
 datagram for <em>every</em> frame whose <strong>DF</strong> flag is clear – not only the
 fragmented ones, since an unfragmented frame still reaches
-<a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.IP.reassembly" title="pcapkit.foundation.reassembly.ip.IP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.reassembly</span></code></a> and is
+<a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.reassembly.IP.reassembly" title="pcapkit.foundation.reassembly.ip.reassembly.IP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.reassembly</span></code></a> and is
 submitted there as a trivially complete datagram – so an eager parse would
 re-parse captures holding no fragments at all: <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> has 1117
 IPv4 frames, none of them fragmented, and the eager parse measured 86% of the
 cost of IP reassembly over it.</p>
 <p>TCP reassembly defers its <code class="docutils literal notranslate"><span class="pre">packet</span></code> as well
-(<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a>), at a far
+(<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a>), at a far
 smaller saving, being FIN/RST-driven rather than per-frame – 222 submits per
 <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> pass against 1117. DTLS reassembly defers its own for
 parity with IP and TCP rather than for a saving, since a handshake message
 reaches it only once fragmented (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2531">#2531</a>).</p>
 <p>Holding the call here defers it to the first read of
-<a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram.packet" title="pcapkit.foundation.reassembly.data.ip.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>,
+<a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram.packet" title="pcapkit.foundation.reassembly.ip.data.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>,
 where <a class="reference internal" href="../../corekit/packet.html#pcapkit.corekit.packet.DeferredPacket" title="pcapkit.corekit.packet.DeferredPacket"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredPacket</span></code></a> runs it, so a caller that
 wants the parsed payload still gets exactly the object an eager call would
 produce, and one that does not never pays for it.</p>
@@ -906,21 +913,21 @@ parameter is that value’s type, so an instance’s <code class="docutils liter
 its <code class="docutils literal notranslate"><span class="pre">analyze</span></code> expects are the same type rather than a union every call
 site would have to widen to:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.IP.submit" title="pcapkit.foundation.reassembly.ip.IP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.submit</span></code></a> builds a
+<li><p><a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.reassembly.IP.submit" title="pcapkit.foundation.reassembly.ip.reassembly.IP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.submit</span></code></a> builds a
 <code class="docutils literal notranslate"><span class="pre">Deferred[TransType]</span></code>. It passes the payload protocol type, a
 <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> read from the reassembled
 datagram’s <strong>Protocol</strong> / <strong>Next Header</strong> field, to the parse
 <a class="reference internal" href="../analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a> runs:
 <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a>,
 which looks the next layer up by protocol registry number.</p></li>
-<li><p><a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a> builds a
+<li><p><a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a> builds a
 <code class="docutils literal notranslate"><span class="pre">Deferred[tuple[AppType_TCP,</span> <span class="pre">AppType_TCP]]</span></code>. It passes a
 <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> port pair to the parse
 <a class="reference internal" href="../analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a> runs, because
 <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> overrides that
 parameter to one: a reassembled transport-layer payload carries no
 protocol number, so its application protocol is inferred from the ports.</p></li>
-<li><p><a class="reference internal" href="dtls.html#pcapkit.foundation.reassembly.dtls.DTLS._datagram_from_fragment" title="pcapkit.foundation.reassembly.dtls.DTLS._datagram_from_fragment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS._datagram_from_fragment</span></code></a> builds a
+<li><p><a class="reference internal" href="dtls.html#pcapkit.foundation.reassembly.dtls.reassembly.DTLS._datagram_from_fragment" title="pcapkit.foundation.reassembly.dtls.reassembly.DTLS._datagram_from_fragment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS._datagram_from_fragment</span></code></a> builds a
 <code class="docutils literal notranslate"><span class="pre">Deferred[tuple[HandshakeType,</span> <span class="pre">int,</span> <span class="pre">int]]</span></code> for a complete message. It
 passes the message’s <code class="docutils literal notranslate"><span class="pre">(msg_type,</span> <span class="pre">length,</span> <span class="pre">message_seq)</span></code>, its handshake
 header as if unfragmented (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.2.3"><strong>RFC 6347 Section 4.2.3</strong></a>), to the decoder
@@ -934,7 +941,7 @@ port numbers: a port is a member of
 <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> here – the per-transport
 registry itself, not the base
 <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>, since that is what
-<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_ports</span></code></a>
+<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_ports</span></code></a>
 really answers with – so what the deferred analysis dispatches on is of a
 piece with what the eager path dispatches on at
 <a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP.src" title="pcapkit.protocols.transport.tcp.protocol.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a>, whichever
@@ -985,8 +992,8 @@ slots in Python’s own default state, in place of a reduction and a
 <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code> of its own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2714">#2714</a>).</p>
 </div>
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred.__call__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Deferred.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#Deferred.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Deferred.__call__" title="Link to this definition">¶</a></dt>
 <dd><p>Run the postponed analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -999,8 +1006,8 @@ slots in Python’s own default state, in place of a reduction and a
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred.__setstate__">
-<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred.__setstate__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred.__setstate__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.Deferred.__setstate__">
+<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data.html#Deferred.__setstate__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.Deferred.__setstate__" title="Link to this definition">¶</a></dt>
 <dd><p>Unpickling support.</p>
 <p>Accepts the <code class="docutils literal notranslate"><span class="pre">(dict_or_None,</span> <span class="pre">slots)</span></code> pair Python’s own default state
 construction builds for a slotted class, which every pickle of this

@@ -2,11 +2,19 @@ Follow TCP Stream
 =================
 
 .. module:: pcapkit.foundation.traceflow.tcp
+.. module:: pcapkit.foundation.traceflow.tcp.traceflow
 
-:mod:`pcapkit.foundation.traceflow.tcp` traces TCP flows from a series of
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.traceflow.tcp.logger``, with no alias: it is in
+   :mod:`~pcapkit.foundation.traceflow.tcp.traceflow`, and
+   :mod:`pcapkit.foundation.traceflow.tcp` exports the flow tracing class alone
+   (:issue:`2882`).
+
+:mod:`pcapkit.foundation.traceflow.tcp.traceflow` traces TCP flows from a series of
 packets.
 
-.. autoclass:: pcapkit.foundation.traceflow.tcp.TCP
+.. autoclass:: pcapkit.foundation.traceflow.tcp.traceflow.TCP
    :no-members:
    :show-inheritance:
 
@@ -89,7 +97,7 @@ Terminology
                   frame.info.time_epoch),             # frame timestamp
           )
 
-       .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Packet`
+       .. seealso:: :class:`pcapkit.foundation.traceflow.tcp.data.Packet`
 
    trace.tcp.buffer
        Data structure for internal buffering when performing flow tracing algorithms
@@ -122,7 +130,7 @@ Terminology
 
        When tracing bidirectionally, the default, ``BUFID`` orders the endpoints
        canonically, so both halves of a conversation share one key;
-       :data:`~pcapkit.foundation.traceflow.data.tcp.BufferID` says why it stays a
+       :data:`~pcapkit.foundation.traceflow.tcp.data.BufferID` says why it stays a
        plain :obj:`tuple`.
 
        A teardown -- a FIN from each endpoint, or a RST from either -- is recorded
@@ -132,7 +140,7 @@ Terminology
        open a fresh buffer under the same ``BUFID``, for a later connection reusing
        those endpoints to merge into. Only proof that nothing more can arrive
        finalises it -- a new connection's SYN on the same endpoints, or
-       :meth:`TCP.finish <pcapkit.foundation.traceflow.tcp.TCP.finish>` at the end
+       :meth:`TCP.finish <pcapkit.foundation.traceflow.tcp.traceflow.TCP.finish>` at the end
        of the capture -- and the recorded teardown is what tells that SYN from the
        peer's SYN-ACK.
 
@@ -153,7 +161,7 @@ Terminology
               O --> F : TCP.finish() at the end of the capture, either mode,<br/>or this direction's FIN, when unidirectional
               F --> [*] : \_finalise pops the buffer, stores its Index,<br/>then calls each \_\_callback\_fn\_\_
 
-       .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Buffer`
+       .. seealso:: :class:`pcapkit.foundation.traceflow.tcp.data.Buffer`
 
    trace.tcp.index
        Data structure for **TCP flow tracing** (element from
@@ -185,32 +193,38 @@ Terminology
        taking the label apart.
 
        ``packet`` is reassembled on its *first read*, and each datagram's own
-       :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` parsed later
+       :attr:`~pcapkit.foundation.reassembly.tcp.data.Datagram.packet` parsed later
        still, so a caller that wanted only frame numbers pays for none of it. The
        tracer does not reassemble the stream itself: it feeds
-       :class:`~pcapkit.foundation.reassembly.tcp.TCP`, whose :rfc:`815` algorithm
+       :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`, whose :rfc:`815` algorithm
        handles the reordering and retransmission that concatenating payloads in
        capture order would corrupt.
 
-       .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Index`
+       .. seealso:: :class:`pcapkit.foundation.traceflow.tcp.data.Index`
 
 Data Structures
 ---------------
 
-.. module:: pcapkit.foundation.traceflow.data.tcp
-.. currentmodule:: pcapkit.foundation.traceflow.tcp
+.. module:: pcapkit.foundation.traceflow.tcp.data
 
-.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Packet
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.traceflow.data.tcp``, with no alias: the module moved here
+   (:issue:`2882`).
+
+.. currentmodule:: pcapkit.foundation.traceflow.tcp.traceflow
+
+.. autoclass:: pcapkit.foundation.traceflow.tcp.data.Packet
    :members:
    :show-inheritance:
 
-.. autodata:: pcapkit.foundation.traceflow.data.tcp.BufferID
+.. autodata:: pcapkit.foundation.traceflow.tcp.data.BufferID
 
-.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Buffer
+.. autoclass:: pcapkit.foundation.traceflow.tcp.data.Buffer
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Index
+.. autoclass:: pcapkit.foundation.traceflow.tcp.data.Index
    :members:
    :show-inheritance:
 
@@ -218,7 +232,7 @@ Type Variables
 --------------
 
 .. data:: _AT
-   :module: pcapkit.foundation.traceflow.data.tcp
+   :module: pcapkit.foundation.traceflow.tcp.data
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
    IP address type.

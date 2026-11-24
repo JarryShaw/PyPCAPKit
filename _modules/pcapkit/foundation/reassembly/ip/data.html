@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.foundation.reassembly.data.dtls - PyPCAPKit</title>
+        <title>pcapkit.foundation.reassembly.ip.data - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -573,210 +573,228 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.foundation.reassembly.data.dtls</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.foundation.reassembly.ip.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""data models for DTLS handshake-message reassembly"""</span>
+<span class="sd">"""data models for IP reassembly</span>
+
+<span class="sd">.. versionremoved:: 1.7.0</span>
+
+<span class="sd">   ``pcapkit.foundation.reassembly.data.ip``, with no alias: the module moved here</span>
+<span class="sd">   (:issue:`2882`).</span>
+
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferredPacket</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deferred</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span><span class="p">,</span> <span class="n">Deferred</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'HoleDescriptor'</span><span class="p">,</span> <span class="s1">'Fragment'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span>
+    <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeAlias</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span> <span class="k">as</span> <span class="n">Enum_HandshakeType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSHandshake</span> <span class="k">as</span> <span class="n">Data_DTLSHandshake</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
 
-<span class="c1">#: Buffer ID -- the UDP 4-tuple (addresses and ports; the protocol is always</span>
-<span class="c1">#: UDP, so it is left out), plus the DTLS **epoch**: the record sequence</span>
-<span class="c1">#: number resets on every change of cipher state (:rfc:`6347#section-4.1`), so</span>
-<span class="c1">#: a fragment from a new epoch belongs to a fresh buffer rather than the one</span>
-<span class="c1">#: its 4-tuple would otherwise name.</span>
-<span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="c1">#: Buffer ID.</span>
+<span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">'TransType'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Packet">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.data.dtls.Packet">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.data.Packet">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`DTLS &lt;reasm.dtls.packet&gt;` handshake-fragment</span>
-<span class="sd">    representation."""</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.packet&gt;` and/or</span>
+<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.packet&gt;` packet representation."""</span>
 
     <span class="c1">#: Buffer ID.</span>
     <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span>
     <span class="c1">#: Original packet range number.</span>
     <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Handshake message type.</span>
-    <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span>
-    <span class="c1">#: Total message length (:rfc:`6347#section-4.2.2`'s ``length``), fragment</span>
-    <span class="c1">#: headers and bodies excluded -- the same on every fragment of one</span>
-    <span class="c1">#: message.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Message sequence number, the datagram key within :attr:`bufid`.</span>
-    <span class="n">message_seq</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Fragment offset into the reassembled message.</span>
-    <span class="n">fragment_offset</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Length of this fragment.</span>
-    <span class="n">fragment_length</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Raw fragment payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Capture timestamp of the fragment, in seconds since the Unix epoch,</span>
-    <span class="c1">#: i.e. the *capture's* clock. Recorded only; it does not expire anything.</span>
+    <span class="c1">#: Fragment offset.</span>
+    <span class="n">fo</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Internet header length.</span>
+    <span class="n">ihl</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: More fragments flag.</span>
+    <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Total length, header included.</span>
+    <span class="n">tl</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Raw :obj:`bytes` type header.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Raw :obj:`bytearray` type payload.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Capture timestamp of the fragment, in seconds since the Unix epoch. This</span>
+    <span class="c1">#: is the *capture's* clock, not the host's: it is what drives the :rfc:`1122#section-3.3.2`</span>
+    <span class="c1">#: and :rfc:`8200#section-4.5` reassembly timeout, since an offline parser</span>
+    <span class="c1">#: replaying a file has no other notion of time passing.</span>
     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, int, _AT, int, int]'</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">message_seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fragment_offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fragment_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, _AT, int, TransType]'</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fo</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ihl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">tl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
 <div class="viewcode-block" id="DatagramID">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.data.dtls.DatagramID">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.data.DatagramID">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`DTLS &lt;reasm.dtls.datagram&gt;` original packet</span>
-<span class="sd">    identifier."""</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.datagram&gt;` and/or</span>
+<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.datagram&gt;` original packet identifier."""</span>
 
     <span class="c1">#: Source address.</span>
     <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span>
-    <span class="c1">#: Source port.</span>
-    <span class="n">sport</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Destination address.</span>
     <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span>
-    <span class="c1">#: Destination port.</span>
-    <span class="n">dport</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Epoch the message was reassembled under.</span>
-    <span class="n">epoch</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: IP identification.</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Payload protocol type.</span>
+    <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">sport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">dport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
 <div class="viewcode-block" id="Datagram">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.data.dtls.Datagram">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.data.Datagram">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Datagram</span><span class="p">(</span><span class="n">DeferredPacket</span><span class="p">,</span> <span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`DTLS &lt;reasm.dtls.datagram&gt;` reassembled</span>
-<span class="sd">    handshake message."""</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.datagram&gt;` and/or</span>
+<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.datagram&gt;` reassembled datagram."""</span>
 
-    <span class="c1">#: Listing ``packet`` here is what makes :attr:`packet` lazy -- see</span>
-    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket`.</span>
+    <span class="c1">#: Listing ``packet`` here is what makes :attr:`packet` lazy. :class:`Info`</span>
+    <span class="c1">#: stores a field whose name is a *builtin* name under a mangled key and maps</span>
+    <span class="c1">#: it back on the way out, so ``packet`` never lands in :attr:`__dict__`</span>
+    <span class="c1">#: itself -- which routes reading it through :meth:`__getattr__`, where a</span>
+    <span class="c1">#: :class:`~pcapkit.foundation.reassembly.data.Deferred` analysis can be</span>
+    <span class="c1">#: run, while ``dict(datagram)``, :meth:`to_dict` and iteration still report the</span>
+    <span class="c1">#: field under its own name.</span>
+    <span class="c1">#: See :class:`~pcapkit.corekit.packet.DeferredPacket`.</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
     <span class="c1">#: Placeholder class :attr:`packet` may hold, for</span>
-    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted</span>
+    <span class="c1">#: even though :class:`~pcapkit.foundation.reassembly.data.Deferred` is</span>
+    <span class="c1">#: generic: :meth:`DeferredPacket.__analyse__</span>
+    <span class="c1">#: &lt;pcapkit.corekit.packet.DeferredPacket.__analyse__&gt;` tests a value against</span>
+    <span class="c1">#: this with :func:`isinstance`, which rejects a parameterized generic with</span>
+    <span class="c1">#: :exc:`TypeError`.</span>
     <span class="n">__deferred__</span> <span class="o">=</span> <span class="n">Deferred</span>
 
-    <span class="c1">#: How completely the message was reassembled, and why reassembly</span>
-    <span class="c1">#: stopped; see :class:`~pcapkit.foundation.reassembly.data.data.Completion`.</span>
+    <span class="c1">#: How completely the datagram was reassembled, and why reassembly stopped.</span>
+    <span class="c1">#: Only :attr:`Completion.COMPLETE</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.data.Completion.COMPLETE&gt;` is truthy, so</span>
+    <span class="c1">#: ``if datagram.completed:`` reads as it would for a :obj:`bool`; equality</span>
+    <span class="c1">#: against :obj:`True` or :obj:`False` does not hold.</span>
     <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span>
     <span class="c1">#: Original packet identifier.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span>
-    <span class="c1">#: Packet numbers of the fragments that built this message.</span>
+    <span class="c1">#: Packet numbers.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
-    <span class="c1">#: Message sequence number.</span>
-    <span class="n">message_seq</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Handshake message type.</span>
-    <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span>
-    <span class="c1">#: Total message length, as declared by its fragments.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Reassembled message body, undecoded.</span>
-    <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span>
-    <span class="c1">#: Decoded message, as :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`</span>
+    <span class="c1">#: Initial IP header.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Reassembled IP payload.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span>
+    <span class="c1">#: Parsed IP payload, as :func:`~pcapkit.foundation.analysis.ip.ip_datagram`</span>
     <span class="c1">#: returns it unless the reassembly's ``__protocol_type__`` names another</span>
-    <span class="c1">#: protocol, whose ``analyze_handshake`` then decodes it. Decoded on first</span>
-    <span class="c1">#: read, not at construction time, and :data:`None` for an incomplete</span>
-    <span class="c1">#: message. A :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may</span>
-    <span class="c1">#: be passed in its place, and reading this attribute then runs it and keeps</span>
-    <span class="c1">#: the result.</span>
-    <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Data_DTLSHandshake]'</span>
+    <span class="c1">#: protocol, which then parses it. Analysed on first read, not at</span>
+    <span class="c1">#: construction time; a :class:`~pcapkit.foundation.reassembly.data.Deferred`</span>
+    <span class="c1">#: may be passed in its place, and reading this attribute then runs it and</span>
+    <span class="c1">#: keeps the result.</span>
+    <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase]'</span>
+    <span class="c1">#: Octet ranges, absolute into the reassembled payload and both</span>
+    <span class="c1">#: **inclusive** -- the same convention as :attr:`Packet.fo` combined with</span>
+    <span class="c1">#: its length -- on which two fragments disagreed, i.e. an arriving</span>
+    <span class="c1">#: fragment overlapped octets already buffered but did not repeat them.</span>
+    <span class="c1">#: Empty when the datagram never saw a contested octet.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: For IPv4, :rfc:`791` resolves the disagreement itself: "In the case that</span>
+    <span class="c1">#: two or more fragments contain the same data either identically or</span>
+    <span class="c1">#: through a partial overlap, this procedure will use the more recently</span>
+    <span class="c1">#: arrived copy in the data buffer and datagram delivered." So</span>
+    <span class="c1">#: :attr:`payload` always holds whichever fragment arrived *last* over a</span>
+    <span class="c1">#: contested range -- the opposite resolution from TCP's first-write-wins</span>
+    <span class="c1">#: (:rfc:`9293#section-3.10`) -- and this field is what lets a caller tell</span>
+    <span class="c1">#: a clean datagram from a contested one, since a resolved conflict does</span>
+    <span class="c1">#: not, on its own, leave a hole for ``completed`` to report. IPv6 instead</span>
+    <span class="c1">#: abandons the datagram on the overlapping fragment, without writing it</span>
+    <span class="c1">#: (:rfc:`8200#section-4.5`), so there a conflict comes only with</span>
+    <span class="c1">#: :attr:`Completion.OVERLAP</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.data.Completion.OVERLAP&gt;`.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :attr:`Buffer.RCVBT &lt;pcapkit.foundation.reassembly.ip.data.Buffer.RCVBT&gt;`</span>
+    <span class="c1">#: only records receipt in 8-octet blocks, coarser than the octet</span>
+    <span class="c1">#: granularity a conflict needs, and an octet is compared only if its</span>
+    <span class="c1">#: block is marked. :attr:`Packet.fo` is *always* a multiple of 8, being</span>
+    <span class="c1">#: wire-encoded in 8-octet units, and only the final fragment marks a</span>
+    <span class="c1">#: partial last block, so the only marked block that can be partially real</span>
+    <span class="c1">#: is the one holding the final fragment's own tail -- and a range reported</span>
+    <span class="c1">#: here never extends past</span>
+    <span class="c1">#: :attr:`Buffer.TDL &lt;pcapkit.foundation.reassembly.ip.data.Buffer.TDL&gt;`</span>
+    <span class="c1">#: for exactly that reason, even though a whole ``RCVBT`` block straddling</span>
+    <span class="c1">#: it reads as "received". Any other partial last block -- a non-final,</span>
+    <span class="c1">#: truncated or clipped fragment's -- is left unmarked, so a later fragment</span>
+    <span class="c1">#: that overwrites its octets records no conflict. See</span>
+    <span class="c1">#: :meth:`IP._detect_conflicts &lt;pcapkit.foundation.reassembly.ip.reassembly.IP._detect_conflicts&gt;`.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">message_seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Data_DTLSHandshake | Deferred[tuple[Enum_HandshakeType, int, int]]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
-
-
-
-<div class="viewcode-block" id="HoleDescriptor">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.data.dtls.HoleDescriptor">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">HoleDescriptor</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`DTLS &lt;reasm.dtls.buffer&gt;` hole descriptor.</span>
-
-<span class="sd">    Both bounds are **inclusive** byte offsets into the reassembled message,</span>
-<span class="sd">    so a hole covers ``last - first + 1`` octets. They never wrap and need no</span>
-<span class="sd">    open-ended sentinel: every fragment declares the message's total</span>
-<span class="sd">    :attr:`Fragment.length` (:rfc:`6347#section-4.2.3`), so it is known from</span>
-<span class="sd">    the first fragment.</span>
-
-<span class="sd">    """</span>
-
-    <span class="c1">#: Offset of the first missing octet.</span>
-    <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Offset of the last missing octet, inclusive.</span>
-    <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
-
-
-
-<div class="viewcode-block" id="Fragment">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.data.dtls.Fragment">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Fragment</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`DTLS &lt;reasm.dtls.buffer&gt;` message-under-</span>
-<span class="sd">    construction, one per :attr:`Packet.message_seq` buffered under one</span>
-<span class="sd">    :data:`BufferID`."""</span>
-
-    <span class="c1">#: Numbers of the packets merged into this fragment.</span>
-    <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span>
-    <span class="c1">#: Handshake message type -- read off the first-arriving fragment and</span>
-    <span class="c1">#: trusted from there, same as :attr:`length`.</span>
-    <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span>
-    <span class="c1">#: Total message length, read off the first-arriving fragment.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Reassembled payload, holes left zero-filled.</span>
-    <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span>
-    <span class="c1">#: Hole descriptor list; empty once the message is whole.</span>
-    <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDescriptor]'</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">msg_type</span><span class="p">:</span> <span class="s1">'Enum_HandshakeType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDescriptor]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
-
+        <span class="c1"># NOTE: no ``@overload`` pair keyed on ``completed``: under ``strict=False`` an incomplete</span>
+        <span class="c1"># datagram is reported as ``bytes`` and analysed, so that correlation does not hold.</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred[TransType]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 <div class="viewcode-block" id="Buffer">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.data.dtls.Buffer">[docs]</a>
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.data.Buffer">[docs]</a>
 <span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`DTLS &lt;reasm.dtls.buffer&gt;` buffer entry -- every</span>
-<span class="sd">    handshake message being reassembled under one :data:`BufferID`,</span>
-<span class="sd">    i.e. one UDP association at one epoch."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`IPv4 &lt;reasm.ipv4.buffer&gt;` and/or</span>
+<span class="sd">    :term:`IPv6 &lt;reasm.ipv6.buffer&gt;` reassembly buffer entry."""</span>
 
-    <span class="c1">#: Messages under reconstruction, by :attr:`Packet.message_seq`. Several</span>
-    <span class="c1">#: may be in flight at once: a ``Certificate``, a ``ServerKeyExchange``</span>
-    <span class="c1">#: and a ``ServerHelloDone`` can each fragment independently in the same</span>
-    <span class="c1">#: flight.</span>
-    <span class="n">msg</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span>
-    <span class="c1">#: Capture timestamp of the first fragment buffered under this buffer ID,</span>
-    <span class="c1">#: in seconds since the Unix epoch. Recorded only: the buffer has no</span>
-    <span class="c1">#: time-based deadline, so it is never expired by time.</span>
+    <span class="c1">#: Total data length.</span>
+    <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Fragment received bit table.</span>
+    <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Numbers of the packets merged into this buffer.</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span>
+    <span class="c1">#: Header buffer.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Data buffer, holes set to ``b'\x00'``.</span>
+    <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Capture timestamp of the **first-arriving** fragment of this datagram, in</span>
+    <span class="c1">#: seconds since the Unix epoch. This is the origin of the reassembly timer:</span>
+    <span class="c1">#: :rfc:`8200#section-4.5` counts its 60 seconds "of the reception of the</span>
+    <span class="c1">#: first-arriving fragment", so a later fragment does not extend the</span>
+    <span class="c1">#: deadline and this field is never revised once set.</span>
     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
+    <span class="c1">#: Octet ranges, absolute into :attr:`datagram` and both **inclusive**, on</span>
+    <span class="c1">#: which an arriving fragment disagreed with bytes already placed there by</span>
+    <span class="c1">#: an earlier one. Accumulated across every fragment merged into this</span>
+    <span class="c1">#: buffer, in the order the conflicts were found; carried onto</span>
+    <span class="c1">#: :attr:`Datagram.conflict &lt;pcapkit.foundation.reassembly.ip.data.Datagram.conflict&gt;`</span>
+    <span class="c1">#: verbatim when the buffer is submitted.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span>
+    <span class="c1">#: Extent of each fragment merged into this buffer, as ``(start, stop,</span>
+    <span class="c1">#: mf)``: its first octet, one past its last, and its **MF** (**M**) flag,</span>
+    <span class="c1">#: sorted by ``start``. Kept only where an overlapping fragment abandons</span>
+    <span class="c1">#: the datagram, i.e. for IPv6, whose merged fragments therefore never</span>
+    <span class="c1">#: overlap; empty for IPv4. See</span>
+    <span class="c1">#: :attr:`IP.__discard_overlap__ &lt;pcapkit.foundation.reassembly.ip.reassembly.IP.__discard_overlap__&gt;`.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: .. versionadded:: 1.6.0</span>
+    <span class="n">extent</span><span class="p">:</span> <span class="s1">'list[tuple[int, int, bool]]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="s1">'dict[int, Fragment]'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="s1">'list[tuple[int, int, bool]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

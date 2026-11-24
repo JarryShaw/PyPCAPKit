@@ -1415,9 +1415,9 @@
 <span class="s1">        crafted value -- ``TCP('unknown [54321 - tcp]')`` -- which</span>
 <span class="s1">        :meth:`_missing_` rejects as not a port, so the member pickled fine and</span>
 <span class="s1">        then raised :exc:`ValueError` on read-back. That bit reassembly, whose</span>
-<span class="s1">        :class:`~pcapkit.foundation.reassembly.data.tcp.Datagram` holds these</span>
+<span class="s1">        :class:`~pcapkit.foundation.reassembly.tcp.data.Datagram` holds these</span>
 <span class="s1">        members in an unresolved</span>
-<span class="s1">        :class:`~pcapkit.foundation.reassembly.data.data.Deferred`: measured</span>
+<span class="s1">        :class:`~pcapkit.foundation.reassembly.data.Deferred`: measured</span>
 <span class="s1">        before the fix, 59,413 of the 65,536 possible ports -- every</span>
 <span class="s1">        ``unknown`` and every IANA-span label alike, not just the truly</span>
 <span class="s1">        unregistered ones -- failed to round-trip. Rebuilding re-enters this</span>

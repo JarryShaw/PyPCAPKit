@@ -7,7 +7,7 @@ TCP Datagram Analysis
 :mod:`pcapkit.foundation.analysis.tcp` contains
 :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` only, which parses the
 application-layer payload of a TCP datagram that
-:class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembled.
+:class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` reassembled.
 
 .. versionadded:: 1.6.0
 

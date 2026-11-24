@@ -18,8 +18,12 @@ under ``# Data models.``, and everything else under ``# Utilities.``, which a cl
 adds where it has none. A topic section, such as ``# Defaults.``,
 ``# Reassembly.`` or ``# Availability.``, keeps what it gathers. Ruled on
 :issue:`2911`, so one rule files every class and the API pages follow from the
-source; :file:`tests/project/test_section_meanings_2911_unit.py` holds every class
-under :file:`pcapkit/` to it. The order below binds protocol classes.
+source. No member sits above such a class's first section comment, and an engine
+files ``unsupported_reason()`` and its helpers under ``# Availability.``, as
+:class:`~pcapkit.foundation.engines.engine.EngineBase` does; ruled on :issue:`2922`.
+:file:`tests/project/test_section_meanings_2911_unit.py` holds every class under
+:file:`pcapkit/` to the meanings and fails a member above the first comment. The
+order below binds protocol classes.
 
 The Order
 ~~~~~~~~~

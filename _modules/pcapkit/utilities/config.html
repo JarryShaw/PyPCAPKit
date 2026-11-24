@@ -801,7 +801,7 @@
     <span class="s1">'each capture remembered pins one of its packets in memory'</span><span class="p">))</span>
 
 <span class="c1">#: int: Widest gap, in octets, that</span>
-<span class="c1">#: :meth:`TCP.reassembly &lt;pcapkit.foundation.reassembly.tcp.TCP.reassembly&gt;`</span>
+<span class="c1">#: :meth:`TCP.reassembly &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly&gt;`</span>
 <span class="c1">#: zero-fills to merge a segment into the payload buffer it is read against,</span>
 <span class="c1">#: :envvar:`PCAPKIT_TCP_GAP_LIMIT`; ``-1`` always merges.</span>
 <span class="c1">#:</span>
@@ -812,7 +812,7 @@
 <span class="c1">#: windows are far smaller -- Linux's default ``net.ipv4.tcp_rmem`` ceiling is</span>
 <span class="c1">#: 6 MiB -- so the default of 16 MiB clears them with room to spare. Past it,</span>
 <span class="c1">#: the stream is split rather than padded, as :meth:`TCP.reassembly</span>
-<span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.TCP.reassembly&gt;` describes.</span>
+<span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly&gt;` describes.</span>
 <span class="c1">#:</span>
 <span class="c1">#: At ``-1`` only the sequence space bounds the gap: a sequence number is read</span>
 <span class="c1">#: within ``2 ** 31`` of the data buffered (:rfc:`9293#section-3.4`), so one</span>

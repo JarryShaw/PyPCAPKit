@@ -735,7 +735,7 @@
 
     <span class="c1">#: float: Default reassembly timeout, in seconds, for this protocol --</span>
     <span class="c1">#: overridden per protocol, e.g.</span>
-    <span class="c1">#: :attr:`IPv6.__timeout__ &lt;pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__&gt;`.</span>
+    <span class="c1">#: :attr:`IPv6.__timeout__ &lt;pcapkit.foundation.reassembly.ipv6.reassembly.IPv6.__timeout__&gt;`.</span>
     <span class="c1">#: :data:`math.inf` means "never expire", which is the base default because</span>
     <span class="c1">#: nothing here knows what a protocol's specification asks for.</span>
     <span class="n">__timeout__</span><span class="p">:</span> <span class="s1">'float'</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
@@ -880,7 +880,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Datagrams of the buffers abandoned, reported with</span>
-<span class="sd">            :attr:`Completion.TIMEOUT &lt;pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT&gt;`</span>
+<span class="sd">            :attr:`Completion.TIMEOUT &lt;pcapkit.foundation.reassembly.data.Completion.TIMEOUT&gt;`</span>
 <span class="sd">            and already stored in :attr:`datagram`, through :meth:`_release`.</span>
 <span class="sd">            Empty when nothing expired, which is the overwhelmingly common case.</span>
 
@@ -897,7 +897,7 @@
 <span class="sd">            parser has that time has moved on. Fed by hand, a reassembly object</span>
 <span class="sd">            sees only the packets handed to it, so a buffer followed by none is</span>
 <span class="sd">            reported as</span>
-<span class="sd">            :attr:`Completion.PARTIAL &lt;pcapkit.foundation.reassembly.data.data.Completion.PARTIAL&gt;`</span>
+<span class="sd">            :attr:`Completion.PARTIAL &lt;pcapkit.foundation.reassembly.data.Completion.PARTIAL&gt;`</span>
 <span class="sd">            at the end of the capture. The</span>
 <span class="sd">            :class:`~pcapkit.foundation.extraction.Extractor` calls</span>
 <span class="sd">            :meth:`advance` with every frame's timestamp, so there a buffer</span>

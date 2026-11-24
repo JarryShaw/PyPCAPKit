@@ -629,6 +629,25 @@ one is logged at debug level. Any other <a class="reference external" href="http
 <a class="reference internal" href="../../pcapkit/utilities/callbacks.html#pcapkit.utilities.callbacks.run_callbacks" title="pcapkit.utilities.callbacks.run_callbacks"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_callbacks()</span></code></a>. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2875">#2875</a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2855">#2855</a>).</p>
 </section>
+<section id="package-layout">
+<h2>Package Layout<a class="headerlink" href="#package-layout" title="Link to this heading">¶</a></h2>
+<p><strong>Each reassembly and flow tracing class has a package of its own, named after it</strong>,
+laid out as a protocol’s is (<a class="reference internal" href="protocol-family-grouping.html#protocol-family-grouping"><span class="std std-ref">Protocol Family Grouping</span></a>). Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2882">#2882</a>:</p>
+<ul class="simple">
+<li><p>Its <code class="docutils literal notranslate"><span class="pre">reassembly</span></code> or <code class="docutils literal notranslate"><span class="pre">traceflow</span></code> module holds the class, and <code class="docutils literal notranslate"><span class="pre">data</span></code> its data
+models where it has its own.</p></li>
+<li><p>Its <code class="docutils literal notranslate"><span class="pre">__init__</span></code> exports the class alone, and binds each class <code class="docutils literal notranslate"><span class="pre">data</span></code> defines as
+<code class="docutils literal notranslate"><span class="pre">Data_&lt;name&gt;</span></code> outside <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, as <a class="reference internal" href="../../pcapkit/foundation/reassembly/tcp.html#module-pcapkit.foundation.reassembly.tcp" title="pcapkit.foundation.reassembly.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.tcp</span></code></a> does.</p></li>
+<li><p>The IP base’s package, <a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ip.html#module-pcapkit.foundation.reassembly.ip" title="pcapkit.foundation.reassembly.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ip</span></code></a>, holds the data models
+IPv4 and IPv6 share, so <a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ipv4.html#module-pcapkit.foundation.reassembly.ipv4" title="pcapkit.foundation.reassembly.ipv4"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ipv4</span></code></a> and
+<a class="reference internal" href="../../pcapkit/foundation/reassembly/ip/ipv6.html#module-pcapkit.foundation.reassembly.ipv6" title="pcapkit.foundation.reassembly.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ipv6</span></code></a> have no <code class="docutils literal notranslate"><span class="pre">data</span></code> of their own.</p></li>
+<li><p>The bases stay in <a class="reference internal" href="../../pcapkit/foundation/reassembly/reassembly.html#module-pcapkit.foundation.reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.reassembly</span></code></a> and
+<a class="reference internal" href="../../pcapkit/foundation/traceflow/traceflow.html#module-pcapkit.foundation.traceflow.traceflow" title="pcapkit.foundation.traceflow.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.traceflow</span></code></a>, with their data models beside them in
+<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly.data" title="pcapkit.foundation.reassembly.data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.data</span></code></a> and <a class="reference internal" href="../../pcapkit/foundation/traceflow/index.html#module-pcapkit.foundation.traceflow.data" title="pcapkit.foundation.traceflow.data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.data</span></code></a>.</p></li>
+</ul>
+<p><code class="file docutils literal notranslate"><span class="pre">tests/foundation/test_foundation_packages_2882_unit.py</span></code> fails on a package out of
+this layout.</p>
+</section>
 <section id="parse-ownership">
 <h2>Parse Ownership<a class="headerlink" href="#parse-ownership" title="Link to this heading">¶</a></h2>
 <p><strong>The protocol class owns the parse of a reassembled outcome</strong>, and
@@ -642,7 +661,7 @@ for TCP, and
 for a DTLS handshake message.</p></li>
 <li><p>Each <a class="reference internal" href="../../pcapkit/foundation/analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> function is a public wrapper that calls that
 method and holds no parsing of its own.</p></li>
-<li><p>The reassembly <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> calls the
+<li><p>The reassembly <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred" title="pcapkit.foundation.reassembly.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> calls the
 same method, on the reassembly’s own <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>.</p></li>
 <li><p>Protocol code never imports <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> to do its own work; the
 dependency runs from <code class="docutils literal notranslate"><span class="pre">foundation</span></code> to the protocols. The protocol base’s import from
@@ -734,7 +753,7 @@ them the rule held for DTLS alone.</p>
 <p><strong>Where the rule is silent, DTLS takes the IP/TCP shape</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2531">#2531</a>). IPv4, IPv6,
 TCP and DTLS reassembly each set <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> and report the parsed outcome as
 a datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code>, deferred to first read by
-<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>. Each <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> runs the
+<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred" title="pcapkit.foundation.reassembly.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>. Each <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> runs the
 parse behind its engine’s analysis function, so a <code class="docutils literal notranslate"><span class="pre">packet</span></code> is what that function
 returns, and binds it to <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> – <code class="docutils literal notranslate"><span class="pre">analyze</span></code> for IP and TCP
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2581">#2581</a>), <code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>) – so a subclass naming
@@ -802,6 +821,7 @@ DTLS holds <a class="reference external" href="https://docs.python.org/3/builtin
             <ul>
 <li><a class="reference internal" href="#">Reassembly Integration</a><ul>
 <li><a class="reference internal" href="#the-rule">The Rule</a></li>
+<li><a class="reference internal" href="#package-layout">Package Layout</a></li>
 <li><a class="reference internal" href="#parse-ownership">Parse Ownership</a></li>
 <li><a class="reference internal" href="#compliance-measured">Compliance, Measured</a></li>
 </ul>

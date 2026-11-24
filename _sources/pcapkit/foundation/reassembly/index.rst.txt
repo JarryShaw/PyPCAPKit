@@ -41,11 +41,11 @@ extracted fragments into whole datagrams:
        click C "reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly"
        click D "../../../ext.html#reassembly-and-flow-tracing"
 
-       click IP "ip/ip.html#pcapkit.foundation.reassembly.ip.IP"
-       click IPv4 "ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4"
-       click IPv6 "ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6"
-       click TCP "tcp.html#pcapkit.foundation.reassembly.tcp.TCP"
-       click DTLS "dtls.html#pcapkit.foundation.reassembly.dtls.DTLS"
+       click IP "ip/ip.html#pcapkit.foundation.reassembly.ip.reassembly.IP"
+       click IPv4 "ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.reassembly.IPv4"
+       click IPv6 "ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.reassembly.IPv6"
+       click TCP "tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP"
+       click DTLS "dtls.html#pcapkit.foundation.reassembly.dtls.reassembly.DTLS"
 
 Auxiliary Data
 ==============
@@ -55,17 +55,25 @@ Auxiliary Data
    :show-inheritance:
 
 .. module:: pcapkit.foundation.reassembly.data
-.. module:: pcapkit.foundation.reassembly.data.data
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.data``, with no alias: the module moved here.
+   The ``IP_*``, ``TCP_*`` and ``DTLS_*`` data models
+   ``pcapkit.foundation.reassembly.data`` collected, with no alias: each reassembly
+   class's are in the ``data`` module of its own package, such as
+   :mod:`pcapkit.foundation.reassembly.tcp.data` (:issue:`2882`).
+
 .. currentmodule:: pcapkit.foundation.reassembly
 
-.. autoclass:: pcapkit.foundation.reassembly.data.data.ReassemblyData
+.. autoclass:: pcapkit.foundation.reassembly.data.ReassemblyData
    :members:
    :show-inheritance:
 
 .. _reassembly-submissions:
 
 What submits a buffer, and how its holes at that point pick the
-:class:`~pcapkit.foundation.reassembly.data.data.Completion` it reports:
+:class:`~pcapkit.foundation.reassembly.data.Completion` it reports:
 
 .. mermaid::
 
@@ -106,15 +114,15 @@ What submits a buffer, and how its holes at that point pick the
        click SUB "reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.submit"
        click T6 "reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.expire"
        click T7 "reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.fetch"
-       click OV "index.html#pcapkit.foundation.reassembly.data.data.Completion.OVERLAP"
-       click CO "index.html#pcapkit.foundation.reassembly.data.data.Completion.COMPLETE"
-       click TO "index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT"
-       click PA "index.html#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL"
+       click OV "index.html#pcapkit.foundation.reassembly.data.Completion.OVERLAP"
+       click CO "index.html#pcapkit.foundation.reassembly.data.Completion.COMPLETE"
+       click TO "index.html#pcapkit.foundation.reassembly.data.Completion.TIMEOUT"
+       click PA "index.html#pcapkit.foundation.reassembly.data.Completion.PARTIAL"
 
-.. autoclass:: pcapkit.foundation.reassembly.data.data.Completion
+.. autoclass:: pcapkit.foundation.reassembly.data.Completion
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.data.Deferred
+.. autoclass:: pcapkit.foundation.reassembly.data.Deferred
    :members:
    :show-inheritance:

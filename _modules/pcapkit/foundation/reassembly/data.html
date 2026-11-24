@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.foundation.reassembly.dtls - PyPCAPKit</title>
+        <title>pcapkit.foundation.reassembly.data - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -573,400 +573,352 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.foundation.reassembly.dtls</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.foundation.reassembly.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""DTLS Handshake-Message Reassembly</span>
-<span class="sd">=======================================</span>
+<span class="sd">"""shared data models for reassembly</span>
 
-<span class="sd">.. module:: pcapkit.foundation.reassembly.dtls</span>
+<span class="sd">.. versionremoved:: 1.7.0</span>
 
-<span class="sd">:mod:`pcapkit.foundation.reassembly.dtls` contains</span>
-<span class="sd">:class:`~pcapkit.foundation.reassembly.dtls.DTLS` only, which reconstructs a</span>
-<span class="sd">DTLS handshake message split across several records back to origin</span>
-<span class="sd">(:rfc:`6347#section-4.2.3`). A byte range is punched out of the message's</span>
-<span class="sd">hole list as each fragment arrives, and the message is whole once no hole</span>
-<span class="sd">remains.</span>
-
-<span class="sd">.. versionadded:: 1.6.0</span>
+<span class="sd">   ``pcapkit.foundation.reassembly.data.data``, with no alias: the module moved here.</span>
+<span class="sd">   The ``IP_*``, ``TCP_*`` and ``DTLS_*`` data models</span>
+<span class="sd">   ``pcapkit.foundation.reassembly.data`` collected, with no alias: each reassembly</span>
+<span class="sd">   class's are in the ``data`` module of its own package, such as</span>
+<span class="sd">   :mod:`pcapkit.foundation.reassembly.tcp.data` (:issue:`2882`).</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span><span class="p">,</span> <span class="n">Deferred</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
-                                                     <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">DTLS_Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.pickle</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReduceAsProtocol2</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ReassemblyData'</span><span class="p">,</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span> <span class="k">as</span> <span class="n">Enum_HandshakeType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">DTLS_Datagram</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">IP_Datagram</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSHandshake</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'DTLS'</span><span class="p">]</span>
+<span class="c1"># registry key an analyser dispatches a reassembled payload on; see ``Deferred``</span>
+<span class="n">_KT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_KT'</span><span class="p">,</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="s1">'tuple[AppType_TCP, AppType_TCP]'</span><span class="p">,</span> <span class="s1">'tuple[HandshakeType, int, int]'</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="DTLS">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DTLS</span><span class="p">(</span><span class="n">ReassemblyBase</span><span class="p">[</span><span class="n">Packet</span><span class="p">[</span><span class="n">_AT</span><span class="p">],</span> <span class="n">Datagram</span><span class="p">[</span><span class="n">_AT</span><span class="p">],</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-<span class="w">    </span><span class="sd">"""Reassembly for DTLS handshake messages.</span>
+<div class="viewcode-block" id="Completion">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Completion">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Completion</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""How completely a datagram was reassembled, and why it stopped.</span>
+
+<span class="sd">    Derives from :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue</span>
+<span class="sd">    :issue:`877`'s ruling that every non-registry enumeration shares that lookup</span>
+<span class="sd">    contract; the class defines neither ``get`` nor ``_missing_`` of its own.</span>
+
+<span class="sd">    This is the value of</span>
+<span class="sd">    :attr:`Datagram.completed &lt;pcapkit.foundation.reassembly.ip.data.Datagram.completed&gt;`,</span>
+<span class="sd">    which widens a plain :obj:`bool` rather than adding a second channel beside</span>
+<span class="sd">    it: reassembly has more outcomes to report than a :obj:`bool` can hold, since</span>
+<span class="sd">    a buffer abandoned under the :rfc:`1122` / :rfc:`8200` reassembly timeout is</span>
+<span class="sd">    a different event from one that simply had not finished when the capture</span>
+<span class="sd">    did. An expired datagram says "these fragments are gone", a partial one says</span>
+<span class="sd">    "these fragments had not arrived yet".</span>
+
+<span class="sd">    Truthiness is that of a :obj:`bool`: :attr:`COMPLETE` is the only truthy</span>
+<span class="sd">    member, so ``if datagram.completed:`` reads as it would for a boolean.</span>
+<span class="sd">    Equality against :obj:`True` and :obj:`False` is *not* preserved --</span>
+<span class="sd">    ``datagram.completed == True`` is :data:`False` even for a complete datagram --</span>
+<span class="sd">    so a caller comparing against a boolean has to compare against a member</span>
+<span class="sd">    instead.</span>
+
+<span class="sd">    It derives from :mod:`pcapkit.utilities.compat`'s ``StrEnum``, as</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.httpv1.protocol.Type` does, which buys what a</span>
+<span class="sd">    plain :class:`enum.Enum` does not: the value survives</span>
+<span class="sd">    :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and</span>
+<span class="sd">    :meth:`Datagram.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` hands this</span>
+<span class="sd">    field straight out -- and ``datagram.completed == 'timeout'`` works, so a</span>
+<span class="sd">    state can be tested for without importing this class.</span>
+<span class="sd">    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of</span>
+<span class="sd">    string enumeration, but it is generated like its :mod:`pcapkit.const.pcapng`</span>
+<span class="sd">    siblings (:issue:`886`), so it derives from |aenum|_'s own</span>
+<span class="sd">    ``StrEnum``, alongside :class:`~pcapkit.corekit.enum.EnumRegistry`. The</span>
+<span class="sd">    properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`</span>
+<span class="sd">    subclass, but ``isinstance``/``issubclass`` against</span>
+<span class="sd">    ``pcapkit.utilities.compat.StrEnum`` does not on Python 3.11 and later,</span>
+<span class="sd">    where that name is the stdlib ``enum.StrEnum``.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        Being a :class:`str` whose members other than :attr:`COMPLETE` are</span>
+<span class="sd">        **falsy** makes this a non-empty string that tests false, so ``bool(x)``</span>
+<span class="sd">        and ``bool(str(x))`` disagree. That is deliberate -- the truthiness above</span>
+<span class="sd">        is what lets ``if datagram.completed:`` read as a boolean test -- but code</span>
+<span class="sd">        that takes this for an ordinary string and tests it for truth will read it</span>
+<span class="sd">        backwards.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Reassembled in whole: every octet of the datagram was received.</span>
+    <span class="n">COMPLETE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+    <span class="c1">#: Fragments were still outstanding when the buffer was flushed -- at the end</span>
+    <span class="c1">#: of the capture, or when the session was torn down (a TCP RST, a TCP SYN on</span>
+    <span class="c1">#: a 4-tuple already buffered, or an IPv4 datagram whose identifier was</span>
+    <span class="c1">#: reused by an unfragmented packet).</span>
+    <span class="c1">#: The missing octets may simply not have been captured.</span>
+    <span class="n">PARTIAL</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+    <span class="c1">#: Reassembly was **abandoned** under the reassembly timeout, i.e. the</span>
+    <span class="c1">#: capture clock advanced past the deadline of</span>
+    <span class="c1">#: :attr:`Reassembly.timeout</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.reassembly.Reassembly.timeout&gt;`</span>
+    <span class="c1">#: seconds after the first-arriving fragment while the datagram was still</span>
+    <span class="c1">#: incomplete. :rfc:`8200#section-4.5` requires the held fragments be</span>
+    <span class="c1">#: discarded, so no further fragment will ever be added to this datagram.</span>
+    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+    <span class="c1">#: Reassembly was **abandoned** because a fragment overlapped another of the</span>
+    <span class="c1">#: same datagram without being an exact duplicate of it, which</span>
+    <span class="c1">#: :rfc:`8200#section-4.5` discards an IPv6 datagram for. The overlapping</span>
+    <span class="c1">#: fragment's octets are not in the payload; ``conflict`` still lists where</span>
+    <span class="c1">#: they disagreed with the octets kept.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: .. versionadded:: 1.6.0</span>
+    <span class="n">OVERLAP</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Completion.__bool__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Completion.__bool__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether the datagram was reassembled in whole.</span>
+
+<span class="sd">        Only :attr:`COMPLETE` is truthy; every other member describes an</span>
+<span class="sd">        incomplete datagram.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This override is what a :class:`str` base does *not* give -- every</span>
+<span class="sd">            non-empty string is otherwise truthy, which would make an incomplete</span>
+<span class="sd">            datagram read as a complete one. ``__str__`` needs no such</span>
+<span class="sd">            override: :mod:`pcapkit.utilities.compat`'s ``StrEnum`` already</span>
+<span class="sd">            renders a member as its value.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Deferred">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Deferred</span><span class="p">(</span><span class="n">ReduceAsProtocol2</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_KT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""A postponed analysis of a reassembled payload.</span>
+
+<span class="sd">    A reassembled datagram's ``packet`` is a second, full parse of the payload</span>
+<span class="sd">    the datagram just reassembled. Nothing about postponing it is specific to any</span>
+<span class="sd">    one reassembler, which is why this lives beside</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.data.ReassemblyData` rather than in</span>
+<span class="sd">    any one protocol's data module.</span>
+
+<span class="sd">    IP reassembly is the case that made it necessary. IPv4 reassembly submits a</span>
+<span class="sd">    datagram for *every* frame whose **DF** flag is clear -- not only the</span>
+<span class="sd">    fragmented ones, since an unfragmented frame still reaches</span>
+<span class="sd">    :meth:`IP.reassembly &lt;pcapkit.foundation.reassembly.ip.reassembly.IP.reassembly&gt;` and is</span>
+<span class="sd">    submitted there as a trivially complete datagram -- so an eager parse would</span>
+<span class="sd">    re-parse captures holding no fragments at all: :file:`http.pcap` has 1117</span>
+<span class="sd">    IPv4 frames, none of them fragmented, and the eager parse measured 86% of the</span>
+<span class="sd">    cost of IP reassembly over it.</span>
+
+<span class="sd">    TCP reassembly defers its ``packet`` as well</span>
+<span class="sd">    (:meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit&gt;`), at a far</span>
+<span class="sd">    smaller saving, being FIN/RST-driven rather than per-frame -- 222 submits per</span>
+<span class="sd">    :file:`http.pcap` pass against 1117. DTLS reassembly defers its own for</span>
+<span class="sd">    parity with IP and TCP rather than for a saving, since a handshake message</span>
+<span class="sd">    reaches it only once fragmented (:issue:`2531`).</span>
+
+<span class="sd">    Holding the call here defers it to the first read of</span>
+<span class="sd">    :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.ip.data.Datagram.packet&gt;`,</span>
+<span class="sd">    where :class:`~pcapkit.corekit.packet.DeferredPacket` runs it, so a caller that</span>
+<span class="sd">    wants the parsed payload still gets exactly the object an eager call would</span>
+<span class="sd">    produce, and one that does not never pays for it.</span>
+
+<span class="sd">    The class is generic because the reassemblers do *not* dispatch on the</span>
+<span class="sd">    same kind of value, and each analyser declares the one it takes. The type</span>
+<span class="sd">    parameter is that value's type, so an instance's ``proto`` and the parameter</span>
+<span class="sd">    its ``analyze`` expects are the same type rather than a union every call</span>
+<span class="sd">    site would have to widen to:</span>
+
+<span class="sd">    * :meth:`IP.submit &lt;pcapkit.foundation.reassembly.ip.reassembly.IP.submit&gt;` builds a</span>
+<span class="sd">      ``Deferred[TransType]``. It passes the payload protocol type, a</span>
+<span class="sd">      :class:`~pcapkit.const.reg.transtype.TransType` read from the reassembled</span>
+<span class="sd">      datagram's **Protocol** / **Next Header** field, to the parse</span>
+<span class="sd">      :func:`~pcapkit.foundation.analysis.ip.ip_datagram` runs:</span>
+<span class="sd">      :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`,</span>
+<span class="sd">      which looks the next layer up by protocol registry number.</span>
+<span class="sd">    * :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit&gt;` builds a</span>
+<span class="sd">      ``Deferred[tuple[AppType_TCP, AppType_TCP]]``. It passes a</span>
+<span class="sd">      ``(source, destination)`` port pair to the parse</span>
+<span class="sd">      :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, because</span>
+<span class="sd">      :meth:`Transport.analyze</span>
+<span class="sd">      &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` overrides that</span>
+<span class="sd">      parameter to one: a reassembled transport-layer payload carries no</span>
+<span class="sd">      protocol number, so its application protocol is inferred from the ports.</span>
+<span class="sd">    * :meth:`DTLS._datagram_from_fragment</span>
+<span class="sd">      &lt;pcapkit.foundation.reassembly.dtls.reassembly.DTLS._datagram_from_fragment&gt;` builds a</span>
+<span class="sd">      ``Deferred[tuple[HandshakeType, int, int]]`` for a complete message. It</span>
+<span class="sd">      passes the message's ``(msg_type, length, message_seq)``, its handshake</span>
+<span class="sd">      header as if unfragmented (:rfc:`6347#section-4.2.3`), to the decoder</span>
+<span class="sd">      :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs,</span>
+<span class="sd">      :meth:`DTLS.analyze_handshake</span>
+<span class="sd">      &lt;pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake&gt;`, which reads</span>
+<span class="sd">      the body by its :class:`~pcapkit.const.tls.handshake_type.HandshakeType`.</span>
+
+<span class="sd">    Those are the cases the type parameter is constrained to. IP's and TCP's are</span>
+<span class="sd">    *named registry values* rather than one named value and one pair of bare</span>
+<span class="sd">    port numbers: a port is a member of</span>
+<span class="sd">    :class:`~pcapkit.const.reg.apptype.tcp.TCP` here -- the per-transport</span>
+<span class="sd">    registry itself, not the base</span>
+<span class="sd">    :class:`~pcapkit.const.reg.apptype.apptype.AppType`, since that is what</span>
+<span class="sd">    :meth:`TCP._make_ports &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports&gt;`</span>
+<span class="sd">    really answers with -- so what the deferred analysis dispatches on is of a</span>
+<span class="sd">    piece with what the eager path dispatches on at</span>
+<span class="sd">    :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.protocol.TCP.src&gt;`, whichever</span>
+<span class="sd">    reassembler built it. (Of a piece, not identical: for an *unassigned* port</span>
+<span class="sd">    the two paths build equal members by different routes, which</span>
+<span class="sd">    ``TCP.submit``'s own docstring records.)</span>
+
+<span class="sd">    The pairing the regression actually produced -- a port pair handed to an</span>
+<span class="sd">    analyser declared over :class:`~pcapkit.const.reg.transtype.TransType` --</span>
+<span class="sd">    is rejected, which is the direction a real mismatch takes and the one</span>
+<span class="sd">    :issue:`2417` was about.</span>
+
+<span class="sd">    Rejecting the *reverse* pairing is not guaranteed by mypy alone, for a</span>
+<span class="sd">    reason outside this class: |aenum|_ ships no type stubs, so under</span>
+<span class="sd">    ``ignore_missing_imports`` the ``aenum.IntEnum`` base of</span>
+<span class="sd">    :class:`~pcapkit.const.reg.transtype.TransType` resolves to ``Any``. A</span>
+<span class="sd">    ``TransType`` is therefore accepted where a</span>
+<span class="sd">    ``tuple[AppType_TCP, AppType_TCP]`` is</span>
+<span class="sd">    expected, and a ``Deferred[TransType]`` built over the port-pair analyser</span>
+<span class="sd">    type-checks clean. That is a gap in the dependency's type coverage rather</span>
+<span class="sd">    than in the constraint, which would bite both ways were ``TransType`` fully</span>
+<span class="sd">    typed; the values the reassemblers really pass are pinned by the tests</span>
+<span class="sd">    either way.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        strict: if :data:`True`, report a message that is not completely</span>
-<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
-<span class="sd">            contiguous payload, its holes zero-filled</span>
-<span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
-<span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
-<span class="sd">            (if not, datagram will be discarded after callback)</span>
-<span class="sd">        timeout: reassembly timeout in seconds, on the capture's own clock;</span>
-<span class="sd">            :data:`None` selects</span>
-<span class="sd">            :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`,</span>
-<span class="sd">            which for DTLS disables expiry</span>
+<span class="sd">        analyze: The analyser to call: the parse</span>
+<span class="sd">            :mod:`pcapkit.foundation.analysis` runs for the engine, bound to</span>
+<span class="sd">            the reassembly object's protocol for IP and TCP, whose ``analyze``</span>
+<span class="sd">            it calls, and that protocol's ``analyze_handshake`` for DTLS.</span>
+<span class="sd">        proto: What the analyser dispatches the payload on -- the payload</span>
+<span class="sd">            protocol type for IP, the port pair for TCP, the handshake header</span>
+<span class="sd">            for DTLS, as above.</span>
+<span class="sd">        payload: Reassembled payload to parse.</span>
 
-<span class="sd">    Note:</span>
-<span class="sd">        The buffer ID is the UDP 4-tuple plus the DTLS **epoch**: the record</span>
-<span class="sd">        sequence number resets on each cipher-state change</span>
-<span class="sd">        (:rfc:`6347#section-4.1`), so a new epoch opens a fresh buffer.</span>
-<span class="sd">        Overlapping fragments are accepted</span>
-<span class="sd">        (:rfc:`6347#section-4.2.3`, :rfc:`9147#section-5.5`). The</span>
-<span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` feeds it through</span>
-<span class="sd">        :func:`pcapkit.toolkit.pcap.dtls_reassembly`, which reads the 4-tuple</span>
-<span class="sd">        off the frame, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`</span>
-<span class="sd">        decodes what it reassembles. A complete message's</span>
-<span class="sd">        :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.packet` holds</span>
-<span class="sd">        the same decode, run on first read. Both call the protocol's</span>
-<span class="sd">        :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake`; the</span>
-<span class="sd">        ``packet`` calls that of :attr:`__protocol_type__` (:issue:`2622`).</span>
+<span class="sd">    .. versionadded:: 1.5.0</span>
 
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; from pcapkit.foundation.reassembly.dtls import DTLS</span>
-<span class="sd">        # Initialise instance:</span>
-<span class="sd">        &gt;&gt;&gt; dtls_reassembly = DTLS()</span>
-<span class="sd">        # Call reassembly:</span>
-<span class="sd">        &gt;&gt;&gt; dtls_reassembly(packet_dict)</span>
-<span class="sd">        # Fetch result:</span>
-<span class="sd">        &gt;&gt;&gt; result = dtls_reassembly.datagram</span>
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       Also constrained to the DTLS handshake header, and the analyser may</span>
+<span class="sd">       return a :class:`~pcapkit.protocols.application.dtls.data.DTLSHandshake`</span>
+<span class="sd">       (:issue:`2531`). IP's and TCP's analyser is the parse their</span>
+<span class="sd">       :mod:`pcapkit.foundation.analysis` module runs, bound to the</span>
+<span class="sd">       reassembly's protocol, rather than that protocol's bound ``analyze``</span>
+<span class="sd">       (:issue:`2581`). Protocol 0 and 1 reduce as protocol 2 does, through</span>
+<span class="sd">       :class:`~pcapkit.utilities.pickle.ReduceAsProtocol2`, which carries the</span>
+<span class="sd">       slots in Python's own default state, in place of a reduction and a</span>
+<span class="sd">       ``__getstate__`` of its own (:issue:`2714`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'analyze'</span><span class="p">,</span> <span class="s1">'proto'</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyze</span><span class="p">:</span> <span class="s1">'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]'</span><span class="p">,</span>
+                 <span class="n">proto</span><span class="p">:</span> <span class="s1">'_KT'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1"># NOTE: annotated on assignment, as in :mod:`pcapkit.corekit.multidict`: mypy cannot infer</span>
+        <span class="c1"># a slotted attribute's type from a type variable.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span><span class="p">:</span> <span class="s1">'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]'</span> <span class="o">=</span> <span class="n">analyze</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">:</span> <span class="s1">'_KT'</span> <span class="o">=</span> <span class="n">proto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span>
+
+<div class="viewcode-block" id="Deferred.__call__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase | DTLSHandshake'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run the postponed analysis.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed payload.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Deferred.__setstate__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred.__setstate__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="s1">'tuple[Optional[dict[str, Any]], dict[str, Any]] | dict[str, Any]'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpickling support.</span>
+
+<span class="sd">        Accepts the ``(dict_or_None, slots)`` pair Python's own default state</span>
+<span class="sd">        construction builds for a slotted class, which every pickle of this</span>
+<span class="sd">        class carries under protocol 2 and above, and which</span>
+<span class="sd">        :class:`~pcapkit.utilities.pickle.ReduceAsProtocol2` carries under</span>
+<span class="sd">        protocol 0 and 1 too. It also accepts a bare :obj:`dict` of</span>
+<span class="sd">        ``{slot: value}``, the state a first, unreleased fix for :issue:`2423`</span>
+<span class="sd">        pickled (:issue:`2425`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">dict_state</span><span class="p">,</span> <span class="n">slots</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dict_state</span><span class="p">,</span> <span class="n">slots</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">if</span> <span class="n">dict_state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dict_state</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">slots</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ReassemblyData">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.ReassemblyData">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReassemblyData</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data storage for reassembly.</span>
+
+<span class="sd">    Each built-in field is :data:`None` when its reassembly is disabled. Every</span>
+<span class="sd">    other enabled reassembler adds a field of its own, under the name it is</span>
+<span class="sd">    registered by in :attr:`Extractor.__reassembly__</span>
+<span class="sd">    &lt;pcapkit.foundation.extraction.Extractor.__reassembly__&gt;`, iterated after</span>
+<span class="sd">    the built-ins in the order given.</span>
 
 <span class="sd">    .. versionchanged:: 1.7.0</span>
 
-<span class="sd">       ``timeout`` is added, as the other reassembly classes take it; the</span>
-<span class="sd">       default still never expires a buffer (:issue:`2839`).</span>
+<span class="sd">       Takes a field for each enabled reassembler beyond the built-ins</span>
+<span class="sd">       (:issue:`2814`).</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[DTLS_Protocol]'</span>
 
-        <span class="c1">#: The message, if any, that the most recent call to :meth:`reassembly`</span>
-        <span class="c1">#: completed; see :attr:`last`.</span>
-        <span class="n">_last</span><span class="p">:</span> <span class="s1">'Optional[Datagram[_AT]]'</span>
+    <span class="c1">#: IPv4 reassembled data.</span>
+    <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'tuple[IP_Datagram, ...]'</span>
+    <span class="c1">#: IPv6 reassembled data.</span>
+    <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'tuple[IP_Datagram, ...]'</span>
+    <span class="c1">#: TCP reassembled data.</span>
+    <span class="n">tcp</span><span class="p">:</span> <span class="s1">'tuple[TCP_Datagram, ...]'</span>
+    <span class="c1">#: DTLS reassembled handshake messages.</span>
+    <span class="n">dtls</span><span class="p">:</span> <span class="s1">'tuple[DTLS_Datagram, ...]'</span>
 
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Defaults.</span>
-    <span class="c1">##########################################################################</span>
-
-    <span class="c1">#: Protocol name of current reassembly object.</span>
-    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'DTLS'</span>
-    <span class="c1">#: Protocol of current reassembly object. An extension point -- a protocol</span>
-    <span class="c1">#: named here need only define ``analyze_handshake``, with the signature of</span>
-    <span class="c1">#: :meth:`DTLS.analyze_handshake</span>
-    <span class="c1">#: &lt;pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake&gt;`, and is read</span>
-    <span class="c1">#: for it when a message completes, so one without it raises</span>
-    <span class="c1">#: :exc:`AttributeError` there.</span>
-    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">DTLS_Protocol</span>
-
-    <span class="c1"># No ``__timeout__``: RFC 6347 section 4.2.3 and RFC 9147 section 5.5 give</span>
-    <span class="c1"># DTLS handshake reassembly no timeout, so it inherits the base default,</span>
-    <span class="c1"># :data:`math.inf`, and by default a buffer is held until its messages</span>
-    <span class="c1"># complete or the capture ends.</span>
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Properties.</span>
-    <span class="c1">##########################################################################</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">last</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Datagram[_AT]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""The message reassembled by the most recent call to</span>
-<span class="sd">        :meth:`reassembly`, or :data:`None` if that fragment did not complete</span>
-<span class="sd">        one.</span>
-
-<span class="sd">        This is a synchronous alternative to :attr:`datagram`/:meth:`fetch`</span>
-<span class="sd">        for a caller that wants to know, immediately after feeding one</span>
-<span class="sd">        fragment, whether *that* fragment was the one that completed its</span>
-<span class="sd">        message, rather than waiting for the buffer (which may hold several</span>
-<span class="sd">        other messages still in flight under the same buffer ID) to be</span>
-<span class="sd">        flushed.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last</span>
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Methods.</span>
-    <span class="c1">##########################################################################</span>
-
-<div class="viewcode-block" id="DTLS.reassembly">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS.reassembly">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Reassembly procedure.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            info: :term:`info` record of packets to be reassembled</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            A callback raising on a message this fragment displaces propagates</span>
-<span class="sd">            before the fragment's own message is checked, so one it completes</span>
-<span class="sd">            stays buffered, where :attr:`datagram` still reports it, and its</span>
-<span class="sd">            callbacks do not run.</span>
-
-<span class="sd">        """</span>
-        <span class="c1"># clear cache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="n">BUFID</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">bufid</span>          <span class="c1"># Buffer Identifier</span>
-        <span class="n">MSN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">message_seq</span>      <span class="c1"># Message Sequence Number</span>
-        <span class="n">FO</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">fragment_offset</span>   <span class="c1"># Fragment Offset</span>
-        <span class="n">FL</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">fragment_length</span>   <span class="c1"># Fragment Length</span>
-
-        <span class="c1"># NOTE: only ``expire`` abandons a buffer, under a ``timeout`` the caller gave.</span>
-        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">buf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">buf</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="p">{},</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span>
-
-        <span class="n">frag</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">MSN</span><span class="p">)</span>
-        <span class="n">displaced</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Fragment]</span>
-        <span class="c1"># A fresh buffer for this MSN, or a disagreement with the one held</span>
-        <span class="c1"># there: a different ``length`` or ``msg_type`` means this fragment</span>
-        <span class="c1"># cannot belong to the message under construction. A reused 4-tuple</span>
-        <span class="c1"># restarts ``message_seq`` at 0 (:rfc:`6347#section-4.2.2`). Restarting</span>
-        <span class="c1"># prevents merging disagreeing fragments. Known limitation: a late</span>
-        <span class="c1"># fragment of the displaced message whose length and msg_type match</span>
-        <span class="c1"># the new one can still splice into it.</span>
-        <span class="k">if</span> <span class="n">frag</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">frag</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="n">info</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">frag</span><span class="o">.</span><span class="n">msg_type</span> <span class="o">!=</span> <span class="n">info</span><span class="o">.</span><span class="n">msg_type</span><span class="p">:</span>
-            <span class="n">displaced</span> <span class="o">=</span> <span class="n">frag</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">length</span>
-            <span class="n">frag</span> <span class="o">=</span> <span class="n">Fragment</span><span class="p">(</span>
-                <span class="n">ind</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">msg_type</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">msg_type</span><span class="p">,</span>
-                <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
-                <span class="n">raw</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
-                <span class="n">hdl</span><span class="o">=</span><span class="p">([</span><span class="n">HoleDescriptor</span><span class="p">(</span><span class="n">first</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span> <span class="k">if</span> <span class="n">length</span> <span class="k">else</span> <span class="p">[]),</span>
-            <span class="p">)</span>
-            <span class="n">buf</span><span class="o">.</span><span class="n">msg</span><span class="p">[</span><span class="n">MSN</span><span class="p">]</span> <span class="o">=</span> <span class="n">frag</span>
-
-        <span class="n">frag</span><span class="o">.</span><span class="n">ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
-
-        <span class="c1"># The fragment's data length is what its header declares, but only</span>
-        <span class="c1"># the octets the capture actually holds can be written, and a write</span>
-        <span class="c1"># past the message's own declared length is clipped.</span>
-        <span class="n">held</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span> <span class="n">FL</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span> <span class="o">-</span> <span class="n">FO</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">held</span><span class="p">:</span>
-            <span class="n">stop</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">+</span> <span class="n">held</span>
-            <span class="n">frag</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">FO</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[:</span><span class="n">held</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_update_hole_descriptors</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">hdl</span><span class="p">,</span> <span class="n">FO</span><span class="p">,</span> <span class="n">stop</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># The displaced partial is reported as PARTIAL rather than dropped.</span>
-        <span class="c1">#</span>
-        <span class="c1"># NOTE: submitted once its slot holds this fragment's message, so a callback that raises</span>
-        <span class="c1"># leaves it stored and out of the buffer, never in both (#2856).</span>
-        <span class="k">if</span> <span class="n">displaced</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="n">Buffer</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="p">{</span><span class="n">MSN</span><span class="p">:</span> <span class="n">displaced</span><span class="p">},</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
-
-        <span class="c1"># the message is whole once no hole remains</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">frag</span><span class="o">.</span><span class="n">hdl</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">buf</span><span class="o">.</span><span class="n">msg</span><span class="p">[</span><span class="n">MSN</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="o">.</span><span class="n">msg</span><span class="p">:</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
-
-            <span class="n">datagram</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datagram_from_fragment</span><span class="p">(</span><span class="n">frag</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">,</span> <span class="n">MSN</span><span class="p">,</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="n">datagram</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">([</span><span class="n">datagram</span><span class="p">],</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="DTLS.submit">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">checked</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">expired</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram[_AT]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,unused-argument,line-too-long</span>
-<span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            buf: buffer dict of reassembled packets</span>
-<span class="sd">            bufid: buffer identifier</span>
-<span class="sd">            checked: unused; every message's completeness is decided from its</span>
-<span class="sd">                own hole list, so there is nothing for a caller to assert</span>
-<span class="sd">                ahead of time</span>
-<span class="sd">            expired: whether this buffer is being submitted because</span>
-<span class="sd">                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`</span>
-<span class="sd">                abandoned it under the reassembly timeout</span>
-<span class="sd">            store: whether ``buf`` has left</span>
-<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`</span>
-<span class="sd">                for good, so its messages join</span>
-<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`</span>
-<span class="sd">                before the callbacks run, and one that raises cannot lose them</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Every message still held in ``buf``, each reported</span>
-<span class="sd">            :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`</span>
-<span class="sd">            if its hole list is empty, otherwise</span>
-<span class="sd">            :attr:`~pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT`</span>
-<span class="sd">            or :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`.</span>
-
-<span class="sd">        .. versionchanged:: 1.7.0</span>
-
-<span class="sd">           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).</span>
-
-<span class="sd">        """</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Datagram[_AT]]</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">msn</span><span class="p">,</span> <span class="n">frag</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buf</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">frag</span><span class="o">.</span><span class="n">hdl</span><span class="p">:</span>
-                <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">TIMEOUT</span> <span class="k">if</span> <span class="n">expired</span> <span class="k">else</span> <span class="n">Completion</span><span class="o">.</span><span class="n">PARTIAL</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_datagram_from_fragment</span><span class="p">(</span><span class="n">frag</span><span class="p">,</span> <span class="n">bufid</span><span class="p">,</span> <span class="n">msn</span><span class="p">,</span> <span class="n">completion</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span></div>
-
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Data models.</span>
-    <span class="c1">##########################################################################</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                 <span class="n">timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Initialise packet reassembly.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            strict: if :data:`True`, report a message that is not completely</span>
-<span class="sd">                reassembled as the tuple of its received runs; otherwise as</span>
-<span class="sd">                one contiguous payload, its holes zero-filled</span>
-<span class="sd">            store: if store reassembled datagram in memory</span>
-<span class="sd">            timeout: reassembly timeout in seconds, on the capture's own clock;</span>
-<span class="sd">                :data:`None` selects</span>
-<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``timeout`` is negative.</span>
-
-<span class="sd">        """</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Utilities.</span>
-    <span class="c1">##########################################################################</span>
-
-<div class="viewcode-block" id="DTLS._datagram_from_fragment">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS._datagram_from_fragment">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_datagram_from_fragment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frag</span><span class="p">:</span> <span class="s1">'Fragment'</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="n">message_seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                                <span class="n">completion</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Datagram[_AT]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Build a :class:`~pcapkit.foundation.reassembly.data.dtls.Datagram`</span>
-<span class="sd">        from a message's buffered :class:`~pcapkit.foundation.reassembly.data.dtls.Fragment`.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            frag: message-under-construction to report</span>
-<span class="sd">            bufid: buffer identifier it was held under</span>
-<span class="sd">            message_seq: its message sequence number</span>
-<span class="sd">            completion: how completely it was reassembled</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The reassembled (or partially reassembled) message. Its ``packet``</span>
-<span class="sd">            is the decode :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`</span>
-<span class="sd">            runs, by this reassembly's own</span>
-<span class="sd">            :attr:`protocol &lt;pcapkit.foundation.reassembly.reassembly.Reassembly.protocol&gt;`,</span>
-<span class="sd">            deferred to its first read, if the message is complete, and</span>
-<span class="sd">            :data:`None` otherwise, as that function returns.</span>
-
-<span class="sd">        """</span>
-        <span class="n">packet</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Deferred[tuple[Enum_HandshakeType, int, int]]]</span>
-        <span class="k">if</span> <span class="n">completion</span><span class="p">:</span>
-            <span class="n">body</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="n">body</span>  <span class="c1"># type: 'bytes | tuple[bytes, ...]'</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="n">Deferred</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze_handshake</span><span class="p">,</span>
-                              <span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">msg_type</span><span class="p">,</span> <span class="n">frag</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">message_seq</span><span class="p">),</span> <span class="n">body</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_received_runs</span><span class="p">(</span><span class="n">frag</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Datagram</span><span class="p">(</span>
-            <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
-            <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
-                <span class="n">src</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">sport</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                <span class="n">dst</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                <span class="n">dport</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
-                <span class="n">epoch</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
-            <span class="p">),</span>
-            <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">ind</span><span class="p">),</span>
-            <span class="n">message_seq</span><span class="o">=</span><span class="n">message_seq</span><span class="p">,</span>
-            <span class="n">msg_type</span><span class="o">=</span><span class="n">frag</span><span class="o">.</span><span class="n">msg_type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">frag</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">body</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
-            <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="DTLS._received_runs">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS._received_runs">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_received_runs</span><span class="p">(</span><span class="n">frag</span><span class="p">:</span> <span class="s1">'Fragment'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Extract the octet runs actually received, for ``strict=True``'s</span>
-<span class="sd">        report of an incomplete message.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            frag: message-under-construction to extract runs from</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Received octet runs, in offset order; empty runs (a hole butting</span>
-<span class="sd">            straight up against the start, the end, or another hole) are left</span>
-<span class="sd">            out.</span>
-
-<span class="sd">        """</span>
-        <span class="n">runs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
-        <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">hdl</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">hole</span><span class="p">:</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span> <span class="o">&gt;</span> <span class="n">pos</span><span class="p">:</span>
-                <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">pos</span><span class="p">:</span><span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">]))</span>
-            <span class="n">pos</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="n">frag</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
-            <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">frag</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">pos</span><span class="p">:</span><span class="n">frag</span><span class="o">.</span><span class="n">length</span><span class="p">]))</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">run</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> <span class="n">run</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="DTLS._update_hole_descriptors">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS._update_hole_descriptors">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_update_hole_descriptors</span><span class="p">(</span><span class="n">hdl</span><span class="p">:</span> <span class="s1">'list[HoleDescriptor]'</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Punch a received byte range out of a message's hole list.</span>
-
-<span class="sd">        Offsets are message-relative and inclusive. They never wrap and need</span>
-<span class="sd">        no open upper bound, since every fragment of a message declares the</span>
-<span class="sd">        same total ``length`` (:rfc:`6347#section-4.2.3`).</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            hdl: the message's hole descriptor list, mutated in place</span>
-<span class="sd">            first: offset of the first octet the arriving fragment actually</span>
-<span class="sd">                held</span>
-<span class="sd">            last: offset of the last octet the arriving fragment actually</span>
-<span class="sd">                held, inclusive</span>
-
-<span class="sd">        """</span>
-        <span class="n">new_hdl</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[HoleDescriptor]</span>
-        <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">hdl</span><span class="p">:</span>                                    <span class="c1"># step one</span>
-            <span class="k">if</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="ow">or</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>      <span class="c1"># steps two and three</span>
-                <span class="n">new_hdl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hole</span><span class="p">)</span>
-                <span class="k">continue</span>
-            <span class="c1"># step four: this hole is (partly) filled and replaced by what of</span>
-            <span class="c1"># it survives, on either side of the arriving range</span>
-            <span class="k">if</span> <span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                          <span class="c1"># step five</span>
-                <span class="n">new_hdl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HoleDescriptor</span><span class="p">(</span><span class="n">first</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="n">first</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span><span class="p">:</span>                             <span class="c1"># step six</span>
-                <span class="n">new_hdl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HoleDescriptor</span><span class="p">(</span><span class="n">first</span><span class="o">=</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">last</span><span class="p">))</span>
-            <span class="c1"># step seven: go on to the next hole, since one fragment may span</span>
-            <span class="c1"># several of them</span>
-        <span class="n">hdl</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">new_hdl</span></div>
-</div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'Optional[tuple[IP_Datagram, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=super-init-not-called</span>
+                 <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Optional[tuple[IP_Datagram, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Datagram, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">dtls</span><span class="p">:</span> <span class="s1">'Optional[tuple[DTLS_Datagram, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Optional[tuple[Any, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="n">dtls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">()</span></div>
 
 </pre></div>
         </article>

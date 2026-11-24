@@ -856,7 +856,7 @@ warn exactly once each.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.config.TCP_GAP_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">TCP_GAP_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16777216</span></span><a class="headerlink" href="#pcapkit.utilities.config.TCP_GAP_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Widest gap, in octets, that
-<a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a>
+<a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a>
 zero-fills to merge a segment into the payload buffer it is read against,
 <span class="target" id="index-23"></span><a class="reference internal" href="#envvar-PCAPKIT_TCP_GAP_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_TCP_GAP_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> always merges.</p>
 <p>This is a safety limit, not a reassembly rule: no RFC calls for one
@@ -865,7 +865,7 @@ data in flight, which the receive window bounds. <span class="target" id="index-
 up to <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">30</span></code>, but zero-filling a gap that wide costs 1 GiB, and real
 windows are far smaller – Linux’s default <code class="docutils literal notranslate"><span class="pre">net.ipv4.tcp_rmem</span></code> ceiling is
 6 MiB – so the default of 16 MiB clears them with room to spare. Past it,
-the stream is split rather than padded, as <a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a> describes.</p>
+the stream is split rather than padded, as <a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a> describes.</p>
 <p>At <code class="docutils literal notranslate"><span class="pre">-1</span></code> only the sequence space bounds the gap: a sequence number is read
 within <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">31</span></code> of the data buffered (<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4"><strong>RFC 9293 Section 3.4</strong></a>), so one
 segment can have up to 2 GiB zero-filled.</p>

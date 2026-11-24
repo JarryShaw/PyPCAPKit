@@ -734,7 +734,7 @@
 <span class="sd">            of its own, such as :class:`~pcapkit.const.reg.apptype.tcp.TCP`. A</span>
 <span class="sd">            caller that knows its transport gets the narrower type from</span>
 <span class="sd">            whatever handed it the pair, e.g. :meth:`TCP._make_ports</span>
-<span class="sd">            &lt;pcapkit.foundation.reassembly.tcp.TCP._make_ports&gt;`.</span>
+<span class="sd">            &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports&gt;`.</span>
 
 <span class="sd">            A bare :obj:`int` port still resolves: a member hashes as its port</span>
 <span class="sd">            (:meth:`AppType.__hash__</span>
@@ -758,8 +758,8 @@
 <span class="sd">           ``ports`` is a pair of</span>
 <span class="sd">           :class:`~pcapkit.const.reg.apptype.apptype.AppType` members rather</span>
 <span class="sd">           than of bare :obj:`int` port numbers, so :meth:`TCP.submit</span>
-<span class="sd">           &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;`, through</span>
-<span class="sd">           :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, hands</span>
+<span class="sd">           &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit&gt;`, through</span>
+<span class="sd">           :class:`~pcapkit.foundation.reassembly.data.Deferred`, hands</span>
 <span class="sd">           over the same named ports a parsed header carries (:issue:`2417`).</span>
 
 <span class="sd">        .. versionchanged:: 1.7.0</span>

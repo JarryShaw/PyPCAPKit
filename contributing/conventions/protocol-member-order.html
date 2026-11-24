@@ -605,8 +605,12 @@ under <code class="docutils literal notranslate"><span class="pre">#</span> <spa
 adds where it has none. A topic section, such as <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Defaults.</span></code>,
 <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Reassembly.</span></code> or <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Availability.</span></code>, keeps what it gathers. Ruled on
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2911">#2911</a>, so one rule files every class and the API pages follow from the
-source; <code class="file docutils literal notranslate"><span class="pre">tests/project/test_section_meanings_2911_unit.py</span></code> holds every class
-under <code class="file docutils literal notranslate"><span class="pre">pcapkit/</span></code> to it. The order below binds protocol classes.</p>
+source. No member sits above such a class’s first section comment, and an engine
+files <code class="docutils literal notranslate"><span class="pre">unsupported_reason()</span></code> and its helpers under <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Availability.</span></code>, as
+<a class="reference internal" href="../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> does; ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2922">#2922</a>.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_section_meanings_2911_unit.py</span></code> holds every class under
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/</span></code> to the meanings and fails a member above the first comment. The
+order below binds protocol classes.</p>
 <section id="the-order">
 <h2>The Order<a class="headerlink" href="#the-order" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">

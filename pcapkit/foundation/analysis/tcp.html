@@ -595,7 +595,7 @@
 <p><a class="reference internal" href="#module-pcapkit.foundation.analysis.tcp" title="pcapkit.foundation.analysis.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis.tcp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a> only, which parses the
 application-layer payload of a TCP datagram that
-<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> reassembled.</p>
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> reassembled.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
@@ -603,18 +603,18 @@ application-layer payload of a TCP datagram that
 <dt class="sig sig-object py" id="pcapkit.foundation.analysis.tcp.tcp_datagram">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.tcp.</span></span><span class="sig-name descname"><span class="pre">tcp_datagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datagram</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/analysis/tcp.html#tcp_datagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis.tcp.tcp_datagram" title="Link to this definition">¶</a></dt>
 <dd><p>Parse the payload of a TCP datagram reassembled by
-<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>.</p>
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>.</p>
 <p>A reassembled datagram carries no protocol number, so its payload is
 dispatched on its <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> ports by
 <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a>
 of <a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>. Each port is resolved to
 its <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> member by
 <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport._make_port" title="pcapkit.protocols.transport.transport.Transport._make_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport._make_port</span></code></a>, as
-<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_ports</span></code></a>
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_ports</span></code></a>
 resolves them for the reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>datagram</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a></span>) – Reassembled datagram (<a class="reference internal" href="../reassembly/tcp.html#term-reasm.tcp.datagram"><span class="xref std std-term">reasm.tcp.datagram</span></a>).</p>
+<dd class="field-odd"><p><strong>datagram</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Datagram" title="pcapkit.foundation.reassembly.tcp.data.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a></span>) – Reassembled datagram (<a class="reference internal" href="../reassembly/tcp.html#term-reasm.tcp.datagram"><span class="xref std std-term">reasm.tcp.datagram</span></a>).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
@@ -628,7 +628,7 @@ received, as <code class="docutils literal notranslate"><span class="pre">strict
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>
+<p><a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Datagram.packet" title="pcapkit.foundation.reassembly.tcp.data.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>
 holds the same result, parsed on its first read, unless the
 reassembly’s <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another protocol, which then
 parses it instead.</p>

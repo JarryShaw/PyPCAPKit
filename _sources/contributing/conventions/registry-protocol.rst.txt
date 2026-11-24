@@ -612,7 +612,7 @@ That leaves the classes with something to decide:
    * - Every other non-registry enumeration
      - --
      - Each is one of pcapkit's own discriminators and bit labels, with no registrar behind
-       them at all -- :class:`~pcapkit.foundation.reassembly.data.data.Completion`,
+       them at all -- :class:`~pcapkit.foundation.reassembly.data.Completion`,
        :class:`ftp.Type <pcapkit.protocols.application.ftp.protocol.Type>`,
        :class:`httpv1.Type <pcapkit.protocols.application.httpv1.protocol.Type>`,
        :class:`~pcapkit.corekit.infoclass.FinalisedState`,

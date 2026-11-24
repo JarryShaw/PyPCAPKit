@@ -837,7 +837,7 @@ bounds how many are dissected. <a class="reference internal" href="conventions/p
 <code class="docutils literal notranslate"><span class="pre">alias</span></code> tell the family’s members apart.</p>
 <p><strong>Done: reassembling a handshake message DTLS has fragmented across several
 records</strong> (<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.2.3"><strong>RFC 6347 Section 4.2.3</strong></a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>), via
-<a class="reference internal" href="../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS" title="pcapkit.foundation.reassembly.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>, keyed on the UDP 4-tuple
+<code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code>, keyed on the UDP 4-tuple
 and the epoch. <code class="docutils literal notranslate"><span class="pre">Extractor(reassembly=True,</span> <span class="pre">dtls=True)</span></code> opts in on the
 default engine, which feeds it through
 <a class="reference internal" href="../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.dtls_reassembly" title="pcapkit.toolkit.pcap.dtls_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap.dtls_reassembly()</span></code></a>, and
@@ -1007,8 +1007,8 @@ extraction by itself. The reopen is what remains.</p></li>
 <a class="reference internal" href="../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.ipv4_reassembly" title="pcapkit.toolkit.pcap.ipv4_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv4_reassembly()</span></code></a> filters only on the <em>DF</em> flag –
 so a capture with no fragments at all still produces one
 “datagram” per frame. Parsing its payload is not part of that cost:
-<a class="reference internal" href="../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram.packet" title="pcapkit.foundation.reassembly.data.ip.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a> is a
-<a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> parsed on first
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code> is a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code> parsed on first
 read, rather than running
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code></a> eagerly on each one,
 measured at 86% of the IP-reassembly cost plus a 133 ms garbage-collection
@@ -1270,10 +1270,10 @@ engine gets an adapter for every registered tracer, keyed by the tracer’s
 name, so a new tracer costs one class plus one adapter per engine
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2843">#2843</a>).</p>
 <p>It does treat both directions of a connection as one flow, though.
-<a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.make_bufid" title="pcapkit.foundation.traceflow.tcp.TCP.make_bufid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.make_bufid</span></code></a> orders the two endpoints
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.make_bufid</span></code> orders the two endpoints
 canonically, so both halves of a conversation reduce to one buffer ID, one
 label and one output file, and
-<a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a> reports <code class="docutils literal notranslate"><span class="pre">forward</span></code> and
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code> reports <code class="docutils literal notranslate"><span class="pre">forward</span></code> and
 <code class="docutils literal notranslate"><span class="pre">reverse</span></code> alongside <code class="docutils literal notranslate"><span class="pre">index</span></code> so per-direction ordering stays recoverable.
 This is the default; <code class="docutils literal notranslate"><span class="pre">bidirectional=False</span></code>
 (<code class="docutils literal notranslate"><span class="pre">trace_bidirectional=False</span></code> on
@@ -1296,25 +1296,25 @@ that SYN from the peer’s SYN-ACK is what the recorded teardown is for.</p>
 <p>One case remains undecided rather than solved: a capture that <em>starts</em> in the
 middle of a connection, sees no teardown, and then has its endpoints reused. The
 reuse is indistinguishable from a continuation without the ACK flag on
-<a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, which would make
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>, which would make
 <code class="docutils literal notranslate"><span class="pre">syn</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">ack</span></code> a definitive new-connection test on its own.</p>
 <p><strong>The application layer is wired into flow tracing</strong> as well. Of the ways
 of buffering a traced payload, the tracer <strong>delegates to</strong>
-<a class="reference internal" href="../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than growing a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> rather than growing a
 per-direction payload buffer of its own. A buffer that concatenated payloads in
 capture order would be silently wrong on the first retransmission or reordered
 segment, where the <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
 reassembler is not – so
-<a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> carries the segment
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code> carries the segment
 fields (<code class="docutils literal notranslate"><span class="pre">seq</span></code>, <code class="docutils literal notranslate"><span class="pre">ack</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code>, <code class="docutils literal notranslate"><span class="pre">payload</span></code>) that reassembler needs, and
 the tracer hands each traced segment straight to it.</p>
-<p><a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index.packet" title="pcapkit.foundation.traceflow.data.tcp.Index.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Index.packet</span></code></a> then
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Index.packet</span></code> then
 holds the reassembled datagrams, one per direction and acknowledgement number
-(<a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP" title="pcapkit.foundation.traceflow.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> says why), and postpones twice:
+(<code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> says why), and postpones twice:
 reading it is what flushes the flow’s reassembler, and each datagram’s own
-<a class="reference internal" href="../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a> is parsed later
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code> is parsed later
 still, through the same
-<a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> arrangement the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code> arrangement the
 reassembly side uses. It is <strong>opt-in</strong> – <code class="docutils literal notranslate"><span class="pre">analyse=True</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">trace_analyse=True</span></code> on <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>,
 <a class="reference internal" href="../pcapkit/interface/core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code></a> and
@@ -1338,9 +1338,9 @@ advanced, so that is when the sweep happens – which means the clock advances
 only while the reassembler is being fed. For IPv4 and TCP that is nearly every
 frame of the protocol; for IPv6 it is only the fragments, so an IPv6 buffer
 that stalls with no further fragment behind it is reported as
-<a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL" title="pcapkit.foundation.reassembly.data.data.Completion.PARTIAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PARTIAL</span></code></a> rather
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">PARTIAL</span></code> rather
 than
-<a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT" title="pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TIMEOUT</span></code></a>. That is
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">TIMEOUT</span></code>. That is
 the honest answer, since the capture never shows the deadline passing; feeding
 every frame’s timestamp to every enabled reassembler would close the gap and
 is worth doing on its own account.</p>

@@ -583,7 +583,7 @@
 <span class="sd">:mod:`pcapkit.foundation.analysis.tcp` contains</span>
 <span class="sd">:func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` only, which parses the</span>
 <span class="sd">application-layer payload of a TCP datagram that</span>
-<span class="sd">:class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembled.</span>
+<span class="sd">:class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` reassembled.</span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
 
@@ -597,7 +597,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'tcp_datagram'</span><span class="p">]</span>
@@ -607,7 +607,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tcp_datagram</span><span class="p">(</span><span class="n">datagram</span><span class="p">:</span> <span class="s1">'TCP_Datagram'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[ProtocolBase]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Parse the payload of a TCP datagram reassembled by</span>
-<span class="sd">    :class:`~pcapkit.foundation.reassembly.tcp.TCP`.</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`.</span>
 
 <span class="sd">    A reassembled datagram carries no protocol number, so its payload is</span>
 <span class="sd">    dispatched on its ``(source, destination)`` ports by</span>
@@ -616,7 +616,7 @@
 <span class="sd">    its :class:`~pcapkit.const.reg.apptype.tcp.TCP` member by</span>
 <span class="sd">    :meth:`Transport._make_port</span>
 <span class="sd">    &lt;pcapkit.protocols.transport.transport.Transport._make_port&gt;`, as</span>
-<span class="sd">    :meth:`TCP._make_ports &lt;pcapkit.foundation.reassembly.tcp.TCP._make_ports&gt;`</span>
+<span class="sd">    :meth:`TCP._make_ports &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports&gt;`</span>
 <span class="sd">    resolves them for the reassembly.</span>
 
 <span class="sd">    Args:</span>
@@ -629,7 +629,7 @@
 <span class="sd">        received, as ``strict=True`` reports an incomplete one.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.data.tcp.Datagram.packet&gt;`</span>
+<span class="sd">        :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.tcp.data.Datagram.packet&gt;`</span>
 <span class="sd">        holds the same result, parsed on its first read, unless the</span>
 <span class="sd">        reassembly's ``__protocol_type__`` names another protocol, which then</span>
 <span class="sd">        parses it instead.</span>
@@ -649,8 +649,8 @@
 <span class="w">    </span><span class="sd">"""Parse a reassembled payload by its datagram's ports.</span>
 
 <span class="sd">    :func:`tcp_datagram` runs this, and so does the</span>
-<span class="sd">    :class:`~pcapkit.foundation.reassembly.data.data.Deferred` that</span>
-<span class="sd">    :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;` stores as</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.data.Deferred` that</span>
+<span class="sd">    :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit&gt;` stores as</span>
 <span class="sd">    a datagram's ``packet``, with the reassembly's own protocol bound as</span>
 <span class="sd">    ``protocol``.</span>
 

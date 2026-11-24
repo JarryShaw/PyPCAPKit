@@ -596,7 +596,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pyshark</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyShark</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1180,7 +1180,7 @@
 <span class="sd">            text.</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
+<span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 

@@ -593,10 +593,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.const.capture</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span><span class="p">,</span> <span class="n">RESOLUTION_PLACES</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
@@ -1226,7 +1226,7 @@
 <span class="sd">        (:issue:`1616`).</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -1310,7 +1310,7 @@
 <span class="sd">        packet itself is left untouched either way.</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -1418,7 +1418,7 @@
 <span class="sd">        either way.</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -1500,7 +1500,7 @@
 <span class="sd">        either way.</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
+<span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`</span>
 
 <span class="sd">    """</span>
     <span class="n">ip</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>

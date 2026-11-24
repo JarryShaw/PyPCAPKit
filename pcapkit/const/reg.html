@@ -7596,9 +7596,9 @@ that, <code class="docutils literal notranslate"><span class="pre">Enum.__reduce
 crafted value – <code class="docutils literal notranslate"><span class="pre">TCP('unknown</span> <span class="pre">[54321</span> <span class="pre">-</span> <span class="pre">tcp]')</span></code> – which
 <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._missing_" title="pcapkit.const.reg.apptype.apptype.AppType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> rejects as not a port, so the member pickled fine and
 then raised <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> on read-back. That bit reassembly, whose
-<a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a> holds these
+<a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Datagram" title="pcapkit.foundation.reassembly.tcp.data.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a> holds these
 members in an unresolved
-<a class="reference internal" href="../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>: measured
+<a class="reference internal" href="../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred" title="pcapkit.foundation.reassembly.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>: measured
 before the fix, 59,413 of the 65,536 possible ports – every
 <code class="docutils literal notranslate"><span class="pre">unknown</span></code> and every IANA-span label alike, not just the truly
 unregistered ones – failed to round-trip. Rebuilding re-enters this

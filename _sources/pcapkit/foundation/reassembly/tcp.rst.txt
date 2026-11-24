@@ -3,12 +3,13 @@ TCP Datagram Reassembly
 =======================
 
 .. module:: pcapkit.foundation.reassembly.tcp
+.. module:: pcapkit.foundation.reassembly.tcp.reassembly
 
-:mod:`pcapkit.foundation.reassembly.tcp` contains
-:class:`~pcapkit.foundation.reassembly.tcp.TCP` only,
+:mod:`pcapkit.foundation.reassembly.tcp.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` only,
 which reconstructs fragmented TCP packets back to origin.
 
-.. autoclass:: pcapkit.foundation.reassembly.tcp.TCP
+.. autoclass:: pcapkit.foundation.reassembly.tcp.reassembly.TCP
    :no-members:
    :show-inheritance:
 
@@ -272,7 +273,7 @@ Terminology
        names another protocol.
 
        ``completed`` and ``conflict`` are independent signals: a datagram can
-       be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+       be :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`
        and still carry a non-empty ``conflict`` -- the resolution of a
        conflicting overlap is first-write-wins (:rfc:`9293#section-3.10`), so
        it never leaves a hole, and a contested range that was later filled in
@@ -352,9 +353,9 @@ Terminology
           :rfc:`8200#section-4.5` give IP fragmentation one, and an idle
           connection is ordinary rather than pathological. ``timestamp`` is
           recorded regardless, so passing ``timeout`` to
-          :class:`~pcapkit.foundation.reassembly.tcp.TCP` enables the same
+          :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` enables the same
           eviction the IP reassemblers use -- see
-          :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.TCP.__timeout__>`.
+          :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.reassembly.TCP.__timeout__>`.
 
        The hole descriptor list is kept in **absolute TCP sequence numbers**,
        once per ``BUFID``, whereas each ACK's payload buffer is indexed from
@@ -363,40 +364,46 @@ Terminology
        up below the data already buffered, so it is not necessarily the
        connection's own initial sequence number. Each ACK's ``gap`` and
        ``conflict`` lists are kept in sequence numbers too;
-       :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` turns
+       :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` turns
        the ``gap`` entries into offsets into ``raw`` when it reports the buffer.
 
 Data Models
 ===========
 
-.. module:: pcapkit.foundation.reassembly.data.tcp
-.. currentmodule:: pcapkit.foundation.reassembly.tcp
+.. module:: pcapkit.foundation.reassembly.tcp.data
 
-.. autoclass:: pcapkit.foundation.reassembly.data.tcp.Packet
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.tcp``, with no alias: the module moved here
+   (:issue:`2882`).
+
+.. currentmodule:: pcapkit.foundation.reassembly.tcp.reassembly
+
+.. autoclass:: pcapkit.foundation.reassembly.tcp.data.Packet
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.tcp.DatagramID
+.. autoclass:: pcapkit.foundation.reassembly.tcp.data.DatagramID
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.tcp.Datagram
+.. autoclass:: pcapkit.foundation.reassembly.tcp.data.Datagram
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.tcp.HoleDescriptor
+.. autoclass:: pcapkit.foundation.reassembly.tcp.data.HoleDescriptor
    :members:
    :show-inheritance:
 
-.. autodata:: pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND
+.. autodata:: pcapkit.foundation.reassembly.tcp.data.HOLE_OPEN_BOUND
 
-.. autoclass:: pcapkit.foundation.reassembly.data.tcp.Fragment
+.. autoclass:: pcapkit.foundation.reassembly.tcp.data.Fragment
    :members:
    :show-inheritance:
 
-.. autodata:: pcapkit.foundation.reassembly.data.tcp.BufferID
+.. autodata:: pcapkit.foundation.reassembly.tcp.data.BufferID
 
-.. autoclass:: pcapkit.foundation.reassembly.data.tcp.Buffer
+.. autoclass:: pcapkit.foundation.reassembly.tcp.data.Buffer
    :members:
    :show-inheritance:
 
@@ -404,7 +411,7 @@ Type Variables
 ==============
 
 .. data:: _AT
-   :module: pcapkit.foundation.reassembly.data.tcp
+   :module: pcapkit.foundation.reassembly.tcp.data
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
    IP address type.

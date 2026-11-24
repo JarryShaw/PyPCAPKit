@@ -986,7 +986,7 @@ pair. Released 0.6 builds its event loop with
 event loop exists instead of quietly creating one.</p>
 </dd></dl>
 
-<p class="rubric">Class Methods</p>
+<p class="rubric">Availability</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pyshark.html#PyShark.unsupported_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason" title="Link to this definition">¶</a></dt>
@@ -1295,7 +1295,7 @@ ships, for the same reason; one registered with
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">register_traceflow()</span></code> is fed.</p>
 </dd></dl>
 
-<p class="rubric">Class Methods</p>
+<p class="rubric">Availability</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcap.html#PyPCAP.unsupported_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason" title="Link to this definition">¶</a></dt>
@@ -1711,7 +1711,7 @@ ships, for the same reason; one registered with
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">register_traceflow()</span></code> is fed.</p>
 </dd></dl>
 
-<p class="rubric">Class Methods</p>
+<p class="rubric">Availability</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap_ct.html#PCAP_CT.unsupported_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason" title="Link to this definition">¶</a></dt>
@@ -1991,29 +1991,6 @@ the class docstring for why this stops short of the transport layer.</p>
 <code class="docutils literal notranslate"><span class="pre">pcapfile.linklayer</span></code>, and <a class="reference external" href="https://docs.python.org/3/library/imp.html#module-imp" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">imp</span></code></a> was removed in Python 3.12.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.unsupported_reason">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile.unsupported_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.unsupported_reason" title="Link to this definition">¶</a></dt>
-<dd><p>Why this engine cannot run here, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when it can.</p>
-<p>Consulted when <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> settles
-its engine, <em>before</em> the import test, which cannot answer this.
-<a class="reference external" href="https://github.com/kisom/pypcapfile"><code class="docutils literal notranslate"><span class="pre">pcapfile</span></code></a>’s top-level package imports on Python 3.12 and newer; it is
-<code class="docutils literal notranslate"><span class="pre">pcapfile.linklayer</span></code> that fails, imported by <code class="docutils literal notranslate"><span class="pre">pcapfile.savefile</span></code>. So
-<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapfile</span></code> succeeds and the <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> escapes
-from <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__init__" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> as a hard error instead of degrading to the default
-engine with a warning.</p>
-<p>The version is checked rather than the import attempted, so the answer
-does not depend on which submodule happens to be imported first.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A short phrase naming the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <p class="rubric">Defaults</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__engine_name__">
@@ -2049,6 +2026,30 @@ savefile’s link type and its frame number.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.dlink">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.dlink" title="Link to this definition">¶</a></dt>
 <dd><p>Data link layer protocol, as reported by the savefile header.</p>
+</dd></dl>
+
+<p class="rubric">Availability</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.unsupported_reason">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile.unsupported_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.unsupported_reason" title="Link to this definition">¶</a></dt>
+<dd><p>Why this engine cannot run here, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when it can.</p>
+<p>Consulted when <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> settles
+its engine, <em>before</em> the import test, which cannot answer this.
+<a class="reference external" href="https://github.com/kisom/pypcapfile"><code class="docutils literal notranslate"><span class="pre">pcapfile</span></code></a>’s top-level package imports on Python 3.12 and newer; it is
+<code class="docutils literal notranslate"><span class="pre">pcapfile.linklayer</span></code> that fails, imported by <code class="docutils literal notranslate"><span class="pre">pcapfile.savefile</span></code>. So
+<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapfile</span></code> succeeds and the <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> escapes
+from <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__init__" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> as a hard error instead of degrading to the default
+engine with a warning.</p>
+<p>The version is checked rather than the import attempted, so the answer
+does not depend on which submodule happens to be imported first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A short phrase naming the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Data Models</p>

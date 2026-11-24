@@ -35,7 +35,7 @@ subtree can be addressed on its own:
    logging.getLogger('pcapkit.foundation.extraction').setLevel(logging.DEBUG)
 
 Logger names are the module paths, e.g. ``pcapkit.foundation.engines.pcap`` or
-``pcapkit.foundation.traceflow.tcp``.
+``pcapkit.foundation.traceflow.tcp.traceflow``.
 
 .. autofunction:: pcapkit.utilities.logging.get_logger
 

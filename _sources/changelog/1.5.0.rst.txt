@@ -958,7 +958,7 @@ Changed
   :rfc:`791` specifies the opposite resolution, and records the disagreement
   instead (:pr:`482`).
 * renames with no compatibility alias left behind: ``HoleDiscriptor`` is spelled
-  :class:`~pcapkit.foundation.reassembly.data.tcp.HoleDescriptor` and its package alias ``TCP_HoleDiscriptor`` is
+  :class:`~pcapkit.foundation.reassembly.tcp.data.HoleDescriptor` and its package alias ``TCP_HoleDiscriptor`` is
   ``TCP_HoleDescriptor`` (:pr:`350`).
 * subclass registration is **opt-in** for :class:`.Engine`, :class:`.Reassembly`,
   :class:`.TraceFlow` and ``dumpkit``'s :class:`.Dumper` (:issue:`514`). Each registers
@@ -1234,7 +1234,7 @@ Fixed
 * TCP reassembly bounded its holes with ``sys.maxsize``, which on GraalPy and 32-bit
   builds is ``2**31 - 1``, inside TCP's sequence space, so a stream past it never
   completed. The bound is
-  :data:`~pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND`, ``2**63 - 1``, the
+  :data:`~pcapkit.foundation.reassembly.tcp.data.HOLE_OPEN_BOUND`, ``2**63 - 1``, the
   value 64-bit builds already used (:issue:`1959`, :pr:`1965`).
 * the method-name registrars, such as ``register_ipv4_option``, and
   ``register_linktype``, ``register_pcap``, ``register_pcapng``, ``register_ethertype``
@@ -1264,7 +1264,7 @@ Fixed
   naming the engine, that they ignore a parsing context supplied through
   :class:`.Extractor`'s ``context=``, as the dpkt, scapy and pyshark engines already
   did, where they dropped it silently (:issue:`2313`, :pr:`2332`).
-* :class:`~pcapkit.foundation.reassembly.data.data.Deferred` could not be pickled
+* :class:`~pcapkit.foundation.reassembly.data.Deferred` could not be pickled
   under protocol 0 or 1 -- a slotted class with no ``__getstate__`` raises
   :exc:`TypeError` there, independent of the ``analyze``/``proto`` regression
   :issue:`2417` fixed. It now defines ``__getstate__`` and ``__setstate__``,

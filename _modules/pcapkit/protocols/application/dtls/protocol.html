@@ -660,7 +660,7 @@
 <span class="sd">octets, flagged</span>
 <span class="sd">:attr:`~pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented`.</span>
 <span class="sd">``Extractor(fin, reassembly=['dtls'])`` reassembles the message</span>
-<span class="sd">(:class:`~pcapkit.foundation.reassembly.dtls.DTLS`), and</span>
+<span class="sd">(:class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS`), and</span>
 <span class="sd">:func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it with</span>
 <span class="sd">:meth:`DTLS.analyze_handshake`, which reads it with :meth:`DTLS.read_handshake`.</span>
 <span class="sd">Only the first record of each datagram is reassembled.</span>
@@ -1308,8 +1308,8 @@
 <span class="w">        </span><span class="sd">"""Analyse a reassembled handshake message from its header and body.</span>
 
 <span class="sd">        :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs this, and</span>
-<span class="sd">        so does the :class:`~pcapkit.foundation.reassembly.data.data.Deferred`</span>
-<span class="sd">        that :class:`~pcapkit.foundation.reassembly.dtls.DTLS` stores as a</span>
+<span class="sd">        so does the :class:`~pcapkit.foundation.reassembly.data.Deferred`</span>
+<span class="sd">        that :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` stores as a</span>
 <span class="sd">        complete message's ``packet`` (:issue:`2622`).</span>
 
 <span class="sd">        The message is read by :meth:`read_handshake` as if it had arrived</span>

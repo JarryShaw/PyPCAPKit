@@ -611,7 +611,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tcp.html">Follow TCP Stream</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#terminology">Terminology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.foundation.traceflow.data.tcp">Data Structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.foundation.traceflow.tcp.data">Data Structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#type-variables">Type Variables</a></li>
 </ul>
 </li>
@@ -634,7 +634,7 @@ flows of extracted packets:</p>
     click C &quot;traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow&quot;
     click D &quot;../../../ext.html#reassembly-and-flow-tracing&quot;
 
-    click TCP &quot;tcp.html#pcapkit.foundation.traceflow.tcp.TCP&quot;
+    click TCP &quot;tcp.html#pcapkit.foundation.traceflow.tcp.traceflow.TCP&quot;
     </pre><section id="auxiliary-data">
 <h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -662,9 +662,15 @@ reassemblers, where it had a <code class="docutils literal notranslate"><span cl
 </div>
 </dd></dl>
 
-<dl class="py class" id="module-pcapkit.foundation.traceflow.data.data">
-<span id="module-pcapkit.foundation.traceflow.data"></span><dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.TraceFlowData">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.data.</span></span><span class="sig-name descname"><span class="pre">TraceFlowData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tcp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/data.html#TraceFlowData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.TraceFlowData" title="Link to this definition">¶</a></dt>
+<div class="versionremoved" id="module-pcapkit.foundation.traceflow.data">
+<p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.data.data</span></code>, with no alias: the module moved here.
+The <code class="docutils literal notranslate"><span class="pre">TCP_*</span></code> data models <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.data</span></code> collected, with no
+alias: they are in <a class="reference internal" href="tcp.html#module-pcapkit.foundation.traceflow.tcp.data" title="pcapkit.foundation.traceflow.tcp.data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp.data</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2882">#2882</a>).</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.TraceFlowData">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.</span></span><span class="sig-name descname"><span class="pre">TraceFlowData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tcp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data.html#TraceFlowData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.TraceFlowData" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Data storage for flow tracing.</p>
 <p>The built-in <code class="docutils literal notranslate"><span class="pre">tcp</span></code> field is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when TCP flow tracing is disabled.
@@ -675,30 +681,30 @@ registered by in <a class="reference internal" href="../extraction.html#pcapkit.
 <p><span class="versionmodified changed">Changed in version 1.7.0: </span>Takes a field for each enabled flow tracer beyond TCP’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2843">#2843</a>).</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.TraceFlowData.tcp">
-<span class="sig-name descname"><span class="pre">tcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><span class="pre">Index</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.TraceFlowData.tcp" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.TraceFlowData.tcp">
+<span class="sig-name descname"><span class="pre">tcp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.tcp.data.Index" title="pcapkit.foundation.traceflow.tcp.data.Index"><span class="pre">Index</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.TraceFlowData.tcp" title="Link to this definition">¶</a></dt>
 <dd><p>TCP traced flows.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.Deferred">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reassembly</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.Deferred" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.Deferred">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reassembly</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.Deferred" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A postponed reassembly of a traced flow’s application layer.</p>
 <p>A traced flow’s <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the application-layer payload of the
 conversation, as reassembled datagrams – one per direction and
-acknowledgement number, see <a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.tcp.TCP" title="pcapkit.foundation.traceflow.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>.
+acknowledgement number, see <a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.tcp.traceflow.TCP" title="pcapkit.foundation.traceflow.tcp.traceflow.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>.
 Producing it means reassembling the
 stream, which is neither free nor wanted by most callers of a <em>tracer</em> – so
 the flow keeps the reassembler it was fed and this holds it until somebody
 reads
-<a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.data.tcp.Index.packet" title="pcapkit.foundation.traceflow.data.tcp.Index.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Index.packet</span></code></a>.</p>
+<a class="reference internal" href="tcp.html#pcapkit.foundation.traceflow.tcp.data.Index.packet" title="pcapkit.foundation.traceflow.tcp.data.Index.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Index.packet</span></code></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Deliberately not
-<a class="reference internal" href="../reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.data.data.Deferred</span></code></a>, and not shared
+<a class="reference internal" href="../reassembly/index.html#pcapkit.foundation.reassembly.data.Deferred" title="pcapkit.foundation.reassembly.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.data.Deferred</span></code></a>, and not shared
 with it. That one postpones a single <code class="docutils literal notranslate"><span class="pre">analyze()</span></code> call over bytes already
 in hand; this postpones a <em>submit</em> over a reassembler’s buffers. The
 reassembly and flow tracing subpackages are siblings, and the flow tracer
@@ -709,23 +715,23 @@ merging.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>reassembly</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a></span>) – The flow’s own
-<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> reassembler, fed the
+<dd class="field-odd"><p><strong>reassembly</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a></span>) – The flow’s own
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.reassembly.TCP" title="pcapkit.foundation.reassembly.tcp.reassembly.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> reassembler, fed the
 segments of this conversation as they were traced.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.Deferred.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/data.html#Deferred.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.Deferred.__call__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.Deferred.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data.html#Deferred.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.Deferred.__call__" title="Link to this definition">¶</a></dt>
 <dd><p>Run the postponed reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Datagram" title="pcapkit.foundation.reassembly.tcp.data.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The conversation’s reassembled datagrams, one per direction and
 acknowledgement number. Each carries its <em>own</em> postponed analysis in
-<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>,
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.data.Datagram.packet" title="pcapkit.foundation.reassembly.tcp.data.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a>,
 so parsing the payload as an application-layer protocol is still not
 paid for until that is read in turn.</p>
 </dd>
@@ -735,8 +741,8 @@ paid for until that is read in turn.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.FrameRecord">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.data.</span></span><span class="sig-name descname"><span class="pre">FrameRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_epoch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/data.html#FrameRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.FrameRecord">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.data.</span></span><span class="sig-name descname"><span class="pre">FrameRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_epoch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data.html#FrameRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.FrameRecord" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>A frame as a third-party engine’s flow tracing adapter reports it.</p>
 <p>The mapping is the engine’s own dissection of the frame, which every trace
@@ -765,21 +771,21 @@ exports its keys, and drops the <code class="docutils literal notranslate"><span
 <code class="docutils literal notranslate"><span class="pre">time_epoch</span></code> attributes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2726">#2726</a>).</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.FrameRecord.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.packet" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.FrameRecord.packet">
+<span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.FrameRecord.packet" title="Link to this definition">¶</a></dt>
 <dd><p>The frame’s captured octets.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.FrameRecord.frame_info">
-<span class="sig-name descname"><span class="pre">frame_info</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.FrameInfo" title="pcapkit.protocols.misc.pcap.frame.data.FrameInfo"><span class="pre">FrameInfo</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.frame_info" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.FrameRecord.frame_info">
+<span class="sig-name descname"><span class="pre">frame_info</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.FrameInfo" title="pcapkit.protocols.misc.pcap.frame.data.FrameInfo"><span class="pre">FrameInfo</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.FrameRecord.frame_info" title="Link to this definition">¶</a></dt>
 <dd><p>The frame’s PCAP record header, with the fraction in the capture’s own
 resolution.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.FrameRecord.time_epoch">
-<span class="sig-name descname"><span class="pre">time_epoch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><span class="pre">Decimal</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.time_epoch" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.FrameRecord.time_epoch">
+<span class="sig-name descname"><span class="pre">time_epoch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><span class="pre">Decimal</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.FrameRecord.time_epoch" title="Link to this definition">¶</a></dt>
 <dd><p>The frame’s exact UNIX timestamp, from which
 <a class="reference internal" href="../../dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO._make_timestamp" title="pcapkit.dumpkit.pcap.PCAPIO._make_timestamp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPIO._make_timestamp</span></code></a>
 tells which resolution <code class="docutils literal notranslate"><span class="pre">frame_info.ts_usec</span></code> is in. A
@@ -787,10 +793,10 @@ tells which resolution <code class="docutils literal notranslate"><span class="p
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.FrameRecord.__getattribute__">
-<span class="sig-name descname"><span class="pre">__getattribute__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/data.html#FrameRecord.__getattribute__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.__getattribute__" title="Link to this definition">¶</a></dt>
-<dd><p>Read an attribute, taking <a class="reference internal" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.packet" title="pcapkit.foundation.traceflow.data.data.FrameRecord.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.frame_info" title="pcapkit.foundation.traceflow.data.data.FrameRecord.frame_info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_info</span></code></a> and
-<a class="reference internal" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.time_epoch" title="pcapkit.foundation.traceflow.data.data.FrameRecord.time_epoch"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_epoch</span></code></a> from the keys holding them.</p>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.FrameRecord.__getattribute__">
+<span class="sig-name descname"><span class="pre">__getattribute__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data.html#FrameRecord.__getattribute__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.FrameRecord.__getattribute__" title="Link to this definition">¶</a></dt>
+<dd><p>Read an attribute, taking <a class="reference internal" href="#pcapkit.foundation.traceflow.data.FrameRecord.packet" title="pcapkit.foundation.traceflow.data.FrameRecord.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.traceflow.data.FrameRecord.frame_info" title="pcapkit.foundation.traceflow.data.FrameRecord.frame_info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_info</span></code></a> and
+<a class="reference internal" href="#pcapkit.foundation.traceflow.data.FrameRecord.time_epoch" title="pcapkit.foundation.traceflow.data.FrameRecord.time_epoch"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_epoch</span></code></a> from the keys holding them.</p>
 <p>So a mapping key of the same name never stands in for one of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -807,8 +813,8 @@ tells which resolution <code class="docutils literal notranslate"><span class="p
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.FrameRecord.__reduce_ex__">
-<span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data/data.html#FrameRecord.__reduce_ex__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.__reduce_ex__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.FrameRecord.__reduce_ex__">
+<span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/data.html#FrameRecord.__reduce_ex__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.data.FrameRecord.__reduce_ex__" title="Link to this definition">¶</a></dt>
 <dd><p>Reduce to a call of <code class="xref py py-func docutils literal notranslate"><span class="pre">_frame_record()</span></code>, under every protocol.</p>
 <p>A release before 1.6.0 reduces a record to it as well, so a pickle
 loads on either side of 1.6.0.</p>

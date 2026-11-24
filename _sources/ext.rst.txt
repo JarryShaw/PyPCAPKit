@@ -684,17 +684,17 @@ classes derive from
 
 The reassembly and flow tracing classes, per protocol:
 
-+------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
-| Protocol                                                   | Reassembly Class                                 | Flow Tracing Class                            |
-+============================================================+==================================================+===============================================+
-| :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`    | :class:`pcapkit.foundation.reassembly.ipv4.IPv4` |                                               |
-+------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
-| :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`    | :class:`pcapkit.foundation.reassembly.ipv6.IPv6` |                                               |
-+------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
-| :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`     | :class:`pcapkit.foundation.reassembly.tcp.TCP`   | :class:`pcapkit.foundation.traceflow.tcp.TCP` |
-+------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
-| :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` | :class:`pcapkit.foundation.reassembly.dtls.DTLS` |                                               |
-+------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
++------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
+| Protocol                                                   | Reassembly Class                                            | Flow Tracing Class                                      |
++============================================================+=============================================================+=========================================================+
+| :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`    | :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4` |                                                         |
++------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
+| :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`    | :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6` |                                                         |
++------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
+| :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`     | :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`   | :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP` |
++------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
+| :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` | :class:`pcapkit.foundation.reassembly.dtls.reassembly.DTLS` |                                                         |
++------------------------------------------------------------+-------------------------------------------------------------+---------------------------------------------------------+
 
 .. seealso::
 
@@ -705,8 +705,8 @@ New Implementation
 ~~~~~~~~~~~~~~~~~~
 
 A sketch of an IPv4 reassembly class, modelled on
-:class:`~pcapkit.foundation.reassembly.ipv4.IPv4`, whose full implementation is
-:mod:`pcapkit.foundation.reassembly.ipv4`; a flow tracing class subclasses
+:class:`~pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`, whose full implementation is
+:mod:`pcapkit.foundation.reassembly.ipv4.reassembly`; a flow tracing class subclasses
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` the same way:
 
 .. code-block:: python
@@ -800,7 +800,7 @@ datagrams or flows as they are produced.
 A reassembly callback runs on every :ref:`submission <reassembly-submissions>` and
 takes one argument, the list of datagrams that submission produced. A flow tracing
 callback runs as each flow is finalised and takes that flow's
-:class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Each should return
+:class:`~pcapkit.foundation.traceflow.tcp.data.Index`. Each should return
 :obj:`None`; any return value is ignored.
 
 Every callback runs, of either kind: the first :exc:`Exception` one raises

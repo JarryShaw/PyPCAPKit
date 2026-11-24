@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.foundation.reassembly.ipv4 - PyPCAPKit</title>
+        <title>pcapkit.foundation.traceflow.data - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -573,89 +573,240 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.foundation.reassembly.ipv4</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.foundation.traceflow.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""IPv4 Datagram Reassembly</span>
-<span class="sd">==============================</span>
+<span class="sd">"""shared data models for flow tracing</span>
 
-<span class="sd">.. module:: pcapkit.foundation.reassembly.ipv4</span>
+<span class="sd">.. versionremoved:: 1.7.0</span>
 
-<span class="sd">:mod:`pcapkit.foundation.reassembly.ipv4` contains</span>
-<span class="sd">:class:`~pcapkit.foundation.reassembly.ipv4.IPv4`</span>
-<span class="sd">only, which reconstructs fragmented IPv4 packets back to</span>
-<span class="sd">origin. Please refer to :doc:`ip` for more information.</span>
+<span class="sd">   ``pcapkit.foundation.traceflow.data.data``, with no alias: the module moved here.</span>
+<span class="sd">   The ``TCP_*`` data models ``pcapkit.foundation.traceflow.data`` collected, with no</span>
+<span class="sd">   alias: they are in :mod:`pcapkit.foundation.traceflow.tcp.data`</span>
+<span class="sd">   (:issue:`2882`).</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">IPv4_Protocol</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv4'</span><span class="p">]</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TraceFlowData'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'FrameRecord'</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">SupportsIndex</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.tcp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Index</span> <span class="k">as</span> <span class="n">TCP_Index</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 
 
-<span class="c1"># BUG: It is supposed to be ``IP[IPv4Address]``. But somehow Python</span>
-<span class="c1"># thinks that ``IP`` should take 4 arguments as in its parent class</span>
-<span class="c1"># ``Reassembly``. So we have to drop the type hint here.</span>
-<div class="viewcode-block" id="IPv4">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">IPv4</span><span class="p">(</span><span class="n">IP</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Reassembly for IPv4 payload.</span>
+<div class="viewcode-block" id="Deferred">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.Deferred">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Deferred</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A postponed reassembly of a traced flow's application layer.</span>
+
+<span class="sd">    A traced flow's ``packet`` is the application-layer payload of the</span>
+<span class="sd">    conversation, as reassembled datagrams -- one per direction and</span>
+<span class="sd">    acknowledgement number, see :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP`.</span>
+<span class="sd">    Producing it means reassembling the</span>
+<span class="sd">    stream, which is neither free nor wanted by most callers of a *tracer* -- so</span>
+<span class="sd">    the flow keeps the reassembler it was fed and this holds it until somebody</span>
+<span class="sd">    reads</span>
+<span class="sd">    :attr:`Index.packet &lt;pcapkit.foundation.traceflow.tcp.data.Index.packet&gt;`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Deliberately not</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.data.Deferred`, and not shared</span>
+<span class="sd">        with it. That one postpones a single ``analyze()`` call over bytes already</span>
+<span class="sd">        in hand; this postpones a *submit* over a reassembler's buffers. The</span>
+<span class="sd">        reassembly and flow tracing subpackages are siblings, and the flow tracer</span>
+<span class="sd">        reaches the reassembler only lazily, when ``analyze`` asks for one, so the</span>
+<span class="sd">        few lines are written in each rather than one importing the other -- the</span>
+<span class="sd">        same reason their ``data.py`` modules mirror each other instead of</span>
+<span class="sd">        merging.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>
-<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
-<span class="sd">            contiguous payload, its holes zero-filled -- or, while the total</span>
-<span class="sd">            length is unknown, only the prefix up to the first hole</span>
-<span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
-<span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
-<span class="sd">            (if not, datagram will be discarded after callback)</span>
-<span class="sd">        timeout: reassembly timeout in seconds, on the capture's own clock;</span>
-<span class="sd">            :data:`None` selects :attr:`__timeout__`</span>
-
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; from pcapkit.foundation.reassembly.ipv4 import IPv4</span>
-<span class="sd">        # Initialise instance:</span>
-<span class="sd">        &gt;&gt;&gt; ipv4_reassembly = IPv4()</span>
-<span class="sd">        # Call reassembly:</span>
-<span class="sd">        &gt;&gt;&gt; ipv4_reassembly(packet_dict)</span>
-<span class="sd">        # Fetch result:</span>
-<span class="sd">        &gt;&gt;&gt; result = ipv4_reassembly.datagram</span>
+<span class="sd">        reassembly: The flow's own</span>
+<span class="sd">            :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` reassembler, fed the</span>
+<span class="sd">            segments of this conversation as they were traced.</span>
 
 <span class="sd">    """</span>
 
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Defaults.</span>
-    <span class="c1">##########################################################################</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'reassembly'</span><span class="p">,)</span>
 
-    <span class="c1">#: Protocol name of current reassembly object.</span>
-    <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'IPv4'</span>
-    <span class="c1">#: Protocol of current reassembly object.</span>
-    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv4_Protocol</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'TCP_Reassembly'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span> <span class="o">=</span> <span class="n">reassembly</span>
 
-    <span class="c1">#: float: Default reassembly timeout, in seconds, on the capture's clock.</span>
-    <span class="c1">#:</span>
-    <span class="c1">#: :rfc:`1122#section-3.3.2` is the governing text and it is emphatic on both</span>
-    <span class="c1">#: halves: "There MUST be a reassembly timeout. The reassembly timeout value</span>
-    <span class="c1">#: SHOULD be a fixed value, **not set from the remaining TTL**. It is</span>
-    <span class="c1">#: recommended that the value lie between 60 seconds and 120 seconds." Its</span>
-    <span class="c1">#: DISCUSSION explains why it overrode :rfc:`791`: gateways came to treat TTL</span>
-    <span class="c1">#: as a hop count rather than elapsed seconds, so a TTL-derived deadline</span>
-    <span class="c1">#: discards datagrams that were merely slow.</span>
-    <span class="c1">#:</span>
-    <span class="c1">#: :rfc:`791#section-3.2` is therefore *not* followed to the letter. Its</span>
-    <span class="c1">#: scheme is ``TIMER &lt;- MAX(TIMER,TTL)`` seeded from a "Timer Lower Bound",</span>
-    <span class="c1">#: for which "the current recommendation for the initial timer setting is 15</span>
-    <span class="c1">#: seconds" -- an initial lower bound that a later fragment's TTL raises,</span>
-    <span class="c1">#: up to the 4.25-minute TTL ceiling, not a 15-second deadline. It is ruled</span>
-    <span class="c1">#: out here: the recommendation is superseded, and TTL is not in</span>
-    <span class="c1">#: :class:`~pcapkit.foundation.reassembly.data.ip.Packet` at all, so the</span>
-    <span class="c1">#: fragment model would have to grow a field to express a scheme RFC 1122</span>
-    <span class="c1">#: asks implementations not to use.</span>
-    <span class="c1">#:</span>
-    <span class="c1">#: 60 seconds is the low end of RFC 1122's range, and it makes IPv4 agree</span>
-    <span class="c1">#: with the 60 seconds :rfc:`8200#section-4.5` mandates for IPv6 -- so one</span>
-    <span class="c1">#: timestamp-driven eviction path serves both, which is the whole reason the</span>
-    <span class="c1">#: buffer models carry a timestamp.</span>
-    <span class="n">__timeout__</span> <span class="o">=</span> <span class="mf">60.0</span></div>
+<div class="viewcode-block" id="Deferred.__call__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.Deferred.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[TCP_Datagram, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run the postponed reassembly.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The conversation's reassembled datagrams, one per direction and</span>
+<span class="sd">            acknowledgement number. Each carries its *own* postponed analysis in</span>
+<span class="sd">            :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.tcp.data.Datagram.packet&gt;`,</span>
+<span class="sd">            so parsing the payload as an application-layer protocol is still not</span>
+<span class="sd">            paid for until that is read in turn.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">datagram</span></div>
+</div>
+
+
+
+<span class="c1">#: Each attribute a :class:`FrameRecord` carries beside its mapping, to the</span>
+<span class="c1">#: dunder key holding it, which iteration, ``len()`` and the dumps leave out.</span>
+<span class="n">_RECORD</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'packet'</span><span class="p">:</span> <span class="s1">'__packet__'</span><span class="p">,</span> <span class="s1">'frame_info'</span><span class="p">:</span> <span class="s1">'__frame_info__'</span><span class="p">,</span> <span class="s1">'time_epoch'</span><span class="p">:</span> <span class="s1">'__time_epoch__'</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="FrameRecord">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.FrameRecord">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FrameRecord</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A frame as a third-party engine's flow tracing adapter reports it.</span>
+
+<span class="sd">    The mapping is the engine's own dissection of the frame, which every trace</span>
+<span class="sd">    format that takes a mapping writes unchanged. Beside it, as</span>
+<span class="sd">    attributes the mapping does not show, it carries what the PCAP trace dumper</span>
+<span class="sd">    reads of a frame -- :meth:`PCAPIO._append_value</span>
+<span class="sd">    &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` takes ``packet``,</span>
+<span class="sd">    ``frame_info`` and ``time_epoch`` -- so a ``'pcap'`` trace writes the</span>
+<span class="sd">    frame's record too (:issue:`1507`). A key of the mapping and an attribute</span>
+<span class="sd">    of the same name stay apart: ``record['packet']`` is the engine's, and</span>
+<span class="sd">    ``record.packet`` the frame's captured octets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mapping: The engine's dissection of the frame.</span>
+<span class="sd">        packet: The frame's captured octets.</span>
+<span class="sd">        frame_info: The frame's PCAP record header.</span>
+<span class="sd">        time_epoch: The frame's exact UNIX timestamp.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       An :class:`~pcapkit.corekit.infoclass.Info` rather than a :obj:`dict`</span>
+<span class="sd">       subclass, so it is immutable and no :obj:`dict`. :meth:`to_dict`</span>
+<span class="sd">       exports the mapping alone, as any :class:`~pcapkit.corekit.infoclass.Info`</span>
+<span class="sd">       exports its keys, and drops the ``packet``, ``frame_info`` and</span>
+<span class="sd">       ``time_epoch`` attributes (:issue:`2726`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: The dunder keys holding the attributes, which ``repr`` and ``str``</span>
+    <span class="c1">#: leave out as well.</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_RECORD</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="c1"># NOTE: annotated for the type checker alone, since the attributes are no</span>
+    <span class="c1"># fields of the mapping, which is the engine's.</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: The frame's captured octets.</span>
+        <span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span>
+        <span class="c1">#: The frame's PCAP record header, with the fraction in the capture's own</span>
+        <span class="c1">#: resolution.</span>
+        <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'Data_FrameInfo'</span>
+        <span class="c1">#: The frame's exact UNIX timestamp, from which</span>
+        <span class="c1">#: :meth:`PCAPIO._make_timestamp &lt;pcapkit.dumpkit.pcap.PCAPIO._make_timestamp&gt;`</span>
+        <span class="c1">#: tells which resolution ``frame_info.ts_usec`` is in. A</span>
+        <span class="c1">#: :class:`~decimal.Decimal`, since only that settles it exactly.</span>
+        <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">:</span> <span class="s1">'Mapping[str, Any]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                 <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'Data_FrameInfo'</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mapping</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">_RECORD</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">frame_info</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="FrameRecord.__getattribute__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.FrameRecord.__getattribute__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read an attribute, taking :attr:`packet`, :attr:`frame_info` and</span>
+<span class="sd">        :attr:`time_epoch` from the keys holding them.</span>
+
+<span class="sd">        So a mapping key of the same name never stands in for one of them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Attribute name.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: If ``name`` is one of them and the record carries</span>
+<span class="sd">                none, as one :meth:`from_dict` builds from a mapping.</span>
+
+<span class="sd">        """</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">_RECORD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="s1">'__dict__'</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="FrameRecord.__reduce_ex__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.FrameRecord.__reduce_ex__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'SupportsIndex'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reduce to a call of :func:`_frame_record`, under every protocol.</span>
+
+<span class="sd">        A release before 1.6.0 reduces a record to it as well, so a pickle</span>
+<span class="sd">        loads on either side of 1.6.0.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            protocol: Pickle protocol in use, which does not change the reduction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``(_frame_record, (mapping, packet, frame_info, time_epoch))``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">_frame_record</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_frame_record</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="s1">'Mapping[str, Any]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                  <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'Data_FrameInfo'</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FrameRecord'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rebuild a pickled :class:`FrameRecord`.</span>
+
+<span class="sd">    Its pickles call this under every protocol, as those of a release before</span>
+<span class="sd">    1.6.0 do.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mapping: The engine's dissection of the frame.</span>
+<span class="sd">        packet: The frame's captured octets.</span>
+<span class="sd">        frame_info: The frame's PCAP record header.</span>
+<span class="sd">        time_epoch: The frame's exact UNIX timestamp.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The frame record.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">FrameRecord</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">frame_info</span><span class="o">=</span><span class="n">frame_info</span><span class="p">,</span> <span class="n">time_epoch</span><span class="o">=</span><span class="n">time_epoch</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TraceFlowData">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.TraceFlowData">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TraceFlowData</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data storage for flow tracing.</span>
+
+<span class="sd">    The built-in ``tcp`` field is :data:`None` when TCP flow tracing is disabled.</span>
+<span class="sd">    Every other enabled flow tracer adds a field of its own, under the name it is</span>
+<span class="sd">    registered by in :attr:`Extractor.__traceflow__</span>
+<span class="sd">    &lt;pcapkit.foundation.extraction.Extractor.__traceflow__&gt;`, iterated after</span>
+<span class="sd">    ``tcp`` in the order given.</span>
+
+<span class="sd">    .. versionchanged:: 1.7.0</span>
+
+<span class="sd">       Takes a field for each enabled flow tracer beyond TCP's (:issue:`2843`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: TCP traced flows.</span>
+    <span class="n">tcp</span><span class="p">:</span> <span class="s1">'tuple[TCP_Index, ...]'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'Optional[tuple[TCP_Index, ...]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=super-init-not-called</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Optional[tuple[Any, ...]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">()</span></div>
 
 </pre></div>
         </article>
