@@ -20,7 +20,7 @@ from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Any, Optional, Type
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
@@ -57,7 +57,8 @@ def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
         :attr:`Datagram.packet <pcapkit.foundation.reassembly.ip.data.Datagram.packet>`
         holds the same result, parsed on its first read, unless the
         reassembly's ``__protocol_type__`` names another protocol, which then
-        parses it instead.
+        parses it instead, or the engine parsed its frames with stops or a
+        context, which that parse takes too (:issue:`2933`).
 
     """
     if isinstance(datagram.payload, tuple):
@@ -67,22 +68,24 @@ def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
 
 
 def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
-                     payload: 'bytes') -> 'ProtocolBase':
+                     payload: 'bytes', /, **kwargs: 'Any') -> 'ProtocolBase':
     """Parse a reassembled payload by its payload protocol type.
 
     :func:`ip_datagram` runs this, and so does the
     :class:`~pcapkit.foundation.reassembly.data.Deferred` that
     :meth:`IP.submit <pcapkit.foundation.reassembly.ip.reassembly.IP.submit>` stores as a
     datagram's ``packet``, with the reassembly's own protocol bound as
-    ``protocol``.
+    ``protocol`` and the keywords its engine hands it as ``kwargs``.
 
     Args:
         protocol: The IP protocol whose ``analyze`` parses ``payload``.
         proto: The payload protocol type.
         payload: The reassembled payload.
+        **kwargs: Keyword arguments for ``analyze``: the stops and context
+            the engine parses its frames with, which the reassembly hands on.
 
     Returns:
         The parsed payload.
 
     """
-    return protocol.analyze(proto, payload)
+    return protocol.analyze(proto, payload, **kwargs)

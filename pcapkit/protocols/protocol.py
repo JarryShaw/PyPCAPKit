@@ -1146,7 +1146,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Args:
             proto: Protocol registry number.
             payload: Packet payload.
-            **kwargs: Arbitrary keyword arguments.
+            **kwargs: Keyword arguments for the payload's constructor, such as
+                the stops and context a frame's next layer is parsed with.
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
@@ -1159,7 +1160,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             :data:`logging.WARNING`, and the failed parse's warnings are dropped,
             as :meth:`_analyze_next_layer` describes. An empty payload is
             :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a
-            frame.
+            frame. A payload past a stop this class meets is ``Raw``, as a frame
+            keeps the next layer of the layer it stops at.
 
         .. versionchanged:: 1.7.0
 
@@ -1168,10 +1170,18 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            Its ``protocol`` is ``proto``, a refusal it absorbs is quiet, any
            other error is logged at :data:`logging.WARNING`, and the failed
            parse's warnings are dropped (:issue:`2862`). An empty payload is
-           ``NoPayload`` (:issue:`2880`).
+           ``NoPayload`` (:issue:`2880`). A payload past a stop is ``Raw``, and
+           the parse gets ``proto`` as ``alias``, as a frame's next layer does
+           (:issue:`2933`).
 
         """
-        protocol = cls._lookup_next_layer(cls.__proto__, proto)
+        if TYPE_CHECKING:
+            protocol: 'Type[ProtocolBase]'
+
+        if cls._stops_next_layer(kwargs):
+            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        else:
+            protocol = cls._lookup_next_layer(cls.__proto__, proto)
         return cls._analyze_next_layer(protocol, payload, proto, **kwargs)
 
     @classmethod
@@ -3035,8 +3045,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Arguments:
             klass: protocol class the payload was dispatched to
             payload: payload to parse
-            code: code the payload was dispatched on, the fallback's ``alias``
-                unless ``kwargs`` gives one
+            code: code the payload was dispatched on, the ``alias`` of the parse
+                and its fallback unless ``kwargs`` gives one, as a frame's next
+                layer takes it
             **kwargs: keyword arguments for ``klass``'s constructor
 
         Returns:
@@ -3068,6 +3079,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             (:issue:`2880`).
 
         """
+        # NOTE: The parse takes ``alias`` as a frame's next layer does, its fallback too (#2933).
+        kwargs.setdefault('alias', code)
         payload_io = io.BytesIO(payload)
         # NOTE: No octets are no layer, as a frame's ``_empty_next_layer`` keeps them (#2880).
         if not payload:
@@ -3103,31 +3116,77 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         else:
             from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # type: ignore[assignment] # pylint: disable=import-outside-toplevel # isort: skip
 
-        # NOTE: Rewound, as the failed parse read the stream; ``error`` and ``alias`` as
-        # ``beholder`` gives a frame's fallback (#2842, #2862).
+        # NOTE: Rewound, as the failed parse read the stream; ``error`` as ``beholder``
+        # gives a frame's fallback (#2842, #2862).
         payload_io.seek(0)
-        kwargs.setdefault('alias', code)
         kwargs['error'] = error
         return protocol(payload_io, len(payload), **kwargs)
 
     def _check_term_threshold(self) -> bool:
         """Check if reached termination threshold."""
-        if self._exlayer is None or (layer := self.__layer__) is None:
+        return self._meets_term_threshold(self._exlayer, self._exproto)
+
+    @classmethod
+    def _meets_term_threshold(cls, layer: 'Optional[str]',
+                              protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]') -> 'bool':
+        """Whether a parse stopping at ``layer`` or ``protocol`` stops at this class.
+
+        Arguments:
+            layer: layer to parse until, matched case-insensitively
+            protocol: protocol to parse until, by name, class or instance
+
+        Returns:
+            Whether this class is in ``layer`` or is ``protocol``, which keeps its
+            next layer as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
+
+        .. versionadded:: 1.7.0
+
+        """
+        if layer is None or (own := cls.__layer__) is None:
             layer_match = False
         else:
-            layer_match = layer.upper() == self._exlayer.upper()
+            layer_match = own.upper() == layer.upper()
 
-        if self._exproto is None:
+        if protocol is None:
             protocol_match = False
         else:
             protocol_match = False
-            comp_test = [name.upper() for name in self.id()]
-            for test in self.expand_comp(self._exproto):
+            comp_test = [name.upper() for name in cls.id()]
+            for test in cls.expand_comp(protocol):
                 if test in comp_test:
                     protocol_match = True
                     break
 
         return layer_match or protocol_match
+
+    @classmethod
+    def _stops_next_layer(cls, kwargs: 'dict[str, Any]') -> 'bool':
+        """Whether a parse given ``kwargs`` stops at this class, as ``_sigterm`` stops a layer.
+
+        Arguments:
+            kwargs: keyword arguments of the parse, whose stops are read as
+                :meth:`__init__` reads them while parsing: the prefixed spelling
+                wins, and ``'none'`` and ``'null'`` are no stop
+
+        Returns:
+            Whether :meth:`analyze` keeps the payload as
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as a frame keeps the
+            next layer of the layer it stops at.
+
+        .. versionadded:: 1.7.0
+
+        """
+        layer = kwargs.get('_layer')
+        if layer is None:
+            layer = kwargs.get('layer')
+        protocol = kwargs.get('_protocol')
+        if protocol is None:
+            protocol = kwargs.get('protocol')
+        if isinstance(layer, str) and layer.lower() == 'none':
+            layer = None
+        if isinstance(protocol, str) and protocol.lower() == 'null':
+            protocol = None
+        return cls._meets_term_threshold(layer, protocol)
 
     def _read_qs_rate(self, code: 'int') -> 'int':
         """Read a Quick-Start rate code as a rate in kbps.

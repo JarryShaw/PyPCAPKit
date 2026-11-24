@@ -259,8 +259,14 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
                  RegistryWarning, stacklevel=stacklevel())
         adapters[name] = adapter
 
-    def _setup_reassembly(self) -> 'None':
+    def _setup_reassembly(self, *, parse: 'bool' = False) -> 'None':
         """Disable each enabled reassembler this engine has no adapter for.
+
+        Args:
+            parse: whether this engine parses its frames with the extraction's
+                stops and context; as the extraction's engine, it then hands them
+                to each reassembler kept, whose reassembled payloads are parsed
+                with them as the frames' next layers are (:issue:`2933`)
 
         Warns:
             AttributeWarning: For each reassembler disabled; once, naming them
@@ -288,6 +294,22 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
                      stacklevel=stacklevel())
             ext._reasm = ReassemblyManager((name, reasm) for (name, reasm) in ext._reasm.items()
                                            if name in adapters)
+
+        # NOTE: Only as the extraction's engine: a third-party one runs this one's ``run`` for the
+        # global header alone (``Extractor.record_header``), and parses no frame with them.
+        if not parse or getattr(ext, '_exeng', None) is not self:
+            return
+        # NOTE: Only those set, so an ``analyze`` taking no keywords, as a custom
+        # ``__protocol_type__``'s may, is called as before when the extraction sets none.
+        keywords = {}  # type: dict[str, Any]
+        if ext._exlyr != 'none':
+            keywords['layer'] = ext._exlyr
+        if ext._exptl != 'null':
+            keywords['protocol'] = ext._exptl
+        if ext._exctx:
+            keywords['__context__'] = ext._exctx
+        for (_, reasm) in ext._reasm.items():
+            reasm._parse_keywords = dict(keywords)
 
     def _reassemble(self, timestamp: 'float', *args: 'Any', **kwargs: 'Any') -> 'None':
         """Feed a frame to every enabled reassembler.

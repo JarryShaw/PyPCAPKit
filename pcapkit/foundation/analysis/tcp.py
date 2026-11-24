@@ -18,7 +18,7 @@ from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtoco
 from pcapkit.protocols.transport.tcp.protocol import TCP
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Any, Optional, Type
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
@@ -54,7 +54,8 @@ def tcp_datagram(datagram: 'TCP_Datagram') -> 'Optional[ProtocolBase]':
         :attr:`Datagram.packet <pcapkit.foundation.reassembly.tcp.data.Datagram.packet>`
         holds the same result, parsed on its first read, unless the
         reassembly's ``__protocol_type__`` names another protocol, which then
-        parses it instead.
+        parses it instead, or the engine parsed its frames with stops or a
+        context, which that parse takes too (:issue:`2933`).
 
     """
     if isinstance(datagram.payload, tuple):
@@ -66,22 +67,24 @@ def tcp_datagram(datagram: 'TCP_Datagram') -> 'Optional[ProtocolBase]':
 
 
 def _analyze_payload(protocol: 'Type[TCP]', ports: 'tuple[AppType_TCP, AppType_TCP]',
-                     payload: 'bytes') -> 'ProtocolBase':
+                     payload: 'bytes', /, **kwargs: 'Any') -> 'ProtocolBase':
     """Parse a reassembled payload by its datagram's ports.
 
     :func:`tcp_datagram` runs this, and so does the
     :class:`~pcapkit.foundation.reassembly.data.Deferred` that
     :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` stores as
     a datagram's ``packet``, with the reassembly's own protocol bound as
-    ``protocol``.
+    ``protocol`` and the keywords its engine hands it as ``kwargs``.
 
     Args:
         protocol: The TCP protocol whose ``analyze`` parses ``payload``.
         ports: The datagram's ``(source, destination)`` ports.
         payload: The reassembled payload.
+        **kwargs: Keyword arguments for ``analyze``: the stops and context
+            the engine parses its frames with, which the reassembly hands on.
 
     Returns:
         The parsed payload.
 
     """
-    return protocol.analyze(ports, payload)
+    return protocol.analyze(ports, payload, **kwargs)

@@ -133,7 +133,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 :attr:`TCP.dst <pcapkit.protocols.transport.tcp.protocol.TCP.dst>` read
                 off a parsed header, resolved the same way.
             payload: Packet payload.
-            **kwargs: Arbitrary keyword arguments.
+            **kwargs: Keyword arguments for the payload's constructor, such as
+                the stops and context a frame's next layer is parsed with.
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
@@ -143,7 +144,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             a frame's fallback records the port :meth:`_decode_next_layer`
             looked up. An empty payload is
             :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a
-            frame.
+            frame, and one past a stop this class meets is ``Raw``.
 
         Important:
             The annotation names the **base** registry because every transport
@@ -187,11 +188,19 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
            quiet, any other error is logged at :data:`logging.WARNING` rather
            than ``ERROR``, and the failed parse's warnings are dropped
            (:issue:`2862`). An empty payload is ``NoPayload`` (:issue:`2880`).
+           A payload past a stop is ``Raw``, and the parse gets the port as
+           ``alias``, as a frame's next layer does (:issue:`2933`).
 
         """
+        if TYPE_CHECKING:
+            protocol: 'Type[ProtocolBase]'
+
         port = ports[0] if ports[0] in cls.__proto__ else ports[1]
         code = int(port) if isinstance(port, Enum_AppType) else port
-        protocol = cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, code), payload, len(payload))
+        if cls._stops_next_layer(kwargs):
+            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        else:
+            protocol = cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, code), payload, len(payload))
         return cls._analyze_next_layer(protocol, payload, code, **kwargs)
 
     @classmethod

@@ -458,7 +458,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 payload=payload,
                 # NOTE: ``analyze`` reparses the payload of every IPv4 frame with **DF** clear, so
                 # ``Deferred`` postpones it to the first read of ``Datagram.packet``.
-                packet=Deferred(partial(_analyze_payload, self.protocol), bufid[3], payload),
+                packet=Deferred(partial(_analyze_payload, self.protocol, **self._parse_keywords),
+                                bufid[3], payload),
                 conflict=conflict,
             )
             ret.append(packet)

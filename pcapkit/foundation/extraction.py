@@ -1165,10 +1165,11 @@ class Extractor(Generic[_P]):
                 ID -- cf. :mod:`pcapkit.corekit.context`. Accepts a
                 :class:`~pcapkit.corekit.context.ContextRegistry`, a single
                 :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping,
-                or any iterable of contexts. The channel is honoured by the
-                :term:`default engine`, whose PCAP and PCAP-NG readers parse
-                with :mod:`pcapkit`'s own protocol implementations; the third
-                party engines ignore it.
+                or any iterable of contexts. Like ``layer`` and ``protocol``,
+                the channel is honoured by the :term:`default engine`, whose PCAP
+                and PCAP-NG readers parse with :mod:`pcapkit`'s own protocol
+                implementations, in its frames and in the payloads IP and TCP
+                reassembly rebuild from them; the third party engines ignore it.
             reassembly: reassembly settings, or the names of the reassemblers to
                 enable with their defaults, each as registered in
                 :attr:`__reassembly__`; :data:`None`, or no names, reassembles
