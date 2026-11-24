@@ -37,6 +37,7 @@ import unittest
 from tests._dependency_gates import EDITABLE_INSTALL
 from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, job, load, steps
+from tests.project.test_python_versions_1660 import legs, matrix
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / 'util' / 'pip_install.py'
@@ -428,8 +429,9 @@ class TestTheStepsRunTheScript(unittest.TestCase):
                                                'LEG': f"Python {setup['with']['python-version']}"})
                 self.assertFalse({'id', 'if', 'continue-on-error', 'shell', 'timeout-minutes'} & set(step))
                 self.assertNotIn('ANNOTATION_LEVEL', job(WORKFLOW, job_id).get('env') or {})
-                self.assertFalse([leg for leg in (job(WORKFLOW, job_id).get('strategy') or {}).get('matrix', {})
-                                  .get('include', []) if leg.get('ktlo')])
+                # #2916: `project-tests`' matrix is an expression, so it is expanded rather than read.
+                cells = legs(matrix(WORKFLOW.name, job_id)) if 'strategy' in job(WORKFLOW, job_id) else []
+                self.assertFalse([leg for leg in cells if leg.get('ktlo')])
 
     def test_the_ktlo_twins_run_the_same_step(self) -> None:
         for twin, job_id in TWINS.items():

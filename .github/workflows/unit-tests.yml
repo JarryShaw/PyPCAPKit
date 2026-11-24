@@ -1288,10 +1288,11 @@ jobs:
   # #2254: the project cell's run step ran near its step cap, so tests/project,
   # which has no subdirectories, is cut at module names: `--part 1` to
   # `--part 3`, at the names SHARD_BOUNDARIES in util/run_unittest_leg.py holds
-  # for it, so every module, a new one included, runs in exactly one part. The
-  # names are chosen so the parts take about the same CI time; each part also
-  # runs the root-level modules. Move one to rebalance. The same cost as
-  # #1029's: a pair split between two cells does not share a process.
+  # for it, where `project-tests`' docs-only cells cut it too (#2916), so every
+  # module, a new one included, runs in exactly one part. The names are chosen
+  # so the parts take about the same CI time; each part also runs the
+  # root-level modules. Move one to rebalance. The same cost as #1029's: a pair
+  # split between two cells does not share a process.
   #
   # The rest of protocols is cut the same way, at its SHARD_BOUNDARIES
   # entry, with the `--exclude` in every part. Its run step took 527 s on
@@ -1499,26 +1500,25 @@ jobs:
   # listed there, so a new one cannot go unrun.
   #
   # #2798: the docs-only path held the job's p90 near its cap, so the job runs
-  # as two cells, one per half of tests/project, cut at tests/_tiers.py's
-  # PROJECT_BOUNDARY, which HALF_BOUNDARIES in util/run_unittest_leg.py holds;
-  # `unittest-ordering` cuts the leg in three at names of its own (#2913).
-  # On a code diff each cell runs its half of the pins; on a docs-only one, its
-  # half of the leg, and half 1 the other docs readers too. Between them the
-  # cells run each pin, each tests/project module and each other docs reader
-  # once; tests/project/test_unittest_ordering_shards.py pins that. On
-  # d248be1f8's docs-only run the leg's tests/project modules took
-  # 363 s and 419 s on either side of this boundary, and the root-level modules
-  # 123-148 s in each half.
+  # as several cells. On a code diff a `half` per cell runs the pins on its side
+  # of tests/_tiers.py's PROJECT_BOUNDARY. #2916: on a docs-only diff a `part`
+  # per cell runs that `--part` of the leg, cut at the names SHARD_BOUNDARIES in
+  # util/run_unittest_leg.py holds, where `unittest-ordering`'s `project` cells
+  # cut it, and part 1 the other docs readers too. Halved, the leg's half 2 ran
+  # the modules the ordering cells' old half 2 did, 12.5 min at p90 (#2913),
+  # past half this step's 18-minute cap. Between them the cells run each pin,
+  # each tests/project module and each other docs reader once;
+  # tests/project/test_unittest_ordering_shards.py pins that.
   project-tests:
-    name: Project tests (half ${{ matrix.half }})
+    name: Project tests (${{ matrix.half && 'half' || 'part' }} ${{ matrix.half || matrix.part }})
     needs: [changes]
     if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
-      matrix:
-        half: [1, 2]
+      # The leg's parts only where the leg runs, so a code diff starts its halves alone.
+      matrix: ${{ fromJSON(needs.changes.outputs.code == 'false' && '{"part":[1,2,3]}' || '{"half":[1,2]}') }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -1582,10 +1582,10 @@ jobs:
       - name: Run tests/project and the root-level modules under plain unittest
         if: ${{ needs.changes.outputs.code == 'false' }}
         timeout-minutes: 18
-        run: python util/cap_file_size.py python util/run_unittest_leg.py project --half ${{ matrix.half }} --verbose --stall-dump 1020
+        run: python util/cap_file_size.py python util/run_unittest_leg.py project --part ${{ matrix.part }} --verbose --stall-dump 1020
 
       - name: Run the other tests that read docs/ or Markdown
-        if: ${{ needs.changes.outputs.code == 'false' && matrix.half == 1 }}
+        if: ${{ needs.changes.outputs.code == 'false' && matrix.part == 1 }}
         timeout-minutes: 5
         run: python util/cap_file_size.py python -m unittest -v tests.corekit.test_sentinel_exports_unit tests.utilities.test_config_unit tests.vendor.test_vendor_variables_1726_unit
 

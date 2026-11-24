@@ -950,7 +950,7 @@ one runs everything:
      - skipped
      - skipped
    * - ``unit-tests.yml``: ``project-tests``
-     - :file:`tests/project` and the root-level modules under plain unittest, a half
+     - :file:`tests/project` and the root-level modules under plain unittest, a part
        per cell, and the docs readers
      - the project pins, a half per cell
    * - ``experimental.yml``: ``experimental``, ``windows``
@@ -1619,16 +1619,16 @@ answer. Under ``gate-only``, ``gate``'s full suite runs the pins with everything
 one interpreter, in file order and without xdist, which is a question about the module
 rather than the Python version.
 
-``project-tests`` runs a cell per half of :file:`tests/project` (:issue:`2798`), as its
-docs-only path, run whole, comes near the job's cap. Both paths cut at
-``PROJECT_BOUNDARY`` in :file:`tests/_tiers.py`, which ``--half`` of
-:file:`util/run_unittest_leg.py` cuts at too: a cell runs its half of the pins on a
-code diff, and its half of the leg on a docs-only one, half 1 the other docs readers
-as well. ``unittest-ordering``'s ``project`` cells cut the leg in three instead, at the
-names its ``SHARD_BOUNDARIES`` holds, a ``--part`` per cell, as its cells for the rest
-of :file:`tests/protocols` do (:issue:`2913`).
+``project-tests`` runs as several cells (:issue:`2798`), as its docs-only path, run
+whole, comes near the job's cap, and its matrix reads the diff. On a code diff a cell
+runs a half of the pins, cut at ``PROJECT_BOUNDARY`` in :file:`tests/_tiers.py`. On a
+docs-only one a cell runs a part of the leg, a ``--part`` of
+:file:`util/run_unittest_leg.py`, part 1 the other docs readers as well
+(:issue:`2916`): the parts ``unittest-ordering``'s ``project`` cells run, cut at the
+names the script's ``SHARD_BOUNDARIES`` holds (:issue:`2913`), so the two jobs cannot
+cut the leg in different places, and a code diff starts its halves alone.
 :file:`tests/project/test_unittest_ordering_shards.py` fails when a module or a pin
-runs in no cell of a job or in two.
+runs in no cell of a job or in two, or when the two jobs' parts differ.
 
 A pin's skip where ``tomllib`` is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner's own ``python3``, and
@@ -1858,7 +1858,7 @@ script not listed here is CI-only.
        to regenerate :file:`CHANGELOG.md`.
    * - :file:`util/run_unittest_leg.py`
      - ``unit-tests.yml``'s ``unittest-ordering``, once per cell, and
-       ``project-tests``, once per half of :file:`tests/project`.
+       ``project-tests`` on a docs-only diff, once per part of :file:`tests/project`.
      - ``python util/run_unittest_leg.py <directory>`` over the :file:`tests/`
        directory a change touches, when it moves imports or module state (see
        :doc:`conventions/test-coverage`).

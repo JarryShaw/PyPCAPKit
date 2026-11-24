@@ -20,6 +20,7 @@ import unittest
 
 from tests import _tiers
 from tests.project.test_python_matrix_tiers_1633 import job
+from tests.project.test_python_versions_1660 import matrix
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DOC = ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst'
@@ -69,7 +70,7 @@ class TestThePinsJob(unittest.TestCase):
         self.assertIn('python util/cap_file_size.py python -m pytest -q -n logical --dist load', run)
         self.assertIn(f'{_tiers.PROJECT_PIN_HALF_SELECTOR} "$HALF"', run)
         self.assertEqual(step(JOB, STEP)['env'], {'HALF': '${{ matrix.half }}'})
-        self.assertEqual(job(*JOB)['strategy']['matrix'], {'half': list(_tiers.PROJECT_HALVES)})
+        self.assertEqual(matrix(*JOB), {'half': list(_tiers.PROJECT_HALVES)})
         self.assertLess(step(JOB, STEP)['timeout-minutes'], job(*JOB)['timeout-minutes'])
 
 

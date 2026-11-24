@@ -15,10 +15,10 @@ job stays green while covering less. The assertions are therefore over the
 * #2254: the ``project`` cells cut that flat directory at module names, a
   ``--part`` per cell, all read from :data:`run_unittest_leg.SHARD_BOUNDARIES`,
   so they too are disjoint and together equal the unsharded leg, a module added
-  later included; and ``project-tests``' cells halve it at
-  :data:`run_unittest_leg.HALF_BOUNDARIES`' one name, its pins included (#2798).
-  The rest of ``protocols``, everything but ``protocols/internet``, is cut at its
-  own entry there (#2913), every part leaving out the same subdirectory;
+  later included; ``project-tests``' docs-only cells run the same parts (#2916),
+  and its code-diff cells halve the pins at :data:`tests._tiers.PROJECT_BOUNDARY`
+  (#2798). The rest of ``protocols``, everything but ``protocols/internet``, is cut
+  at its own entry there (#2913), every part leaving out the same subdirectory;
 * every other matrix cell is a bare direct child of ``tests/`` with no
   ``--exclude`` or boundary, i.e. runs that whole directory;
 * every ``tests/`` subdirectory holding a test module is a leg, except the
@@ -34,6 +34,7 @@ which comes only with the ``test`` extra of :file:`pyproject.toml`; the same spl
 from __future__ import annotations
 
 import io
+import json
 import pathlib
 import re
 import sys
@@ -91,8 +92,6 @@ def _boundary(name: 'str', flags: 'str') -> 'dict[str, str]':
     """:func:`run_unittest_leg.leg_modules`'s ``before``/``start`` for a cell's or step's flags."""
     boundary = {'before' if flag == 'before' else 'start': value
                 for flag, value in re.findall(r'--(before|from)\s+(\S+)', flags)}
-    for half in re.findall(r'--half\s+(\S+)', flags):
-        boundary.update(leg.half_bounds(name, int(half)))
     for part in _parts(flags):
         boundary.update(leg.part_bounds(name, int(part)))
     return boundary
@@ -105,8 +104,8 @@ def _parts(flags: 'str') -> 'list[str]':
 def _matrix() -> 'list[tuple[str, list[str], dict[str, str]]]':
     """``(leg, exclude, boundary)`` for every cell of the ``unittest-ordering`` matrix.
 
-    ``boundary`` maps the cell's ``--part``, ``--half``, ``--before`` and ``--from``
-    to :func:`run_unittest_leg.leg_modules`'s ``before`` and ``start``.
+    ``boundary`` maps the cell's ``--part``, ``--before`` and ``--from`` to
+    :func:`run_unittest_leg.leg_modules`'s ``before`` and ``start``.
 
     """
     text = _job('unittest-ordering')
@@ -123,12 +122,18 @@ def _matrix() -> 'list[tuple[str, list[str], dict[str, str]]]':
     return cells
 
 
-def _project_tests_halves() -> 'list[str]':
-    """The ``half`` values of the ``project-tests`` matrix (#2798)."""
-    found = re.findall(r'^\s+half:\s*\[([^\]\n]*)\]\s*$', _job('project-tests'), re.M)
+def _project_tests_matrix(docs_only: 'bool') -> 'dict[str, list[int]]':
+    """The ``project-tests`` matrix on a docs-only diff or on any other (#2798, #2916).
+
+    Read off the job's one ``fromJSON`` of the two literals;
+    :mod:`tests.project.test_light_pull_requests_2243` evaluates it as GitHub does.
+
+    """
+    found = re.findall(r"^\s+matrix:\s*\$\{\{ fromJSON\(needs\.changes\.outputs\.code == 'false' && "
+                       r"'([^']*)' \|\| '([^']*)'\) \}\}\s*$", _job('project-tests'), re.M)
     if len(found) != 1:
-        raise AssertionError(f'expected one half: list in project-tests, found {len(found)}')
-    return [value.strip() for value in found[0].split(',')]
+        raise AssertionError(f'expected one fromJSON matrix in project-tests, found {len(found)}')
+    return json.loads(found[0][0 if docs_only else 1])
 
 
 def _modules(name: 'str', exclude: 'list[str]', boundary: 'dict[str, str]') -> 'tuple[str, ...]':
@@ -181,41 +186,43 @@ class TestShardedProtocolsLeg(unittest.TestCase):
                                 if ('before' not in b or key < b['before']) and key >= b.get('start', '')]
                         self.assertEqual(len(hits), 1)
 
-    def test_project_tests_halves_the_leg(self):
-        """#2798: on a docs-only diff each ``project-tests`` cell runs its half of the
-        leg, cut at :data:`tests._tiers.PROJECT_BOUNDARY` rather than at the
-        ``unittest-ordering`` parts' names (#2913), and between them the whole leg, once."""
+    def test_project_tests_cuts_the_leg_where_the_ordering_cells_do(self):
+        """#2916: on a docs-only diff each ``project-tests`` cell runs a ``--part`` of the
+        leg, so its cells run the ``unittest-ordering`` ``project`` cells' parts, cut at
+        the same :data:`SHARD_BOUNDARIES` names, and between them the whole leg, once."""
         runs = re.findall(r'run_unittest_leg\.py\s+project\b([^\n]*)', _job('project-tests'))
-        self.assertEqual(len(runs), 1, 'one step runs the leg, a half per cell')
-        self.assertIn('--half ${{ matrix.half }}', runs[0])
-        self.assertNotIn('--part', runs[0])
-        halves = _project_tests_halves()
-        self.assertEqual(sorted(halves), ['1', '2'])
-        cuts = [_boundary('project', runs[0].replace('${{ matrix.half }}', half)) for half in halves]
-        self.assertEqual({value for cut in cuts for value in cut.values()}, {_tiers.PROJECT_BOUNDARY})
-        steps = [leg.leg_modules('project', **cut) for cut in cuts]
+        self.assertEqual(len(runs), 1, 'one step runs the leg, a part per cell')
+        self.assertIn('--part ${{ matrix.part }}', runs[0])
+        self.assertNotRegex(runs[0], r'--(?:half|before|from)\b')
+        cells = _project_tests_matrix(docs_only=True)
+        self.assertEqual(cells, {'part': list(range(1, len(leg.SHARD_BOUNDARIES['project']) + 2))})
+        steps = [leg.leg_modules('project', **_boundary('project', runs[0].replace('${{ matrix.part }}', str(part))))
+                 for part in cells['part']]
         self.assertTrue(all(steps), 'a cell runs no tests/project module')
-        flat = [module for half in steps for module in half]
-        self.assertEqual(len(flat), len(set(flat)), 'a module runs in both cells')
+        self.assertEqual(sorted(steps), sorted(_modules(*cell) for cell in _matrix() if cell[0] == 'project'),
+                         'project-tests and unittest-ordering cut tests/project in different places')
+        flat = [module for part in steps for module in part]
+        self.assertEqual(len(flat), len(set(flat)), 'a module runs in two cells')
         self.assertEqual(sorted(flat), sorted(leg.leg_modules('project')))
 
     def test_project_tests_cells_partition_the_pins(self):
-        """#2798: on a code diff each cell runs the pins on its side of the leg's cut, and
-        between them every pin, once, a pin added later included."""
-        self.assertIs(leg.HALF_BOUNDARIES['project'], _tiers.PROJECT_BOUNDARY)
+        """#2798: on any other diff each cell runs the pins on its side of
+        :data:`tests._tiers.PROJECT_BOUNDARY`, and between them every pin, once, a pin
+        added later included."""
         self.assertIn(f'{_tiers.PROJECT_PIN_HALF_SELECTOR} "$HALF"', _job('project-tests'))
         self.assertIn('HALF: ${{ matrix.half }}', _job('project-tests'))
-        halves = _project_tests_halves()
-        self.assertEqual(sorted(halves), sorted(str(half) for half in _tiers.PROJECT_HALVES))
-        pins = [_tiers.project_pin_half(int(half)) for half in halves]
+        cells = _project_tests_matrix(docs_only=False)
+        self.assertEqual(cells, {'half': list(_tiers.PROJECT_HALVES)})
+        pins = [_tiers.project_pin_half(half) for half in cells['half']]
         self.assertTrue(all(pins), 'a cell runs no pin')
         flat = [pin for half in pins for pin in half]
         self.assertEqual(len(flat), len(set(flat)), 'a pin runs in two cells')
         self.assertEqual(sorted(flat), list(_tiers.project_pin_paths()), 'a pin falls between cells')
-        for half, chosen in zip(halves, pins):
+        sides = [{'before': _tiers.PROJECT_BOUNDARY}, {'start': _tiers.PROJECT_BOUNDARY}]
+        for half, chosen, side in zip(cells['half'], pins, sides):
             with self.subTest(half=half):
-                side = leg.leg_modules('project', **leg.half_bounds('project', int(half)))
-                self.assertLessEqual({pin[:-len('.py')].replace('/', '.') for pin in chosen}, set(side))
+                self.assertLessEqual({pin[:-len('.py')].replace('/', '.') for pin in chosen},
+                                     set(leg.leg_modules('project', **side)))
         with self.assertRaises(ValueError):
             _tiers.project_pin_half(3)
 
@@ -294,21 +301,9 @@ class TestLegModulesSubpath(unittest.TestCase):
         with self.assertRaises(SystemExit):
             leg.part_bounds('cli', 1)
 
-    def test_a_half_is_the_boundary_from_half_boundaries(self):
-        """#2798: ``--half`` cuts ``project`` where ``project-tests`` cuts its pins."""
-        self.assertEqual(leg.HALF_BOUNDARIES, {'project': _tiers.PROJECT_BOUNDARY})
-        for directory, edge in leg.HALF_BOUNDARIES.items():
-            with self.subTest(directory=directory):
-                self.assertEqual(leg.half_bounds(directory, 1), {'before': edge})
-                self.assertEqual(leg.half_bounds(directory, 2), {'start': edge})
-        for directory, half in (('cli', 1), ('protocols', 1), ('project', 0), ('project', 3)):
-            with self.subTest(directory=directory, half=half), self.assertRaises(SystemExit):
-                leg.half_bounds(directory, half)
-
     def test_a_named_cut_and_another_cut_are_refused_together(self):
-        for argv, message in ((['project', '--half', '1', '--from', 'test_a'], '--half sets the boundary'),
-                              (['project', '--part', '2', '--before', 'test_z'], '--part sets the boundary'),
-                              (['project', '--part', '1', '--half', '1'], 'pass one'),
+        for argv, message in ((['project', '--part', '2', '--before', 'test_z'], '--part sets the boundary'),
+                              (['project', '--part', '1', '--from', 'test_a'], '--part sets the boundary'),
                               (['project', '--part', str(len(leg.SHARD_BOUNDARIES['project']) + 2)], 'has parts 1 to')):
             with self.subTest(argv=argv), \
                     unittest.mock.patch('sys.stderr', new_callable=io.StringIO) as err, \
@@ -319,8 +314,7 @@ class TestLegModulesSubpath(unittest.TestCase):
     def test_the_tally_names_the_cut(self):
         """The leg's closing line says which side ran, as it does for ``--exclude``."""
         first, second = leg.SHARD_BOUNDARIES['project'][:2]
-        for argv, expected in ((['project', '--half', '2'], f"(from {leg.HALF_BOUNDARIES['project']}) + "),
-                               (['project', '--part', '1'], f'(before {first}) + '),
+        for argv, expected in ((['project', '--part', '1'], f'(before {first}) + '),
                                (['project', '--part', '2'], f'(from {first}) (before {second}) + ')):
             with self.subTest(argv=argv), \
                     unittest.mock.patch.object(leg, 'build_suite', return_value=unittest.TestSuite()), \

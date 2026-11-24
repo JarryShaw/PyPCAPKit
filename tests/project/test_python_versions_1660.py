@@ -184,6 +184,12 @@ LIGHT = re.compile(r'\$\{\{ fromJSON\((?P<light>needs\.changes\.outputs\.[\w-]+ 
                    r'(?P<cut>needs\.[\w-]+\.outputs\.[\w-]+) \|\| (?P<full>needs\.[\w-]+\.outputs\.[\w-]+)\) \}\}')
 
 
+#: #2916: a matrix written out for a docs-only pull request and for every other run,
+#: ``fromJSON(<docs-only> && '<its matrix>' || '<every other run's>')``, reading no script.
+CLASSIFIED = re.compile(r"\$\{\{ fromJSON\(needs\.changes\.outputs\.code == 'false' && "
+                        r"'(?P<cut>[^']*)' \|\| '(?P<full>[^']*)'\) \}\}")
+
+
 def light_matrix(name: 'str', job_id: 'str') -> 'Optional[re.Match[str]]':
     """Job ``job_id``'s matrix as :data:`LIGHT` reads it, or :data:`None` for a matrix every run expands alike."""
     raw = workflow(name)['jobs'][job_id]['strategy']['matrix']
@@ -195,10 +201,14 @@ def matrix(name: 'str', job_id: 'str', values: 'Optional[dict[str, str]]' = None
     """Job ``job_id``'s ``strategy.matrix``, each expression read from the script.
 
     A :data:`LIGHT` matrix is read as a push to ``main`` expands it, or with
-    ``light`` as a docs-only or test-only pull request does (#2243).
+    ``light`` as a docs-only or test-only pull request does (#2243), and a
+    :data:`CLASSIFIED` one as a push expands it.
 
     """
     raw = workflow(name)['jobs'][job_id]['strategy']['matrix']
+    classified = CLASSIFIED.fullmatch(raw) if isinstance(raw, str) else None
+    if classified is not None and not light:
+        return json.loads(classified.group('full'))
     cut = light_matrix(name, job_id)
     if cut is not None:
         raw = '${{ fromJSON(%s) }}' % cut.group('cut' if light else 'full')
