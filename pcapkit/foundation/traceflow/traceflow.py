@@ -448,46 +448,6 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         """
         _close_files(self._fopen)
 
-    def _write(self, dumper: 'Dumper', value: 'Any', name: 'str', *, hold: 'bool' = True) -> 'None':
-        """Write a frame to a flow's output file, keeping the file open.
-
-        Arguments:
-            dumper: the flow's output dumper
-            value: the frame
-            name: name of the frame's block
-            hold: whether the flow takes more frames, and so whether its file is
-                worth keeping open
-
-        Keeping the file open between frames, through
-        :meth:`~pcapkit.dumpkit.common.DumperBase.open`, saves reopening it per
-        frame (:issue:`2815`). At most
-        :data:`~pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT` files are kept
-        open: past it, the one written least recently is closed, and reopened on
-        its flow's next frame.
-
-        """
-        files = self._fopen
-        key = id(dumper)
-        if key in files:
-            files.move_to_end(key)
-        elif hold and (limit := config.TRACE_OPEN_FILE_LIMIT):
-            while 0 < limit <= len(files):
-                files.popitem(last=False)[1].close()
-            dumper.open()
-            files[key] = dumper
-        dumper(value, name=name)
-
-    def _release(self, dumper: 'Dumper') -> 'None':
-        """Close a flow's output file, once the flow takes no more frames.
-
-        Arguments:
-            dumper: the flow's output dumper
-
-        """
-        held = self._fopen.pop(id(dumper), None)
-        if held is not None:
-            held.close()
-
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -588,6 +548,50 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
         """
         cls.__callback_fn__ = []
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _write(self, dumper: 'Dumper', value: 'Any', name: 'str', *, hold: 'bool' = True) -> 'None':
+        """Write a frame to a flow's output file, keeping the file open.
+
+        Arguments:
+            dumper: the flow's output dumper
+            value: the frame
+            name: name of the frame's block
+            hold: whether the flow takes more frames, and so whether its file is
+                worth keeping open
+
+        Keeping the file open between frames, through
+        :meth:`~pcapkit.dumpkit.common.DumperBase.open`, saves reopening it per
+        frame (:issue:`2815`). At most
+        :data:`~pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT` files are kept
+        open: past it, the one written least recently is closed, and reopened on
+        its flow's next frame.
+
+        """
+        files = self._fopen
+        key = id(dumper)
+        if key in files:
+            files.move_to_end(key)
+        elif hold and (limit := config.TRACE_OPEN_FILE_LIMIT):
+            while 0 < limit <= len(files):
+                files.popitem(last=False)[1].close()
+            dumper.open()
+            files[key] = dumper
+        dumper(value, name=name)
+
+    def _release(self, dumper: 'Dumper') -> 'None':
+        """Close a flow's output file, once the flow takes no more frames.
+
+        Arguments:
+            dumper: the flow's output dumper
+
+        """
+        held = self._fopen.pop(id(dumper), None)
+        if held is not None:
+            held.close()
 
 
 class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):

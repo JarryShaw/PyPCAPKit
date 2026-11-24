@@ -11,6 +11,16 @@ Each group sits under its section comment, spelled as the repo spells it:
 comments also title the member groups on the API pages
 (:ref:`documentation-member-lists`).
 
+**Every class with section comments.** The four comments mean the same in any
+class body that uses section comments, not only a protocol's: every ``@property``
+goes under ``# Properties.``, public methods under ``# Methods.``, every dunder
+under ``# Data models.``, and everything else under ``# Utilities.``, which a class
+adds where it has none. A topic section, such as ``# Defaults.``,
+``# Reassembly.`` or ``# Availability.``, keeps what it gathers. Ruled on
+:issue:`2911`, so one rule files every class and the API pages follow from the
+source; :file:`tests/project/test_section_meanings_2911_unit.py` holds every class
+under :file:`pcapkit/` to it. The order below binds protocol classes.
+
 The Order
 ~~~~~~~~~
 

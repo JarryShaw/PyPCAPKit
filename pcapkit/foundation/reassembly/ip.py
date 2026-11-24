@@ -111,42 +111,6 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
     # Methods.
     ##########################################################################
 
-    def _rectify_header(self, header: 'bytes', proto: 'TransType') -> 'bytes':  # pylint: disable=unused-argument
-        """Adapt a fragment's header into the reassembled datagram's header.
-
-        The base implementation returns ``header`` unchanged, which is what IPv4
-        wants: an IPv4 fragment's header needs nothing removed to describe the
-        datagram it belongs to. IPv6 overrides this, because
-        :rfc:`8200#section-4.5` drops the Fragment header from the reassembled
-        packet and hands its Next Header field to the header before it.
-
-        Args:
-            header: Raw header octets of the fragment at fragment offset zero.
-            proto: Payload protocol type, i.e. ``bufid[3]``.
-
-        Returns:
-            Header octets to keep for the reassembled datagram.
-
-        """
-        return header
-
-    def _header_overhead(self, length: 'int') -> 'int':
-        """Count the header octets that a datagram's length field includes.
-
-        The base implementation counts them all, which is what IPv4 wants: its
-        Total Length is the header's length plus the data's
-        (:rfc:`791#section-3.1`). IPv6 overrides this, because its Payload
-        Length leaves out the fixed header (:rfc:`8200#section-3`).
-
-        Args:
-            length: Length of the datagram's header.
-
-        Returns:
-            How many of those octets the length field counts.
-
-        """
-        return length
-
     def reassembly(self, info: 'Packet[_AT]') -> 'None':
         """Reassembly procedure.
 
@@ -345,144 +309,6 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         elif self._is_complete(buf):
             self._release(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
 
-    def _is_complete(self, buf: 'Buffer[_AT]') -> 'bool':
-        """Tell whether a buffer holds its whole datagram.
-
-        Arguments:
-            buf: buffer to check
-
-        Returns:
-            Whether the total data length is known, the datagram is no longer
-            than it may be, and every 8-octet block up to it is marked
-            received.
-
-        A datagram is no longer than
-        :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` with its header, as
-        :meth:`_header_overhead` counts it: IPv4's Total Length counts the
-        whole header, and IPv6's Payload Length every header but the fixed one.
-        A longer datagram cannot be declared, so it is never complete, and
-        Linux's ``ip_frag_reasm`` and ``ip6_frag_reasm`` reject it too
-        (:issue:`1585`). A fragment with Total Length 0 declares no length, so
-        a buffer it has grown past that bounds the datagram by its own length
-        alone (:issue:`1555`). Checking ``RCVBT`` does not show either bound:
-        slicing it past its end stops silently, so the blocks past the buffer
-        would read as received (:issue:`1566`).
-
-        """
-        TDL = buf.TDL
-        if len(buf.datagram) > IP_MAX_LENGTH:
-            limit = len(buf.datagram)
-        else:
-            limit = IP_MAX_LENGTH - self._header_overhead(len(buf.header))
-        return 0 <= TDL <= limit and all(buf.RCVBT[:(TDL + 7) // 8])
-
-    @staticmethod
-    def _detect_conflicts(rcvbt: 'bytearray', tdl: 'int', datagram: 'bytearray', payload: 'bytearray',
-                           start: 'int', stop: 'int') -> 'list[tuple[int, int]]':
-        """Find where an arriving fragment disagrees with already-received bytes.
-
-        Arguments:
-            rcvbt: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT`
-                as it stood *before* the arriving fragment's own bits are set,
-                i.e. what earlier fragments had already claimed, in 8-octet
-                blocks.
-            tdl: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.TDL`
-                as it stood *before* the arriving fragment's own update --
-                ``-1`` while the final fragment (``MF=0``) has not yet
-                arrived.
-            datagram: this buffer's data buffer, read *before* the arriving
-                fragment's payload is written into it.
-            payload: the arriving fragment's payload.
-            start: absolute octet offset of ``payload[0]`` in ``datagram``,
-                i.e. this fragment's ``FO``.
-            stop: absolute octet offset one past ``payload[-1]``, i.e.
-                ``start + len(payload)``.
-
-        Returns:
-            ``(first, last)`` absolute octet ranges, inclusive, where
-            ``datagram`` and ``payload`` disagree over octets this buffer had
-            already genuinely received.
-
-        :rfc:`791` marks receipt in 8-octet blocks (``RCVBT``), coarser than
-        the octet granularity a conflict needs, so an octet is compared only if
-        its block is marked. A fragment's ``FO`` is *always* a multiple of 8 --
-        it is wire-encoded in 8-octet units -- and the ``RCVBT`` update in
-        :meth:`reassembly` marks the blocks a fragment fills whole. Only the
-        final fragment, held in full, also marks its partial last block, across
-        its full 8 octets even though only the octets up to ``tdl`` were ever
-        actually written, the rest still being ``datagram``'s zero-fill.
-
-        So once ``tdl`` is known, an octet at or past it is excluded here
-        regardless of its block's bit -- comparing it would manufacture a
-        conflict against a byte nothing ever really sent, over a distinction
-        :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need
-        anyway, since it never reports a payload past ``tdl``. Before ``tdl``
-        is known (``tdl < 0``), every set ``rcvbt`` bit came from a non-final
-        fragment's whole block and is exact on its own, with nothing to clip.
-
-        Any other partial last block -- a non-final, truncated or clipped
-        fragment's -- is written but left clear (:issue:`1567`), so its octets
-        are deliberately not compared: a later fragment that overwrites them
-        records no conflict, whether or not it agrees (:issue:`1585`). Telling
-        which octets of a clear block were written would take receipt state per
-        octet, which ``RCVBT`` does not keep. Linux never compares a non-final
-        fragment's partial block either: it trims an IPv4 one to a multiple of
-        8 (``ip_frag_queue``) and drops an IPv6 one (``ip6_frag_queue``).
-
-        """
-        conflicts = []  # type: list[tuple[int, int]]
-        length = stop - start
-        index = 0
-        while index < length:
-            pos = start + index
-            if not (rcvbt[pos // 8] and (tdl < 0 or pos < tdl)):
-                index += 1
-                continue
-            if datagram[pos] == payload[index]:
-                index += 1
-                continue
-            run_stop = index + 1
-            while run_stop < length:
-                pos = start + run_stop
-                if not (rcvbt[pos // 8] and (tdl < 0 or pos < tdl)):
-                    break
-                if datagram[pos] == payload[run_stop]:
-                    break
-                run_stop += 1
-            conflicts.append((start + index, start + run_stop - 1))
-            index = run_stop
-        return conflicts
-
-    @staticmethod
-    def _find_overlap(extent: 'list[tuple[int, int, bool]]', start: 'int',
-                      stop: 'int') -> 'Optional[tuple[int, int, bool]]':
-        """Find a merged fragment that an arriving one overlaps.
-
-        Arguments:
-            extent: this buffer's
-                :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.extent`,
-                sorted and pairwise disjoint.
-            start: the arriving fragment's first octet, i.e. its ``FO``.
-            stop: one past the arriving fragment's last octet.
-
-        Returns:
-            The extent of a merged fragment sharing an octet with the arriving
-            one, or :data:`None` if none does.
-
-        Since the extents are disjoint, only the last one starting at or before
-        ``start`` and the first one starting after it can reach the arriving
-        fragment.
-
-        """
-        if stop <= start:
-            return None
-        after = bisect.bisect_right(extent, (start, sys.maxsize, True))
-        if after and extent[after - 1][1] > start:
-            return extent[after - 1]
-        if after < len(extent) and extent[after][0] < stop:
-            return extent[after]
-        return None
-
     def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
                checked: 'bool' = False, expired: 'bool' = False,
                overlap: 'bool' = False, store: 'bool' = False) -> 'list[Datagram[_AT]]':
@@ -638,3 +464,181 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             ret.append(packet)
 
         return self._notify(ret, store=store)
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _rectify_header(self, header: 'bytes', proto: 'TransType') -> 'bytes':  # pylint: disable=unused-argument
+        """Adapt a fragment's header into the reassembled datagram's header.
+
+        The base implementation returns ``header`` unchanged, which is what IPv4
+        wants: an IPv4 fragment's header needs nothing removed to describe the
+        datagram it belongs to. IPv6 overrides this, because
+        :rfc:`8200#section-4.5` drops the Fragment header from the reassembled
+        packet and hands its Next Header field to the header before it.
+
+        Args:
+            header: Raw header octets of the fragment at fragment offset zero.
+            proto: Payload protocol type, i.e. ``bufid[3]``.
+
+        Returns:
+            Header octets to keep for the reassembled datagram.
+
+        """
+        return header
+
+    def _header_overhead(self, length: 'int') -> 'int':
+        """Count the header octets that a datagram's length field includes.
+
+        The base implementation counts them all, which is what IPv4 wants: its
+        Total Length is the header's length plus the data's
+        (:rfc:`791#section-3.1`). IPv6 overrides this, because its Payload
+        Length leaves out the fixed header (:rfc:`8200#section-3`).
+
+        Args:
+            length: Length of the datagram's header.
+
+        Returns:
+            How many of those octets the length field counts.
+
+        """
+        return length
+
+    def _is_complete(self, buf: 'Buffer[_AT]') -> 'bool':
+        """Tell whether a buffer holds its whole datagram.
+
+        Arguments:
+            buf: buffer to check
+
+        Returns:
+            Whether the total data length is known, the datagram is no longer
+            than it may be, and every 8-octet block up to it is marked
+            received.
+
+        A datagram is no longer than
+        :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` with its header, as
+        :meth:`_header_overhead` counts it: IPv4's Total Length counts the
+        whole header, and IPv6's Payload Length every header but the fixed one.
+        A longer datagram cannot be declared, so it is never complete, and
+        Linux's ``ip_frag_reasm`` and ``ip6_frag_reasm`` reject it too
+        (:issue:`1585`). A fragment with Total Length 0 declares no length, so
+        a buffer it has grown past that bounds the datagram by its own length
+        alone (:issue:`1555`). Checking ``RCVBT`` does not show either bound:
+        slicing it past its end stops silently, so the blocks past the buffer
+        would read as received (:issue:`1566`).
+
+        """
+        TDL = buf.TDL
+        if len(buf.datagram) > IP_MAX_LENGTH:
+            limit = len(buf.datagram)
+        else:
+            limit = IP_MAX_LENGTH - self._header_overhead(len(buf.header))
+        return 0 <= TDL <= limit and all(buf.RCVBT[:(TDL + 7) // 8])
+
+    @staticmethod
+    def _detect_conflicts(rcvbt: 'bytearray', tdl: 'int', datagram: 'bytearray', payload: 'bytearray',
+                           start: 'int', stop: 'int') -> 'list[tuple[int, int]]':
+        """Find where an arriving fragment disagrees with already-received bytes.
+
+        Arguments:
+            rcvbt: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT`
+                as it stood *before* the arriving fragment's own bits are set,
+                i.e. what earlier fragments had already claimed, in 8-octet
+                blocks.
+            tdl: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.TDL`
+                as it stood *before* the arriving fragment's own update --
+                ``-1`` while the final fragment (``MF=0``) has not yet
+                arrived.
+            datagram: this buffer's data buffer, read *before* the arriving
+                fragment's payload is written into it.
+            payload: the arriving fragment's payload.
+            start: absolute octet offset of ``payload[0]`` in ``datagram``,
+                i.e. this fragment's ``FO``.
+            stop: absolute octet offset one past ``payload[-1]``, i.e.
+                ``start + len(payload)``.
+
+        Returns:
+            ``(first, last)`` absolute octet ranges, inclusive, where
+            ``datagram`` and ``payload`` disagree over octets this buffer had
+            already genuinely received.
+
+        :rfc:`791` marks receipt in 8-octet blocks (``RCVBT``), coarser than
+        the octet granularity a conflict needs, so an octet is compared only if
+        its block is marked. A fragment's ``FO`` is *always* a multiple of 8 --
+        it is wire-encoded in 8-octet units -- and the ``RCVBT`` update in
+        :meth:`reassembly` marks the blocks a fragment fills whole. Only the
+        final fragment, held in full, also marks its partial last block, across
+        its full 8 octets even though only the octets up to ``tdl`` were ever
+        actually written, the rest still being ``datagram``'s zero-fill.
+
+        So once ``tdl`` is known, an octet at or past it is excluded here
+        regardless of its block's bit -- comparing it would manufacture a
+        conflict against a byte nothing ever really sent, over a distinction
+        :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need
+        anyway, since it never reports a payload past ``tdl``. Before ``tdl``
+        is known (``tdl < 0``), every set ``rcvbt`` bit came from a non-final
+        fragment's whole block and is exact on its own, with nothing to clip.
+
+        Any other partial last block -- a non-final, truncated or clipped
+        fragment's -- is written but left clear (:issue:`1567`), so its octets
+        are deliberately not compared: a later fragment that overwrites them
+        records no conflict, whether or not it agrees (:issue:`1585`). Telling
+        which octets of a clear block were written would take receipt state per
+        octet, which ``RCVBT`` does not keep. Linux never compares a non-final
+        fragment's partial block either: it trims an IPv4 one to a multiple of
+        8 (``ip_frag_queue``) and drops an IPv6 one (``ip6_frag_queue``).
+
+        """
+        conflicts = []  # type: list[tuple[int, int]]
+        length = stop - start
+        index = 0
+        while index < length:
+            pos = start + index
+            if not (rcvbt[pos // 8] and (tdl < 0 or pos < tdl)):
+                index += 1
+                continue
+            if datagram[pos] == payload[index]:
+                index += 1
+                continue
+            run_stop = index + 1
+            while run_stop < length:
+                pos = start + run_stop
+                if not (rcvbt[pos // 8] and (tdl < 0 or pos < tdl)):
+                    break
+                if datagram[pos] == payload[run_stop]:
+                    break
+                run_stop += 1
+            conflicts.append((start + index, start + run_stop - 1))
+            index = run_stop
+        return conflicts
+
+    @staticmethod
+    def _find_overlap(extent: 'list[tuple[int, int, bool]]', start: 'int',
+                      stop: 'int') -> 'Optional[tuple[int, int, bool]]':
+        """Find a merged fragment that an arriving one overlaps.
+
+        Arguments:
+            extent: this buffer's
+                :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.extent`,
+                sorted and pairwise disjoint.
+            start: the arriving fragment's first octet, i.e. its ``FO``.
+            stop: one past the arriving fragment's last octet.
+
+        Returns:
+            The extent of a merged fragment sharing an octet with the arriving
+            one, or :data:`None` if none does.
+
+        Since the extents are disjoint, only the last one starting at or before
+        ``start`` and the first one starting after it can reach the arriving
+        fragment.
+
+        """
+        if stop <= start:
+            return None
+        after = bisect.bisect_right(extent, (start, sys.maxsize, True))
+        if after and extent[after - 1][1] > start:
+            return extent[after - 1]
+        if after < len(extent) and extent[after][0] < stop:
+            return extent[after]
+        return None

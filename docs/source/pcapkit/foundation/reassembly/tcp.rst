@@ -24,9 +24,11 @@ which reconstructs fragmented TCP packets back to origin.
    .. rubric:: Methods
 
    .. automethod:: reassembly
+   .. automethod:: submit
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_ports
-   .. automethod:: submit
 
 Algorithm
 =========

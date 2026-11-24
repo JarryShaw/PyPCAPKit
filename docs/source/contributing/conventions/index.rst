@@ -22,7 +22,8 @@ House Conventions
      package, modules and classes are named and imported, and how quietly a
      next-layer fallback keeps a refused layer as
      :class:`~pcapkit.protocols.misc.raw.protocol.Raw`;
-   * :ref:`protocol-member-order` -- the order of members in a protocol class body;
+   * :ref:`protocol-member-order` -- the order of members in a protocol class body,
+     and the section comment each member of any class sits under;
    * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
    * :ref:`process` -- the repository rather than any of its code;
    * :ref:`documentation` -- the prose itself, on these pages and in the API

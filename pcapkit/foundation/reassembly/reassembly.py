@@ -288,70 +288,6 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
         """
 
-    # submit a buffer that has left the buffers for good
-    def _release(self, buf: '_BT', **kwargs: 'Any') -> 'list[_DT]':
-        """Submit a buffer that has left :attr:`_buffer` for good, storing its
-        datagrams exactly once.
-
-        Arguments:
-            buf: buffer to submit
-            **kwargs: keyword arguments for :meth:`submit`, which is also
-                passed ``store``
-
-        Returns:
-            The datagrams :meth:`submit` returned, now in :attr:`_dtgram`.
-
-        A :meth:`submit` that passes ``store`` on to :meth:`_notify` has stored
-        them before its callbacks ran. One that drops ``store`` stored none,
-        so they are stored here, after its callbacks.
-
-        .. versionadded:: 1.7.0
-
-        """
-        size = len(self._dtgram)
-        datagrams = self.submit(buf, store=True, **kwargs)
-        # NOTE: compared by identity, so only the very datagrams ``submit`` returned count as
-        # stored, even when a callback appended after them.
-        stored = self._dtgram[size:size + len(datagrams)]
-        if len(stored) < len(datagrams) or any(kept is not datagram
-                                                for (kept, datagram) in zip(stored, datagrams)):
-            self._dtgram.extend(datagrams)
-        return datagrams
-
-    # run the callbacks on submitted datagrams
-    def _notify(self, datagrams: 'list[_DT]', *, store: 'bool' = False) -> 'list[_DT]':
-        """Run each callback on the datagrams :meth:`submit` built.
-
-        Arguments:
-            datagrams: datagrams to report
-            store: whether their buffer has left :attr:`_buffer` for good, so
-                they join :attr:`_dtgram` before the callbacks run, and one
-                that raises cannot lose them
-
-        Returns:
-            ``datagrams``, for :meth:`submit` to return.
-
-        Every callback runs, through
-        :func:`~pcapkit.utilities.callbacks.run_callbacks`: the first
-        :exc:`Exception` one raises propagates once the last has run. While they
-        run, :meth:`fetch` returns what :attr:`_dtgram` holds, so a callback
-        reading :attr:`datagram` does not run them again.
-
-        .. versionadded:: 1.7.0
-
-        """
-        # NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).
-        if store:
-            self._dtgram.extend(datagrams)
-
-        # NOTE: restored rather than cleared, as a callback feeding a packet nests a run (#2867).
-        held, self._flag_c = self._flag_c, True
-        try:
-            run_callbacks(self.__callback_fn__, datagrams, logger=logger, subject=f'{self.name} reassembly')
-        finally:
-            self._flag_c = held
-        return datagrams
-
     # abandon timed-out buffers
     def expire(self, timestamp: 'float') -> 'list[_DT]':
         """Abandon every buffer whose reassembly timeout has elapsed.
@@ -652,6 +588,74 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
         """
         cls.__callback_fn__ = []
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    # submit a buffer that has left the buffers for good
+    def _release(self, buf: '_BT', **kwargs: 'Any') -> 'list[_DT]':
+        """Submit a buffer that has left :attr:`_buffer` for good, storing its
+        datagrams exactly once.
+
+        Arguments:
+            buf: buffer to submit
+            **kwargs: keyword arguments for :meth:`submit`, which is also
+                passed ``store``
+
+        Returns:
+            The datagrams :meth:`submit` returned, now in :attr:`_dtgram`.
+
+        A :meth:`submit` that passes ``store`` on to :meth:`_notify` has stored
+        them before its callbacks ran. One that drops ``store`` stored none,
+        so they are stored here, after its callbacks.
+
+        .. versionadded:: 1.7.0
+
+        """
+        size = len(self._dtgram)
+        datagrams = self.submit(buf, store=True, **kwargs)
+        # NOTE: compared by identity, so only the very datagrams ``submit`` returned count as
+        # stored, even when a callback appended after them.
+        stored = self._dtgram[size:size + len(datagrams)]
+        if len(stored) < len(datagrams) or any(kept is not datagram
+                                                for (kept, datagram) in zip(stored, datagrams)):
+            self._dtgram.extend(datagrams)
+        return datagrams
+
+    # run the callbacks on submitted datagrams
+    def _notify(self, datagrams: 'list[_DT]', *, store: 'bool' = False) -> 'list[_DT]':
+        """Run each callback on the datagrams :meth:`submit` built.
+
+        Arguments:
+            datagrams: datagrams to report
+            store: whether their buffer has left :attr:`_buffer` for good, so
+                they join :attr:`_dtgram` before the callbacks run, and one
+                that raises cannot lose them
+
+        Returns:
+            ``datagrams``, for :meth:`submit` to return.
+
+        Every callback runs, through
+        :func:`~pcapkit.utilities.callbacks.run_callbacks`: the first
+        :exc:`Exception` one raises propagates once the last has run. While they
+        run, :meth:`fetch` returns what :attr:`_dtgram` holds, so a callback
+        reading :attr:`datagram` does not run them again.
+
+        .. versionadded:: 1.7.0
+
+        """
+        # NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).
+        if store:
+            self._dtgram.extend(datagrams)
+
+        # NOTE: restored rather than cleared, as a callback feeding a packet nests a run (#2867).
+        held, self._flag_c = self._flag_c, True
+        try:
+            run_callbacks(self.__callback_fn__, datagrams, logger=logger, subject=f'{self.name} reassembly')
+        finally:
+            self._flag_c = held
+        return datagrams
 
 
 class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]):

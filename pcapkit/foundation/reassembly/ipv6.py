@@ -153,7 +153,7 @@ class IPv6(IP):
     __discard_overlap__ = True
 
     ##########################################################################
-    # Methods.
+    # Utilities.
     ##########################################################################
 
     def _rectify_header(self, header: 'bytes', proto: 'TransType') -> 'bytes':

@@ -17,11 +17,12 @@ origin, using the :rfc:`791` procedure described in :doc:`index`.
    .. rubric:: Methods
 
    .. automethod:: reassembly
+   .. automethod:: submit
+
+   .. rubric:: Utilities
 
    .. automethod:: _detect_conflicts
    .. automethod:: _find_overlap
-
-   .. automethod:: submit
 
 Data Models
 -----------

@@ -23,13 +23,14 @@ packets.
    .. automethod:: dump
    .. automethod:: make_bufid
    .. automethod:: trace
+   .. automethod:: finish
+   .. automethod:: submit
+
+   .. rubric:: Utilities
 
    .. automethod:: _unique_label
    .. automethod:: _make_segment
    .. automethod:: _ended
-
-   .. automethod:: finish
-   .. automethod:: submit
 
    .. rubric:: Properties
 
