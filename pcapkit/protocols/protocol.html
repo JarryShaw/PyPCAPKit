@@ -480,6 +480,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -795,7 +796,8 @@ every layer’s <code class="docutils literal notranslate"><span class="pre">reg
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Protocol registry number.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Packet payload.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Keyword arguments for the payload’s constructor, such as
+the stops and context a frame’s next layer is parsed with.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -812,7 +814,8 @@ A refusal it absorbs is quiet, any other error is logged at
 <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a>, and the failed parse’s warnings are dropped,
 as <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._analyze_next_layer" title="pcapkit.protocols.protocol.Protocol._analyze_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_analyze_next_layer()</span></code></a> describes. An empty payload is
 <a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, as in a
-frame.</p>
+frame. A payload past a stop this class meets is <code class="docutils literal notranslate"><span class="pre">Raw</span></code>, as a frame
+keeps the next layer of the layer it stops at.</p>
 </dd>
 </dl>
 <div class="versionchanged">
@@ -821,7 +824,9 @@ rather than the octets the failed parse left unread (<a class="extlink-issue ref
 Its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is <code class="docutils literal notranslate"><span class="pre">proto</span></code>, a refusal it absorbs is quiet, any
 other error is logged at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a>, and the failed
 parse’s warnings are dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>). An empty payload is
-<code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
+<code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>). A payload past a stop is <code class="docutils literal notranslate"><span class="pre">Raw</span></code>, and
+the parse gets <code class="docutils literal notranslate"><span class="pre">proto</span></code> as <code class="docutils literal notranslate"><span class="pre">alias</span></code>, as a frame’s next layer does
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>).</p>
 </div>
 </dd></dl>
 
@@ -2191,8 +2196,9 @@ it and the rest of the frame are kept as
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>klass</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – protocol class the payload was dispatched to</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – payload to parse</p></li>
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – code the payload was dispatched on, the fallback’s <code class="docutils literal notranslate"><span class="pre">alias</span></code>
-unless <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> gives one</p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – code the payload was dispatched on, the <code class="docutils literal notranslate"><span class="pre">alias</span></code> of the parse
+and its fallback unless <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> gives one, as a frame’s next
+layer takes it</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – keyword arguments for <code class="docutils literal notranslate"><span class="pre">klass</span></code>’s constructor</p></li>
 </ul>
 </dd>

@@ -473,6 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -1138,6 +1139,12 @@
         <span class="c1">#: float: Reassembly timeout in seconds, on the capture's clock.</span>
         <span class="c1">#: :data:`math.inf` disables expiry.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="c1">#: dict[str, Any]: Keyword arguments a reassembled payload's parse takes:</span>
+        <span class="c1">#: the stops and context the engine parses its frames with, as</span>
+        <span class="c1">#: :meth:`EngineBase._setup_reassembly</span>
+        <span class="c1">#: &lt;pcapkit.foundation.engines.engine.EngineBase._setup_reassembly&gt;`</span>
+        <span class="c1">#: hands them over (:issue:`2933`).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse_keywords</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
 
         <span class="c1">#: dict[_IT, _BT]: Dict buffer field. This field is used to</span>
         <span class="c1">#: store reassembled packets in the form of ``{bufid: buffer}``.</span>

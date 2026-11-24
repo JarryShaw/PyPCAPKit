@@ -1,0 +1,594 @@
+1.7.0 -- unreleased
+===================
+
+1.7.0 adds dissectors for PPP, PPPoE and DNS, decodes MLD in ICMPv6, SCTP's
+I-DATA, FORWARD TSN and PAD chunks and the TLS extensions a current handshake
+carries, writes PCAP-NG, and lets an extraction feed any registered reassembler
+and flow tracer, not the built-ins alone. Its breaking changes, each marked
+**a breaking change to** and ending with how to migrate, are mostly to public
+signatures: extraction takes grouped options, and the reassembly, flow-tracing
+and registry interfaces take keyword-only parameters, one name per concept.
+
+pcapkit.corekit
+---------------
+
+Added
+~~~~~
+
+* :mod:`pcapkit.corekit.schema.extlen`, whose
+  :func:`~pcapkit.corekit.schema.extlen.ext_len_to_octets` and
+  :func:`~pcapkit.corekit.schema.extlen.octets_to_ext_len` convert a length field
+  counting 8-octet units past the first 8 (:rfc:`6564#section-4`) -- the IPv6
+  extension headers' Hdr Ext Len, MH's Header Len and HIP's Header Length -- to a
+  header's octets and back, rounding down (:issue:`2854`, :pr:`2871`). Those
+  headers and IPv6 reassembly convert through it, reading and writing the same
+  octets as before.
+
+Changed
+~~~~~~~
+
+* **a breaking change to** where constants and helpers live, each
+  moved with no re-export at its old path (:issue:`2883`, :issue:`2896`,
+  :issue:`2897`, :pr:`2895`, :pr:`2903`, :pr:`2919`). A format constant that
+  code outside its own protocol or family reads moves to a topic module of
+  :mod:`pcapkit.corekit.const`, a package that exports nothing itself:
+  :mod:`~pcapkit.corekit.const.capture` for the PCAP and PCAP-NG ones,
+  :mod:`~pcapkit.corekit.const.ipheader` for the IPv4, IPv6 and AH ones, and
+  :mod:`~pcapkit.corekit.const.tcpheader` for TCP's. A constant only a protocol
+  package's own modules read moves to a ``const`` module in that package, and
+  one a family shares to its base package's, as
+  :mod:`pcapkit.protocols.application.ssl.const` holds those of TLS and DTLS.
+  :func:`~pcapkit.corekit.schema.byteorder.family_byteorder` moves from
+  ``pcapkit.protocols.link.loopback.protocol`` to
+  :mod:`pcapkit.corekit.schema.byteorder`. The ``versionremoved`` note of each
+  old module in the API reference lists each name that left it and its new
+  home. A name its old module still imports for its own use resolves there
+  incidentally; the rest raise :exc:`ImportError`. To migrate, import each name
+  from its new module, as
+  ``from pcapkit.corekit.const.capture import MAGIC_NUMBER``.
+
+Fixed
+~~~~~
+
+* an :class:`~pcapkit.corekit.infoclass.Info` could iterate, print
+  and export its fields in an earlier instance's order on PyPy, which lays out a
+  new instance's ``__dict__`` that way, and a
+  :class:`~pcapkit.protocols.schema.Schema` built by
+  :meth:`~pcapkit.protocols.schema.Schema.from_dict` in the order the mapping
+  gave them, or on PyPy in an earlier instance's. An ``Info`` records the order
+  its fields were first set in as ``__keys__``, a replaced field keeping its
+  place, and a ``Schema`` lists its fields in
+  :attr:`~pcapkit.protocols.schema.Schema.__fields__` order however it was
+  built, then any other key it stores; iteration, ``repr``, ``str`` and
+  ``to_dict()`` follow that order on every interpreter (:issue:`2829`,
+  :issue:`2831`, :pr:`2830`, :pr:`2832`).
+* the first
+  :meth:`Info.from_dict <pcapkit.corekit.infoclass.Info.from_dict>` of an ``Info``
+  class could raise ``RuntimeError: dictionary changed size during iteration``
+  when another thread's first call for that class, or a first import, wrote a
+  namespace it was copying, on an interpreter that switches threads part way
+  through such a copy, which CPython does not. Raised under IPv4's parse, it kept
+  an Ethernet frame's payload as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`;
+  a GraalPy failure that kept such a payload is inferred to be this race. A
+  class's nested types now resolve and cache under
+  :data:`~pcapkit.utilities.importlib.import_lock`, which every first import
+  already holds (:issue:`2870`, :pr:`2917`).
+
+pcapkit.dumpkit
+---------------
+
+Added
+~~~~~
+
+* :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO`, a PCAP-NG writer, as the
+  ``pcapng`` format, with the ``.pcapng`` extension, of an extraction's output, a
+  flow tracer's output and the command line's ``--format`` (:issue:`2835`,
+  :pr:`2864`). It writes one Section Header Block, an Interface Description Block
+  per distinct interface and an Enhanced Packet Block per frame, without
+  dissecting the frame again, and falls back to JSON under the same engines as
+  the PCAP writer. A PCAP-NG frame keeps its interface's options and its own, a
+  Simple or obsolete Packet Block written as an Enhanced Packet Block; Name
+  Resolution, Interface Statistics, Decryption Secrets, custom and journal
+  blocks are not written.
+
+pcapkit.foundation
+------------------
+
+Changed
+~~~~~~~
+
+* **a breaking change to**
+  :class:`~pcapkit.foundation.extraction.Extractor` and
+  :func:`~pcapkit.interface.core.extract`: each takes ``fin``, now required, then
+  keyword-only ``dump``, ``engine``, ``layer``, ``protocol``, ``context``,
+  ``reassembly``, ``traceflow``, ``stream``, ``auto``, ``store`` and ``verbose``
+  (:issue:`2836`, :pr:`2868`). The output, reassembly, flow-tracing and input
+  settings are grouped into the immutable
+  :class:`~pcapkit.foundation.options.DumpOptions`,
+  :class:`~pcapkit.foundation.options.ReassemblyOptions`,
+  :class:`~pcapkit.foundation.options.TraceFlowOptions` and
+  :class:`~pcapkit.foundation.options.StreamOptions` of the new
+  :mod:`pcapkit.foundation.options`, which :mod:`pcapkit` exports too, and
+  ``reassembly`` and ``traceflow`` also take a list of registered names.
+  ``nofile``, ``fout``, ``format``, ``extension``, ``files``, ``ip``,
+  ``ipv4``, ``ipv6``, ``tcp``, ``dtls``, the ``reasm_*``, ``trace_*`` and
+  ``buffer_*`` parameters and ``no_eof`` are removed with no alias, and passing
+  one raises :exc:`TypeError`. Nothing is written without ``dump``, where 1.6.x
+  wrote ``out.txt``, and ``fin`` is opened as named, with no ``.pcap``
+  appended. ``engine`` defaults to ``'default'`` and refuses :data:`None`, which
+  stood for it, with :exc:`~pcapkit.utilities.exceptions.RegistryError`; an
+  unknown ``layer``, an unregistered name or an unknown flow-tracing format
+  raises :exc:`~pcapkit.utilities.exceptions.FormatError`, where an unknown
+  trace format warned and wrote no flow files; and an empty list of names turns
+  its feature off with an :exc:`~pcapkit.utilities.warnings.AttributeWarning`.
+  The ``Extractor.trace`` property is renamed
+  :attr:`Extractor.traceflow <pcapkit.foundation.extraction.Extractor.traceflow>`,
+  with no alias, and
+  :meth:`Extractor.make_name <pcapkit.foundation.extraction.Extractor.make_name>`
+  takes ``(fin, dump)``. The command-line flags are unchanged. To migrate,
+  ``extract('in.pcap', fout='out', format='json', reassembly=True, ipv4=True, trace=True, tcp=True)``,
+  whose ``tcp`` enabled TCP reassembly as well as tracing, becomes
+  ``extract('in.pcap', dump=DumpOptions(fout='out', format='json'), reassembly=['ipv4', 'tcp'], traceflow=['tcp'])``,
+  and ``Extractor.trace`` is read as ``Extractor.traceflow``.
+* **a breaking change to** reassembly: any reassembler registered
+  in
+  :attr:`Extractor.__reassembly__ <pcapkit.foundation.extraction.Extractor.__reassembly__>`
+  can be enabled by name, and is made by
+  :meth:`Extractor.make_reassembly <pcapkit.foundation.extraction.Extractor.make_reassembly>`,
+  for the extractor and for :func:`~pcapkit.interface.core.reassemble`, where
+  IPv4, IPv6 and TCP alone were (:issue:`2814`, :pr:`2825`). An engine feeds
+  each through a :mod:`pcapkit.toolkit` adapter in
+  :attr:`EngineBase.__reassembly__ <pcapkit.foundation.engines.engine.EngineBase.__reassembly__>`,
+  which
+  :meth:`EngineBase.register_reassembly <pcapkit.foundation.engines.engine.EngineBase.register_reassembly>`
+  and :func:`~pcapkit.foundation.registry.foundation.register_engine_reassembly`
+  extend, and drops one with no adapter with an
+  :exc:`~pcapkit.utilities.warnings.AttributeWarning`; the PyShark, PyPCAP and
+  pcap-ct engines ship none, and the new
+  :func:`~pcapkit.toolkit.pyshark.packet2timestamp` reads PyShark's clock
+  (:issue:`2893`, :pr:`2901`). Every enabled reassembler is advanced to each
+  frame's timestamp through
+  :meth:`Reassembly.advance <pcapkit.foundation.reassembly.reassembly.Reassembly.advance>`,
+  so a stalled IPv4 or IPv6 buffer reports
+  :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.Completion.TIMEOUT>`
+  once a later frame passes its timeout, where it reported ``PARTIAL``.
+  :class:`~pcapkit.foundation.reassembly.ReassemblyManager` holds the enabled
+  reassemblers by name, where it had a field per built-in, and
+  :class:`~pcapkit.foundation.reassembly.data.ReassemblyData` adds a field per
+  further one. The :mod:`pcapkit.toolkit.pypcap` and
+  :mod:`pcapkit.toolkit.pcap_ct` ``*_reassembly`` stubs take
+  ``(packet, timestamp, *, data_link, count)`` and still raise
+  :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, so a 1.6.x call with
+  ``packet`` alone raises :exc:`TypeError`. The private ``Extractor._ipv4``,
+  ``_ipv6`` and ``_dtls`` are removed. To migrate, treat a ``TIMEOUT`` buffer as
+  incomplete, as a stalled ``PARTIAL`` one was, and test whether
+  ``ReassemblyManager`` holds a reassembler's name rather than whether its field
+  is :data:`None`.
+* **a breaking change to** flow tracing: any flow tracer
+  registered in
+  :attr:`Extractor.__traceflow__ <pcapkit.foundation.extraction.Extractor.__traceflow__>`
+  and named in ``traceflow`` is made and fed, where TCP's alone was, through the
+  new
+  :meth:`Extractor.make_traceflow <pcapkit.foundation.extraction.Extractor.make_traceflow>`,
+  which :func:`~pcapkit.interface.core.trace` uses too (:issue:`2843`,
+  :pr:`2892`, :pr:`2902`). An engine feeds a tracer as it feeds a reassembler,
+  through an adapter in
+  :attr:`EngineBase.__traceflow__ <pcapkit.foundation.engines.engine.EngineBase.__traceflow__>`,
+  which
+  :meth:`EngineBase.register_traceflow <pcapkit.foundation.engines.engine.EngineBase.register_traceflow>`
+  and :func:`~pcapkit.foundation.registry.foundation.register_engine_traceflow`
+  extend; PyPCAP and pcap-ct ship none.
+  :attr:`Extractor.traceflow <pcapkit.foundation.extraction.Extractor.traceflow>`
+  and :class:`~pcapkit.foundation.traceflow.data.TraceFlowData` keep ``tcp``,
+  :data:`None` when TCP is not traced, and add a field per further tracer. An
+  extraction that ends finishes every tracer even when one's ``finish()``
+  raises, re-raising the first error once the last has run. The private
+  ``Extractor._tcp`` is removed. To migrate, a caller tracing TCP alone changes
+  nothing, and a further tracer is named in ``traceflow``, with an adapter
+  registered on each engine that ships none.
+* **a breaking change to** the reassembly and flow-tracing
+  signatures: each class and interface function takes its settings by keyword
+  only, under its class's names (:issue:`2837`, :issue:`2839`, :pr:`2894`).
+  :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` takes ``fout``,
+  ``format``, ``byteorder``, ``nanosecond``, ``bidirectional`` and ``analyze``,
+  ``fout`` and ``format`` defaulting to ``'./tmp'`` and ``'pcap'``, where they
+  were required, and ``analyse`` is renamed ``analyze``.
+  :meth:`TraceFlow.make_fout <pcapkit.foundation.traceflow.traceflow.TraceFlow.make_fout>`'s
+  ``fmt`` is renamed ``format``, keyword-only, and ``TraceFlow.register_dumper``
+  takes ``ext`` by keyword only. ``Reassembly.register`` is renamed
+  :meth:`Reassembly.register_callback <pcapkit.foundation.reassembly.reassembly.Reassembly.register_callback>`,
+  as TraceFlow's is, and ``submit``'s ``timeout`` flag is renamed ``expired``,
+  each with no alias.
+  :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` takes
+  ``timeout``, off by default, so a caller's reassembly timeout now expires DTLS
+  buffers. :class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds the
+  enabled tracers by name, so it has no ``tcp`` when TCP is not traced, where
+  that was :data:`None`. :func:`~pcapkit.interface.core.reassemble` takes
+  ``strict``, ``store`` and ``timeout``, ``strict`` defaulting to :data:`True`,
+  where it was :data:`False`; :func:`~pcapkit.interface.core.trace` takes
+  TraceFlow's keywords and reaches any registered tracer; and both raise
+  :exc:`~pcapkit.utilities.exceptions.RegistryError` for a name that is not a
+  :class:`str`. :func:`~pcapkit.interface.misc.follow_tcp_stream` takes
+  ``fin``, now required, then keyword-only ``verbose``, ``engine`` and
+  ``traceflow``, a :class:`~pcapkit.foundation.options.TraceFlowOptions`, which
+  replaces its trace keywords and ``extension`` with no alias (:pr:`2868`), and
+  ``engine=None`` raises ``RegistryError``, where it stood for ``'default'``. A
+  reassembly class's ``submit`` is passed ``store``, for it to pass on to
+  ``_notify``, which stores a datagram before its callbacks run, and
+  ``expire()`` stores what it returns (:issue:`2856`, :pr:`2866`). To migrate,
+  pass every setting by keyword, rename ``analyse=``, ``fmt=``, ``register()``
+  and ``submit(timeout=...)`` as above, pass ``reassemble()`` ``strict=False``
+  for a 1.6.x call's contiguous payload, have a custom ``submit`` accept
+  ``store`` and pass it on, and do not also extend ``_dtgram`` with what
+  ``expire()`` returns.
+* **a breaking change to** the wrappers of
+  :mod:`pcapkit.foundation.registry`: each takes the entry its classmethod takes
+  as one parameter named after it -- ``protocol``, ``engine``, ``dumper``,
+  ``reassembly``, ``traceflow`` or ``adapter`` -- a class or a
+  :class:`~pcapkit.corekit.module.ModuleDescriptor`, where it also took a module
+  name and a ``class_`` name, and a module name raises
+  :exc:`~pcapkit.utilities.exceptions.RegistryError` (:issue:`2838`,
+  :pr:`2878`). ``register_apptype`` takes its transports as a keyword-only
+  ``transport``, one or a list, where they were trailing positional arguments.
+  :func:`~pcapkit.foundation.registry.foundation.register_reassembly_callback`
+  and :func:`~pcapkit.foundation.registry.foundation.register_traceflow_callback`
+  take a registered name, reaching DTLS and any registered class, and replace
+  ``register_reassembly_ipv4_callback``, ``register_reassembly_ipv6_callback``,
+  ``register_reassembly_tcp_callback`` and ``register_traceflow_tcp_callback``,
+  removed with no alias. Every registrar taking a ``meth`` refuses one that is
+  neither a method name nor a tuple of two callables, a list included, with
+  ``RegistryError`` before touching a registry. ``pcapkit.interface.registry``
+  moves to :mod:`pcapkit.corekit.registry`, with no re-export at the old path.
+  To migrate, ``register_ethertype(code, 'pkg.mod', 'Cls')`` becomes
+  ``register_ethertype(code, ModuleDescriptor('pkg.mod', 'Cls'))``,
+  ``register_apptype(code, Cls, 'tcp')`` becomes
+  ``register_apptype(code, Cls, transport='tcp')``, and
+  ``register_reassembly_ipv4_callback(fn)`` becomes
+  ``register_reassembly_callback('ipv4', fn)``.
+* **a breaking change to** the layout of
+  :mod:`pcapkit.foundation.reassembly` and :mod:`pcapkit.foundation.traceflow`:
+  each reassembler -- ``ip``, ``ipv4``, ``ipv6``, ``tcp`` and ``dtls`` -- and the
+  TCP flow tracer is a package holding its class in a ``reassembly`` or
+  ``traceflow`` module and its data models in a ``data`` module, as
+  :mod:`pcapkit.foundation.reassembly.tcp` holds
+  :mod:`~pcapkit.foundation.reassembly.tcp.reassembly` and
+  :mod:`~pcapkit.foundation.reassembly.tcp.data`, following 1.6.0's protocol
+  packages (:issue:`2882`, :pr:`2926`). A package's ``__init__.py`` exports its
+  class and binds each data class as ``Data_<name>``; IPv4 and IPv6 reassembly
+  read IP's. The ``data`` subpackages become the modules
+  :mod:`pcapkit.foundation.reassembly.data` and
+  :mod:`pcapkit.foundation.traceflow.data`, holding the base data models, and
+  their ``IP_*``, ``TCP_*`` and ``DTLS_*`` aliases, the modules they held,
+  ``pcapkit.foundation.reassembly.ip.logger`` and
+  ``pcapkit.foundation.traceflow.tcp.logger`` are removed, with no re-export at
+  any old path; a ``versionremoved`` note in the API reference gives each name
+  that moved. ``IPv4_Reassembly``, ``TCP_TraceFlow`` and the other package
+  exports are unchanged. A reassembly or flow-tracing data model pickled by
+  1.6.x raises :exc:`ModuleNotFoundError` when loaded, as the pickle names its
+  1.6.x module. To migrate,
+  ``from pcapkit.foundation.reassembly.data import TCP_Datagram``, which raises
+  :exc:`ImportError`, becomes
+  ``from pcapkit.foundation.reassembly.tcp import Data_Datagram``, and a pickled
+  data model is regenerated under 1.7.0.
+* a flow tracer keeps each flow's output file open between its
+  frames, where 1.6.x reopened it for every frame, up to
+  :data:`~pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT` files, set by
+  ``PCAPKIT_TRACE_OPEN_FILE_LIMIT``, 64 by default, ``0`` reopening per frame
+  and ``-1`` for no limit; past it the file written least recently is closed
+  (:issue:`2815`, :pr:`2821`). Each frame is flushed, so the files are
+  byte-identical. A flow's file closes when the flow is finalised, before its
+  callbacks run, at ``finish()``, on an error tracing a frame, and when the
+  tracer is collected. :class:`~pcapkit.dumpkit.pcap.PCAPIO` and the writers
+  :func:`~pcapkit.dumpkit.common.make_dumper` builds gain ``open()`` and
+  ``close()``. Tracing ``http.pcap`` to PCAP took about 31% less time, measured
+  on the tracer alone; JSON output, dominated by serialising, gains nothing
+  measurable.
+
+Fixed
+~~~~~
+
+* a reassembly or flow-tracing callback that raised lost what it
+  was handed: a TCP flow dropped out of the tracer's ``index`` and
+  ``submit()`` (:issue:`2827`, :pr:`2845`), and a reassembled datagram out of
+  ``datagram`` (:issue:`2856`, :pr:`2866`), each stored only once its
+  callbacks returned. Each is stored first, and the exception still
+  propagates. A unidirectional flow ending on a FIN ran its callbacks before
+  that frame was written, so a callback found one frame fewer in the file than
+  the index listed, and a raising one left the file short; the frame is
+  written first. A raising callback no longer skips the ones after it: every
+  reassembly and trace callback runs, the first :exc:`Exception` re-raised once
+  the last has run and later ones logged at debug, through the new
+  :func:`~pcapkit.utilities.callbacks.run_callbacks`, while any other
+  :exc:`BaseException` still stops them (:issue:`2855`, :issue:`2881`,
+  :pr:`2875`, :pr:`2884`). A reassembly callback reading ``datagram`` while
+  another buffer was outstanding recursed until :exc:`RecursionError`, and gets
+  the datagrams stored so far (:issue:`2867`, :pr:`2884`). An ``auto=False``
+  extraction whose trace callback raised at the end of the capture left its
+  input file open and its engine unclosed; both are released, and the
+  callback's error propagates (:issue:`2857`, :pr:`2891`).
+* :meth:`Extractor.register_engine <pcapkit.foundation.extraction.Extractor.register_engine>`,
+  :meth:`Extractor.register_reassembly <pcapkit.foundation.extraction.Extractor.register_reassembly>`,
+  :meth:`Extractor.register_traceflow <pcapkit.foundation.extraction.Extractor.register_traceflow>`
+  and their :mod:`pcapkit.foundation.registry` wrappers stored a name as given,
+  while every lookup lower-cases it, so an engine registered through
+  ``register_engine('MyEngine', ...)`` could not be selected. Each stores the
+  name lower-cased, and refuses a name that is not a :class:`str` with
+  :exc:`~pcapkit.utilities.exceptions.RegistryError`, as
+  :meth:`Extractor.make_reassembly <pcapkit.foundation.extraction.Extractor.make_reassembly>`
+  and :func:`~pcapkit.interface.core.reassemble` do (:issue:`2879`, :pr:`2891`).
+* the API page of the TCP flow tracer,
+  :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP`, documents its ``name``
+  and ``protocol`` properties, which 1.6.x left off it, as
+  :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta`'s class
+  properties of the same names hide them from autodoc (:issue:`2910`).
+* reassembled payloads are parsed with the extraction's ``layer`` and
+  ``protocol`` stops and its ``context``, as the frame path parses them: an
+  ESP datagram reassembled over IP decrypts with ``extract(context=...)``, and
+  a stop applies to the reassembled payload and at the reassembled layer.
+  With neither set nothing changes, and the third-party engines, which ignore
+  stops and context for their frames, ignore them here too. A reassembled TCP
+  payload kept :class:`~pcapkit.protocols.misc.raw.protocol.Raw` now records
+  its port as ``protocol`` rather than ``None`` (:issue:`2933`, :pr:`2940`).
+
+pcapkit.protocols
+-----------------
+
+Added
+~~~~~
+
+* :class:`~pcapkit.protocols.link.ppp.protocol.PPP` (:rfc:`1661`,
+  :rfc:`1662`) and :class:`~pcapkit.protocols.link.pppoe.protocol.PPPoE`
+  (:rfc:`2516`), dissectors for the Point-to-Point Protocol and PPP over Ethernet
+  (:issue:`2817`, :pr:`2828`). PCAP and PCAP-NG frames of ``LINKTYPE_PPP`` (9)
+  and ``LINKTYPE_PPP_HDLC`` (50), EtherType ``0x880B``, a PPPoE session packet
+  and an L2TPv2 data message, whose payload 1.6.x kept as
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, dispatch to PPP; frames of
+  ``LINKTYPE_PPP_ETHER`` (51) and EtherTypes ``0x8863`` and ``0x8864`` dispatch
+  to PPPoE. PPP reads the Address and Control fields where the frame carries
+  them and a one-octet Protocol field under Protocol-Field-Compression, refuses
+  Cisco HDLC under ``LINKTYPE_PPP_HDLC``, and dispatches IPv4 and IPv6 onward;
+  LCP, IPCP, IPv6CP, PAP and CHAP are read at header level, their Code,
+  Identifier and Length, the rest kept as ``Raw``.
+  :func:`~pcapkit.foundation.registry.protocols.link.register_ppp` registers a
+  dissector for a further protocol number, and
+  :func:`~pcapkit.foundation.registry.protocols.link.register_ppp_control` a
+  control-packet parser. PPPoE reads a discovery packet's tags and a session
+  packet's PPP frame, telling the stages apart by the Code, keeps the octets past
+  its Length as ``trailer``, and refuses a Length ending inside a tag; its
+  ``make()`` refuses a length or tag it would not read back. The protocol
+  numbers, codes and tags are :mod:`pcapkit.const.ppp` and
+  :mod:`pcapkit.const.pppoe`, crawled from IANA and exported as
+  ``PPP_Protocol``, ``PPPoE_Code`` and ``PPPoE_Tag``.
+* MLDv1 (:rfc:`2710`) and MLDv2 (:rfc:`9777`) in
+  :class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6`: types 130, 131,
+  132 and 143 decode into
+  :class:`~pcapkit.protocols.internet.icmpv6.data.MLDv1`,
+  :class:`~pcapkit.protocols.internet.icmpv6.data.MLDv2Query` and
+  :class:`~pcapkit.protocols.internet.icmpv6.data.MLDv2Report`, an MLDv2
+  Report's records as :class:`~pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord`
+  with IGMPv3's record types, and rebuild byte-exact, whole or cut
+  (:issue:`2812`, :pr:`2818`). A Query of 28 octets or more is MLDv2's;
+  ``make()`` takes a Query's ``version`` and refuses MLDv2's fields in an MLDv1
+  Query. :func:`~pcapkit.corekit.schema.shortread.hoist_short_read` records on
+  the header a cut inside an MLDv2 or IGMPv3 body.
+* :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.compute_upper`,
+  through which :meth:`IPv6.make <pcapkit.protocols.internet.ipv6.protocol.IPv6.make>`
+  computes the pending checksum of an upper layer behind any chain of extension
+  headers (:issue:`2824`, :pr:`2850`), and
+  :meth:`IPv4.make <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>` one
+  behind one or more Authentication Headers (:issue:`2861`, :pr:`2885`). 1.6.x
+  computed it only for a payload directly after the IP header, so
+  ``IPv4(protocol=51, payload=AH(next=6, payload=TCP(...)))`` left TCP's at
+  ``0000`` and verified ``INVALID``. The pseudo-header is the one the receiver
+  derives from the packet parsed back: a Home Address option's address as the
+  source (:rfc:`6275#section-6.1.1`), and the final destination of a Routing
+  header (:rfc:`8200#section-8.1`) or an IPv4 source route. Where the packet
+  gives none, as for any fragment but an atomic one, the checksum stays pending,
+  quietly; a checksum given is kept.
+* SCTP chunk and parameter types that 1.6.x parsed as unknown
+  (:issue:`2811`, :pr:`2823`): the I-DATA and I-FORWARD-TSN chunks
+  (:rfc:`8260`), the FORWARD TSN chunk and Forward-TSN-Supported parameter
+  (:rfc:`3758`), the PAD chunk and Padding parameter (:rfc:`4820`), and the
+  Supported Extensions parameter (:rfc:`5061`), each read and built by
+  :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`. The first DATA or
+  I-DATA chunk picks the next layer by its PPID. I-DATA's PPID/FSN field is the
+  PPID with ``B`` set and the FSN otherwise, and the maker refuses either out of
+  place. A FORWARD TSN or I-FORWARD-TSN Length that leaves part of a stream entry
+  raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
+* :class:`~pcapkit.protocols.application.dns.protocol.DNS`, a
+  dissector for the Domain Name System at TCP and UDP port 53 (:issue:`2816`,
+  :pr:`2826`). It reads the header, the four sections, the RDATA of A, NS,
+  CNAME, SOA, PTR, MX, TXT, AAAA, SRV and CAA records, and the EDNS(0) OPT
+  pseudo-record (:rfc:`6891`) with its ``edns-client-subnet``, ``COOKIE``,
+  ``edns-tcp-keepalive`` and Extended DNS Error options; any other type or
+  option, or RDATA its decoder cannot read exactly, is kept as octets. Each name
+  records the compression it was read with, so a message rebuilds byte-exact,
+  and ``make()`` writes names plain or, with ``compress=True``, compressed. Over
+  TCP, ``framed=True`` reads and writes the two-octet length field, and a parse
+  not given it takes the framed reading where that decodes better; a further
+  whole message in the segment is another ``DNS`` layer, the previous one's
+  payload.
+  :func:`~pcapkit.foundation.registry.protocols.application.register_dns_rdata`
+  and :func:`~pcapkit.foundation.registry.protocols.application.register_dns_option`
+  register a further RR type or option. The classes, RR types, opcodes, RCODEs
+  and option codes are :mod:`pcapkit.const.dns`, crawled from IANA and exported
+  as ``DNS_RRClass``, ``DNS_RRType``, ``DNS_Opcode``, ``DNS_RCode`` and
+  ``DNS_Option``.
+* decoding of the TLS extensions a current ``ClientHello``,
+  ``ServerHello``, ``HelloRetryRequest`` and ``EncryptedExtensions`` carry, each
+  in the messages its RFC defines it in, which 1.6.x kept as octets
+  (:issue:`2810`, :pr:`2820`): ``status_request``, ``ec_point_formats``,
+  ``signed_certificate_timestamp``, ``padding``, ``extended_main_secret``,
+  ``compress_certificate``, ``record_size_limit``, ``session_ticket``,
+  ``pre_shared_key``, ``early_data``, ``cookie``, ``psk_key_exchange_modes``,
+  ``post_handshake_auth``, ``encrypted_client_hello``, its ``retry_configs``
+  down to each ``ECHConfig``, and ``renegotiation_info``. An empty body reads as
+  :class:`~pcapkit.protocols.application.ssl.data.Empty`, and a GREASE value
+  stays octets. The EC point formats, certificate status types, PSK key exchange
+  modes and certificate compression algorithms are new :mod:`pcapkit.const.tls`
+  registries crawled from IANA, exported as ``TLS_ECPointFormat``,
+  ``TLS_CertificateStatusType``, ``TLS_PskKeyExchangeMode`` and
+  ``TLS_CertificateCompressionAlgorithm``. So are IANA's HPKE identifiers,
+  :class:`~pcapkit.const.tls.hpke_kem_id.HpkeKemId`,
+  :class:`~pcapkit.const.tls.hpke_kdf_id.HpkeKdfId` and
+  :class:`~pcapkit.const.tls.hpke_aead_id.HpkeAeadId`, exported as
+  ``TLS_HpkeKemId``, ``TLS_HpkeKdfId`` and ``TLS_HpkeAeadId``, as which
+  ``encrypted_client_hello`` decodes its ``kem_id``, ``kdf_id`` and ``aead_id``,
+  its maker taking a member or an :class:`int` for each (:issue:`2851`,
+  :pr:`2873`). A KEM name keeps its parenthetical, so
+  ``DHKEM(X25519, HKDF-SHA256)`` is ``DHKEM_X25519_HKDF_SHA256``.
+
+Changed
+~~~~~~~
+
+* **a breaking change to** TLS extensions. Each type
+  :attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.protocol.SSL.__extension__>`
+  decodes has a concrete schema in the new
+  :mod:`pcapkit.protocols.application.ssl.schema`, registered under its
+  :class:`~pcapkit.const.tls.extension_type.ExtensionType` and exported by the
+  package as ``Schema_<name>`` (:issue:`2833`, :pr:`2849`). A
+  ``(parser, constructor)`` pair registered through
+  :func:`~pcapkit.foundation.registry.protocols.application.register_tls_extension`
+  is handed the ``extension_data`` unpacked by that schema and returns one,
+  where 1.6.x handed it and took back octets; ``register_tls_extension`` takes
+  the schema as ``schema=``, and a constructor returning anything else is
+  refused with :exc:`~pcapkit.utilities.exceptions.ProtocolError`. Extensions
+  1.6.x decoded in any message decode only where their RFCs define them, and are
+  kept as octets elsewhere (:issue:`2852`, :issue:`2853`, :pr:`2874`):
+  ``supported_groups`` in a ``ClientHello`` or ``EncryptedExtensions``,
+  ``signature_algorithms`` in a ``ClientHello`` or ``CertificateRequest``, ALPN
+  in a ``ClientHello``, ``ServerHello`` or ``EncryptedExtensions``, and
+  ``connection_id`` in a DTLS ``ClientHello`` or ``ServerHello`` only
+  (:rfc:`9146#section-10.2`), never in a TLS record. Their makers refuse
+  keyword arguments for any message other than the ones their RFCs define them
+  in. An empty ``server_name`` in a ``ServerHello`` or ``EncryptedExtensions``
+  reads as :class:`~pcapkit.protocols.application.ssl.data.Empty`, where it read
+  as ``b''``, and an empty one in a ``ClientHello`` is kept as octets. To migrate,
+  register a pair with ``schema=``, a subclass of
+  :class:`~pcapkit.protocols.application.ssl.schema.Extension`, whose parser
+  reads that schema and whose constructor returns one, and expect octets for an
+  extension outside the messages its RFC defines it in.
+* **a breaking change to**
+  :class:`~pcapkit.protocols.internet.mh.protocol.MH` and
+  :class:`~pcapkit.protocols.internet.hip.protocol.HIP`: their checksums are
+  verified and computed over the IP pseudo-header (:rfc:`6275#section-6.1.1`,
+  :rfc:`7401#section-5.1.1`), as TCP's, UDP's and ICMPv6's are, where 1.6.x
+  only recorded the field (:issue:`2813`, :pr:`2822`). Under
+  ``PCAPKIT_CHECKSUM_VERIFY`` the enclosing IP layer records
+  ``checksum_status`` on the data model, including for an MH or HIP header that
+  ends IPv6's extension-header walk, and MH over IPv4 is ``NO_PSEUDO_HEADER``.
+  ``make()`` computes a checksum it is not given, over ``pseudo`` or by the
+  enclosing IP layer, so the octets built change, and
+  :meth:`MH.make <pcapkit.protocols.internet.mh.protocol.MH.make>` takes it as
+  ``checksum``, as HIP's does, where 1.6.x took ``chksum``; the data model's
+  field stays ``chksum``. To migrate, ``MH.make(chksum=...)`` becomes
+  ``MH.make(checksum=...)``.
+* **a breaking change to** building
+  :class:`~pcapkit.protocols.internet.ah.protocol.AH`: ``make()`` pads the ICV
+  with the fewest zero octets that make the header a multiple of 4 octets, or of
+  8 in IPv6 (:rfc:`4302#section-2.6`), counted in Payload Length, where 1.6.x
+  cut the ICV to a multiple of 4, so a 6-octet ICV builds a 20-octet header
+  where it built 16 and dropped two octets (:issue:`2886`, :pr:`2888`).
+  Keyword-only ``version``, 4 by default, and ``extension=True`` pick the
+  alignment, and a keyword-only ``payload_length`` is written as given, which a
+  rebuild passes so that a captured header rebuilds as captured. ``make()``
+  refuses with :exc:`~pcapkit.utilities.exceptions.ProtocolError` a ``version``
+  other than 4 or 6, an ICV too long for Payload Length, which 1.6.x wrapped,
+  and a ``payload_length`` that does not describe the ICV exactly.
+  :meth:`IPv6.make <pcapkit.protocols.internet.ipv6.protocol.IPv6.make>`
+  refuses an extension header given as a layer that is not a multiple of 8
+  octets (:rfc:`8200#section-4`), ESP excepted. Read on its own, an AH header
+  whose captured Payload Length is short of its 12 fixed octets is refused, as a
+  whole one is, and one cut at or before Payload Length rebuilds as captured
+  (:issue:`2880`, :issue:`2886`). To migrate, an ICV already a multiple of 4
+  octets builds as before, and an AH header for IPv6 is built with
+  ``version=6``.
+* **a breaking change to** the
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` fallback of
+  :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` and
+  :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`:
+  its ``protocol`` is the code dispatched on, ``Transport.analyze``'s port as an
+  :class:`int`, as the per-frame ``Raw`` records it, where it was :data:`None`,
+  and ``pcapkit.protocols.transport.transport.logger``, which nothing logs to
+  any more, is removed with no alias (:issue:`2862`, :pr:`2877`). To migrate,
+  expect the dispatch code in the fallback's ``protocol``, and configure the
+  package's logger, :data:`pcapkit.utilities.logging.logger`, rather than the
+  removed one.
+
+Fixed
+~~~~~
+
+* a layer parsed on its own from octets that end inside its header
+  warned ``packet length < 0`` for each field past the cut, and most protocols
+  then refused it: in 1.6.x, TCP from 3 octets raised
+  ``ProtocolError: Field padding resolved to a negative length``, and IPv4, IPv6
+  and ICMPv6 raised too, while UDP parsed. Every protocol now reads such a cut
+  as a quiet short read and rebuilds it as captured, as inside a frame, its
+  checks of a header length, version or length leaving a zero the cut left to
+  the short read, as :func:`~pcapkit.corekit.schema.shortread.cut_on_its_own`
+  tells them (:issue:`2880`, :pr:`2887`). ICMP and ICMPv6 messages cut inside
+  their fixed fields, which raised ``Field data resolved to a negative length``,
+  read the same way (:issue:`2848`, :pr:`2876`). A cut inside a TCP or IPv4
+  option, the PCAP magic, IGMP's length classification, NGAP's PER decode and
+  the TLS, DTLS, SSLv3 and HTTP/2 framing stay refused, and inside a frame
+  nothing changes. So ``IPv4.analyze(6, b'\x00\x01')`` gives a TCP short read
+  where it gave :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and an empty
+  payload analyses as
+  :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as a frame's
+  does, where it gave ``Raw``.
+* an ICMPv6 Destination Unreachable or Time Exceeded message, or an
+  ICMP Destination Unreachable, Time Exceeded or Parameter Problem message, that
+  the capture cut inside its unused octets parsed, but raised
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` rebuilt through
+  ``from_data``. Its maker zero-fills the octets the cut left, as MH's and
+  OSPF's do, and the rebuild cuts back to the octets captured; unused octets
+  the cut did not leave are still refused (:issue:`2819`, :pr:`2844`).
+* the :class:`~pcapkit.protocols.misc.raw.protocol.Raw` fallback of
+  :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` and
+  :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`,
+  through which :func:`~pcapkit.foundation.analysis.ip.ip_datagram`,
+  :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` and reassembly parse a
+  payload, differed from the per-frame one. It held only the octets the failed
+  parse left unread, so ``IPv4.analyze(6, bytes(range(30)))`` gave a ``Raw`` of
+  none; it holds them all, with the failure as ``error`` (:issue:`2842`,
+  :pr:`2858`). The refusal logged at ``CRITICAL``, or at ``ERROR`` with a
+  traceback from ``Transport.analyze``, let the failed parse's warnings escape
+  and installed the exception hooks; it is quiet, as under ``beholder``, any
+  other absorbed error logging at ``WARNING`` (:issue:`2862`, :pr:`2877`).
+  ``Raw.from_data`` keeps its info's ``error`` and ``protocol``, which it
+  dropped, so a rebuilt protocol chain names the code rather than ``Raw``
+  (:issue:`2863`, :pr:`2869`).
+* with ``PCAPKIT_CHECKSUM_VERIFY`` on, an IPv4 or IPv6 layer parsed
+  or built on its own whose upper layer's pseudo-header cannot be derived --
+  behind a Routing header of a type not parsed with segments left, or in a
+  first fragment -- logged the refusal at ``CRITICAL`` and replaced
+  :func:`sys.excepthook` and :func:`threading.excepthook`.
+  :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`
+  keeps it quiet, and the upper layer records ``NO_PSEUDO_HEADER`` as before
+  (:issue:`2859`, :pr:`2872`).
+* :class:`~pcapkit.protocols.internet.esp.protocol.ESP`'s
+  ``make()`` and ``from_schema()`` raised :exc:`TypeError` for a protocol or
+  schema payload, as ``ESP(spi=1, seq=1, payload=TCP(srcport=1, dstport=2))``
+  did. Each takes the payload's packed octets, and the packet rebuilds
+  byte-exact (:issue:`2860`, :pr:`2865`).
+* on PyPy, building a CALIPSO option in
+  :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT` or
+  :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts` from a
+  :class:`bytearray` bitmap left the bitmap exported until collected, so
+  resizing it raised :exc:`BufferError`. It is copied through a view released
+  at once (:issue:`2807`, :pr:`2808`).
+
+Project infrastructure
+----------------------
+
+Changed
+~~~~~~~
+
+* the API pages group a class's members under a subtitle for each
+  section comment of its body -- *Properties*, *Methods*, *Data Models* and the
+  like -- in the order the source gives them, inherited members after the class's
+  own, base by base in method resolution order; 1.6.x ordered the protocol pages
+  alone, with no subtitles. ``util/member_sections.py`` writes the lists, and a
+  project test fails on a page out of step (:issue:`2907`, :pr:`2909`).
+* the ``docs`` extra pins ``sphinx-autodoc-typehints`` 3.17.6,
+  where 1.6.2 pinned 3.17.5 (:pr:`2931`).

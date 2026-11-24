@@ -480,6 +480,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -969,7 +970,9 @@ either way.</p>
 <li><p><strong>analyze</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="docutils literal notranslate"><span class="pre">_KT</span></code>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>], <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../../protocols/application/dtls.html#pcapkit.protocols.application.dtls.data.DTLSHandshake" title="pcapkit.protocols.application.dtls.data.DTLSHandshake"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLSHandshake</span></code></a>]</span>) – The analyser to call: the parse
 <a class="reference internal" href="../analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> runs for the engine, bound to
 the reassembly object’s protocol for IP and TCP, whose <code class="docutils literal notranslate"><span class="pre">analyze</span></code>
-it calls, and that protocol’s <code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS.</p></li>
+it calls, and to the stops and context the extraction’s engine
+parses its frames with (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>); that protocol’s
+<code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS.</p></li>
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_KT</span></code></span>) – What the analyser dispatches the payload on – the payload
 protocol type for IP, the port pair for TCP, the handshake header
 for DTLS, as above.</p></li>

@@ -473,6 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -1041,7 +1042,8 @@
                 <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
                 <span class="c1"># NOTE: ``analyze`` reparses the payload of every IPv4 frame with **DF** clear, so</span>
                 <span class="c1"># ``Deferred`` postpones it to the first read of ``Datagram.packet``.</span>
-                <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_analyze_payload</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">),</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">payload</span><span class="p">),</span>
+                <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_analyze_payload</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_parse_keywords</span><span class="p">),</span>
+                                <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">payload</span><span class="p">),</span>
                 <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>

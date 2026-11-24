@@ -473,6 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -1765,7 +1766,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            proto: Protocol registry number.</span>
 <span class="sd">            payload: Packet payload.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+<span class="sd">            **kwargs: Keyword arguments for the payload's constructor, such as</span>
+<span class="sd">                the stops and context a frame's next layer is parsed with.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
@@ -1778,7 +1780,8 @@
 <span class="sd">            :data:`logging.WARNING`, and the failed parse's warnings are dropped,</span>
 <span class="sd">            as :meth:`_analyze_next_layer` describes. An empty payload is</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a</span>
-<span class="sd">            frame.</span>
+<span class="sd">            frame. A payload past a stop this class meets is ``Raw``, as a frame</span>
+<span class="sd">            keeps the next layer of the layer it stops at.</span>
 
 <span class="sd">        .. versionchanged:: 1.7.0</span>
 
@@ -1787,10 +1790,18 @@
 <span class="sd">           Its ``protocol`` is ``proto``, a refusal it absorbs is quiet, any</span>
 <span class="sd">           other error is logged at :data:`logging.WARNING`, and the failed</span>
 <span class="sd">           parse's warnings are dropped (:issue:`2862`). An empty payload is</span>
-<span class="sd">           ``NoPayload`` (:issue:`2880`).</span>
+<span class="sd">           ``NoPayload`` (:issue:`2880`). A payload past a stop is ``Raw``, and</span>
+<span class="sd">           the parse gets ``proto`` as ``alias``, as a frame's next layer does</span>
+<span class="sd">           (:issue:`2933`).</span>
 
 <span class="sd">        """</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
+
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stops_next_layer</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -3786,8 +3797,9 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            klass: protocol class the payload was dispatched to</span>
 <span class="sd">            payload: payload to parse</span>
-<span class="sd">            code: code the payload was dispatched on, the fallback's ``alias``</span>
-<span class="sd">                unless ``kwargs`` gives one</span>
+<span class="sd">            code: code the payload was dispatched on, the ``alias`` of the parse</span>
+<span class="sd">                and its fallback unless ``kwargs`` gives one, as a frame's next</span>
+<span class="sd">                layer takes it</span>
 <span class="sd">            **kwargs: keyword arguments for ``klass``'s constructor</span>
 
 <span class="sd">        Returns:</span>
@@ -3819,6 +3831,8 @@
 <span class="sd">            (:issue:`2880`).</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: The parse takes ``alias`` as a frame's next layer does, its fallback too (#2933).</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'alias'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
         <span class="n">payload_io</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
         <span class="c1"># NOTE: No octets are no layer, as a frame's ``_empty_next_layer`` keeps them (#2880).</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">payload</span><span class="p">:</span>
@@ -3854,32 +3868,78 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # pylint: disable=import-outside-toplevel # isort: skip</span>
 
-        <span class="c1"># NOTE: Rewound, as the failed parse read the stream; ``error`` and ``alias`` as</span>
-        <span class="c1"># ``beholder`` gives a frame's fallback (#2842, #2862).</span>
+        <span class="c1"># NOTE: Rewound, as the failed parse read the stream; ``error`` as ``beholder``</span>
+        <span class="c1"># gives a frame's fallback (#2842, #2862).</span>
         <span class="n">payload_io</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'alias'</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">'error'</span><span class="p">]</span> <span class="o">=</span> <span class="n">error</span>
         <span class="k">return</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_term_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Check if reached termination threshold."""</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">layer</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__layer__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meets_term_threshold</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_meets_term_threshold</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span>
+                              <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str | ProtocolBase | Type[ProtocolBase]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a parse stopping at ``layer`` or ``protocol`` stops at this class.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            layer: layer to parse until, matched case-insensitively</span>
+<span class="sd">            protocol: protocol to parse until, by name, class or instance</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether this class is in ``layer`` or is ``protocol``, which keeps its</span>
+<span class="sd">            next layer as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">own</span> <span class="o">:=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__layer__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">layer_match</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">layer_match</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">layer_match</span> <span class="o">=</span> <span class="n">own</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">layer</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">protocol_match</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">protocol_match</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">comp_test</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">()]</span>
-            <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_comp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">):</span>
+            <span class="n">comp_test</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">id</span><span class="p">()]</span>
+            <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">expand_comp</span><span class="p">(</span><span class="n">protocol</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">comp_test</span><span class="p">:</span>
                     <span class="n">protocol_match</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">break</span>
 
         <span class="k">return</span> <span class="n">layer_match</span> <span class="ow">or</span> <span class="n">protocol_match</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stops_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a parse given ``kwargs`` stops at this class, as ``_sigterm`` stops a layer.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kwargs: keyword arguments of the parse, whose stops are read as</span>
+<span class="sd">                :meth:`__init__` reads them while parsing: the prefixed spelling</span>
+<span class="sd">                wins, and ``'none'`` and ``'null'`` are no stop</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether :meth:`analyze` keeps the payload as</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as a frame keeps the</span>
+<span class="sd">            next layer of the layer it stops at.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_layer'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">layer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'layer'</span><span class="p">)</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_protocol'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'protocol'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">layer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'none'</span><span class="p">:</span>
+            <span class="n">layer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">protocol</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'null'</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_meets_term_threshold</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_qs_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read a Quick-Start rate code as a rate in kbps.</span>

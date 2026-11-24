@@ -473,6 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -716,7 +717,8 @@
 <span class="sd">                :attr:`TCP.dst &lt;pcapkit.protocols.transport.tcp.protocol.TCP.dst&gt;` read</span>
 <span class="sd">                off a parsed header, resolved the same way.</span>
 <span class="sd">            payload: Packet payload.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+<span class="sd">            **kwargs: Keyword arguments for the payload's constructor, such as</span>
+<span class="sd">                the stops and context a frame's next layer is parsed with.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
@@ -726,7 +728,7 @@
 <span class="sd">            a frame's fallback records the port :meth:`_decode_next_layer`</span>
 <span class="sd">            looked up. An empty payload is</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a</span>
-<span class="sd">            frame.</span>
+<span class="sd">            frame, and one past a stop this class meets is ``Raw``.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            The annotation names the **base** registry because every transport</span>
@@ -770,11 +772,19 @@
 <span class="sd">           quiet, any other error is logged at :data:`logging.WARNING` rather</span>
 <span class="sd">           than ``ERROR``, and the failed parse's warnings are dropped</span>
 <span class="sd">           (:issue:`2862`). An empty payload is ``NoPayload`` (:issue:`2880`).</span>
+<span class="sd">           A payload past a stop is ``Raw``, and the parse gets the port as</span>
+<span class="sd">           ``alias``, as a frame's next layer does (:issue:`2933`).</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
+
         <span class="n">port</span> <span class="o">=</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span> <span class="k">else</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">)</span> <span class="k">else</span> <span class="n">port</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stops_next_layer</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch_family</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_analyze_next_layer</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 

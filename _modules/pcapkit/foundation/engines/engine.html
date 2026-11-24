@@ -473,6 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -848,8 +849,14 @@
 
 <div class="viewcode-block" id="EngineBase._setup_reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase._setup_reassembly">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Disable each enabled reassembler this engine has no adapter for.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parse: whether this engine parses its frames with the extraction's</span>
+<span class="sd">                stops and context; as the extraction's engine, it then hands them</span>
+<span class="sd">                to each reassembler kept, whose reassembled payloads are parsed</span>
+<span class="sd">                with them as the frames' next layers are (:issue:`2933`)</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: For each reassembler disabled; once, naming them</span>
@@ -876,7 +883,23 @@
                      <span class="sa">f</span><span class="s1">'reassembly; so </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> will be ignored'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span>
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span> <span class="o">=</span> <span class="n">ReassemblyManager</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">reasm</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">reasm</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                                           <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">adapters</span><span class="p">)</span></div>
+                                           <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">adapters</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Only as the extraction's engine: a third-party one runs this one's ``run`` for the</span>
+        <span class="c1"># global header alone (``Extractor.record_header``), and parses no frame with them.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parse</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="s1">'_exeng'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c1"># NOTE: Only those set, so an ``analyze`` taking no keywords, as a custom</span>
+        <span class="c1"># ``__protocol_type__``'s may, is called as before when the extraction sets none.</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">!=</span> <span class="s1">'none'</span><span class="p">:</span>
+            <span class="n">keywords</span><span class="p">[</span><span class="s1">'layer'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">!=</span> <span class="s1">'null'</span><span class="p">:</span>
+            <span class="n">keywords</span><span class="p">[</span><span class="s1">'protocol'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">:</span>
+            <span class="n">keywords</span><span class="p">[</span><span class="s1">'__context__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">reasm</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">reasm</span><span class="o">.</span><span class="n">_parse_keywords</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="EngineBase._reassemble">

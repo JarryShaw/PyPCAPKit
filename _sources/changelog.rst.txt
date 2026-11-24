@@ -35,6 +35,11 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
+* **1.7.0** (unreleased) -- Dissectors for PPP, PPPoE and DNS, MLD, newer SCTP
+  chunks and current TLS extensions decoded, a PCAP-NG writer, every registered
+  reassembler and flow tracer fed, and grouped, keyword-only extraction and
+  reassembly signatures. :doc:`Full changelog <changelog/1.7.0>`.
+
 * **1.6.2** (2026-11-21) -- A registry and bug-fix release: new TLS extension
   types, the ``ETW2`` link type, new TCP and UDP port assignments, and a
   ``BufferError`` on closing a buffered reader under PyPy 3.12 fixed.
@@ -178,6 +183,7 @@ carries only the version being released.
    :hidden:
    :maxdepth: 1
 
+   changelog/1.7.0
    changelog/1.6.2
    changelog/1.6.1
    changelog/1.6.0

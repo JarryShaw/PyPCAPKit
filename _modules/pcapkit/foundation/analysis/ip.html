@@ -473,6 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -596,7 +597,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">IP_Datagram</span>
@@ -635,7 +636,8 @@
 <span class="sd">        :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.ip.data.Datagram.packet&gt;`</span>
 <span class="sd">        holds the same result, parsed on its first read, unless the</span>
 <span class="sd">        reassembly's ``__protocol_type__`` names another protocol, which then</span>
-<span class="sd">        parses it instead.</span>
+<span class="sd">        parses it instead, or the engine parsed its frames with stops or a</span>
+<span class="sd">        context, which that parse takes too (:issue:`2933`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -646,25 +648,27 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_analyze_payload</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[IP_Protocol]'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span>
-                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Parse a reassembled payload by its payload protocol type.</span>
 
 <span class="sd">    :func:`ip_datagram` runs this, and so does the</span>
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.data.Deferred` that</span>
 <span class="sd">    :meth:`IP.submit &lt;pcapkit.foundation.reassembly.ip.reassembly.IP.submit&gt;` stores as a</span>
 <span class="sd">    datagram's ``packet``, with the reassembly's own protocol bound as</span>
-<span class="sd">    ``protocol``.</span>
+<span class="sd">    ``protocol`` and the keywords its engine hands it as ``kwargs``.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        protocol: The IP protocol whose ``analyze`` parses ``payload``.</span>
 <span class="sd">        proto: The payload protocol type.</span>
 <span class="sd">        payload: The reassembled payload.</span>
+<span class="sd">        **kwargs: Keyword arguments for ``analyze``: the stops and context</span>
+<span class="sd">            the engine parses its frames with, which the reassembly hands on.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The parsed payload.</span>
 
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>

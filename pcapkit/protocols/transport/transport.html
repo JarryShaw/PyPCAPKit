@@ -480,6 +480,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -704,7 +705,8 @@ the <code class="docutils literal notranslate"><span class="pre">module</span></
 <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP.dst" title="pcapkit.protocols.transport.tcp.protocol.TCP.dst"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.dst</span></code></a> read
 off a parsed header, resolved the same way.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Packet payload.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Keyword arguments for the payload’s constructor, such as
+the stops and context a frame’s next layer is parsed with.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -718,7 +720,7 @@ keeps one, its <code class="docutils literal notranslate"><span class="pre">prot
 a frame’s fallback records the port <a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>
 looked up. An empty payload is
 <a class="reference internal" href="../misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, as in a
-frame.</p>
+frame, and one past a stop this class meets is <code class="docutils literal notranslate"><span class="pre">Raw</span></code>.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -753,7 +755,9 @@ rather than the octets the failed parse left unread (<a class="extlink-issue ref
 Its <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is the port looked up, a refusal it absorbs is
 quiet, any other error is logged at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> rather
 than <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>, and the failed parse’s warnings are dropped
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>). An empty payload is <code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2862">#2862</a>). An empty payload is <code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2880">#2880</a>).
+A payload past a stop is <code class="docutils literal notranslate"><span class="pre">Raw</span></code>, and the parse gets the port as
+<code class="docutils literal notranslate"><span class="pre">alias</span></code>, as a frame’s next layer does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>).</p>
 </div>
 </dd></dl>
 

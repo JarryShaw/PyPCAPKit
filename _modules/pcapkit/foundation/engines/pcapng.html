@@ -473,6 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -771,7 +772,7 @@
 
 <span class="sd">        """</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_reassembly</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_reassembly</span><span class="p">(</span><span class="n">parse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_traceflow</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bound_read_ahead</span><span class="p">()</span>
