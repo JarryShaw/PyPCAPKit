@@ -459,7 +459,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                         index=tuple(buffer.ind),
                         header=buf.hdr,
                         payload=bytes(payload),
-                        packet=Deferred(partial(_analyze_payload, self.protocol),
+                        packet=Deferred(partial(_analyze_payload, self.protocol, **self._parse_keywords),
                                         self._make_ports(bufid), bytes(payload)),
                         conflict=conflict,
                     )

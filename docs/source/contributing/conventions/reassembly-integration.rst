@@ -77,7 +77,10 @@ Parse Ownership
 * Each :mod:`pcapkit.foundation.analysis` function is a public wrapper that calls that
   method and holds no parsing of its own.
 * The reassembly :class:`~pcapkit.foundation.reassembly.data.Deferred` calls the
-  same method, on the reassembly's own ``__protocol_type__``.
+  same method, on the reassembly's own ``__protocol_type__``. For IP and TCP it
+  passes the stops and context the extraction's engine parses its frames with: the
+  default engine's, and none from a third-party engine, whose frames ignore them
+  (:issue:`2933`).
 * Protocol code never imports :mod:`pcapkit.foundation` to do its own work; the
   dependency runs from ``foundation`` to the protocols. The protocol base's import from
   :mod:`pcapkit.foundation.registry.protocols` registers a class rather than parsing.

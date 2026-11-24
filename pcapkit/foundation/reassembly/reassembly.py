@@ -557,6 +557,12 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         #: float: Reassembly timeout in seconds, on the capture's clock.
         #: :data:`math.inf` disables expiry.
         self._timeout = float(timeout)
+        #: dict[str, Any]: Keyword arguments a reassembled payload's parse takes:
+        #: the stops and context the engine parses its frames with, as
+        #: :meth:`EngineBase._setup_reassembly
+        #: <pcapkit.foundation.engines.engine.EngineBase._setup_reassembly>`
+        #: hands them over (:issue:`2933`).
+        self._parse_keywords = {}  # type: dict[str, Any]
 
         #: dict[_IT, _BT]: Dict buffer field. This field is used to
         #: store reassembled packets in the form of ``{bufid: buffer}``.

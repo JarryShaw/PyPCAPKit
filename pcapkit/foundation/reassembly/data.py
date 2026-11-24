@@ -227,7 +227,9 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
         analyze: The analyser to call: the parse
             :mod:`pcapkit.foundation.analysis` runs for the engine, bound to
             the reassembly object's protocol for IP and TCP, whose ``analyze``
-            it calls, and that protocol's ``analyze_handshake`` for DTLS.
+            it calls, and to the stops and context the extraction's engine
+            parses its frames with (:issue:`2933`); that protocol's
+            ``analyze_handshake`` for DTLS.
         proto: What the analyser dispatches the payload on -- the payload
             protocol type for IP, the port pair for TCP, the handshake header
             for DTLS, as above.

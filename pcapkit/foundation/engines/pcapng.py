@@ -188,7 +188,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         """
         ext = self._extractor
-        self._setup_reassembly()
+        self._setup_reassembly(parse=True)
         self._setup_traceflow()
 
         self._bound_read_ahead()
