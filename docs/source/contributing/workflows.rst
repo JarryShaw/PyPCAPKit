@@ -746,7 +746,11 @@ cancelled at 95% of its cap or later timed out and counts, even in a run that re
 ``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the ``ci-timing-report`` artifact (90
-days), and the newest earlier report is the next run's baseline. The
+days), and the newest earlier report is the next run's baseline. ``H3`` alone
+compares only like windows (:issue:`2915`): its baseline is the newest earlier
+report of the same ``days``, whose figures each report carries forward, so a
+one-day dispatch is not the next weekly report's. With none, ``H3`` is not
+evaluated, a p90 over its floor is ``W9``, and a note says so. The
 ``discussion`` job then posts it to the ``ci-timing: weekly CI timing report``
 thread (see `CI Reports`_). It is not a
 ``workflow_run`` on Unit Tests, which would add a job per run to a runner pool
@@ -786,7 +790,7 @@ measured on the issue:
      - ``protocols (rest)``: 319 s
    * - ``H3``
      - ``W9``'s p90 is at or over 30 min and 25% or more above the baseline's (needs a
-       baseline)
+       baseline of the same ``days``)
      - --
    * - ``H4``
      - a job's or capped step's linear fit reaches its cap within 14 days
@@ -840,6 +844,12 @@ The finding keeps its ``H`` id and says it is non-blocking. A
 KTLO leg past its job's ``timeout-minutes`` is still cancelled, and its check run
 reads red, though since :issue:`1738` nothing gating waits on it, so that warning is worth
 acting on before the cap.
+
+A job's trend, and so its ``H4``, is fitted only on the runs that reached its test
+step (``TEST_STEPS`` in the script, :issue:`2915`): a leg that failed installing its
+dependencies after seconds times no tests, and a few such runs opening the window
+read as a steep rise. They stay in the tables and in ``H1``'s p90, and a note names
+their jobs. A job with no test step, such as ``Lint``, is fitted on every run.
 
 No cap finding fires on a job the workflow no longer runs, such as a leg renamed or
 split inside the window (:issue:`2904`); its rows stay in the tables, marked *(no longer
