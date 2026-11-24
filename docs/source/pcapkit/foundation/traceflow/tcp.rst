@@ -10,6 +10,31 @@ packets.
    :no-members:
    :show-inheritance:
 
+   .. Hand-written: TraceFlowMeta's class properties shadow TraceFlowBase's,
+      so autoproperty finds no property to document (#2910).
+
+   .. property:: name
+      :type: str
+
+      Protocol name of current flow tracing object.
+
+      .. note::
+
+         The same value is also available as a class attribute, from the
+         property of the same name on
+         :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta`.
+
+   .. property:: protocol
+      :type: typing.Type[pcapkit.protocols.protocol.ProtocolBase]
+
+      Protocol of current flow tracing object.
+
+      .. note::
+
+         The same value is also available as a class attribute, from the
+         property of the same name on
+         :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta`.
+
    .. autoattribute:: __callback_fn__
       :no-value:
 
@@ -31,11 +56,6 @@ packets.
    .. automethod:: _unique_label
    .. automethod:: _make_segment
    .. automethod:: _ended
-
-   .. rubric:: Properties
-
-   .. autoproperty:: name
-   .. autoproperty:: protocol
 
 Terminology
 -----------
