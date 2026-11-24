@@ -28,6 +28,7 @@ from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict, iter_multi_items
 from pcapkit.utilities.compat import Mapping, UnionType, final, get_annotations
 from pcapkit.utilities.exceptions import InfoError, UnsupportedCall, stacklevel
+from pcapkit.utilities.importlib import import_lock
 from pcapkit.utilities.pickle import ReduceAsProtocol2, ReduceToItems
 from pcapkit.utilities.warnings import InfoWarning, warn
 
@@ -1190,7 +1191,7 @@ def _nested_info_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
     """Map the keys of ``cls`` annotated with an :class:`Info` subclass to it.
 
     It is :func:`_nested_types` less the multi-mapping classes
-    (:class:`_MultiInfo`), and cached alongside.
+    (:class:`_MultiInfo`), and cached alongside, under the same lock.
 
     Args:
         cls: Info class.
@@ -1203,9 +1204,13 @@ def _nested_info_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
     if cached is not None:
         return cached
 
-    nested = {key: value for (key, value) in _nested_types(cls).items()
-              if not issubclass(value, _MultiInfo)}  # type: dict[str, Type[Info]]
-    setattr(cls, _NESTED_INFO_CACHE, nested)
+    with import_lock:
+        cached = cls.__dict__.get(_NESTED_INFO_CACHE)
+        if cached is not None:
+            return cached
+        nested = {key: value for (key, value) in _nested_types(cls).items()
+                  if not issubclass(value, _MultiInfo)}  # type: dict[str, Type[Info]]
+        setattr(cls, _NESTED_INFO_CACHE, nested)
     return nested
 
 
@@ -1245,11 +1250,38 @@ def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
         re-resolving the annotations on every call to catch a case that does
         not arise in this package costs far more than it saves.
 
+        The first resolution of a class and its store hold
+        :data:`~pcapkit.utilities.importlib.import_lock`, as every first import
+        does, so no thread writes a namespace part way through its copy here.
+        Where the interpreter lets one, the copy raises "dictionary changed size
+        during iteration", which keeps the payload of an Ethernet frame whose
+        first IPv4 parse races others as
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2870`).
+
     """
     cached = cls.__dict__.get(_NESTED_CACHE)
     if cached is not None:
         return cached
 
+    with import_lock:
+        cached = cls.__dict__.get(_NESTED_CACHE)
+        if cached is not None:
+            return cached
+        nested = _resolve_nested_types(cls)
+        setattr(cls, _NESTED_CACHE, nested)
+    return nested
+
+
+def _resolve_nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
+    """Work out what :func:`_nested_types` caches for ``cls``.
+
+    Args:
+        cls: Info class.
+
+    Returns:
+        Mapping of key names to the class annotated for them.
+
+    """
     nested = {}  # type: dict[str, Type[Info]]
     seen = set()  # type: set[str]
     for cls_ in cls.mro():  # pragma: no branch
@@ -1275,6 +1307,4 @@ def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
             info_cls = _as_info_type(hint)
             if info_cls is not None:
                 nested[key] = info_cls
-
-    setattr(cls, _NESTED_CACHE, nested)
     return nested
