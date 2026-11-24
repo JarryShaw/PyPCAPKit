@@ -1611,11 +1611,14 @@ rather than the Python version.
 
 ``project-tests`` runs a cell per half of :file:`tests/project` (:issue:`2798`), as its
 docs-only path, run whole, comes near the job's cap. Both paths cut at
-``PROJECT_BOUNDARY`` in :file:`tests/_tiers.py`, where ``unittest-ordering``'s
-``project`` cells cut too: a cell runs its half of the pins on a code diff, and its
-half of the leg on a docs-only one, half 1 the other docs readers as well.
+``PROJECT_BOUNDARY`` in :file:`tests/_tiers.py`, which ``--half`` of
+:file:`util/run_unittest_leg.py` cuts at too: a cell runs its half of the pins on a
+code diff, and its half of the leg on a docs-only one, half 1 the other docs readers
+as well. ``unittest-ordering``'s ``project`` cells cut the leg in three instead, at the
+names its ``SHARD_BOUNDARIES`` holds, a ``--part`` per cell, as its cells for the rest
+of :file:`tests/protocols` do (:issue:`2913`).
 :file:`tests/project/test_unittest_ordering_shards.py` fails when a module or a pin
-runs in neither cell or in both.
+runs in no cell of a job or in two.
 
 A pin's skip where ``tomllib`` is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner's own ``python3``, and

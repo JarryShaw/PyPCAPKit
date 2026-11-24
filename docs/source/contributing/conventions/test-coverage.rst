@@ -195,10 +195,12 @@ Running the Tests
    .. code-block:: shell
 
       python util/run_unittest_leg.py protocols/internet
-      python util/run_unittest_leg.py protocols --exclude protocols/internet --half 1
-      python util/run_unittest_leg.py protocols --exclude protocols/internet --half 2
-      python util/run_unittest_leg.py project --half 1
-      python util/run_unittest_leg.py project --half 2
+      python util/run_unittest_leg.py protocols --exclude protocols/internet --part 1
+      python util/run_unittest_leg.py protocols --exclude protocols/internet --part 2
+      python util/run_unittest_leg.py protocols --exclude protocols/internet --part 3
+      python util/run_unittest_leg.py project --part 1
+      python util/run_unittest_leg.py project --part 2
+      python util/run_unittest_leg.py project --part 3
 
    The leg list lives in the workflow, not the script. Every :file:`tests/`
    subdirectory is a leg except :file:`tests/integration/`, which holds no unit-tier
