@@ -13,15 +13,23 @@ an extractor for unknown protocols, and constructs a
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 

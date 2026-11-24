@@ -65,18 +65,26 @@ exceptions:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __frame__
       :no-value:
+
+   .. rubric:: Properties
 
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: version
+
+   .. rubric:: Methods
 
    .. automethod:: unpack
    .. automethod:: read
    .. automethod:: make
    .. automethod:: id
    .. automethod:: register_frame
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_http_none

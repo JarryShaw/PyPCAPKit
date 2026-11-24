@@ -12,15 +12,21 @@ which reconstructs fragmented TCP packets back to origin.
    :no-members:
    :show-inheritance:
 
-   .. automethod:: reassembly
-   .. automethod:: submit
-   .. automethod:: _make_ports
+   .. autoattribute:: __callback_fn__
+      :no-value:
+
+   .. rubric:: Defaults
 
    .. autoattribute:: __protocol_name__
    .. autoattribute:: __protocol_type__
-   .. autoattribute:: __callback_fn__
-      :no-value:
    .. autoattribute:: __timeout__
+
+   .. rubric:: Methods
+
+   .. automethod:: reassembly
+
+   .. automethod:: _make_ports
+   .. automethod:: submit
 
 Algorithm
 =========

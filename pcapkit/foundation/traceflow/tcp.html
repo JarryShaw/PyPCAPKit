@@ -692,6 +692,26 @@ tracing does not otherwise pay, and tracing’s per-packet cost is something
 this package deliberately keeps low. Nothing is reassembled, parsed
 or retained unless it is asked for.</p>
 </div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__">
+<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
+<dd><p>List of callback functions upon a finalised flow.</p>
+</dd></dl>
+
+<p class="rubric">Defaults</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__">
+<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol name of current flow tracing object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.protocol.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol of current flow tracing object.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.dump">
 <span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.dump" title="Link to this definition">¶</a></dt>
@@ -787,6 +807,86 @@ so on, so that each flow keeps its own output file; see
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP._unique_label">
+<span class="sig-name descname"><span class="pre">_unique_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP._unique_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP._unique_label" title="Link to this definition">¶</a></dt>
+<dd><p>Make a new flow’s label unique within this tracer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – the label built from the packet that opens the flow</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">label</span></code> itself if no earlier flow carries it; otherwise <code class="docutils literal notranslate"><span class="pre">label</span></code>
+suffixed with the first of <code class="docutils literal notranslate"><span class="pre">-1</span></code>, <code class="docutils literal notranslate"><span class="pre">-2</span></code>, … that is still unused.</p>
+</dd>
+</dl>
+<p>The label names the flow’s output file, which is opened – and so
+truncated – when the flow starts. Two flows with one label would
+therefore share one file, and the later would erase the earlier: the
+same endpoints opening a second flow at the same capture timestamp, as a
+unidirectional flow resumed after its FIN or a new connection reusing a
+bidirectional flow’s endpoints can. A label that does not collide is
+returned unchanged.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP._make_segment">
+<span class="sig-name descname"><span class="pre">_make_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP._make_segment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP._make_segment" title="Link to this definition">¶</a></dt>
+<dd><p>Describe a traced packet the way the reassembler expects a segment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp._AT" title="pcapkit.foundation.traceflow.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – a flow packet (<a class="reference internal" href="#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Packet" title="pcapkit.foundation.reassembly.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">reassembly</span> <span class="pre">packet</span></code></a>
+for the same segment.</p>
+</dd>
+</dl>
+<p>The tracer does not reassemble anything itself – it hands the segment to
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>, which already implements
+the <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm and handles the out-of-order and
+retransmitted segments a tracer concatenating payloads in capture order
+would silently corrupt. This is the whole of the translation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The buffer ID is <strong>(source, destination)</strong> and so unidirectional, which
+is what makes each direction of the conversation reassemble separately
+even though the <em>flow</em> is keyed on the pair. The sequence number is
+passed through untouched: a SYN occupies one of its own, and
+<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a>
+is where that is accounted for.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP._ended">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_ended</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP._ended"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP._ended" title="Link to this definition">¶</a></dt>
+<dd><p>Whether a flow’s connection has been seen to end.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>buffer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Buffer" title="pcapkit.foundation.traceflow.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp._AT" title="pcapkit.foundation.traceflow.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – a flow buffer (<a class="reference internal" href="#term-trace.tcp.buffer"><span class="xref std std-term">trace.tcp.buffer</span></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether a teardown was observed – a <strong>FIN from both endpoints</strong>, the
+polite close of <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a>, or a <strong>RST</strong> from either, the
+abrupt one of <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.3"><strong>RFC 9293 Section 3.5.3</strong></a>.</p>
+</dd>
+</dl>
+<p>This is not the same as “nothing more will arrive on these endpoints”: the
+acknowledgement that completes a four-way close, and any duplicate of it,
+still follow. It is used to tell a new connection’s SYN from the peer’s
+SYN-ACK, which is a question the flag alone cannot answer.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.finish">
 <span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP.finish"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="Link to this definition">¶</a></dt>
 <dd><p>Finalise every flow still being traced.</p>
@@ -845,104 +945,7 @@ one, that cannot catch up. For a result that is final, read after
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__">
-<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_name__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol name of current flow tracing object.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__">
-<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.protocol.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol of current flow tracing object.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__">
-<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
-<dd><p>List of callback functions upon a finalised flow.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP._make_segment">
-<span class="sig-name descname"><span class="pre">_make_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP._make_segment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP._make_segment" title="Link to this definition">¶</a></dt>
-<dd><p>Describe a traced packet the way the reassembler expects a segment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp._AT" title="pcapkit.foundation.traceflow.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – a flow packet (<a class="reference internal" href="#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Packet" title="pcapkit.foundation.reassembly.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">reassembly</span> <span class="pre">packet</span></code></a>
-for the same segment.</p>
-</dd>
-</dl>
-<p>The tracer does not reassemble anything itself – it hands the segment to
-<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>, which already implements
-the <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm and handles the out-of-order and
-retransmitted segments a tracer concatenating payloads in capture order
-would silently corrupt. This is the whole of the translation.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The buffer ID is <strong>(source, destination)</strong> and so unidirectional, which
-is what makes each direction of the conversation reassemble separately
-even though the <em>flow</em> is keyed on the pair. The sequence number is
-passed through untouched: a SYN occupies one of its own, and
-<a class="reference internal" href="../reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a>
-is where that is accounted for.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP._unique_label">
-<span class="sig-name descname"><span class="pre">_unique_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP._unique_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP._unique_label" title="Link to this definition">¶</a></dt>
-<dd><p>Make a new flow’s label unique within this tracer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – the label built from the packet that opens the flow</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">label</span></code> itself if no earlier flow carries it; otherwise <code class="docutils literal notranslate"><span class="pre">label</span></code>
-suffixed with the first of <code class="docutils literal notranslate"><span class="pre">-1</span></code>, <code class="docutils literal notranslate"><span class="pre">-2</span></code>, … that is still unused.</p>
-</dd>
-</dl>
-<p>The label names the flow’s output file, which is opened – and so
-truncated – when the flow starts. Two flows with one label would
-therefore share one file, and the later would erase the earlier: the
-same endpoints opening a second flow at the same capture timestamp, as a
-unidirectional flow resumed after its FIN or a new connection reusing a
-bidirectional flow’s endpoints can. A label that does not collide is
-returned unchanged.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP._ended">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_ended</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP._ended"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP._ended" title="Link to this definition">¶</a></dt>
-<dd><p>Whether a flow’s connection has been seen to end.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>buffer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Buffer" title="pcapkit.foundation.traceflow.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp._AT" title="pcapkit.foundation.traceflow.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – a flow buffer (<a class="reference internal" href="#term-trace.tcp.buffer"><span class="xref std std-term">trace.tcp.buffer</span></a>)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Whether a teardown was observed – a <strong>FIN from both endpoints</strong>, the
-polite close of <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a>, or a <strong>RST</strong> from either, the
-abrupt one of <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.3"><strong>RFC 9293 Section 3.5.3</strong></a>.</p>
-</dd>
-</dl>
-<p>This is not the same as “nothing more will arrive on these endpoints”: the
-acknowledgement that completes a four-way close, and any duplicate of it,
-still follow. It is used to tell a new connection’s SYN from the peer’s
-SYN-ACK, which is a question the flag alone cannot answer.</p>
-</dd></dl>
-
+<p class="rubric">Properties</p>
 </dd></dl>
 
 <section id="terminology">

@@ -17,9 +17,13 @@ extractor for Internet Group Management Protocol version 2 (IGMPv2)
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: version
    .. autoproperty:: alias
+
+   .. rubric:: Methods
 
    .. automethod:: id
 

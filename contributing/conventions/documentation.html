@@ -874,6 +874,35 @@ and on a placeholder that gains one.</p>
 where a user could have depended on it, deleted outright where it never shipped, as the
 <code class="docutils literal notranslate"><span class="pre">rarp</span></code> entry was. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
 </section>
+<section id="class-member-lists">
+<span id="documentation-member-lists"></span><h2>Class Member Lists<a class="headerlink" href="#class-member-lists" title="Link to this heading">¶</a></h2>
+<p><strong>An</strong> <code class="docutils literal notranslate"><span class="pre">autoclass</span></code> <strong>lists its members in source order.</strong> Where the <code class="docutils literal notranslate"><span class="pre">automethod</span></code>,
+<code class="docutils literal notranslate"><span class="pre">autoattribute</span></code> and <code class="docutils literal notranslate"><span class="pre">autoproperty</span></code> directives nested under it name members of one
+class body, they follow the order that body defines them, as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2772">#2772</a> ruled;
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_protocol_member_order_2780_unit.py</span></code> fails on a list out
+of that order (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2780">#2780</a>).</p>
+<p><strong>Each section comment titles its members with a</strong> <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">rubric::</span></code>, the comment in
+Title Case without its period, so <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Data</span> <span class="pre">models.</span></code> gives <em>Data Models</em>. The sections
+run in the order the class’s own comments give them. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2907">#2907</a>:</p>
+<ul class="simple">
+<li><p>Members above a body’s first section comment, and names no body binds, lead the
+list untitled. A list that falls in one section takes no rubric.</p></li>
+<li><p>An inherited member joins its section after the class’s own members, the bases
+taken in method resolution order, and a section only a base has follows the
+class’s own. A member of a body with no section comments takes the section its
+nearest base files it under.</p></li>
+<li><p>A class whose body has section comments takes an explicit list rather than
+<code class="docutils literal notranslate"><span class="pre">:members:</span></code>, which cannot carry the rubrics.</p></li>
+<li><p>A block with other content among its members, or with an order of its own, is a
+<code class="docutils literal notranslate"><span class="pre">HAND</span></code> entry of <code class="file docutils literal notranslate"><span class="pre">util/member_sections.py</span></code>, with its reason, and is left as
+written: the <code class="docutils literal notranslate"><span class="pre">Protocol</span></code> block on <a class="reference internal" href="../../pcapkit/protocols/protocol.html"><span class="doc">Root Protocol</span></a> keeps its
+order (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2772">#2772</a>).</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/member_sections.py</span> <span class="pre">--write</span></code> writes the lists and rubrics, and <code class="docutils literal notranslate"><span class="pre">--check</span></code>
+prints what it would change. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_member_sections_2907_unit.py</span></code>
+fails on a page out of step, naming that command, and on a class body that repeats a
+section, which no page could show as one.</p>
+</section>
 <section id="version-directives">
 <h2>Version Directives<a class="headerlink" href="#version-directives" title="Link to this heading">¶</a></h2>
 <p><strong>One</strong> <code class="docutils literal notranslate"><span class="pre">versionadded</span></code> <strong>per version in a docstring or prose block</strong>; same-version
@@ -986,6 +1015,7 @@ still be diffed against upstream, which a house-style rewrite destroys.</p></li>
 <li><a class="reference internal" href="#paraphrasing-a-ruling">Paraphrasing a Ruling</a></li>
 <li><a class="reference internal" href="#accuracy">Accuracy</a></li>
 <li><a class="reference internal" href="#resolvable-targets">Resolvable Targets</a></li>
+<li><a class="reference internal" href="#class-member-lists">Class Member Lists</a></li>
 <li><a class="reference internal" href="#version-directives">Version Directives</a></li>
 <li><a class="reference internal" href="#format-and-mechanics">Format and Mechanics</a></li>
 </ul>

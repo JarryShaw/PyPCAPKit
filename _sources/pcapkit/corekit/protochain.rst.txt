@@ -10,16 +10,21 @@ Protocol Chain
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: protocols
    .. autoproperty:: aliases
    .. autoproperty:: chain
+
+   .. rubric:: Methods
 
    .. automethod:: from_list
    .. automethod:: index
    .. automethod:: count
 
-   .. automethod:: __str__
-   .. automethod:: __repr__
+   .. rubric:: Data Models
 
-   .. automethod:: __add__
+   .. automethod:: __repr__
+   .. automethod:: __str__
    .. automethod:: __contains__
+   .. automethod:: __add__

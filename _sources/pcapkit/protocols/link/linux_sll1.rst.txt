@@ -40,17 +40,25 @@ see :ref:`linux-sll-labels`.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: info_name
    .. autoproperty:: length
    .. autoproperty:: protocol
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 

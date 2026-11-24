@@ -39,19 +39,27 @@ which tells whether a payload opens with an HTTP/1.* start line.
 
    .. autoattribute:: _preface_length
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: version
+
+   .. rubric:: Methods
 
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
    .. automethod:: from_data
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
    .. automethod:: __init__
    .. automethod:: __new__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _guess_version

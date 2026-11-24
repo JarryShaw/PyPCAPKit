@@ -19,15 +19,14 @@ classes :class:`~pcapkit.corekit.infoclass.MultiInfo` and
       subclass its key's annotation names.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+   .. autoattribute:: __map__
+   .. autoattribute:: __map_reverse__
    .. autoattribute:: __additional__
       :no-value:
    .. autoattribute:: __excluded__
       :no-value:
    .. autoattribute:: __included__
       :no-value:
-
-   .. autoattribute:: __map__
-   .. autoattribute:: __map_reverse__
 
 .. autodecorator:: pcapkit.corekit.infoclass.info_final
 

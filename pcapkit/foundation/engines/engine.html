@@ -741,10 +741,16 @@ table every engine registration lands in.</p>
 </div>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.extractor">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extractor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><span class="pre">Extractor</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.extractor" title="Link to this definition">¶</a></dt>
-<dd><p>Extractor instance.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__engine_name__">
+<span class="sig-name descname"><span class="pre">__engine_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__engine_module__">
+<span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_module__" title="Link to this definition">¶</a></dt>
+<dd><p>Engine module name.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -753,6 +759,41 @@ table every engine registration lands in.</p>
 <dd><p>Extractor instance this engine reads for.</p>
 </dd></dl>
 
+<p class="rubric">Defaults</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__reassembly__">
+<span class="sig-name descname"><span class="pre">__reassembly__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__reassembly__" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly adapters. For each reassembler this engine supports, under the
+name it is registered by in <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__reassembly__" title="pcapkit.foundation.extraction.Extractor.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Extractor.__reassembly__</span></code></a>, the
+<a class="reference internal" href="../../toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> function that makes its input from a frame. An
+enabled reassembler with no entry is disabled at startup, with a warning,
+and an engine with none supports no reassembly.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__traceflow__">
+<span class="sig-name descname"><span class="pre">__traceflow__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__traceflow__" title="Link to this definition">¶</a></dt>
+<dd><p>Flow tracing adapters. For each flow tracer this engine supports, under the
+name it is registered by in <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__traceflow__" title="pcapkit.foundation.extraction.Extractor.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Extractor.__traceflow__</span></code></a>, the
+<a class="reference internal" href="../../toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> function that makes its input from a frame. An
+enabled flow tracer with no entry is dropped at startup, with a warning,
+and an engine with none supports no flow tracing.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<p class="rubric">Properties</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.extractor">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extractor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><span class="pre">Extractor</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.extractor" title="Link to this definition">¶</a></dt>
+<dd><p>Extractor instance.</p>
+</dd></dl>
+
+<p class="rubric">Availability</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unsupported_reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineBase.unsupported_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="Link to this definition">¶</a></dt>
@@ -783,19 +824,7 @@ raises <a class="reference external" href="https://docs.python.org/3/builtins/ex
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__reassembly__">
-<span class="sig-name descname"><span class="pre">__reassembly__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__reassembly__" title="Link to this definition">¶</a></dt>
-<dd><p>Reassembly adapters. For each reassembler this engine supports, under the
-name it is registered by in <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__reassembly__" title="pcapkit.foundation.extraction.Extractor.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Extractor.__reassembly__</span></code></a>, the
-<a class="reference internal" href="../../toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> function that makes its input from a frame. An
-enabled reassembler with no entry is disabled at startup, with a warning,
-and an engine with none supports no reassembly.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
-</div>
-</dd></dl>
-
+<p class="rubric">Reassembly</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.register_reassembly">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adapter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineBase.register_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.register_reassembly" title="Link to this definition">¶</a></dt>
@@ -858,19 +887,7 @@ its protocol’s. The adapter’s record, or each of a tuple of them, is then
 fed in.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__traceflow__">
-<span class="sig-name descname"><span class="pre">__traceflow__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__traceflow__" title="Link to this definition">¶</a></dt>
-<dd><p>Flow tracing adapters. For each flow tracer this engine supports, under the
-name it is registered by in <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__traceflow__" title="pcapkit.foundation.extraction.Extractor.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Extractor.__traceflow__</span></code></a>, the
-<a class="reference internal" href="../../toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> function that makes its input from a frame. An
-enabled flow tracer with no entry is dropped at startup, with a warning,
-and an engine with none supports no flow tracing.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
-</div>
-</dd></dl>
-
+<p class="rubric">Flow Tracing</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.register_traceflow">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adapter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineBase.register_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.register_traceflow" title="Link to this definition">¶</a></dt>
@@ -930,6 +947,16 @@ all, if this engine supports no flow tracing.</p>
 them.</p>
 </dd></dl>
 
+<p class="rubric">Data Models</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineBase.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Start extraction.</p>
+<p>This method will directly call <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.run" title="pcapkit.foundation.engines.engine.EngineBase.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> to start the
+extraction process.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.run">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineBase.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.run" title="Link to this definition">¶</a></dt>
@@ -959,26 +986,6 @@ return the parsed frame.</p>
 <dd><p>Close engine.</p>
 <p>This method is to be used for closing the engine instance. It is to
 close the engine instance after the extraction process is finished.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineBase.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Start extraction.</p>
-<p>This method will directly call <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.run" title="pcapkit.foundation.engines.engine.EngineBase.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> to start the
-extraction process.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__engine_name__">
-<span class="sig-name descname"><span class="pre">__engine_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_name__" title="Link to this definition">¶</a></dt>
-<dd><p>Engine name.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__engine_module__">
-<span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_module__" title="Link to this definition">¶</a></dt>
-<dd><p>Engine module name.</p>
 </dd></dl>
 
 </dd></dl>

@@ -748,6 +748,7 @@ at port 5684 (<code class="docutils literal notranslate"><span class="pre">coaps
 other DTLS-borne services; bind more with
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_udp" title="pcapkit.foundation.registry.protocols.transport.register_udp"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.transport.register_udp()</span></code></a>.</p>
 </div>
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.protocol.DTLS.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Datagram</span> <span class="pre">Transport</span> <span class="pre">Layer</span> <span class="pre">Security'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.dtls.protocol.DTLS.name" title="Link to this definition">¶</a></dt>
@@ -769,6 +770,7 @@ connection ID’s length more for a <code class="docutils literal notranslate"><
 header’s length follows from its first octet and its connection ID.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.protocol.DTLS.id">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls/protocol.html#DTLS.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.protocol.DTLS.id" title="Link to this definition">¶</a></dt>
@@ -960,6 +962,7 @@ installed.</p>
 </dl>
 </dd></dl>
 
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.protocol.DTLS.__length_hint__">
 <span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls/protocol.html#DTLS.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.protocol.DTLS.__length_hint__" title="Link to this definition">¶</a></dt>
@@ -990,6 +993,7 @@ dispatches here (<a class="reference internal" href="../../../contributing/conve
 </dl>
 </dd></dl>
 
+<p class="rubric">Utilities</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.protocol.DTLS._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls/protocol.html#DTLS._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.protocol.DTLS._make_data" title="Link to this definition">¶</a></dt>
@@ -1052,6 +1056,7 @@ room for its record-number sample, which rules most such readings out.</p>
     <code class="docutils literal notranslate"><span class="pre">cid_length</span></code> is not an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> from 1 to 255.</p>
 </dd>
 </dl>
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.protocol.DTLSContext.connection_ids">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">connection_ids</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.dtls.protocol.DTLSContext.connection_ids" title="Link to this definition">¶</a></dt>
@@ -1064,6 +1069,7 @@ room for its record-number sample, which rules most such readings out.</p>
 <dd><p>Connection ID length of a record that no registered one opens.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.protocol.DTLSContext.protocol">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls/protocol.html#DTLSContext.protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.protocol.DTLSContext.protocol" title="Link to this definition">¶</a></dt>

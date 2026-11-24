@@ -38,13 +38,21 @@ which implements an extractor for File Transfer Protocol
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
+
+   .. rubric:: Methods
 
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 

@@ -97,47 +97,9 @@ An extraction runs in this order; a third-party engine implements its own
    :no-members:
    :show-inheritance:
 
-   .. automethod:: __init__
-
-   .. autoproperty:: length
-   .. autoproperty:: format
-   .. autoproperty:: input
-   .. autoproperty:: output
-   .. autoproperty:: frame
-   .. autoproperty:: reassembly
-   .. autoproperty:: traceflow
-   .. autoproperty:: engine
-   .. autoproperty:: magic_number
-
-   .. automethod:: register_dumper
-   .. automethod:: register_engine
-   .. automethod:: register_reassembly
-   .. automethod:: register_traceflow
-
-   .. automethod:: make_reassembly
-   .. automethod:: make_traceflow
-
-   .. automethod:: run
-
-   .. automethod:: import_test
-   .. automethod:: make_name
-
-   .. automethod:: record_header
-   .. automethod:: _open_output
-   .. automethod:: record_frames
-
-   .. autoattribute:: __output__
-      :no-value:
-   .. autoattribute:: __engine__
-      :no-value:
-   .. autoattribute:: __reassembly__
-      :no-value:
-   .. autoattribute:: __traceflow__
-      :no-value:
-
-   .. automethod:: _cleanup
-   .. automethod:: _release
-
+   .. autoattribute:: _ifnm
+   .. autoattribute:: _ofnm
+   .. autoattribute:: _fext
    .. autoattribute:: _flag_a
    .. autoattribute:: _flag_d
    .. autoattribute:: _flag_e
@@ -149,32 +111,72 @@ An extraction runs in this order; a third-party engine implements its own
    .. autoattribute:: _flag_v
    .. autoattribute:: _flag_n
    .. autoattribute:: _flag_s
-
-   .. autoattribute:: _ifile
-   .. autoattribute:: _finalizer
-   .. autoattribute:: _ofile
-   .. autoattribute:: _ifnm
-   .. autoattribute:: _ofnm
-   .. autoattribute:: _fext
-   .. autoattribute:: _offmt
-   .. autoattribute:: _magic
-
+   .. autoattribute:: _vfunc
+   .. autoattribute:: _vfunc_default
    .. autoattribute:: _frnum
    .. autoattribute:: _frame
    .. autoattribute:: _reasm
    .. autoattribute:: _trace
-
-   .. autoattribute:: _eof_mark
-   .. autoattribute:: _vfunc
-   .. autoattribute:: _vfunc_default
-
+   .. autoattribute:: _exptl
+   .. autoattribute:: _exlyr
+   .. autoattribute:: _exctx
    .. autoattribute:: _exnam
    .. autoattribute:: _exeng
+   .. autoattribute:: _ifile
+   .. autoattribute:: _finalizer
+   .. autoattribute:: _ofile
+   .. autoattribute:: _eof_mark
+   .. autoattribute:: _magic
+   .. autoattribute:: _offmt
 
-   .. autoattribute:: _exlyr
-   .. autoattribute:: _exptl
-   .. autoattribute:: _exctx
+   .. rubric:: Defaults
 
+   .. autoattribute:: __output__
+      :no-value:
+   .. autoattribute:: __engine__
+      :no-value:
+   .. autoattribute:: __reassembly__
+      :no-value:
+   .. autoattribute:: __traceflow__
+      :no-value:
+
+   .. rubric:: Properties
+
+   .. autoproperty:: length
+   .. autoproperty:: format
+   .. autoproperty:: input
+   .. autoproperty:: output
+   .. autoproperty:: frame
+   .. autoproperty:: reassembly
+   .. autoproperty:: traceflow
+   .. autoproperty:: engine
+   .. autoproperty:: magic_number
+
+   .. rubric:: Methods
+
+   .. automethod:: register_dumper
+   .. automethod:: register_engine
+
+   .. automethod:: _register_internal_engine
+
+   .. automethod:: register_reassembly
+   .. automethod:: make_reassembly
+
+   .. automethod:: register_traceflow
+   .. automethod:: make_traceflow
+
+   .. automethod:: run
+
+   .. automethod:: import_test
+   .. automethod:: make_name
+
+   .. automethod:: record_header
+   .. automethod:: _open_output
+   .. automethod:: record_frames
+
+   .. rubric:: Data Models
+
+   .. automethod:: __init__
    .. automethod:: __iter__
    .. automethod:: __next__
    .. automethod:: __call__
@@ -182,9 +184,13 @@ An extraction runs in this order; a third-party engine implements its own
    .. automethod:: __enter__
    .. automethod:: __exit__
    .. automethod:: __del__
-   .. automethod:: _register_internal_engine
+
+   .. rubric:: Utilities
+
    .. automethod:: _owns_input
    .. automethod:: _note_eof_progress
+   .. automethod:: _cleanup
+   .. automethod:: _release
 
 Type Variables
 --------------

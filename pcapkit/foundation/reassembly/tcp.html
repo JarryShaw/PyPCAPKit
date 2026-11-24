@@ -678,6 +678,49 @@ kept the later octets without a record (<a class="extlink-issue reference extern
 <p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">__window__</span></code>, now <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.TCP_GAP_LIMIT" title="pcapkit.utilities.config.TCP_GAP_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">TCP_GAP_LIMIT</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>).</p>
 </div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__">
+<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.15)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
+<dd><p>List of callback functions upon reassembled datagram.</p>
+</dd></dl>
+
+<p class="rubric">Defaults</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__">
+<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol name of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.protocol.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__timeout__">
+<span class="sig-name descname"><span class="pre">__timeout__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">inf</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__timeout__" title="Link to this definition">¶</a></dt>
+<dd><p>Default reassembly timeout – <strong>disabled</strong>, unlike IPv4 and IPv6.</p>
+<p>No specification gives TCP stream reassembly a deadline the way
+<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> and <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> give IP
+fragmentation one, and the numbers that look like candidates are not
+reassembly timeouts: the Maximum Segment Lifetime of
+<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4.1"><strong>RFC 9293 Section 3.4.1</strong></a> bounds how long a <em>segment</em> may linger in the
+network, and the user timeout of <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10.8"><strong>RFC 9293 Section 3.10.8</strong></a> aborts a
+connection whose data goes unacknowledged. Picking either as a default
+would silently discard buffered stream data on captures that are merely
+idle – a long-lived connection with a two-minute lull is ordinary, while
+a 60-second gap between fragments of one IP datagram is pathological.</p>
+<p>So the mechanism is available and the default is off: pass <code class="docutils literal notranslate"><span class="pre">timeout</span></code> to
+ask for one, e.g. <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">120</span></code> for 2·MSL if that is the policy wanted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.reassembly">
 <span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="Link to this definition">¶</a></dt>
@@ -707,66 +750,6 @@ SYN’s header and counts as having seen it.</p></li>
 <dd class="field-odd"><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet" title="pcapkit.foundation.reassembly.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – <a class="reference internal" href="#term-reasm.tcp.packet"><span class="xref std std-term">info</span></a> dict of packets to be reassembled</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="Link to this definition">¶</a></dt>
-<dd><p>Submit reassembled payload.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>buf</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer" title="pcapkit.foundation.reassembly.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a></span>) – <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">buffer</span></a> dict of reassembled packets</p></li>
-<li><p><strong>bufid</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – buffer identifier</p></li>
-<li><p><strong>expired</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether this buffer is being submitted because
-<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a>
-abandoned it under the reassembly timeout</p></li>
-<li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether <code class="docutils literal notranslate"><span class="pre">buf</span></code> has left
-<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a>
-for good, so its datagrams join
-<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a>
-before the callbacks run, and one that raises cannot lose them</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Reassembled <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">packets</span></a>. Where the payload
-is one contiguous run, its <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the parse
-<a class="reference internal" href="../analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a> runs, by this
-reassembly’s own
-<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="pcapkit.foundation.reassembly.reassembly.Reassembly.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>,
-deferred to its first read.</p>
-</dd>
-</dl>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> pair handed to
-<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> is a pair
-of <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> members rather than
-of the bare port numbers <code class="xref py py-data docutils literal notranslate"><span class="pre">BufferID</span></code> holds (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a>), so
-a deferred analysis dispatches on the named service rather than on a
-number. The resolution is <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport._make_port" title="pcapkit.protocols.transport.transport.Transport._make_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport._make_port</span></code></a>, so it
-is the one the maker path uses and cannot drift from it. See
-<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ports()</span></code></a> for why it is reached through
-<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.protocol</span></code>.</p>
-<p>For a <em>registered</em> port that is the very member
-<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP.src" title="pcapkit.protocols.transport.tcp.protocol.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a> reads off
-a parsed header. For an unassigned one the two are <strong>equal but not
-identical</strong>, and not even equally named: the parse path builds its
-member through <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField._unregistered_member" title="pcapkit.corekit.fields.numbers.EnumField._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumField._unregistered_member</span></code></a>,
-whose <code class="docutils literal notranslate"><span class="pre">.name</span></code> is <code class="docutils literal notranslate"><span class="pre">'&lt;unassigned&gt;'</span></code>, where <code class="docutils literal notranslate"><span class="pre">get</span></code> builds its own,
-named <code class="docutils literal notranslate"><span class="pre">'unknown'</span></code> – measured on port <code class="docutils literal notranslate"><span class="pre">50000</span></code>. Both are real
-members of the same registry carrying the same <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AppType.port</span></code></a>, which is what
-every reader of this pair goes on to use, so the distinction costs
-nothing here; it is recorded because “the same member the header
-carries” would be an overstatement of it.</p>
-</div>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">timeout</span></code> is renamed <code class="docutils literal notranslate"><span class="pre">expired</span></code>, with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2839">#2839</a>).</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -840,45 +823,64 @@ the analyser.</p>
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__">
-<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TCP'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_name__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol name of current reassembly object.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__">
-<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.protocol.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol of current reassembly object.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__">
-<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.15)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
-<dd><p>List of callback functions upon reassembled datagram.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__timeout__">
-<span class="sig-name descname"><span class="pre">__timeout__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">inf</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__timeout__" title="Link to this definition">¶</a></dt>
-<dd><p>Default reassembly timeout – <strong>disabled</strong>, unlike IPv4 and IPv6.</p>
-<p>No specification gives TCP stream reassembly a deadline the way
-<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> and <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> give IP
-fragmentation one, and the numbers that look like candidates are not
-reassembly timeouts: the Maximum Segment Lifetime of
-<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4.1"><strong>RFC 9293 Section 3.4.1</strong></a> bounds how long a <em>segment</em> may linger in the
-network, and the user timeout of <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10.8"><strong>RFC 9293 Section 3.10.8</strong></a> aborts a
-connection whose data goes unacknowledged. Picking either as a default
-would silently discard buffered stream data on captures that are merely
-idle – a long-lived connection with a two-minute lull is ordinary, while
-a 60-second gap between fragments of one IP datagram is pathological.</p>
-<p>So the mechanism is available and the default is off: pass <code class="docutils literal notranslate"><span class="pre">timeout</span></code> to
-ask for one, e.g. <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">120</span></code> for 2·MSL if that is the policy wanted.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submit reassembled payload.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>buf</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer" title="pcapkit.foundation.reassembly.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a></span>) – <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">buffer</span></a> dict of reassembled packets</p></li>
+<li><p><strong>bufid</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – buffer identifier</p></li>
+<li><p><strong>expired</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether this buffer is being submitted because
+<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a>
+abandoned it under the reassembly timeout</p></li>
+<li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether <code class="docutils literal notranslate"><span class="pre">buf</span></code> has left
+<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a>
+for good, so its datagrams join
+<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a>
+before the callbacks run, and one that raises cannot lose them</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Reassembled <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">packets</span></a>. Where the payload
+is one contiguous run, its <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the parse
+<a class="reference internal" href="../analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a> runs, by this
+reassembly’s own
+<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="pcapkit.foundation.reassembly.reassembly.Reassembly.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>,
+deferred to its first read.</p>
 </dd>
 </dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> pair handed to
+<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> is a pair
+of <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> members rather than
+of the bare port numbers <code class="xref py py-data docutils literal notranslate"><span class="pre">BufferID</span></code> holds (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a>), so
+a deferred analysis dispatches on the named service rather than on a
+number. The resolution is <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport._make_port" title="pcapkit.protocols.transport.transport.Transport._make_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport._make_port</span></code></a>, so it
+is the one the maker path uses and cannot drift from it. See
+<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ports()</span></code></a> for why it is reached through
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.protocol</span></code>.</p>
+<p>For a <em>registered</em> port that is the very member
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP.src" title="pcapkit.protocols.transport.tcp.protocol.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a> reads off
+a parsed header. For an unassigned one the two are <strong>equal but not
+identical</strong>, and not even equally named: the parse path builds its
+member through <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField._unregistered_member" title="pcapkit.corekit.fields.numbers.EnumField._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumField._unregistered_member</span></code></a>,
+whose <code class="docutils literal notranslate"><span class="pre">.name</span></code> is <code class="docutils literal notranslate"><span class="pre">'&lt;unassigned&gt;'</span></code>, where <code class="docutils literal notranslate"><span class="pre">get</span></code> builds its own,
+named <code class="docutils literal notranslate"><span class="pre">'unknown'</span></code> – measured on port <code class="docutils literal notranslate"><span class="pre">50000</span></code>. Both are real
+members of the same registry carrying the same <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AppType.port</span></code></a>, which is what
+every reader of this pair goes on to use, so the distinction costs
+nothing here; it is recorded because “the same member the header
+carries” would be an overstatement of it.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">timeout</span></code> is renamed <code class="docutils literal notranslate"><span class="pre">expired</span></code>, with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2839">#2839</a>).</p>
+</div>
 </dd></dl>
 
 </dd></dl>

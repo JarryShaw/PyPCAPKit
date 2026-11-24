@@ -12,6 +12,8 @@ which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protoc
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __layer__
       :no-value:
 
@@ -23,10 +25,16 @@ which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protoc
 
    .. autoattribute:: _exthdr_depth
 
+   .. rubric:: Properties
+
    .. autoproperty:: layer
+
+   .. rubric:: Methods
 
    .. automethod:: register
    .. automethod:: from_data
+
+   .. rubric:: Utilities
 
    .. automethod:: _next_exthdr_depth
    .. automethod:: _rebuilt_exthdr_depth

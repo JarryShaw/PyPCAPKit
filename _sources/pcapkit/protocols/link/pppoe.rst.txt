@@ -36,14 +36,22 @@ layer, and a session packet a PPP frame.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: code
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _make_tag

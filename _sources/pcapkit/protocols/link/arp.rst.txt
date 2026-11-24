@@ -50,6 +50,8 @@ Protocol (ARP) [*]_, whose structure is:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -57,11 +59,17 @@ Protocol (ARP) [*]_, whose structure is:
    .. autoproperty:: dst
    .. autoproperty:: type
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_addr_resolve

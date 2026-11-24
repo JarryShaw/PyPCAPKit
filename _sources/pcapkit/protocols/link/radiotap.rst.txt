@@ -115,6 +115,8 @@ as ``fields`` and encodes them with zero padding.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
 
@@ -124,9 +126,13 @@ as ``fields`` and encodes them with zero padding.
    .. autoattribute:: __field__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
+
+   .. rubric:: Methods
 
    .. automethod:: id
    .. automethod:: read
@@ -134,8 +140,12 @@ as ``fields`` and encodes them with zero padding.
    .. automethod:: register
    .. automethod:: register_field
 
+   .. rubric:: Data Models
+
    .. automethod:: __length_hint__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_radiotap_fields

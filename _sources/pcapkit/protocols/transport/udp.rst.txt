@@ -22,21 +22,31 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
 
    .. autoattribute:: __proto_key__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
    .. autoproperty:: dst
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _verify_pseudo_checksum

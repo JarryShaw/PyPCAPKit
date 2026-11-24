@@ -853,6 +853,7 @@ parameter of <span class="target" id="index-4"></span><a class="rfc reference ex
 chunk or parameter, and the first DATA or I-DATA chunk, rather than the
 first DATA chunk, picks the next layer (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2811">#2811</a>).</p>
 </div>
+<p class="rubric">Defaults</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="Link to this definition">¶</a></dt>
@@ -912,6 +913,7 @@ has no such method; any other value is a <code class="docutils literal notransla
 of callables.</p>
 </dd></dl>
 
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.protocol.SCTP.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Stream</span> <span class="pre">Control</span> <span class="pre">Transmission</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.name" title="Link to this definition">¶</a></dt>
@@ -960,6 +962,7 @@ involves no IP pseudo-header, so it can be verified from the SCTP packet
 alone. See <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a>.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.protocol.SCTP.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/sctp/protocol.html#SCTP.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.read" title="Link to this definition">¶</a></dt>
@@ -1223,6 +1226,7 @@ chunk.</p>
 </dl>
 </dd></dl>
 
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.protocol.SCTP.__index__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/sctp/protocol.html#SCTP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__index__" title="Link to this definition">¶</a></dt>
@@ -1237,6 +1241,7 @@ chunk.</p>
 </dl>
 </dd></dl>
 
+<p class="rubric">Utilities</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.protocol.SCTP._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/sctp/protocol.html#SCTP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.sctp.protocol.SCTP._make_data" title="Link to this definition">¶</a></dt>

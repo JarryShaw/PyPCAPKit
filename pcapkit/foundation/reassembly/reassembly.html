@@ -695,6 +695,140 @@ one table every reassembly registration lands in.</p>
 </div>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__">
+<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol name of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol of current reassembly object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__">
+<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.15)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__" title="Link to this definition">¶</a></dt>
+<dd><p>List of callback functions upon reassembled datagram.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_s">
+<span class="sig-name descname"><span class="pre">_flag_s</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_s" title="Link to this definition">¶</a></dt>
+<dd><p>Strict mode flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, a datagram
+not completely reassembled is reported as the tuple of its
+received runs; otherwise, as one contiguous payload, its
+holes zero-filled – or, for IP while the total length is
+unknown, only the prefix up to the first hole.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d">
+<span class="sig-name descname"><span class="pre">_flag_d</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d" title="Link to this definition">¶</a></dt>
+<dd><p>Store mode flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, all
+reassembled datagram will be stored in memory, i.e.,
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>; otherwise, datagram
+will be discarded after callback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_n">
+<span class="sig-name descname"><span class="pre">_flag_n</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_n" title="Link to this definition">¶</a></dt>
+<dd><p>New datagram flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, the
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a> will be repopulated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_c">
+<span class="sig-name descname"><span class="pre">_flag_c</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_c" title="Link to this definition">¶</a></dt>
+<dd><p>Callback flag. Set while the callbacks run, so a callback
+reading <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> gets <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
+rather than a submission that would run them again.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._timeout">
+<span class="sig-name descname"><span class="pre">_timeout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._timeout" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly timeout in seconds, on the capture’s clock.
+<a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> disables expiry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer">
+<span class="sig-name descname"><span class="pre">_buffer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly._BT"><span class="pre">_BT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="Link to this definition">¶</a></dt>
+<dd><p>Dict buffer field. This field is used to
+store reassembled packets in the form of <code class="docutils literal notranslate"><span class="pre">{bufid:</span> <span class="pre">buffer}</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly._IT">_IT</a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly._BT">_BT</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram">
+<span class="sig-name descname"><span class="pre">_dtgram</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="Link to this definition">¶</a></dt>
+<dd><p>List reassembled datagram. This list is used
+to store reassembled datagrams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT">_DT</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Defaults</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__">
+<span class="sig-name descname"><span class="pre">__timeout__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">inf</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__" title="Link to this definition">¶</a></dt>
+<dd><p>Default reassembly timeout, in seconds, for this protocol –
+overridden per protocol, e.g.
+<a class="reference internal" href="ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__" title="pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.__timeout__</span></code></a>.
+<a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> means “never expire”, which is the base default because
+nothing here knows what a protocol’s specification asks for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Properties</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.timeout">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">timeout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.timeout" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly timeout, in seconds, of the current reassembly object.</p>
+<p>A buffer whose first-arriving fragment is older than this many seconds
+<strong>on the capture’s own clock</strong> is abandoned rather than held for the life
+of the object – see <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a>. <a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> disables expiry.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.count">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.count" title="Link to this definition">¶</a></dt>
@@ -717,15 +851,7 @@ submitting the outstanding buffers; see <a class="reference internal" href="#pca
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.timeout">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">timeout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.timeout" title="Link to this definition">¶</a></dt>
-<dd><p>Reassembly timeout, in seconds, of the current reassembly object.</p>
-<p>A buffer whose first-arriving fragment is older than this many seconds
-<strong>on the capture’s own clock</strong> is abandoned rather than held for the life
-of the object – see <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a>. <a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> disables expiry.</p>
-</dd></dl>
-
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="Link to this definition">¶</a></dt>
@@ -982,114 +1108,7 @@ it (<a class="extlink-issue reference external" href="https://github.com/JarrySh
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__">
-<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.15)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__callback_fn__" title="Link to this definition">¶</a></dt>
-<dd><p>List of callback functions upon reassembled datagram.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_s">
-<span class="sig-name descname"><span class="pre">_flag_s</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_s" title="Link to this definition">¶</a></dt>
-<dd><p>Strict mode flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, a datagram
-not completely reassembled is reported as the tuple of its
-received runs; otherwise, as one contiguous payload, its
-holes zero-filled – or, for IP while the total length is
-unknown, only the prefix up to the first hole.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d">
-<span class="sig-name descname"><span class="pre">_flag_d</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_d" title="Link to this definition">¶</a></dt>
-<dd><p>Store mode flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, all
-reassembled datagram will be stored in memory, i.e.,
-<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>; otherwise, datagram
-will be discarded after callback.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_n">
-<span class="sig-name descname"><span class="pre">_flag_n</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_n" title="Link to this definition">¶</a></dt>
-<dd><p>New datagram flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, the
-<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a> will be repopulated.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._flag_c">
-<span class="sig-name descname"><span class="pre">_flag_c</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._flag_c" title="Link to this definition">¶</a></dt>
-<dd><p>Callback flag. Set while the callbacks run, so a callback
-reading <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> gets <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
-rather than a submission that would run them again.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._timeout">
-<span class="sig-name descname"><span class="pre">_timeout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._timeout" title="Link to this definition">¶</a></dt>
-<dd><p>Reassembly timeout in seconds, on the capture’s clock.
-<a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> disables expiry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer">
-<span class="sig-name descname"><span class="pre">_buffer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly._BT"><span class="pre">_BT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="Link to this definition">¶</a></dt>
-<dd><p>Dict buffer field. This field is used to
-store reassembled packets in the form of <code class="docutils literal notranslate"><span class="pre">{bufid:</span> <span class="pre">buffer}</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly._IT">_IT</a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly._BT">_BT</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram">
-<span class="sig-name descname"><span class="pre">_dtgram</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="Link to this definition">¶</a></dt>
-<dd><p>List reassembled datagram. This list is used
-to store reassembled datagrams.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly._DT">_DT</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Call packet reassembly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – packet dict to be reassembled
-(detailed format described in corresponding protocol)</p>
-</dd>
-</dl>
-</dd></dl>
-
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__init_subclass__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#Reassembly.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__init_subclass__" title="Link to this definition">¶</a></dt>
@@ -1131,29 +1150,14 @@ registered; only the keyword decides registration.</p>
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__">
-<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol name of current reassembly object.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__">
-<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol of current reassembly object.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__">
-<span class="sig-name descname"><span class="pre">__timeout__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">inf</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__" title="Link to this definition">¶</a></dt>
-<dd><p>Default reassembly timeout, in seconds, for this protocol –
-overridden per protocol, e.g.
-<a class="reference internal" href="ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__" title="pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.__timeout__</span></code></a>.
-<a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> means “never expire”, which is the base default because
-nothing here knows what a protocol’s specification asks for.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Call packet reassembly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – packet dict to be reassembled
+(detailed format described in corresponding protocol)</p>
 </dd>
 </dl>
 </dd></dl>

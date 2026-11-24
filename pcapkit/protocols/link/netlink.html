@@ -657,6 +657,7 @@ registered – see the module docstring’s <em>Scope</em> section for why.
 <a class="reference internal" href="#pcapkit.protocols.link.netlink.protocol.Netlink.__proto__" title="pcapkit.protocols.link.netlink.protocol.Netlink.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a>
 ships empty, so that <a class="reference internal" href="#pcapkit.protocols.link.netlink.protocol.Netlink.register" title="pcapkit.protocols.link.netlink.protocol.Netlink.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> works the same way every other
 <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> subclass’s does.</p>
+<p class="rubric">Defaults</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.netlink.protocol.Netlink.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.netlink.protocol.Netlink.__proto__" title="Link to this definition">¶</a></dt>
@@ -666,6 +667,7 @@ key resolves through the <a class="reference external" href="https://docs.python
 <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
 </dd></dl>
 
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.netlink.protocol.Netlink.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Netlink'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.netlink.protocol.Netlink.name" title="Link to this definition">¶</a></dt>
@@ -690,6 +692,7 @@ key resolves through the <a class="reference external" href="https://docs.python
 <dd><p>Message type of the dissected <code class="docutils literal notranslate"><span class="pre">nlmsghdr</span></code>.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.netlink.protocol.Netlink.id">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/netlink/protocol.html#Netlink.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.netlink.protocol.Netlink.id" title="Link to this definition">¶</a></dt>
@@ -820,6 +823,7 @@ replacement; see <a class="reference internal" href="../protocol.html#pcapkit.pr
 </dl>
 </dd></dl>
 
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.netlink.protocol.Netlink.__length_hint__">
 <span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/netlink/protocol.html#Netlink.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.netlink.protocol.Netlink.__length_hint__" title="Link to this definition">¶</a></dt>
@@ -848,6 +852,7 @@ dispatches here.</p>
 </dl>
 </dd></dl>
 
+<p class="rubric">Utilities</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.netlink.protocol.Netlink._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/netlink/protocol.html#Netlink._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.netlink.protocol.Netlink._make_data" title="Link to this definition">¶</a></dt>

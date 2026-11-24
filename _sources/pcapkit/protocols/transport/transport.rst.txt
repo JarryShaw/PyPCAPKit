@@ -27,16 +27,26 @@ which is a base class for transport layer protocols, e.g.
 
          The attribute **must** be defined and maintained in subclass.
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __layer__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: layer
+
+   .. rubric:: Methods
 
    .. automethod:: register
    .. automethod:: analyze
    .. automethod:: from_data
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_port
    .. automethod:: _decode_next_layer

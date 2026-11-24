@@ -42,13 +42,19 @@ accepting bytes that cannot be a genuine record.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __extension__
       :no-value:
 
    .. autoattribute:: _dtls
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: register_extension
+
+   .. rubric:: Utilities
 
    .. automethod:: _read_ext_unknown
    .. automethod:: _read_ext_server_name

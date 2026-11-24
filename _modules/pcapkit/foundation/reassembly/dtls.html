@@ -656,6 +656,10 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[DTLS_Protocol]'</span>
 
+        <span class="c1">#: The message, if any, that the most recent call to :meth:`reassembly`</span>
+        <span class="c1">#: completed; see :attr:`last`.</span>
+        <span class="n">_last</span><span class="p">:</span> <span class="s1">'Optional[Datagram[_AT]]'</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
@@ -674,33 +678,6 @@
     <span class="c1"># DTLS handshake reassembly no timeout, so it inherits the base default,</span>
     <span class="c1"># :data:`math.inf`, and by default a buffer is held until its messages</span>
     <span class="c1"># complete or the capture ends.</span>
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Methods.</span>
-    <span class="c1">##########################################################################</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                 <span class="n">timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Initialise packet reassembly.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            strict: if :data:`True`, report a message that is not completely</span>
-<span class="sd">                reassembled as the tuple of its received runs; otherwise as</span>
-<span class="sd">                one contiguous payload, its holes zero-filled</span>
-<span class="sd">            store: if store reassembled datagram in memory</span>
-<span class="sd">            timeout: reassembly timeout in seconds, on the capture's own clock;</span>
-<span class="sd">                :data:`None` selects</span>
-<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``timeout`` is negative.</span>
-
-<span class="sd">        """</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
-
-        <span class="c1">#: Optional[Datagram[_AT]]: The message, if any, that the most recent</span>
-        <span class="c1">#: call to :meth:`reassembly` completed; see :attr:`last`.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">:</span> <span class="s1">'Optional[Datagram[_AT]]'</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -960,7 +937,32 @@
             <span class="c1"># step seven: go on to the next hole, since one fragment may span</span>
             <span class="c1"># several of them</span>
         <span class="n">hdl</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">new_hdl</span></div>
-</div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Initialise packet reassembly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            strict: if :data:`True`, report a message that is not completely</span>
+<span class="sd">                reassembled as the tuple of its received runs; otherwise as</span>
+<span class="sd">                one contiguous payload, its holes zero-filled</span>
+<span class="sd">            store: if store reassembled datagram in memory</span>
+<span class="sd">            timeout: reassembly timeout in seconds, on the capture's own clock;</span>
+<span class="sd">                :data:`None` selects</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__`</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``timeout`` is negative.</span>
+
+<span class="sd">        """</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 </pre></div>
         </article>

@@ -2196,11 +2196,14 @@ one interpreter, in file order and without xdist, which is a question about the 
 rather than the Python version.</p>
 <p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs a cell per half of <code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2798">#2798</a>), as its
 docs-only path, run whole, comes near the job’s cap. Both paths cut at
-<code class="docutils literal notranslate"><span class="pre">PROJECT_BOUNDARY</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>, where <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">project</span></code> cells cut too: a cell runs its half of the pins on a code diff, and its
-half of the leg on a docs-only one, half 1 the other docs readers as well.
+<code class="docutils literal notranslate"><span class="pre">PROJECT_BOUNDARY</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>, which <code class="docutils literal notranslate"><span class="pre">--half</span></code> of
+<code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code> cuts at too: a cell runs its half of the pins on a
+code diff, and its half of the leg on a docs-only one, half 1 the other docs readers
+as well. <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code> cells cut the leg in three instead, at the
+names its <code class="docutils literal notranslate"><span class="pre">SHARD_BOUNDARIES</span></code> holds, a <code class="docutils literal notranslate"><span class="pre">--part</span></code> per cell, as its cells for the rest
+of <code class="file docutils literal notranslate"><span class="pre">tests/protocols</span></code> do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2913">#2913</a>).
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_unittest_ordering_shards.py</span></code> fails when a module or a pin
-runs in neither cell or in both.</p>
+runs in no cell of a job or in two.</p>
 <p>A pin’s skip where <code class="docutils literal notranslate"><span class="pre">tomllib</span></code> is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> checks those skips in a child

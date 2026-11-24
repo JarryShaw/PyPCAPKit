@@ -682,24 +682,6 @@ stored that instead of a placeholder.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.packet.DeferredPacket.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/packet.html#DeferredPacket.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.packet.DeferredPacket.to_dict" title="Link to this definition">¶</a></dt>
-<dd><p>Convert the instance into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>meth:<cite>Info.to_dict
-&lt;pcapkit.corekit.infoclass.Info.to_dict&gt;</cite> exports them, with
-<code class="docutils literal notranslate"><span class="pre">packet</span></code> resolved if it had not been read yet – an export
-holding the placeholder would leak an implementation detail into
-what is meant to be plain data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.packet.DeferredPacket.__getattr__">
 <span class="sig-name descname"><span class="pre">__getattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/packet.html#DeferredPacket.__getattr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.packet.DeferredPacket.__getattr__" title="Link to this definition">¶</a></dt>
 <dd><p>Resolve <code class="docutils literal notranslate"><span class="pre">packet</span></code> on first access; any other missing name raises.</p>
@@ -715,6 +697,24 @@ what is meant to be plain data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><strong>AttributeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is not <code class="docutils literal notranslate"><span class="pre">packet</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.packet.DeferredPacket.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/packet.html#DeferredPacket.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.packet.DeferredPacket.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Convert the instance into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>meth:<cite>Info.to_dict
+&lt;pcapkit.corekit.infoclass.Info.to_dict&gt;</cite> exports them, with
+<code class="docutils literal notranslate"><span class="pre">packet</span></code> resolved if it had not been read yet – an export
+holding the placeholder would leak an implementation detail into
+what is meant to be plain data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>

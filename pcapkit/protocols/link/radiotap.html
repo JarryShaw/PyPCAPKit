@@ -743,6 +743,7 @@ registry below, keyed by the link type of the frame:</p>
 by its <a class="reference internal" href="../../const/radiotap.html#pcapkit.const.radiotap.field_type.FieldType" title="pcapkit.const.radiotap.field_type.FieldType"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldType</span></code></a>. See the
 module docstring’s <em>Scope</em> and <em>Field Decoding</em> sections for what is, and
 is not, decoded.</p>
+<p class="rubric">Defaults</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__" title="Link to this definition">¶</a></dt>
@@ -771,6 +772,7 @@ type missing from either has no layout and is kept raw. Presence bits 28 to
 docstring; a type from 32 on is reached as a TLV item only.</p>
 </dd></dl>
 
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.radiotap.protocol.Radiotap.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Radiotap'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.radiotap.protocol.Radiotap.name" title="Link to this definition">¶</a></dt>
@@ -794,6 +796,7 @@ exactly as captured, even when it disagrees with
 <a class="reference internal" href="#pcapkit.protocols.link.radiotap.protocol.Radiotap.read" title="pcapkit.protocols.link.radiotap.protocol.Radiotap.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.radiotap.protocol.Radiotap.id">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/radiotap/protocol.html#Radiotap.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.radiotap.protocol.Radiotap.id" title="Link to this definition">¶</a></dt>
@@ -968,6 +971,7 @@ so an override can be undone (<a class="extlink-issue reference external" href="
 </dl>
 </dd></dl>
 
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.radiotap.protocol.Radiotap.__length_hint__">
 <span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/radiotap/protocol.html#Radiotap.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.radiotap.protocol.Radiotap.__length_hint__" title="Link to this definition">¶</a></dt>
@@ -1002,6 +1006,7 @@ names its own key for this class, <code class="docutils literal notranslate"><sp
 </dl>
 </dd></dl>
 
+<p class="rubric">Utilities</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.radiotap.protocol.Radiotap._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/radiotap/protocol.html#Radiotap._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.radiotap.protocol.Radiotap._make_data" title="Link to this definition">¶</a></dt>

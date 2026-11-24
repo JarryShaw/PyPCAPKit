@@ -10,6 +10,8 @@ only, the base class of every vendor crawler.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Macros
+
    .. autoattribute:: NAME
    .. autoattribute:: DOCS
    .. autoattribute:: FLAG
@@ -18,19 +20,22 @@ only, the base class of every vendor crawler.
       :no-value:
    .. autoattribute:: PROTO_DEST
 
-   .. automethod:: count
-   .. automethod:: process
-   .. automethod:: context
+   .. rubric:: Processors
 
    .. automethod:: wrap_comment
    .. automethod:: safe_name
    .. automethod:: rename
-
+   .. automethod:: process
+   .. automethod:: count
+   .. automethod:: context
    .. automethod:: request
-   .. automethod:: _request
-   .. automethod:: _dest_path
+
+   .. rubric:: Defaults
 
    .. automethod:: __init__
+
+   .. automethod:: _dest_path
+   .. automethod:: _request
 
 Running a Crawler
 -----------------

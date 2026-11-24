@@ -692,12 +692,158 @@ table every flow tracing registration lands in. It is <em>not</em>
 </div>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__">
+<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol name of current flow tracing object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__">
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol of current flow tracing object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__">
+<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__" title="Link to this definition">¶</a></dt>
+<dd><p>List of callback functions upon a finalised flow.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._buffer">
+<span class="sig-name descname"><span class="pre">_buffer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._DT" title="pcapkit.foundation.traceflow.traceflow._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._BT" title="pcapkit.foundation.traceflow.traceflow._BT"><span class="pre">_BT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._buffer" title="Link to this definition">¶</a></dt>
+<dd><p>Buffer field (<a class="reference internal" href="tcp.html#term-trace.tcp.buffer"><span class="xref std std-term">trace.tcp.buffer</span></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._DT" title="pcapkit.foundation.traceflow.traceflow._DT">_DT</a>, <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._BT" title="pcapkit.foundation.traceflow.traceflow._BT">_BT</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._stream">
+<span class="sig-name descname"><span class="pre">_stream</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._stream" title="Link to this definition">¶</a></dt>
+<dd><p>Stream index (<a class="reference internal" href="tcp.html#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT">_IT</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._bidir">
+<span class="sig-name descname"><span class="pre">_bidir</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._bidir" title="Link to this definition">¶</a></dt>
+<dd><p>Bidirectional tracing flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, both halves
+of a conversation share one buffer entry, one label and one output
+file; otherwise each direction is a flow of its own.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fproot">
+<span class="sig-name descname"><span class="pre">_fproot</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fproot" title="Link to this definition">¶</a></dt>
+<dd><p>Output root path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._foutio">
+<span class="sig-name descname"><span class="pre">_foutio</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._foutio" title="Link to this definition">¶</a></dt>
+<dd><p>Dumper class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><em>Type</em></a>[<a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper">Dumper</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fdpext">
+<span class="sig-name descname"><span class="pre">_fdpext</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fdpext" title="Link to this definition">¶</a></dt>
+<dd><p>Output file extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fopen">
+<span class="sig-name descname"><span class="pre">_fopen</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.15)"><span class="pre">OrderedDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">dictdumper.dumper.Dumper</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fopen" title="Link to this definition">¶</a></dt>
+<dd><p>Dumpers keeping their flow’s
+output file open, by <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#id" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">id()</span></code></a>, least recently written first; see
+<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._write" title="pcapkit.foundation.traceflow.traceflow.TraceFlow._write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_write()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.15)">collections.OrderedDict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, <a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper">Dumper</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._endian">
+<span class="sig-name descname"><span class="pre">_endian</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._endian" title="Link to this definition">¶</a></dt>
+<dd><p>Output file byte order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[‘little’, ‘big’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._nnsecd">
+<span class="sig-name descname"><span class="pre">_nnsecd</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._nnsecd" title="Link to this definition">¶</a></dt>
+<dd><p>Output nanosecond-resolution file flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._analyze">
+<span class="sig-name descname"><span class="pre">_analyze</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._analyze" title="Link to this definition">¶</a></dt>
+<dd><p>Application-layer analysis flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, each
+flow reassembles the payload it carries so that its <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be
+read; otherwise no payload is buffered and <code class="docutils literal notranslate"><span class="pre">packet</span></code> is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Defaults</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__">
+<span class="sig-name descname"><span class="pre">__output__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">dictdumper.dumper.Dumper</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">dictdumper.dumper.Dumper</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__" title="Link to this definition">¶</a></dt>
+<dd><p>Format dumper mapping for writing output files. Each value pairs the dumper,
+as a module descriptor or a <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a> subclass, with
+the file extension of its format.</p>
+</dd></dl>
+
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.index">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">index</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.index" title="Link to this definition">¶</a></dt>
 <dd><p>Index table for traced flows.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper" title="Link to this definition">¶</a></dt>
@@ -859,6 +1005,20 @@ flow label itself.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.submit">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submit traced TCP flows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_IT</span></code>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Traced TCP flow (<a class="reference internal" href="tcp.html#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish">
 <span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="Link to this definition">¶</a></dt>
 <dd><p>Finalise every flow still being traced.</p>
@@ -893,20 +1053,6 @@ collected.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.submit">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.submit" title="Link to this definition">¶</a></dt>
-<dd><p>Submit traced TCP flows.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_IT</span></code>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Traced TCP flow (<a class="reference internal" href="tcp.html#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>).</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._write">
 <span class="sig-name descname"><span class="pre">_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._write" title="Link to this definition">¶</a></dt>
 <dd><p>Write a frame to a flow’s output file, keeping the file open.</p>
@@ -932,150 +1078,7 @@ open: past it, the one written least recently is closed, and reopened on
 its flow’s next frame.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__">
-<span class="sig-name descname"><span class="pre">__output__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">dictdumper.dumper.Dumper</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">dictdumper.dumper.Dumper</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__" title="Link to this definition">¶</a></dt>
-<dd><p>Format dumper mapping for writing output files. Each value pairs the dumper,
-as a module descriptor or a <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a> subclass, with
-the file extension of its format.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__">
-<span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__callback_fn__" title="Link to this definition">¶</a></dt>
-<dd><p>List of callback functions upon a finalised flow.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._buffer">
-<span class="sig-name descname"><span class="pre">_buffer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._DT" title="pcapkit.foundation.traceflow.traceflow._DT"><span class="pre">_DT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._BT" title="pcapkit.foundation.traceflow.traceflow._BT"><span class="pre">_BT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._buffer" title="Link to this definition">¶</a></dt>
-<dd><p>Buffer field (<a class="reference internal" href="tcp.html#term-trace.tcp.buffer"><span class="xref std std-term">trace.tcp.buffer</span></a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._DT" title="pcapkit.foundation.traceflow.traceflow._DT">_DT</a>, <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._BT" title="pcapkit.foundation.traceflow.traceflow._BT">_BT</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._stream">
-<span class="sig-name descname"><span class="pre">_stream</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._stream" title="Link to this definition">¶</a></dt>
-<dd><p>Stream index (<a class="reference internal" href="tcp.html#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT">_IT</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._bidir">
-<span class="sig-name descname"><span class="pre">_bidir</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._bidir" title="Link to this definition">¶</a></dt>
-<dd><p>Bidirectional tracing flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, both halves
-of a conversation share one buffer entry, one label and one output
-file; otherwise each direction is a flow of its own.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fproot">
-<span class="sig-name descname"><span class="pre">_fproot</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fproot" title="Link to this definition">¶</a></dt>
-<dd><p>Output root path.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._foutio">
-<span class="sig-name descname"><span class="pre">_foutio</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._foutio" title="Link to this definition">¶</a></dt>
-<dd><p>Dumper class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><em>Type</em></a>[<a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper">Dumper</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fdpext">
-<span class="sig-name descname"><span class="pre">_fdpext</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fdpext" title="Link to this definition">¶</a></dt>
-<dd><p>Output file extension.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Optional[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fopen">
-<span class="sig-name descname"><span class="pre">_fopen</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.15)"><span class="pre">OrderedDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><span class="pre">dictdumper.dumper.Dumper</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fopen" title="Link to this definition">¶</a></dt>
-<dd><p>Dumpers keeping their flow’s
-output file open, by <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#id" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">id()</span></code></a>, least recently written first; see
-<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._write" title="pcapkit.foundation.traceflow.traceflow.TraceFlow._write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_write()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.15)">collections.OrderedDict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, <a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper">Dumper</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._endian">
-<span class="sig-name descname"><span class="pre">_endian</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._endian" title="Link to this definition">¶</a></dt>
-<dd><p>Output file byte order.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Literal[‘little’, ‘big’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._nnsecd">
-<span class="sig-name descname"><span class="pre">_nnsecd</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._nnsecd" title="Link to this definition">¶</a></dt>
-<dd><p>Output nanosecond-resolution file flag.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._analyze">
-<span class="sig-name descname"><span class="pre">_analyze</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._analyze" title="Link to this definition">¶</a></dt>
-<dd><p>Application-layer analysis flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, each
-flow reassembles the payload it carries so that its <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be
-read; otherwise no payload is buffered and <code class="docutils literal notranslate"><span class="pre">packet</span></code> is
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Dump frame to output files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – a flow packet (<a class="reference internal" href="tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>)</p>
-</dd>
-</dl>
-<p>An error closes every output file kept open (<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.close" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a>), since the
-caller may then stop before <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a>.</p>
-</dd></dl>
-
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__init_subclass__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__init_subclass__" title="Link to this definition">¶</a></dt>
@@ -1117,16 +1120,17 @@ registered; only the keyword decides registration.</p>
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__">
-<span class="sig-name descname"><span class="pre">__protocol_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol name of current flow tracing object.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__">
-<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol of current flow tracing object.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Dump frame to output files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – a flow packet (<a class="reference internal" href="tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>)</p>
+</dd>
+</dl>
+<p>An error closes every output file kept open (<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.close" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a>), since the
+caller may then stop before <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>

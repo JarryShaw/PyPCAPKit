@@ -55,14 +55,23 @@ unregistered PPID's does:
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
+
+   .. rubric:: Methods
 
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __length_hint__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
+
    .. automethod:: _make_data
 
 Decoder Dependency

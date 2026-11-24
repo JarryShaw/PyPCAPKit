@@ -649,6 +649,20 @@ subclass its key’s annotation names.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__map__">
+<span class="sig-name descname"><span class="pre">__map__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__map__" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of name conflicts with builtin methods (original names to
+transformed names).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__map_reverse__">
+<span class="sig-name descname"><span class="pre">__map_reverse__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__map_reverse__" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of name conflicts with builtin methods (transformed names to
+original names).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__additional__">
 <span class="sig-name descname"><span class="pre">__additional__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__additional__" title="Link to this definition">¶</a></dt>
 <dd><p>List of additional built-in names.</p>
@@ -677,20 +691,6 @@ dunder is carried regardless. A subclass extends the list with its own
 names, as for <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>, so a custom <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> holding
 dunder keys of its own must list them here for <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> to keep
 them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__map__">
-<span class="sig-name descname"><span class="pre">__map__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__map__" title="Link to this definition">¶</a></dt>
-<dd><p>Mapping of name conflicts with builtin methods (original names to
-transformed names).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__map_reverse__">
-<span class="sig-name descname"><span class="pre">__map_reverse__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__map_reverse__" title="Link to this definition">¶</a></dt>
-<dd><p>Mapping of name conflicts with builtin methods (transformed names to
-original names).</p>
 </dd></dl>
 
 <dl class="py method">

@@ -47,6 +47,9 @@ which implements an extractor for PCAP-NG file format [*]_, and the
 
    .. autoattribute:: PACKET_TYPES
    .. autoattribute:: SHORT_HEADER_TYPES
+
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
 
@@ -65,6 +68,8 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    .. autoattribute:: __secrets__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: packet
@@ -77,6 +82,8 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    .. autoproperty:: linktype
    .. autoproperty:: block
 
+   .. rubric:: Methods
+
    .. automethod:: register
    .. automethod:: register_block
    .. automethod:: register_option
@@ -88,9 +95,13 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    .. automethod:: read
    .. automethod:: make
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __length_hint__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_block_short

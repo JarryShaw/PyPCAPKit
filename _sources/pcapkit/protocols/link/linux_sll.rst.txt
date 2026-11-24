@@ -33,19 +33,27 @@ whose data model it is handed (:issue:`2574`).
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
 
    .. autoattribute:: __proto_key__
       :no-value:
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: register
    .. automethod:: from_data
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
    .. automethod:: __init__
    .. automethod:: __new__
+
+   .. rubric:: Utilities
 
    .. automethod:: _import_next_layer
    .. automethod:: _member_of_version

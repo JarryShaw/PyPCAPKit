@@ -28,8 +28,8 @@ Base Fields
 
    .. autoattribute:: _name
    .. autoattribute:: _template
-   .. autoattribute:: _default
    .. autoattribute:: _callback
+   .. autoattribute:: _default
 
 Internal Definitions
 --------------------

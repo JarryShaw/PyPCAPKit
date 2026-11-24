@@ -37,6 +37,6 @@ object.
 
    .. automethod:: __init_subclass__
    .. automethod:: __analyse__
-   .. automethod:: to_dict
-
    .. automethod:: __getattr__
+
+   .. automethod:: to_dict

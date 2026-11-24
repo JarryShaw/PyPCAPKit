@@ -665,6 +665,7 @@ rather than overwriting the octets it overlaps. IPv4 overwrites them
 </dl>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP.reassembly">
 <span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP.reassembly" title="Link to this definition">¶</a></dt>
@@ -684,51 +685,6 @@ datagram, <code class="docutils literal notranslate"><span class="pre">PARTIAL</
 it expires first. This is intended, is permitted by
 <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a>, and matches Linux, Zeek and Wireshark
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1507">#1507</a>).</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP.submit" title="Link to this definition">¶</a></dt>
-<dd><p>Submit reassembled payload.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>buf</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer" title="pcapkit.foundation.reassembly.data.ip.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – buffer dict of reassembled packets</p></li>
-<li><p><strong>bufid</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="../../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a>]</span>) – buffer identifier</p></li>
-<li><p><strong>checked</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – buffer consistency checked flag</p></li>
-<li><p><strong>expired</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether this buffer is being submitted because
-<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a>
-abandoned it under the reassembly timeout, which is what
-separates
-<a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT" title="pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code></a>
-from
-<a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL" title="pcapkit.foundation.reassembly.data.data.Completion.PARTIAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.PARTIAL</span></code></a></p></li>
-<li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether this buffer is being submitted because an
-overlapping fragment abandoned it (<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP.__discard_overlap__" title="pcapkit.foundation.reassembly.ip.IP.__discard_overlap__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__discard_overlap__</span></code></a>),
-reported as <a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Completion.OVERLAP" title="pcapkit.foundation.reassembly.data.data.Completion.OVERLAP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.OVERLAP</span></code></a>
-and never as complete</p></li>
-<li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether <code class="docutils literal notranslate"><span class="pre">buf</span></code> has left
-<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a>
-for good, so its datagrams join
-<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a>
-before the callbacks run, and one that raises cannot lose them</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram" title="pcapkit.foundation.reassembly.data.ip.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Reassembled packets. Where the payload is one contiguous run, its
-<code class="docutils literal notranslate"><span class="pre">packet</span></code> is the parse
-<a class="reference internal" href="../../analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a> runs, by this
-reassembly’s own
-<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="pcapkit.foundation.reassembly.reassembly.Reassembly.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>,
-deferred to its first read.</p>
-</dd>
-</dl>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">timeout</span></code> is renamed <code class="docutils literal notranslate"><span class="pre">expired</span></code>, with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2839">#2839</a>).</p>
 </div>
 </dd></dl>
 
@@ -815,6 +771,51 @@ one, or <a class="reference external" href="https://docs.python.org/3/builtins/c
 <p>Since the extents are disjoint, only the last one starting at or before
 <code class="docutils literal notranslate"><span class="pre">start</span></code> and the first one starting after it can reach the arriving
 fragment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submit reassembled payload.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>buf</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer" title="pcapkit.foundation.reassembly.data.ip.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – buffer dict of reassembled packets</p></li>
+<li><p><strong>bufid</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="../../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a>]</span>) – buffer identifier</p></li>
+<li><p><strong>checked</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – buffer consistency checked flag</p></li>
+<li><p><strong>expired</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether this buffer is being submitted because
+<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a>
+abandoned it under the reassembly timeout, which is what
+separates
+<a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT" title="pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code></a>
+from
+<a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL" title="pcapkit.foundation.reassembly.data.data.Completion.PARTIAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.PARTIAL</span></code></a></p></li>
+<li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether this buffer is being submitted because an
+overlapping fragment abandoned it (<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP.__discard_overlap__" title="pcapkit.foundation.reassembly.ip.IP.__discard_overlap__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__discard_overlap__</span></code></a>),
+reported as <a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Completion.OVERLAP" title="pcapkit.foundation.reassembly.data.data.Completion.OVERLAP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.OVERLAP</span></code></a>
+and never as complete</p></li>
+<li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether <code class="docutils literal notranslate"><span class="pre">buf</span></code> has left
+<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a>
+for good, so its datagrams join
+<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_dtgram</span></code></a>
+before the callbacks run, and one that raises cannot lose them</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram" title="pcapkit.foundation.reassembly.data.ip.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Reassembled packets. Where the payload is one contiguous run, its
+<code class="docutils literal notranslate"><span class="pre">packet</span></code> is the parse
+<a class="reference internal" href="../../analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a> runs, by this
+reassembly’s own
+<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="pcapkit.foundation.reassembly.reassembly.Reassembly.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>,
+deferred to its first read.</p>
+</dd>
+</dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">timeout</span></code> is renamed <code class="docutils literal notranslate"><span class="pre">expired</span></code>, with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2839">#2839</a>).</p>
+</div>
 </dd></dl>
 
 </dd></dl>

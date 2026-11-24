@@ -32,21 +32,31 @@ An NLPID of ``0x80``, with or without the pad, is followed by a SNAP header, a
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
+
+   .. rubric:: Properties
 
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: protocol
 
+   .. rubric:: Methods
+
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register
 
+   .. rubric:: Data Models
+
    .. automethod:: __length_hint__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _import_next_layer

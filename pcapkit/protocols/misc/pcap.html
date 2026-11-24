@@ -636,6 +636,7 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.misc.pcap.he
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.resolve_index" title="pcapkit.protocols.protocol.Protocol.resolve_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resolve_index()</span></code></a> first
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p>
 </div>
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.protocol.Header.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Global</span> <span class="pre">Header'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.protocol.Header.name" title="Link to this definition">¶</a></dt>
@@ -694,6 +695,7 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.misc.pcap.he
 <dd><p>Nanosecond-resolution flag.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.protocol.Header.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header/protocol.html#Header.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.protocol.Header.read" title="Link to this definition">¶</a></dt>
@@ -764,6 +766,7 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.misc.pcap.he
 </dl>
 </dd></dl>
 
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.protocol.Header.__post_init__">
 <span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header/protocol.html#Header.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.protocol.Header.__post_init__" title="Link to this definition">¶</a></dt>
@@ -810,6 +813,7 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.misc.pcap.he
 </dl>
 </dd></dl>
 
+<p class="rubric">Utilities</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.protocol.Header._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header/protocol.html#Header._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.protocol.Header._make_data" title="Link to this definition">¶</a></dt>
@@ -1081,6 +1085,7 @@ attribute:</p>
 <p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType.RAW" title="pcapkit.const.reg.linktype.LinkType.RAW"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.const.reg.linktype.LinkType.RAW</span></code></a> has no entry of its own:
 its data is dispatched as <code class="docutils literal notranslate"><span class="pre">IPV4</span></code> or <code class="docutils literal notranslate"><span class="pre">IPV6</span></code> by the version nibble of
 its first octet, see <a class="reference internal" href="#pcapkit.protocols.misc.pcap.frame.protocol.Frame._dispatch_linktype" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame._dispatch_linktype"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch_linktype()</span></code></a>.</p>
+<p class="rubric">Defaults</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__" title="Link to this definition">¶</a></dt>
@@ -1104,6 +1109,7 @@ checks a <code class="docutils literal notranslate"><span class="pre">code=</spa
 is keyed by the same enum, declares its own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
 </dd></dl>
 
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.protocol.Frame.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.protocol.Frame.name" title="Link to this definition">¶</a></dt>
@@ -1122,6 +1128,7 @@ is keyed by the same enum, declares its own (<a class="extlink-issue reference e
 <dd><p>Global header of the PCAP file.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.protocol.Frame.register">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/frame/protocol.html#Frame.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.protocol.Frame.register" title="Link to this definition">¶</a></dt>
@@ -1283,6 +1290,7 @@ captured.</p>
 </dl>
 </dd></dl>
 
+<p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.protocol.Frame.__post_init__">
 <span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/frame/protocol.html#Frame.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.protocol.Frame.__post_init__" title="Link to this definition">¶</a></dt>
@@ -1332,6 +1340,7 @@ frame index number of itself; else raises
 </dl>
 </dd></dl>
 
+<p class="rubric">Utilities</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.protocol.Frame._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/frame/protocol.html#Frame._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.protocol.Frame._make_data" title="Link to this definition">¶</a></dt>

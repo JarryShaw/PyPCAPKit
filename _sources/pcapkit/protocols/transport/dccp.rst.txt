@@ -34,6 +34,8 @@ header 12 octets long. The fields of the packet type, then the options, follow.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __proto__
       :no-value:
 
@@ -43,16 +45,24 @@ header 12 octets long. The fields of the packet type, then the options, follow.
    .. autoattribute:: __option__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
    .. autoproperty:: dst
 
+   .. rubric:: Methods
+
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register_option
 
+   .. rubric:: Data Models
+
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_dccp_options

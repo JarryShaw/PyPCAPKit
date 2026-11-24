@@ -154,9 +154,13 @@ ones on the wire.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
+
+   .. rubric:: Methods
 
    .. automethod:: id
 
@@ -166,8 +170,12 @@ ones on the wire.
    .. automethod:: read_handshake
    .. automethod:: analyze_handshake
 
+   .. rubric:: Data Models
+
    .. automethod:: __length_hint__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
 
@@ -175,8 +183,12 @@ ones on the wire.
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Properties
+
    .. autoproperty:: connection_ids
    .. autoproperty:: cid_length
+
+   .. rubric:: Methods
 
    .. automethod:: protocol
    .. automethod:: register

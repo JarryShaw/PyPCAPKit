@@ -49,21 +49,8 @@ follow :rfc:`791` and :rfc:`815`.
          :attr:`~pcapkit.foundation.extraction.Extractor.__reassembly__`, the
          one table every reassembly registration lands in.
 
-   .. autoproperty:: count
-   .. autoproperty:: datagram
-   .. autoproperty:: timeout
-
-   .. automethod:: reassembly
-   .. automethod:: submit
-   .. automethod:: _release
-   .. automethod:: _notify
-   .. automethod:: expire
-   .. automethod:: advance
-   .. automethod:: fetch
-   .. automethod:: index
-   .. automethod:: run
-   .. automethod:: register_callback
-
+   .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
    .. autoattribute:: __callback_fn__
       :no-value:
 
@@ -83,12 +70,33 @@ follow :rfc:`791` and :rfc:`815`.
    .. autoattribute:: _dtgram
       :no-value:
 
-   .. automethod:: __call__
-   .. automethod:: __init_subclass__
+   .. rubric:: Defaults
 
-   .. autoattribute:: __protocol_name__
-   .. autoattribute:: __protocol_type__
    .. autoattribute:: __timeout__
+
+   .. rubric:: Properties
+
+   .. autoproperty:: timeout
+   .. autoproperty:: count
+   .. autoproperty:: datagram
+
+   .. rubric:: Methods
+
+   .. automethod:: reassembly
+   .. automethod:: submit
+   .. automethod:: _release
+   .. automethod:: _notify
+   .. automethod:: expire
+   .. automethod:: advance
+   .. automethod:: fetch
+   .. automethod:: index
+   .. automethod:: run
+   .. automethod:: register_callback
+
+   .. rubric:: Data Models
+
+   .. automethod:: __init_subclass__
+   .. automethod:: __call__
 
 Internal Definitions
 --------------------

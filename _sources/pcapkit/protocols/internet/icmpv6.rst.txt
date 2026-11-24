@@ -25,20 +25,30 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __type__
       :no-value:
+
+   .. rubric:: Properties
 
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
+
+   .. rubric:: Methods
 
    .. automethod:: id
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register_type
 
+   .. rubric:: Data Models
+
    .. automethod:: __length_hint__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_data_type_none

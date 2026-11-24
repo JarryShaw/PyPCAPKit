@@ -39,6 +39,8 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. rubric:: Defaults
+
    .. autoattribute:: __message__
       :no-value:
 
@@ -48,12 +50,16 @@ Octets      Bits        Name                    Description
    .. autoattribute:: __extension__
       :no-value:
 
+   .. rubric:: Properties
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: payload
    .. autoproperty:: protocol
    .. autoproperty:: protochain
+
+   .. rubric:: Methods
 
    .. automethod:: read
    .. automethod:: make
@@ -62,8 +68,12 @@ Octets      Bits        Name                    Description
    .. automethod:: register_extension
    .. automethod:: id
 
+   .. rubric:: Data Models
+
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. rubric:: Utilities
 
    .. automethod:: _make_data
    .. automethod:: _read_msg_unknown

@@ -722,6 +722,7 @@ own 8-octet schema and data model, IGMPv3’s wire format differs
 materially by message – a Query’s source-list extension, a Report’s
 group-record list – so this class carries its own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>).</p>
+<p class="rubric">Properties</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet</span> <span class="pre">Group</span> <span class="pre">Management</span> <span class="pre">Protocol</span> <span class="pre">version</span> <span class="pre">3'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.name" title="Link to this definition">¶</a></dt>
@@ -746,6 +747,7 @@ rather than returned as a constant, unlike the base’s own
 <a class="reference internal" href="igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP.length" title="pcapkit.protocols.internet.igmp.protocol.IGMP.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>.</p>
 </dd></dl>
 
+<p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.id">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/protocol.html#IGMPv3.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.id" title="Link to this definition">¶</a></dt>
@@ -878,6 +880,7 @@ Report.</p></li>
 </dl>
 </dd></dl>
 
+<p class="rubric">Utilities</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/protocol.html#IGMPv3._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_data" title="Link to this definition">¶</a></dt>

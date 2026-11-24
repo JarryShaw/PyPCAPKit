@@ -7,7 +7,9 @@ The order of members inside a protocol class body. Settled by the owner on
 :issue:`2490`, so a new dissector and a refactor land in the same layout.
 
 Each group sits under its section comment, spelled as the repo spells it:
-``# Properties.``, ``# Methods.``, ``# Data models.`` and ``# Utilities.``
+``# Properties.``, ``# Methods.``, ``# Data models.`` and ``# Utilities.`` Those
+comments also title the member groups on the API pages
+(:ref:`documentation-member-lists`).
 
 The Order
 ~~~~~~~~~
