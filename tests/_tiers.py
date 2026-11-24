@@ -59,7 +59,7 @@ So this module answers, cheaply and without needing the fixtures themselves:
 * :func:`is_project_pin` and :func:`project_pin_paths` -- which
   :file:`tests/project` modules give one answer on every interpreter, and so run
   once per push, in the ``project-tests`` job, rather than on every leg (#1954)?
-  :func:`project_pin_half` gives each cell of that job its half (#2798).
+  :func:`project_pin_half` gives each cell of that job its half on a code diff (#2798).
 
 :file:`tests/conftest.py` runs :func:`is_unit_tier` and :func:`audit_module` --
 and through it :func:`committed_captures` and :func:`explain` -- at collection
@@ -305,15 +305,14 @@ PROJECT_PINS_SELECTOR = (
     'python -c "from tests._tiers import project_pin_paths; '
     'print(\' \'.join(project_pin_paths()))"'
 )
-#: The halves :file:`tests/project` is cut into, one per cell of the ``project-tests``
-#: job of :file:`.github/workflows/unit-tests.yml` (#2798).
+#: The halves the project pins are cut into, one per cell of the ``project-tests``
+#: job of :file:`.github/workflows/unit-tests.yml` on a code diff (#2798).
 PROJECT_HALVES = (1, 2)
-#: The name at which :file:`tests/project` is halved (#2254): half 1 is every module
-#: whose path below that directory sorts before it, half 2 the rest, so a new module
-#: lands in exactly one half. :func:`project_pin_half` cuts the pins here and
-#: :file:`util/run_unittest_leg.py`'s ``--half`` cuts the ``project`` leg here, so
-#: the ``project-tests`` cells cut both in one place; ``unittest-ordering`` cuts the
-#: leg in three at its own names (#2913). It is chosen so the halves take about the
+#: The name at which :func:`project_pin_half` halves the pins (#2254): half 1 is every
+#: pin whose path below :file:`tests/project` sorts before it, half 2 the rest, so a
+#: new pin lands in exactly one half. A docs-only diff runs the ``project`` leg instead,
+#: in parts cut at :file:`util/run_unittest_leg.py`'s ``SHARD_BOUNDARIES``, as
+#: ``unittest-ordering`` does (#2913, #2916). It is chosen so the halves take about the
 #: same CI time; move it to rebalance, and the cells follow.
 PROJECT_BOUNDARY = 'test_pypy_w'
 #: The selector each cell of the ``project-tests`` job asks for its half of the pins,
@@ -1272,9 +1271,8 @@ def project_pin_half(half: 'int') -> 'tuple[str, ...]':
     """Half ``half`` of the :func:`project pins <project_pin_paths>`, sorted (#2798).
 
     What :data:`PROJECT_PIN_HALF_SELECTOR` prints: the selection of one cell of the
-    ``project-tests`` job. Half 1 is every pin whose path below
-    :file:`tests/project` sorts before :data:`PROJECT_BOUNDARY`, half 2 the rest, as
-    :file:`util/run_unittest_leg.py`'s ``--half`` cuts the ``project`` leg; both
+    ``project-tests`` job on a code diff. Half 1 is every pin whose path below
+    :file:`tests/project` sorts before :data:`PROJECT_BOUNDARY`, half 2 the rest; both
     halves together are :func:`project_pin_paths`.
 
     Args:

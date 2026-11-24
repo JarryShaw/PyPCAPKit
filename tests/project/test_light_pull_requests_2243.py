@@ -9,7 +9,7 @@ step's ``if:`` and each matrix expression, rather than reading their text:
 * :file:`.github/workflows/unit-tests.yml`: ``test`` and ``integration`` run
   their ``latest`` leg alone on a test-only diff and skip a docs-only one; the
   KTLO jobs, ``engine-tests`` and ``pypcap-parity`` skip both; ``project-tests``
-  runs on every diff.
+  runs on every diff, in parts of its leg on a docs-only one alone (#2916).
 * :file:`.github/workflows/experimental.yml`: its legs skip both.
 * :file:`.github/workflows/python-compatibility.yml`: its required legs still
   run, under their required names, on either light diff, and skip every step
@@ -30,9 +30,12 @@ import re
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _tiers
 from tests._workflows import WORKFLOWS
+from tests.project.test_ktlo_legs_stay_green_1672 import interpolate
 from tests.project.test_python_versions_1660 import REQUIRED_AT_MAIN, legs, live_outputs, matrix, render, workflow
 from tests.project.test_release_gates import STATUS, calls_status_check, evaluate_condition, evaluate_expression
+from util import run_unittest_leg
 
 if TYPE_CHECKING:
     from typing import Any, Optional
@@ -103,6 +106,20 @@ def matrix_legs(name: 'str', job_id: 'str', outputs: 'dict[str, str]') -> 'list[
     return legs(found)
 
 
+#: ``project-tests``' steps that pick a diff, by name: the pins', the leg's and the other docs readers'.
+PINS_STEP = 'Run the project pins'
+LEG_STEP = 'Run tests/project and the root-level modules under plain unittest'
+READERS_STEP = 'Run the other tests that read docs/ or Markdown'
+
+
+def project_tests_steps(leg: 'dict[str, Any]', outputs: 'dict[str, str]') -> 'list[str]':
+    """The steps of ``project-tests`` with an ``if:`` that run on cell ``leg`` of a diff with ``outputs``."""
+    context = {'matrix': leg, 'needs': needs_context(UNIT, 'project-tests', outputs),
+               STATUS: {'success': True, 'failure': False, 'cancelled': False, 'always': True}}
+    return [step['name'] for step in workflow(UNIT)['jobs']['project-tests']['steps']
+            if 'if' in step and evaluate_condition(str(step['if']), context)]
+
+
 class TestUnitTests(unittest.TestCase):
     """unit-tests.yml's jobs on each kind of diff."""
 
@@ -142,6 +159,22 @@ class TestUnitTests(unittest.TestCase):
         for kind, outputs in CLASSES.items():
             with self.subTest(diff=kind):
                 self.assertTrue(job_runs(UNIT, 'project-tests', outputs))
+
+    def test_project_tests_runs_the_leg_in_parts_on_a_docs_only_diff_alone(self) -> None:
+        """#2916: a cell per ``unittest-ordering`` part of the leg on a docs-only diff, part 1
+        with the other docs readers; a cell per half of the pins on any other, and no more."""
+        template = workflow(UNIT)['jobs']['project-tests']['name']
+        parts = range(1, len(run_unittest_leg.SHARD_BOUNDARIES['project']) + 2)
+        for kind, outputs in CLASSES.items():
+            if kind == 'docs':
+                expected = [(f'Project tests (part {part})', [LEG_STEP] + [READERS_STEP] * (part == 1))
+                            for part in parts]
+            else:
+                expected = [(f'Project tests (half {half})', [PINS_STEP]) for half in _tiers.PROJECT_HALVES]
+            with self.subTest(diff=kind):
+                found = [(interpolate(template, {'matrix': leg}), project_tests_steps(leg, outputs))
+                         for leg in matrix_legs(UNIT, 'project-tests', outputs)]
+                self.assertEqual(found, expected)
 
     def test_the_gate_still_runs_whatever_its_needs_did(self) -> None:
         """``required-checks`` runs on ``always()``, so a skipped or failed leg is judged, not inherited."""
