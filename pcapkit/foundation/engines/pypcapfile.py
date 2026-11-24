@@ -119,31 +119,6 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     #: ``pcapfile.linklayer``, and :mod:`imp` was removed in Python 3.12.
     PYTHON_CEILING = (3, 12)
 
-    @classmethod
-    def unsupported_reason(cls) -> 'Optional[str]':
-        """Why this engine cannot run here, or :data:`None` when it can.
-
-        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles
-        its engine, *before* the import test, which cannot answer this.
-        |pcapfile|_'s top-level package imports on Python 3.12 and newer; it is
-        ``pcapfile.linklayer`` that fails, imported by ``pcapfile.savefile``. So
-        ``import pcapfile`` succeeds and the :exc:`ModuleNotFoundError` escapes
-        from :meth:`__init__` as a hard error instead of degrading to the default
-        engine with a warning.
-
-        The version is checked rather than the import attempted, so the answer
-        does not depend on which submodule happens to be imported first.
-
-        Returns:
-            A short phrase naming the limitation, or :data:`None`.
-
-        """
-        if sys.version_info[:2] >= cls.PYTHON_CEILING:
-            return (f'pypcapfile does not support Python '
-                    f'{sys.version_info[0]}.{sys.version_info[1]}; '
-                    'its linklayer module imports `imp`, removed in Python 3.12')
-        return None
-
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -178,6 +153,35 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     def dlink(self) -> 'Enum_LinkType':
         """Data link layer protocol, as reported by the savefile header."""
         return self._dlink
+
+    ##########################################################################
+    # Availability.
+    ##########################################################################
+
+    @classmethod
+    def unsupported_reason(cls) -> 'Optional[str]':
+        """Why this engine cannot run here, or :data:`None` when it can.
+
+        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles
+        its engine, *before* the import test, which cannot answer this.
+        |pcapfile|_'s top-level package imports on Python 3.12 and newer; it is
+        ``pcapfile.linklayer`` that fails, imported by ``pcapfile.savefile``. So
+        ``import pcapfile`` succeeds and the :exc:`ModuleNotFoundError` escapes
+        from :meth:`__init__` as a hard error instead of degrading to the default
+        engine with a warning.
+
+        The version is checked rather than the import attempted, so the answer
+        does not depend on which submodule happens to be imported first.
+
+        Returns:
+            A short phrase naming the limitation, or :data:`None`.
+
+        """
+        if sys.version_info[:2] >= cls.PYTHON_CEILING:
+            return (f'pypcapfile does not support Python '
+                    f'{sys.version_info[0]}.{sys.version_info[1]}; '
+                    'its linklayer module imports `imp`, removed in Python 3.12')
+        return None
 
     ##########################################################################
     # Data models.

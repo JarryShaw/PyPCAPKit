@@ -138,7 +138,7 @@ class PyShark(EngineBase['PySharkPacket']):
     PYTHON_CEILING = (3, 14)
 
     ##########################################################################
-    # Class methods.
+    # Availability.
     ##########################################################################
 
     @classmethod
