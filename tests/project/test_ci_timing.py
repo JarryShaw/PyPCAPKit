@@ -26,6 +26,8 @@ this tier has no network and no token:
   just short of all of them.
 * :class:`TestNoLongerRun` -- no cap finding on a job the workflow no longer runs
   (#2904), and the runs that decide which those are.
+* :class:`TestUnfinishedRuns` -- runs listed without the ``status`` filter, which
+  lags behind runs already completed (#2906), and those still in flight dropped.
 * :class:`TestTimingArtifacts` and :class:`TestReviewWorkflow` -- what the script
   relies on in :file:`unit-tests.yml` (artifact names, the coverage leg, upload
   steps that cannot fail a required leg) and the review workflow's own triggers and
@@ -708,7 +710,7 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(len(unit), len(SLICES) + 1)
         self.assertEqual(sorted({query['created'][0] for query in unit}), sorted(SLICES))
         for query in unit:
-            self.assertEqual(query['status'], ['completed'])
+            self.assertNotIn('status', query)
         self.assertEqual(len(listings), len(unit) + len(SLICES) * len(ci_timing.OTHER_WORKFLOWS))
         # The caps come from the newest and oldest push runs' shas, one read each.
         refs = [urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)['ref'][0]
@@ -956,6 +958,59 @@ class TestSampling(unittest.TestCase):
             shares = [sum(1 for n in read if n in group) / len(group)
                       for group in ({n for n in range(12)} - {5}, {100, 102, 103})]
             self.assertLessEqual(abs(shares[0] - shares[1]), 0.5, (count, read))
+
+
+#: Synthetic Unit Tests runs still in flight, newer than every fixture run.
+UNFINISHED = [{'id': 38002100001, 'name': 'Unit Tests', 'event': 'pull_request', 'status': 'in_progress',
+               'conclusion': None, 'run_attempt': 1, 'created_at': '2026-10-09T23:20:00Z', 'head_sha': 'a' * 40},
+              {'id': 38002100002, 'name': 'Unit Tests', 'event': 'push', 'status': 'queued',
+               'conclusion': None, 'run_attempt': 1, 'created_at': '2026-10-09T23:10:00Z', 'head_sha': 'b' * 40}]
+
+
+class _Lagging(FakeAPI):
+    """Unit Tests' listing as #2906 measured it: filtered by ``status``, it lags.
+
+    Unfiltered, it also holds :data:`UNFINISHED`. Filtered, it holds the runs of that
+    status but :data:`PUSH_RUN`, completed and still missing from the filtered listing.
+
+    """
+
+    def __call__(self, url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
+        parts = urllib.parse.urlsplit(url)
+        if not parts.path.endswith('/actions/workflows/unit-tests.yml/runs'):
+            return super().__call__(url, accept)
+        self.requests.append((url, accept))
+        query = urllib.parse.parse_qs(parts.query)
+        runs = UNFINISHED + all_runs()
+        if 'status' in query:
+            runs = [run for run in runs if run['status'] == query['status'][0] and run['id'] != PUSH_RUN]
+        return self.listing(runs, query)
+
+
+class TestUnfinishedRuns(unittest.TestCase):
+    """#2906: a run the ``status=completed`` listing lags on is still read; one in flight is not."""
+
+    def collect(self, api: 'FakeAPI') -> 'dict':
+        return ci_timing.collect(ci_timing.Client('t', transport=api), REPO, now=NOW, days=7,
+                                 junit_runs=0)['workflows'][ci_timing.UNIT_TESTS]
+
+    def test_the_listing_is_read_as_if_nothing_lagged_or_ran(self) -> 'None':
+        api = _Lagging()
+        # The fake does lag, or what follows would pass on the filtered listing too.
+        lagged = ci_timing.list_runs(ci_timing.Client('t', transport=api),
+                                     f'/repos/{REPO}/actions/workflows/unit-tests.yml/runs',
+                                     NOW - datetime.timedelta(days=7), NOW, [], status='completed')
+        self.assertNotIn(PUSH_RUN, [run['id'] for run in lagged])
+        unit, settled = self.collect(api), self.collect(FakeAPI())
+        ids = [run['id'] for run in unit['runs']]
+        self.assertIn(PUSH_RUN, ids)
+        self.assertFalse({run['id'] for run in UNFINISHED} & set(ids))
+        self.assertEqual(ids, [run['id'] for run in settled['runs']])
+        self.assertEqual(unit['listed'], settled['listed'])
+        # The newest finished push is the one the caps are read at.
+        push = next(run for run in all_runs() if run['id'] == PUSH_RUN)
+        self.assertEqual(unit['specs']['newest'][0], push['head_sha'])
+        self.assertEqual(unit['specs'], settled['specs'])
 
 
 class _Clocked(FakeAPI):
