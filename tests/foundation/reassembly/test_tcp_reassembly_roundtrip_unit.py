@@ -7,7 +7,7 @@ GitHub issues #1354, #1355 and #1356, from the foundation round-trip audit
 * #1354 -- completion judged from the buffer-wide hole list, which never
   learns of a gap opened *below* the first segment to arrive, and which another
   acknowledgement number's payload buffer can clear, brings a zero-filled gap
-  back :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`.
+  back :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`.
 * #1355 -- sequence numbers compared as plain integers make a stream crossing
   ``2 ** 32`` read as a gap of about 4 GiB and allocate it.
 * #1356 -- a FIN that submits the buffer at once splits data reordered behind
@@ -48,8 +48,8 @@ class TestTCPReassemblyRoundTrip(unittest.TestCase):
         return [(d.completed.name, d.id.ack, d.index, d.payload) for d in reasm.datagram]
 
     def _run(self, *segments, strict=True):
-        from pcapkit.foundation.reassembly.data.tcp import Packet
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.data import Packet
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP(strict=strict)
         for num, (seq, ack, syn, fin, rst, payload) in enumerate(segments, 1):
@@ -87,7 +87,7 @@ class TestTCPReassemblyRoundTrip(unittest.TestCase):
     # #1355 ------------------------------------------------------------------
 
     def _no_big_allocation(self):
-        import pcapkit.foundation.reassembly.tcp as module
+        import pcapkit.foundation.reassembly.tcp.reassembly as module
 
         def guarded(*args):
             if args and isinstance(args[0], int) and args[0] > 1 << 20:

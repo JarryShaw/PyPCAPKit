@@ -14,9 +14,9 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.corekit.const.capture import RESOLUTION
-from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
 from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
-    from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
+    from pcapkit.foundation.reassembly.dtls.data import Packet as DTLS_Packet
     from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
     from pcapkit.protocols.misc.pcapng.data import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
@@ -54,7 +54,7 @@ def ipv4_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv4Address] | None':
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
+        :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`
 
     """
     if (ipv4 := cast('Optional[IPv4]', _fragment(frame, IPv4))) is not None:
@@ -100,7 +100,7 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
+        :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`
 
     """
     if (ipv6 := cast('Optional[IPv6]', _fragment(frame, IPv6))) is not None:
@@ -154,7 +154,7 @@ def tcp_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCP`
+        :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`
 
     """
     if (segment := tcp_segment(frame)) is not None:
@@ -204,7 +204,7 @@ def dtls_reassembly(frame: 'PCAPNG') -> 'Optional[tuple[DTLS_Packet, ...]]':
         message, if the ``frame`` can be reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.dtls.DTLS`
+        :class:`pcapkit.foundation.reassembly.dtls.reassembly.DTLS`
 
     .. versionadded:: 1.6.0
 
@@ -229,7 +229,7 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
         traced; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.tcp.TCP`
+        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`
 
     """
     if (segment := tcp_segment(frame)) is not None:

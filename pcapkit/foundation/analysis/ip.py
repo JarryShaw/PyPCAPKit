@@ -7,8 +7,8 @@
 :mod:`pcapkit.foundation.analysis.ip` contains
 :func:`~pcapkit.foundation.analysis.ip.ip_datagram` only, which parses the
 payload of an IPv4 or IPv6 datagram that
-:class:`~pcapkit.foundation.reassembly.ipv4.IPv4` or
-:class:`~pcapkit.foundation.reassembly.ipv6.IPv6` reassembled.
+:class:`~pcapkit.foundation.reassembly.ipv4.reassembly.IPv4` or
+:class:`~pcapkit.foundation.reassembly.ipv6.reassembly.IPv6` reassembled.
 
 .. versionadded:: 1.6.0
 
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from typing import Optional, Type
 
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
+    from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
     from pcapkit.protocols.internet.ip.protocol import IP as IP_Protocol
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -32,8 +32,8 @@ __all__ = ['ip_datagram']
 
 def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
     """Parse the payload of an IP datagram reassembled by
-    :class:`~pcapkit.foundation.reassembly.ipv4.IPv4` or
-    :class:`~pcapkit.foundation.reassembly.ipv6.IPv6`.
+    :class:`~pcapkit.foundation.reassembly.ipv4.reassembly.IPv4` or
+    :class:`~pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`.
 
     The payload is dispatched on the datagram's payload protocol type -- the
     **Protocol** field for IPv4, the Fragment header's **Next Header** for
@@ -54,7 +54,7 @@ def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
         received, as ``strict=True`` reports an incomplete one.
 
     Note:
-        :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.ip.Datagram.packet>`
+        :attr:`Datagram.packet <pcapkit.foundation.reassembly.ip.data.Datagram.packet>`
         holds the same result, parsed on its first read, unless the
         reassembly's ``__protocol_type__`` names another protocol, which then
         parses it instead.
@@ -71,8 +71,8 @@ def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
     """Parse a reassembled payload by its payload protocol type.
 
     :func:`ip_datagram` runs this, and so does the
-    :class:`~pcapkit.foundation.reassembly.data.data.Deferred` that
-    :meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>` stores as a
+    :class:`~pcapkit.foundation.reassembly.data.Deferred` that
+    :meth:`IP.submit <pcapkit.foundation.reassembly.ip.reassembly.IP.submit>` stores as a
     datagram's ``packet``, with the reassembly's own protocol bound as
     ``protocol``.
 

@@ -64,8 +64,8 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def ipv4(self) -> 'tuple[type, dict[str, Any], str, list[Any]]':
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         def frag(num: int, ident: int, fo: int, mf: bool, payload: bytes, ts: float = T0) -> 'Any':
             bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), ident, TransType.UDP)
@@ -82,8 +82,8 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def ipv6(self) -> 'tuple[type, dict[str, Any], str, list[Any]]':
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         def frag(num: int, ident: int, fo: int, mf: bool, payload: bytes, ts: float = T0) -> 'Any':
             bufid = (ip_address('2001:db8::1'), ip_address('2001:db8::2'), ident, TransType.UDP)
@@ -100,8 +100,8 @@ class RaisingCallbackTests(unittest.TestCase):
         ]
 
     def tcp(self) -> 'tuple[type, dict[str, Any], str, list[Any]]':
-        from pcapkit.foundation.reassembly.data.tcp import Packet
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.data import Packet
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         def seg(num: int, sport: int, dsn: int, payload: bytes = b'', *, syn: bool = False,
                 fin: bool = False, rst: bool = False, ts: float = T0) -> 'Any':
@@ -124,8 +124,8 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def dtls(self) -> 'tuple[type, dict[str, Any], str, list[Any]]':
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.foundation.reassembly.data.dtls import Packet
-        from pcapkit.foundation.reassembly.dtls import DTLS
+        from pcapkit.foundation.reassembly.dtls.data import Packet
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
 
         def frag(num: int, host: str, msn: int, length: int, payload: bytes,
                  msg_type: 'Any' = HandshakeType.client_hello) -> 'Any':
@@ -262,7 +262,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def test_ipv4_order(self) -> None:
         """#2856: with no raise, IPv4 reports the pinned order, each datagram stored before its callbacks."""
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         self.check_order(self.ipv4, [
             (Completion.PARTIAL, (7,), (b'g' * 8,)),
@@ -279,7 +279,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def test_ipv6_order(self) -> None:
         """#2856: with no raise, IPv6 reports the pinned order, each datagram stored before its callbacks."""
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         self.check_order(self.ipv6, [
             (Completion.PARTIAL, (8,), (b'h' * 8,)),
@@ -296,7 +296,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def test_tcp_order(self) -> None:
         """#2856: with no raise, TCP reports the pinned order, each datagram stored before its callbacks."""
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         self.narrow_gap_limit()
         self.check_order(self.tcp, [
@@ -316,7 +316,7 @@ class RaisingCallbackTests(unittest.TestCase):
 
     def test_dtls_order(self) -> None:
         """#2856: with no raise, DTLS reports the pinned order, each message stored before its callbacks."""
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         self.check_order(self.dtls, [
             (Completion.PARTIAL, (3,), (b'c' * 3,)),
@@ -341,9 +341,9 @@ class RaisingCallbackTests(unittest.TestCase):
     def test_advance_keeps_every_expired_datagram_and_clears_the_cache(self) -> None:
         """#2856: a callback raising on the second buffer one ``advance()`` expires keeps both, read afresh."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         def frag(num: int, ts: float) -> 'Any':
             bufid = (ip_address('2001:db8::1'), ip_address('2001:db8::2'), num, TransType.UDP)

@@ -75,19 +75,19 @@ class NextHeaderOffsetTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_a_bare_ipv6_header_answers_with_its_own_field(self) -> None:
-        from pcapkit.foundation.reassembly.ipv6 import _next_header_offset
+        from pcapkit.foundation.reassembly.ipv6.reassembly import _next_header_offset
 
         self.assertEqual(_next_header_offset(ipv6_header(NH_IPV6_FRAG)), 6)
 
     def test_one_extension_header_moves_the_answer_past_the_fixed_header(self) -> None:
-        from pcapkit.foundation.reassembly.ipv6 import _next_header_offset
+        from pcapkit.foundation.reassembly.ipv6.reassembly import _next_header_offset
 
         header = ipv6_header(NH_HOPOPT) + ext_header(NH_IPV6_FRAG, 8)
         self.assertEqual(len(header), 48)
         self.assertEqual(_next_header_offset(header), 40)
 
     def test_the_walk_follows_each_header_s_own_length(self) -> None:
-        from pcapkit.foundation.reassembly.ipv6 import _next_header_offset
+        from pcapkit.foundation.reassembly.ipv6.reassembly import _next_header_offset
 
         # a 24 octet Routing header, then an 8 octet Destination Options header
         header = (ipv6_header(NH_ROUTING) + ext_header(NH_DSTOPT, 24)
@@ -104,7 +104,7 @@ class NextHeaderOffsetTests(unittest.TestCase):
         Fragment header the datagram advertises never gets rewritten at all.
 
         """
-        from pcapkit.foundation.reassembly.ipv6 import _next_header_offset
+        from pcapkit.foundation.reassembly.ipv6.reassembly import _next_header_offset
 
         header = (ipv6_header(NH_AH) + ah_header(NH_DSTOPT, 24)
                   + ext_header(NH_IPV6_FRAG, 8))
@@ -131,7 +131,7 @@ class RectifyHeaderTests(unittest.TestCase):
 
     def rectify(self, header: bytes) -> bytes:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         return IPv6()._rectify_header(header, TransType.UDP)
 
@@ -172,7 +172,7 @@ class RectifyHeaderTests(unittest.TestCase):
     def test_ipv4_reassembly_leaves_the_header_alone(self) -> None:
         """The base implementation is the identity, which is what IPv4 needs."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         header = bytes.fromhex('4500001c007b2000400600000000000000000000')
         self.assertEqual(IPv4()._rectify_header(header, TransType.TCP), header)
@@ -187,7 +187,7 @@ class IPv6ReassemblyHeaderTests(unittest.TestCase):
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, header: bytes):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         src = ip_address('2001:db8::1')
         dst = ip_address('2001:db8::2')
@@ -195,7 +195,7 @@ class IPv6ReassemblyHeaderTests(unittest.TestCase):
                       len(header) + len(payload), header, bytearray(payload), 1000.0)
 
     def test_the_reassembled_datagram_does_not_advertise_a_fragment_header(self) -> None:
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         header = ipv6_header(NH_HOPOPT) + ext_header(NH_IPV6_FRAG, 8)
         reasm = IPv6()
@@ -219,7 +219,7 @@ class IPv6ReassemblyHeaderTests(unittest.TestCase):
         fragments in wire order never reaches.
 
         """
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         header = ipv6_header(NH_IPV6_FRAG)
         reasm = IPv6()

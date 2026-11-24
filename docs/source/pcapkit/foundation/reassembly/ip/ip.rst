@@ -2,13 +2,21 @@ IP Reassembly Base Class
 ========================
 
 .. module:: pcapkit.foundation.reassembly.ip
+.. module:: pcapkit.foundation.reassembly.ip.reassembly
 
-:mod:`pcapkit.foundation.reassembly.ip` contains
-:class:`~pcapkit.foundation.reassembly.ip.IP`
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.ip.logger``, with no alias: it is in
+   :mod:`~pcapkit.foundation.reassembly.ip.reassembly`, and
+   :mod:`pcapkit.foundation.reassembly.ip` exports the reassembly class alone
+   (:issue:`2882`).
+
+:mod:`pcapkit.foundation.reassembly.ip.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.ip.reassembly.IP`
 only, which reconstructs fragmented IP packets back to
 origin, using the :rfc:`791` procedure described in :doc:`index`.
 
-.. autoclass:: pcapkit.foundation.reassembly.ip.IP
+.. autoclass:: pcapkit.foundation.reassembly.ip.reassembly.IP
    :no-members:
    :show-inheritance:
 
@@ -27,28 +35,34 @@ origin, using the :rfc:`791` procedure described in :doc:`index`.
 Data Models
 -----------
 
-.. module:: pcapkit.foundation.reassembly.data.ip
-.. currentmodule:: pcapkit.foundation.reassembly.ip
+.. module:: pcapkit.foundation.reassembly.ip.data
 
-.. autoclass:: pcapkit.foundation.reassembly.data.ip.Packet
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.ip``, with no alias: the module moved here
+   (:issue:`2882`).
+
+.. currentmodule:: pcapkit.foundation.reassembly.ip.reassembly
+
+.. autoclass:: pcapkit.foundation.reassembly.ip.data.Packet
    :members:
    :show-inheritance:
 
 .. data:: BufferID
-   :module: pcapkit.foundation.reassembly.data.ip
-   :type: typing.Tuple[~pcapkit.foundation.reassembly.data.ip._AT, ~pcapkit.foundation.reassembly.data.ip._AT, int, pcapkit.const.reg.transtype.TransType]
+   :module: pcapkit.foundation.reassembly.ip.data
+   :type: typing.Tuple[~pcapkit.foundation.reassembly.ip.data._AT, ~pcapkit.foundation.reassembly.ip.data._AT, int, pcapkit.const.reg.transtype.TransType]
 
    Data model for buffer ID.
 
-.. autoclass:: pcapkit.foundation.reassembly.data.ip.Buffer
+.. autoclass:: pcapkit.foundation.reassembly.ip.data.Buffer
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.ip.DatagramID
+.. autoclass:: pcapkit.foundation.reassembly.ip.data.DatagramID
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.foundation.reassembly.data.ip.Datagram
+.. autoclass:: pcapkit.foundation.reassembly.ip.data.Datagram
    :members:
    :show-inheritance:
 
@@ -56,7 +70,7 @@ Type Variables
 --------------
 
 .. data:: _AT
-   :module: pcapkit.foundation.reassembly.data.ip
+   :module: pcapkit.foundation.reassembly.ip.data
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
    IP address type.

@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-"""data models for DTLS handshake-message reassembly"""
+"""data models for DTLS handshake-message reassembly
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.dtls``, with no alias: the module moved here
+   (:issue:`2882`).
+
+"""
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.packet import DeferredPacket
-from pcapkit.foundation.reassembly.data.data import Deferred
+from pcapkit.foundation.reassembly.data import Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -19,7 +26,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
-    from pcapkit.foundation.reassembly.data.data import Completion
+    from pcapkit.foundation.reassembly.data import Completion
     from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
@@ -96,7 +103,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     __deferred__ = Deferred
 
     #: How completely the message was reassembled, and why reassembly
-    #: stopped; see :class:`~pcapkit.foundation.reassembly.data.data.Completion`.
+    #: stopped; see :class:`~pcapkit.foundation.reassembly.data.Completion`.
     completed: 'Completion'
     #: Original packet identifier.
     id: 'DatagramID[_AT]'
@@ -114,7 +121,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: returns it unless the reassembly's ``__protocol_type__`` names another
     #: protocol, whose ``analyze_handshake`` then decodes it. Decoded on first
     #: read, not at construction time, and :data:`None` for an incomplete
-    #: message. A :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may
+    #: message. A :class:`~pcapkit.foundation.reassembly.data.Deferred` may
     #: be passed in its place, and reading this attribute then runs it and keeps
     #: the result.
     packet: 'Optional[Data_DTLSHandshake]'

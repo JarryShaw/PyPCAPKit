@@ -13,11 +13,11 @@ is missing from -- so these pickled fine and then raised on read-back::
     ValueError: 'unknown [54321 - tcp]' is not a valid TCP
 
 That became reachable from reassembly once
-:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` began
+:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` began
 dispatching on ``AppType`` members rather than bare port numbers: the
-:class:`~pcapkit.foundation.reassembly.data.tcp.Datagram` it produces holds the
+:class:`~pcapkit.foundation.reassembly.tcp.data.Datagram` it produces holds the
 pair in an unresolved
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred`, so pickling an
+:class:`~pcapkit.foundation.reassembly.data.Deferred`, so pickling an
 unresolved datagram pickled the members. Measured before the fix, most of the
 TCP port space failed to round-trip -- not merely the truly unregistered
 ``unknown`` ports but every IANA-span label too (``unassigned``, ``reserved``,

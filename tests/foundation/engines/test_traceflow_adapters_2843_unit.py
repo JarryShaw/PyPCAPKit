@@ -244,7 +244,7 @@ class SetupAndFeedTests(TraceflowAdapterTestCase):
         self.assertIsNone(dict(extractor._trace.items()).get('tcp'))
 
     def test_a_tracer_with_no_adapter_is_dropped(self) -> None:
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.utilities.warnings import AttributeWarning
 
         tracer = mock.Mock(spec=TCP)

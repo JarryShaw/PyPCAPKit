@@ -39,7 +39,7 @@ class DTLSHandshake(Handshake):
     :attr:`is_fragmented` is :data:`False`. A fragmented message's :attr:`body`
     is the fragment's raw octets;
     :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes the
-    message once :class:`~pcapkit.foundation.reassembly.dtls.DTLS` has
+    message once :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` has
     reassembled it (:issue:`2440`).
 
     """

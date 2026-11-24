@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """IP reassembly reads :data:`IP_MAX_LENGTH` as a strict bound at its edge. C.f. #1739.
 
-:class:`pcapkit.foundation.reassembly.ip.IP` reads
+:class:`pcapkit.foundation.reassembly.ip.reassembly.IP` reads
 :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` from its home. A
 fragment with Total Length 0 declares no length (#1555), and grows the buffer
 past the bound only when its datagram, header included, is *longer* than
@@ -42,7 +42,7 @@ class TestIPMaxLengthEdge(unittest.TestCase):
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, tl: 'int | None' = None):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), 7, TransType.UDP)
         return Packet(bufid, num, fo, IHL, mf, IHL + len(payload) if tl is None else tl,
@@ -55,7 +55,7 @@ class TestIPMaxLengthEdge(unittest.TestCase):
         what a 20-octet header leaves room for.
 
         """
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(strict=strict)
         reasm(self._packet(num=1, fo=0, mf=True, payload=DATA[:first], tl=0))
@@ -65,7 +65,7 @@ class TestIPMaxLengthEdge(unittest.TestCase):
         return datagram.completed
 
     def test_exactly_the_bound_keeps_it(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -73,7 +73,7 @@ class TestIPMaxLengthEdge(unittest.TestCase):
                 self.assertIs(self._completed(first=65535 - IHL, strict=strict), Completion.PARTIAL)
 
     def test_one_past_the_bound_lifts_it(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for strict in (True, False):
             with self.subTest(strict=strict):

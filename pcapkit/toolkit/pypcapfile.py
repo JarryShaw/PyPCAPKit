@@ -52,9 +52,9 @@ from pcapkit.corekit.const import ipheader as Module_IPHeader
 from pcapkit.corekit.const import tcpheader as Module_TCPHeader
 from pcapkit.corekit.const.capture import RESOLUTION
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
-from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.internet.ipv4.protocol import IPv4 as Protocol_IPv4
 from pcapkit.protocols.transport.tcp.protocol import TCP as Protocol_TCP
 from pcapkit.utilities import config
@@ -738,7 +738,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             IPv4 address.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
+        :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`
 
     """
     ipv4 = _network(packet)
@@ -808,7 +808,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             capture's such frames are left out without another warning.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCP`
+        :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`
 
     """
     ipv4 = _network(packet)
@@ -878,7 +878,7 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
             capture's such frames are left out without another warning.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.tcp.TCP`
+        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`
 
     """
     ipv4 = _network(packet)

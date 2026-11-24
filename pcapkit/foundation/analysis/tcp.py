@@ -7,7 +7,7 @@
 :mod:`pcapkit.foundation.analysis.tcp` contains
 :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` only, which parses the
 application-layer payload of a TCP datagram that
-:class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembled.
+:class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` reassembled.
 
 .. versionadded:: 1.6.0
 
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from typing import Optional, Type
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
-    from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
     from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['tcp_datagram']
@@ -29,7 +29,7 @@ __all__ = ['tcp_datagram']
 
 def tcp_datagram(datagram: 'TCP_Datagram') -> 'Optional[ProtocolBase]':
     """Parse the payload of a TCP datagram reassembled by
-    :class:`~pcapkit.foundation.reassembly.tcp.TCP`.
+    :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`.
 
     A reassembled datagram carries no protocol number, so its payload is
     dispatched on its ``(source, destination)`` ports by
@@ -38,7 +38,7 @@ def tcp_datagram(datagram: 'TCP_Datagram') -> 'Optional[ProtocolBase]':
     its :class:`~pcapkit.const.reg.apptype.tcp.TCP` member by
     :meth:`Transport._make_port
     <pcapkit.protocols.transport.transport.Transport._make_port>`, as
-    :meth:`TCP._make_ports <pcapkit.foundation.reassembly.tcp.TCP._make_ports>`
+    :meth:`TCP._make_ports <pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports>`
     resolves them for the reassembly.
 
     Args:
@@ -51,7 +51,7 @@ def tcp_datagram(datagram: 'TCP_Datagram') -> 'Optional[ProtocolBase]':
         received, as ``strict=True`` reports an incomplete one.
 
     Note:
-        :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>`
+        :attr:`Datagram.packet <pcapkit.foundation.reassembly.tcp.data.Datagram.packet>`
         holds the same result, parsed on its first read, unless the
         reassembly's ``__protocol_type__`` names another protocol, which then
         parses it instead.
@@ -70,8 +70,8 @@ def _analyze_payload(protocol: 'Type[TCP]', ports: 'tuple[AppType_TCP, AppType_T
     """Parse a reassembled payload by its datagram's ports.
 
     :func:`tcp_datagram` runs this, and so does the
-    :class:`~pcapkit.foundation.reassembly.data.data.Deferred` that
-    :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` stores as
+    :class:`~pcapkit.foundation.reassembly.data.Deferred` that
+    :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` stores as
     a datagram's ``packet``, with the reassembly's own protocol bound as
     ``protocol``.
 

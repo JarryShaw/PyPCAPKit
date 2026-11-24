@@ -440,9 +440,12 @@ branch = true
 show_missing = true
 
 [tool.isort]
-# The protocol package __init__ files keep their imports in role blocks under
-# headings, which isort would merge (#2534). make isort passes its own flags.
+# The protocol, reassembler and flow tracer package __init__ files keep their
+# imports in role blocks under headings, which isort would merge (#2534, #2882).
+# make isort passes its own flags.
 extend_skip_glob = [
     "pcapkit/protocols/*/*/__init__.py",
+    "pcapkit/foundation/reassembly/*/__init__.py",
+    "pcapkit/foundation/traceflow/*/__init__.py",
 ]
 filter_files = true

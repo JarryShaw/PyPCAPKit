@@ -490,7 +490,7 @@ class DPKTTimestampTests(unittest.TestCase):
         import decimal
         import pickle
 
-        from pcapkit.foundation.traceflow.data.data import FrameRecord
+        from pcapkit.foundation.traceflow.data import FrameRecord
         from pcapkit.protocols.misc.pcap.frame.data import FrameInfo
 
         record = FrameRecord({'packet': b'rebuilt', 'Ethernet': {'type': 2048}}, packet=b'captured',

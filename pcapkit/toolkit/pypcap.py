@@ -33,9 +33,9 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-    from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
-    from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-    from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+    from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+    from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+    from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 
 __all__ = [
     'packet2chain', 'packet2dict',

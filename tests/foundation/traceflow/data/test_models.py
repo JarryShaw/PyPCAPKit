@@ -17,16 +17,16 @@ class TraceFlowDataModelTests(unittest.TestCase):
 
     def test_tcp_traceflow_data_models_and_package_aliases(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.traceflow.data import (TCP_Buffer, TCP_Index, TCP_Packet,
-                                                       TraceFlowData)
-        from pcapkit.foundation.traceflow.data.tcp import Buffer, Index, Packet
+        from pcapkit.foundation.traceflow.data import TraceFlowData
+        from pcapkit.foundation.traceflow.tcp import Data_Buffer, Data_Index, Data_Packet
+        from pcapkit.foundation.traceflow.tcp.data import Buffer, Index, Packet
 
         src = ip_address('2001:db8::1')
         dst = ip_address('2001:db8::2')
         frame = {'frame': 1}
         packet = Packet(LinkType.ETHERNET, 1, frame, True, False, False, src, dst, 12345, 443,
                         1.5, 7, 8, b'tcp-header', bytearray(b'payload'))
-        self.assertIsInstance(packet, TCP_Packet)
+        self.assertIsInstance(packet, Data_Packet)
         self.assertEqual(packet.src, src)
         self.assertEqual(packet.frame, frame)
         self.assertFalse(packet.rst)
@@ -38,7 +38,7 @@ class TraceFlowDataModelTests(unittest.TestCase):
         origin = (src, 12345)
         buffer = Buffer(dumper, [1, 2], '2001_db8_1-12345_2001_db8_2-443',
                         origin, [1], [2], {origin}, False, None)
-        self.assertIsInstance(buffer, TCP_Buffer)
+        self.assertIsInstance(buffer, Data_Buffer)
         self.assertEqual(buffer.fpout, dumper)
         self.assertEqual(buffer.origin, origin)
         self.assertEqual((buffer.forward, buffer.reverse), ([1], [2]))
@@ -47,7 +47,7 @@ class TraceFlowDataModelTests(unittest.TestCase):
         self.assertIsNone(buffer.reassembly)
 
         index = Index('/tmp/flow.json', (1, 2), buffer.label, (1,), (2,), None)
-        self.assertIsInstance(index, TCP_Index)
+        self.assertIsInstance(index, Data_Index)
         self.assertEqual(index.index, (1, 2))
         # each direction stays recoverable, so a caller can still ask which way a
         # given frame went without taking the label apart

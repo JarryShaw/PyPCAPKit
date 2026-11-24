@@ -243,7 +243,7 @@ class ScapyToolkitTests(unittest.TestCase):
         from scapy.layers.l2 import Ether
         from scapy.packet import Raw
 
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
         from pcapkit.toolkit import scapy as toolkit
 
         # Fragment 1: offset 0, 40 octets of payload -- a multiple of 8, so

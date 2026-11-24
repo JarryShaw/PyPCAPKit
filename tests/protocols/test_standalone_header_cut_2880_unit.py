@@ -404,8 +404,8 @@ class AnalyzeEmptyPayloadTests(unittest.TestCase):
 
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.analysis import ip_datagram
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.ip import Datagram, DatagramID
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ip.data import Datagram, DatagramID
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         datagram = Datagram(completed=Completion.COMPLETE,

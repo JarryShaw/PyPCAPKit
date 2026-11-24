@@ -2,10 +2,10 @@
 """IPv6 Datagram Reassembly
 ==============================
 
-.. module:: pcapkit.foundation.reassembly.ipv6
+.. module:: pcapkit.foundation.reassembly.ipv6.reassembly
 
-:mod:`pcapkit.foundation.reassembly.ipv6` contains
-:class:`~pcapkit.foundation.reassembly.ipv6.IPv6`
+:mod:`pcapkit.foundation.reassembly.ipv6.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`
 only, which reconstructs fragmented IPv6 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.const.ipheader import IPV6_HEADER_LEN, IPV6_NEXT_HEADER_OFFSET
 from pcapkit.corekit.schema.extlen import ext_len_to_octets
-from pcapkit.foundation.reassembly.ip import IP
+from pcapkit.foundation.reassembly.ip.reassembly import IP
 from pcapkit.protocols.internet.ipv6.protocol import IPv6 as IPv6_Protocol
 
 if TYPE_CHECKING:
@@ -77,7 +77,7 @@ class IPv6(IP):
             :data:`None` selects :attr:`__timeout__`
 
     Example:
-        >>> from pcapkit.foundation.reassembly.ipv6 import IPv6
+        >>> from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
         # Initialise instance:
         >>> ipv6_reassembly = IPv6()
         # Call reassembly:
@@ -99,7 +99,7 @@ class IPv6(IP):
        A fragment overlapping another of its datagram, other than an exact
        duplicate, abandons that datagram, which is reported as
        :attr:`Completion.OVERLAP
-       <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`, per
+       <pcapkit.foundation.reassembly.data.Completion.OVERLAP>`, per
        :rfc:`8200#section-4.5`; 1.5.x overwrote the octets it overlapped, as
        :rfc:`791` has IPv4 do (:issue:`2547`).
 
@@ -125,7 +125,7 @@ class IPv6(IP):
     #: Note "first-arriving", not "first" -- the deadline is counted from
     #: whichever fragment opened the buffer, not from the one at fragment offset
     #: zero, which is why
-    #: :attr:`Buffer.timestamp <pcapkit.foundation.reassembly.data.ip.Buffer.timestamp>`
+    #: :attr:`Buffer.timestamp <pcapkit.foundation.reassembly.ip.data.Buffer.timestamp>`
     #: is set once and never revised. The offset-zero fragment matters only to
     #: the second half of the rule, the ICMP Time Exceeded that a live stack
     #: "should" send and that an offline parser cannot -- see
@@ -147,7 +147,7 @@ class IPv6(IP):
     #: fragments while keeping the other fragments belonging to the same
     #: packet", which this one does: a fragment with the same offset, length,
     #: **M** flag and data as one already merged changes nothing but
-    #: :attr:`Datagram.index <pcapkit.foundation.reassembly.data.ip.Datagram.index>`.
+    #: :attr:`Datagram.index <pcapkit.foundation.reassembly.ip.data.Datagram.index>`.
     #: A later fragment of an abandoned datagram opens a new buffer, as one
     #: does after a datagram completes (:issue:`2547`).
     __discard_overlap__ = True

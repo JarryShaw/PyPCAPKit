@@ -390,10 +390,10 @@ class Extractor(Generic[_P]):
     #: ``register_reassembly`` additionally admits only
     #: :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclasses.
     __reassembly__ = {
-        'ipv4': ModuleDescriptor('pcapkit.foundation.reassembly.ipv4', 'IPv4'),
-        'ipv6': ModuleDescriptor('pcapkit.foundation.reassembly.ipv6', 'IPv6'),
-        'tcp': ModuleDescriptor('pcapkit.foundation.reassembly.tcp', 'TCP'),
-        'dtls': ModuleDescriptor('pcapkit.foundation.reassembly.dtls', 'DTLS'),
+        'ipv4': ModuleDescriptor('pcapkit.foundation.reassembly.ipv4.reassembly', 'IPv4'),
+        'ipv6': ModuleDescriptor('pcapkit.foundation.reassembly.ipv6.reassembly', 'IPv6'),
+        'tcp': ModuleDescriptor('pcapkit.foundation.reassembly.tcp.reassembly', 'TCP'),
+        'dtls': ModuleDescriptor('pcapkit.foundation.reassembly.dtls.reassembly', 'DTLS'),
     }  # type: dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]
 
     #: Flow tracing support mapping for extracting frames, keyed by lower-cased protocol
@@ -403,7 +403,7 @@ class Extractor(Generic[_P]):
     #: ``register_traceflow`` additionally admits only
     #: :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclasses.
     __traceflow__ = {
-        'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp', 'TCP'),
+        'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp.traceflow', 'TCP'),
     }  # type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]
 
     # Read-only copies of the registries as shipped. A public registrar

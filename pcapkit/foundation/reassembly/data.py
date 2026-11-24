@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
-"""shared data models for reassembly"""
+"""shared data models for reassembly
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.data``, with no alias: the module moved here.
+   The ``IP_*``, ``TCP_*`` and ``DTLS_*`` data models
+   ``pcapkit.foundation.reassembly.data`` collected, with no alias: each reassembly
+   class's are in the ``data`` module of its own package, such as
+   :mod:`pcapkit.foundation.reassembly.tcp.data` (:issue:`2882`).
+
+"""
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
@@ -16,9 +26,9 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.const.tls.handshake_type import HandshakeType
-    from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
-    from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
-    from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
+    from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
+    from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
     from pcapkit.protocols.application.dtls.data import DTLSHandshake
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -34,7 +44,7 @@ class Completion(EnumLookup, StrEnum):
     contract; the class defines neither ``get`` nor ``_missing_`` of its own.
 
     This is the value of
-    :attr:`Datagram.completed <pcapkit.foundation.reassembly.data.ip.Datagram.completed>`,
+    :attr:`Datagram.completed <pcapkit.foundation.reassembly.ip.data.Datagram.completed>`,
     which widens a plain :obj:`bool` rather than adding a second channel beside
     it: reassembly has more outcomes to report than a :obj:`bool` can hold, since
     a buffer abandoned under the :rfc:`1122` / :rfc:`8200` reassembly timeout is
@@ -126,27 +136,27 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
     A reassembled datagram's ``packet`` is a second, full parse of the payload
     the datagram just reassembled. Nothing about postponing it is specific to any
     one reassembler, which is why this lives beside
-    :class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` rather than in
+    :class:`~pcapkit.foundation.reassembly.data.ReassemblyData` rather than in
     any one protocol's data module.
 
     IP reassembly is the case that made it necessary. IPv4 reassembly submits a
     datagram for *every* frame whose **DF** flag is clear -- not only the
     fragmented ones, since an unfragmented frame still reaches
-    :meth:`IP.reassembly <pcapkit.foundation.reassembly.ip.IP.reassembly>` and is
+    :meth:`IP.reassembly <pcapkit.foundation.reassembly.ip.reassembly.IP.reassembly>` and is
     submitted there as a trivially complete datagram -- so an eager parse would
     re-parse captures holding no fragments at all: :file:`http.pcap` has 1117
     IPv4 frames, none of them fragmented, and the eager parse measured 86% of the
     cost of IP reassembly over it.
 
     TCP reassembly defers its ``packet`` as well
-    (:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>`), at a far
+    (:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>`), at a far
     smaller saving, being FIN/RST-driven rather than per-frame -- 222 submits per
     :file:`http.pcap` pass against 1117. DTLS reassembly defers its own for
     parity with IP and TCP rather than for a saving, since a handshake message
     reaches it only once fragmented (:issue:`2531`).
 
     Holding the call here defers it to the first read of
-    :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.ip.Datagram.packet>`,
+    :attr:`Datagram.packet <pcapkit.foundation.reassembly.ip.data.Datagram.packet>`,
     where :class:`~pcapkit.corekit.packet.DeferredPacket` runs it, so a caller that
     wants the parsed payload still gets exactly the object an eager call would
     produce, and one that does not never pays for it.
@@ -157,14 +167,14 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
     its ``analyze`` expects are the same type rather than a union every call
     site would have to widen to:
 
-    * :meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>` builds a
+    * :meth:`IP.submit <pcapkit.foundation.reassembly.ip.reassembly.IP.submit>` builds a
       ``Deferred[TransType]``. It passes the payload protocol type, a
       :class:`~pcapkit.const.reg.transtype.TransType` read from the reassembled
       datagram's **Protocol** / **Next Header** field, to the parse
       :func:`~pcapkit.foundation.analysis.ip.ip_datagram` runs:
       :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`,
       which looks the next layer up by protocol registry number.
-    * :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` builds a
+    * :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` builds a
       ``Deferred[tuple[AppType_TCP, AppType_TCP]]``. It passes a
       ``(source, destination)`` port pair to the parse
       :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, because
@@ -173,7 +183,7 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
       parameter to one: a reassembled transport-layer payload carries no
       protocol number, so its application protocol is inferred from the ports.
     * :meth:`DTLS._datagram_from_fragment
-      <pcapkit.foundation.reassembly.dtls.DTLS._datagram_from_fragment>` builds a
+      <pcapkit.foundation.reassembly.dtls.reassembly.DTLS._datagram_from_fragment>` builds a
       ``Deferred[tuple[HandshakeType, int, int]]`` for a complete message. It
       passes the message's ``(msg_type, length, message_seq)``, its handshake
       header as if unfragmented (:rfc:`6347#section-4.2.3`), to the decoder
@@ -188,7 +198,7 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
     :class:`~pcapkit.const.reg.apptype.tcp.TCP` here -- the per-transport
     registry itself, not the base
     :class:`~pcapkit.const.reg.apptype.apptype.AppType`, since that is what
-    :meth:`TCP._make_ports <pcapkit.foundation.reassembly.tcp.TCP._make_ports>`
+    :meth:`TCP._make_ports <pcapkit.foundation.reassembly.tcp.reassembly.TCP._make_ports>`
     really answers with -- so what the deferred analysis dispatches on is of a
     piece with what the eager path dispatches on at
     :attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>`, whichever

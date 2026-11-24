@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
-"""shared data models for flow tracing"""
+"""shared data models for flow tracing
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.traceflow.data.data``, with no alias: the module moved here.
+   The ``TCP_*`` data models ``pcapkit.foundation.traceflow.data`` collected, with no
+   alias: they are in :mod:`pcapkit.foundation.traceflow.tcp.data`
+   (:issue:`2882`).
+
+"""
 
 from typing import TYPE_CHECKING
 
@@ -11,9 +20,9 @@ if TYPE_CHECKING:
     from decimal import Decimal
     from typing import Any, Mapping, Optional, SupportsIndex
 
-    from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
-    from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
-    from pcapkit.foundation.traceflow.data.tcp import Index as TCP_Index
+    from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
+    from pcapkit.foundation.traceflow.tcp.data import Index as TCP_Index
     from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 
 
@@ -22,16 +31,16 @@ class Deferred:
 
     A traced flow's ``packet`` is the application-layer payload of the
     conversation, as reassembled datagrams -- one per direction and
-    acknowledgement number, see :class:`~pcapkit.foundation.traceflow.tcp.TCP`.
+    acknowledgement number, see :class:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP`.
     Producing it means reassembling the
     stream, which is neither free nor wanted by most callers of a *tracer* -- so
     the flow keeps the reassembler it was fed and this holds it until somebody
     reads
-    :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`.
+    :attr:`Index.packet <pcapkit.foundation.traceflow.tcp.data.Index.packet>`.
 
     Note:
         Deliberately not
-        :class:`pcapkit.foundation.reassembly.data.data.Deferred`, and not shared
+        :class:`pcapkit.foundation.reassembly.data.Deferred`, and not shared
         with it. That one postpones a single ``analyze()`` call over bytes already
         in hand; this postpones a *submit* over a reassembler's buffers. The
         reassembly and flow tracing subpackages are siblings, and the flow tracer
@@ -42,7 +51,7 @@ class Deferred:
 
     Args:
         reassembly: The flow's own
-            :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler, fed the
+            :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` reassembler, fed the
             segments of this conversation as they were traced.
 
     """
@@ -58,7 +67,7 @@ class Deferred:
         Returns:
             The conversation's reassembled datagrams, one per direction and
             acknowledgement number. Each carries its *own* postponed analysis in
-            :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>`,
+            :attr:`Datagram.packet <pcapkit.foundation.reassembly.tcp.data.Datagram.packet>`,
             so parsing the payload as an application-layer protocol is still not
             paid for until that is read in turn.
 

@@ -125,7 +125,7 @@ class TestMessageForm(unittest.TestCase):
                 self.assertEqual(str(context.exception), pinned)
 
     def test_make_fout_unsupported_output_format(self) -> None:
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.utilities.warnings import FormatWarning
 
         # ``__output__`` is a defaultdict, so the lookup inserts ``'foo'``; put

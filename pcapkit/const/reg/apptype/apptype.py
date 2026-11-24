@@ -2882,9 +2882,9 @@ class AppType(EnumRegistry, StrEnum):
         crafted value -- ``TCP('unknown [54321 - tcp]')`` -- which
         :meth:`_missing_` rejects as not a port, so the member pickled fine and
         then raised :exc:`ValueError` on read-back. That bit reassembly, whose
-        :class:`~pcapkit.foundation.reassembly.data.tcp.Datagram` holds these
+        :class:`~pcapkit.foundation.reassembly.tcp.data.Datagram` holds these
         members in an unresolved
-        :class:`~pcapkit.foundation.reassembly.data.data.Deferred`: measured
+        :class:`~pcapkit.foundation.reassembly.data.Deferred`: measured
         before the fix, 59,413 of the 65,536 possible ports -- every
         ``unknown`` and every IANA-span label alike, not just the truly
         unregistered ones -- failed to round-trip. Rebuilding re-enters this

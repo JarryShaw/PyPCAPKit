@@ -2367,7 +2367,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         Note:
             A record split across TCP segments is rejected too: this layer
             holds only a fragment of it, and reassembly is
-            :class:`~pcapkit.foundation.reassembly.tcp.TCP`'s job.
+            :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`'s job.
 
         """
         # NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a

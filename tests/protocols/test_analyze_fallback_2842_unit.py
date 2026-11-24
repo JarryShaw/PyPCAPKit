@@ -115,8 +115,8 @@ class AnalyzeFallbackTests(unittest.TestCase):
     def test_ip_datagram(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.analysis import ip_datagram
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.ip import Datagram, DatagramID
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ip.data import Datagram, DatagramID
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for protocol, frame in self._ip_frames():
@@ -129,8 +129,8 @@ class AnalyzeFallbackTests(unittest.TestCase):
 
     def test_tcp_datagram(self) -> None:
         from pcapkit.foundation.analysis import tcp_datagram
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.tcp import Datagram, DatagramID
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.tcp.data import Datagram, DatagramID
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         frame = _parse(TCP, _tcp(REQUEST)).payload
@@ -141,10 +141,10 @@ class AnalyzeFallbackTests(unittest.TestCase):
 
     def test_deferred_ip_packet(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.data import Deferred
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
-        from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
+        from pcapkit.foundation.reassembly.data import Deferred
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4 as IPv4_Reassembly
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6 as IPv6_Reassembly
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         engines = {'IPv4': IPv4_Reassembly, 'IPv6': IPv6_Reassembly}
@@ -165,7 +165,7 @@ class AnalyzeFallbackTests(unittest.TestCase):
         from functools import partial
 
         from pcapkit.foundation.analysis.tcp import _analyze_payload
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         frame = _parse(TCP, _tcp(REQUEST)).payload

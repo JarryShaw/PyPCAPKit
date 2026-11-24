@@ -19,10 +19,10 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.corekit.const.tcpheader import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
-from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
-from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.foundation.reassembly.dtls.data import Packet as DTLS_Packet
+from pcapkit.foundation.reassembly.ip.data import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp.data import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.tcp.data import Packet as TF_TCP_Packet
 from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 from pcapkit.protocols.application.dtls.protocol import DTLS
@@ -252,7 +252,7 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
+        :class:`pcapkit.foundation.reassembly.ipv4.reassembly.IPv4`
 
     """
     if (ipv4 := cast('Optional[IPv4]', _fragment(frame, IPv4))) is not None:
@@ -297,7 +297,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
+        :class:`pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`
 
     """
     if (ipv6 := cast('Optional[IPv6]', _fragment(frame, IPv6))) is not None:
@@ -350,7 +350,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCP`
+        :class:`pcapkit.foundation.reassembly.tcp.reassembly.TCP`
 
     """
     if (segment := tcp_segment(frame)) is not None:
@@ -461,7 +461,7 @@ def dtls_reassembly(frame: 'Frame') -> 'Optional[tuple[DTLS_Packet, ...]]':
         message, if the ``frame`` can be reassembled; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.dtls.DTLS`
+        :class:`pcapkit.foundation.reassembly.dtls.reassembly.DTLS`
 
     .. versionadded:: 1.6.0
 
@@ -485,7 +485,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
         traced; otherwise :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.tcp.TCP`
+        :class:`pcapkit.foundation.traceflow.tcp.traceflow.TCP`
 
     """
     if (segment := tcp_segment(frame)) is not None:

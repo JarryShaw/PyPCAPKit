@@ -54,8 +54,7 @@ __tier__ = 'LATEST'
 
 #: Packages whose modules define :class:`Info` subclasses but are not imported by
 #: ``import pcapkit`` alone.
-PACKAGES = ('pcapkit.protocols', 'pcapkit.foundation.reassembly.data',
-            'pcapkit.foundation.traceflow.data')
+PACKAGES = ('pcapkit.protocols', 'pcapkit.foundation.reassembly', 'pcapkit.foundation.traceflow')
 
 #: Values a model's ``__init__`` or ``__post_init__`` needs in a shape no marker
 #: has, by label; each is a callable, so it is built against the current import.

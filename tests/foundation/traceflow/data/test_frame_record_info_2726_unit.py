@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A traced frame record is an ``Info``, not a ``dict`` subclass (#2726).
 
-:class:`~pcapkit.foundation.traceflow.data.data.FrameRecord` is the engine's
+:class:`~pcapkit.foundation.traceflow.data.FrameRecord` is the engine's
 dissection of a frame, as a mapping, with ``packet``, ``frame_info`` and
 ``time_epoch`` beside it as attributes the mapping does not show. It was a slotted
 :class:`dict` subclass; the owner ruled on #2726 that no class subclass
@@ -43,7 +43,7 @@ MAPPING = {'packet': b'rebuilt', 'Ethernet': {'type': 2048, 'IPv4': {'ttl': 64}}
 
 def _record() -> 'Any':
     """A record whose mapping is :data:`MAPPING`, built after the per-class import."""
-    from pcapkit.foundation.traceflow.data.data import FrameRecord
+    from pcapkit.foundation.traceflow.data import FrameRecord
     from pcapkit.protocols.misc.pcap.frame.data import FrameInfo
 
     return FrameRecord(MAPPING, packet=b'captured',
@@ -90,7 +90,7 @@ class FrameRecordInfoTests(unittest.TestCase):
     def test_to_dict_exports_the_dissection_alone(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.foundation.traceflow.data.tcp import Packet
+        from pcapkit.foundation.traceflow.tcp.data import Packet
 
         record = _record()
         traced = Packet(LinkType.ETHERNET, 1, record, True, False, False,
@@ -128,7 +128,7 @@ class FrameRecordPickleTests(unittest.TestCase):
 
     def _assert_restored(self, clone: 'Any', record: 'Any') -> None:
         from pcapkit.corekit.infoclass import Info
-        from pcapkit.foundation.traceflow.data.data import FrameRecord
+        from pcapkit.foundation.traceflow.data import FrameRecord
 
         self.assertIs(type(clone), FrameRecord)
         self.assertIsInstance(clone, Info)
@@ -139,7 +139,7 @@ class FrameRecordPickleTests(unittest.TestCase):
     def test_a_record_reduces_to_frame_record_under_every_protocol(self) -> None:
         # NOTE: the 1.5 releases reduce a record to ``_frame_record`` too, so a
         # pickle written here loads in them.
-        from pcapkit.foundation.traceflow.data.data import _frame_record
+        from pcapkit.foundation.traceflow.data import _frame_record
 
         record = _record()
         for protocol in PROTOCOLS:
@@ -153,7 +153,7 @@ class FrameRecordPickleTests(unittest.TestCase):
     def test_a_pickle_of_a_1_5_release_loads_as_the_info(self) -> None:
         # NOTE: the slotted dict subclass of the 1.5 releases, whose __reduce__
         # called _frame_record on its mapping and its slots.
-        from pcapkit.foundation.traceflow.data.data import _frame_record
+        from pcapkit.foundation.traceflow.data import _frame_record
 
         class FrameRecord(dict):
             __slots__ = ('packet', 'frame_info', 'time_epoch')

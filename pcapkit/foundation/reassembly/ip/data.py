@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-"""data models for IP reassembly"""
+"""data models for IP reassembly
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.foundation.reassembly.data.ip``, with no alias: the module moved here
+   (:issue:`2882`).
+
+"""
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.packet import DeferredPacket
-from pcapkit.foundation.reassembly.data.data import Completion, Deferred
+from pcapkit.foundation.reassembly.data import Completion, Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -85,14 +92,14 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: stores a field whose name is a *builtin* name under a mangled key and maps
     #: it back on the way out, so ``packet`` never lands in :attr:`__dict__`
     #: itself -- which routes reading it through :meth:`__getattr__`, where a
-    #: :class:`~pcapkit.foundation.reassembly.data.data.Deferred` analysis can be
+    #: :class:`~pcapkit.foundation.reassembly.data.Deferred` analysis can be
     #: run, while ``dict(datagram)``, :meth:`to_dict` and iteration still report the
     #: field under its own name.
     #: See :class:`~pcapkit.corekit.packet.DeferredPacket`.
     __additional__ = ['packet']
     #: Placeholder class :attr:`packet` may hold, for
     #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted
-    #: even though :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is
+    #: even though :class:`~pcapkit.foundation.reassembly.data.Deferred` is
     #: generic: :meth:`DeferredPacket.__analyse__
     #: <pcapkit.corekit.packet.DeferredPacket.__analyse__>` tests a value against
     #: this with :func:`isinstance`, which rejects a parameterized generic with
@@ -101,7 +108,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
 
     #: How completely the datagram was reassembled, and why reassembly stopped.
     #: Only :attr:`Completion.COMPLETE
-    #: <pcapkit.foundation.reassembly.data.data.Completion.COMPLETE>` is truthy, so
+    #: <pcapkit.foundation.reassembly.data.Completion.COMPLETE>` is truthy, so
     #: ``if datagram.completed:`` reads as it would for a :obj:`bool`; equality
     #: against :obj:`True` or :obj:`False` does not hold.
     completed: 'Completion'
@@ -116,7 +123,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Parsed IP payload, as :func:`~pcapkit.foundation.analysis.ip.ip_datagram`
     #: returns it unless the reassembly's ``__protocol_type__`` names another
     #: protocol, which then parses it. Analysed on first read, not at
-    #: construction time; a :class:`~pcapkit.foundation.reassembly.data.data.Deferred`
+    #: construction time; a :class:`~pcapkit.foundation.reassembly.data.Deferred`
     #: may be passed in its place, and reading this attribute then runs it and
     #: keeps the result.
     packet: 'Optional[ProtocolBase]'
@@ -138,9 +145,9 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: abandons the datagram on the overlapping fragment, without writing it
     #: (:rfc:`8200#section-4.5`), so there a conflict comes only with
     #: :attr:`Completion.OVERLAP
-    #: <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`.
+    #: <pcapkit.foundation.reassembly.data.Completion.OVERLAP>`.
     #:
-    #: :attr:`Buffer.RCVBT <pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT>`
+    #: :attr:`Buffer.RCVBT <pcapkit.foundation.reassembly.ip.data.Buffer.RCVBT>`
     #: only records receipt in 8-octet blocks, coarser than the octet
     #: granularity a conflict needs, and an octet is compared only if its
     #: block is marked. :attr:`Packet.fo` is *always* a multiple of 8, being
@@ -148,12 +155,12 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: partial last block, so the only marked block that can be partially real
     #: is the one holding the final fragment's own tail -- and a range reported
     #: here never extends past
-    #: :attr:`Buffer.TDL <pcapkit.foundation.reassembly.data.ip.Buffer.TDL>`
+    #: :attr:`Buffer.TDL <pcapkit.foundation.reassembly.ip.data.Buffer.TDL>`
     #: for exactly that reason, even though a whole ``RCVBT`` block straddling
     #: it reads as "received". Any other partial last block -- a non-final,
     #: truncated or clipped fragment's -- is left unmarked, so a later fragment
     #: that overwrites its octets records no conflict. See
-    #: :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`.
+    #: :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.reassembly.IP._detect_conflicts>`.
     conflict: 'tuple[tuple[int, int], ...]'
 
     if TYPE_CHECKING:
@@ -186,7 +193,7 @@ class Buffer(Info, Generic[_AT]):
     #: which an arriving fragment disagreed with bytes already placed there by
     #: an earlier one. Accumulated across every fragment merged into this
     #: buffer, in the order the conflicts were found; carried onto
-    #: :attr:`Datagram.conflict <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>`
+    #: :attr:`Datagram.conflict <pcapkit.foundation.reassembly.ip.data.Datagram.conflict>`
     #: verbatim when the buffer is submitted.
     conflict: 'list[tuple[int, int]]'
     #: Extent of each fragment merged into this buffer, as ``(start, stop,
@@ -194,7 +201,7 @@ class Buffer(Info, Generic[_AT]):
     #: sorted by ``start``. Kept only where an overlapping fragment abandons
     #: the datagram, i.e. for IPv6, whose merged fragments therefore never
     #: overlap; empty for IPv4. See
-    #: :attr:`IP.__discard_overlap__ <pcapkit.foundation.reassembly.ip.IP.__discard_overlap__>`.
+    #: :attr:`IP.__discard_overlap__ <pcapkit.foundation.reassembly.ip.reassembly.IP.__discard_overlap__>`.
     #:
     #: .. versionadded:: 1.6.0
     extent: 'list[tuple[int, int, bool]]'

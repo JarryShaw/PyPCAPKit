@@ -17,24 +17,25 @@ class ReassemblyDataModelTests(unittest.TestCase):
 
     def test_ip_data_models_and_package_aliases(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data import (Completion, IP_Buffer, IP_Datagram,
-                                                        IP_DatagramID, IP_Packet, ReassemblyData)
-        from pcapkit.foundation.reassembly.data.ip import Buffer, Datagram, DatagramID, Packet
+        from pcapkit.foundation.reassembly.data import Completion, ReassemblyData
+        from pcapkit.foundation.reassembly.ip import (Data_Buffer, Data_Datagram, Data_DatagramID,
+                                                      Data_Packet)
+        from pcapkit.foundation.reassembly.ip.data import Buffer, Datagram, DatagramID, Packet
 
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
         bufid = (src, dst, 123, TransType.UDP)
 
         packet = Packet(bufid, 7, 8, 20, True, 28, b'ip-header', bytearray(b'payload'), 1000.0)
-        self.assertIsInstance(packet, IP_Packet)
+        self.assertIsInstance(packet, Data_Packet)
         self.assertEqual(packet.bufid, bufid)
         self.assertEqual(packet.payload, bytearray(b'payload'))
         self.assertEqual(packet.timestamp, 1000.0)
 
         datagram_id = DatagramID(src, dst, 123, TransType.UDP)
         datagram = Datagram(Completion.PARTIAL, datagram_id, (7,), b'ip-header', (b'payload',), None, ())
-        self.assertIsInstance(datagram.id, IP_DatagramID)
-        self.assertIsInstance(datagram, IP_Datagram)
+        self.assertIsInstance(datagram.id, Data_DatagramID)
+        self.assertIsInstance(datagram, Data_Datagram)
         self.assertFalse(datagram.completed)
         self.assertIs(datagram.completed, Completion.PARTIAL)
         self.assertEqual(datagram.to_dict()['payload'], (b'payload',))
@@ -42,7 +43,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
 
         buffer = Buffer(-1, bytearray(b'\x01'), [7], b'ip-header', bytearray(b'payload'), 1000.0, [],
                         [(8, 15, True)])
-        self.assertIsInstance(buffer, IP_Buffer)
+        self.assertIsInstance(buffer, Data_Buffer)
         self.assertEqual(buffer.index, [7])
         self.assertEqual(buffer.timestamp, 1000.0)
         self.assertEqual(buffer.conflict, [])
@@ -67,7 +68,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
         """
         import json
 
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         # only COMPLETE is truthy, so ``if datagram.completed:`` reads as a bool would
         self.assertTrue(Completion.COMPLETE)
@@ -91,7 +92,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
     def test_completion_values_are_pinned(self) -> None:
         """GitHub issue #884: pin every member's exact value and the member set.
 
-        :class:`~pcapkit.foundation.reassembly.data.data.Completion` spells its
+        :class:`~pcapkit.foundation.reassembly.data.Completion` spells its
         values with ``auto()``, which on a
         :class:`~pcapkit.utilities.compat.StrEnum` returns ``name.lower()``, so
         a change to ``_generate_next_value_`` could silently alter these
@@ -99,7 +100,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
         and every value is asserted explicitly.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         self.assertEqual([member.name for member in Completion],
                         ['COMPLETE', 'PARTIAL', 'TIMEOUT', 'OVERLAP'])
@@ -110,10 +111,10 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(Completion.OVERLAP, 'overlap')
 
     def test_tcp_data_models_and_package_aliases(self) -> None:
-        from pcapkit.foundation.reassembly.data import (Completion, TCP_Buffer, TCP_Datagram,
-                                                        TCP_DatagramID, TCP_Fragment,
-                                                        TCP_HoleDescriptor, TCP_Packet)
-        from pcapkit.foundation.reassembly.data.tcp import (Buffer, Datagram, DatagramID,
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.tcp import (Data_Buffer, Data_Datagram, Data_DatagramID,
+                                                       Data_Fragment, Data_HoleDescriptor, Data_Packet)
+        from pcapkit.foundation.reassembly.tcp.data import (Buffer, Datagram, DatagramID,
                                                             Fragment, HoleDescriptor, Packet)
 
         src = ip_address('192.0.2.10')
@@ -122,7 +123,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
 
         packet = Packet(bufid, 100, 200, 3, True, False, False, 5, 0, 4,
                         b'tcp-header', bytearray(b'hello'), 1000.0)
-        self.assertIsInstance(packet, TCP_Packet)
+        self.assertIsInstance(packet, Data_Packet)
         self.assertEqual(packet.first, 0)
         self.assertTrue(packet.syn)
         self.assertEqual(packet.timestamp, 1000.0)
@@ -130,8 +131,8 @@ class ReassemblyDataModelTests(unittest.TestCase):
         datagram_id = DatagramID((src, 12345), (dst, 443), 200)
         datagram = Datagram(Completion.COMPLETE, datagram_id, (3,), b'tcp-header', b'hello',
                             {'parsed': True}, ())
-        self.assertIsInstance(datagram.id, TCP_DatagramID)
-        self.assertIsInstance(datagram, TCP_Datagram)
+        self.assertIsInstance(datagram.id, Data_DatagramID)
+        self.assertIsInstance(datagram, Data_Datagram)
         self.assertTrue(datagram.completed)
         self.assertIs(datagram.completed, Completion.COMPLETE)
         self.assertEqual(datagram.conflict, ())
@@ -139,9 +140,9 @@ class ReassemblyDataModelTests(unittest.TestCase):
         hole = HoleDescriptor(5, 10)
         fragment = Fragment([3], 100, 5, bytearray(b'hello'), [], [])
         buffer = Buffer([hole], b'tcp-header', {200: fragment}, 1000.0)
-        self.assertIsInstance(hole, TCP_HoleDescriptor)
-        self.assertIsInstance(fragment, TCP_Fragment)
-        self.assertIsInstance(buffer, TCP_Buffer)
+        self.assertIsInstance(hole, Data_HoleDescriptor)
+        self.assertIsInstance(fragment, Data_Fragment)
+        self.assertIsInstance(buffer, Data_Buffer)
         self.assertEqual(buffer.ack[200].raw, bytearray(b'hello'))
         self.assertEqual(buffer.timestamp, 1000.0)
 

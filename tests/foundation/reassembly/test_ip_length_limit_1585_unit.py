@@ -40,7 +40,7 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, ihl: int, tl: 'int | None' = None):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), 7, TransType.UDP)
         return Packet(bufid, num, fo, ihl, mf, ihl + len(payload) if tl is None else tl,
@@ -58,8 +58,8 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
 
     def test_the_issues_repro_is_partial(self) -> None:
         # case 3c: TDL 65,523 behind a 20-octet header is 65,543 octets
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for reverse in (False, True):
             for strict in (True, False):
@@ -72,8 +72,8 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
                     self.assertEqual(datagram.conflict, ())
 
     def test_ipv4_counts_the_whole_header(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for ihl in (20, 60):
             for strict in (True, False):
@@ -87,8 +87,8 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
     def test_ipv6_counts_only_the_extension_headers(self) -> None:
         # The fixed header is not in the Payload Length, so 65,535 octets of
         # data behind it fit; an 8-octet extension header takes 8 of them.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         for ihl, tdl in ((40, 65535), (48, 65527)):
             for strict in (True, False):
@@ -103,8 +103,8 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
 
     def test_an_ipv4_final_fragment_at_the_largest_offset_never_completes(self) -> None:
         # Its data ends past octet 65,528, so no header leaves it room.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for size in (1, 7):
             for strict in (True, False):
@@ -123,8 +123,8 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
         # Total Length 0 declares nothing, as Linux's BIG TCP leaves a datagram
         # over 65,535 octets: 65,523 octets of data fit the preallocated buffer
         # but not with the header, so the buffer still grows past the bound.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -140,8 +140,8 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
         # overwrites 56-59 with other octets. Receipt is tracked in whole
         # blocks only, so they are not compared, and the later octets win as
         # RFC 791 has them do.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         other = bytes(b ^ 0xFF for b in DATA[56:64])
         for strict in (True, False):
@@ -159,8 +159,8 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
         # The same fragments on IPv6: the cut one's 60 octets reach into the
         # next one's, so RFC 8200 section 4.5 abandons the datagram (#2547).
         # The overlapped octets sit in a hole, so no conflict is recorded.
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         other = bytes(b ^ 0xFF for b in DATA[56:64])
         for strict in (True, False):

@@ -39,7 +39,7 @@ class TestTraceFlowLabelUnique(unittest.TestCase):
     def _packet(index: int, *, syn: bool = False, fin: bool = False, reverse: bool = False,
                 timestamp: float = 300.0) -> 'object':
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.traceflow.data.tcp import Packet
+        from pcapkit.foundation.traceflow.tcp.data import Packet
 
         near, far = (ip_address('192.0.2.1'), 12345), (ip_address('198.51.100.2'), 443)
         (src, srcport), (dst, dstport) = (far, near) if reverse else (near, far)
@@ -47,7 +47,7 @@ class TestTraceFlowLabelUnique(unittest.TestCase):
                       srcport, dstport, timestamp, 0, 0, b'h', bytearray(b''))
 
     def _trace(self, bidirectional: bool, packets: 'list[object]') -> 'tuple[list, dict]':
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='json', bidirectional=bidirectional)

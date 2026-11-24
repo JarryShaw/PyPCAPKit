@@ -35,13 +35,13 @@ class TestIPReassemblyTSOTotalLength(unittest.TestCase):
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, tl: int):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), 0x1234, TransType.UDP)
         return Packet(bufid, num, fo, 20, mf, tl, b'H' * 20, bytearray(payload), 1000.0 + num)
 
     def _reassemble(self, *packets, strict: bool):
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         reasm = IPv4(strict=strict)
         for packet in packets:
@@ -50,7 +50,7 @@ class TestIPReassemblyTSOTotalLength(unittest.TestCase):
         return reasm.datagram
 
     def test_an_unfragmented_tso_datagram_is_whole(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -73,7 +73,7 @@ class TestIPReassemblyTSOTotalLength(unittest.TestCase):
         # to be because of "TCP segmentation offload" (TSO))", then "[2 IPv4
         # Fragments (104 bytes): #1(56), #2(48)]". A malformed fragment is read
         # the same way, so no octet the capture holds is dropped.
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         first, final = DATA[:56], DATA[56:]
         for zeroed in (0, 1):
@@ -94,7 +94,7 @@ class TestIPReassemblyTSOTotalLength(unittest.TestCase):
         # fragment carries a multiple of 8 octets, so with Total Length 0 its
         # partial last block is a cut, and the datagram reads exactly as it does
         # with the real Total Length of 76: octets 52 to 55 are a hole.
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for final_tl in (68, 0):
             for strict in (True, False):
@@ -113,7 +113,7 @@ class TestIPReassemblyTSOTotalLength(unittest.TestCase):
                         self.assertEqual(zeroed.payload, DATA[:52] + bytes(4) + DATA[56:])
 
     def test_a_tso_datagram_past_65535_octets_is_kept_whole(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for strict in (True, False):
             with self.subTest(strict=strict):
@@ -135,7 +135,7 @@ class TestIPReassemblyTSOTotalLength(unittest.TestCase):
     def test_a_missing_fragment_still_leaves_a_tso_datagram_incomplete(self) -> None:
         # Only the final fragment, with Total Length 0: its own octets are
         # received, but the first 56 never were.
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         datagram, = self._reassemble(self._packet(num=2, fo=56, mf=False, payload=DATA[56:], tl=0),
                                      strict=True)

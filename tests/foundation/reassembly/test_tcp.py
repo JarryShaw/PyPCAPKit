@@ -42,7 +42,7 @@ class TCPReassemblyTests(unittest.TestCase):
         the :rfc:`815` interval arithmetic on its own still override both.
 
         """
-        from pcapkit.foundation.reassembly.data.tcp import Packet
+        from pcapkit.foundation.reassembly.tcp.data import Packet
 
         if first is None:
             first = dsn
@@ -52,7 +52,7 @@ class TCPReassemblyTests(unittest.TestCase):
                       first, last, header, bytearray(payload), timestamp)
 
     def test_complete_stream_submits_on_fin_and_analyzes_payload(self) -> None:
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         class Analyzer:
             calls: list[tuple[tuple[int, int], bytes]] = []
@@ -85,7 +85,7 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertEqual(len(callback_calls), 1)
 
     def test_syn_resets_existing_session_and_flushes_previous_payload(self) -> None:
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         class Analyzer:
             @classmethod
@@ -105,9 +105,9 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertEqual(reasm._buffer[self._bufid()].hdr, b'new-header')
 
     def test_fragment_merging_covers_gaps_overlaps_new_acks_and_holes(self) -> None:
-        from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, Fragment,
+        from pcapkit.foundation.reassembly.tcp.data import (HOLE_OPEN_BOUND, Buffer, Fragment,
                                                             HoleDescriptor)
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         class Analyzer:
             @classmethod
@@ -169,9 +169,9 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertEqual(before_gap._buffer[bufid].ack[500].conflict, [])
 
     def test_submit_incomplete_strict_complete_strict_false_and_empty_buffers(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.tcp import Buffer, Fragment, HoleDescriptor
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.tcp.data import Buffer, Fragment, HoleDescriptor
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         class Analyzer:
             calls: list[tuple[tuple[int, int], bytes]] = []
@@ -274,7 +274,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
     must not become a NUL octet at the head of the payload, which would make a
     complete datagram compare unequal to the octets that were sent.
 
-    Every stream here is driven through :class:`~pcapkit.foundation.reassembly.tcp.TCP`
+    Every stream here is driven through :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`
     with segment descriptors built exactly as the :mod:`pcapkit.toolkit` modules
     build them -- ``first`` the segment's own sequence number and ``last`` the
     sequence number of its final payload octet -- so the tests pin the contract
@@ -295,7 +295,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         would drag HTTP parsing into tests about sequence arithmetic.
 
         """
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         class Analyzer:
             @classmethod
@@ -311,7 +311,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
                  syn: bool = False, fin: bool = False, rst: bool = False,
                  timestamp: float = 1000.0):
         """One segment, described the way every :mod:`pcapkit.toolkit` describes it."""
-        from pcapkit.foundation.reassembly.data.tcp import Packet
+        from pcapkit.foundation.reassembly.tcp.data import Packet
 
         return Packet(self._bufid(), seq, ack, num, syn, fin, rst, len(payload),
                       seq, seq + len(payload) - 1, b'tcp-header', bytearray(payload),
@@ -393,7 +393,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         each; anywhere else the datagram disappears entirely.
 
         """
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         segments = [(0, b'A' * 10), (20, b'C' * 10), (40, b'E' * 10)]
         expected = (Completion.PARTIAL, (b'A' * 10, b'C' * 10, b'E' * 10))
@@ -522,7 +522,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         sequence numbers leaves one descriptor holding one of each.
 
         """
-        from pcapkit.foundation.reassembly.data.tcp import HOLE_OPEN_BOUND
+        from pcapkit.foundation.reassembly.tcp.data import HOLE_OPEN_BOUND
 
         packets = self._stream(segments=[(0, b'A' * 10), (20, b'C' * 10)], teardown=None)
         reasm = self._run(packets)
@@ -554,7 +554,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         long-lived connection, for no change in what is missing.
 
         """
-        from pcapkit.foundation.reassembly.data.tcp import HOLE_OPEN_BOUND
+        from pcapkit.foundation.reassembly.tcp.data import HOLE_OPEN_BOUND
 
         base = ISN + 1
         reasm = self._run([
@@ -612,7 +612,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         """
         from unittest import mock
 
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for syn in (True, False):
             with self.subTest(syn=syn), mock.patch.object(sys, 'maxsize', 2 ** 31 - 1):
@@ -640,7 +640,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     first-write-wins instead: the already-buffered bytes are kept, the
     conflicting portion of whichever segment arrived later is discarded, and
     the sequence range on which they disagreed is recorded on
-    :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.conflict` --
+    :attr:`~pcapkit.foundation.reassembly.tcp.data.Datagram.conflict` --
     additive, so ``completed`` means what it does without a conflict.
 
     Every test drives the public API only -- build :class:`Packet`, feed
@@ -660,13 +660,13 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     def _packet(self, *, num: int, dsn: int, payload: bytes = b'', ack: int = 1000,
                 timestamp: float = 0.0):
         """One segment, described exactly as the issue's own reproduction does."""
-        from pcapkit.foundation.reassembly.data.tcp import Packet
+        from pcapkit.foundation.reassembly.tcp.data import Packet
 
         return Packet(self._bufid(), dsn, ack, num, False, False, False, len(payload),
                       dsn, dsn + len(payload) - 1, b'hdr', bytearray(payload), timestamp)
 
     def _run(self, *packets):
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP()
         for packet in packets:
@@ -715,7 +715,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         """A segment that overlaps the buffered tail and then extends past it.
 
         Exercises the non-reach-back overlap branch
-        (:meth:`~pcapkit.foundation.reassembly.tcp.TCP.reassembly`, the branch
+        (:meth:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP.reassembly`, the branch
         guarded by ``PSN >= ISN``) when the arriving segment's end lies past
         the already-buffered end: the overlapping half is contested and
         resolved first-write-wins, the non-overlapping half is genuinely new
@@ -775,15 +775,15 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         The gap between the two original segments is a real hole -- unlike the
         overlap in the other tests here, filling it is an ordinary gap fill,
         not a conflict -- and once it closes the datagram reports
-        :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`,
+        :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`,
         since ``completed`` does not consider conflicts: the conflict recorded
         earlier is still there, on the completed datagram, rather than being
         dropped or blocking completion.
 
         """
         base = self.BASE
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP()
         reasm(self._packet(num=1, dsn=base, payload=b'AAAAAAAA'))          # base .. base+7
@@ -812,14 +812,14 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         ``conflict`` for both. This one asserts the case where one bucket
         genuinely *does* record a conflict while another, in flight at the same
         time, must not: the gap lists and conflict records are per
-        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment`, and this is
+        :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment`, and this is
         what proves it rather than arguing it from where the field is declared.
 
         Worth stating why this case in particular: boundary tests that all use
         a *single* ACK bucket cannot see state leaking across buckets, which is
         where the data loss this whole mechanism exists to fix hides, and the
         single-bucket tests of the
-        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`
+        :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.gap`
         representation share that blind spot.
 
         Bucket 1000 takes a real conflicting retransmission over ``base..base+3``
@@ -828,7 +828,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
 
         """
         base = self.BASE
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP()
         reasm(self._packet(num=1, dsn=base, payload=b'AAAA', ack=1000))         # bucket 1000, first receipt
@@ -852,9 +852,9 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     def test_one_ack_buckets_hole_closing_does_not_leak_receipt_into_another(self) -> None:
         """A hole closed in one ACK bucket must not look received in a different one.
 
-        :attr:`~pcapkit.foundation.reassembly.data.tcp.Buffer.hdl` is one hole
+        :attr:`~pcapkit.foundation.reassembly.tcp.data.Buffer.hdl` is one hole
         descriptor list shared by every ACK bucket under the same BUFID, while
-        each bucket's own :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.raw`
+        each bucket's own :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.raw`
         is private to that bucket. Bucket 2000 here fills the *shared* hole at
         base+4..base+9 with its own, entirely unrelated data; that must not
         make bucket 1000's later, real segment for the very same absolute
@@ -864,7 +864,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
 
         """
         base = self.BASE
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         reasm = TCP()
         reasm(self._packet(num=1, dsn=base, payload=b'AAAA', ack=1000))          # bucket 1000: base..base+3
@@ -887,7 +887,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
 
         The arriving segment here straddles a real hole *and* touches
         already-received bytes on both sides of it in the same merge call --
-        the case :meth:`~pcapkit.foundation.reassembly.tcp.TCP._merge_overlap`
+        the case :meth:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP._merge_overlap`
         has to get right on a single call, not just across separate ones. The
         already-received edges carry bytes identical to what is buffered (a
         conforming overlap), so nothing there conflicts either; only the
@@ -916,7 +916,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         inside the arriving segment's range (``dsn=90``, ``len=30``), so the
         arriving segment supplies genuinely new bytes *before* ``isn``
         (90..99) and genuinely new bytes *past* the old buffer's end
-        (110..119) in the very same :meth:`~pcapkit.foundation.reassembly.tcp.TCP._merge_overlap`
+        (110..119) in the very same :meth:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP._merge_overlap`
         call. What is mutually exclusive is only which one of the
         old buffer's own tail or a genuinely new one survives -- never both --
         and that is unaffected by the head also being new.
@@ -957,7 +957,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         """
         import random
 
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         rng = random.Random(20260918)
         bufid = self._bufid()

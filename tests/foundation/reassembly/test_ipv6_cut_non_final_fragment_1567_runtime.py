@@ -112,7 +112,7 @@ class IPv6CutFragmentEngineTests(unittest.TestCase):
                     yield fmt, build, engine, strict
 
     def test_a_cut_first_fragment_leaves_a_hole(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for cut in (60, 52):
             for fmt, build, engine, strict in self._cases():
@@ -125,7 +125,7 @@ class IPv6CutFragmentEngineTests(unittest.TestCase):
                                      else DATA[:cut] + bytes(64 - cut) + DATA[64:])
 
     def test_an_uncut_capture_completes_byte_exact(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for fmt, build, engine, strict in self._cases():
             with self.subTest(fmt=fmt, engine=engine, strict=strict):

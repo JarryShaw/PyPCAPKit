@@ -18,7 +18,7 @@
 from pcapkit.foundation.traceflow.traceflow import TraceFlow
 
 # TCP Flow Tracing
-from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
+from pcapkit.foundation.traceflow.tcp.traceflow import TCP as TCP_TraceFlow
 
 __all__ = [
     'TCP_TraceFlow',

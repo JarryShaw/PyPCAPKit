@@ -5,7 +5,7 @@ GitHub issue #1565. The data buffer holds 65,535 octets. Guards against a
 received-bit table ``RCVBT`` of only 8,191 entries, one per 8-octet block, which
 cover octets 0 to 65,527: a fragment whose data reaches octet 65,528 -- the last
 fragment at the largest Fragment Offset, 8191, among them -- then makes
-:meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`
+:meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.reassembly.IP._detect_conflicts>`
 index past the table, and the whole extraction raises :exc:`IndexError`. The
 table has 8,192 entries, the partial last block included.
 
@@ -34,15 +34,15 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes, tl: 'int | None' = None):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), 7, TransType.UDP)
         return Packet(bufid, num, fo, 20, mf, 20 + len(payload) if tl is None else tl,
                       b'H' * 20, bytearray(payload), 1000.0 + num)
 
     def _classes(self):
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         return IPv4, IPv6
 
@@ -52,7 +52,7 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
                 self._packet(num=2, fo=32768, mf=True, payload=BODY[32768:]))
 
     def test_a_lone_fragment_at_the_largest_offset_is_buffered(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for cls in self._classes():
             for size in (1, 7):
@@ -84,8 +84,8 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
     def test_the_last_fragment_at_the_largest_offset_completes_its_datagram(self) -> None:
         # IPv6 only: an IPv4 datagram reaching octet 65,528 is too long for its
         # Total Length, header included, so it never completes (#1585).
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         for cls in (IPv6,):
             for size in (1, 7):
@@ -103,7 +103,7 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
                         self.assertEqual(datagram.conflict, ())
 
     def test_a_non_final_fragment_at_the_largest_offset_leaves_the_datagram_open(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for cls in self._classes():
             for size in (1, 7):
@@ -128,7 +128,7 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
     def test_a_tso_fragment_at_the_largest_offset_composes_with_the_buffer_growth(self) -> None:
         # Total Length 0 (#1555): 7 octets end exactly at the preallocated
         # buffer's end, 9 run past it and grow it.
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for size in (7, 9):
             for strict in (True, False):

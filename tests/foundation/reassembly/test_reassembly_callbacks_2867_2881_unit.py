@@ -87,7 +87,7 @@ class ReassemblerCases:
 
     def build_ipv4(self, num: int, ident: int, tail: bool, ts: float) -> 'list[Any]':
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('192.0.2.1'), ip_address('198.51.100.2'), ident, TransType.UDP)
         fo, mf, payload = (8, False, b'z' * 4) if tail else (0, True, bytes([ident]) * 8)
@@ -95,14 +95,14 @@ class ReassemblerCases:
 
     def build_ipv6(self, num: int, ident: int, tail: bool, ts: float) -> 'list[Any]':
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         bufid = (ip_address('2001:db8::1'), ip_address('2001:db8::2'), ident, TransType.UDP)
         fo, mf, payload = (8, False, b'z' * 4) if tail else (0, True, bytes([ident]) * 8)
         return [Packet(bufid, num, fo, 40, mf, 40 + len(payload), b'H' * 40, bytearray(payload), ts)]
 
     def build_tcp(self, num: int, ident: int, tail: bool, ts: float) -> 'list[Any]':
-        from pcapkit.foundation.reassembly.data.tcp import Packet
+        from pcapkit.foundation.reassembly.tcp.data import Packet
 
         bufid = (ip_address('192.0.2.1'), ident, ip_address('198.51.100.2'), 443)
 
@@ -117,7 +117,7 @@ class ReassemblerCases:
 
     def build_dtls(self, num: int, ident: int, tail: bool, ts: float) -> 'list[Any]':
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.foundation.reassembly.data.dtls import Packet
+        from pcapkit.foundation.reassembly.dtls.data import Packet
 
         offset, payload = (4, b'z' * 4) if tail else (0, bytes([ident]) * 4)
         return [Packet(bufid=(f'10.0.0.{ident}', 1234, '10.0.1.1', 5684, 0), num=num,

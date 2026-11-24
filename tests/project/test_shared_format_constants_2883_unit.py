@@ -510,7 +510,7 @@ class TestRule(unittest.TestCase):
                 'from pcapkit.protocols.application.ssl.const import SHARED\n',
             'pcapkit.toolkit.pcap': 'import pcapkit.protocols.application.ssl.const as ssl\nssl.TOOL\n',
             'pcapkit.protocols.transport.tcp.schema': 'WIDTH = 1\n',
-            'pcapkit.foundation.reassembly.tcp':
+            'pcapkit.foundation.reassembly.tcp.reassembly':
                 'import pcapkit.protocols.transport.tcp.schema\npcapkit.protocols.transport.tcp.schema.WIDTH\n',
             'pcapkit.protocols.misc.pcap.header.schema': 'MAGIC = 1\n',
             'pcapkit.dumpkit.pcap': 'from pcapkit.protocols.misc.pcap import header\nheader.schema.MAGIC\n',
@@ -521,7 +521,7 @@ class TestRule(unittest.TestCase):
             'pcapkit.protocols.internet.ipv6.schema.LIMIT: read by pcapkit.protocols.internet.icmpv6.schema',
             'pcapkit.protocols.internet.ipv6.schema.RELATIVE: read by pcapkit.protocols.internet.icmpv6.protocol',
             'pcapkit.protocols.misc.pcap.header.schema.MAGIC: read by pcapkit.dumpkit.pcap',
-            'pcapkit.protocols.transport.tcp.schema.WIDTH: read by pcapkit.foundation.reassembly.tcp',
+            'pcapkit.protocols.transport.tcp.schema.WIDTH: read by pcapkit.foundation.reassembly.tcp.reassembly',
         ])
 
     def test_the_helper_rule_flags_what_it_should(self) -> 'None':

@@ -101,7 +101,7 @@ class DelegationTests(_Reassembled):
 
     def test_a_dtls_subclass_overriding_the_method_decodes_the_packet(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLS_Reassembly
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS as DTLS_Reassembly
         from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
         from pcapkit.protocols.application.ssl.data import ClientHello
@@ -124,8 +124,8 @@ class DelegationTests(_Reassembled):
 
     def test_a_protocol_type_without_the_method_fails_when_a_message_completes(self) -> None:
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.foundation.reassembly.data.dtls import Packet
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLS_Reassembly
+        from pcapkit.foundation.reassembly.dtls.data import Packet
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS as DTLS_Reassembly
 
         class Unrelated:  # pylint: disable=too-few-public-methods
             """A ``__protocol_type__`` with no ``analyze_handshake``."""
@@ -147,7 +147,7 @@ class DelegationTests(_Reassembled):
                 engine(info)
 
     def test_the_packet_is_the_bound_method_across_pickling(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
         from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for container, write in CONTAINERS:

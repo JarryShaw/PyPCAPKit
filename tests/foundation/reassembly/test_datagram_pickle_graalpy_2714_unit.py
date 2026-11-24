@@ -68,7 +68,7 @@ class DatagramPickleTests(unittest.TestCase):
             yield 'dtls', container, datagram, dtls_handshake, lambda packet: packet
 
     def test_a_datagram_pickles_under_every_protocol(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
 
         for kind, container, datagram, function, value in self._engines():
             held = _held(datagram)
@@ -86,7 +86,7 @@ class DatagramPickleTests(unittest.TestCase):
                     self.assertEqual(value(copy.packet), expected)
 
     def test_the_reassembly_result_pickles_under_every_protocol(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Deferred, ReassemblyData
+        from pcapkit.foundation.reassembly.data import Deferred, ReassemblyData
 
         reassembly = _extract(self, _pcap(FRAMES['ipv4'][0]), reassembly=['ipv4', 'ipv6']).reassembly
         held = _held(reassembly.ipv4[0])

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """DTLS handshake-message reassembly (GitHub issues #2440 and #2496).
 
-Covers the :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine in
+Covers the :class:`~pcapkit.foundation.reassembly.dtls.reassembly.DTLS` engine in
 isolation, fed fragments directly, and the extraction path: the default engine
 feeds it through :func:`pcapkit.toolkit.pcap.dtls_reassembly`, and
 :func:`pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a fragmented
@@ -137,14 +137,14 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
 
     @staticmethod
     def _engine(strict: bool = True):
-        from pcapkit.foundation.reassembly.dtls import DTLS
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
 
         return DTLS(strict=strict)
 
     @staticmethod
     def _packet(bufid, num, msg_type, length, message_seq, fragment_offset, fragment_length,
                payload, timestamp=0.0):
-        from pcapkit.foundation.reassembly.data.dtls import Packet
+        from pcapkit.foundation.reassembly.dtls.data import Packet
 
         return Packet(bufid=bufid, num=num, msg_type=msg_type, length=length,
                       message_seq=message_seq, fragment_offset=fragment_offset,
@@ -403,7 +403,7 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
 
     def test_stale_buffer_is_held_not_expired_by_time(self) -> None:
         """A buffer whose first fragment is arbitrarily old is never abandoned
-        as :attr:`~pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT`:
+        as :attr:`~pcapkit.foundation.reassembly.data.Completion.TIMEOUT`:
         DTLS handshake reassembly has no time-based deadline
         (:rfc:`6347#section-4.2.3`, :rfc:`9147#section-5.5`). Its late
         fragments still complete it."""

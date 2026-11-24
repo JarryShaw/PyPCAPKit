@@ -35,9 +35,9 @@ EVENT = 'viewcode-follow-imported'
 
 #: The modules binding a ``BufferID`` alias.
 ALIASES = (
-    'pcapkit.foundation.reassembly.data.ip',
-    'pcapkit.foundation.reassembly.data.tcp',
-    'pcapkit.foundation.traceflow.data.tcp',
+    'pcapkit.foundation.reassembly.ip.data',
+    'pcapkit.foundation.reassembly.tcp.data',
+    'pcapkit.foundation.traceflow.tcp.data',
 )
 
 

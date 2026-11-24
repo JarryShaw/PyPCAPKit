@@ -142,7 +142,7 @@ class TunnelledIPReassemblyTests(unittest.TestCase):
                 yield engine, pcapng
 
     def test_fragmented_inner_datagram_is_reassembled(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for engine, pcapng in self.cases():
             for version, df in ((4, False), (4, True), (6, False)):
@@ -158,7 +158,7 @@ class TunnelledIPReassemblyTests(unittest.TestCase):
                     self.assertEqual(datagram.payload, DATAGRAM)
 
     def test_fragmented_tunnel_is_reassembled_on_its_own_header(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for engine, pcapng in self.cases():
             for version in (4, 6):

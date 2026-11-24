@@ -216,7 +216,7 @@ class MakeTraceflowTests(TracerCase):
 
     def test_makes_a_registered_tracer_by_name(self) -> None:
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         fout = os.path.join(self.root, 'made')
         for (name, kind) in (('Counter', self.Counter), ('TCP', TCP)):
@@ -247,7 +247,7 @@ class MakeTraceflowTests(TracerCase):
 
     def test_trace_makes_its_tracer_through_it(self) -> None:
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.interface.core import trace
         from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 

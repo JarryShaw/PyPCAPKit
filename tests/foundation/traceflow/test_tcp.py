@@ -27,7 +27,7 @@ class TCPTraceFlowTests(unittest.TestCase):
                 frame: object | None = None, seq: int = 0, ack: int = 0,
                 payload: bytes = b''):
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.foundation.traceflow.data.tcp import Packet
+        from pcapkit.foundation.traceflow.tcp.data import Packet
 
         if frame is None:
             frame = {'frame': index}
@@ -43,7 +43,7 @@ class TCPTraceFlowTests(unittest.TestCase):
 
         """
         from pcapkit.dumpkit.null import NotImplementedIO
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
         callbacks = []
@@ -86,7 +86,7 @@ class TCPTraceFlowTests(unittest.TestCase):
 
         """
         from pcapkit.dumpkit.null import NotImplementedIO
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
 
@@ -120,7 +120,7 @@ class TCPTraceFlowTests(unittest.TestCase):
 
         """
         from pcapkit.dumpkit.null import NotImplementedIO
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
 
@@ -169,7 +169,7 @@ class TCPTraceFlowTests(unittest.TestCase):
 
         """
         from pcapkit.dumpkit.null import NotImplementedIO
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         TCP.register_dumper('unit-null', NotImplementedIO, ext='.unit')
         callbacks = []
@@ -216,7 +216,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         at its second frame.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format')
@@ -234,7 +234,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         same contamination as the FIN case, by a different route.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format')
@@ -263,7 +263,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         part-way through a capture is not destructive.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         callbacks = []
         TCP.register_callback(callbacks.append)
@@ -298,7 +298,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         a caller who only wanted frame numbers must not be charged for it.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format')
@@ -315,7 +315,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         """One reassembled datagram per direction, parsed on demand.
 
         The tracer does not reassemble the stream itself -- it feeds
-        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, which is why the segments
+        :class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP`, which is why the segments
         below are delivered *out of order* and still come back in sequence order.
         A tracer concatenating payloads as they arrived would return ``b'worldhello'``.
 
@@ -325,7 +325,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         for what a real, advancing acknowledgement number does.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
@@ -352,7 +352,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         """A direction yields one datagram per acknowledgement number, not one total.
 
         The reassembler buckets as ``self._buffer[BUFID].ack[ACK]`` and emits one
-        datagram per bucket, and :meth:`~pcapkit.foundation.traceflow.tcp.TCP._make_segment`
+        datagram per bucket, and :meth:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP._make_segment`
         passes ``ack`` through untouched. So the count follows the *conversation*:
         the acknowledgement number advances exactly when the peer has spoken, which
         splits each direction at its message boundaries and leaves every datagram's
@@ -363,7 +363,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         datagram per direction" is the whole truth.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
@@ -418,7 +418,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         request and one reply. This is the case where it does not.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
@@ -446,16 +446,16 @@ class TCPTraceFlowTests(unittest.TestCase):
     def test_an_open_flows_application_layer_is_a_snapshot_of_when_it_was_read(self) -> None:
         """Reading ``packet`` on an open flow freezes it there.
 
-        :meth:`~pcapkit.foundation.traceflow.tcp.TCP.submit` deliberately reports
+        :meth:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP.submit` deliberately reports
         open flows without finalising them, and the
-        :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves on first
+        :class:`~pcapkit.foundation.traceflow.data.Deferred` resolves on first
         read and is then fixed in place. So an :class:`Index` a caller kept from a
         mid-capture read cannot see segments that arrived afterwards, and nothing on
         it says so -- which is why the docstring tells callers to read after
-        :meth:`~pcapkit.foundation.traceflow.tcp.TCP.finish` for a final result.
+        :meth:`~pcapkit.foundation.traceflow.tcp.traceflow.TCP.finish` for a final result.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
@@ -482,13 +482,13 @@ class TCPTraceFlowTests(unittest.TestCase):
         """``Index.packet`` holds a :class:`Deferred` until somebody reads it.
 
         The same postponement reassembly uses for
-        :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>`,
+        :attr:`Datagram.packet <pcapkit.foundation.reassembly.tcp.data.Datagram.packet>`,
         one layer out: the flow defers its *reassembly*, and each datagram then
         defers its own *parse*.
 
         """
-        from pcapkit.foundation.traceflow.data.data import Deferred
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.data import Deferred
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format', analyze=True)
@@ -519,7 +519,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         :class:`collections.abc.Mapping` sets ``__hash__`` to :data:`None`.
 
         """
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format')
@@ -534,7 +534,7 @@ class TCPTraceFlowTests(unittest.TestCase):
                                 oneway.make_bufid(self._reply(index=2)))
 
     def test_tcp_trace_ipv6_label_and_no_extension_output_path(self) -> None:
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with tempfile.TemporaryDirectory() as tempdir:
             trace = TCP(fout=tempdir, format='unknown-unit-format')
@@ -563,7 +563,7 @@ class TCPTraceFlowTests(unittest.TestCase):
         """
         from dictdumper import JSON
 
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         TCP.register_dumper('unit-noext', JSON, ext='')
 

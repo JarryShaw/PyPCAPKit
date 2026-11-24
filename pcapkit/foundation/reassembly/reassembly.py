@@ -154,7 +154,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
     #: float: Default reassembly timeout, in seconds, for this protocol --
     #: overridden per protocol, e.g.
-    #: :attr:`IPv6.__timeout__ <pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__>`.
+    #: :attr:`IPv6.__timeout__ <pcapkit.foundation.reassembly.ipv6.reassembly.IPv6.__timeout__>`.
     #: :data:`math.inf` means "never expire", which is the base default because
     #: nothing here knows what a protocol's specification asks for.
     __timeout__: 'float' = math.inf
@@ -299,7 +299,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
 
         Returns:
             Datagrams of the buffers abandoned, reported with
-            :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+            :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.Completion.TIMEOUT>`
             and already stored in :attr:`datagram`, through :meth:`_release`.
             Empty when nothing expired, which is the overwhelmingly common case.
 
@@ -316,7 +316,7 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
             parser has that time has moved on. Fed by hand, a reassembly object
             sees only the packets handed to it, so a buffer followed by none is
             reported as
-            :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.data.Completion.PARTIAL>`
+            :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.Completion.PARTIAL>`
             at the end of the capture. The
             :class:`~pcapkit.foundation.extraction.Extractor` calls
             :meth:`advance` with every frame's timestamp, so there a buffer

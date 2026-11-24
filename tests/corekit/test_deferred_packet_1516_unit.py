@@ -2,8 +2,8 @@
 """GitHub issue #1516: one :class:`~pcapkit.corekit.packet.DeferredPacket` for
 reassembly and flow tracing.
 
-The mixin serves the models of both ``pcapkit/foundation/reassembly/data/data.py``
-and ``pcapkit/foundation/traceflow/data/data.py``, which differ only in which
+The mixin serves the models of both ``pcapkit/foundation/reassembly/data.py``
+and ``pcapkit/foundation/traceflow/data.py``, which differ only in which
 module-level ``Deferred`` the ``isinstance`` test names. The class takes that
 difference as the ``__deferred__`` hook each subclass sets, so a model resolves
 its own placeholder class and nothing else.
@@ -29,10 +29,10 @@ MODULE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'corekit' / '
 
 #: The models, as ``(module, class, module holding its placeholder)``.
 MODELS = (
-    ('pcapkit.foundation.reassembly.data.ip', 'Datagram', 'pcapkit.foundation.reassembly.data.data'),
-    ('pcapkit.foundation.reassembly.data.tcp', 'Datagram', 'pcapkit.foundation.reassembly.data.data'),
-    ('pcapkit.foundation.reassembly.data.dtls', 'Datagram', 'pcapkit.foundation.reassembly.data.data'),
-    ('pcapkit.foundation.traceflow.data.tcp', 'Index', 'pcapkit.foundation.traceflow.data.data'),
+    ('pcapkit.foundation.reassembly.ip.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
+    ('pcapkit.foundation.reassembly.tcp.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
+    ('pcapkit.foundation.reassembly.dtls.data', 'Datagram', 'pcapkit.foundation.reassembly.data'),
+    ('pcapkit.foundation.traceflow.tcp.data', 'Index', 'pcapkit.foundation.traceflow.data'),
 )
 
 
@@ -212,17 +212,16 @@ class WiringTests(unittest.TestCase):
                 self.assertIs(cls.__deferred__, importlib.import_module(deferred_module).Deferred)
 
     def test_deferred_packet_has_no_re_export(self) -> 'None':
-        """None of the three paths the name was public at keeps a re-export
-        (GitHub issue #1744; #1715: a moved name keeps no re-export at its old
-        path), so :mod:`pcapkit.corekit.packet` is the one home.
+        """Neither base data module, the paths the name was public at that still
+        import, keeps a re-export (GitHub issue #1744; #1715: a moved name keeps
+        no re-export at its old path), so :mod:`pcapkit.corekit.packet` is the
+        one home.
 
         """
         from pcapkit.corekit.packet import DeferredPacket
 
         self.assertEqual(DeferredPacket.__module__, 'pcapkit.corekit.packet')
-        for module in ('pcapkit.foundation.reassembly.data',
-                       'pcapkit.foundation.reassembly.data.data',
-                       'pcapkit.foundation.traceflow.data.data'):
+        for module in ('pcapkit.foundation.reassembly.data', 'pcapkit.foundation.traceflow.data'):
             with self.subTest(module=module):
                 imported = importlib.import_module(module)
                 self.assertFalse(hasattr(imported, 'DeferredPacket'))
@@ -230,13 +229,13 @@ class WiringTests(unittest.TestCase):
 
     def test_each_model_resolves_its_own_placeholder_and_not_the_other(self) -> 'None':
         from pcapkit.corekit.packet import DeferredPacket
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.data import Deferred as ReassemblyDeferred
-        from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
-        from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
-        from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
-        from pcapkit.foundation.traceflow.data.data import Deferred as TraceFlowDeferred
-        from pcapkit.foundation.traceflow.data.tcp import Index
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.data import Deferred as ReassemblyDeferred
+        from pcapkit.foundation.reassembly.dtls.data import Datagram as DTLS_Datagram
+        from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
+        from pcapkit.foundation.reassembly.tcp.data import Datagram as TCP_Datagram
+        from pcapkit.foundation.traceflow.data import Deferred as TraceFlowDeferred
+        from pcapkit.foundation.traceflow.tcp.data import Index
 
         def reassembly() -> 'ReassemblyDeferred':
             return ReassemblyDeferred(lambda proto, payload: ('parsed', proto, payload), 'proto', b'payload')

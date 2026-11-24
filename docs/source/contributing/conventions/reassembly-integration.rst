@@ -42,6 +42,26 @@ one is logged at debug level. Any other :exc:`BaseException`, such as
 :func:`~pcapkit.utilities.callbacks.run_callbacks`. Ruled in review of :pr:`2875`
 (:issue:`2855`).
 
+Package Layout
+~~~~~~~~~~~~~~
+
+**Each reassembly and flow tracing class has a package of its own, named after it**,
+laid out as a protocol's is (:ref:`protocol-family-grouping`). Ruled on :issue:`2882`:
+
+* Its ``reassembly`` or ``traceflow`` module holds the class, and ``data`` its data
+  models where it has its own.
+* Its ``__init__`` exports the class alone, and binds each class ``data`` defines as
+  ``Data_<name>`` outside ``__all__``, as :mod:`pcapkit.foundation.reassembly.tcp` does.
+* The IP base's package, :mod:`pcapkit.foundation.reassembly.ip`, holds the data models
+  IPv4 and IPv6 share, so :mod:`pcapkit.foundation.reassembly.ipv4` and
+  :mod:`pcapkit.foundation.reassembly.ipv6` have no ``data`` of their own.
+* The bases stay in :mod:`pcapkit.foundation.reassembly.reassembly` and
+  :mod:`pcapkit.foundation.traceflow.traceflow`, with their data models beside them in
+  :mod:`pcapkit.foundation.reassembly.data` and :mod:`pcapkit.foundation.traceflow.data`.
+
+:file:`tests/foundation/test_foundation_packages_2882_unit.py` fails on a package out of
+this layout.
+
 Parse Ownership
 ~~~~~~~~~~~~~~~
 
@@ -56,7 +76,7 @@ Parse Ownership
   for a DTLS handshake message.
 * Each :mod:`pcapkit.foundation.analysis` function is a public wrapper that calls that
   method and holds no parsing of its own.
-* The reassembly :class:`~pcapkit.foundation.reassembly.data.data.Deferred` calls the
+* The reassembly :class:`~pcapkit.foundation.reassembly.data.Deferred` calls the
   same method, on the reassembly's own ``__protocol_type__``.
 * Protocol code never imports :mod:`pcapkit.foundation` to do its own work; the
   dependency runs from ``foundation`` to the protocols. The protocol base's import from
@@ -162,7 +182,7 @@ them the rule held for DTLS alone.
 **Where the rule is silent, DTLS takes the IP/TCP shape** (:issue:`2531`). IPv4, IPv6,
 TCP and DTLS reassembly each set ``__protocol_type__`` and report the parsed outcome as
 a datagram's ``packet``, deferred to first read by
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred`. Each ``Deferred`` runs the
+:class:`~pcapkit.foundation.reassembly.data.Deferred`. Each ``Deferred`` runs the
 parse behind its engine's analysis function, so a ``packet`` is what that function
 returns, and binds it to ``__protocol_type__`` -- ``analyze`` for IP and TCP
 (:issue:`2581`), ``analyze_handshake`` for DTLS (:issue:`2622`) -- so a subclass naming

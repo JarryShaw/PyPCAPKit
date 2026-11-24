@@ -48,11 +48,11 @@ class ReassemblyKeywordTests(unittest.TestCase):
 
     def test_every_builtin_reassembler_takes_the_base_keywords(self) -> None:
         from pcapkit.foundation.options import ReassemblyOptions
-        from pcapkit.foundation.reassembly.dtls import DTLS
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
         from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         base = list(inspect.signature(ReassemblyBase.__init__).parameters.values())[1:]
         self.assertEqual({param.kind for param in base}, {inspect.Parameter.KEYWORD_ONLY})
@@ -63,7 +63,7 @@ class ReassemblyKeywordTests(unittest.TestCase):
         self.assertEqual(_shape(ReassemblyOptions, skip=0)[1:], _shape(ReassemblyBase.__init__))
 
     def test_dtls_takes_a_timeout_and_keeps_none_by_default(self) -> None:
-        from pcapkit.foundation.reassembly.dtls import DTLS
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
         from pcapkit.utilities.exceptions import FieldValueError
 
         self.assertEqual(DTLS().timeout, math.inf)
@@ -73,9 +73,9 @@ class ReassemblyKeywordTests(unittest.TestCase):
 
     def test_dtls_expires_a_buffer_past_its_timeout(self) -> None:
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.foundation.reassembly.data.data import Completion
-        from pcapkit.foundation.reassembly.data.dtls import Packet
-        from pcapkit.foundation.reassembly.dtls import DTLS
+        from pcapkit.foundation.reassembly.data import Completion
+        from pcapkit.foundation.reassembly.dtls.data import Packet
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
 
         bufid = ('192.0.2.1', 1234, '192.0.2.2', 5684, 0)
         for timeout, after, expired in ((1.0, 12.0, True), (None, 1e9, False)):
@@ -94,9 +94,9 @@ class ReassemblyKeywordTests(unittest.TestCase):
                     self.assertIn(bufid, engine._buffer)
 
     def test_submit_flags_an_expired_buffer_as_expired(self) -> None:
-        from pcapkit.foundation.reassembly.dtls import DTLS
-        from pcapkit.foundation.reassembly.ip import IP
-        from pcapkit.foundation.reassembly.tcp import TCP
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
+        from pcapkit.foundation.reassembly.ip.reassembly import IP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
         for klass in (IP, TCP, DTLS):
             with self.subTest(klass=klass.__name__):
@@ -120,7 +120,7 @@ class ReassemblyKeywordTests(unittest.TestCase):
                                   ('index', inspect.Parameter.KEYWORD_ONLY, None)])
 
     def test_register_callback_reaches_the_reassembler(self) -> None:
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         calls = []  # type: list[object]
         IPv4.register_callback(calls.append)
@@ -151,7 +151,7 @@ class TraceFlowKeywordTests(unittest.TestCase):
         self.assertEqual(_shape(TraceFlowOptions, skip=0)[1:], _shape(TraceFlowBase.__init__))
 
     def test_positional_arguments_and_the_old_spelling_are_refused(self) -> None:
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         for args, kwargs in (((self.tmp, 'json'), {}),
                              ((), {'fout': self.tmp, 'format': 'json', 'analyse': True})):
@@ -159,8 +159,8 @@ class TraceFlowKeywordTests(unittest.TestCase):
                 TCP(*args, **kwargs)  # type: ignore[misc,arg-type]
 
     def test_analyze_buffers_each_flow_for_its_application_layer(self) -> None:
-        from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.reassembly.tcp.reassembly import TCP as TCP_Reassembly
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')

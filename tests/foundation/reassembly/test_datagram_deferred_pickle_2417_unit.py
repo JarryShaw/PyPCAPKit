@@ -4,9 +4,9 @@
 GitHub issue :issue:`2417`. Dispatching on
 :class:`~pcapkit.const.reg.apptype.apptype.AppType` members rather than bare
 port numbers put those members inside the
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred` that
-:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` stores as a
-:class:`~pcapkit.foundation.reassembly.data.tcp.Datagram`'s ``packet``. For a
+:class:`~pcapkit.foundation.reassembly.data.Deferred` that
+:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.reassembly.TCP.submit>` stores as a
+:class:`~pcapkit.foundation.reassembly.tcp.data.Datagram`'s ``packet``. For a
 port the registry holds no assignment for, such a member was absent from the
 value table ``Enum.__reduce_ex__`` reduces to, so the datagram pickled and then
 raised on read-back::
@@ -48,7 +48,7 @@ __tier__ = 'ALL'
 #:
 #: Below protocol 2, ``copyreg._reduce_ex`` refuses a slotted class with no
 #: ``__getstate__`` (#2423), and its MRO walk is one GraalPy cannot pass (#2433).
-#: The slotted :class:`~pcapkit.foundation.reassembly.data.data.Deferred` and the
+#: The slotted :class:`~pcapkit.foundation.reassembly.data.Deferred` and the
 #: :class:`~pcapkit.corekit.infoclass.Info` datagram around it both reduce as
 #: protocol 2 does, which reaches neither (#2714).
 PROTOCOLS = tuple(range(pickle.HIGHEST_PROTOCOL + 1))
@@ -74,8 +74,8 @@ def _datagram(bufid: 'Any') -> 'Any':
     builds no :class:`Deferred` at all.
 
     """
-    from pcapkit.foundation.reassembly.data.tcp import Packet
-    from pcapkit.foundation.reassembly.tcp import TCP
+    from pcapkit.foundation.reassembly.tcp.data import Packet
+    from pcapkit.foundation.reassembly.tcp.reassembly import TCP
 
     reasm = TCP()
     reasm(Packet(bufid, 1, 500, 1, False, True, False, 5, 1, 5,

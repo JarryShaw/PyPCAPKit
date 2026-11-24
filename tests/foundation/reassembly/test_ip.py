@@ -22,7 +22,7 @@ class IPReassemblyTests(unittest.TestCase):
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes,
                 header: bytes = b'ip-header', timestamp: float = 1000.0, ident: int = 42):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
@@ -31,9 +31,9 @@ class IPReassemblyTests(unittest.TestCase):
 
     def test_complete_fragmented_datagram_is_submitted_and_analyzed(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.ip import IP
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
-        from pcapkit.foundation.reassembly.ipv6 import IPv6
+        from pcapkit.foundation.reassembly.ip.reassembly import IP
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+        from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
 
         class Analyzer:
             calls: list[tuple[TransType, bytes]] = []
@@ -70,8 +70,8 @@ class IPReassemblyTests(unittest.TestCase):
 
     def test_non_fragment_flushes_pending_incomplete_datagram_without_padding(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Buffer
-        from pcapkit.foundation.reassembly.ip import IP
+        from pcapkit.foundation.reassembly.ip.data import Buffer
+        from pcapkit.foundation.reassembly.ip.reassembly import IP
 
         class Analyzer:
             @classmethod
@@ -142,7 +142,7 @@ class IPOverlapConflictTests(unittest.TestCase):
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes,
                 header: bytes = b'ip-header', timestamp: float = 1000.0, ident: int = 42):
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
+        from pcapkit.foundation.reassembly.ip.data import Packet
 
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
@@ -150,7 +150,7 @@ class IPOverlapConflictTests(unittest.TestCase):
                       20 + len(payload), header, bytearray(payload), timestamp)
 
     def _reasm(self):
-        from pcapkit.foundation.reassembly.ip import IP
+        from pcapkit.foundation.reassembly.ip.reassembly import IP
 
         class Analyzer:
             @classmethod
@@ -313,7 +313,7 @@ class IPOverlapConflictTests(unittest.TestCase):
 
     def test_single_write_produces_two_conflict_runs_separated_by_a_match(self) -> None:
         """Coverage gap named in #482's review: the inner loop of
-        :meth:`~pcapkit.foundation.reassembly.ip.IP._detect_conflicts` breaks a
+        :meth:`~pcapkit.foundation.reassembly.ip.reassembly.IP._detect_conflicts` breaks a
         conflict run on a match and resumes detection afterwards. This drives a
         single fragment's comparison pass through two separate, non-adjacent
         conflict runs, rather than only a leading match (or mismatch) followed
@@ -326,7 +326,7 @@ class IPOverlapConflictTests(unittest.TestCase):
         The overlapping/completing fragment is placed at ``fo=8``, not ``0``:
         a fragment with ``fo=0`` *and* ``mf=False`` is indistinguishable from
         a whole, never-fragmented packet, and :meth:`IP.reassembly
-        <pcapkit.foundation.reassembly.ip.IP.reassembly>` special-cases that by
+        <pcapkit.foundation.reassembly.ip.reassembly.IP.reassembly>` special-cases that by
         flushing the pending buffer unread rather than merging it -- which
         would skip :meth:`_detect_conflicts` entirely and not exercise this
         gap at all.
@@ -378,8 +378,8 @@ class DeferredAnalysisTests(unittest.TestCase):
     def _reassemble(self, *, calls: 'list'):
         """One complete, unfragmented datagram, and the analyser's call log."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ip import IP
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ip.reassembly import IP
 
         class Analyzer:
             @classmethod
@@ -469,7 +469,7 @@ class DeferredAnalysisTests(unittest.TestCase):
     def test_the_deferred_holder_is_a_plain_callable(self) -> None:
         """It has to be callable and comparable by identity, nothing more."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Deferred
+        from pcapkit.foundation.reassembly.ip.data import Deferred
 
         seen = []  # type: list
         deferred = Deferred(lambda proto, payload: seen.append((proto, payload)) or 'parsed',

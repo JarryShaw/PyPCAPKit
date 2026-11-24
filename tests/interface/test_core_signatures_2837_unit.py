@@ -85,7 +85,7 @@ class ReassembleTests(unittest.TestCase):
         self.assertEqual([str(w.message) for w in caught], [])
 
     def test_every_keyword_reaches_the_reassembler(self) -> None:
-        from pcapkit.foundation.reassembly.dtls import DTLS
+        from pcapkit.foundation.reassembly.dtls.reassembly import DTLS
         from pcapkit.interface.core import reassemble
 
         reasm = reassemble('DTLS', strict=False, store=False, timeout=2.5)
@@ -130,7 +130,7 @@ class TraceTests(unittest.TestCase):
         self.tmp = tempdir.name
 
     def test_every_keyword_reaches_the_tracer(self) -> None:
-        from pcapkit.foundation.traceflow.tcp import TCP
+        from pcapkit.foundation.traceflow.tcp.traceflow import TCP
         from pcapkit.interface.core import trace
 
         tracer = trace('tcp', fout=self.tmp, format='json', byteorder='big', nanosecond=True,

@@ -165,8 +165,8 @@ class GenericPickleTests(unittest.TestCase):
 
     def test_a_reassembly_engine_pickles_mid_datagram(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.ip import Packet
-        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.foundation.reassembly.ip.data import Packet
+        from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
 
         bufid = (ipaddress.ip_address('192.0.2.1'), ipaddress.ip_address('198.51.100.2'), 42,
                  TransType.UDP)
@@ -195,7 +195,7 @@ class SharedReductionTests(unittest.TestCase):
 
     def test_a_deferred_pickles_still_deferred(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.reassembly.data.data import Deferred
+        from pcapkit.foundation.reassembly.data import Deferred
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         payload = struct.pack('!HHHH', 1234, 9, 8, 0)
@@ -209,7 +209,7 @@ class SharedReductionTests(unittest.TestCase):
                 self.assertEqual(copy().info, deferred().info)
 
     def test_a_frame_record_pickles_with_its_attributes(self) -> None:
-        from pcapkit.foundation.traceflow.data.data import FrameRecord
+        from pcapkit.foundation.traceflow.data import FrameRecord
         from pcapkit.protocols.misc.pcap.frame.data import FrameInfo
 
         record = FrameRecord({'packet': b'rebuilt', 'Ethernet': {'type': 2048}}, packet=b'captured',

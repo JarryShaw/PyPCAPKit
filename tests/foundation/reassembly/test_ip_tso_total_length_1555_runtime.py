@@ -126,7 +126,7 @@ class TSOReassemblyTests(unittest.TestCase):
         return extractor
 
     def test_tso_capture_reassembles_like_the_unmodified_one(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for fix_checksum in (True, False):
             octets = _tso_capture(fix_checksum=fix_checksum)
@@ -156,7 +156,7 @@ class TSOReassemblyTests(unittest.TestCase):
                                           for datagram in expected])
 
     def test_a_zero_total_length_fragment_is_reassembled(self) -> None:
-        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.data import Completion
 
         for zeroed in (0, 1):
             octets, payload = _fragment_capture(zeroed)

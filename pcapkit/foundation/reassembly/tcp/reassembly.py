@@ -2,10 +2,10 @@
 """TCP Datagram Reassembly
 =============================
 
-.. module:: pcapkit.foundation.reassembly.tcp
+.. module:: pcapkit.foundation.reassembly.tcp.reassembly
 
-:mod:`pcapkit.foundation.reassembly.tcp` contains
-:class:`~pcapkit.foundation.reassembly.tcp.TCP` only,
+:mod:`pcapkit.foundation.reassembly.tcp.reassembly` contains
+:class:`~pcapkit.foundation.reassembly.tcp.reassembly.TCP` only,
 which reconstructs fragmented TCP packets back to origin.
 
 """
@@ -15,10 +15,10 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.foundation.analysis.tcp import _analyze_payload
-from pcapkit.foundation.reassembly.data.data import Completion, Deferred
-from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, BufferID, Datagram,
-                                                    DatagramID, Fragment, HoleDescriptor, Packet)
+from pcapkit.foundation.reassembly.data import Completion, Deferred
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
+from pcapkit.foundation.reassembly.tcp.data import (HOLE_OPEN_BOUND, Buffer, BufferID, Datagram,
+                                                    DatagramID, Fragment, HoleDescriptor, Packet)
 from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 from pcapkit.utilities import config
 
@@ -45,7 +45,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             expiry
 
     Example:
-        >>> from pcapkit.foundation.reassembly.tcp import TCP
+        >>> from pcapkit.foundation.reassembly.tcp.reassembly import TCP
         # Initialise instance:
         >>> tcp_reassembly = TCP()
         # Call reassembly:
@@ -57,8 +57,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         There are two coordinate systems in play here, and keeping them apart
         matters. Sequence numbers -- in the :term:`hole descriptor list
         <reasm.tcp.buffer>` of :rfc:`815`, and in each payload buffer's own
-        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` and
-        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.conflict` lists
+        :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.gap` and
+        :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.conflict` lists
         -- are kept **unwrapped**, inclusive of both bounds: every arriving
         sequence number is read modulo ``2 ** 32`` relative to the data
         already buffered under its buffer ID, per :rfc:`9293#section-3.4`, and
@@ -66,9 +66,9 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         ``2 ** 32`` therefore continues at ``2 ** 32`` rather than back at
         zero. A payload buffer, on the other hand, is indexed from zero, such
         that
-        :attr:`buffer.raw[n] <pcapkit.foundation.reassembly.data.tcp.Fragment.raw>`
+        :attr:`buffer.raw[n] <pcapkit.foundation.reassembly.tcp.data.Fragment.raw>`
         holds the octet with sequence number
-        :attr:`buffer.isn <pcapkit.foundation.reassembly.data.tcp.Fragment.isn>`
+        :attr:`buffer.isn <pcapkit.foundation.reassembly.tcp.data.Fragment.isn>`
         ``+ n``. :meth:`submit` converts between the two, subtracting that
         buffer's initial sequence number from each gap bound, and reports
         conflict ranges reduced back to modulo ``2 ** 32``.
@@ -79,7 +79,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         has been seen is whole and may be submitted. Whether each payload
         buffer is complete is a question about that buffer alone, answered
         from its own
-        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` list.
+        :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.gap` list.
 
     Warning:
         **Limitation.** Without the handshake the start of a stream is unknown,
@@ -87,7 +87,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         lowest one seen so far up to the FIN has arrived. Data that arrives
         later but lies *below* everything seen before that FIN therefore opens
         a buffer of its own, and the first buffer has already been reported
-        :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+        :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`
         although the stream was not: ``[seq 1000 A*5, FIN 1005, seq 990 B*10]``
         gives ``B*10`` and ``A*5`` as two datagrams. This applies only to a
         buffer begun without a SYN: once the SYN is captured, the stream's
@@ -99,7 +99,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
        Of two overlapping segments that disagree, the octets received first
        are kept, per :rfc:`9293#section-3.10`, and the contested range is
        recorded in :attr:`Datagram.conflict
-       <pcapkit.foundation.reassembly.data.tcp.Datagram.conflict>`; 1.4.x
+       <pcapkit.foundation.reassembly.tcp.data.Datagram.conflict>`; 1.4.x
        kept the later octets without a record (:issue:`443`).
 
     .. versionremoved:: 1.6.0
@@ -157,10 +157,10 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
           4-tuple, and the two buffers are reported independently.
         * **SYN captured** -- the SYN proves both are the same stream with the
           range in between lost, so that range is recorded in the
-          :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` of the
+          :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.gap` of the
           payload buffer the segment was read against and of the new one, and
           both are reported
-          :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`
+          :attr:`~pcapkit.foundation.reassembly.data.Completion.PARTIAL`
           (in strict mode, as a single run each). The new buffer keeps the
           SYN's header and counts as having seen it.
 
@@ -348,7 +348,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         Important:
             The ``(source, destination)`` pair handed to
-            :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is a pair
+            :class:`~pcapkit.foundation.reassembly.data.Deferred` is a pair
             of :class:`~pcapkit.const.reg.apptype.tcp.TCP` members rather than
             of the bare port numbers :data:`BufferID` holds (:issue:`2417`), so
             a deferred analysis dispatches on the named service rather than on a
@@ -544,7 +544,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         Arguments:
             info: :term:`info <reasm.tcp.packet>` dict of the arriving segment
             fragment: this ACK bucket's own
-                :class:`~pcapkit.foundation.reassembly.data.tcp.Fragment`
+                :class:`~pcapkit.foundation.reassembly.tcp.data.Fragment`
             PSN: payload sequence number of the arriving segment
 
         """
@@ -565,7 +565,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             # position this *fragment* has not received yet (per
             # its own ``gap`` list, not the buffer-wide ``HDL`` --
             # see
-            # :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`)
+            # :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.gap`)
             # has nothing to disagree with, so the arriving byte
             # is simply accepted there -- an ordinary gap fill,
             # not a conflict.
@@ -599,7 +599,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         Arguments:
             info: :term:`info <reasm.tcp.packet>` dict of the arriving segment
             fragment: this ACK bucket's own
-                :class:`~pcapkit.foundation.reassembly.data.tcp.Fragment`
+                :class:`~pcapkit.foundation.reassembly.tcp.data.Fragment`
             PSN: payload sequence number of the arriving segment
 
         """
@@ -697,7 +697,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
     def _trim_gaps(gap: 'list[tuple[int, int]]', first: 'int', last: 'int') -> 'None':
         """Remove a received range from a fragment's gap list, in place.
 
-        Only an entry lying outside :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.raw`
+        Only an entry lying outside :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.raw`
         -- the range a split stream left out, see :meth:`TCP.reassembly` -- can
         still overlap a segment once it is merged; :meth:`_merge_overlap` has
         already closed every entry inside ``raw`` that the segment covers.
@@ -728,14 +728,14 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         Arguments:
             gap: this *fragment's own*
-                :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`
+                :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.gap`
                 list -- absolute, inclusive sequence ranges still zero-fill
                 placeholder in ``old``. **Mutated in place**: whichever
                 portion of a gap entry falls inside ``[start, start +
                 len(old) - 1]`` is filled from ``new`` and removed (or
                 trimmed, if only part of the entry falls inside the range).
                 Deliberately **not** derived from
-                :attr:`~pcapkit.foundation.reassembly.data.tcp.Buffer.hdl`,
+                :attr:`~pcapkit.foundation.reassembly.tcp.data.Buffer.hdl`,
                 which is shared across every acknowledgement number under the
                 same buffer ID: a *different* fragment closing a hole there
                 says nothing about what *this* fragment has received, and
@@ -751,7 +751,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         Returns:
             The bytes to keep for the range, and any ``(first, last)``
             absolute sequence ranges -- inclusive, same convention as
-            :attr:`gap` and :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.conflict`
+            :attr:`gap` and :attr:`~pcapkit.foundation.reassembly.tcp.data.Fragment.conflict`
             -- where already-*received* bytes disagreed with the arriving
             segment.
 
@@ -762,7 +762,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         received -- can conflict, per :rfc:`9293#section-3.10`: the
         already-received byte wins and the arriving one is discarded, but the
         disagreement itself is what this records for :attr:`Fragment.conflict
-        <pcapkit.foundation.reassembly.data.tcp.Fragment.conflict>`.
+        <pcapkit.foundation.reassembly.tcp.data.Fragment.conflict>`.
 
         """
         length = len(old)
@@ -812,7 +812,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         Returns:
             The pair :meth:`submit` hands
-            :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, i.e. what
+            :class:`~pcapkit.foundation.reassembly.data.Deferred`, i.e. what
             :meth:`Transport.analyze
             <pcapkit.protocols.transport.transport.Transport.analyze>` dispatches
             the reassembled payload on (:issue:`2417`). Typed as the

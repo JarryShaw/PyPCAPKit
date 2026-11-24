@@ -150,9 +150,9 @@ def read(test: unittest.TestCase, linktype: int) -> 'dict[str, set[int]]':
     """
     from pcapkit import extract
     from pcapkit.foundation.options import TraceFlowOptions
-    from pcapkit.foundation.reassembly.ipv4 import IPv4
-    from pcapkit.foundation.reassembly.ipv6 import IPv6
-    from pcapkit.foundation.reassembly.tcp import TCP
+    from pcapkit.foundation.reassembly.ipv4.reassembly import IPv4
+    from pcapkit.foundation.reassembly.ipv6.reassembly import IPv6
+    from pcapkit.foundation.reassembly.tcp.reassembly import TCP
     from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
     seen = {'IPv4': set(), 'IPv6': set(), 'TCP': set(), 'trace': set()}  # type: dict[str, set[int]]
