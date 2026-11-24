@@ -19,13 +19,15 @@ included, and writes these lines and annotations:
 
 ``plan``
    ``sudo timeout 60 apt-get update``, up to twice, with a ``::warning`` titled by
-   ``APT_SET`` after each failure and exit 1 after the second. Then ``apt-get
-   install -s --no-install-recommends APT_PACKAGES``, whose failure ends the
-   script with its status. Its ``Inst`` lines, sorted, are printed under ``To
-   download:``, or ``(nothing)``; when there are some, ``restore-prefix``,
-   ``apt-debs-<ImageOS>-<RUNNER_ARCH>-<APT_SET>-``, and ``key``, that prefix and the
-   first 16 hex digits of the lines' SHA-256, are appended to ``$GITHUB_OUTPUT``.
-   ``ImageOS`` is ``unknown`` when unset or empty.
+   ``APT_SET`` after each failure. After the second, ``degraded``, ``true``, is
+   appended to ``$GITHUB_OUTPUT`` and the script exits 0 with no key, leaving the
+   update to ``install`` and its fallback mirror: a slow mirror costs the cache, not
+   the job (#2923). Otherwise, ``apt-get install -s --no-install-recommends
+   APT_PACKAGES``, whose failure ends the script with its status. Its ``Inst``
+   lines, sorted, are printed under ``To download:``, or ``(nothing)``; when there
+   are some, ``restore-prefix``, ``apt-debs-<ImageOS>-<RUNNER_ARCH>-<APT_SET>-``,
+   and ``key``, that prefix and the first 16 hex digits of the lines' SHA-256, are
+   appended to ``$GITHUB_OUTPUT``. ``ImageOS`` is ``unknown`` when unset or empty.
 ``install``
    Nothing when ``APT_PACKAGES`` is empty. Otherwise, when it names ``tshark``,
    pre-seeds debconf against its "non-superusers may capture" prompt, then up to
@@ -117,16 +119,20 @@ def debs(directory: 'str') -> 'list[str]':
 
 
 def plan() -> 'int':
-    """Update apt's indexes, then write the cache key of what this image still lacks."""
+    """Update apt's indexes, then write the cache key of what this image still lacks, or that it cannot."""
     for attempt in range(1, ATTEMPTS + 1):
         if call(['sudo', 'timeout', str(UPDATE_BOUND), 'apt-get', 'update']).returncode == 0:
             break
+        # #2923: the last failure degrades to no key rather than failing the job, since
+        # `install` updates again, with its fallback mirror (#1432).
+        then = '; no cache this run, and the install step updates again' if attempt == ATTEMPTS else ''
         # #2047: unescaped, and through `say`, which writes a lone surrogate as its byte.
         _actions.say(_actions.annotation(
-            'warning', f'apt-get update failed or exceeded its {UPDATE_BOUND}s bound.',
+            'warning', f'apt-get update failed or exceeded its {UPDATE_BOUND}s bound{then}.',
             title=f'apt-get update attempt {attempt} of {ATTEMPTS} failed ({os.environ["APT_SET"]})', escape=False))
         if attempt == ATTEMPTS:
-            return 1
+            _actions.set_output('degraded', 'true')
+            return 0
 
     simulated = call(['apt-get', 'install', '-s', '--no-install-recommends', *packages()], stdout=subprocess.PIPE)
     if simulated.returncode != 0:
