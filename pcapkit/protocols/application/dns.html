@@ -2182,7 +2182,7 @@ says when unpacking; packing, a <a class="reference internal" href="#pcapkit.pro
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.DNS.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Flags</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.DNS.flags" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.dns.schema.Flags" title="pcapkit.protocols.application.dns.schema.Flags"><span class="pre">Flags</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.DNS.flags" title="Link to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
@@ -2247,6 +2247,76 @@ says when unpacking; packing, a <a class="reference internal" href="#pcapkit.pro
 </dd></dl>
 
 </section>
+</section>
+<section id="type-stubs">
+<h2>Type Stubs<a class="headerlink" href="#type-stubs" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dns/schema.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
+<p>DNS header flags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.qr">
+<span class="sig-name descname"><span class="pre">qr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.qr" title="Link to this definition">¶</a></dt>
+<dd><p>Query or response.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.opcode">
+<span class="sig-name descname"><span class="pre">opcode</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.opcode" title="Link to this definition">¶</a></dt>
+<dd><p>Kind of query.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.aa">
+<span class="sig-name descname"><span class="pre">aa</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.aa" title="Link to this definition">¶</a></dt>
+<dd><p>Authoritative answer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.tc">
+<span class="sig-name descname"><span class="pre">tc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.tc" title="Link to this definition">¶</a></dt>
+<dd><p>Truncation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.rd">
+<span class="sig-name descname"><span class="pre">rd</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.rd" title="Link to this definition">¶</a></dt>
+<dd><p>Recursion desired.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.ra">
+<span class="sig-name descname"><span class="pre">ra</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.ra" title="Link to this definition">¶</a></dt>
+<dd><p>Recursion available.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.z">
+<span class="sig-name descname"><span class="pre">z</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.z" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.ad">
+<span class="sig-name descname"><span class="pre">ad</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.ad" title="Link to this definition">¶</a></dt>
+<dd><p>Authentic data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.cd">
+<span class="sig-name descname"><span class="pre">cd</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.cd" title="Link to this definition">¶</a></dt>
+<dd><p>Checking disabled.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.Flags.rcode">
+<span class="sig-name descname"><span class="pre">rcode</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.Flags.rcode" title="Link to this definition">¶</a></dt>
+<dd><p>Response code.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="domain-name-codec">
 <h2>Domain Name Codec<a class="headerlink" href="#domain-name-codec" title="Link to this heading">¶</a></h2>
@@ -3148,6 +3218,7 @@ carries, its fields named as its specification names them.</p>
 <li><a class="reference internal" href="#module-pcapkit.protocols.application.dns.schema">Header Schemas</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 <li><a class="reference internal" href="#domain-name-codec">Domain Name Codec</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.protocols.application.dns.data">Data Models</a></li>
 </ul>

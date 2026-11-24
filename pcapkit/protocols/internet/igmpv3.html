@@ -809,7 +809,7 @@ the more natural default.</p>
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/igmp.html#pcapkit.const.igmp.type.Type" title="pcapkit.const.igmp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Message type.</p></li>
 <li><p><strong>max_resp_code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Max response code, as transmitted on the wire. When
 not given, derived from <code class="docutils literal notranslate"><span class="pre">max_resp_time</span></code> via
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_float_code()</span></code>;
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase._make_float_code" title="pcapkit.protocols.protocol.ProtocolBase._make_float_code"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_float_code()</span></code></a>;
 only meaningful for a Query.</p></li>
 <li><p><strong>max_resp_time</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Max response time, in units of 1/10 second: an
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> from 0 to 255 (not a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>), else
@@ -832,7 +832,7 @@ sender; only meaningful for a Query.</p></li>
 only meaningful for a Query.</p></li>
 <li><p><strong>qqic</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Querier’s Query Interval Code, as transmitted on the wire;
 derived from <code class="docutils literal notranslate"><span class="pre">qqi</span></code> via
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_float_code()</span></code>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase._make_float_code" title="pcapkit.protocols.protocol.ProtocolBase._make_float_code"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_float_code()</span></code></a>
 when not given; only meaningful for a Query.</p></li>
 <li><p><strong>qqi</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Querier’s Query Interval, in seconds; ignored when <code class="docutils literal notranslate"><span class="pre">qqic</span></code>
 is given; only meaningful for a Query.</p></li>
@@ -955,7 +955,7 @@ IGMPv3 sender to leave this empty.</p></li>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for an IGMPv3 packet.</p>
 <p><a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.IGMPv3.type" title="pcapkit.protocols.internet.igmpv3.schema.IGMPv3.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a> is common to both shapes IGMPv3 defines; everything past it
-is switched, by <code class="xref py py-func docutils literal notranslate"><span class="pre">igmpv3_body_selector()</span></code>, between <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Query" title="pcapkit.protocols.internet.igmpv3.schema.Query"><code class="xref py py-class docutils literal notranslate"><span class="pre">Query</span></code></a> and
+is switched, by <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.igmpv3_body_selector" title="pcapkit.protocols.internet.igmpv3.schema.igmpv3_body_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">igmpv3_body_selector()</span></code></a>, between <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Query" title="pcapkit.protocols.internet.igmpv3.schema.Query"><code class="xref py py-class docutils literal notranslate"><span class="pre">Query</span></code></a> and
 <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report" title="pcapkit.protocols.internet.igmpv3.schema.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1007,7 +1007,7 @@ above for exactly where each shape keeps them.</p>
 <p>The first 8 octets are the same shape IGMPv1/v2 share
 (<a class="reference internal" href="igmp.html#pcapkit.protocols.internet.igmp.schema.IGMP" title="pcapkit.protocols.internet.igmp.schema.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a>); the extension is
 present only on a Query of 12 or more octets overall – see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">query_extension_present()</span></code>. An 8-octet Query, which this schema
+<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.query_extension_present" title="pcapkit.protocols.internet.igmpv3.schema.query_extension_present"><code class="xref py py-func docutils literal notranslate"><span class="pre">query_extension_present()</span></code></a>. An 8-octet Query, which this schema
 unpacks too (with <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Query.ext" title="pcapkit.protocols.internet.igmpv3.schema.Query.ext"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ext</span></code></a> <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>), is not actually IGMPv3;
 <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.read" title="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMPv3.read</span></code></a> is what
 refuses it.</p>
@@ -1038,7 +1038,7 @@ pseudo-header involved – the whole IP payload (<span class="target" id="index-
 <span class="sig-name descname"><span class="pre">ext</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.QueryExtension" title="pcapkit.protocols.internet.igmpv3.schema.QueryExtension"><span class="pre">QueryExtension</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">ext&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.Query.ext" title="Link to this definition">¶</a></dt>
 <dd><p>Source-list extension (<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1"><strong>RFC 3376 Section 4.1</strong></a>), present only on a
 Query at least 12 octets long overall; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> otherwise – see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">query_extension_present()</span></code>.</p>
+<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.query_extension_present" title="pcapkit.protocols.internet.igmpv3.schema.query_extension_present"><code class="xref py py-func docutils literal notranslate"><span class="pre">query_extension_present()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1082,7 +1082,7 @@ itself otherwise.</p>
 (<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1"><strong>RFC 3376 Section 4.1</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.QueryExtension.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">QueryFlags</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.QueryExtension.flags" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.QueryFlags" title="pcapkit.protocols.internet.igmpv3.schema.QueryFlags"><span class="pre">QueryFlags</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.QueryExtension.flags" title="Link to this definition">¶</a></dt>
 <dd><p>Resv/S Flag/QRV.</p>
 </dd></dl>
 
@@ -1130,7 +1130,7 @@ the declared count cannot size it in octets (cf.
 <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report.post_process" title="pcapkit.protocols.internet.igmpv3.schema.Report.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> keeps only the first <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report.num_group_records" title="pcapkit.protocols.internet.igmpv3.schema.Report.num_group_records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_group_records</span></code></a>
 records and gives the rest to <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report.payload" title="pcapkit.protocols.internet.igmpv3.schema.Report.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a>, which is
 <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.11"><strong>RFC 3376 Section 4.2.11</strong></a>’s “Additional Data”. Where the data ends
-before the records counted, see <code class="xref py py-func docutils literal notranslate"><span class="pre">report_record_count()</span></code>.</p>
+before the records counted, see <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.report_record_count" title="pcapkit.protocols.internet.igmpv3.schema.report_record_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">report_record_count()</span></code></a>.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.Report.reserved_1">
@@ -1235,6 +1235,123 @@ the short read <code class="xref py py-meth docutils literal notranslate"><span 
 
 </dd></dl>
 
+<section id="type-stubs">
+<h3>Type Stubs<a class="headerlink" href="#type-stubs" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.QueryFlags">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmpv3.schema.</span></span><span class="sig-name descname"><span class="pre">QueryFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/schema.html#QueryFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.QueryFlags" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
+<p>IGMPv3 Query flags field.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.QueryFlags.resv">
+<span class="sig-name descname"><span class="pre">resv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.QueryFlags.resv" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.QueryFlags.s_flag">
+<span class="sig-name descname"><span class="pre">s_flag</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.QueryFlags.s_flag" title="Link to this definition">¶</a></dt>
+<dd><p>Suppress Router-Side Processing flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.QueryFlags.qrv">
+<span class="sig-name descname"><span class="pre">qrv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.QueryFlags.qrv" title="Link to this definition">¶</a></dt>
+<dd><p>Querier’s Robustness Variable.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="auxiliary-functions">
+<h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.igmpv3_body_selector">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmpv3.schema.</span></span><span class="sig-name descname"><span class="pre">igmpv3_body_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/schema.html#igmpv3_body_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.igmpv3_body_selector" title="Link to this definition">¶</a></dt>
+<dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.IGMPv3.body" title="pcapkit.protocols.internet.igmpv3.schema.IGMPv3.body"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IGMPv3.body</span></code></a> field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> wrapped
+<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Query" title="pcapkit.protocols.internet.igmpv3.schema.Query"><code class="xref py py-class docutils literal notranslate"><span class="pre">Query</span></code></a> or <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report" title="pcapkit.protocols.internet.igmpv3.schema.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a> instance, chosen by <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.IGMPv3.type" title="pcapkit.protocols.internet.igmpv3.schema.IGMPv3.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IGMPv3.type</span></code></a>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.IGMPv3.type" title="pcapkit.protocols.internet.igmpv3.schema.IGMPv3.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IGMPv3.type</span></code></a> is neither the Membership Query
+    nor the IGMPv3 Membership Report. <a class="reference internal" href="igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._classify" title="pcapkit.protocols.internet.igmp.protocol.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP._classify</span></code></a> is what keeps a
+    genuine IGMPv1/v2 message (an 8-octet Query, or a Report/Leave
+    type) from ever reaching this class in the first place; this is
+    only reached when <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3" title="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a>
+    is instantiated directly on a message of neither shape.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.query_extension_present">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmpv3.schema.</span></span><span class="sig-name descname"><span class="pre">query_extension_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/schema.html#query_extension_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.query_extension_present" title="Link to this definition">¶</a></dt>
+<dd><p>Test function for <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Query.ext" title="pcapkit.protocols.internet.igmpv3.schema.Query.ext"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Query.ext</span></code></a>.</p>
+<p>Only a Query at least 12 octets long overall carries the extension
+(<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-7.1"><strong>RFC 3376 Section 7.1</strong></a>): at least 4 octets past the 8-octet fixed
+portion. A <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Query" title="pcapkit.protocols.internet.igmpv3.schema.Query"><code class="xref py py-class docutils literal notranslate"><span class="pre">Query</span></code></a> unpacked on its own, with no enclosing <code class="docutils literal notranslate"><span class="pre">type</span></code>,
+decides by length alone.</p>
+<p>On the packing path <code class="docutils literal notranslate"><span class="pre">'ext'</span></code> is already in <code class="docutils literal notranslate"><span class="pre">pkt</span></code>, and the question is
+whether an <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.QueryExtension" title="pcapkit.protocols.internet.igmpv3.schema.QueryExtension"><code class="xref py py-class docutils literal notranslate"><span class="pre">ext</span></code></a> value was given, since
+<code class="docutils literal notranslate"><span class="pre">__length__</span></code> is a placeholder there.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Query.ext" title="pcapkit.protocols.internet.igmpv3.schema.Query.ext"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Query.ext</span></code></a> should be parsed (unpacking) or packed
+(packing).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.schema.report_record_count">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmpv3.schema.</span></span><span class="sig-name descname"><span class="pre">report_record_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/schema.html#report_record_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.schema.report_record_count" title="Link to this definition">¶</a></dt>
+<dd><p>Count callback for <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report.records" title="pcapkit.protocols.internet.igmpv3.schema.Report.records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Report.records</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report.num_group_records" title="pcapkit.protocols.internet.igmpv3.schema.Report.num_group_records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Report.num_group_records</span></code></a>, for a message parsed on its own;
+otherwise <code class="docutils literal notranslate"><span class="pre">-1</span></code>, counting none: inside a frame, the layer before the
+message or the frame’s own lengths say where it ends, and on the
+packing path <code class="docutils literal notranslate"><span class="pre">'records'</span></code> is already in <code class="docutils literal notranslate"><span class="pre">pkt</span></code>, as no count is
+without <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.schema.Report.num_group_records" title="pcapkit.protocols.internet.igmpv3.schema.Report.num_group_records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Report.num_group_records</span></code></a>.</p>
+</dd>
+</dl>
+<p>No layer before a message parsed on its own gives its length, and none
+tells a cut from the end of the message, so the count does: records it
+counts past the data are a cut, however the cut falls, on a field boundary
+too, and <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records it, the records
+present alone being read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the records counted, at the 8 fixed octets of each,
+    behind the 8 octets ahead of them, reach past the
+    <a class="reference internal" href="../../corekit/const/ipheader.html#pcapkit.corekit.const.ipheader.IP_MAX_LENGTH" title="pcapkit.corekit.const.ipheader.IP_MAX_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">IP_MAX_LENGTH</span></code></a> octets
+    an IP payload can hold, so the count is no cut but one the message
+    cannot carry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 <section id="module-pcapkit.protocols.internet.igmpv3.data">
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.internet.igmpv3.data" title="Link to this heading">¶</a></h2>
@@ -1285,7 +1402,7 @@ same way <a class="reference internal" href="esp.html#pcapkit.protocols.internet
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmpv3.data.</span></span><span class="sig-name descname"><span class="pre">Query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_flag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qrv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qqic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qqi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/data.html#Query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.IGMPv3" title="pcapkit.protocols.internet.igmpv3.data.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a></p>
-<p>Data model for an IGMPv3 Membership Query (<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1"><strong>RFC 3376 Section 4.1</strong></a>).</p>
+<p>Data model for an IGMPv3 Membership Query (<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1"><strong>RFC 3376 Section 4.1</strong></a>).</p>
 <p>Reached only once <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.read" title="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMPv3.read</span></code></a>
 has confirmed the message classifies as IGMPv3 (at least 12 octets), so
 the source-list extension fields below are always populated – never
@@ -1295,7 +1412,7 @@ with.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query.max_resp_code">
 <span class="sig-name descname"><span class="pre">max_resp_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.max_resp_code" title="Link to this definition">¶</a></dt>
 <dd><p>Max response code, as received on the wire; the raw octet
-<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time" title="pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_resp_time</span></code></a> is decoded from (<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.1"><strong>RFC 3376 Section 4.1.1</strong></a>).</p>
+<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time" title="pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_resp_time</span></code></a> is decoded from (<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.1"><strong>RFC 3376 Section 4.1.1</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1303,7 +1420,7 @@ with.</p>
 <span class="sig-name descname"><span class="pre">max_resp_time</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time" title="Link to this definition">¶</a></dt>
 <dd><p>Max response time, in units of 1/10 second, decoded from
 <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.max_resp_code" title="pcapkit.protocols.internet.igmpv3.data.Query.max_resp_code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_resp_code</span></code></a>: literal if below 128, else floating-point,
-<code class="docutils literal notranslate"><span class="pre">(mant</span> <span class="pre">|</span> <span class="pre">0x10)</span> <span class="pre">&lt;&lt;</span> <span class="pre">(exp</span> <span class="pre">+</span> <span class="pre">3)</span></code> (<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.1"><strong>RFC 3376 Section 4.1.1</strong></a>).</p>
+<code class="docutils literal notranslate"><span class="pre">(mant</span> <span class="pre">|</span> <span class="pre">0x10)</span> <span class="pre">&lt;&lt;</span> <span class="pre">(exp</span> <span class="pre">+</span> <span class="pre">3)</span></code> (<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.1"><strong>RFC 3376 Section 4.1.1</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1323,20 +1440,20 @@ on a General Query.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query.resv">
 <span class="sig-name descname"><span class="pre">resv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.resv" title="Link to this definition">¶</a></dt>
 <dd><p>Resv, the 4 reserved high-order bits of the flags octet
-(<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.4"><strong>RFC 3376 Section 4.1.4</strong></a>), kept as read rather than assumed zero so
+(<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.4"><strong>RFC 3376 Section 4.1.4</strong></a>), kept as read rather than assumed zero so
 a round trip reproduces a non-conformant sender’s octet exactly.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query.s_flag">
 <span class="sig-name descname"><span class="pre">s_flag</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.s_flag" title="Link to this definition">¶</a></dt>
-<dd><p>Suppress Router-Side Processing flag (<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.5"><strong>RFC 3376 Section 4.1.5</strong></a>).</p>
+<dd><p>Suppress Router-Side Processing flag (<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.5"><strong>RFC 3376 Section 4.1.5</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query.qrv">
 <span class="sig-name descname"><span class="pre">qrv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.qrv" title="Link to this definition">¶</a></dt>
-<dd><p>Querier’s Robustness Variable (<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.6"><strong>RFC 3376 Section 4.1.6</strong></a>).</p>
+<dd><p>Querier’s Robustness Variable (<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.6"><strong>RFC 3376 Section 4.1.6</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1349,21 +1466,21 @@ a round trip reproduces a non-conformant sender’s octet exactly.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query.qqi">
 <span class="sig-name descname"><span class="pre">qqi</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.qqi" title="Link to this definition">¶</a></dt>
 <dd><p>Querier’s Query Interval, in seconds, decoded from <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.qqic" title="pcapkit.protocols.internet.igmpv3.data.Query.qqic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">qqic</span></code></a> by the
-same formula as <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time" title="pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_resp_time</span></code></a> (<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.7"><strong>RFC 3376 Section 4.1.7</strong></a>).</p>
+same formula as <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time" title="pcapkit.protocols.internet.igmpv3.data.Query.max_resp_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_resp_time</span></code></a> (<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.7"><strong>RFC 3376 Section 4.1.7</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query.num_sources">
 <span class="sig-name descname"><span class="pre">num_sources</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.num_sources" title="Link to this definition">¶</a></dt>
 <dd><p>Number of source addresses, as received on the wire
-(<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.8"><strong>RFC 3376 Section 4.1.8</strong></a>); more than <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.sources" title="pcapkit.protocols.internet.igmpv3.data.Query.sources"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sources</span></code></a> holds where the
+(<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.8"><strong>RFC 3376 Section 4.1.8</strong></a>); more than <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Query.sources" title="pcapkit.protocols.internet.igmpv3.data.Query.sources"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sources</span></code></a> holds where the
 data ends inside them.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Query.sources">
 <span class="sig-name descname"><span class="pre">sources</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Query.sources" title="Link to this definition">¶</a></dt>
-<dd><p>Source addresses being queried (<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.9"><strong>RFC 3376 Section 4.1.9</strong></a>); an empty
+<dd><p>Source addresses being queried (<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.9"><strong>RFC 3376 Section 4.1.9</strong></a>); an empty
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> for a General or Group-Specific Query.</p>
 </dd></dl>
 
@@ -1373,11 +1490,11 @@ data ends inside them.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Report">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmpv3.data.</span></span><span class="sig-name descname"><span class="pre">Report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_group_records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/data.html#Report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Report" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.IGMPv3" title="pcapkit.protocols.internet.igmpv3.data.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a></p>
-<p>Data model for an IGMPv3 Membership Report (<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2"><strong>RFC 3376 Section 4.2</strong></a>).</p>
+<p>Data model for an IGMPv3 Membership Report (<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2"><strong>RFC 3376 Section 4.2</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Report.reserved_1">
 <span class="sig-name descname"><span class="pre">reserved_1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Report.reserved_1" title="Link to this definition">¶</a></dt>
-<dd><p>Reserved octet after <code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code> (<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.1"><strong>RFC 3376 Section 4.2.1</strong></a>), kept as
+<dd><p>Reserved octet after <code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code> (<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.1"><strong>RFC 3376 Section 4.2.1</strong></a>), kept as
 read rather than assumed zero so a round trip reproduces a
 non-conformant sender’s octet exactly.</p>
 </dd></dl>
@@ -1392,7 +1509,7 @@ non-conformant sender’s octet exactly.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Report.reserved_2">
 <span class="sig-name descname"><span class="pre">reserved_2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Report.reserved_2" title="Link to this definition">¶</a></dt>
 <dd><p>Reserved 16 bits before <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Report.num_group_records" title="pcapkit.protocols.internet.igmpv3.data.Report.num_group_records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_group_records</span></code></a>
-(<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.1"><strong>RFC 3376 Section 4.2.1</strong></a>); see <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Report.reserved_1" title="pcapkit.protocols.internet.igmpv3.data.Report.reserved_1"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reserved_1</span></code></a>.</p>
+(<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.1"><strong>RFC 3376 Section 4.2.1</strong></a>); see <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.Report.reserved_1" title="pcapkit.protocols.internet.igmpv3.data.Report.reserved_1"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reserved_1</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1404,7 +1521,7 @@ non-conformant sender’s octet exactly.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.Report.records">
 <span class="sig-name descname"><span class="pre">records</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.GroupRecord" title="pcapkit.protocols.internet.igmpv3.data.GroupRecord"><span class="pre">GroupRecord</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.Report.records" title="Link to this definition">¶</a></dt>
-<dd><p>Group records (<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.4"><strong>RFC 3376 Section 4.2.4</strong></a>).</p>
+<dd><p>Group records (<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.4"><strong>RFC 3376 Section 4.2.4</strong></a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -1413,7 +1530,7 @@ non-conformant sender’s octet exactly.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.GroupRecord">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmpv3.data.</span></span><span class="sig-name descname"><span class="pre">GroupRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multicast_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/data.html#GroupRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.GroupRecord" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
-<p>Data model for an IGMPv3 group record (<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.4"><strong>RFC 3376 Section 4.2.4</strong></a>).</p>
+<p>Data model for an IGMPv3 group record (<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.4"><strong>RFC 3376 Section 4.2.4</strong></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.GroupRecord.record_type">
 <span class="sig-name descname"><span class="pre">record_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/igmp.html#pcapkit.const.igmp.record_type.RecordType" title="pcapkit.const.igmp.record_type.RecordType"><span class="pre">RecordType</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.GroupRecord.record_type" title="Link to this definition">¶</a></dt>
@@ -1441,13 +1558,13 @@ non-conformant sender’s octet exactly.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.GroupRecord.sources">
 <span class="sig-name descname"><span class="pre">sources</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.GroupRecord.sources" title="Link to this definition">¶</a></dt>
-<dd><p>Source addresses (<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.9"><strong>RFC 3376 Section 4.2.9</strong></a>).</p>
+<dd><p>Source addresses (<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.9"><strong>RFC 3376 Section 4.2.9</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.data.GroupRecord.aux_data">
 <span class="sig-name descname"><span class="pre">aux_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.data.GroupRecord.aux_data" title="Link to this definition">¶</a></dt>
-<dd><p>Auxiliary data (<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.10"><strong>RFC 3376 Section 4.2.10</strong></a>); always empty for a
+<dd><p>Auxiliary data (<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.10"><strong>RFC 3376 Section 4.2.10</strong></a>); always empty for a
 standards-conformant IGMPv3 sender, but kept as read for a receiver.</p>
 </dd></dl>
 
@@ -1512,7 +1629,11 @@ standards-conformant IGMPv3 sender, but kept as read for a receiver.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">IGMPv3 - Internet Group Management Protocol Version 3</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.internet.igmpv3.schema">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.internet.igmpv3.schema">Header Schemas</a><ul>
+<li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
+<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.internet.igmpv3.data">Data Models</a></li>
 </ul>
 </li>

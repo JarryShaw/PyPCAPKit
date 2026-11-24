@@ -25,6 +25,12 @@ The protocol classes :mod:`pcapkit` ships:
 + Link Layer                                                       +----------------+-----------------------+--------------------------------------------------------------------+
 | (:class:`~pcapkit.protocols.link.link.Link` subclasses)          | :class:`pcapkit.protocols.link.ethernet.protocol.Ethernet`                                                  |
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.link.frad.protocol.FRAD`                                                          |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.link.gre.protocol.GRE`                                                            |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`                                              |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.link.l2tp.protocol.L2TP`                                         |
 +                                                                  +                +-----------------------+--------------------------------------------------------------------+
 |                                                                  | L2TP Family    | :class:`pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`                                     |
@@ -36,6 +42,14 @@ The protocol classes :mod:`pcapkit` ships:
 |                                                                  |                | :class:`pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2`                              |
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.link.loopback.protocol.Loopback`                                                  |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.link.netlink.protocol.Netlink`                                                    |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.link.ppp.protocol.PPP`                                                            |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.link.pppoe.protocol.PPPoE`                                                        |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.link.radiotap.protocol.Radiotap`                                                  |
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.link.vlan.protocol.VLAN`                                         |
 +                                                                  +                +-----------------------+--------------------------------------------------------------------+
@@ -93,6 +107,8 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.transport.dccp.protocol.DCCP`                                                     |
 +------------------------------------------------------------------+----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.application.dns.protocol.DNS`                                                     |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ftp.protocol.FTP`                                    |
 +                                                                  + FTP Family     +-----------------------+--------------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`                          |
@@ -126,6 +142,8 @@ The protocol classes :mod:`pcapkit` ships:
 |                                                                  |                | :class:`pcapkit.protocols.misc.pcap.frame.protocol.Frame`                                  |
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 | Miscellaneous Protocols                                          | PCAP-NG Format | :class:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG`                                     |
++                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`                                       |
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.misc.raw.protocol.Raw`                                                            |
 +                                                                  +----------------+-----------------------+--------------------------------------------------------------------+
@@ -352,6 +370,10 @@ The extension points, with the registry function that writes each:
 +-------------------+---------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
 | Protocol Type     | Protocol Class                                                      | Extensible Registry                                                                                    | Registry Function                                                                   |
 +===================+=====================================================================+========================================================================================================+=====================================================================================+
+|                   | :class:`~pcapkit.protocols.link.ppp.protocol.PPP`                   | :attr:`PPP.__control__ <pcapkit.protocols.link.ppp.protocol.PPP.__control__>`                          | :func:`~pcapkit.foundation.registry.protocols.link.register_ppp_control`            |
++ Link Layer        +---------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap`         | :attr:`Radiotap.__field__ <pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__>`               | :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap_field`         |
++-------------------+---------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
 |                   | :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`             | :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.protocol.IPv4.__option__>`                     | :func:`~pcapkit.foundation.registry.protocols.internet.register_ipv4_option`        |
 +                   +---------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
 |                   | :class:`~pcapkit.protocols.internet.hip.protocol.HIP`               | :attr:`HIP.__parameter__ <pcapkit.protocols.internet.hip.protocol.HIP.__parameter__>`                  | :func:`~pcapkit.foundation.registry.protocols.internet.register_hip_parameter`      |
@@ -700,6 +722,16 @@ The reassembly and flow tracing classes, per protocol:
 
    :mod:`pcapkit.foundation.reassembly` and :mod:`pcapkit.foundation.traceflow`
    document the classes and their algorithms.
+
+An engine feeds a class only through the :mod:`pcapkit.toolkit` adapter its
+:attr:`EngineBase.__reassembly__ <pcapkit.foundation.engines.engine.EngineBase.__reassembly__>`
+or :attr:`EngineBase.__traceflow__ <pcapkit.foundation.engines.engine.EngineBase.__traceflow__>`
+holds under the name the class is registered by, and drops an enabled one it holds
+none for with an :exc:`~pcapkit.utilities.warnings.AttributeWarning`. So a class
+registered under a new name needs an adapter on each engine it should run on, through
+:func:`~pcapkit.foundation.registry.foundation.register_engine_reassembly` or
+:func:`~pcapkit.foundation.registry.foundation.register_engine_traceflow`; see
+:ref:`reassembly-integration`.
 
 New Implementation
 ~~~~~~~~~~~~~~~~~~

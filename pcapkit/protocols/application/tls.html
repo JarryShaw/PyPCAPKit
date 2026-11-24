@@ -674,7 +674,8 @@ decides which are):</p>
 methods and extensions, and <code class="docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code> down to its
 extensions; an extension’s body decodes where
 <a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.protocol.SSL.__extension__" title="pcapkit.protocols.application.ssl.protocol.SSL.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SSL.__extension__</span></code></a>
-registers a decoder for its type.</p></li>
+registers a decoder for its type, in the handshake messages its RFC defines
+it in.</p></li>
 <li><p>Every other handshake message at type and length only.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Alert</span></code> and <code class="docutils literal notranslate"><span class="pre">ChangeCipherSpec</span></code> in full.</p></li>
 </ul>

@@ -899,6 +899,24 @@ select this class.</p>
 
 <p class="rubric">Data Models</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__">
+<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tpv2/protocol.html#L2TPv2.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__" title="Link to this definition">¶</a></dt>
+<dd><p>Return an estimated length for the object.</p>
+<p>A variable-length header’s hint is its longest form – here 16, past the
+14 octets of every optional field but the offset pad – since
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._parse_next_layer</span></code></a> keeps a next
+layer as raw octets when fewer are captured than both its hint and its
+<a class="reference internal" href="#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.length" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>: the shortest form would keep a longer header cut short,
+its missing fields zero-filled, while the longest still keeps a fully
+captured shorter one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">16</span></span></code></span>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__index__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tpv2/protocol.html#L2TPv2.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>

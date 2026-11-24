@@ -1136,7 +1136,8 @@ both are <strong>inclusive</strong>, so a segment carrying no payload at all has
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is what <a class="reference internal" href="../analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a>
 parses <code class="docutils literal notranslate"><span class="pre">payload</span></code> to, on its first read, unless <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>
-names another protocol.</p>
+names another protocol, or the extraction’s engine parses its frames with
+stops or a context, which this parse takes too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>).</p>
 <p><code class="docutils literal notranslate"><span class="pre">completed</span></code> and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> are independent signals: a datagram can
 be <a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.Completion.COMPLETE" title="pcapkit.foundation.reassembly.data.Completion.COMPLETE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code></a>
 and still carry a non-empty <code class="docutils literal notranslate"><span class="pre">conflict</span></code> – the resolution of a

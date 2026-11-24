@@ -603,6 +603,8 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
+<div class="viewcode-block" id="QueryFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.schema.QueryFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">QueryFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""IGMPv3 Query flags field."""</span>
 
@@ -611,9 +613,12 @@
         <span class="c1">#: Suppress Router-Side Processing flag.</span>
         <span class="n">s_flag</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Querier's Robustness Variable.</span>
-        <span class="n">qrv</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="n">qrv</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
+
+<div class="viewcode-block" id="igmpv3_body_selector">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.schema.igmpv3_body_selector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">igmpv3_body_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'SchemaField'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Selector function for :attr:`IGMPv3.body` field.</span>
 
@@ -644,9 +649,12 @@
         <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Query</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMPv3_Membership_Report</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Report</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>
-    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IGMPv3: unsupported message type: </span><span class="si">{</span><span class="n">type_</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IGMPv3: unsupported message type: </span><span class="si">{</span><span class="n">type_</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="query_extension_present">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.schema.query_extension_present">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">query_extension_present</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Test function for :attr:`Query.ext`.</span>
 
@@ -669,9 +677,12 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="s1">'ext'</span> <span class="ow">in</span> <span class="n">pkt</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'ext'</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">4</span>
+    <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">4</span></div>
 
 
+
+<div class="viewcode-block" id="report_record_count">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.schema.report_record_count">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">report_record_count</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Count callback for :attr:`Report.records`.</span>
 
@@ -706,7 +717,8 @@
     <span class="c1"># NOTE: The 8 octets ahead of the records count against the IP payload too.</span>
     <span class="k">if</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">IP_MAX_LENGTH</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IGMPv3: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1"> group records cannot fit in one IP payload'</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">count</span>
+    <span class="k">return</span> <span class="n">count</span></div>
+
 
 
 <div class="viewcode-block" id="QueryExtension">

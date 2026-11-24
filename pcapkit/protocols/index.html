@@ -743,7 +743,7 @@ parsing a packet from its octets or building one from field values:</p>
     end
 
     subgraph link [Link Layer]
-        Link --&gt; Ethernet &amp; L2TP &amp; LinuxSLL &amp; Loopback &amp; VLAN &amp; ARP
+        Link --&gt; Ethernet &amp; FRAD &amp; GRE &amp; IEEE802_11 &amp; L2TP &amp; LinuxSLL &amp; Loopback &amp; Netlink &amp; PPP &amp; PPPoE &amp; Radiotap &amp; VLAN &amp; ARP
 
         subgraph arp [ARP Family]
             ARP --&gt; InARP
@@ -807,12 +807,19 @@ parsing a packet from its octets or building one from field values:</p>
 
     click Link &quot;link/link.html#pcapkit.protocols.link.link.Link&quot;
     click Ethernet &quot;link/ethernet.html#pcapkit.protocols.link.ethernet.protocol.Ethernet&quot;
+    click FRAD &quot;link/frad.html#pcapkit.protocols.link.frad.protocol.FRAD&quot;
+    click GRE &quot;link/gre.html#pcapkit.protocols.link.gre.protocol.GRE&quot;
+    click IEEE802_11 &quot;link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11&quot;
     click L2TP &quot;link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP&quot;
     click L2TPv2 &quot;link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2&quot;
     click LinuxSLL &quot;link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL&quot;
     click LinuxSLL1 &quot;link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1&quot;
     click LinuxSLL2 &quot;link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2&quot;
     click Loopback &quot;link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback&quot;
+    click Netlink &quot;link/netlink.html#pcapkit.protocols.link.netlink.protocol.Netlink&quot;
+    click PPP &quot;link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP&quot;
+    click PPPoE &quot;link/pppoe.html#pcapkit.protocols.link.pppoe.protocol.PPPoE&quot;
+    click Radiotap &quot;link/radiotap.html#pcapkit.protocols.link.radiotap.protocol.Radiotap&quot;
     click VLAN &quot;link/vlan.html#pcapkit.protocols.link.vlan.protocol.VLAN&quot;
     click C_Tag &quot;link/c_tag.html#pcapkit.protocols.link.c_tag.protocol.C_Tag&quot;
     click S_Tag &quot;link/s_tag.html#pcapkit.protocols.link.s_tag.protocol.S_Tag&quot;

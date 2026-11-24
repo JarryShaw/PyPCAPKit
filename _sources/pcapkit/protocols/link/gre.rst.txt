@@ -90,6 +90,13 @@ Header Schemas
    :members:
    :show-inheritance:
 
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.link.gre.schema.FlagsType
+   :members:
+   :show-inheritance:
+
 Data Models
 -----------
 

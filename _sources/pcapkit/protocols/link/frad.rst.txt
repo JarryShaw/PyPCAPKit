@@ -70,6 +70,13 @@ Header Schemas
    :members:
    :show-inheritance:
 
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.link.frad.schema.AddressType
+   :members:
+   :show-inheritance:
+
 Data Models
 -----------
 

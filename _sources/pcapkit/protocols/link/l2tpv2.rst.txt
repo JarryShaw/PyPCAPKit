@@ -79,6 +79,7 @@ reading ``2``. It is dispatched from
 
    .. rubric:: Data Models
 
+   .. automethod:: __length_hint__
    .. automethod:: __index__
 
    .. rubric:: Utilities

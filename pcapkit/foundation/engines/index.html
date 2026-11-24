@@ -822,7 +822,7 @@ distribution is present, and a version check would refuse a working build.</p>
 <p id="engine-selection">The constructor settles the engine in this order, each fallback with its own warning:</p>
 <pre  class="mermaid">
         flowchart TD
-    REQ[&quot;engine= name, lowercased&lt;br/&gt;none given means default&quot;]
+    REQ[&quot;engine= name, lowercased,&lt;br/&gt;'default' when not given,&lt;br/&gt;RegistryError when not a str&quot;]
     K{&quot;a name in&lt;br/&gt;Extractor.\_\_engine\_\_?&quot;}
     U{&quot;unsupported\_reason()&lt;br/&gt;gives a reason?&quot;}
     W2[&quot;EngineWarning:&lt;br/&gt;not supported on this interpreter&quot;]

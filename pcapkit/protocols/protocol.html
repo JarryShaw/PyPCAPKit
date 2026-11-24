@@ -1949,6 +1949,67 @@ prefix its messages carry; <a class="reference internal" href="#pcapkit.protocol
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._read_float_code">
+<span class="sig-name descname"><span class="pre">_read_float_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._read_float_code" title="Link to this definition">¶</a></dt>
+<dd><p>Read an IGMPv3 or MLDv2 floating-point code as the value it encodes.</p>
+<p>A code below <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">(bits</span> <span class="pre">-</span> <span class="pre">1)</span></code> is the value itself. At or above it, the
+code is <code class="docutils literal notranslate"><span class="pre">1</span></code>, a three-bit <code class="docutils literal notranslate"><span class="pre">exp</span></code> and a <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">-</span> <span class="pre">4</span></code>-bit <code class="docutils literal notranslate"><span class="pre">mant</span></code>, standing
+for <code class="docutils literal notranslate"><span class="pre">(mant</span> <span class="pre">|</span> <span class="pre">2</span> <span class="pre">**</span> <span class="pre">(bits</span> <span class="pre">-</span> <span class="pre">4))</span> <span class="pre">&lt;&lt;</span> <span class="pre">(exp</span> <span class="pre">+</span> <span class="pre">3)</span></code>: the eight-bit Max Resp Code and
+QQIC of IGMPv3 (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.1"><strong>RFC 3376 Section 4.1.1</strong></a>, <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.7"><strong>RFC 3376 Section 4.1.7</strong></a>) and
+QQIC of MLDv2 (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.1.9"><strong>RFC 9777 Section 5.1.9</strong></a>), and the 16-bit Maximum Response
+Code of MLDv2 (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.1.3"><strong>RFC 9777 Section 5.1.3</strong></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – the code, as on the wire</p></li>
+<li><p><strong>bits</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – the code’s width, 8 or 16</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value the code encodes.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._make_float_code">
+<span class="sig-name descname"><span class="pre">_make_float_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._make_float_code" title="Link to this definition">¶</a></dt>
+<dd><p>Make the IGMPv3 or MLDv2 floating-point code for a value.</p>
+<p>The inverse of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._read_float_code" title="pcapkit.protocols.protocol.Protocol._read_float_code"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_float_code()</span></code></a>. A value below <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">(bits</span> <span class="pre">-</span> <span class="pre">1)</span></code>
+is its own code. Above it, the smallest exponent whose mantissa fits is
+taken, so a value the format can carry reads back exactly, and any other
+floors to the nearest one it can, the largest above them all.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – the value, in the units the code stands for</p></li>
+<li><p><strong>bits</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – the code’s width, 8 or 16</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – the field, named in an error message</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The code.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is not an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>,
+    or is negative. The message names <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.alias" title="pcapkit.protocols.protocol.Protocol.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._lookup_registry">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_lookup_registry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="Link to this definition">¶</a></dt>
 <dd><p>Look up a dispatch <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registry</span></a> entry without recording a miss.</p>
@@ -3106,6 +3167,10 @@ documented under it above; each group below links to its entries.</p>
 <span class="sig-name descname"><span class="pre">_read_mac_addr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._read_mac_addr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._read_mac_addr" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._make_mac_addr">
 <span class="sig-name descname"><span class="pre">_make_mac_addr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._make_mac_addr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._make_mac_addr" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._read_float_code">
+<span class="sig-name descname"><span class="pre">_read_float_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._read_float_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._read_float_code" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._make_float_code">
+<span class="sig-name descname"><span class="pre">_make_float_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._make_float_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._make_float_code" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._lookup_registry">
 <span class="sig-name descname"><span class="pre">_lookup_registry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase._lookup_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._lookup_registry" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer">
@@ -3154,7 +3219,8 @@ documented under it above; each group below links to its entries.</p>
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_uint" title="pcapkit.protocols.protocol.Protocol._make_uint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_uint()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_sint" title="pcapkit.protocols.protocol.Protocol._make_sint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_sint()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._uint_size" title="pcapkit.protocols.protocol.Protocol._uint_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_uint_size()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_vector" title="pcapkit.protocols.protocol.Protocol._make_vector"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_vector()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_uints" title="pcapkit.protocols.protocol.Protocol._make_uints"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_uints()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._read_mac_addr" title="pcapkit.protocols.protocol.Protocol._read_mac_addr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mac_addr()</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_mac_addr" title="pcapkit.protocols.protocol.Protocol._make_mac_addr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_mac_addr()</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_mac_addr" title="pcapkit.protocols.protocol.Protocol._make_mac_addr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_mac_addr()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._read_float_code" title="pcapkit.protocols.protocol.Protocol._read_float_code"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_float_code()</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_float_code" title="pcapkit.protocols.protocol.Protocol._make_float_code"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_float_code()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_lookup_registry()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_lookup_next_layer()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>,

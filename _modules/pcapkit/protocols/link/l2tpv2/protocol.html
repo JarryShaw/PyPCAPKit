@@ -972,9 +972,23 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
+<div class="viewcode-block" id="L2TPv2.__length_hint__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">16</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object.</span>
+
+<span class="sd">        A variable-length header's hint is its longest form -- here 16, past the</span>
+<span class="sd">        14 octets of every optional field but the offset pad -- since</span>
+<span class="sd">        :meth:`Protocol._parse_next_layer</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol._parse_next_layer&gt;` keeps a next</span>
+<span class="sd">        layer as raw octets when fewer are captured than both its hint and its</span>
+<span class="sd">        :attr:`length`: the shortest form would keep a longer header cut short,</span>
+<span class="sd">        its missing fields zero-filled, while the longest still keeps a fully</span>
+<span class="sd">        captured shorter one.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="mi">16</span></div>
+
 
 <div class="viewcode-block" id="L2TPv2.__index__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__index__">[docs]</a>

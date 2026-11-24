@@ -75,8 +75,8 @@ the version listed:
 
 It also exports :mod:`pathlib`, :exc:`ModuleNotFoundError`,
 :class:`collections.abc.Collection` and :func:`functools.cached_property`
-straight from the standard library, since 1.5.0 requires Python 3.8 or later
-(:issue:`2051`).
+straight from the standard library, since :mod:`pcapkit` requires Python 3.8 or
+later (:issue:`2051`).
 
 .. function:: final(f)
 

@@ -192,7 +192,7 @@ The constructor settles the engine in this order, each fallback with its own war
 .. mermaid::
 
    flowchart TD
-       REQ["engine= name, lowercased<br/>none given means default"]
+       REQ["engine= name, lowercased,<br/>'default' when not given,<br/>RegistryError when not a str"]
        K{"a name in<br/>Extractor.\_\_engine\_\_?"}
        U{"unsupported\_reason()<br/>gives a reason?"}
        W2["EngineWarning:<br/>not supported on this interpreter"]

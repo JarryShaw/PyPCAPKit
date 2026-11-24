@@ -597,6 +597,8 @@
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 
+<div class="viewcode-block" id="AddressType">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/frad.html#pcapkit.protocols.link.frad.schema.AddressType">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">AddressType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Type of the Q.922 address field (2-octet form)."""</span>
 
@@ -615,7 +617,8 @@
         <span class="c1">#: Discard eligibility.</span>
         <span class="n">de</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Address field extension, octet 2 -- ``1`` in the 2-octet form.</span>
-        <span class="n">ea2</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="n">ea2</span><span class="p">:</span> <span class="nb">int</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_effective_nlpid</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>

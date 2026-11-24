@@ -595,9 +595,12 @@
 <span id="http-hypertext-transfer-protocol"></span><h1>HTTP - Hypertext Transfer Protocol<a class="headerlink" href="#module-pcapkit.protocols.application.http" title="Link to this heading">¶</a></h1>
 <div class="versionremoved" id="module-pcapkit.protocols.application.http.protocol">
 <p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http._HTTP2_PREFACE</span></code> and
-<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.test_start_line</span></code>, with no alias: they are in
-this module, and <a class="reference internal" href="#module-pcapkit.protocols.application.http" title="pcapkit.protocols.application.http"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http</span></code></a> exports the protocol class
-alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.test_start_line</span></code>, with no alias:
+<a class="reference internal" href="#pcapkit.protocols.application.http.protocol.test_start_line" title="pcapkit.protocols.application.http.protocol.test_start_line"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_start_line()</span></code></a> is in this
+module and <a class="reference internal" href="#pcapkit.protocols.application.http.const._HTTP2_PREFACE" title="pcapkit.protocols.application.http.const._HTTP2_PREFACE"><code class="xref py py-data docutils literal notranslate"><span class="pre">_HTTP2_PREFACE</span></code></a> in
+<a class="reference internal" href="#module-pcapkit.protocols.application.http.const" title="pcapkit.protocols.application.http.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.const</span></code></a>, and
+<a class="reference internal" href="#module-pcapkit.protocols.application.http" title="pcapkit.protocols.application.http"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http</span></code></a> exports the protocol class alone
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
 </div>
 <p><a class="reference internal" href="#module-pcapkit.protocols.application.http.protocol" title="pcapkit.protocols.application.http.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.protocol</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>,
@@ -1050,6 +1053,16 @@ with no CRLF is a start line with zero field lines, which
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.7.0.</span></p>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.http.const._HTTP2_PREFACE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.http.const.</span></span><span class="sig-name descname"><span class="pre">_HTTP2_PREFACE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0\r\n\r\nSM\r\n\r\n'</span></span><a class="headerlink" href="#pcapkit.protocols.application.http.const._HTTP2_PREFACE" title="Link to this definition">¶</a></dt>
+<dd><p>The HTTP/2 connection preface (<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>), which opens every
+HTTP/2 connection. Its method <code class="docutils literal notranslate"><span class="pre">PRI</span></code> is registered as one no actual client
+uses (<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7540.html#section-11.6"><strong>RFC 7540 Section 11.6</strong></a>), so a prefix match identifies HTTP/2, and
+<a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP._guess_version" title="pcapkit.protocols.application.http.protocol.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version</span></code></a> tests it
+before any parse.</p>
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">

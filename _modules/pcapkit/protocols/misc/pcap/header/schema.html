@@ -609,6 +609,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
 
 
+<div class="viewcode-block" id="magic_number_callback">
+<a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.schema.magic_number_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">magic_number_callback</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="s1">'NumberField'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Calculate byte order of PCAP file.</span>
 
@@ -624,7 +626,8 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">magic_number</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">declared</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: invalid magic number: </span><span class="si">{</span><span class="n">magic_number</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">declared</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">declared</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
 
 
 <div class="viewcode-block" id="Header">

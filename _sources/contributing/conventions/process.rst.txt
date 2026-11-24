@@ -233,6 +233,12 @@ commit, so the label and the message agree by construction:
    and like ``breaking`` below it is **additive**, going on alongside the type label
    rather than instead of it.
 
+.. note::
+
+   ``build`` has no row: it is Dependabot's prefix alone, ``build(deps):``,
+   and its pull requests take ``dependencies`` and their ecosystem's label (*Scope*,
+   below). A packaging change of our own is ``chore`` (:issue:`3050`).
+
 **Issue kind**, for issues rather than pull requests: ``design`` marks a pattern being
 decided rather than a defect or a request, alongside ``bug``, ``enhancement`` and
 ``question``.
@@ -361,8 +367,8 @@ no milestone.
 and settles it as the item closes; a milestone already set by hand to another
 release is kept, and a manual run backfills the items without one
 (:doc:`../workflows`). **The milestone follows the release, not** ``__version__``:
-after a final tag the version still names the release just made, so its closed
-milestone gives way to the lowest open one above it. The owner ruled that on
+once a line's milestone closes, the version still names the line's last release, so
+the closed milestone gives way to the lowest open one above it. The owner ruled that on
 :issue:`2548` over bumping ``__version__`` to a development release after each tag,
 which would block the scheduled releases until the suffix came off by hand. The closed
 milestones were backfilled from merge and close dates against the release tags, so an
@@ -432,6 +438,10 @@ own. Every other issue in the milestone is one of its sub-issues, or a sub-issue
 one, and its body lists the items, what moved out, and the closing steps with the
 status of each. An issue has one parent, so an issue that moves milestone is
 re-parented under its new line's scope issue as it moves.
+
+**A protocol, header or extension is in scope however deprecated or superseded**,
+ruled on :issue:`2805`. Only work with no specification to implement it from is left
+behind, its issue closed as ``wontfix`` with the reason.
 
 Link neither the board nor a milestone from docstrings, code comments or Markdown
 files. Both are tracking metadata that changes as work moves, and a link to them goes

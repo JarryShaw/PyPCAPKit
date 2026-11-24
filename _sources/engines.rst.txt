@@ -43,7 +43,8 @@ import and the other becomes unselectable.
 Every third-party engine supports **less** than the ``default`` one.
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` perform no protocol
-dissection at all, so they offer neither reassembly nor flow tracing, and
+dissection at all, so they reassemble and trace flows only once an adapter is
+registered on them, and
 :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` has no IPv6 decoder,
 so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
 exception, except for these, which pass without a warning:

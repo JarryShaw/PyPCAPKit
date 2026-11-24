@@ -1853,8 +1853,9 @@ script not listed here is CI-only.
        ``bump_version.py --github-output``, whose ``version`` output ``Commit
        changes`` puts in its subject, and ``Commit documentation changes`` there,
        as ``bump_version.py --print-version`` (:issue:`2800`).
-     - ``python util/bump_version.py``, committed to ``main``, to release what is
-       not a vendor refresh (see :doc:`releasing`).
+     - ``python util/bump_version.py``, committed to ``main``, to advance a
+       ``devN``, pre-release or ``postN`` counter; a minor or patch release is a hand
+       edit instead (see :doc:`releasing`).
    * - :file:`util/changelog_md.py`
      - ``Check CHANGELOG.md is in step with its source entry`` in
        ``unit-tests.yml``'s ``changelog``, as ``changelog_md.py --check``.

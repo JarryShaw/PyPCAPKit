@@ -3117,6 +3117,8 @@
                 <span class="s1">'the end of the buffer'</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="SSL._tls_negotiates">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._tls_negotiates">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_tls_negotiates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether this record's first handshake message negotiates ``target``.</span>
 
@@ -3144,7 +3146,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">content</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="n">body</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">'body'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">_negotiated_versions</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">_negotiated_versions</span><span class="p">(</span><span class="n">body</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="SSL._tls_content_is_cleartext">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext">[docs]</a>

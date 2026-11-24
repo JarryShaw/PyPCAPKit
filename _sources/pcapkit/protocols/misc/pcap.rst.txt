@@ -93,6 +93,11 @@ Header Schemas
    :members:
    :show-inheritance:
 
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.misc.pcap.header.schema.magic_number_callback
+
 Data Models
 -----------
 

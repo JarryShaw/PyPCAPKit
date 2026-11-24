@@ -825,8 +825,10 @@ datagram; use <code class="docutils literal notranslate"><span class="pre">len(p
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is what <a class="reference internal" href="../../analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a>
 parses <code class="docutils literal notranslate"><span class="pre">payload</span></code> to, unless <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> names another
-protocol, and it is analysed on the first read, not when the
-datagram is submitted. The analysis is a second full parse of the
+protocol, or the extraction’s engine parses its frames with stops or a
+context, which this parse takes too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2933">#2933</a>). It is analysed on
+the first read, not when the datagram is submitted. The analysis is a
+second full parse of the
 payload, so running it eagerly would charge every caller for a result
 most never read. Reading the attribute, or any mapping view of it (<code class="docutils literal notranslate"><span class="pre">datagram['packet']</span></code>, <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code>, <code class="docutils literal notranslate"><span class="pre">items()</span></code>,
 <code class="docutils literal notranslate"><span class="pre">repr()</span></code>), runs it and keeps the result; see

@@ -838,6 +838,12 @@ request. A single-change patch release’s own pull request keeps its entry
 (<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>).</p></li>
 <li><p><strong>Read the CI reports</strong> (<a class="reference internal" href="workflows.html#ci-reports"><span class="std std-ref">CI Reports (#2030)</span></a>): each warning or failure there is a
 possible defect, root-caused and filed like a red check.</p></li>
+<li><p><strong>File each new issue as a sub-issue of its line’s</strong> <code class="docutils literal notranslate"><span class="pre">release:</span> <span class="pre">X.Y.0</span> <span class="pre">scope</span></code>
+<strong>issue</strong> (<a class="reference internal" href="conventions/process.html#process-release-scope"><span class="std std-ref">the scope rule</span></a>):
+<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">issue</span> <span class="pre">create</span> <span class="pre">--parent</span> <span class="pre">&lt;scope&gt;</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span> <span class="pre">repos/JarryShaw/PyPCAPKit/issues/&lt;scope&gt;/sub_issues</span> <span class="pre">-F</span> <span class="pre">sub_issue_id=&lt;id&gt;</span></code>
+with the issue’s REST <code class="docutils literal notranslate"><span class="pre">id</span></code>, not its number, adding <code class="docutils literal notranslate"><span class="pre">-F</span> <span class="pre">replace_parent=true</span></code>
+when it moves milestone.</p></li>
 </ol>
 </section>
 <section id="notes-checkpoint">

@@ -613,7 +613,11 @@
 <div class="viewcode-block" id="MLDv2QueryFlags">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryFlags">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">MLDv2QueryFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""MLDv2 Query flags octet."""</span>
+<span class="w">        </span><span class="sd">"""MLDv2 Query flags octet.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
 
         <span class="c1">#: Flags.</span>
         <span class="n">flags</span><span class="p">:</span> <span class="nb">int</span>
@@ -670,6 +674,8 @@
 <span class="sd">        Whether :attr:`MLDQuery.ext` should be parsed (unpacking) or packed</span>
 <span class="sd">        (packing).</span>
 
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="s1">'ext'</span> <span class="ow">in</span> <span class="n">pkt</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'ext'</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -698,6 +704,8 @@
 <span class="sd">            :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` octets</span>
 <span class="sd">            an IP payload holds, so the count is no cut but one the message</span>
 <span class="sd">            cannot carry.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
     <span class="n">count</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'num_records'</span><span class="p">)</span>  <span class="c1"># type: Optional[int]</span>
@@ -844,6 +852,8 @@
 
 <span class="sd">    They follow the 24 octets of an MLDv1 Query (:rfc:`2710#section-3`).</span>
 
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: Flags, S Flag and QRV.</span>
@@ -882,6 +892,8 @@
 <span class="sd">    :attr:`ext` holds what an MLDv2 Query adds (:rfc:`9777#section-5.1`), see</span>
 <span class="sd">    :func:`mldv2_query_present`.</span>
 
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: Maximum Response Delay of MLDv1, or Maximum Response Code of MLDv2.</span>
@@ -910,7 +922,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.schema.MLDv1">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MLDv1</span><span class="p">(</span><span class="n">ICMPv6Type</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">Enum_Type</span><span class="o">.</span><span class="n">Multicast_Listener_Report</span><span class="p">,</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Multicast_Listener_Done</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Header schema for an MLDv1 Multicast Listener Report or Done message (:rfc:`2710#section-3`)."""</span>
+<span class="w">    </span><span class="sd">"""Header schema for an MLDv1 Multicast Listener Report or Done message (:rfc:`2710#section-3`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Maximum Response Delay, zero but in a Query.</span>
     <span class="n">max_resp_delay</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -932,7 +948,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.schema.MulticastAddressRecord">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MulticastAddressRecord</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for an MLDv2 multicast address record (:rfc:`9777#section-5.2`)."""</span>
+<span class="w">    </span><span class="sd">"""Header schema for an MLDv2 multicast address record (:rfc:`9777#section-5.2`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Record type (:rfc:`9777#section-5.2.13`).</span>
     <span class="n">record_type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_RecordType</span><span class="p">)</span>
@@ -972,6 +992,8 @@
 <span class="sd">        :attr:`num_records` and gives the rest to :attr:`data`, the message's</span>
 <span class="sd">        Additional Data (:rfc:`9777#section-5.2.12`). Where the data ends before</span>
 <span class="sd">        the records counted, see :func:`mldv2_record_count`.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
 

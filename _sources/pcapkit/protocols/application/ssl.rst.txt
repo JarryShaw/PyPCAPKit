@@ -110,6 +110,7 @@ accepting bytes that cannot be a genuine record.
    .. automethod:: _make_ext_ech
    .. automethod:: _make_ext_renegotiation_info
    .. automethod:: _validate_tls_record
+   .. automethod:: _tls_negotiates
    .. automethod:: _tls_content_is_cleartext
    .. automethod:: _read_tls_content
    .. automethod:: _read_tls_handshake_messages
@@ -131,6 +132,8 @@ Header Schemas
 --------------
 
 .. module:: pcapkit.protocols.application.ssl.schema
+
+.. versionadded:: 1.7.0
 
 .. autoclass:: pcapkit.protocols.application.ssl.schema.Extension
    :members:
@@ -371,6 +374,7 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.application.ssl.schema.RenegotiationInfoExtension
    :members:
    :show-inheritance:
+
 Data Models
 -----------
 

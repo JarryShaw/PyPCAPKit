@@ -79,7 +79,8 @@ Decoded Fields
     methods and extensions, and ``EncryptedExtensions`` down to its
     extensions; an extension's body decodes where
     :attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.protocol.SSL.__extension__>`
-    registers a decoder for its type.
+    registers a decoder for its type, in the handshake messages its RFC defines
+    it in.
   * Every other handshake message at type and length only.
   * ``Alert`` and ``ChangeCipherSpec`` in full.
 

@@ -1684,6 +1684,9 @@ sender leave it empty.</p></li>
 <p>Its first 20 octets are those of an MLDv1 Query (<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2710.html#section-3"><strong>RFC 2710 Section 3</strong></a>);
 <a class="reference internal" href="#pcapkit.protocols.internet.icmpv6.schema.MLDQuery.ext" title="pcapkit.protocols.internet.icmpv6.schema.MLDQuery.ext"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ext</span></code></a> holds what an MLDv2 Query adds (<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.1"><strong>RFC 9777 Section 5.1</strong></a>), see
 <a class="reference internal" href="#pcapkit.protocols.internet.icmpv6.schema.mldv2_query_present" title="pcapkit.protocols.internet.icmpv6.schema.mldv2_query_present"><code class="xref py py-func docutils literal notranslate"><span class="pre">mldv2_query_present()</span></code></a>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.schema.MLDQuery.max_resp_code">
 <span class="sig-name descname"><span class="pre">max_resp_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">max_resp_code&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MLDQuery.max_resp_code" title="Link to this definition">¶</a></dt>
@@ -1723,6 +1726,9 @@ an MLDv2 Query, whose <a class="reference internal" href="#pcapkit.protocols.int
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for the fields an MLDv2 Query adds (<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.1"><strong>RFC 9777 Section 5.1</strong></a>).</p>
 <p>They follow the 24 octets of an MLDv1 Query (<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2710.html#section-3"><strong>RFC 2710 Section 3</strong></a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryExtension.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryFlags" title="pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryFlags"><span class="pre">MLDv2QueryFlags</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryExtension.flags" title="Link to this definition">¶</a></dt>
@@ -1762,6 +1768,9 @@ the field it falls in.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.icmpv6.schema.</span></span><span class="sig-name descname"><span class="pre">MLDv1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_resp_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multicast_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/icmpv6/schema.html#MLDv1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv1" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.internet.icmpv6.schema.ICMPv6Type" title="pcapkit.protocols.internet.icmpv6.schema.ICMPv6Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv6Type</span></code></a></p>
 <p>Header schema for an MLDv1 Multicast Listener Report or Done message (<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2710.html#section-3"><strong>RFC 2710 Section 3</strong></a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.schema.MLDv1.max_resp_delay">
 <span class="sig-name descname"><span class="pre">max_resp_delay</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">max_resp_delay&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv1.max_resp_delay" title="Link to this definition">¶</a></dt>
@@ -1801,6 +1810,9 @@ cannot size it in octets; <a class="reference internal" href="#pcapkit.protocols
 <a class="reference internal" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv2Report.num_records" title="pcapkit.protocols.internet.icmpv6.schema.MLDv2Report.num_records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_records</span></code></a> and gives the rest to <a class="reference internal" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv2Report.data" title="pcapkit.protocols.internet.icmpv6.schema.MLDv2Report.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>, the message’s
 Additional Data (<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.2.12"><strong>RFC 9777 Section 5.2.12</strong></a>). Where the data ends before
 the records counted, see <a class="reference internal" href="#pcapkit.protocols.internet.icmpv6.schema.mldv2_record_count" title="pcapkit.protocols.internet.icmpv6.schema.mldv2_record_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">mldv2_record_count()</span></code></a>.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.schema.MLDv2Report.flags">
@@ -1852,6 +1864,9 @@ short read <code class="xref py py-meth docutils literal notranslate"><span clas
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.icmpv6.schema.</span></span><span class="sig-name descname"><span class="pre">MulticastAddressRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multicast_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/icmpv6/schema.html#MulticastAddressRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MulticastAddressRecord" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for an MLDv2 multicast address record (<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.2"><strong>RFC 9777 Section 5.2</strong></a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.schema.MulticastAddressRecord.record_type">
 <span class="sig-name descname"><span class="pre">record_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/igmp.html#pcapkit.const.igmp.record_type.RecordType" title="pcapkit.const.igmp.record_type.RecordType"><span class="pre">RecordType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">record_type&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MulticastAddressRecord.record_type" title="Link to this definition">¶</a></dt>
@@ -1934,6 +1949,9 @@ whether an <a class="reference internal" href="#pcapkit.protocols.internet.icmpv
 (packing).</p>
 </dd>
 </dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -1962,6 +1980,9 @@ message ends, and on the packing path <code class="docutils literal notranslate"
     cannot carry.</p>
 </dd>
 </dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 </dd></dl>
 
 </section>
@@ -1972,6 +1993,9 @@ message ends, and on the packing path <code class="docutils literal notranslate"
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.icmpv6.schema.</span></span><span class="sig-name descname"><span class="pre">MLDv2QueryFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/icmpv6/schema.html#MLDv2QueryFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryFlags" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
 <p>MLDv2 Query flags octet.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryFlags.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.schema.MLDv2QueryFlags.flags" title="Link to this definition">¶</a></dt>
@@ -2194,6 +2218,9 @@ sequence number.</p>
 (<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-8.1"><strong>RFC 9777 Section 8.1</strong></a>), a Multicast Listener Report (131) or a Multicast
 Listener Done (132). <code class="docutils literal notranslate"><span class="pre">code</span></code> is zero on the wire and ignored
 (<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2710.html#section-3.2"><strong>RFC 2710 Section 3.2</strong></a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.data.MLDv1.version">
 <span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.data.MLDv1.version" title="Link to this definition">¶</a></dt>
@@ -2237,6 +2264,9 @@ a conformant sender.</p>
 <p>Data model for an MLDv2 Multicast Listener Query (<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.1"><strong>RFC 9777 Section 5.1</strong></a>).</p>
 <p>A Query (type 130) of 28 or more octets (<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-8.1"><strong>RFC 9777 Section 8.1</strong></a>). <code class="docutils literal notranslate"><span class="pre">code</span></code> is
 zero on the wire and ignored (<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.1.1"><strong>RFC 9777 Section 5.1.1</strong></a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.data.MLDv2Query.version">
 <span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.data.MLDv2Query.version" title="Link to this definition">¶</a></dt>
@@ -2331,6 +2361,9 @@ conformant sender.</p>
 <p>Data model for an MLDv2 Version 2 Multicast Listener Report (<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.2"><strong>RFC 9777 Section 5.2</strong></a>).</p>
 <p>A Report is type 143, and its <code class="docutils literal notranslate"><span class="pre">code</span></code> the Reserved octet
 (<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.2.1"><strong>RFC 9777 Section 5.2.1</strong></a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.data.MLDv2Report.version">
 <span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.data.MLDv2Report.version" title="Link to this definition">¶</a></dt>
@@ -2369,6 +2402,9 @@ conformant sender.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.icmpv6.data.</span></span><span class="sig-name descname"><span class="pre">MulticastAddressRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multicast_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/icmpv6/data.html#MulticastAddressRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for an MLDv2 multicast address record (<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html#section-5.2"><strong>RFC 9777 Section 5.2</strong></a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord.record_type">
 <span class="sig-name descname"><span class="pre">record_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/igmp.html#pcapkit.const.igmp.record_type.RecordType" title="pcapkit.const.igmp.record_type.RecordType"><span class="pre">RecordType</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord.record_type" title="Link to this definition">¶</a></dt>

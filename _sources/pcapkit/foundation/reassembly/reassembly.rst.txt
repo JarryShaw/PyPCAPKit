@@ -64,6 +64,8 @@ follow :rfc:`791` and :rfc:`815`.
       :no-value:
    .. autoattribute:: _timeout
       :no-value:
+   .. autoattribute:: _parse_keywords
+      :no-value:
 
    .. autoattribute:: _buffer
       :no-value:

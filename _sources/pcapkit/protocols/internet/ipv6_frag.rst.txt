@@ -62,6 +62,13 @@ Header Schemas
    :members:
    :show-inheritance:
 
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.internet.ipv6_frag.schema.Flags
+   :members:
+   :show-inheritance:
+
 Data Models
 -----------
 

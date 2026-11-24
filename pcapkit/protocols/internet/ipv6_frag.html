@@ -885,7 +885,7 @@ later positional argument.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_frag.schema.IPv6_Frag.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Flags</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_frag.schema.IPv6_Frag.flags" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_frag.schema.Flags" title="pcapkit.protocols.internet.ipv6_frag.schema.Flags"><span class="pre">Flags</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_frag.schema.IPv6_Frag.flags" title="Link to this definition">¶</a></dt>
 <dd><p>Fragment offset and flags.</p>
 </dd></dl>
 
@@ -903,6 +903,34 @@ later positional argument.</p>
 
 </dd></dl>
 
+<section id="type-stubs">
+<h3>Type Stubs<a class="headerlink" href="#type-stubs" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_frag.schema.Flags">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_frag.schema.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_frag/schema.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_frag.schema.Flags" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
+<p>Fragment offset and flags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_frag.schema.Flags.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_frag.schema.Flags.offset" title="Link to this definition">¶</a></dt>
+<dd><p>Fragment offset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_frag.schema.Flags.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_frag.schema.Flags.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved bits (<code class="docutils literal notranslate"><span class="pre">Res</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_frag.schema.Flags.mf">
+<span class="sig-name descname"><span class="pre">mf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_frag.schema.Flags.mf" title="Link to this definition">¶</a></dt>
+<dd><p>More fragments flag.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 <section id="module-pcapkit.protocols.internet.ipv6_frag.data">
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6_frag.data" title="Link to this heading">¶</a></h2>
@@ -1024,7 +1052,10 @@ verbatim so that a rebuild reproduces them.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">IPv6-Frag - Fragment Header for IPv6</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_frag.schema">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_frag.schema">Header Schemas</a><ul>
+<li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_frag.data">Data Models</a></li>
 </ul>
 </li>

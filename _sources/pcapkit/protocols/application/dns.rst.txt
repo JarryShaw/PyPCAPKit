@@ -156,6 +156,13 @@ Header Schemas
    :members:
    :show-inheritance:
 
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.application.dns.schema.Flags
+   :members:
+   :show-inheritance:
+
 Domain Name Codec
 ~~~~~~~~~~~~~~~~~
 

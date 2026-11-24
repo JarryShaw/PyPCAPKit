@@ -855,9 +855,8 @@ back (<a class="extlink-issue reference external" href="https://github.com/Jarry
 <span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/frad/protocol.html#FRAD.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.frad.protocol.FRAD.__length_hint__" title="Link to this definition">¶</a></dt>
 <dd><p>Return an estimated length for the object.</p>
 <p>The longest form – a SNAP-encapsulated header, 10 octets – per the
-reason <code class="xref py py-meth docutils literal notranslate"><span class="pre">L2TPv2.__length_hint__</span></code> gives for a
-variable-length header: the shortest form would reject a fully
-captured longer header as too short.</p>
+reason <a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">L2TPv2.__length_hint__</span></code></a> gives for a
+variable-length header.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">10</span></span></code></span>]</span></p>
@@ -944,7 +943,7 @@ or to a <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LI
 trailing FCS.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.FRAD.addr">
-<span class="sig-name descname"><span class="pre">addr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AddressType</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">addr&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.FRAD.addr" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">addr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.link.frad.schema.AddressType" title="pcapkit.protocols.link.frad.schema.AddressType"><span class="pre">AddressType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">addr&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.FRAD.addr" title="Link to this definition">¶</a></dt>
 <dd><p>Q.922 address field (2-octet form only; see <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2427.html#section-3"><strong>RFC 2427 Section 3</strong></a>).</p>
 </dd></dl>
 
@@ -986,6 +985,64 @@ trailing FCS.</p>
 
 </dd></dl>
 
+<section id="type-stubs">
+<h3>Type Stubs<a class="headerlink" href="#type-stubs" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.frad.schema.</span></span><span class="sig-name descname"><span class="pre">AddressType</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/frad/schema.html#AddressType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
+<p>Type of the Q.922 address field (2-octet form).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.dlci_hi">
+<span class="sig-name descname"><span class="pre">dlci_hi</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.dlci_hi" title="Link to this definition">¶</a></dt>
+<dd><p>DLCI, high-order 6 bits.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.cr">
+<span class="sig-name descname"><span class="pre">cr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.cr" title="Link to this definition">¶</a></dt>
+<dd><p>Command/response indication.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.ea1">
+<span class="sig-name descname"><span class="pre">ea1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.ea1" title="Link to this definition">¶</a></dt>
+<dd><p>Address field extension, octet 1 – <code class="docutils literal notranslate"><span class="pre">0</span></code> in the 2-octet form.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.dlci_lo">
+<span class="sig-name descname"><span class="pre">dlci_lo</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.dlci_lo" title="Link to this definition">¶</a></dt>
+<dd><p>DLCI, low-order 4 bits.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.fecn">
+<span class="sig-name descname"><span class="pre">fecn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.fecn" title="Link to this definition">¶</a></dt>
+<dd><p>Forward explicit congestion notification.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.becn">
+<span class="sig-name descname"><span class="pre">becn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.becn" title="Link to this definition">¶</a></dt>
+<dd><p>Backward explicit congestion notification.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.de">
+<span class="sig-name descname"><span class="pre">de</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.de" title="Link to this definition">¶</a></dt>
+<dd><p>Discard eligibility.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.frad.schema.AddressType.ea2">
+<span class="sig-name descname"><span class="pre">ea2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.link.frad.schema.AddressType.ea2" title="Link to this definition">¶</a></dt>
+<dd><p>Address field extension, octet 2 – <code class="docutils literal notranslate"><span class="pre">1</span></code> in the 2-octet form.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 <section id="module-pcapkit.protocols.link.frad.data">
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.link.frad.data" title="Link to this heading">¶</a></h2>
@@ -1130,7 +1187,10 @@ octet, and 5 more with a SNAP header.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">FRAD - Frame Relay Access Device</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.link.frad.schema">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.link.frad.schema">Header Schemas</a><ul>
+<li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.link.frad.data">Data Models</a></li>
 </ul>
 </li>

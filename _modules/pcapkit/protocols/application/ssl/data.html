@@ -856,6 +856,8 @@
 <span class="sd">    ``signed_certificate_timestamp`` in a ``ClientHello`` (:rfc:`6962#section-3.3.1`),</span>
 <span class="sd">    and ``status_request`` in a ``ServerHello`` (:rfc:`6066#section-8`).</span>
 
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -867,7 +869,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OCSPStatusRequest">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OCSPStatusRequest</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``OCSPStatusRequest`` of a ``status_request`` extension (:rfc:`6066#section-8`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``OCSPStatusRequest`` of a ``status_request`` extension (:rfc:`6066#section-8`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: DER-encoded ``ResponderID`` values; empty when the server knows the responders.</span>
     <span class="n">responder_id_list</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span>
@@ -888,6 +894,8 @@
 <span class="sd">    Only ``ocsp`` has a ``request`` structure, so a body naming another</span>
 <span class="sd">    :attr:`status_type` stays raw octets.</span>
 
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: Status type.</span>
@@ -904,7 +912,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECPointFormatList">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECPointFormatList</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``ec_point_formats`` extension (:rfc:`8422#section-5.1.2`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``ec_point_formats`` extension (:rfc:`8422#section-5.1.2`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Point formats, most preferred first.</span>
     <span class="n">ec_point_format_list</span><span class="p">:</span> <span class="s1">'tuple[Enum_ECPointFormat, ...]'</span>
@@ -919,7 +931,11 @@
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SignedCertificateTimestampList</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for a ``ServerHello``'s ``signed_certificate_timestamp`` extension</span>
-<span class="sd">    (:rfc:`6962#section-3.3`)."""</span>
+<span class="sd">    (:rfc:`6962#section-3.3`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: ``SerializedSCT`` octet strings.</span>
     <span class="n">sct_list</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span>
@@ -933,7 +949,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Padding">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Padding</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``padding`` extension (:rfc:`7685#section-3`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``padding`` extension (:rfc:`7685#section-3`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Padding octets as captured, which :rfc:`7685#section-3` requires to be zero.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -947,7 +967,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.CertificateCompressionAlgorithms">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CertificateCompressionAlgorithms</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``compress_certificate`` extension (:rfc:`8879#section-3`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``compress_certificate`` extension (:rfc:`8879#section-3`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Compression algorithms, most preferred first.</span>
     <span class="n">algorithms</span><span class="p">:</span> <span class="s1">'tuple[Enum_CertificateCompressionAlgorithm, ...]'</span>
@@ -961,7 +985,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.RecordSizeLimit">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RecordSizeLimit</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``record_size_limit`` extension (:rfc:`8449#section-4`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``record_size_limit`` extension (:rfc:`8449#section-4`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Largest record, in octets, the sender is willing to receive.</span>
     <span class="n">record_size_limit</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -975,7 +1003,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.SessionTicket">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SessionTicket</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``session_ticket`` extension (:rfc:`5077#section-3.2`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``session_ticket`` extension (:rfc:`5077#section-3.2`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: The ticket; empty when the client has none to offer, and in a ``ServerHello``.</span>
     <span class="n">ticket</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -989,7 +1021,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PskIdentity">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PskIdentity</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for one ``PskIdentity`` of a ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for one ``PskIdentity`` of a ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Label of the key, e.g. a ticket.</span>
     <span class="n">identity</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -1005,7 +1041,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.OfferedPsks">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OfferedPsks</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for a ``ClientHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for a ``ClientHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Identities offered.</span>
     <span class="n">identities</span><span class="p">:</span> <span class="s1">'tuple[PskIdentity, ...]'</span>
@@ -1021,7 +1061,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PreSharedKeyServerHello">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PreSharedKeyServerHello</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for a ``ServerHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for a ``ServerHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Index of the identity selected, into the ``ClientHello``'s list.</span>
     <span class="n">selected_identity</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -1035,7 +1079,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.Cookie">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Cookie</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``cookie`` extension (:rfc:`9846#section-4.3.2`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``cookie`` extension (:rfc:`9846#section-4.3.2`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: The cookie, which a ``ClientHello`` copies from the ``HelloRetryRequest``.</span>
     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -1049,7 +1097,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.PskKeyExchangeModes">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PskKeyExchangeModes</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``psk_key_exchange_modes`` extension (:rfc:`9846#section-4.3.9`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``psk_key_exchange_modes`` extension (:rfc:`9846#section-4.3.9`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Key exchange modes the client supports with a PSK.</span>
     <span class="n">ke_modes</span><span class="p">:</span> <span class="s1">'tuple[Enum_PskKeyExchangeMode, ...]'</span>
@@ -1063,7 +1115,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeSymmetricCipherSuite">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HpkeSymmetricCipherSuite</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: HPKE KDF identifier (:rfc:`9180#section-7.2`).</span>
     <span class="n">kdf_id</span><span class="p">:</span> <span class="s1">'Enum_HpkeKdfId'</span>
@@ -1080,7 +1136,11 @@
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECHClientHelloOuter</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the outer variant of a ``ClientHello``'s ``encrypted_client_hello``</span>
-<span class="sd">    extension (:rfc:`9849#section-5`)."""</span>
+<span class="sd">    extension (:rfc:`9849#section-5`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Cipher suite encrypting the inner ``ClientHello``.</span>
     <span class="n">cipher_suite</span><span class="p">:</span> <span class="s1">'HpkeSymmetricCipherSuite'</span>
@@ -1101,7 +1161,11 @@
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECHClientHelloInner</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the inner variant of a ``ClientHello``'s ``encrypted_client_hello``</span>
-<span class="sd">    extension (:rfc:`9849#section-5`), which carries its type alone."""</span>
+<span class="sd">    extension (:rfc:`9849#section-5`), which carries its type alone.</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,multiple-statements</span></div>
@@ -1113,7 +1177,11 @@
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECHHelloRetryRequest</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for a ``HelloRetryRequest``'s ``encrypted_client_hello`` extension</span>
-<span class="sd">    (:rfc:`9849#section-5`)."""</span>
+<span class="sd">    (:rfc:`9849#section-5`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Acceptance confirmation (8 octets).</span>
     <span class="n">confirmation</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -1127,7 +1195,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigExtension">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECHConfigExtension</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for one ``ECHConfigExtension`` of an ``ECHConfig`` (:rfc:`9849#section-4.2`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for one ``ECHConfigExtension`` of an ``ECHConfig`` (:rfc:`9849#section-4.2`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: ``ECHConfigExtensionType``.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -1143,7 +1215,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.HpkeKeyConfig">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">HpkeKeyConfig</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``HpkeKeyConfig`` of an ``ECHConfig`` (:rfc:`9849#section-4`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``HpkeKeyConfig`` of an ``ECHConfig`` (:rfc:`9849#section-4`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Identifier of the configuration.</span>
     <span class="n">config_id</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -1163,7 +1239,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfigContents">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECHConfigContents</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``ECHConfigContents`` of an ``ECHConfig`` (:rfc:`9849#section-4`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``ECHConfigContents`` of an ``ECHConfig`` (:rfc:`9849#section-4`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: HPKE key configuration.</span>
     <span class="n">key_config</span><span class="p">:</span> <span class="s1">'HpkeKeyConfig'</span>
@@ -1183,7 +1263,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.ECHConfig">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECHConfig</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for one ``ECHConfig`` of an ``ECHConfigList`` (:rfc:`9849#section-4`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for one ``ECHConfig`` of an ``ECHConfigList`` (:rfc:`9849#section-4`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: ECH version of the configuration.</span>
     <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -1201,7 +1285,11 @@
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ECHEncryptedExtensions</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for an ``EncryptedExtensions``' ``encrypted_client_hello`` extension</span>
-<span class="sd">    (:rfc:`9849#section-5`)."""</span>
+<span class="sd">    (:rfc:`9849#section-5`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: The server's retry configurations, most preferred first.</span>
     <span class="n">retry_configs</span><span class="p">:</span> <span class="s1">'tuple[ECHConfig, ...]'</span>
@@ -1215,7 +1303,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.data.RenegotiationInfo">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RenegotiationInfo</span><span class="p">(</span><span class="n">ExtensionData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for the ``renegotiation_info`` extension (:rfc:`5746#section-3.2`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for the ``renegotiation_info`` extension (:rfc:`5746#section-3.2`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: ``verify_data`` of the previous handshake; empty on an initial one.</span>
     <span class="n">renegotiated_connection</span><span class="p">:</span> <span class="s1">'bytes'</span>

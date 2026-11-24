@@ -790,6 +790,8 @@
 <span class="sd">    Listener Done (132). ``code`` is zero on the wire and ignored</span>
 <span class="sd">    (:rfc:`2710#section-3.2`).</span>
 
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: MLD version, always ``1``. It is on no octet; it names the version the</span>
@@ -822,6 +824,8 @@
 
 <span class="sd">    A Query (type 130) of 28 or more octets (:rfc:`9777#section-8.1`). ``code`` is</span>
 <span class="sd">    zero on the wire and ignored (:rfc:`9777#section-5.1.1`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
 
@@ -872,7 +876,11 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.data.MulticastAddressRecord">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MulticastAddressRecord</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for an MLDv2 multicast address record (:rfc:`9777#section-5.2`)."""</span>
+<span class="w">    </span><span class="sd">"""Data model for an MLDv2 multicast address record (:rfc:`9777#section-5.2`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Record type (:rfc:`9777#section-5.2.13`).</span>
     <span class="n">record_type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span>
@@ -903,6 +911,8 @@
 
 <span class="sd">    A Report is type 143, and its ``code`` the Reserved octet</span>
 <span class="sd">    (:rfc:`9777#section-5.2.1`).</span>
+
+<span class="sd">    .. versionadded:: 1.7.0</span>
 
 <span class="sd">    """</span>
 

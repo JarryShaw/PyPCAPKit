@@ -622,7 +622,7 @@ each needs installed.</p>
     LOOP[&quot;record\_frames(): read\_frame() until EOF&quot;]
     MAN[&quot;the caller drives it&lt;br/&gt;next(extractor) or extractor()&quot;]
     RF[&quot;engine.read\_frame()&quot;]
-    EOF{&quot;no\_eof, and the input&lt;br/&gt;still producing?&quot;}
+    EOF{&quot;stream.no\_eof, and the input&lt;br/&gt;still producing?&quot;}
     CLEAN[&quot;\_cleanup(): every flow tracer finished,&lt;br/&gt;the input closed if this class opened it,&lt;br/&gt;the engine closed&quot;]
     FAIL[&quot;\_cleanup(failed=True), then re-raised&lt;br/&gt;input and engine released,&lt;br/&gt;tracing not finished&quot;]
     NEXT[&quot;the frame: read on under auto,&lt;br/&gt;else returned to the caller&quot;]
@@ -642,7 +642,7 @@ each needs installed.</p>
         F1[&quot;parse the next frame, under layer= and protocol=&quot;]
         F2[&quot;count it, then the verbose callback&quot;]
         F3{&quot;dump?&quot;}
-        F3W[&quot;write it: a file per frame under files=,&lt;br/&gt;else the one output&quot;]
+        F3W[&quot;write it: a file per frame under dump.files,&lt;br/&gt;else the one output&quot;]
         F4{&quot;reassembly?&quot;}
         F4R[&quot;the engine's toolkit adapters feed&lt;br/&gt;each enabled reassembler&quot;]
         F5{&quot;traceflow?&quot;}
@@ -725,7 +725,7 @@ timestamp (<a class="extlink-issue reference external" href="https://github.com/
 where TCP’s alone was (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2843">#2843</a>). <code class="docutils literal notranslate"><span class="pre">nofile</span></code>, <code class="docutils literal notranslate"><span class="pre">fout</span></code>, <code class="docutils literal notranslate"><span class="pre">format</span></code>,
 <code class="docutils literal notranslate"><span class="pre">extension</span></code>, <code class="docutils literal notranslate"><span class="pre">files</span></code>, <code class="docutils literal notranslate"><span class="pre">ip</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv4</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv6</span></code>, <code class="docutils literal notranslate"><span class="pre">tcp</span></code>,
 <code class="docutils literal notranslate"><span class="pre">dtls</span></code>, the <code class="docutils literal notranslate"><span class="pre">reasm_*</span></code>, <code class="docutils literal notranslate"><span class="pre">trace_*</span></code> and <code class="docutils literal notranslate"><span class="pre">buffer_*</span></code> parameters and
-<code class="docutils literal notranslate"><span class="pre">no_eof</span></code> are removed with no alias. Nothing is written without
+<code class="docutils literal notranslate"><span class="pre">no_eof</span></code> are removed with no alias. No report is written without
 <code class="docutils literal notranslate"><span class="pre">dump</span></code>, <code class="docutils literal notranslate"><span class="pre">fin</span></code> is opened as named, with no <code class="docutils literal notranslate"><span class="pre">.pcap</span></code> appended, and an
 unknown <code class="docutils literal notranslate"><span class="pre">layer</span></code> raises (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2836">#2836</a>).</p>
 </div>

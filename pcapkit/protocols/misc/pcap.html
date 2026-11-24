@@ -727,7 +727,7 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.misc.pcap.he
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the magic number is invalid. Parsing does not get
     this far with one: the schema’s
-    <code class="xref py py-func docutils literal notranslate"><span class="pre">magic_number_callback()</span></code>
+    <a class="reference internal" href="#pcapkit.protocols.misc.pcap.header.schema.magic_number_callback" title="pcapkit.protocols.misc.pcap.header.schema.magic_number_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">magic_number_callback()</span></code></a>
     raises it while the header is unpacked.</p>
 </dd>
 </dl>
@@ -941,6 +941,23 @@ has set it (<a class="extlink-issue reference external" href="https://github.com
 
 </dd></dl>
 
+<section id="auxiliary-functions">
+<h4>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h4>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.schema.magic_number_callback">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcap.header.schema.</span></span><span class="sig-name descname"><span class="pre">magic_number_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header/schema.html#magic_number_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.schema.magic_number_callback" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate byte order of PCAP file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a></span>) – Field instance.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 <section id="module-pcapkit.protocols.misc.pcap.header.data">
 <span id="data-models"></span><h3>Data Models<a class="headerlink" href="#module-pcapkit.protocols.misc.pcap.header.data" title="Link to this heading">¶</a></h3>
@@ -1649,7 +1666,10 @@ into the capture file”.</p>
             <ul>
 <li><a class="reference internal" href="#">PCAP File Headers</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header">Global Header</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header.schema">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header.schema">Header Schemas</a><ul>
+<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header.data">Data Models</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header.const">Constants</a></li>
 </ul>

@@ -597,7 +597,8 @@
 <p class="admonition-title">Important</p>
 <p>The <strong>operational contract</strong> for cutting a release: what a maintainer touches
 by hand, what the workflow does unattended, and the precautions that follow.</p>
-<p><strong>The only manual edit is bumping</strong> <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>. Everything
+<p><strong>The only manual edit is bumping</strong> <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>, with
+<code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code> moved to match (<a class="reference internal" href="#the-one-manual-step">The One Manual Step</a>). Everything
 else – the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag, the GitHub Release, the PyPI and Anaconda uploads, the
 <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag and its commit to <code class="docutils literal notranslate"><span class="pre">main</span></code> – is produced by
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> and is never hand-made.</p>
@@ -814,7 +815,7 @@ tagged it, or, for Anaconda files that run’s own <code class="docutils literal
 build, by Conda Update’s <code class="docutils literal notranslate"><span class="pre">publish</span></code> dispatch (see <a class="reference internal" href="#recovery">Recovery</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> attach their files with <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">upload</span></code>, in
 their “Upload package to GitHub Release” steps, not <code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code>,
-which calls Update a release before every upload (3.0.3’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> in
+which calls Update a release before every upload (3.0.4’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> in
 <code class="docutils literal notranslate"><span class="pre">src/github.ts</span></code>, on a release that exists). A file
 the release already has is left alone
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>): the action
@@ -889,7 +890,7 @@ Create Release’s tag check.
 The action would also retarget a draft at <code class="docutils literal notranslate"><span class="pre">commit</span></code>
 (<code class="docutils literal notranslate"><span class="pre">Action.updateDraftOrCreateRelease()</span></code> and <code class="docutils literal notranslate"><span class="pre">Action.updateRelease()</span></code>), which <code class="docutils literal notranslate"><span class="pre">omitDraftDuringUpdate</span></code> keeps a
 draft, but Create Release’s <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> run finds the draft and resets
-its target to the run’s sha (<code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code> 3.0.3’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> and
+its target to the run’s sha (<code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code> 3.0.4’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> and
 <code class="docutils literal notranslate"><span class="pre">findTagFromReleases()</span></code>), so skipping a draft is a precaution
 against retargeting a release Create Release owns.
 Either way the build goes to anaconda.org only, with a <code class="docutils literal notranslate"><span class="pre">::notice</span></code>. The
@@ -907,10 +908,10 @@ on, in <code class="docutils literal notranslate"><span class="pre">src/Inputs.t
 the release with a GitHub App installation token, which Create a release
 accepts for a target that changes a workflow file when it has the “Workflows”
 repository permission (write). “Mint the release App’s token” runs
-<code class="docutils literal notranslate"><span class="pre">actions/create-github-app-token</span></code> v3.3.0, pinned to its commit, with
+<code class="docutils literal notranslate"><span class="pre">actions/create-github-app-token</span></code> v3.4.0, pinned to its commit, with
 <code class="docutils literal notranslate"><span class="pre">permission-contents:</span> <span class="pre">write</span></code> and <code class="docutils literal notranslate"><span class="pre">permission-workflows:</span> <span class="pre">write</span></code> and no
 <code class="docutils literal notranslate"><span class="pre">owner</span></code> or <code class="docutils literal notranslate"><span class="pre">repositories</span></code>, so the token is “scoped to only the current
-repository” and revoked in the action’s <code class="docutils literal notranslate"><span class="pre">post</span></code> step (v3.3.0’s README). Only
+repository” and revoked in the action’s <code class="docutils literal notranslate"><span class="pre">post</span></code> step (v3.4.0’s README). Only
 Create Release spends it.
 While <code class="docutils literal notranslate"><span class="pre">vars.RELEASE_APP_CLIENT_ID</span></code> is unset, which reads as “an empty
 string”, the step skips and Create Release spends <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>, so the

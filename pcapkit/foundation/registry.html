@@ -676,6 +676,10 @@ the engine <code class="docutils literal notranslate"><span class="pre">name</sp
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.3.0: </span><code class="docutils literal notranslate"><span class="pre">ext</span></code> is keyword-only.</p>
 </div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">dumper</span></code> is the class, where <code class="docutils literal notranslate"><span class="pre">module</span></code> and <code class="docutils literal notranslate"><span class="pre">class_</span></code> named it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -699,6 +703,10 @@ the engine <code class="docutils literal notranslate"><span class="pre">name</sp
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.3.0: </span><code class="docutils literal notranslate"><span class="pre">ext</span></code> is keyword-only.</p>
 </div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">dumper</span></code> is the class, where <code class="docutils literal notranslate"><span class="pre">module</span></code> and <code class="docutils literal notranslate"><span class="pre">class_</span></code> named it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -721,6 +729,10 @@ the engine <code class="docutils literal notranslate"><span class="pre">name</sp
 </dl>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.3.0: </span><code class="docutils literal notranslate"><span class="pre">ext</span></code> is keyword-only.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">dumper</span></code> is the class, where <code class="docutils literal notranslate"><span class="pre">module</span></code> and <code class="docutils literal notranslate"><span class="pre">class_</span></code> named it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>).</p>
 </div>
 </dd></dl>
 
@@ -798,7 +810,8 @@ callback will be appended to the end of the list</p></li>
 <div class="versionremoved">
 <p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">register_reassembly_ipv4_callback</span></code>, <code class="docutils literal notranslate"><span class="pre">register_reassembly_ipv6_callback</span></code>,
 <code class="docutils literal notranslate"><span class="pre">register_reassembly_tcp_callback</span></code> and <code class="docutils literal notranslate"><span class="pre">register_traceflow_tcp_callback</span></code>,
-which the two above replace with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>).</p>
+which <a class="reference internal" href="#pcapkit.foundation.registry.foundation.register_reassembly_callback" title="pcapkit.foundation.registry.foundation.register_reassembly_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_reassembly_callback()</span></code></a> and
+<a class="reference internal" href="#pcapkit.foundation.registry.foundation.register_traceflow_callback" title="pcapkit.foundation.registry.foundation.register_traceflow_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_traceflow_callback()</span></code></a> replace with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>).</p>
 </div>
 </section>
 <section id="extractor-registries">
@@ -825,6 +838,12 @@ the class <code class="docutils literal notranslate"><span class="pre">protocol<
     is refused as above.</p>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">reassembly</span></code> is the class, where <code class="docutils literal notranslate"><span class="pre">module</span></code> and <code class="docutils literal notranslate"><span class="pre">class_</span></code> named it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>), and <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is stored lower-cased, one that is not
+a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> raising <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2879">#2879</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -880,6 +899,12 @@ the class <code class="docutils literal notranslate"><span class="pre">protocol<
     is refused as above.</p>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">traceflow</span></code> is the class, where <code class="docutils literal notranslate"><span class="pre">module</span></code> and <code class="docutils literal notranslate"><span class="pre">class_</span></code> named it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2838">#2838</a>), and <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is stored lower-cased, one that is not
+a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> raising <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2879">#2879</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py function">

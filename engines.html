@@ -636,7 +636,8 @@ import and the other becomes unselectable.</p>
 <p>Every third-party engine supports <strong>less</strong> than the <code class="docutils literal notranslate"><span class="pre">default</span></code> one.
 <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> and
 <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> perform no protocol
-dissection at all, so they offer neither reassembly nor flow tracing, and
+dissection at all, so they reassemble and trace flows only once an adapter is
+registered on them, and
 <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a> has no IPv6 decoder,
 so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
 exception, except for these, which pass without a warning:</p>
