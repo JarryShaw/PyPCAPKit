@@ -160,7 +160,7 @@ The `PyShark`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __traceflow__
    .. autoattribute:: PYTHON_CEILING
 
-   .. rubric:: Class Methods
+   .. rubric:: Availability
 
    .. automethod:: unsupported_reason
 
@@ -263,7 +263,7 @@ The `PyPCAP`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
 
-   .. rubric:: Class Methods
+   .. rubric:: Availability
 
    .. automethod:: unsupported_reason
 
@@ -419,7 +419,7 @@ The `pcap-ct`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: __reassembly__
    .. autoattribute:: __traceflow__
 
-   .. rubric:: Class Methods
+   .. rubric:: Availability
 
    .. automethod:: unsupported_reason
 
@@ -470,8 +470,6 @@ The `PyPCAPFile`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: LAYERS
    .. autoattribute:: PYTHON_CEILING
 
-   .. automethod:: unsupported_reason
-
    .. rubric:: Defaults
 
    .. autoattribute:: __engine_name__
@@ -482,6 +480,10 @@ The `PyPCAPFile`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    .. rubric:: Properties
 
    .. autoproperty:: dlink
+
+   .. rubric:: Availability
+
+   .. automethod:: unsupported_reason
 
    .. rubric:: Data Models
 

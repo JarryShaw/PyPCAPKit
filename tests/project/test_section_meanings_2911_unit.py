@@ -9,10 +9,10 @@ not only the protocol classes ``test_protocol_member_order_2490_unit`` orders.
 
 :func:`audit` holds a class to them: a member under one of the four comments is
 of that comment's kind. A member under any other comment, a topic section such
-as ``# Defaults.`` or ``# Reassembly.``, keeps its place, and so does one above
-the first comment. The comments are read as :file:`util/member_sections.py` reads
-them for the API pages' subtitles, and a member's kind as the #2490 guard reads
-it, so the three agree.
+as ``# Defaults.`` or ``# Reassembly.``, keeps its place. :func:`unfiled` finds a
+member above the class's first comment, which the owner ruled out on #2922. The
+comments are read as :file:`util/member_sections.py` reads them for the API pages'
+subtitles, and a member's kind as the #2490 guard reads it, so the three agree.
 
 This module is unit-tier: it parses source and imports nothing it scans.
 
@@ -70,22 +70,36 @@ def audit(path: 'pathlib.Path', node: 'ast.ClassDef') -> 'list[tuple[str, str, s
     return found
 
 
-def audit_tree(root: 'pathlib.Path' = ROOT) -> 'dict[str, list[tuple[str, str, str]]]':
-    """Every class under ``root``'s :file:`pcapkit/` with section comments, mapped to what :func:`audit` finds."""
-    found = {}  # type: dict[str, list[tuple[str, str, str]]]
+def unfiled(path: 'pathlib.Path', node: 'ast.ClassDef') -> 'list[str]':
+    """Each member of the class ``node``, parsed from ``path``, above its first section comment.
+
+    A class without section comments has none.
+
+    """
+    cls = member_sections.Class(path, node)
+    if not member_sections.banners(cls):
+        return []
+    layout = member_sections.layout(cls)
+    return [name for name, _ in members(node) if layout[name][1] is None]
+
+
+def audit_tree(root: 'pathlib.Path' = ROOT) -> 'dict[str, tuple[list[tuple[str, str, str]], list[str]]]':
+    """Every class under ``root``'s :file:`pcapkit/` with section comments, mapped to its :func:`audit` and :func:`unfiled`."""
+    found = {}  # type: dict[str, tuple[list[tuple[str, str, str]], list[str]]]
     for path in sorted((root / 'pcapkit').rglob('*.py')):
         for name, node in classes(path, root):
             if member_sections.banners(member_sections.Class(path, node)):
-                found[name] = audit(path, node)
+                found[name] = audit(path, node), unfiled(path, node)
     return found
 
 
-#: Fixture classes: ``Sound`` files each kind under its comment, with a member
-#: above the first comment and a topic section; ``Misfiled`` files each kind
-#: under a comment of another.
+#: Fixture classes: ``Sound`` files each kind under its comment, with an
+#: attribute above the first comment and a topic section; ``Misfiled`` files each
+#: kind under a comment of another; ``Unfiled`` has members above its first
+#: comment; ``Plain`` has no section comments.
 FIXTURE = textwrap.dedent('''\
     class Sound:
-        def lead(self): ...
+        lead = None
 
         ##########
         # Defaults.
@@ -154,19 +168,41 @@ FIXTURE = textwrap.dedent('''\
         ##########
 
         def __index__(self): ...
+
+
+    class Unfiled:
+        """A docstring is no member."""
+
+        lead = None
+
+        def __init__(self): ...
+
+        @classmethod
+        def check(cls): ...
+
+        ##########
+        # Methods.
+        ##########
+
+        def read(self): ...
+
+
+    class Plain:
+        def read(self): ...
 ''')
 
 
 class TestAudit(unittest.TestCase):
-    """The audit finds each kind under another kind's comment, and nothing elsewhere."""
+    """The audits find each kind under another kind's comment and each member above the first, and nothing else."""
 
     @classmethod
     def setUpClass(cls) -> 'None':
         cls.scratch = tempfile.TemporaryDirectory(prefix='pcapkit-section-meanings-')
         cls.path = pathlib.Path(cls.scratch.name) / 'fixture.py'
         cls.path.write_text(FIXTURE, encoding='utf-8')
-        cls.findings = {name.rsplit('.', 1)[-1]: audit(cls.path, node)
-                        for name, node in classes(cls.path, cls.path.parent)}
+        found = {name.rsplit('.', 1)[-1]: node for name, node in classes(cls.path, cls.path.parent)}
+        cls.findings = {name: audit(cls.path, node) for name, node in found.items()}
+        cls.unfiled = {name: unfiled(cls.path, node) for name, node in found.items()}
 
     @classmethod
     def tearDownClass(cls) -> 'None':
@@ -174,6 +210,13 @@ class TestAudit(unittest.TestCase):
 
     def test_a_sound_class_has_no_finding(self) -> 'None':
         self.assertEqual(self.findings['Sound'], [])
+        self.assertEqual(self.unfiled['Sound'], [])
+
+    def test_a_member_above_the_first_comment_is_found(self) -> 'None':
+        self.assertEqual(self.unfiled['Unfiled'], ['__init__', 'check'])
+
+    def test_a_class_without_comments_has_none_above(self) -> 'None':
+        self.assertEqual(self.unfiled['Plain'], [])
 
     def test_each_kind_misfiled_is_found(self) -> 'None':
         self.assertEqual(self.findings['Misfiled'], [
@@ -186,7 +229,7 @@ class TestAudit(unittest.TestCase):
 
 
 class TestSectionMeanings(unittest.TestCase):
-    """Every class under :file:`pcapkit/` with section comments keeps the four meanings."""
+    """Every class under :file:`pcapkit/` with section comments keeps the four meanings and files every member."""
 
     @classmethod
     def setUpClass(cls) -> 'None':
@@ -194,8 +237,14 @@ class TestSectionMeanings(unittest.TestCase):
 
     def test_every_member_is_under_its_kind(self) -> 'None':
         misfiled = [f'{name}.{member} is under # {section} but belongs under # {belongs}'
-                    for name, found in sorted(self.findings.items()) for member, section, belongs in found]
+                    for name, (found, _) in sorted(self.findings.items()) for member, section, belongs in found]
         self.assertEqual(misfiled, [], 'move each member under the comment its kind names (protocol-member-order.rst)')
+
+    def test_no_member_is_above_the_first_comment(self) -> 'None':
+        above = [f'{name}.{member} is above the first section comment'
+                 for name, (_, found) in sorted(self.findings.items()) for member in found]
+        self.assertEqual(above, [], 'move each member under the comment its kind or topic names '
+                                    '(protocol-member-order.rst)')
 
     def test_the_scan_reaches_beyond_protocols(self) -> 'None':
         # The ruling's scope: a protocol class and one outside pcapkit.protocols.

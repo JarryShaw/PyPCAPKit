@@ -159,7 +159,7 @@ class PCAP_CT(EngineBase['RawFrame']):
     __traceflow__ = {}  # type: dict[str, ModuleDescriptor[Any] | Callable[..., Any]]
 
     ##########################################################################
-    # Class methods.
+    # Availability.
     ##########################################################################
 
     @classmethod

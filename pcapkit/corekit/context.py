@@ -110,14 +110,6 @@ class ContextRegistry(Mapping[str, 'ProtocolContext']):
 
     """
 
-    def __init__(self, *contexts: 'ProtocolContext', **named: 'ProtocolContext') -> 'None':
-        self.__data__ = {}  # type: dict[str, ProtocolContext]
-
-        for context in contexts:
-            self.register(context)
-        for name, context in named.items():
-            self.register(context, name=name)
-
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -220,6 +212,14 @@ class ContextRegistry(Mapping[str, 'ProtocolContext']):
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    def __init__(self, *contexts: 'ProtocolContext', **named: 'ProtocolContext') -> 'None':
+        self.__data__ = {}  # type: dict[str, ProtocolContext]
+
+        for context in contexts:
+            self.register(context)
+        for name, context in named.items():
+            self.register(context, name=name)
 
     def __getitem__(self, key: 'str') -> 'ProtocolContext':
         """Get the context registered for ``key``."""
