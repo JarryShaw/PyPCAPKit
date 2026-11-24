@@ -11,6 +11,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
                                          SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BytesField
+from pcapkit.protocols.application.sslv2.const import _HELLO_PROBE_LENGTH
 from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
 
 __all__ = [
@@ -54,12 +55,6 @@ def sslv2_record_length(packet: 'dict[str, Any]') -> 'int':
     if indicator & 0x80:
         return ((indicator & 0x7F) << 8) | length_low
     return ((indicator & 0x3F) << 8) | length_low
-
-
-#: Octets of a hello body's own fixed-width sub-header a forward-match probe
-#: ever needs to peek -- enough for the longer of the two,
-#: ``SERVER-HELLO``'s 10-octet one (``CLIENT-HELLO``'s is 8).
-_HELLO_PROBE_LENGTH = 10
 
 
 def sslv2_hello_probe_length(packet: 'dict[str, Any]') -> 'int':

@@ -27,7 +27,6 @@ control channel of the File Transfer Protocol (FTP) [*]_; the data channel is
    modules (:issue:`2285`).
 
 """
-import re
 from typing import TYPE_CHECKING
 
 from pcapkit.const.ftp.command import Command as Enum_Command
@@ -35,6 +34,7 @@ from pcapkit.const.ftp.return_code import ReturnCode as Enum_ReturnCode
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.application.ftp.const import FTP_REQUEST, FTP_RESPONSE
 from pcapkit.protocols.application.ftp.data import FTP as Data_FTP
 from pcapkit.protocols.application.ftp.data import Request as Data_Request
 from pcapkit.protocols.application.ftp.data import Response as Data_Response
@@ -57,14 +57,6 @@ __all__ = ['FTP']
 #: (:issue:`1538`), so its first import holds
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _TCP: 'ModuleDescriptor[AppType_TCP]' = ModuleDescriptor('pcapkit.const.reg.apptype.tcp', 'TCP')
-
-# FTP lines (RFC 959, sections 4 and 5): a command is ``<command> [<SP>
-# <argument>] <CRLF>``, a reply ``<code> [<SP> <text>] <CRLF>``, and a multi-line
-# reply opens ``<code>-<text> <CRLF>``. Only the one SP is syntax, so ``make``
-# writes back the line as read. ``\Z``, as ``$`` also matches before a ``\n``.
-FTP_REQUEST = re.compile(rb'^(?P<cmmd>[A-Z]{3,4})(?: (?P<args>.*))?\r\n\Z', re.I)
-FTP_RESPONSE = re.compile(rb'^(?P<code>[0-9]{3})'
-                          rb'(?:(?P<more>-)(?P<text>.*)|(?: (?P<args>.*))?)\r\n\Z', re.I)
 
 
 class Type(EnumLookup, StrEnum):

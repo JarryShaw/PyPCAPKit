@@ -47,8 +47,8 @@ from pcapkit.const.http.method import Method as Enum_Method
 from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.protocols.application.http.protocol import (_HTTP2_PREFACE_HEADER, _RE_METHOD,
-                                                         _RE_STATUS, _RE_VERSION)
+from pcapkit.protocols.application.http.const import (_HTTP2_PREFACE_HEADER, _RE_METHOD, _RE_STATUS,
+                                                      _RE_VERSION)
 from pcapkit.protocols.application.http.protocol import HTTP as HTTPBase
 from pcapkit.protocols.application.httpv1.data import HTTPv1 as Data_HTTP
 from pcapkit.protocols.application.httpv1.data import RequestHeader as Data_RequestHeader

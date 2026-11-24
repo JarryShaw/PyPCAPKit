@@ -130,6 +130,9 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.link.radiotap.const import (_FIXED_HEADER_LEN, _IT_PRESENT_EXTENDED,
+                                                   _PRESENT_WORD_BITS, _PRESENT_WORD_LEN,
+                                                   _REASON_NO_LAYOUT, _REASON_PAST_REGION)
 from pcapkit.protocols.link.radiotap.data import EHT as Data_EHT
 from pcapkit.protocols.link.radiotap.data import FHSS as Data_FHSS
 from pcapkit.protocols.link.radiotap.data import HE as Data_HE
@@ -235,28 +238,9 @@ if TYPE_CHECKING:
 
 __all__ = ['Radiotap']
 
-#: Bit 31 of an ``it_present`` word -- set, another present-flags word
-#: follows; clear, the field-data region starts right after this word.
-_IT_PRESENT_EXTENDED = 1 << 31
-
-#: Octets of the fixed start every radiotap header has, before any extended
-#: present-flags word or field data.
-_FIXED_HEADER_LEN = 8
-
-#: Octets of one present-flags word, extended or not.
-_PRESENT_WORD_LEN = 4
-
-#: Bits of one present-flags word.
-_PRESENT_WORD_BITS = 8 * _PRESENT_WORD_LEN
-
 #: The largest field type, the bound of a TLV's ``type``; a presence bit past
 #: it ends the walk, see :meth:`Radiotap._walk_present`.
 _FIELD_TYPE_MAX = (1 << 8 * Schema_TLV.__fields__['type'].length) - 1
-
-#: Why an :class:`~pcapkit.protocols.link.radiotap.data.Unknown` entry ended
-#: the walk, as its ``reason`` says.
-_REASON_NO_LAYOUT = 'no layout is defined for the field type'
-_REASON_PAST_REGION = 'the field runs past the field-data region'
 
 
 class Radiotap(Link[Data_Radiotap, Schema_Radiotap],

@@ -64,6 +64,7 @@ from pcapkit.const.ieee802_11.extension_subtype import ExtensionSubtype as Enum_
 from pcapkit.const.ieee802_11.management_subtype import ManagementSubtype as Enum_ManagementSubtype
 from pcapkit.const.ieee802_11.type import Type as Enum_Type
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.protocols.link.ieee802_11.const import SUBTYPE
 from pcapkit.protocols.link.ieee802_11.data import IEEE802_11 as Data_IEEE802_11
 from pcapkit.protocols.link.ieee802_11.data import FrameControl as Data_FrameControl
 from pcapkit.protocols.link.ieee802_11.data import HTControl as Data_HTControl
@@ -75,7 +76,7 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, Mapping, Optional, Type, Union
+    from typing import Any, Mapping, Optional, Union
 
     from typing_extensions import Literal
 
@@ -85,14 +86,6 @@ if TYPE_CHECKING:
     Subtype = Union[Enum_ManagementSubtype, Enum_ControlSubtype, Enum_DataSubtype, Enum_ExtensionSubtype]
 
 __all__ = ['IEEE802_11']
-
-#: Subtype registry of each frame type (IEEE Std 802.11-2020, Table 9-1).
-SUBTYPE = {
-    Enum_Type.Management: Enum_ManagementSubtype,
-    Enum_Type.Control: Enum_ControlSubtype,
-    Enum_Type.Data: Enum_DataSubtype,
-    Enum_Type.Extension: Enum_ExtensionSubtype,
-}  # type: dict[int, Type[Subtype]]
 
 
 def _header_length(fields: 'Layout') -> 'int':

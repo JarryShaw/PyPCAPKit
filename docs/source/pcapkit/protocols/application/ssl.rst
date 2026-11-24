@@ -34,6 +34,13 @@ accepting bytes that cannot be a genuine record.
 
 .. versionadded:: 1.6.0
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.application.ssl.protocol.TLS13_VERSION`` and
+   ``pcapkit.protocols.application.ssl.protocol.DTLS13_VERSION``, now
+   :data:`pcapkit.protocols.application.ssl.const.TLS13_VERSION` and
+   :data:`pcapkit.protocols.application.ssl.const.DTLS13_VERSION` (:issue:`2896`).
+
 .. raw:: html
 
    <br />
@@ -544,6 +551,20 @@ Data Models
 .. autoclass:: pcapkit.protocols.application.ssl.data.ChangeCipherSpec
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.application.ssl.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.application.ssl.const.TLS13_VERSION
+
+.. autodata:: pcapkit.protocols.application.ssl.const.DTLS13_VERSION
+
+.. autodata:: pcapkit.protocols.application.ssl.const._HRR_RANDOM
+   :no-value:
 
 .. rubric:: Footnotes
 

@@ -644,6 +644,16 @@ Data Models
    :members:
    :show-inheritance:
 
+Constants
+---------
+
+.. module:: pcapkit.protocols.transport.sctp.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.transport.sctp.const.CRC32C_TABLE
+   :no-value:
+
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Stream_Control_Transmission_Protocol

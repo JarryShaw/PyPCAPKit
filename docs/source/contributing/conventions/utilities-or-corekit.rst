@@ -12,16 +12,16 @@ The page's questions, as one decision:
 .. mermaid::
 
    flowchart TD
-       NEW["a new support module,<br/>helper, constant<br/>or ContextVar"] --> CONST{"a constant the<br/>format or RFCs fix?"}
+       NEW["a new support module,<br/>helper, constant<br/>or ContextVar"] --> CONST{"a constant?"}
        CONST -->|"referenced beyond its<br/>protocol or family"| SHARED["corekit.const<br/>one module per topic"]
-       CONST -->|"referenced by its<br/>protocol or family alone"| STAY["stays in its<br/>protocol or family"]
+       CONST -->|"referenced by its<br/>protocol or family alone"| OWNC["the const module of its<br/>package or family base"]
        CONST -->|no| LAYER{"a schema-layer<br/>helper used<br/>outside it?"}
        LAYER -->|no| OWNED{"a helper in<br/>one protocol's<br/>own modules?"}
        LAYER -->|yes| SCHEMA["corekit.schema<br/>one module per group"]
        OWNED -->|"in its schema, used<br/>beyond its protocol<br/>or family"| SCHEMA
        OWNED -->|"elsewhere, used<br/>beyond its protocol<br/>or family"| UTIL
        OWNED -->|no| VAR{"a ContextVar?"}
-       OWNED -->|"used by its protocol<br/>or family alone"| STAY
+       OWNED -->|"used by its protocol<br/>or family alone"| STAY["stays in its<br/>protocol or family"]
        VAR -->|"set or read by<br/>several modules"| CTX["utilities.contextvars"]
        VAR -->|no| UTIL{"usable by any<br/>code, importing<br/>no pcapkit but<br/>utilities?"}
        VAR -->|"used by one<br/>module only"| PRIV["private, in<br/>that module"]
@@ -153,7 +153,7 @@ classification by length, NGAP's PER decoding, and the TLS, DTLS and HTTP/2 fram
 protocol or its family uses it**, so other implementors can find it; a helper only its
 own protocol calls stays beside the schema. Ruled on :issue:`2674`, and widened to the
 rest of a protocol's own modules on :issue:`2897` (`Shared Helpers`_). A protocol's
-own modules are its protocol, data and schema modules. So
+own modules are its protocol, data, schema and const modules. So
 :func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length`, which the IPv6
 pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
 :mod:`pcapkit.corekit.schema.jumbogram`, while
@@ -206,13 +206,11 @@ enumerations generated from the vendor registries.
 
 What counts as a reference was ruled in review of :pr:`2895` (:issue:`2883`) too. Any
 module counts -- another protocol, the engines, the dumpers, IP reassembly and the
-toolkit alike -- but a protocol's own ``protocol``, ``schema`` and ``data`` modules
-are one place, and so is a family. So a family base's constant that its members
-reference stays with the family, as the IPv6 option helpers do (:issue:`2674`):
-TLS and DTLS read SSL's record content types, and HTTP/1 and HTTP/2 the HTTP
-base's patterns. A constant only its own protocol references stays in that
-protocol's package, as
-:data:`~pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN` does.
+toolkit alike -- but a protocol's own ``protocol``, ``schema``, ``data`` and
+``const`` modules are one place, and so is a family. So a family base's constant
+that its members reference stays with the family, as the IPv6 option helpers do
+(:issue:`2674`): TLS and DTLS read SSL's record content types, and HTTP/1 and
+HTTP/2 the HTTP base's patterns.
 
 Every layer imports these modules, so they import nothing from :mod:`pcapkit` but
 :mod:`pcapkit.const` outside an ``if TYPE_CHECKING:`` block, and the package's
@@ -220,6 +218,37 @@ Every layer imports these modules, so they import nothing from :mod:`pcapkit` bu
 :file:`tests/project/test_shared_format_constants_2883_unit.py` fails on a module
 there that does, and on a constant of a protocol's own modules that a module outside
 that protocol or its family references, by import or as an attribute of the module.
+
+**Every other constant of a protocol's own modules lives in its package's**
+``const`` **module**, whichever of its ``protocol``, ``schema`` and ``data`` modules
+reads it, and one a family shares in the family base's: SSL's for TLS and DTLS,
+HTTP's for HTTP/1 and HTTP/2. Ruled by the owner in review of :pr:`2895`
+(:issue:`2883`) and recorded on :issue:`2896`. So
+:data:`~pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN`, which only the
+PCAP global header reads, is in :mod:`pcapkit.protocols.misc.pcap.header.const`.
+
+A constant is a module-level name in capitals, such as ``LIMIT``, ``_LIMIT`` or each
+name of a tuple bound at once, whose value is fixed when its module loads: a
+number, a string, a compiled pattern, an enumeration member, or a table of them.
+These are not constants, and stay beside their readers:
+
+*  a :class:`~pcapkit.corekit.module.ModuleDescriptor`, a lazy import;
+*  run-time state: a name a function rebinds under ``global``, as
+   :data:`~pcapkit.protocols.internet.esp.protocol._CRYPTO` is, or a lock;
+*  a value built from :mod:`pcapkit` beyond the registries and the constants -- a
+   field, a schema or a class of its own module -- as
+   :data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES` is, which a
+   ``const`` module could not import without importing its protocol back.
+
+The modules that read a constant import it, so it stays reachable through them and
+needs no ``versionremoved`` (:issue:`2896`); a released path whose module no longer
+reads it records one, as ``pcapkit.protocols.application.ssl.protocol.TLS13_VERSION``
+does. Those modules import a ``const`` module, so it imports nothing from
+:mod:`pcapkit` but :mod:`pcapkit.const`, :mod:`pcapkit.corekit.const` and another
+``const`` module outside an ``if TYPE_CHECKING:`` block, defines no function or
+class, and its ``__all__`` lists its public constants. The same test fails on a
+constant a ``protocol``, ``schema`` or ``data`` module binds, and on a ``const``
+module that binds anything else or imports beyond these.
 
 Shared Helpers
 ~~~~~~~~~~~~~~

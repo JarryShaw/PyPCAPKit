@@ -66,7 +66,7 @@ from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
-from pcapkit.protocols.application.http.protocol import _HTTP2_PREFACE
+from pcapkit.protocols.application.http.const import _HTTP2_PREFACE
 from pcapkit.protocols.application.http.protocol import HTTP as HTTPBase
 from pcapkit.protocols.application.httpv2.data import ContinuationFrame as Data_ContinuationFrame
 from pcapkit.protocols.application.httpv2.data import \

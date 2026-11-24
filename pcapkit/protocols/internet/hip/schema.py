@@ -29,6 +29,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, 
                                             UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.protocols.internet.hip.const import LOCATOR_SET_LEN
 from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -445,29 +446,6 @@ def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
     return parameter_total_len(length) - 4 - length
 
 
-#: Packet-context key under which :class:`LocatorSetParameter` keeps its own
-#: ``Length`` for the benefit of :func:`locator_set_padding_len`.
-#:
-#: It exists because the contents of ``LOCATOR_SET`` are a
-#: :class:`~pcapkit.corekit.fields.collections.ListField` of nested schemas,
-#: and a nested schema packed through one **shares the
-#: enclosing packet context**: :meth:`Schema.pack
-#: <pcapkit.protocols.schema.Schema.pack>` opens with
-#: ``packet.update(self.__dict__)``, and :class:`Locator` declares a ``len`` of
-#: its own. So by the time ``padding`` is evaluated -- after the list, since
-#: fields are packed in declaration order -- ``pkt['len']`` is the *last
-#: locator's* ``len``, not the parameter's -- 4 for any IPv6 locator,
-#: whatever the locator count.
-#:
-#: The shadowing is specific to the packing path. :meth:`Schema.unpack
-#: <pcapkit.protocols.schema.Schema.unpack>` hands each field
-#: ``packet.copy()``, so nested writes do not propagate back and ``pkt['len']``
-#: stays the parameter's there. Snapshotting under a key no nested schema
-#: declares is what makes one callback correct on both paths rather than
-#: accidentally correct on one.
-LOCATOR_SET_LEN = '__locator_set_len__'
-
-
 def locator_set_len_callback(field: 'ListField',  # pylint: disable=unused-argument
                              pkt: 'dict[str, Any]') -> 'None':
     """Snapshot ``LOCATOR_SET``'s own ``Length`` before its locators shadow it.
@@ -476,8 +454,9 @@ def locator_set_len_callback(field: 'ListField',  # pylint: disable=unused-argum
     :meth:`ListField.__call__
     <pcapkit.corekit.fields.collections.ListField.__call__>` runs when the field
     is resolved against the packet -- i.e. before any nested :class:`Locator` has
-    been packed into it. See :data:`LOCATOR_SET_LEN` for why the snapshot is
-    needed at all.
+    been packed into it. See
+    :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` for why the
+    snapshot is needed at all.
 
     Args:
         field: The field being resolved. Unused; the signature is
@@ -493,8 +472,8 @@ def locator_set_padding_len(pkt: 'dict[str, Any]') -> 'int':
 
     The same arithmetic as :func:`parameter_padding_len` -- it defers to it
     rather than repeating it -- but read off the snapshot
-    :func:`locator_set_len_callback` took, for the reason :data:`LOCATOR_SET_LEN`
-    gives.
+    :func:`locator_set_len_callback` took, for the reason
+    :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` gives.
 
     Args:
         pkt: Parameter unpacked schema.
@@ -644,8 +623,9 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: List of locators.
     #:
     #: The ``length`` callback is the parameter's own ``Length``, and that is
-    #: correct on the unpacking path for the reason :data:`LOCATOR_SET_LEN`
-    #: gives -- nothing has shadowed ``len`` yet when this field is resolved,
+    #: correct on the unpacking path for the reason
+    #: :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` gives --
+    #: nothing has shadowed ``len`` yet when this field is resolved,
     #: since ``type`` and ``len`` are the only fields ahead of it. What matters
     #: is the *quantity* it is handed: :rfc:`7401` Section 5.2.1's ``Length`` is
     #: a byte count, not the 4-octet units :rfc:`8046#section-4` gives
@@ -671,8 +651,9 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: Not :func:`parameter_padding_len`, which every other parameter in this
     #: module uses, but :func:`locator_set_padding_len` -- the same arithmetic
     #: read off a snapshot of this parameter's ``Length`` rather than off
-    #: ``pkt['len']`` directly. :data:`LOCATOR_SET_LEN` documents why the direct
-    #: read does not work here: the nested :class:`Locator` schemas share this
+    #: ``pkt['len']`` directly.
+    #: :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` documents why
+    #: the direct read does not work here: the nested :class:`Locator` schemas share this
     #: parameter's packet context while they pack, and their own ``len``
     #: overwrites it before ``padding`` is reached.
     #:

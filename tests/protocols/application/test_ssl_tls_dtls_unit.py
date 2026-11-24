@@ -895,7 +895,7 @@ class NonRecordPayloadTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_every_first_octet_parses_only_as_an_accepted_content_type(self) -> None:
-        from pcapkit.protocols.application.ssl.protocol import _WIRE_CONTENT_TYPES
+        from pcapkit.protocols.application.ssl.const import _WIRE_CONTENT_TYPES
         from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 

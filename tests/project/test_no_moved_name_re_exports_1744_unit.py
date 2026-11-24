@@ -99,6 +99,12 @@ PURE = (
     ('pcapkit.protocols.misc.pcapng.schema', 'DEFAULT_RESOLUTION'),
     ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_NEXT_HEADER_OFFSET'),
     ('pcapkit.protocols.transport.tcp.schema', 'TCP_DATA_OFFSET_OCTET'),
+    # #2896: constants moved to their package's const module, which the old
+    # module no longer reads.
+    ('pcapkit.protocols.application.ssl.protocol', 'TLS13_VERSION'),
+    ('pcapkit.protocols.application.ssl.protocol', 'DTLS13_VERSION'),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'GLOBAL_HEADER_LEN'),
+    ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IPV4_PSEUDO_LEN'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -127,6 +133,25 @@ USED = (
     ('pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN', 'pcapkit.corekit.const.tcpheader'),
     # #2897: the helper the old module still calls.
     ('pcapkit.protocols.link.loopback.protocol', 'family_byteorder', 'pcapkit.corekit.schema.byteorder'),
+    # #2896: the constants documented at their old paths, now in their package's
+    # const module. The old modules still read them, so they need no
+    # versionremoved.
+    ('pcapkit.protocols.application.dns.schema', 'HEADER_LENGTH', 'pcapkit.protocols.application.dns.const'),
+    ('pcapkit.protocols.application.dns.schema', 'POINTER_LIMIT', 'pcapkit.protocols.application.dns.const'),
+    ('pcapkit.protocols.application.http.protocol', '_HTTP2_PREFACE', 'pcapkit.protocols.application.http.const'),
+    ('pcapkit.protocols.internet.hip.schema', 'LOCATOR_SET_LEN', 'pcapkit.protocols.internet.hip.const'),
+    ('pcapkit.protocols.link.ieee802_11.protocol', 'SUBTYPE', 'pcapkit.protocols.link.ieee802_11.const'),
+    ('pcapkit.protocols.link.ieee802_11.schema', 'CONTROL_WITH_ADDR2', 'pcapkit.protocols.link.ieee802_11.const'),
+    ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IPV6_PSEUDO_LEN',
+     'pcapkit.protocols.misc.checksum.ip_pseudo.const'),
+    ('pcapkit.protocols.misc.pcapng.schema', 'PACKET_FLAGS', 'pcapkit.protocols.misc.pcapng.const'),
+    ('pcapkit.protocols.transport.dccp.protocol', 'DCCP_MAX_HEADER_LEN', 'pcapkit.protocols.transport.dccp.const'),
+    ('pcapkit.protocols.transport.dccp.schema', 'DCCP_MIN_HEADER_LEN', 'pcapkit.protocols.transport.dccp.const'),
+    ('pcapkit.protocols.transport.dccp.schema', 'DCCP_SINGLE_OCTET_OPTION_MAX',
+     'pcapkit.protocols.transport.dccp.const'),
+    ('pcapkit.protocols.transport.dccp.schema', 'ACK_TYPES', 'pcapkit.protocols.transport.dccp.const'),
+    ('pcapkit.protocols.transport.dccp.schema', 'SERVICE_TYPES', 'pcapkit.protocols.transport.dccp.const'),
+    ('pcapkit.protocols.transport.dccp.schema', 'RESET_TYPE', 'pcapkit.protocols.transport.dccp.const'),
 )
 
 #: Every removed ``(old module, name)`` pair.
@@ -215,6 +240,15 @@ SHIPPED = (
     # #2897: shipped in 1.6.x, moved to pcapkit.corekit.schema.
     ('pcapkit.protocols.link.loopback.protocol', 'family_byteorder',
      'pcapkit/protocols/link/loopback/protocol.py', 'pcapkit/protocols/link/loopback.rst', '1.7.0'),
+    # #2896: shipped in 1.6.x, moved to their package's const module.
+    ('pcapkit.protocols.application.ssl.protocol', 'TLS13_VERSION',
+     'pcapkit/protocols/application/ssl/protocol.py', 'pcapkit/protocols/application/ssl.rst', '1.7.0'),
+    ('pcapkit.protocols.application.ssl.protocol', 'DTLS13_VERSION',
+     'pcapkit/protocols/application/ssl/protocol.py', 'pcapkit/protocols/application/ssl.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'GLOBAL_HEADER_LEN',
+     'pcapkit/protocols/misc/pcap/header/schema.py', 'pcapkit/protocols/misc/pcap.rst', '1.7.0'),
+    ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IPV4_PSEUDO_LEN',
+     'pcapkit/protocols/misc/checksum/ip_pseudo/schema.py', 'pcapkit/protocols/misc/checksum.rst', '1.7.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its

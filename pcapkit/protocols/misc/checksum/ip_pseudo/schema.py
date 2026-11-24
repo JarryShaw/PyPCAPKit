@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for the IP pseudo-header"""
+"""header schema for the IP pseudo-header
+
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV4_PSEUDO_LEN``, now
+   :data:`pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN`
+   (:issue:`2896`).
+
+"""
 
 import ipaddress
 from typing import TYPE_CHECKING
@@ -10,6 +18,7 @@ from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import PaddingField
+from pcapkit.protocols.misc.checksum.ip_pseudo.const import IPV6_PSEUDO_LEN
 from pcapkit.protocols.schema import Schema, schema_final
 
 __all__ = ['IP_Pseudo']
@@ -19,18 +28,6 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-
-#: Length of the IPv4 pseudo-header, :rfc:`793#section-3.1` -- source, destination,
-#: zero, protocol and length.
-#:
-#: .. versionadded:: 1.6.0
-IPV4_PSEUDO_LEN = 2 * (ipaddress.IPV4LENGTH // 8) + 1 + 1 + 2
-
-#: Length of the IPv6 pseudo-header, :rfc:`8200#section-8.1` -- source, destination,
-#: length, zero and next header.
-#:
-#: .. versionadded:: 1.6.0
-IPV6_PSEUDO_LEN = 2 * (ipaddress.IPV6LENGTH // 8) + 4 + 3 + 1
 
 
 def is_ipv6(packet: 'dict[str, Any]') -> 'bool':

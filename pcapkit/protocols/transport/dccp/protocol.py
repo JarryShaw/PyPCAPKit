@@ -50,6 +50,10 @@ from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.schema.shortread import cut_on_its_own, fill_short_options
 from pcapkit.protocols.schema import Schema
+from pcapkit.protocols.transport.dccp.const import (ACK_TYPES, DCCP_MAX_HEADER_LEN,
+                                                    DCCP_MIN_HEADER_LEN,
+                                                    DCCP_SINGLE_OCTET_OPTION_MAX, RESET_TYPE,
+                                                    SERVICE_TYPES)
 from pcapkit.protocols.transport.dccp.data import DCCP as Data_DCCP
 from pcapkit.protocols.transport.dccp.data import AckVector as Data_AckVector
 from pcapkit.protocols.transport.dccp.data import AckVectorRun as Data_AckVectorRun
@@ -67,11 +71,7 @@ from pcapkit.protocols.transport.dccp.data import SlowReceiver as Data_SlowRecei
 from pcapkit.protocols.transport.dccp.data import Timestamp as Data_Timestamp
 from pcapkit.protocols.transport.dccp.data import TimestampEcho as Data_TimestampEcho
 from pcapkit.protocols.transport.dccp.data import UnassignedOption as Data_UnassignedOption
-from pcapkit.protocols.transport.dccp.schema import ACK_TYPES
 from pcapkit.protocols.transport.dccp.schema import DCCP as Schema_DCCP
-from pcapkit.protocols.transport.dccp.schema import (DCCP_MIN_HEADER_LEN,
-                                                     DCCP_SINGLE_OCTET_OPTION_MAX, RESET_TYPE,
-                                                     SERVICE_TYPES)
 from pcapkit.protocols.transport.dccp.schema import AckVector as Schema_AckVector
 from pcapkit.protocols.transport.dccp.schema import Change as Schema_Change
 from pcapkit.protocols.transport.dccp.schema import Confirm as Schema_Confirm
@@ -117,9 +117,6 @@ __all__ = ['DCCP']
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _PSEUDO_HEADER: 'ModuleDescriptor[Any]' = \
     ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'pseudo_header')
-
-#: Longest a DCCP header can be -- a Data Offset of 255 words, :rfc:`4340#section-5`.
-DCCP_MAX_HEADER_LEN = 1020
 
 
 class DCCP(Transport[Data_DCCP, Schema_DCCP],

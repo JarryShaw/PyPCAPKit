@@ -7,8 +7,9 @@
 * ``IPX._next_exthdr_depth`` -- an override of the
   ``Internet._next_exthdr_depth`` hook, which ``internet.rst`` documents, so the
   override is contract too.
-* ``held_body``, ``FlagsField`` and ``PACKET_FLAGS`` in
-  :mod:`pcapkit.protocols.misc.pcapng.schema` -- listed beside the length
+* ``held_body`` and ``FlagsField`` in
+  :mod:`pcapkit.protocols.misc.pcapng.schema`, and ``PACKET_FLAGS`` in
+  :mod:`pcapkit.protocols.misc.pcapng.const` (#2896) -- listed beside the length
   callbacks, the option fields and the ``autodata`` constants respectively.
 
 Each entry is checked as declared on its page and as naming a real object, the
@@ -28,6 +29,9 @@ API = ROOT / 'docs' / 'source' / 'pcapkit' / 'protocols'
 
 #: The pcapng schema module, whose helpers ``pcapng.rst`` documents.
 SCHEMA = 'pcapkit.protocols.misc.pcapng.schema'
+
+#: The pcapng const module, whose constants ``pcapng.rst`` documents.
+CONST = 'pcapkit.protocols.misc.pcapng.const'
 
 
 def _block(text: 'str', directive: 'str') -> 'str':
@@ -97,25 +101,24 @@ class PCAPNGSchemaHelperTests(unittest.TestCase):
 
     text = (API / 'misc' / 'pcapng.rst').read_text(encoding='utf-8')
 
-    #: Each name, and the directive that documents it.
+    #: Each name, the module defining it, and the directive that documents it.
     ENTRIES = {
-        'held_body': f'.. autofunction:: {SCHEMA}.held_body\n',
-        'FlagsField': f'.. autoclass:: {SCHEMA}.FlagsField\n   :members:\n   :show-inheritance:\n',
-        'PACKET_FLAGS': f'.. autodata:: {SCHEMA}.PACKET_FLAGS\n   :no-value:\n',
+        'held_body': (SCHEMA, f'.. autofunction:: {SCHEMA}.held_body\n'),
+        'FlagsField': (SCHEMA, f'.. autoclass:: {SCHEMA}.FlagsField\n   :members:\n   :show-inheritance:\n'),
+        'PACKET_FLAGS': (CONST, f'.. autodata:: {CONST}.PACKET_FLAGS\n   :no-value:\n'),
     }
 
     def test_each_entry_is_declared(self) -> 'None':
         """Each directive appears once, with the options its siblings carry."""
-        for name, directive in self.ENTRIES.items():
+        for name, (_, directive) in self.ENTRIES.items():
             with self.subTest(name=name):
                 self.assertEqual(self.text.count(directive), 1)
 
     def test_each_entry_names_a_real_object(self) -> 'None':
-        """Each documented name exists in the schema module."""
-        module = importlib.import_module(SCHEMA)
-        for name in self.ENTRIES:
+        """Each documented name exists in its module."""
+        for name, (module_name, _) in self.ENTRIES.items():
             with self.subTest(name=name):
-                self.assertTrue(hasattr(module, name))
+                self.assertTrue(hasattr(importlib.import_module(module_name), name))
 
 
 if __name__ == '__main__':

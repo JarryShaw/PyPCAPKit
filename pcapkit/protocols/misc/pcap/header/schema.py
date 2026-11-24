@@ -9,7 +9,9 @@
    ``pcapkit.protocols.misc.pcap.header.schema.RESOLUTION_PLACES``, now
    :data:`pcapkit.corekit.const.capture.MAGIC_NUMBER`,
    :data:`pcapkit.corekit.const.capture.RESOLUTION` and
-   :data:`pcapkit.corekit.const.capture.RESOLUTION_PLACES` (:issue:`2883`).
+   :data:`pcapkit.corekit.const.capture.RESOLUTION_PLACES` (:issue:`2883`); and
+   ``pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN``, now
+   :data:`pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN` (:issue:`2896`).
 
 """
 
@@ -28,12 +30,6 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.corekit.fields.numbers import NumberField
-
-#: Length of the PCAP global header, which opens the file. The one home of
-#: this value (:issue:`1739`); the format fixes it, so it is never configurable.
-#:
-#: .. versionadded:: 1.5.0
-GLOBAL_HEADER_LEN = 24
 
 
 def magic_number_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':

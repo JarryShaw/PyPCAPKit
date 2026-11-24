@@ -455,8 +455,6 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.internet.hip.schema.locator_set_len_callback
 .. autofunction:: pcapkit.protocols.internet.hip.schema.locator_set_padding_len
 
-.. autodata:: pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN
-
 Data Models
 -----------
 
@@ -694,6 +692,15 @@ Data Models
 .. autoclass:: pcapkit.protocols.internet.hip.data.RelayHMACParameter
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.internet.hip.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN
 
 .. rubric:: Footnotes
 

@@ -716,8 +716,8 @@ class HTTPUnitTests(unittest.TestCase):
 
         The predicate classifies and the parser parses, and they are two
         statements of the same rule -- which is why the two share one copy of
-        ``_RE_METHOD``/``_RE_VERSION``/``_RE_STATUS``, defined in ``http/protocol.py``
-        beside the predicate and imported by ``httpv1/protocol.py`` (#1519). Drift either way is a defect: a predicate looser
+        ``_RE_METHOD``/``_RE_VERSION``/``_RE_STATUS``, defined in ``http/const.py``
+        and imported by the predicate and ``httpv1/protocol.py`` (#1519, #2896). Drift either way is a defect: a predicate looser
         than the parser classifies payloads the parser then refuses, and a
         tighter one hands real HTTP/1 to a later arm, which is the mislabel #787
         and #800 are both about.
@@ -1656,7 +1656,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import re
 
-        from pcapkit.protocols.application.http.protocol import _RE_METHOD
+        from pcapkit.protocols.application.http.const import _RE_METHOD
 
         for probe, expected in ((b'GET', b'GET'),
                                 (b'POST', b'POST'),

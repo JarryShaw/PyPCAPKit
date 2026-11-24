@@ -51,6 +51,7 @@ from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.application.dns.const import HEADER_LENGTH
 from pcapkit.protocols.application.dns.data import AAAA as Data_AAAA
 from pcapkit.protocols.application.dns.data import CAA as Data_CAA
 from pcapkit.protocols.application.dns.data import CNAME as Data_CNAME
@@ -73,9 +74,8 @@ from pcapkit.protocols.application.dns.data import Question as Data_Question
 from pcapkit.protocols.application.dns.data import ResourceRecord as Data_ResourceRecord
 from pcapkit.protocols.application.dns.data import TCPKeepalive as Data_TCPKeepalive
 from pcapkit.protocols.application.dns.schema import DNS as Schema_DNS
-from pcapkit.protocols.application.dns.schema import (HEADER_LENGTH, compress_name, make_name,
-                                                      name_to_text, read_name, record_name,
-                                                      text_to_labels)
+from pcapkit.protocols.application.dns.schema import (compress_name, make_name, name_to_text,
+                                                      read_name, record_name, text_to_labels)
 from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 

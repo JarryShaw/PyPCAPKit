@@ -70,8 +70,9 @@ from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
+from pcapkit.protocols.misc.checksum.ip_pseudo.const import (_TERMINAL_HEADERS, IPV4_PSEUDO_LEN,
+                                                             IPV6_PSEUDO_LEN)
 from pcapkit.protocols.misc.checksum.ip_pseudo.data import IP_Pseudo as Data_IP_Pseudo
-from pcapkit.protocols.misc.checksum.ip_pseudo.schema import IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN
 from pcapkit.protocols.misc.checksum.ip_pseudo.schema import IP_Pseudo as Schema_IP_Pseudo
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
@@ -99,10 +100,6 @@ __all__ = ['IP_Pseudo', 'pseudo_header', 'compute_upper', 'verify_upper']
 _AH: 'ModuleDescriptor[AH]' = ModuleDescriptor('pcapkit.protocols.internet.ah.protocol', 'AH')
 _IPV6_EXT: 'ModuleDescriptor[IPv6_Ext]' = \
     ModuleDescriptor('pcapkit.protocols.internet.ipv6_ext.protocol', 'IPv6_Ext')
-
-#: Extension headers that end the chain, as the upper layer -- the Mobility Header
-#: (:rfc:`6275#section-6.1.1`) and HIP (:rfc:`7401#section-5.1.1`).
-_TERMINAL_HEADERS = (Enum_ExtensionHeader.Mobility_Header, Enum_ExtensionHeader.HIP)
 
 
 class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],

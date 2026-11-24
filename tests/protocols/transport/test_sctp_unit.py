@@ -85,7 +85,8 @@ class SCTPUnitTests(unittest.TestCase):
     ##########################################################################
 
     def test_crc32c_matches_the_rfc9260_appendix_a_table(self) -> None:
-        from pcapkit.protocols.transport.sctp.protocol import CRC32C_TABLE, SCTP
+        from pcapkit.protocols.transport.sctp.const import CRC32C_TABLE
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         # Spot values quoted verbatim from the crc_c[] table in RFC 9260
         # Appendix A, which is what pins the polynomial and the reflection.

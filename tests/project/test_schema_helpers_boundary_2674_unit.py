@@ -83,15 +83,15 @@ CALLERS = ('pcapkit', 'examples', 'util')
 def protocol_key(module: 'str') -> 'str | None':
     """The protocol ``module`` belongs to, as its path below :mod:`pcapkit.protocols`.
 
-    A protocol's ``protocol``, ``schema`` and ``data`` modules sit in its package
-    (#2534), so all three give the package's key. A module outside
+    A protocol's ``protocol``, ``schema``, ``data`` and ``const`` modules sit in its
+    package (#2534, #2896), so each gives the package's key. A module outside
     :mod:`pcapkit.protocols` belongs to no protocol.
 
     """
     parts = module.split('.')
     if parts[:2] != ['pcapkit', 'protocols'] or len(parts) < 3:
         return None
-    rest = parts[2:-1] if len(parts) > 3 and parts[-1] in ('protocol', 'schema', 'data') \
+    rest = parts[2:-1] if len(parts) > 3 and parts[-1] in ('protocol', 'schema', 'data', 'const') \
         else parts[2:]
     return '.'.join(rest) or None
 

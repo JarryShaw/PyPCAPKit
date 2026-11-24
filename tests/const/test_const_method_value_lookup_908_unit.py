@@ -270,7 +270,7 @@ class NonStrKeyTests(unittest.TestCase):
 
         Without #908's fix this hands back a member whose ``name`` and
         ``value`` are both ``b'GET'``. ``bytes`` is the plausible mistake here, since
-        ``_RE_METHOD`` (in ``pcapkit/protocols/application/http/protocol.py``) is a
+        ``_RE_METHOD`` (in ``pcapkit/protocols/application/http/const.py``) is a
         bytes pattern and ``httpv1`` is bytes throughout -- the live call in
         ``httpv1.HTTPv1._read_start_line`` is safe only because it wraps the match in
         ``self.decode(...)``.

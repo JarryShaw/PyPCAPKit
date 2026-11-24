@@ -69,12 +69,15 @@ from typing import TYPE_CHECKING
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.application.ssl.protocol import (_TLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES,
-                                                        SSL, TLS13_VERSION)
+from pcapkit.protocols.application.ssl.const import (_TLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES,
+                                                     TLS13_VERSION)
+from pcapkit.protocols.application.ssl.protocol import SSL
 from pcapkit.protocols.application.sslv2.data import ClientHello as SSLv2_ClientHello
 from pcapkit.protocols.application.sslv2.data import ServerHello as SSLv2_ServerHello
 from pcapkit.protocols.application.sslv2.data import SSLv2 as SSLv2_Data
 from pcapkit.protocols.application.sslv2.protocol import SSLv2
+from pcapkit.protocols.application.tls.const import (_RECORD_HEADER_LENGTH, _SSLV3_VERSION,
+                                                     _TLS13_LEGACY_VERSIONS, _TLS_VERSION_ALIASES)
 from pcapkit.protocols.application.tls.data import TLS as Data_TLS
 from pcapkit.protocols.application.tls.schema import TLS as Schema_TLS
 from pcapkit.utilities.contextvars import beholding
@@ -97,26 +100,6 @@ __all__ = ['TLS']
 #: (:issue:`1538`), so its first import holds
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _TCP: 'ModuleDescriptor[AppType_TCP]' = ModuleDescriptor('pcapkit.const.reg.apptype.tcp', 'TCP')
-
-#: Length of the record header -- content type, legacy version and length
-#: (:rfc:`9846#section-5.1`).
-_RECORD_HEADER_LENGTH = 5
-
-#: Legacy record version SSLv3 carries, the one tier with its own :attr:`~TLS.name`.
-_SSLV3_VERSION = 0x0300
-
-#: Legacy record version to alias. TLS 1.3 reuses ``0x0303``; see
-#: :data:`_TLS13_LEGACY_VERSIONS`.
-_TLS_VERSION_ALIASES = {
-    _SSLV3_VERSION: 'SSLv3',
-    0x0301: 'TLS 1.0',
-    0x0302: 'TLS 1.1',
-    0x0303: 'TLS 1.2',
-}  # type: dict[int, Literal["SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2"]]
-
-#: Legacy record versions a TLS 1.3 record may carry -- ``0x0303`` always, and
-#: ``0x0301`` on an initial ``ClientHello`` (:rfc:`9846#section-5.1`).
-_TLS13_LEGACY_VERSIONS = frozenset({0x0301, 0x0303})
 
 
 def _opens_whole_record(data: 'bytes') -> 'bool':

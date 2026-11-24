@@ -110,6 +110,11 @@ from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
 from pcapkit.corekit.context import ProtocolContext
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.protocols.application.dtls.const import (_CID_MAX_LENGTH, _CID_OFFSET,
+                                                      _CIPHERTEXT_MIN_LENGTH,
+                                                      _DTLS13_LEGACY_VERSIONS, _DTLSV1_0_VERSION,
+                                                      _DTLSV1_2_VERSION, _LEGACY_HEADER_LENGTH,
+                                                      _UNIFIED_PREFIX)
 from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 from pcapkit.protocols.application.dtls.data import DTLSCIDCiphertext as Data_DTLSCIDCiphertext
 from pcapkit.protocols.application.dtls.data import DTLSCiphertext as Data_DTLSCiphertext
@@ -117,9 +122,10 @@ from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHa
 from pcapkit.protocols.application.dtls.schema import DTLS as Schema_DTLS
 from pcapkit.protocols.application.dtls.schema import DTLSCIDCiphertext as Schema_DTLSCIDCiphertext
 from pcapkit.protocols.application.dtls.schema import DTLSCiphertext as Schema_DTLSCiphertext
+from pcapkit.protocols.application.ssl.const import (_DTLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES,
+                                                     DTLS13_VERSION)
 from pcapkit.protocols.application.ssl.data import ConnectionId as Data_ConnectionId
-from pcapkit.protocols.application.ssl.protocol import (_DTLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES,
-                                                        DTLS13_VERSION, SSL)
+from pcapkit.protocols.application.ssl.protocol import SSL
 from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 
 if TYPE_CHECKING:
@@ -140,35 +146,12 @@ __all__ = ['DTLS', 'DTLSContext']
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _UDP: 'ModuleDescriptor[AppType_UDP]' = ModuleDescriptor('pcapkit.const.reg.apptype.udp', 'UDP')
 
-#: Length of a legacy record header -- content type, legacy version, epoch,
-#: sequence number and length (:rfc:`9147#section-4`).
-_LEGACY_HEADER_LENGTH = 13
-
-#: Legacy record version DTLS 1.0 carries (:rfc:`4347#section-4.1`).
-_DTLSV1_0_VERSION = 0xFEFF
-#: Legacy record version DTLS 1.2 carries, and the value DTLS 1.3 freezes its
-#: own legacy-format records at (:rfc:`9147#section-4`).
-_DTLSV1_2_VERSION = 0xFEFD
-#: Legacy record versions a DTLS 1.3 record may carry -- DTLS 1.2's always, and
-#: DTLS 1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4`).
-_DTLS13_LEGACY_VERSIONS = frozenset({_DTLSV1_0_VERSION, _DTLSV1_2_VERSION})
-#: Top three bits of a unified-header first octet, ``001`` (:rfc:`9147#section-4.1`).
-_UNIFIED_PREFIX = 0b001
-#: Shortest ciphertext a unified-header record may carry. The record-number
-#: sample is taken from its first 16 octets (:rfc:`9147#section-4.2.3`).
-_CIPHERTEXT_MIN_LENGTH = 16
-#: Offset of a ``tls12_cid`` record's connection ID, after its content type,
-#: legacy version, epoch and sequence number (:rfc:`9146#section-4`).
-_CID_OFFSET = 11
-#: Longest connection ID. Its length is one octet (:rfc:`9146#section-3`).
-_CID_MAX_LENGTH = 255
-
 
 def _is_cid(value: 'Any') -> 'bool':
     """Whether ``value`` can be a record's connection ID.
 
     A ``tls12_cid`` record's is one or more octets (:rfc:`9146#section-4`),
-    and at most :data:`_CID_MAX_LENGTH`.
+    and at most :data:`~pcapkit.protocols.application.dtls.const._CID_MAX_LENGTH`.
 
     Args:
         value: Candidate connection ID.

@@ -43,6 +43,7 @@ from pcapkit.corekit.fields.strings import (BitField, BytesField, DecodedString,
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.schema.byteorder import byteorder_callback, packet_byteorder
 from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.protocols.misc.pcapng.const import _SWAPPED_BYTE_ORDER_MAGIC, PACKET_FLAGS
 from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -186,10 +187,6 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         preamble_error: int
         #: Link-layer-dependent error - symbol error (bit 31).
         symbol_error: int
-
-#: :data:`~pcapkit.corekit.const.capture.BYTE_ORDER_MAGIC` read in the other
-#: byte order, i.e. as a big-endian reader sees a little-endian section's.
-_SWAPPED_BYTE_ORDER_MAGIC = int.from_bytes(BYTE_ORDER_MAGIC.to_bytes(4, 'little'), 'big')
 
 
 def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
@@ -852,28 +849,6 @@ class FlagsField(UInt32Field):
         super().__init__(callback=callback)
 
         self._flags = namespace
-
-
-#: Sub-fields of the ``epb_flags`` and ``pack_flags`` words. ``reserved`` keeps
-#: bits 12 to 23 verbatim -- the reserved bits 12-15 and the link-layer-dependent
-#: error bits 16-23 that the data model does not name.
-PACKET_FLAGS = {
-    'direction': (0, 2),
-    'reception': (2, 3),
-    'fcs_len': (5, 4),
-    'checksum_not_ready': (9, 1),
-    'checksum_valid': (10, 1),
-    'tcp_segmentation_offloaded': (11, 1),
-    'reserved': (12, 12),
-    'crc_error': (24, 1),
-    'too_long': (25, 1),
-    'too_short': (26, 1),
-    'gap_error': (27, 1),
-    'unaligned_error': (28, 1),
-    'delimiter_error': (29, 1),
-    'preamble_error': (30, 1),
-    'symbol_error': (31, 1),
-}  # type: dict[str, tuple[int, int]]
 
 
 class OptionEnumField(EnumField):

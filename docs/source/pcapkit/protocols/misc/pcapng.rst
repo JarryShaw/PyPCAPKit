@@ -284,9 +284,6 @@ Header Schemas
    :data:`pcapkit.corekit.const.capture.BLOCK_MINIMUM` and
    :data:`pcapkit.corekit.const.capture.DEFAULT_RESOLUTION` (:issue:`2883`).
 
-.. autodata:: pcapkit.protocols.misc.pcapng.schema.PACKET_FLAGS
-   :no-value:
-
 .. autoclass:: pcapkit.protocols.misc.pcapng.schema.PCAPNG
    :members:
    :show-inheritance:
@@ -881,6 +878,16 @@ Data Models
 .. autoclass:: pcapkit.protocols.misc.pcapng.data.ZigBeeAPSKey
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.misc.pcapng.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.misc.pcapng.const.PACKET_FLAGS
+   :no-value:
 
 .. rubric:: Footnotes
 

@@ -3106,7 +3106,7 @@ class HIPUnitTests(unittest.TestCase):
         (#651) except ``LocatorSetParameter.padding``, whose
         :func:`~pcapkit.protocols.internet.hip.schema.locator_set_padding_len`
         does the same arithmetic on the
-        :data:`~pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN` snapshot
+        :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` snapshot
         :func:`~pcapkit.protocols.internet.hip.schema.locator_set_len_callback`
         takes before the nested locators overwrite ``pkt['len']`` (#679). It
         guards against:

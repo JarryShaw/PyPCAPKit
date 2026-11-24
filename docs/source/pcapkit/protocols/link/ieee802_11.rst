@@ -90,9 +90,6 @@ Scope
    .. automethod:: _make_ht_control
    .. automethod:: _make_mac_addr
 
-.. autodata:: pcapkit.protocols.link.ieee802_11.protocol.SUBTYPE
-   :no-value:
-
 Header Schemas
 --------------
 
@@ -107,9 +104,6 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.link.ieee802_11.schema.Layout
    :members:
    :show-inheritance:
-
-.. autodata:: pcapkit.protocols.link.ieee802_11.schema.CONTROL_WITH_ADDR2
-   :no-value:
 
 Data Models
 -----------
@@ -135,6 +129,19 @@ Data Models
 .. autoclass:: pcapkit.protocols.link.ieee802_11.data.HTControl
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.link.ieee802_11.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.link.ieee802_11.const.SUBTYPE
+   :no-value:
+
+.. autodata:: pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2
+   :no-value:
 
 .. rubric:: Footnotes
 

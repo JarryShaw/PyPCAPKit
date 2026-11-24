@@ -236,6 +236,13 @@ See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``EncryptedExtensions``,
 ``Extension`` and its decoded bodies, ``Alert`` and ``ChangeCipherSpec``,
 shared verbatim with :class:`~pcapkit.protocols.application.tls.protocol.TLS`.
 
+Constants
+---------
+
+.. module:: pcapkit.protocols.application.dtls.const
+
+.. versionadded:: 1.7.0
+
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security

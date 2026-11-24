@@ -12,11 +12,11 @@ on its answer. Every multi-octet numeric field is little-endian, as IEEE Std
 
 from typing import TYPE_CHECKING, NamedTuple
 
-from pcapkit.const.ieee802_11.control_subtype import ControlSubtype as Enum_ControlSubtype
 from pcapkit.const.ieee802_11.type import Type as Enum_Type
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
 from pcapkit.corekit.fields.numbers import UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField
+from pcapkit.protocols.link.ieee802_11.const import CONTROL_WITH_ADDR2
 from pcapkit.protocols.schema import Schema, schema_final
 
 __all__ = ['IEEE802_11']
@@ -25,26 +25,6 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from pcapkit.protocols.protocol import ProtocolBase
-
-#: Control frame subtypes whose MAC header carries a TA (or BSSID) as
-#: Address 2 after the RA; IEEE Std 802.11-2020 §9.3.1, *Control frames*, and
-#: IEEE Std 802.11ax-2021 for ``Trigger``. CTS and Ack carry the RA alone. A
-#: Control Frame Extension frame takes the six octets after the RA as Address 2,
-#: as the Linux kernel's ``ieee80211_hdrlen()`` reads it; in a DMG DTS
-#: (extension 6) they are NAV-SA rather than a TA, and NAV-DA stays in the body.
-CONTROL_WITH_ADDR2 = frozenset({
-    Enum_ControlSubtype.Trigger,
-    Enum_ControlSubtype.TACK,
-    Enum_ControlSubtype.Beamforming_Report_Poll,
-    Enum_ControlSubtype.VHT_HE_NDP_Announcement,
-    Enum_ControlSubtype.Control_Frame_Extension,
-    Enum_ControlSubtype.Block_Ack_Request,
-    Enum_ControlSubtype.Block_Ack,
-    Enum_ControlSubtype.PS_Poll,
-    Enum_ControlSubtype.RTS,
-    Enum_ControlSubtype.CF_End,
-    Enum_ControlSubtype.CF_End_CF_ACK,
-})
 
 
 class Layout(NamedTuple):
@@ -75,8 +55,8 @@ def layout(frame_control: 'int') -> 'Layout':
       both set, QoS Control when the QoS bit (B7) of its subtype is set, and HT
       Control when that bit and +HTC/Order are both set (§9.3.2, *Data frames*).
     * A Control frame carries Address 2 for the subtypes in
-      :data:`CONTROL_WITH_ADDR2`, and Address 1 alone for CTS and Ack (§9.3.1,
-      *Control frames*).
+      :data:`~pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2`, and
+      Address 1 alone for CTS and Ack (§9.3.1, *Control frames*).
     * Every other frame -- a reserved Control subtype, a Control Wrapper, whose
       octets after Address 1 are Carried Frame Control and HT Control, and
       every Extension frame -- is read as the minimal frame format that §9.2.3,

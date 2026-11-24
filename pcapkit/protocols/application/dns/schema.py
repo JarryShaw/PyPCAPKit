@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
 from pcapkit.corekit.fields.numbers import UInt16Field
 from pcapkit.corekit.fields.strings import BitField, BytesField
+from pcapkit.protocols.application.dns.const import HEADER_LENGTH, POINTER_LIMIT
 from pcapkit.protocols.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -50,12 +51,6 @@ if TYPE_CHECKING:
         cd: int
         #: Response code.
         rcode: int
-
-#: Length of the fixed header, before the sections (:rfc:`1035#section-4.1.1`).
-HEADER_LENGTH = 12
-
-#: Largest offset a compression pointer can carry, in its 14 bits.
-POINTER_LIMIT = 0x3FFF
 
 
 def read_name(data: 'bytes', pos: 'int', *, compression: 'bool' = True,

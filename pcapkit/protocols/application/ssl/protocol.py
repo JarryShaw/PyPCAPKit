@@ -30,6 +30,13 @@ written.
 
 .. versionadded:: 1.6.0
 
+.. versionremoved:: 1.7.0
+
+   ``pcapkit.protocols.application.ssl.protocol.TLS13_VERSION`` and
+   ``pcapkit.protocols.application.ssl.protocol.DTLS13_VERSION``, now
+   :data:`pcapkit.protocols.application.ssl.const.TLS13_VERSION` and
+   :data:`pcapkit.protocols.application.ssl.const.DTLS13_VERSION` (:issue:`2896`).
+
 """
 import collections
 from typing import TYPE_CHECKING, Generic, cast
@@ -52,6 +59,10 @@ from pcapkit.corekit.fields.numbers import NumberField
 from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.application.ssl.const import (_DTLS_VERSION_MAJOR, _ECH_CONFIRMATION_LENGTH,
+                                                     _ECH_INNER, _ECH_OUTER, _HOST_NAME,
+                                                     _HRR_RANDOM, _TLS_VERSION_MAJOR,
+                                                     _WIRE_CONTENT_TYPES)
 from pcapkit.protocols.application.ssl.data import Alert as Data_Alert
 from pcapkit.protocols.application.ssl.data import \
     CertificateCompressionAlgorithms as Data_CertificateCompressionAlgorithms
@@ -217,55 +228,6 @@ if TYPE_CHECKING:
                                      NamedArg(Enum_HandshakeType, 'msg_type'), KwArg(Any)], Schema_Extension]
 
 __all__ = ['SSL']
-
-
-#: Legacy record-version major octet TLS records carry (SSLv3 through the
-#: TLS 1.3 wire value, all ``0x03xx``).
-_TLS_VERSION_MAJOR = 0x03
-#: Legacy record-version major octet DTLS records carry (``0xFExx`` --
-#: DTLS encodes its legacy version as the one's complement of TLS's).
-_DTLS_VERSION_MAJOR = 0xFE
-
-#: The content types a genuine record may carry. An allowlist rather than
-#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: 0 is
-#: never assigned, a value :rfc:`9846#section-5.1` rejects outright, and the
-#: enum mints an ``Unassigned``/``Reserved`` member for any value IANA has
-#: not named.
-#:
-#: ``tls12_cid`` (25, :rfc:`9146#section-4`) is left out: its connection ID
-#: precedes ``length`` and has a negotiated length the record does not carry,
-#: so reading ``length`` at the fixed offset would fabricate a fragment.
-_WIRE_CONTENT_TYPES = frozenset({
-    Enum_ContentType.change_cipher_spec,
-    Enum_ContentType.alert,
-    Enum_ContentType.handshake,
-    Enum_ContentType.application_data,
-    Enum_ContentType.heartbeat,
-    Enum_ContentType.ack,
-    Enum_ContentType.return_routability_check,
-})
-
-#: The ``supported_versions`` value for TLS 1.3 (:rfc:`9846#section-4.3.1`).
-TLS13_VERSION = 0x0304
-#: The ``supported_versions`` value for DTLS 1.3 (:rfc:`9147#section-5.3`).
-DTLS13_VERSION = 0xFEFC
-
-#: The ``random`` that makes a ``ServerHello`` a ``HelloRetryRequest`` -- the
-#: SHA-256 of ``"HelloRetryRequest"`` (:rfc:`9846#section-4.2.3`).
-_HRR_RANDOM = bytes.fromhex('cf21ad74e59a6111be1d8c021e65b891c2a211167abb8c5e079e09e2c8a8339c')
-
-#: The ``host_name`` ``NameType`` of ``server_name``, the only one defined
-#: (:rfc:`6066#section-3`).
-_HOST_NAME = 0
-
-#: The ``outer`` and ``inner`` ``ECHClientHelloType`` of ``encrypted_client_hello``
-#: (:rfc:`9849#section-5`).
-_ECH_OUTER, _ECH_INNER = 0, 1
-#: Length of an ``ECHHelloRetryRequest``'s ``confirmation`` (:rfc:`9849#section-5`).
-_ECH_CONFIRMATION_LENGTH = 8
-#: The ``ECHConfig`` version whose ``contents`` :rfc:`9849#section-4` defines, which
-#: is the ``encrypted_client_hello`` code point.
-_ECH_CONFIG_VERSION = int(Enum_ExtensionType.encrypted_client_hello)
 
 
 def _negotiated_versions(message: 'Any') -> 'tuple[int, ...]':
@@ -580,7 +542,8 @@ def _make_ech_config(proto: 'SSL', config: 'Data_ECHConfig') -> 'Schema_ECHConfi
 
 def _hello_type(random: 'bytes') -> 'Enum_HandshakeType':
     """The message a ``ServerHello`` with ``random`` is: a ``HelloRetryRequest``
-    for :data:`_HRR_RANDOM`, a ``ServerHello`` otherwise."""
+    for :data:`~pcapkit.protocols.application.ssl.const._HRR_RANDOM`, a
+    ``ServerHello`` otherwise."""
     if random == _HRR_RANDOM:
         return cast('Enum_HandshakeType', Enum_HandshakeType.hello_retry_request)
     return cast('Enum_HandshakeType', Enum_HandshakeType.server_hello)
@@ -2437,7 +2400,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         Args:
             schema: The just-parsed record header.
             target: The negotiated-version value to look for
-                (:data:`TLS13_VERSION` or :data:`DTLS13_VERSION`).
+                (:data:`~pcapkit.protocols.application.ssl.const.TLS13_VERSION`
+                or :data:`~pcapkit.protocols.application.ssl.const.DTLS13_VERSION`).
             dtls: Whether this is a DTLS record.
 
         Returns:
@@ -2778,7 +2742,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
     def _read_tls_server_hello(self, body: 'bytes') -> 'Data_ServerHello':
         """Decode a ``ServerHello`` handshake message body, or a
-        ``HelloRetryRequest``'s, whose ``random`` is :data:`_HRR_RANDOM`.
+        ``HelloRetryRequest``'s, whose ``random`` is
+        :data:`~pcapkit.protocols.application.ssl.const._HRR_RANDOM`.
 
         Structure of ``ServerHello`` [:rfc:`9846#section-4.2.3`]:
 

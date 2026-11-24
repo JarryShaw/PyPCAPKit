@@ -23,6 +23,7 @@ from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField
+from pcapkit.protocols.application.ssl.const import _ECH_CONFIG_VERSION, _ECH_CONFIRMATION_LENGTH
 from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
 
 __all__ = [
@@ -52,11 +53,6 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
 
     from pcapkit.corekit.fields.field import FieldBase
-
-#: The ``ECHConfig`` version whose ``contents`` :rfc:`9849#section-4` defines.
-_ECH_CONFIG_VERSION = int(Enum_ExtensionType.encrypted_client_hello)
-#: Length of an ``ECHHelloRetryRequest``'s ``confirmation`` (:rfc:`9849#section-5`).
-_ECH_CONFIRMATION_LENGTH = 8
 
 
 def _item(schema: 'Type[Schema]') -> 'SchemaField':
