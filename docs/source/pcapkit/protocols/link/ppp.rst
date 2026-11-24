@@ -37,6 +37,8 @@ IPv6CP, PAP and CHAP packets are read at header level, as
 
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:
    .. autoattribute:: __control__
       :no-value:
 

@@ -270,7 +270,8 @@ Terminology
 
        ``packet`` is what :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`
        parses ``payload`` to, on its first read, unless ``__protocol_type__``
-       names another protocol.
+       names another protocol, or the extraction's engine parses its frames with
+       stops or a context, which this parse takes too (:issue:`2933`).
 
        ``completed`` and ``conflict`` are independent signals: a datagram can
        be :attr:`~pcapkit.foundation.reassembly.data.Completion.COMPLETE`

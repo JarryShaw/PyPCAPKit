@@ -50,8 +50,9 @@ shapes of it at collection time and say what to do; `tests/_tiers.py` has the re
 
 ## Changelog entries
 
-Entries live in `docs/source/changelog/<version>.rst`, one file per version, listed newest-first in
-the toctree of `docs/source/changelog.rst`, which is the single source of the project's history.
+Entries live in `docs/source/changelog/<version>.rst`, one file per final release, a pre- or
+post-release folding into the next final one's, listed newest-first in the toctree of
+`docs/source/changelog.rst`, which is the single source of the project's history.
 
 **Pull requests for user-visible changes do not add their own bullet.** An unreleased version's
 entry is written by the maintainer once a change is ready to merge or has merged, because pull
@@ -199,9 +200,11 @@ footer (optional)
 ```
 
 `type` is one of `feat`, `fix`, `docs`, `test`, `perf`, `refactor`, `ci`, `chore` or `release` —
-the ones in use. `const` is not a type: it is a label for regenerated constant tables, applied
-alongside the type label. `scope` names the part of the package affected — `tcp`, `corekit`,
-`schema`, `ipv4`, `vendor` — with several separated by commas, as in `fix(link,internet):` or
+the ones in use. `build` is Dependabot's prefix alone, `build(deps):`, its pull requests labelled
+`dependencies` and their ecosystem's label; a packaging change of our own is `chore` (#3050).
+`const` is not a type: it is a label for regenerated constant tables, applied alongside the type
+label. `scope` names the part of the package affected — `tcp`, `corekit`, `schema`, `ipv4`,
+`vendor` — with several separated by commas, as in `fix(link,internet):` or
 `test(utilities,foundation):`. Omit the scope where nothing narrower than the whole project applies,
 as in `docs:`. Older commits may carry a bare `protocols:` or `corekit:` prefix; follow the form
 above.

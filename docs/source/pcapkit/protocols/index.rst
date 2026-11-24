@@ -64,7 +64,7 @@ parsing a packet from its octets or building one from field values:
        end
 
        subgraph link [Link Layer]
-           Link --> Ethernet & L2TP & LinuxSLL & Loopback & VLAN & ARP
+           Link --> Ethernet & FRAD & GRE & IEEE802_11 & L2TP & LinuxSLL & Loopback & Netlink & PPP & PPPoE & Radiotap & VLAN & ARP
 
            subgraph arp [ARP Family]
                ARP --> InARP
@@ -128,12 +128,19 @@ parsing a packet from its octets or building one from field values:
 
        click Link "link/link.html#pcapkit.protocols.link.link.Link"
        click Ethernet "link/ethernet.html#pcapkit.protocols.link.ethernet.protocol.Ethernet"
+       click FRAD "link/frad.html#pcapkit.protocols.link.frad.protocol.FRAD"
+       click GRE "link/gre.html#pcapkit.protocols.link.gre.protocol.GRE"
+       click IEEE802_11 "link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11"
        click L2TP "link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP"
        click L2TPv2 "link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"
        click LinuxSLL "link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL"
        click LinuxSLL1 "link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1"
        click LinuxSLL2 "link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2"
        click Loopback "link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback"
+       click Netlink "link/netlink.html#pcapkit.protocols.link.netlink.protocol.Netlink"
+       click PPP "link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP"
+       click PPPoE "link/pppoe.html#pcapkit.protocols.link.pppoe.protocol.PPPoE"
+       click Radiotap "link/radiotap.html#pcapkit.protocols.link.radiotap.protocol.Radiotap"
        click VLAN "link/vlan.html#pcapkit.protocols.link.vlan.protocol.VLAN"
        click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.protocol.C_Tag"
        click S_Tag "link/s_tag.html#pcapkit.protocols.link.s_tag.protocol.S_Tag"

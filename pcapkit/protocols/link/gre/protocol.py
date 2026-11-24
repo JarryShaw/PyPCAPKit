@@ -343,8 +343,7 @@ class GRE(Link[Data_GRE, Schema_GRE],
         The longest form -- every optional field present, 16 octets -- per
         the reason :meth:`L2TPv2.__length_hint__
         <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.__length_hint__>` gives for a
-        variable-length header: the shortest form would reject a fully
-        captured longer header as too short.
+        variable-length header.
 
         """
         return 16

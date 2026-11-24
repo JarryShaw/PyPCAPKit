@@ -91,6 +91,20 @@ Header Schemas
    :members:
    :show-inheritance:
 
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.internet.igmpv3.schema.QueryFlags
+   :members:
+   :show-inheritance:
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.internet.igmpv3.schema.igmpv3_body_selector
+.. autofunction:: pcapkit.protocols.internet.igmpv3.schema.query_extension_present
+.. autofunction:: pcapkit.protocols.internet.igmpv3.schema.report_record_count
+
 Data Models
 -----------
 

@@ -101,6 +101,8 @@ The built-in families, those bases included, derive from
 
    .. automethod:: _read_mac_addr
    .. automethod:: _make_mac_addr
+   .. automethod:: _read_float_code
+   .. automethod:: _make_float_code
 
    .. automethod:: _lookup_registry
    .. automethod:: _lookup_next_layer
@@ -358,6 +360,8 @@ Internal Definitions
                   _make_uints
                   _read_mac_addr
                   _make_mac_addr
+                  _read_float_code
+                  _make_float_code
                   _lookup_registry
                   _lookup_next_layer
                   _decode_next_layer
@@ -394,7 +398,8 @@ Internal Definitions
       :meth:`~Protocol._make_uint`, :meth:`~Protocol._make_sint`,
       :meth:`~Protocol._uint_size`, :meth:`~Protocol._make_vector`,
       :meth:`~Protocol._make_uints`, :meth:`~Protocol._read_mac_addr`,
-      :meth:`~Protocol._make_mac_addr`,
+      :meth:`~Protocol._make_mac_addr`, :meth:`~Protocol._read_float_code`,
+      :meth:`~Protocol._make_float_code`,
       :meth:`~Protocol._lookup_registry`, :meth:`~Protocol._lookup_next_layer`,
       :meth:`~Protocol._decode_next_layer`,
       :meth:`~Protocol._import_next_layer`,

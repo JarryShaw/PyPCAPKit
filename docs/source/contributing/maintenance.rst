@@ -227,6 +227,12 @@ Board Sweep
    (:ref:`release-lines`).
 #. **Read the CI reports** (:ref:`CI Reports`): each warning or failure there is a
    possible defect, root-caused and filed like a red check.
+#. **File each new issue as a sub-issue of its line's** ``release: X.Y.0 scope``
+   **issue** (:ref:`the scope rule <process-release-scope>`):
+   ``gh issue create --parent <scope>``, or
+   ``gh api repos/JarryShaw/PyPCAPKit/issues/<scope>/sub_issues -F sub_issue_id=<id>``
+   with the issue's REST ``id``, not its number, adding ``-F replace_parent=true``
+   when it moves milestone.
 
 Notes Checkpoint
 ~~~~~~~~~~~~~~~~

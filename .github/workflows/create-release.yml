@@ -452,7 +452,7 @@ jobs:
       # requires the "Workflows" permission (write), and "The GITHUB_TOKEN
       # available to GitHub Actions cannot be authorized for this". With no
       # ``owner`` or ``repositories`` the token is "scoped to only the current
-      # repository", and the action's ``post`` step revokes it (v3.3.0's
+      # repository", and the action's ``post`` step revokes it (v3.4.0's
       # README). Skipped while ``vars.RELEASE_APP_CLIENT_ID`` is unset (``''``).
       - name: Mint the release App's token
         id: app_token

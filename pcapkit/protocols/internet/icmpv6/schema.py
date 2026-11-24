@@ -34,7 +34,11 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
 
     class MLDv2QueryFlags(TypedDict):
-        """MLDv2 Query flags octet."""
+        """MLDv2 Query flags octet.
+
+        .. versionadded:: 1.7.0
+
+        """
 
         #: Flags.
         flags: int
@@ -85,6 +89,8 @@ def mldv2_query_present(pkt: 'dict[str, Any]') -> 'bool':
         Whether :attr:`MLDQuery.ext` should be parsed (unpacking) or packed
         (packing).
 
+    .. versionadded:: 1.7.0
+
     """
     if 'ext' in pkt:
         return pkt['ext'] is not None
@@ -110,6 +116,8 @@ def mldv2_record_count(pkt: 'dict[str, Any]') -> 'int':
             :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` octets
             an IP payload holds, so the count is no cut but one the message
             cannot carry.
+
+    .. versionadded:: 1.7.0
 
     """
     count = pkt.get('num_records')  # type: Optional[int]
@@ -229,6 +237,8 @@ class MLDv2QueryExtension(Schema):
 
     They follow the 24 octets of an MLDv1 Query (:rfc:`2710#section-3`).
 
+    .. versionadded:: 1.7.0
+
     """
 
     #: Flags, S Flag and QRV.
@@ -264,6 +274,8 @@ class MLDQuery(ICMPv6Type, code=Enum_Type.Multicast_Listener_Query):
     :attr:`ext` holds what an MLDv2 Query adds (:rfc:`9777#section-5.1`), see
     :func:`mldv2_query_present`.
 
+    .. versionadded:: 1.7.0
+
     """
 
     #: Maximum Response Delay of MLDv1, or Maximum Response Code of MLDv2.
@@ -289,7 +301,11 @@ class MLDQuery(ICMPv6Type, code=Enum_Type.Multicast_Listener_Query):
 
 @schema_final
 class MLDv1(ICMPv6Type, code=[Enum_Type.Multicast_Listener_Report, Enum_Type.Multicast_Listener_Done]):
-    """Header schema for an MLDv1 Multicast Listener Report or Done message (:rfc:`2710#section-3`)."""
+    """Header schema for an MLDv1 Multicast Listener Report or Done message (:rfc:`2710#section-3`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Maximum Response Delay, zero but in a Query.
     max_resp_delay: 'int' = UInt16Field()
@@ -308,7 +324,11 @@ class MLDv1(ICMPv6Type, code=[Enum_Type.Multicast_Listener_Report, Enum_Type.Mul
 
 @schema_final
 class MulticastAddressRecord(Schema):
-    """Header schema for an MLDv2 multicast address record (:rfc:`9777#section-5.2`)."""
+    """Header schema for an MLDv2 multicast address record (:rfc:`9777#section-5.2`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Record type (:rfc:`9777#section-5.2.13`).
     record_type: 'Enum_RecordType' = EnumField(length=1, namespace=Enum_RecordType)
@@ -345,6 +365,8 @@ class MLDv2Report(ICMPv6Type, code=Enum_Type.Version_2_Multicast_Listener_Report
         :attr:`num_records` and gives the rest to :attr:`data`, the message's
         Additional Data (:rfc:`9777#section-5.2.12`). Where the data ends before
         the records counted, see :func:`mldv2_record_count`.
+
+    .. versionadded:: 1.7.0
 
     """
 

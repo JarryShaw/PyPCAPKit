@@ -120,6 +120,11 @@ def register_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] | Type[Dump
 
        ``ext`` is keyword-only.
 
+    .. versionchanged:: 1.7.0
+
+       ``dumper`` is the class, where ``module`` and ``class_`` named it
+       (:issue:`2838`).
+
     """
     Extractor.register_dumper(format, dumper, ext)
     TraceFlow.register_dumper(format, dumper, ext=ext)
@@ -143,6 +148,11 @@ def register_extractor_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] |
 
        ``ext`` is keyword-only.
 
+    .. versionchanged:: 1.7.0
+
+       ``dumper`` is the class, where ``module`` and ``class_`` named it
+       (:issue:`2838`).
+
     """
     Extractor.register_dumper(format, dumper, ext)
     logger.debug('registered extractor output dumper: %s', format)
@@ -164,6 +174,11 @@ def register_traceflow_dumper(format: 'str', dumper: 'ModuleDescriptor[Dumper] |
     .. versionchanged:: 1.3.0
 
        ``ext`` is keyword-only.
+
+    .. versionchanged:: 1.7.0
+
+       ``dumper`` is the class, where ``module`` and ``class_`` named it
+       (:issue:`2838`).
 
     """
     TraceFlow.register_dumper(format, dumper, ext=ext)
@@ -302,6 +317,13 @@ def register_extractor_reassembly(protocol: 'str',
         RegistryError: If ``protocol`` is not a :class:`str`, or ``reassembly``
             is refused as above.
 
+    .. versionchanged:: 1.7.0
+
+       ``reassembly`` is the class, where ``module`` and ``class_`` named it
+       (:issue:`2838`), and ``protocol`` is stored lower-cased, one that is not
+       a :class:`str` raising :exc:`~pcapkit.utilities.exceptions.RegistryError`
+       (:issue:`2879`).
+
     """
     Extractor.register_reassembly(protocol, reassembly)
     logger.debug('registered extractor reassembly: %s', protocol)
@@ -383,6 +405,13 @@ def register_extractor_traceflow(protocol: 'str',
     Raises:
         RegistryError: If ``protocol`` is not a :class:`str`, or ``traceflow``
             is refused as above.
+
+    .. versionchanged:: 1.7.0
+
+       ``traceflow`` is the class, where ``module`` and ``class_`` named it
+       (:issue:`2838`), and ``protocol`` is stored lower-cased, one that is not
+       a :class:`str` raising :exc:`~pcapkit.utilities.exceptions.RegistryError`
+       (:issue:`2879`).
 
     """
     Extractor.register_traceflow(protocol, traceflow)

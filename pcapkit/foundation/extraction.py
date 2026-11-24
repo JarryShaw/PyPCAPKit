@@ -215,7 +215,7 @@ class Extractor(Generic[_P]):
        where TCP's alone was (:issue:`2843`). ``nofile``, ``fout``, ``format``,
        ``extension``, ``files``, ``ip``, ``ipv4``, ``ipv6``, ``tcp``,
        ``dtls``, the ``reasm_*``, ``trace_*`` and ``buffer_*`` parameters and
-       ``no_eof`` are removed with no alias. Nothing is written without
+       ``no_eof`` are removed with no alias. No report is written without
        ``dump``, ``fin`` is opened as named, with no ``.pcap`` appended, and an
        unknown ``layer`` raises (:issue:`2836`).
 

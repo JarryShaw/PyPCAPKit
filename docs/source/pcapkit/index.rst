@@ -130,6 +130,10 @@ Command Line Tool
    ``-L`` accepts only ``link``, ``internet``, ``transport``, ``application`` or
    ``none``, in any case (:issue:`356`).
 
+.. versionchanged:: 1.7.0
+
+   ``-f`` takes ``pcapng``, writing the report as PCAP-NG (:issue:`2835`).
+
 Environment Variables
 =====================
 

@@ -35,7 +35,7 @@ An extraction runs in this order; a third-party engine implements its own
        LOOP["record\_frames(): read\_frame() until EOF"]
        MAN["the caller drives it<br/>next(extractor) or extractor()"]
        RF["engine.read\_frame()"]
-       EOF{"no\_eof, and the input<br/>still producing?"}
+       EOF{"stream.no\_eof, and the input<br/>still producing?"}
        CLEAN["\_cleanup(): every flow tracer finished,<br/>the input closed if this class opened it,<br/>the engine closed"]
        FAIL["\_cleanup(failed=True), then re-raised<br/>input and engine released,<br/>tracing not finished"]
        NEXT["the frame: read on under auto,<br/>else returned to the caller"]
@@ -55,7 +55,7 @@ An extraction runs in this order; a third-party engine implements its own
            F1["parse the next frame, under layer= and protocol="]
            F2["count it, then the verbose callback"]
            F3{"dump?"}
-           F3W["write it: a file per frame under files=,<br/>else the one output"]
+           F3W["write it: a file per frame under dump.files,<br/>else the one output"]
            F4{"reassembly?"}
            F4R["the engine's toolkit adapters feed<br/>each enabled reassembler"]
            F5{"traceflow?"}

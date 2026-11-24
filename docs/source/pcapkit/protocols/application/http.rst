@@ -7,9 +7,12 @@ HTTP - Hypertext Transfer Protocol
 .. versionremoved:: 1.6.0
 
    ``pcapkit.protocols.application.http._HTTP2_PREFACE`` and
-   ``pcapkit.protocols.application.http.test_start_line``, with no alias: they are in
-   this module, and :mod:`pcapkit.protocols.application.http` exports the protocol class
-   alone (:issue:`2534`).
+   ``pcapkit.protocols.application.http.test_start_line``, with no alias:
+   :func:`~pcapkit.protocols.application.http.protocol.test_start_line` is in this
+   module and :data:`~pcapkit.protocols.application.http.const._HTTP2_PREFACE` in
+   :mod:`pcapkit.protocols.application.http.const`, and
+   :mod:`pcapkit.protocols.application.http` exports the protocol class alone
+   (:issue:`2534`).
 
 :mod:`pcapkit.protocols.application.http.protocol` contains
 :class:`~pcapkit.protocols.application.http.protocol.HTTP`,
@@ -74,6 +77,8 @@ Constants
 .. module:: pcapkit.protocols.application.http.const
 
 .. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.application.http.const._HTTP2_PREFACE
 
 .. rubric:: Footnotes
 

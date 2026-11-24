@@ -235,6 +235,8 @@ class Empty(ExtensionData):
     ``signed_certificate_timestamp`` in a ``ClientHello`` (:rfc:`6962#section-3.3.1`),
     and ``status_request`` in a ``ServerHello`` (:rfc:`6066#section-8`).
 
+    .. versionadded:: 1.7.0
+
     """
 
     if TYPE_CHECKING:
@@ -243,7 +245,11 @@ class Empty(ExtensionData):
 
 @info_final
 class OCSPStatusRequest(Data):
-    """Data model for the ``OCSPStatusRequest`` of a ``status_request`` extension (:rfc:`6066#section-8`)."""
+    """Data model for the ``OCSPStatusRequest`` of a ``status_request`` extension (:rfc:`6066#section-8`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: DER-encoded ``ResponderID`` values; empty when the server knows the responders.
     responder_id_list: 'tuple[bytes, ...]'
@@ -261,6 +267,8 @@ class CertificateStatusRequest(ExtensionData):
     Only ``ocsp`` has a ``request`` structure, so a body naming another
     :attr:`status_type` stays raw octets.
 
+    .. versionadded:: 1.7.0
+
     """
 
     #: Status type.
@@ -274,7 +282,11 @@ class CertificateStatusRequest(ExtensionData):
 
 @info_final
 class ECPointFormatList(ExtensionData):
-    """Data model for the ``ec_point_formats`` extension (:rfc:`8422#section-5.1.2`)."""
+    """Data model for the ``ec_point_formats`` extension (:rfc:`8422#section-5.1.2`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Point formats, most preferred first.
     ec_point_format_list: 'tuple[Enum_ECPointFormat, ...]'
@@ -286,7 +298,11 @@ class ECPointFormatList(ExtensionData):
 @info_final
 class SignedCertificateTimestampList(ExtensionData):
     """Data model for a ``ServerHello``'s ``signed_certificate_timestamp`` extension
-    (:rfc:`6962#section-3.3`)."""
+    (:rfc:`6962#section-3.3`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: ``SerializedSCT`` octet strings.
     sct_list: 'tuple[bytes, ...]'
@@ -297,7 +313,11 @@ class SignedCertificateTimestampList(ExtensionData):
 
 @info_final
 class Padding(ExtensionData):
-    """Data model for the ``padding`` extension (:rfc:`7685#section-3`)."""
+    """Data model for the ``padding`` extension (:rfc:`7685#section-3`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Padding octets as captured, which :rfc:`7685#section-3` requires to be zero.
     padding: 'bytes'
@@ -308,7 +328,11 @@ class Padding(ExtensionData):
 
 @info_final
 class CertificateCompressionAlgorithms(ExtensionData):
-    """Data model for the ``compress_certificate`` extension (:rfc:`8879#section-3`)."""
+    """Data model for the ``compress_certificate`` extension (:rfc:`8879#section-3`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Compression algorithms, most preferred first.
     algorithms: 'tuple[Enum_CertificateCompressionAlgorithm, ...]'
@@ -319,7 +343,11 @@ class CertificateCompressionAlgorithms(ExtensionData):
 
 @info_final
 class RecordSizeLimit(ExtensionData):
-    """Data model for the ``record_size_limit`` extension (:rfc:`8449#section-4`)."""
+    """Data model for the ``record_size_limit`` extension (:rfc:`8449#section-4`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Largest record, in octets, the sender is willing to receive.
     record_size_limit: 'int'
@@ -330,7 +358,11 @@ class RecordSizeLimit(ExtensionData):
 
 @info_final
 class SessionTicket(ExtensionData):
-    """Data model for the ``session_ticket`` extension (:rfc:`5077#section-3.2`)."""
+    """Data model for the ``session_ticket`` extension (:rfc:`5077#section-3.2`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: The ticket; empty when the client has none to offer, and in a ``ServerHello``.
     ticket: 'bytes'
@@ -341,7 +373,11 @@ class SessionTicket(ExtensionData):
 
 @info_final
 class PskIdentity(Data):
-    """Data model for one ``PskIdentity`` of a ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`)."""
+    """Data model for one ``PskIdentity`` of a ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Label of the key, e.g. a ticket.
     identity: 'bytes'
@@ -354,7 +390,11 @@ class PskIdentity(Data):
 
 @info_final
 class OfferedPsks(ExtensionData):
-    """Data model for a ``ClientHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`)."""
+    """Data model for a ``ClientHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Identities offered.
     identities: 'tuple[PskIdentity, ...]'
@@ -367,7 +407,11 @@ class OfferedPsks(ExtensionData):
 
 @info_final
 class PreSharedKeyServerHello(ExtensionData):
-    """Data model for a ``ServerHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`)."""
+    """Data model for a ``ServerHello``'s ``pre_shared_key`` extension (:rfc:`9846#section-4.3.11`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Index of the identity selected, into the ``ClientHello``'s list.
     selected_identity: 'int'
@@ -378,7 +422,11 @@ class PreSharedKeyServerHello(ExtensionData):
 
 @info_final
 class Cookie(ExtensionData):
-    """Data model for the ``cookie`` extension (:rfc:`9846#section-4.3.2`)."""
+    """Data model for the ``cookie`` extension (:rfc:`9846#section-4.3.2`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: The cookie, which a ``ClientHello`` copies from the ``HelloRetryRequest``.
     cookie: 'bytes'
@@ -389,7 +437,11 @@ class Cookie(ExtensionData):
 
 @info_final
 class PskKeyExchangeModes(ExtensionData):
-    """Data model for the ``psk_key_exchange_modes`` extension (:rfc:`9846#section-4.3.9`)."""
+    """Data model for the ``psk_key_exchange_modes`` extension (:rfc:`9846#section-4.3.9`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Key exchange modes the client supports with a PSK.
     ke_modes: 'tuple[Enum_PskKeyExchangeMode, ...]'
@@ -400,7 +452,11 @@ class PskKeyExchangeModes(ExtensionData):
 
 @info_final
 class HpkeSymmetricCipherSuite(Data):
-    """Data model for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`)."""
+    """Data model for an ``HpkeSymmetricCipherSuite`` (:rfc:`9849#section-4`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: HPKE KDF identifier (:rfc:`9180#section-7.2`).
     kdf_id: 'Enum_HpkeKdfId'
@@ -414,7 +470,11 @@ class HpkeSymmetricCipherSuite(Data):
 @info_final
 class ECHClientHelloOuter(ExtensionData):
     """Data model for the outer variant of a ``ClientHello``'s ``encrypted_client_hello``
-    extension (:rfc:`9849#section-5`)."""
+    extension (:rfc:`9849#section-5`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Cipher suite encrypting the inner ``ClientHello``.
     cipher_suite: 'HpkeSymmetricCipherSuite'
@@ -432,7 +492,11 @@ class ECHClientHelloOuter(ExtensionData):
 @info_final
 class ECHClientHelloInner(ExtensionData):
     """Data model for the inner variant of a ``ClientHello``'s ``encrypted_client_hello``
-    extension (:rfc:`9849#section-5`), which carries its type alone."""
+    extension (:rfc:`9849#section-5`), which carries its type alone.
+
+    .. versionadded:: 1.7.0
+
+    """
 
     if TYPE_CHECKING:
         def __init__(self) -> 'None': ...  # pylint: disable=super-init-not-called,multiple-statements
@@ -441,7 +505,11 @@ class ECHClientHelloInner(ExtensionData):
 @info_final
 class ECHHelloRetryRequest(ExtensionData):
     """Data model for a ``HelloRetryRequest``'s ``encrypted_client_hello`` extension
-    (:rfc:`9849#section-5`)."""
+    (:rfc:`9849#section-5`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Acceptance confirmation (8 octets).
     confirmation: 'bytes'
@@ -452,7 +520,11 @@ class ECHHelloRetryRequest(ExtensionData):
 
 @info_final
 class ECHConfigExtension(Data):
-    """Data model for one ``ECHConfigExtension`` of an ``ECHConfig`` (:rfc:`9849#section-4.2`)."""
+    """Data model for one ``ECHConfigExtension`` of an ``ECHConfig`` (:rfc:`9849#section-4.2`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: ``ECHConfigExtensionType``.
     type: 'int'
@@ -465,7 +537,11 @@ class ECHConfigExtension(Data):
 
 @info_final
 class HpkeKeyConfig(Data):
-    """Data model for the ``HpkeKeyConfig`` of an ``ECHConfig`` (:rfc:`9849#section-4`)."""
+    """Data model for the ``HpkeKeyConfig`` of an ``ECHConfig`` (:rfc:`9849#section-4`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Identifier of the configuration.
     config_id: 'int'
@@ -482,7 +558,11 @@ class HpkeKeyConfig(Data):
 
 @info_final
 class ECHConfigContents(Data):
-    """Data model for the ``ECHConfigContents`` of an ``ECHConfig`` (:rfc:`9849#section-4`)."""
+    """Data model for the ``ECHConfigContents`` of an ``ECHConfig`` (:rfc:`9849#section-4`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: HPKE key configuration.
     key_config: 'HpkeKeyConfig'
@@ -499,7 +579,11 @@ class ECHConfigContents(Data):
 
 @info_final
 class ECHConfig(Data):
-    """Data model for one ``ECHConfig`` of an ``ECHConfigList`` (:rfc:`9849#section-4`)."""
+    """Data model for one ``ECHConfig`` of an ``ECHConfigList`` (:rfc:`9849#section-4`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: ECH version of the configuration.
     version: 'int'
@@ -514,7 +598,11 @@ class ECHConfig(Data):
 @info_final
 class ECHEncryptedExtensions(ExtensionData):
     """Data model for an ``EncryptedExtensions``' ``encrypted_client_hello`` extension
-    (:rfc:`9849#section-5`)."""
+    (:rfc:`9849#section-5`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: The server's retry configurations, most preferred first.
     retry_configs: 'tuple[ECHConfig, ...]'
@@ -525,7 +613,11 @@ class ECHEncryptedExtensions(ExtensionData):
 
 @info_final
 class RenegotiationInfo(ExtensionData):
-    """Data model for the ``renegotiation_info`` extension (:rfc:`5746#section-3.2`)."""
+    """Data model for the ``renegotiation_info`` extension (:rfc:`5746#section-3.2`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: ``verify_data`` of the previous handshake; empty on an initial one.
     renegotiated_connection: 'bytes'

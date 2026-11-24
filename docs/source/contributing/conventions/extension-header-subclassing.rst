@@ -98,8 +98,9 @@ fields"* whose addresses are *"the addresses that appear in the Source and
 Destination Address fields in the IPv6 packet carrying the Mobility Header"* -- there
 is no IPv4 variant of that computation -- and the IPv4 equivalent function is not
 protocol 135 at all, since :rfc:`5944` carries Mobile IPv4 over UDP port 434.
-``Shim6`` (140) has the same shape and the same verdict; this package carries no parser
-class for it, so nothing implements the classification, but a future one inherits
+``Shim6`` (140) has the same shape and the same verdict; this package has no class of
+its own for it, as :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`
+itself reads it, so nothing implements the classification, but a future one inherits
 :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` alone.
 
 .. important::

@@ -190,6 +190,8 @@ class MLDv1(ICMPv6):
     Listener Done (132). ``code`` is zero on the wire and ignored
     (:rfc:`2710#section-3.2`).
 
+    .. versionadded:: 1.7.0
+
     """
 
     #: MLD version, always ``1``. It is on no octet; it names the version the
@@ -219,6 +221,8 @@ class MLDv2Query(ICMPv6):
 
     A Query (type 130) of 28 or more octets (:rfc:`9777#section-8.1`). ``code`` is
     zero on the wire and ignored (:rfc:`9777#section-5.1.1`).
+
+    .. versionadded:: 1.7.0
 
     """
 
@@ -266,7 +270,11 @@ class MLDv2Query(ICMPv6):
 
 @info_final
 class MulticastAddressRecord(Data):
-    """Data model for an MLDv2 multicast address record (:rfc:`9777#section-5.2`)."""
+    """Data model for an MLDv2 multicast address record (:rfc:`9777#section-5.2`).
+
+    .. versionadded:: 1.7.0
+
+    """
 
     #: Record type (:rfc:`9777#section-5.2.13`).
     record_type: 'Enum_RecordType'
@@ -294,6 +302,8 @@ class MLDv2Report(ICMPv6):
 
     A Report is type 143, and its ``code`` the Reserved octet
     (:rfc:`9777#section-5.2.1`).
+
+    .. versionadded:: 1.7.0
 
     """
 

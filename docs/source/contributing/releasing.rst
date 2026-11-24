@@ -6,7 +6,8 @@ Release Process
    The **operational contract** for cutting a release: what a maintainer touches
    by hand, what the workflow does unattended, and the precautions that follow.
 
-   **The only manual edit is bumping** :data:`pcapkit.__version__`. Everything
+   **The only manual edit is bumping** :data:`pcapkit.__version__`, with
+   :file:`CITATION.cff` moved to match (`The One Manual Step`_). Everything
    else -- the ``v*`` tag, the GitHub Release, the PyPI and Anaconda uploads, the
    ``conda-*`` tag and its commit to ``main`` -- is produced by
    ``.github/workflows/create-release.yml`` and is never hand-made.
@@ -241,7 +242,7 @@ the default branch, and ``tag`` pulls ``main`` before tagging.
   build, by Conda Update's ``publish`` dispatch (see `Recovery`_).
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``, in
   their "Upload package to GitHub Release" steps, not ``action-gh-release``,
-  which calls Update a release before every upload (3.0.3's ``release()`` in
+  which calls Update a release before every upload (3.0.4's ``release()`` in
   ``src/github.ts``, on a release that exists). A file
   the release already has is left alone
   (:issue:`1640`): the action
@@ -324,7 +325,7 @@ Create Release's tag check.
 The action would also retarget a draft at ``commit``
 (``Action.updateDraftOrCreateRelease()`` and ``Action.updateRelease()``), which ``omitDraftDuringUpdate`` keeps a
 draft, but Create Release's ``workflow_run`` run finds the draft and resets
-its target to the run's sha (``action-gh-release`` 3.0.3's ``release()`` and
+its target to the run's sha (``action-gh-release`` 3.0.4's ``release()`` and
 ``findTagFromReleases()``), so skipping a draft is a precaution
 against retargeting a release Create Release owns.
 Either way the build goes to anaconda.org only, with a ``::notice``. The
@@ -343,10 +344,10 @@ The owner's choice on :issue:`1634`:
 the release with a GitHub App installation token, which Create a release
 accepts for a target that changes a workflow file when it has the "Workflows"
 repository permission (write). "Mint the release App's token" runs
-``actions/create-github-app-token`` v3.3.0, pinned to its commit, with
+``actions/create-github-app-token`` v3.4.0, pinned to its commit, with
 ``permission-contents: write`` and ``permission-workflows: write`` and no
 ``owner`` or ``repositories``, so the token is "scoped to only the current
-repository" and revoked in the action's ``post`` step (v3.3.0's README). Only
+repository" and revoked in the action's ``post`` step (v3.4.0's README). Only
 Create Release spends it.
 While ``vars.RELEASE_APP_CLIENT_ID`` is unset, which reads as "an empty
 string", the step skips and Create Release spends ``GITHUB_TOKEN``, so the

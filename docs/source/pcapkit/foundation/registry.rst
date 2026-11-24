@@ -53,7 +53,8 @@ Callback Registries
 
    ``register_reassembly_ipv4_callback``, ``register_reassembly_ipv6_callback``,
    ``register_reassembly_tcp_callback`` and ``register_traceflow_tcp_callback``,
-   which the two above replace with no alias (:issue:`2838`).
+   which :func:`register_reassembly_callback` and
+   :func:`register_traceflow_callback` replace with no alias (:issue:`2838`).
 
 Extractor Registries
 ~~~~~~~~~~~~~~~~~~~~

@@ -63,7 +63,8 @@ IPv6Address('fe80::a6:87f9:2793:16ee')
 The output is from the committed `examples/captures/in.pcap`.
 
 Reassembly, TCP flow tracing, the engine and the output are keyword arguments to the
-same call; nothing is written unless `dump` asks for it:
+same call. A report is written only when `dump` asks for one; flow tracing writes each
+flow under `./tmp`, or the `fout` of a `TraceFlowOptions` passed as `traceflow`:
 
 ```python
 >>> from pcapkit import DumpOptions

@@ -385,7 +385,18 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
     ##########################################################################
 
     def __length_hint__(self) -> 'Literal[16]':
-        """Return an estimated length for the object."""
+        """Return an estimated length for the object.
+
+        A variable-length header's hint is its longest form -- here 16, past the
+        14 octets of every optional field but the offset pad -- since
+        :meth:`Protocol._parse_next_layer
+        <pcapkit.protocols.protocol.Protocol._parse_next_layer>` keeps a next
+        layer as raw octets when fewer are captured than both its hint and its
+        :attr:`length`: the shortest form would keep a longer header cut short,
+        its missing fields zero-filled, while the longest still keeps a fully
+        captured shorter one.
+
+        """
         return 16
 
     @classmethod

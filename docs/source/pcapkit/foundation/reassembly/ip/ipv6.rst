@@ -145,8 +145,10 @@ Terminology
 
           ``packet`` is what :func:`~pcapkit.foundation.analysis.ip.ip_datagram`
           parses ``payload`` to, unless ``__protocol_type__`` names another
-          protocol, and it is analysed on the first read, not when the
-          datagram is submitted. The analysis is a second full parse of the
+          protocol, or the extraction's engine parses its frames with stops or a
+          context, which this parse takes too (:issue:`2933`). It is analysed on
+          the first read, not when the datagram is submitted. The analysis is a
+          second full parse of the
           payload, so running it eagerly would charge every caller for a result
           most never read. Reading the attribute, or any mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,
           ``repr()``), runs it and keeps the result; see
