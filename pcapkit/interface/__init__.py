@@ -12,15 +12,15 @@ macros of :mod:`pcapkit`, and exports the options
 """
 
 from pcapkit.foundation.options import DumpOptions, ReassemblyOptions, StreamOptions, TraceFlowOptions
-from pcapkit.interface.core import (APP, DPKT, INET, JSON, LINK, PCAP, PCAP_CT, PLIST, RAW, TRANS,
-                                    TREE, PCAPKit, PyPCAP, PyPCAPFile, PyShark, Scapy, extract,
-                                    reassemble, trace)
+from pcapkit.interface.core import (APP, DPKT, INET, JSON, LINK, PCAP, PCAP_CT, PCAP_NG, PLIST, RAW,
+                                    TRANS, TREE, PCAPKit, PyPCAP, PyPCAPFile, PyShark, Scapy,
+                                    extract, reassemble, trace)
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # interface functions
     'DumpOptions', 'ReassemblyOptions',                     # extraction options
     'TraceFlowOptions', 'StreamOptions',                    # extraction options
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
+    'TREE', 'JSON', 'PLIST', 'PCAP', 'PCAP_NG',             # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # engine macros
     'PyPCAP', 'PCAP_CT', 'PyPCAPFile',                      # engine macros

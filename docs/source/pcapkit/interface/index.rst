@@ -46,10 +46,12 @@ The public interfaces, by category:
 |                  |                     | :data:`pcapkit.interface.core.TREE`        |
 +                  +                     +--------------------------------------------+
 |                  |                     | :data:`pcapkit.interface.core.JSON`        |
-+                  + Output File Formats +--------------------------------------------+
-|                  |                     | :data:`pcapkit.interface.core.PLIST`       |
++                  +                     +--------------------------------------------+
+|                  | Output File Formats | :data:`pcapkit.interface.core.PLIST`       |
 +                  +                     +--------------------------------------------+
 |                  |                     | :data:`pcapkit.interface.core.PCAP`        |
++                  +                     +--------------------------------------------+
+|                  |                     | :data:`pcapkit.interface.core.PCAP_NG`     |
 +                  +---------------------+--------------------------------------------+
 | Core Interfaces  |                     | :data:`pcapkit.interface.core.RAW`         |
 +                  +                     +--------------------------------------------+

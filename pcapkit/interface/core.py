@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # interface functions
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
+    'TREE', 'JSON', 'PLIST', 'PCAP', 'PCAP_NG',             # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # engine macros
     'PyPCAP', 'PCAP_CT', 'PyPCAPFile',                      # engine macros
@@ -40,6 +40,8 @@ TREE = 'tree'
 JSON = 'json'
 PLIST = 'plist'
 PCAP = 'pcap'
+# NOTE: not ``PCAPNG``, which ``pcapkit`` and ``pcapkit.all`` bind to the protocol (#3047).
+PCAP_NG = 'pcapng'
 
 # layer thresholds
 RAW = 'none'
