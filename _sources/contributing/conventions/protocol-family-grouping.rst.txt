@@ -452,7 +452,8 @@ added, as ruled in review of :pr:`2446` (:issue:`2436`).
 **A protocol has a package of its own, named after it, whose modules take their
 role** (:issue:`2534`): ``protocol`` holds the dissector, ``schema`` its header
 schema and ``data`` its data model, and each holds the class named after the
-package. The package's ``__init__`` exports the protocol class alone, and binds
+package; ``const`` holds its constants, where it has any (:ref:`utilities-or-corekit`).
+The package's ``__init__`` exports the protocol class alone, and binds
 each class its ``schema`` and ``data`` modules define as ``Schema_<name>`` and
 ``Data_<name>`` outside ``__all__``, as 1.5.1's aggregators exposed them, ruled in
 review of :pr:`2753` (:issue:`2534`). The class

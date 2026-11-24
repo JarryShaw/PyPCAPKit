@@ -591,6 +591,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">PayloadField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">UInt16Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dns.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEADER_LENGTH</span><span class="p">,</span> <span class="n">POINTER_LIMIT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
@@ -626,12 +627,6 @@
         <span class="n">cd</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Response code.</span>
         <span class="n">rcode</span><span class="p">:</span> <span class="nb">int</span>
-
-<span class="c1">#: Length of the fixed header, before the sections (:rfc:`1035#section-4.1.1`).</span>
-<span class="n">HEADER_LENGTH</span> <span class="o">=</span> <span class="mi">12</span>
-
-<span class="c1">#: Largest offset a compression pointer can carry, in its 14 bits.</span>
-<span class="n">POINTER_LIMIT</span> <span class="o">=</span> <span class="mh">0x3FFF</span>
 
 
 <div class="viewcode-block" id="read_name">

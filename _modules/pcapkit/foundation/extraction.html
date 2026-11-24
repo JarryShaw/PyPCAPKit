@@ -1263,41 +1263,6 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_engine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Extractor._register_internal_engine">
-<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._register_internal_engine">[docs]</a>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_register_internal_engine</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[EngineBase] | Type[EngineBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Register an engine for pcapkit's own use, bypassing the public guard.</span>
-
-<span class="sd">        Unlike :meth:`register_engine`, accepts a class deriving only from</span>
-<span class="sd">        :class:`~pcapkit.foundation.engines.engine.EngineBase`, which is how every</span>
-<span class="sd">        built-in engine is written. Not part of the public API.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            name: engine name, lower-cased</span>
-<span class="sd">            engine: module descriptor or an</span>
-<span class="sd">                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``name`` is not a :obj:`str`, or ``engine`` is not an</span>
-<span class="sd">                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.</span>
-
-<span class="sd">        Warns:</span>
-<span class="sd">            RegistryWarning: If a different class is already registered under</span>
-<span class="sd">                ``name``; it is overwritten.</span>
-
-<span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'engine'</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-            <span class="n">engine</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">klass</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Extractor._register_internal_engine: engine must be an EngineBase subclass, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine</span></div>
-
-
 <div class="viewcode-block" id="Extractor.register_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.register_reassembly">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1364,39 +1329,6 @@
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly must be a Reassembly subclass, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">)</span></div>
 
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_register_internal_reassembly</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Register a reassembly class for pcapkit's own use, bypassing the public guard.</span>
-
-<span class="sd">        Unlike :meth:`register_reassembly`, accepts a class deriving only from</span>
-<span class="sd">        :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, which is how every</span>
-<span class="sd">        built-in is written. Not part of the public API.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            protocol: protocol name, lower-cased</span>
-<span class="sd">            reassembly: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`, or ``reassembly``</span>
-<span class="sd">                is not a</span>
-<span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass.</span>
-
-<span class="sd">        Warns:</span>
-<span class="sd">            RegistryWarning: If a different class is already registered under</span>
-<span class="sd">                ``protocol``; it is overwritten.</span>
-
-<span class="sd">        """</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'reassembly'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-            <span class="n">reassembly</span> <span class="o">=</span> <span class="n">reassembly</span><span class="o">.</span><span class="n">klass</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">ReassemblyBase</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Extractor._register_internal_reassembly: reassembly must be a ReassemblyBase subclass, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reassembly</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">[</span><span class="n">protocol</span><span class="p">]</span> <span class="o">=</span> <span class="n">reassembly</span>
 
 <div class="viewcode-block" id="Extractor.make_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.make_reassembly">[docs]</a>
@@ -1510,39 +1442,6 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">)</span></div>
 
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_register_internal_traceflow</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Register a traceflow class for pcapkit's own use, bypassing the public guard.</span>
-
-<span class="sd">        Unlike :meth:`register_traceflow`, accepts a class deriving only from</span>
-<span class="sd">        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, which is how every</span>
-<span class="sd">        built-in is written. Not part of the public API.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            protocol: protocol name, lower-cased</span>
-<span class="sd">            traceflow: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`, or ``traceflow``</span>
-<span class="sd">                is not a</span>
-<span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass.</span>
-
-<span class="sd">        Warns:</span>
-<span class="sd">            RegistryWarning: If a different class is already registered under</span>
-<span class="sd">                ``protocol``; it is overwritten.</span>
-
-<span class="sd">        """</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'traceflow'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-            <span class="n">traceflow</span> <span class="o">=</span> <span class="n">traceflow</span><span class="o">.</span><span class="n">klass</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">TraceFlowBase</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Extractor._register_internal_traceflow: traceflow must be a TraceFlowBase subclass, not </span><span class="si">{</span><span class="n">traceflow</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">traceflow</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="n">protocol</span><span class="p">]</span> <span class="o">=</span> <span class="n">traceflow</span>
-
 <div class="viewcode-block" id="Extractor.make_traceflow">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.make_traceflow">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1583,31 +1482,6 @@
         <span class="k">return</span> <span class="n">trace_cls</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
                          <span class="n">bidirectional</span><span class="o">=</span><span class="n">bidirectional</span><span class="p">,</span> <span class="n">analyze</span><span class="o">=</span><span class="n">analyze</span><span class="p">)</span></div>
 
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_traceflow_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[TraceFlowBase]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""The flow tracing class registered under a protocol name, imported.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            protocol: protocol name, matched lower-cased</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The class, which replaces its module descriptor in</span>
-<span class="sd">            :attr:`__traceflow__`.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            FormatError: If no flow tracer is registered under ``protocol``.</span>
-<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`.</span>
-
-<span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'traceflow'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
-        <span class="n">trace_cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">trace_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace_cls</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-            <span class="n">trace_cls</span> <span class="o">=</span> <span class="n">trace_cls</span><span class="o">.</span><span class="n">klass</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls</span>  <span class="c1"># update mapping upon import</span>
-        <span class="k">return</span> <span class="n">trace_cls</span>
 
 <div class="viewcode-block" id="Extractor.run">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.run">[docs]</a>
@@ -1669,70 +1543,6 @@
         <span class="c1"># start iteration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_select_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Type[EngineBase]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Settle which extraction engine will actually run.</span>
-
-<span class="sd">        An engine that is unknown, not installed, or rules itself out via</span>
-<span class="sd">        :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
-<span class="sd">        is replaced by the :term:`default engine`, and :attr:`self._exnam</span>
-<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._exnam&gt;` is updated to match.</span>
-<span class="sd">        :meth:`__init__` calls this before choosing the output format, so that</span>
-<span class="sd">        the choice reflects the engine that runs rather than the one requested.</span>
-
-<span class="sd">        Calling it again is silent: a fallback has already set the name to</span>
-<span class="sd">        ``'default'``, and an engine that passed the checks passes them again.</span>
-
-<span class="sd">        Warns:</span>
-<span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not</span>
-<span class="sd">                available: its dependency is not installed, its</span>
-<span class="sd">                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
-<span class="sd">                rules it out, or the supplied engine is unknown.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The engine class to run, or :data:`None` for the default engine,</span>
-<span class="sd">            which :meth:`run` picks from the input's magic number.</span>
-
-<span class="sd">        """</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'requested extraction engine: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__engine__</span><span class="p">:</span>  <span class="c1"># check if engine is supported</span>
-            <span class="n">eng</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__engine__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eng</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-                <span class="n">eng</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">klass</span>
-
-            <span class="c1"># An engine may rule itself out before the import is even attempted.</span>
-            <span class="c1"># Asking it is necessary because ``import_test`` can only see whether</span>
-            <span class="c1"># the top-level module imports, which is not the same question: a</span>
-            <span class="c1"># package whose *submodules* fail leaves the guard satisfied and the</span>
-            <span class="c1"># failure to escape from the engine's constructor instead. The base</span>
-            <span class="c1"># class answers :data:`None`, so only engines with a real limitation</span>
-            <span class="c1"># override it.</span>
-            <span class="c1">#</span>
-            <span class="c1"># NOTE: one probe serves both calls of this method and the engine's</span>
-            <span class="c1"># constructor in ``run``, rather than one each (#2113).</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_exprb'</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_exprb</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">Memo</span><span class="p">()</span>
-            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprb</span><span class="p">:</span>
-                <span class="n">reason</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">unsupported_reason</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'engine </span><span class="si">%s</span><span class="s1"> is unavailable: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is not supported on this interpreter '</span>
-                     <span class="sa">f</span><span class="s1">'(</span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s1">); using default engine instead'</span><span class="p">,</span>
-                     <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_test</span><span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="k">return</span> <span class="n">eng</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># ``import_test`` has already warned that the package is absent;</span>
-                <span class="c1"># warning again here would report one problem twice.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>  <span class="c1"># using default/pcapkit engine</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">):</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">!r}</span><span class="s1">; '</span>
-                 <span class="s1">'using default engine instead'</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>  <span class="c1"># using default/pcapkit engine</span>
-        <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Extractor.import_test">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.import_test">[docs]</a>
@@ -1894,40 +1704,6 @@
             <span class="k">return</span> <span class="n">engine</span>  <span class="c1"># type: ignore[return-value]</span>
 
         <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="Extractor._open_output">
-<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._open_output">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_open_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Create the output writer.</span>
-
-<span class="sd">        The built-in engines call this at their global-header step. The PCAP</span>
-<span class="sd">        engine passes the header's fields as ``protocol``, ``byteorder``,</span>
-<span class="sd">        ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:</span>
-<span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from</span>
-<span class="sd">        them, :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` its section and interface</span>
-<span class="sd">        from those it takes, and the other writers ignore them. The PCAP-NG</span>
-<span class="sd">        engine passes its first section's ``byteorder``.</span>
-<span class="sd">        :meth:`run` calls it again, without arguments, after the engine has</span>
-<span class="sd">        started, for the engines that have no such step. Only the first call has</span>
-<span class="sd">        an effect.</span>
-
-<span class="sd">        Under split mode, i.e. :attr:`self._flag_f &lt;Extractor._flag_f&gt;` is</span>
-<span class="sd">        :data:`True`, :attr:`self._ofile &lt;Extractor._ofile&gt;` stays a factory,</span>
-<span class="sd">        with ``kwargs`` bound, that the engines call once per output file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            **kwargs: Global header fields for the writer.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Extractor.record_frames">
@@ -2422,6 +2198,230 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Extractor._register_internal_engine">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._register_internal_engine">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_internal_engine</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[EngineBase] | Type[EngineBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register an engine for pcapkit's own use, bypassing the public guard.</span>
+
+<span class="sd">        Unlike :meth:`register_engine`, accepts a class deriving only from</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.engine.EngineBase`, which is how every</span>
+<span class="sd">        built-in engine is written. Not part of the public API.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            name: engine name, lower-cased</span>
+<span class="sd">            engine: module descriptor or an</span>
+<span class="sd">                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RegistryError: If ``name`` is not a :obj:`str`, or ``engine`` is not an</span>
+<span class="sd">                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different class is already registered under</span>
+<span class="sd">                ``name``; it is overwritten.</span>
+
+<span class="sd">        """</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'engine'</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">engine</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Extractor._register_internal_engine: engine must be an EngineBase subclass, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_internal_reassembly</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register a reassembly class for pcapkit's own use, bypassing the public guard.</span>
+
+<span class="sd">        Unlike :meth:`register_reassembly`, accepts a class deriving only from</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, which is how every</span>
+<span class="sd">        built-in is written. Not part of the public API.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            protocol: protocol name, lower-cased</span>
+<span class="sd">            reassembly: module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`, or ``reassembly``</span>
+<span class="sd">                is not a</span>
+<span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different class is already registered under</span>
+<span class="sd">                ``protocol``; it is overwritten.</span>
+
+<span class="sd">        """</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'reassembly'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">reassembly</span> <span class="o">=</span> <span class="n">reassembly</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">ReassemblyBase</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Extractor._register_internal_reassembly: reassembly must be a ReassemblyBase subclass, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reassembly</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">[</span><span class="n">protocol</span><span class="p">]</span> <span class="o">=</span> <span class="n">reassembly</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_internal_traceflow</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">traceflow</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register a traceflow class for pcapkit's own use, bypassing the public guard.</span>
+
+<span class="sd">        Unlike :meth:`register_traceflow`, accepts a class deriving only from</span>
+<span class="sd">        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, which is how every</span>
+<span class="sd">        built-in is written. Not part of the public API.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            protocol: protocol name, lower-cased</span>
+<span class="sd">            traceflow: module descriptor or a</span>
+<span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`, or ``traceflow``</span>
+<span class="sd">                is not a</span>
+<span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different class is already registered under</span>
+<span class="sd">                ``protocol``; it is overwritten.</span>
+
+<span class="sd">        """</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'traceflow'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">traceflow</span> <span class="o">=</span> <span class="n">traceflow</span><span class="o">.</span><span class="n">klass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">TraceFlowBase</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Extractor._register_internal_traceflow: traceflow must be a TraceFlowBase subclass, not </span><span class="si">{</span><span class="n">traceflow</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">traceflow</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="n">protocol</span><span class="p">]</span> <span class="o">=</span> <span class="n">traceflow</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_traceflow_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[TraceFlowBase]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The flow tracing class registered under a protocol name, imported.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            protocol: protocol name, matched lower-cased</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The class, which replaces its module descriptor in</span>
+<span class="sd">            :attr:`__traceflow__`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FormatError: If no flow tracer is registered under ``protocol``.</span>
+<span class="sd">            RegistryError: If ``protocol`` is not a :obj:`str`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_registry_key</span><span class="p">(</span><span class="s1">'traceflow'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">trace_cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">trace_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trace_cls</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">trace_cls</span> <span class="o">=</span> <span class="n">trace_cls</span><span class="o">.</span><span class="n">klass</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls</span>  <span class="c1"># update mapping upon import</span>
+        <span class="k">return</span> <span class="n">trace_cls</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Type[EngineBase]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Settle which extraction engine will actually run.</span>
+
+<span class="sd">        An engine that is unknown, not installed, or rules itself out via</span>
+<span class="sd">        :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
+<span class="sd">        is replaced by the :term:`default engine`, and :attr:`self._exnam</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._exnam&gt;` is updated to match.</span>
+<span class="sd">        :meth:`__init__` calls this before choosing the output format, so that</span>
+<span class="sd">        the choice reflects the engine that runs rather than the one requested.</span>
+
+<span class="sd">        Calling it again is silent: a fallback has already set the name to</span>
+<span class="sd">        ``'default'``, and an engine that passed the checks passes them again.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not</span>
+<span class="sd">                available: its dependency is not installed, its</span>
+<span class="sd">                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
+<span class="sd">                rules it out, or the supplied engine is unknown.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The engine class to run, or :data:`None` for the default engine,</span>
+<span class="sd">            which :meth:`run` picks from the input's magic number.</span>
+
+<span class="sd">        """</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'requested extraction engine: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__engine__</span><span class="p">:</span>  <span class="c1"># check if engine is supported</span>
+            <span class="n">eng</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__engine__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eng</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+                <span class="n">eng</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">klass</span>
+
+            <span class="c1"># An engine may rule itself out before the import is even attempted.</span>
+            <span class="c1"># Asking it is necessary because ``import_test`` can only see whether</span>
+            <span class="c1"># the top-level module imports, which is not the same question: a</span>
+            <span class="c1"># package whose *submodules* fail leaves the guard satisfied and the</span>
+            <span class="c1"># failure to escape from the engine's constructor instead. The base</span>
+            <span class="c1"># class answers :data:`None`, so only engines with a real limitation</span>
+            <span class="c1"># override it.</span>
+            <span class="c1">#</span>
+            <span class="c1"># NOTE: one probe serves both calls of this method and the engine's</span>
+            <span class="c1"># constructor in ``run``, rather than one each (#2113).</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_exprb'</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exprb</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">Memo</span><span class="p">()</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprb</span><span class="p">:</span>
+                <span class="n">reason</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">unsupported_reason</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'engine </span><span class="si">%s</span><span class="s1"> is unavailable: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is not supported on this interpreter '</span>
+                     <span class="sa">f</span><span class="s1">'(</span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s1">); using default engine instead'</span><span class="p">,</span>
+                     <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_test</span><span class="p">(</span><span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="k">return</span> <span class="n">eng</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># ``import_test`` has already warned that the package is absent;</span>
+                <span class="c1"># warning again here would report one problem twice.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>  <span class="c1"># using default/pcapkit engine</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'default'</span><span class="p">,</span> <span class="s1">'pcapkit'</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">!r}</span><span class="s1">; '</span>
+                 <span class="s1">'using default engine instead'</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">'default'</span>  <span class="c1"># using default/pcapkit engine</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Extractor._open_output">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._open_output">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_open_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the output writer.</span>
+
+<span class="sd">        The built-in engines call this at their global-header step. The PCAP</span>
+<span class="sd">        engine passes the header's fields as ``protocol``, ``byteorder``,</span>
+<span class="sd">        ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:</span>
+<span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from</span>
+<span class="sd">        them, :class:`~pcapkit.dumpkit.pcapng.PCAPNGIO` its section and interface</span>
+<span class="sd">        from those it takes, and the other writers ignore them. The PCAP-NG</span>
+<span class="sd">        engine passes its first section's ``byteorder``.</span>
+<span class="sd">        :meth:`run` calls it again, without arguments, after the engine has</span>
+<span class="sd">        started, for the engines that have no such step. Only the first call has</span>
+<span class="sd">        an effect.</span>
+
+<span class="sd">        Under split mode, i.e. :attr:`self._flag_f &lt;Extractor._flag_f&gt;` is</span>
+<span class="sd">        :data:`True`, :attr:`self._ofile &lt;Extractor._ofile&gt;` stays a factory,</span>
+<span class="sd">        with ``kwargs`` bound, that the engines call once per output file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: Global header fields for the writer.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_o</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">:</span> <span class="s1">'TraceFlowOptions'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Check each enabled flow tracer's output settings, before a directory is made.</span>

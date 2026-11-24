@@ -68,7 +68,12 @@ which tells whether a payload opens with an HTTP/1.* start line.
 
 .. autofunction:: pcapkit.protocols.application.http.protocol.test_start_line
 
-.. autodata:: pcapkit.protocols.application.http.protocol._HTTP2_PREFACE
+Constants
+---------
+
+.. module:: pcapkit.protocols.application.http.const
+
+.. versionadded:: 1.7.0
 
 .. rubric:: Footnotes
 

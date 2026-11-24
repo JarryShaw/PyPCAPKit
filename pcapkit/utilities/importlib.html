@@ -598,7 +598,9 @@ time the name is reached, rather than with the package itself. Every package und
 <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> imports its enumerations that way (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2729">#2729</a>), so a caller
 pays only for the enumerations it uses. Those first imports, and that of a
 <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>, hold <a class="reference internal" href="#pcapkit.utilities.importlib.import_lock" title="pcapkit.utilities.importlib.import_lock"><code class="xref py py-data docutils literal notranslate"><span class="pre">import_lock</span></code></a>, one
-thread at a time (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2771">#2771</a>). This module imports nothing from <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>;
+thread at a time (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2771">#2771</a>), as does a class’s first
+<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.from_dict" title="pcapkit.corekit.infoclass.Info.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.from_dict</span></code></a>, which copies
+namespaces they write (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2870">#2870</a>). This module imports nothing from <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>;
 see <a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
@@ -667,7 +669,10 @@ name in its <code class="docutils literal notranslate"><span class="pre">__all__
 <dd><p>Held by every first import <a class="reference internal" href="#pcapkit.utilities.importlib.lazy_exports" title="pcapkit.utilities.importlib.lazy_exports"><code class="xref py py-func docutils literal notranslate"><span class="pre">lazy_exports()</span></code></a>
 makes, and by <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> when its module is not imported
 yet, so threads make them one at a time; unserialised, they deadlock the import
-system (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2771">#2771</a>). Re-entrant, as one first import can nest another.</p>
+system (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2771">#2771</a>). Re-entrant, as one first import can nest another. Also
+held by the first <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.from_dict" title="pcapkit.corekit.infoclass.Info.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.from_dict</span></code></a>
+of a class, which copies namespaces those imports and its own cache write
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2870">#2870</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.RLock" title="(in Python v3.15)">threading.RLock</a></p>

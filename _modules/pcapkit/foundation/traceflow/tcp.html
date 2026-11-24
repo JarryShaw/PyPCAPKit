@@ -840,6 +840,96 @@
         <span class="k">return</span> <span class="n">buffer</span><span class="o">.</span><span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">buffer</span><span class="o">.</span><span class="n">label</span></div>
 
 
+<div class="viewcode-block" id="TCP.finish">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.finish">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Finalise every flow still being traced.</span>
+
+<span class="sd">        The end of the capture can prove a bidirectional flow is over, as a new</span>
+<span class="sd">        connection on the same endpoints can. Draining the buffer here is what lets a flow keep the</span>
+<span class="sd">        acknowledgement that completes its close and *still* have its callback</span>
+<span class="sd">        fired, rather than having to choose between the two.</span>
+
+<span class="sd">        Idempotent: it drains the buffer, so a second call finds nothing to do.</span>
+<span class="sd">        It also closes every output file still kept open, as</span>
+<span class="sd">        :meth:`TraceFlow.finish &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.finish&gt;`</span>
+<span class="sd">        does, even when a callback raises: the flow it was handed is finalised,</span>
+<span class="sd">        and the flows after it stay in the buffer, unfinalised, for a later call.</span>
+
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">bufid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TCP.submit">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.submit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Index, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Submit traced TCP flows.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Traced TCP flow (:term:`trace.tcp.index`).</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This reports flows still being traced **without** finalising them, so</span>
+<span class="sd">            that reading</span>
+<span class="sd">            :attr:`TraceFlow.index &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.index&gt;`</span>
+<span class="sd">            part-way through a capture cannot disturb the tracing -- popping a</span>
+<span class="sd">            buffer there would strand the rest of its conversation in a second</span>
+<span class="sd">            flow. Such a flow is therefore reported here but has not fired its</span>
+<span class="sd">            callback; :meth:`finish` is what does that, at the end of the capture.</span>
+
+<span class="sd">            With ``analyze=True`` that makes an open flow's</span>
+<span class="sd">            :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;`</span>
+<span class="sd">            a **snapshot**, and a mid-capture one. The</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when</span>
+<span class="sd">            it is first read and is then fixed in place, so it holds the flow as it</span>
+<span class="sd">            stood at *that read* -- not as it stood when this method returned, and</span>
+<span class="sd">            not as it will stand once the conversation ends. Read it while the flow</span>
+<span class="sd">            is open and the datagrams cover only the segments seen so far; segments</span>
+<span class="sd">            arriving afterwards are reassembled into the buffer but cannot reach an</span>
+<span class="sd">            already-resolved snapshot, and nothing on the returned</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`</span>
+<span class="sd">            distinguishes one from the final result that :meth:`finish` produces.</span>
+
+<span class="sd">            This call's own cache is not the cause and does not soften it: both</span>
+<span class="sd">            :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a</span>
+<span class="sd">            later call rebuilds the tuple with fresh</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is</span>
+<span class="sd">            the *previously returned*</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`, if a caller kept</span>
+<span class="sd">            one, that cannot catch up. For a result that is final, read after</span>
+<span class="sd">            :meth:`finish`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'submit'</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Index]</span>
+        <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">),</span>
+                             <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+                             <span class="n">label</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+                             <span class="n">forward</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span>
+                             <span class="n">reverse</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reverse</span><span class="p">),</span>
+                             <span class="n">packet</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Deferred</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span><span class="p">),))</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
+        <span class="n">ret_submit</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'submitted </span><span class="si">%d</span><span class="s1"> TCP flow(s), </span><span class="si">%d</span><span class="s1"> still open'</span><span class="p">,</span>
+                     <span class="nb">len</span><span class="p">(</span><span class="n">ret_submit</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_submit</span>
+        <span class="k">return</span> <span class="n">ret_submit</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[BufferID, bool]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Record a packet in its flow, opening the flow or superseding an ended one.</span>
 
@@ -1128,93 +1218,7 @@
         <span class="c1"># from the index (#2827).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">run_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s1">'TCP flow </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">index</span>
-
-<div class="viewcode-block" id="TCP.finish">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.finish">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Finalise every flow still being traced.</span>
-
-<span class="sd">        The end of the capture can prove a bidirectional flow is over, as a new</span>
-<span class="sd">        connection on the same endpoints can. Draining the buffer here is what lets a flow keep the</span>
-<span class="sd">        acknowledgement that completes its close and *still* have its callback</span>
-<span class="sd">        fired, rather than having to choose between the two.</span>
-
-<span class="sd">        Idempotent: it drains the buffer, so a second call finds nothing to do.</span>
-<span class="sd">        It also closes every output file still kept open, as</span>
-<span class="sd">        :meth:`TraceFlow.finish &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.finish&gt;`</span>
-<span class="sd">        does, even when a callback raises: the flow it was handed is finalised,</span>
-<span class="sd">        and the flows after it stay in the buffer, unfinalised, for a later call.</span>
-
-<span class="sd">        """</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">bufid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="TCP.submit">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Index, ...]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Submit traced TCP flows.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Traced TCP flow (:term:`trace.tcp.index`).</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            This reports flows still being traced **without** finalising them, so</span>
-<span class="sd">            that reading</span>
-<span class="sd">            :attr:`TraceFlow.index &lt;pcapkit.foundation.traceflow.traceflow.TraceFlow.index&gt;`</span>
-<span class="sd">            part-way through a capture cannot disturb the tracing -- popping a</span>
-<span class="sd">            buffer there would strand the rest of its conversation in a second</span>
-<span class="sd">            flow. Such a flow is therefore reported here but has not fired its</span>
-<span class="sd">            callback; :meth:`finish` is what does that, at the end of the capture.</span>
-
-<span class="sd">            With ``analyze=True`` that makes an open flow's</span>
-<span class="sd">            :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;`</span>
-<span class="sd">            a **snapshot**, and a mid-capture one. The</span>
-<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when</span>
-<span class="sd">            it is first read and is then fixed in place, so it holds the flow as it</span>
-<span class="sd">            stood at *that read* -- not as it stood when this method returned, and</span>
-<span class="sd">            not as it will stand once the conversation ends. Read it while the flow</span>
-<span class="sd">            is open and the datagrams cover only the segments seen so far; segments</span>
-<span class="sd">            arriving afterwards are reassembled into the buffer but cannot reach an</span>
-<span class="sd">            already-resolved snapshot, and nothing on the returned</span>
-<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`</span>
-<span class="sd">            distinguishes one from the final result that :meth:`finish` produces.</span>
-
-<span class="sd">            This call's own cache is not the cause and does not soften it: both</span>
-<span class="sd">            :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a</span>
-<span class="sd">            later call rebuilds the tuple with fresh</span>
-<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is</span>
-<span class="sd">            the *previously returned*</span>
-<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`, if a caller kept</span>
-<span class="sd">            one, that cannot catch up. For a result that is final, read after</span>
-<span class="sd">            :meth:`finish`.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'submit'</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cached</span>
-
-        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Index]</span>
-        <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">),</span>
-                             <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
-                             <span class="n">label</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
-                             <span class="n">forward</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span>
-                             <span class="n">reverse</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reverse</span><span class="p">),</span>
-                             <span class="n">packet</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Deferred</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span><span class="p">),))</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
-        <span class="n">ret_submit</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
-
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'submitted </span><span class="si">%d</span><span class="s1"> TCP flow(s), </span><span class="si">%d</span><span class="s1"> still open'</span><span class="p">,</span>
-                     <span class="nb">len</span><span class="p">(</span><span class="n">ret_submit</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_submit</span>
-        <span class="k">return</span> <span class="n">ret_submit</span></div>
-</div>
+        <span class="k">return</span> <span class="n">index</span></div>
 
 </pre></div>
         </article>

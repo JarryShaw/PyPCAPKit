@@ -28,6 +28,9 @@ DTLS handshake message split across several records back to origin
 
    .. automethod:: reassembly
    .. automethod:: submit
+
+   .. rubric:: Utilities
+
    .. automethod:: _datagram_from_fragment
    .. automethod:: _received_runs
    .. automethod:: _update_hole_descriptors

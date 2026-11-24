@@ -832,6 +832,28 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.misc.pcap.he
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.protocol.Header._make_magic">
+<span class="sig-name descname"><span class="pre">_make_magic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.byteorder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilendian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bigendian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header/protocol.html#Header._make_magic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.protocol.Header._make_magic" title="Link to this definition">¶</a></dt>
+<dd><p>Generate magic number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>byteorder</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'big'</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'little'</span></span></code></span>]</span>) – header byte order</p></li>
+<li><p><strong>lilendian</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – little-endian flag; overrides <code class="docutils literal notranslate"><span class="pre">byteorder</span></code> if given</p></li>
+<li><p><strong>bigendian</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – big-endian flag; overrides <code class="docutils literal notranslate"><span class="pre">byteorder</span></code> if given</p></li>
+<li><p><strong>nanosecond</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – nanosecond-resolution file flag</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Magic number and little-endian flag.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.protocol.Header._read_protos">
 <span class="sig-name descname"><span class="pre">_read_protos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header/protocol.html#Header._read_protos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.protocol.Header._read_protos" title="Link to this definition">¶</a></dt>
 <dd><p>Read next layer protocol type.</p>
@@ -865,18 +887,10 @@ has set it (<a class="extlink-issue reference external" href="https://github.com
 <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.header.schema.RESOLUTION_PLACES</span></code>, now
 <a class="reference internal" href="../../corekit/const/capture.html#pcapkit.corekit.const.capture.MAGIC_NUMBER" title="pcapkit.corekit.const.capture.MAGIC_NUMBER"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.const.capture.MAGIC_NUMBER</span></code></a>,
 <a class="reference internal" href="../../corekit/const/capture.html#pcapkit.corekit.const.capture.RESOLUTION" title="pcapkit.corekit.const.capture.RESOLUTION"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.const.capture.RESOLUTION</span></code></a> and
-<a class="reference internal" href="../../corekit/const/capture.html#pcapkit.corekit.const.capture.RESOLUTION_PLACES" title="pcapkit.corekit.const.capture.RESOLUTION_PLACES"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.const.capture.RESOLUTION_PLACES</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2883">#2883</a>).</p>
+<a class="reference internal" href="../../corekit/const/capture.html#pcapkit.corekit.const.capture.RESOLUTION_PLACES" title="pcapkit.corekit.const.capture.RESOLUTION_PLACES"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.const.capture.RESOLUTION_PLACES</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2883">#2883</a>); and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN</span></code>, now
+<a class="reference internal" href="#pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN" title="pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2896">#2896</a>).</p>
 </div>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcap.header.schema.</span></span><span class="sig-name descname"><span class="pre">GLOBAL_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the PCAP global header, which opens the file. The one home of
-this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); the format fixes it, so it is never configurable.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
-</div>
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.schema.Header">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcap.header.schema.</span></span><span class="sig-name descname"><span class="pre">Header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">magic_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version_major</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version_minor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thiszone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigfigs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snaplen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header/schema.html#Header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.schema.Header" title="Link to this definition">¶</a></dt>
@@ -999,6 +1013,22 @@ this value (<a class="extlink-issue reference external" href="https://github.com
 <dd><p>Nanosecond-timestamp resolution flag.</p>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.protocols.misc.pcap.header.const">
+<span id="constants"></span><h3>Constants<a class="headerlink" href="#module-pcapkit.protocols.misc.pcap.header.const" title="Link to this heading">¶</a></h3>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcap.header.const.</span></span><span class="sig-name descname"><span class="pre">GLOBAL_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.const.GLOBAL_HEADER_LEN" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the PCAP global header, which opens the file. The one home of
+this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); the format fixes it, so it is never configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
 </dd></dl>
 
 </section>
@@ -1620,6 +1650,7 @@ into the capture file”.</p>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header">Global Header</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header.schema">Header Schemas</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header.data">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.header.const">Constants</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcap.frame">Frame Header</a><ul>

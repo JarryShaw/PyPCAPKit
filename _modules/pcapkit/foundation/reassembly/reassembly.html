@@ -869,70 +869,6 @@
 
 <span class="sd">        """</span>
 
-    <span class="c1"># submit a buffer that has left the buffers for good</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'_BT'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Submit a buffer that has left :attr:`_buffer` for good, storing its</span>
-<span class="sd">        datagrams exactly once.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            buf: buffer to submit</span>
-<span class="sd">            **kwargs: keyword arguments for :meth:`submit`, which is also</span>
-<span class="sd">                passed ``store``</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The datagrams :meth:`submit` returned, now in :attr:`_dtgram`.</span>
-
-<span class="sd">        A :meth:`submit` that passes ``store`` on to :meth:`_notify` has stored</span>
-<span class="sd">        them before its callbacks ran. One that drops ``store`` stored none,</span>
-<span class="sd">        so they are stored here, after its callbacks.</span>
-
-<span class="sd">        .. versionadded:: 1.7.0</span>
-
-<span class="sd">        """</span>
-        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
-        <span class="n">datagrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="c1"># NOTE: compared by identity, so only the very datagrams ``submit`` returned count as</span>
-        <span class="c1"># stored, even when a callback appended after them.</span>
-        <span class="n">stored</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">[</span><span class="n">size</span><span class="p">:</span><span class="n">size</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stored</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">kept</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">datagram</span>
-                                                <span class="k">for</span> <span class="p">(</span><span class="n">kept</span><span class="p">,</span> <span class="n">datagram</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">stored</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">datagrams</span>
-
-    <span class="c1"># run the callbacks on submitted datagrams</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">:</span> <span class="s1">'list[_DT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Run each callback on the datagrams :meth:`submit` built.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            datagrams: datagrams to report</span>
-<span class="sd">            store: whether their buffer has left :attr:`_buffer` for good, so</span>
-<span class="sd">                they join :attr:`_dtgram` before the callbacks run, and one</span>
-<span class="sd">                that raises cannot lose them</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            ``datagrams``, for :meth:`submit` to return.</span>
-
-<span class="sd">        Every callback runs, through</span>
-<span class="sd">        :func:`~pcapkit.utilities.callbacks.run_callbacks`: the first</span>
-<span class="sd">        :exc:`Exception` one raises propagates once the last has run. While they</span>
-<span class="sd">        run, :meth:`fetch` returns what :attr:`_dtgram` holds, so a callback</span>
-<span class="sd">        reading :attr:`datagram` does not run them again.</span>
-
-<span class="sd">        .. versionadded:: 1.7.0</span>
-
-<span class="sd">        """</span>
-        <span class="c1"># NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).</span>
-        <span class="k">if</span> <span class="n">store</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
-
-        <span class="c1"># NOTE: restored rather than cleared, as a callback feeding a packet nests a run (#2867).</span>
-        <span class="n">held</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span><span class="p">,</span> <span class="kc">True</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">run_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> reassembly'</span><span class="p">)</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span> <span class="o">=</span> <span class="n">held</span>
-        <span class="k">return</span> <span class="n">datagrams</span>
-
     <span class="c1"># abandon timed-out buffers</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Abandon every buffer whose reassembly timeout has elapsed.</span>
@@ -1232,7 +1168,75 @@
 <span class="sd">        unnecessary registry calls and simplify the customisation process.</span>
 
 <span class="sd">        """</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span> <span class="o">=</span> <span class="p">[]</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1"># submit a buffer that has left the buffers for good</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'_BT'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Submit a buffer that has left :attr:`_buffer` for good, storing its</span>
+<span class="sd">        datagrams exactly once.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf: buffer to submit</span>
+<span class="sd">            **kwargs: keyword arguments for :meth:`submit`, which is also</span>
+<span class="sd">                passed ``store``</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The datagrams :meth:`submit` returned, now in :attr:`_dtgram`.</span>
+
+<span class="sd">        A :meth:`submit` that passes ``store`` on to :meth:`_notify` has stored</span>
+<span class="sd">        them before its callbacks ran. One that drops ``store`` stored none,</span>
+<span class="sd">        so they are stored here, after its callbacks.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
+        <span class="n">datagrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># NOTE: compared by identity, so only the very datagrams ``submit`` returned count as</span>
+        <span class="c1"># stored, even when a callback appended after them.</span>
+        <span class="n">stored</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">[</span><span class="n">size</span><span class="p">:</span><span class="n">size</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stored</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">kept</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">datagram</span>
+                                                <span class="k">for</span> <span class="p">(</span><span class="n">kept</span><span class="p">,</span> <span class="n">datagram</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">stored</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">datagrams</span>
+
+    <span class="c1"># run the callbacks on submitted datagrams</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">:</span> <span class="s1">'list[_DT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run each callback on the datagrams :meth:`submit` built.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            datagrams: datagrams to report</span>
+<span class="sd">            store: whether their buffer has left :attr:`_buffer` for good, so</span>
+<span class="sd">                they join :attr:`_dtgram` before the callbacks run, and one</span>
+<span class="sd">                that raises cannot lose them</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``datagrams``, for :meth:`submit` to return.</span>
+
+<span class="sd">        Every callback runs, through</span>
+<span class="sd">        :func:`~pcapkit.utilities.callbacks.run_callbacks`: the first</span>
+<span class="sd">        :exc:`Exception` one raises propagates once the last has run. While they</span>
+<span class="sd">        run, :meth:`fetch` returns what :attr:`_dtgram` holds, so a callback</span>
+<span class="sd">        reading :attr:`datagram` does not run them again.</span>
+
+<span class="sd">        .. versionadded:: 1.7.0</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: stored before the callbacks run, so one that raises cannot lose them (#2856).</span>
+        <span class="k">if</span> <span class="n">store</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">datagrams</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: restored rather than cleared, as a callback feeding a packet nests a run (#2867).</span>
+        <span class="n">held</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">run_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">,</span> <span class="n">datagrams</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> reassembly'</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flag_c</span> <span class="o">=</span> <span class="n">held</span>
+        <span class="k">return</span> <span class="n">datagrams</span></div>
 
 
 

@@ -1093,33 +1093,18 @@ refusal logs nothing and installs no exception hook (<a class="extlink-issue ref
 
 <section id="module-pcapkit.protocols.misc.checksum.ip_pseudo.schema">
 <span id="header-schemas"></span><h3>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.misc.checksum.ip_pseudo.schema" title="Link to this heading">¶</a></h3>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV4_PSEUDO_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.checksum.ip_pseudo.schema.</span></span><span class="sig-name descname"><span class="pre">IPV4_PSEUDO_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV4_PSEUDO_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the IPv4 pseudo-header, <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html#section-3.1"><strong>RFC 793 Section 3.1</strong></a> – source, destination,
-zero, protocol and length.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV4_PSEUDO_LEN</span></code>, now
+<a class="reference internal" href="#pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN" title="pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2896">#2896</a>).</p>
 </div>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV6_PSEUDO_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.checksum.ip_pseudo.schema.</span></span><span class="sig-name descname"><span class="pre">IPV6_PSEUDO_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></span><a class="headerlink" href="#pcapkit.protocols.misc.checksum.ip_pseudo.schema.IPV6_PSEUDO_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the IPv6 pseudo-header, <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a> – source, destination,
-length, zero and next header.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
-</div>
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.checksum.ip_pseudo.schema.</span></span><span class="sig-name descname"><span class="pre">IP_Pseudo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipv6_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipv4_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/checksum/ip_pseudo/schema.html#IP_Pseudo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for the IP pseudo-header.</p>
-<p>The layout follows the source address: <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html#section-3.1"><strong>RFC 793 Section 3.1</strong></a> for IPv4,
-whose length is <a class="reference internal" href="#pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo.ipv4_len" title="pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo.ipv4_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ipv4_len</span></code></a>, and <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a> for IPv6,
+<p>The layout follows the source address: <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html#section-3.1"><strong>RFC 793 Section 3.1</strong></a> for IPv4,
+whose length is <a class="reference internal" href="#pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo.ipv4_len" title="pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo.ipv4_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ipv4_len</span></code></a>, and <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a> for IPv6,
 whose length is <a class="reference internal" href="#pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo.ipv6_len" title="pcapkit.protocols.misc.checksum.ip_pseudo.schema.IP_Pseudo.ipv6_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ipv6_len</span></code></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
@@ -1279,6 +1264,32 @@ for the IPv6 layout, of one octet otherwise.</p>
 </dd></dl>
 
 </section>
+<section id="module-pcapkit.protocols.misc.checksum.ip_pseudo.const">
+<span id="constants"></span><h3>Constants<a class="headerlink" href="#module-pcapkit.protocols.misc.checksum.ip_pseudo.const" title="Link to this heading">¶</a></h3>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.checksum.ip_pseudo.const.</span></span><span class="sig-name descname"><span class="pre">IPV4_PSEUDO_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV4_PSEUDO_LEN" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the IPv4 pseudo-header, <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html#section-3.1"><strong>RFC 793 Section 3.1</strong></a> – source, destination,
+zero, protocol and length.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV6_PSEUDO_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.checksum.ip_pseudo.const.</span></span><span class="sig-name descname"><span class="pre">IPV6_PSEUDO_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></span><a class="headerlink" href="#pcapkit.protocols.misc.checksum.ip_pseudo.const.IPV6_PSEUDO_LEN" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the IPv6 pseudo-header, <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a> – source, destination,
+length, zero and next header.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+</dd></dl>
+
+</section>
 </section>
 </section>
 
@@ -1344,6 +1355,7 @@ for the IPv6 layout, of one octet otherwise.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.checksum.ip_pseudo.data">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.checksum.ip_pseudo.const">Constants</a></li>
 </ul>
 </li>
 </ul>

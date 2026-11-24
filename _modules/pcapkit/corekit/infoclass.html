@@ -604,6 +604,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">,</span> <span class="n">iter_multi_items</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">UnionType</span><span class="p">,</span> <span class="n">final</span><span class="p">,</span> <span class="n">get_annotations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_lock</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.pickle</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReduceAsProtocol2</span><span class="p">,</span> <span class="n">ReduceToItems</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -1832,7 +1833,7 @@
 <span class="w">    </span><span class="sd">"""Map the keys of ``cls`` annotated with an :class:`Info` subclass to it.</span>
 
 <span class="sd">    It is :func:`_nested_types` less the multi-mapping classes</span>
-<span class="sd">    (:class:`_MultiInfo`), and cached alongside.</span>
+<span class="sd">    (:class:`_MultiInfo`), and cached alongside, under the same lock.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Info class.</span>
@@ -1845,9 +1846,13 @@
     <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cached</span>
 
-    <span class="n">nested</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_nested_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-              <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">)}</span>  <span class="c1"># type: dict[str, Type[Info]]</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_INFO_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">import_lock</span><span class="p">:</span>
+        <span class="n">cached</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_NESTED_INFO_CACHE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached</span>
+        <span class="n">nested</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_nested_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                  <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">)}</span>  <span class="c1"># type: dict[str, Type[Info]]</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_INFO_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">nested</span>
 
 
@@ -1887,11 +1892,38 @@
 <span class="sd">        re-resolving the annotations on every call to catch a case that does</span>
 <span class="sd">        not arise in this package costs far more than it saves.</span>
 
+<span class="sd">        The first resolution of a class and its store hold</span>
+<span class="sd">        :data:`~pcapkit.utilities.importlib.import_lock`, as every first import</span>
+<span class="sd">        does, so no thread writes a namespace part way through its copy here.</span>
+<span class="sd">        Where the interpreter lets one, the copy raises "dictionary changed size</span>
+<span class="sd">        during iteration", which keeps the payload of an Ethernet frame whose</span>
+<span class="sd">        first IPv4 parse races others as</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2870`).</span>
+
 <span class="sd">    """</span>
     <span class="n">cached</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_NESTED_CACHE</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cached</span>
 
+    <span class="k">with</span> <span class="n">import_lock</span><span class="p">:</span>
+        <span class="n">cached</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_NESTED_CACHE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached</span>
+        <span class="n">nested</span> <span class="o">=</span> <span class="n">_resolve_nested_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nested</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_nested_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'Type[Info]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Type[Info]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Work out what :func:`_nested_types` caches for ``cls``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cls: Info class.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Mapping of key names to the class annotated for them.</span>
+
+<span class="sd">    """</span>
     <span class="n">nested</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Type[Info]]</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: set[str]</span>
     <span class="k">for</span> <span class="n">cls_</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>  <span class="c1"># pragma: no branch</span>
@@ -1917,8 +1949,6 @@
             <span class="n">info_cls</span> <span class="o">=</span> <span class="n">_as_info_type</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">info_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">nested</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_cls</span>
-
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">nested</span>
 </pre></div>
         </article>

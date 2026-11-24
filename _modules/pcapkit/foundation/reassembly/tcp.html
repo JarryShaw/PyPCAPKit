@@ -903,6 +903,158 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="TCP.submit">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+               <span class="n">expired</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf: :term:`buffer &lt;reasm.tcp.buffer&gt;` dict of reassembled packets</span>
+<span class="sd">            bufid: buffer identifier</span>
+<span class="sd">            expired: whether this buffer is being submitted because</span>
+<span class="sd">                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`</span>
+<span class="sd">                abandoned it under the reassembly timeout</span>
+<span class="sd">            store: whether ``buf`` has left</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`</span>
+<span class="sd">                for good, so its datagrams join</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`</span>
+<span class="sd">                before the callbacks run, and one that raises cannot lose them</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Reassembled :term:`packets &lt;reasm.tcp.datagram&gt;`. Where the payload</span>
+<span class="sd">            is one contiguous run, its ``packet`` is the parse</span>
+<span class="sd">            :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, by this</span>
+<span class="sd">            reassembly's own</span>
+<span class="sd">            :attr:`protocol &lt;pcapkit.foundation.reassembly.reassembly.Reassembly.protocol&gt;`,</span>
+<span class="sd">            deferred to its first read.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            The ``(source, destination)`` pair handed to</span>
+<span class="sd">            :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is a pair</span>
+<span class="sd">            of :class:`~pcapkit.const.reg.apptype.tcp.TCP` members rather than</span>
+<span class="sd">            of the bare port numbers :data:`BufferID` holds (:issue:`2417`), so</span>
+<span class="sd">            a deferred analysis dispatches on the named service rather than on a</span>
+<span class="sd">            number. The resolution is :meth:`Transport._make_port</span>
+<span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport._make_port&gt;`, so it</span>
+<span class="sd">            is the one the maker path uses and cannot drift from it. See</span>
+<span class="sd">            :meth:`_make_ports` for why it is reached through</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through</span>
+<span class="sd">            :attr:`self.protocol</span>
+<span class="sd">            &lt;pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol&gt;`.</span>
+
+<span class="sd">            For a *registered* port that is the very member</span>
+<span class="sd">            :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.protocol.TCP.src&gt;` reads off</span>
+<span class="sd">            a parsed header. For an unassigned one the two are **equal but not</span>
+<span class="sd">            identical**, and not even equally named: the parse path builds its</span>
+<span class="sd">            member through :meth:`EnumField._unregistered_member</span>
+<span class="sd">            &lt;pcapkit.corekit.fields.numbers.EnumField._unregistered_member&gt;`,</span>
+<span class="sd">            whose ``.name`` is ``'&lt;unassigned&gt;'``, where ``get`` builds its own,</span>
+<span class="sd">            named ``'unknown'`` -- measured on port ``50000``. Both are real</span>
+<span class="sd">            members of the same registry carrying the same :attr:`AppType.port</span>
+<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.port&gt;`, which is what</span>
+<span class="sd">            every reader of this pair goes on to use, so the distinction costs</span>
+<span class="sd">            nothing here; it is recorded because "the same member the header</span>
+<span class="sd">            carries" would be an overstatement of it.</span>
+
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">datagram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Datagram] # reassembled datagram</span>
+
+        <span class="c1"># check through every buffer with ACK</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buf</span><span class="o">.</span><span class="n">ack</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Translate this payload buffer's own gap list, kept in unwrapped</span>
+            <span class="c1"># sequence numbers, into offsets into the buffer, which is indexed</span>
+            <span class="c1"># from its own initial sequence number. The buffer-wide hole</span>
+            <span class="c1"># descriptor list cannot answer this: it is shared by every</span>
+            <span class="c1"># acknowledgement number, so another payload buffer filling a hole</span>
+            <span class="c1"># there says nothing about this one, and it never learns of a gap</span>
+            <span class="c1"># opened below the first segment to arrive. Entries are clipped to</span>
+            <span class="c1"># the buffer rather than being allowed to index from its far end.</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+            <span class="n">holes</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buffer</span><span class="o">.</span><span class="n">gap</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">first</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span>            <span class="c1"># inclusive lower bound</span>
+                <span class="n">stop</span> <span class="o">=</span> <span class="n">last</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span> <span class="o">+</span> <span class="mi">1</span>          <span class="c1"># exclusive upper bound</span>
+                <span class="k">if</span> <span class="n">stop</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">length</span><span class="p">:</span>
+                    <span class="k">continue</span>                          <span class="c1"># gap lies outside the buffer</span>
+                <span class="n">holes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">length</span><span class="p">)))</span>
+            <span class="n">holes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="c1"># reported in sequence space proper, i.e. modulo 2**32</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">first</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFF</span><span class="p">,</span> <span class="n">last</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFF</span><span class="p">)</span>
+                             <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buffer</span><span class="o">.</span><span class="n">conflict</span><span class="p">)</span>
+
+            <span class="c1"># How completely this buffer came out, and why it stopped. Derived</span>
+            <span class="c1"># once per buffer, so the two branches cannot disagree about it.</span>
+            <span class="c1"># Any gap entry counts, including one lying wholly outside ``raw``:</span>
+            <span class="c1"># that is the range a split stream left out (see ``reassembly``).</span>
+            <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">buffer</span><span class="o">.</span><span class="n">gap</span> <span class="k">else</span> <span class="p">(</span>
+                <span class="n">Completion</span><span class="o">.</span><span class="n">TIMEOUT</span> <span class="k">if</span> <span class="n">expired</span> <span class="k">else</span> <span class="n">Completion</span><span class="o">.</span><span class="n">PARTIAL</span>
+            <span class="p">)</span>
+
+            <span class="c1"># if this buffer is incomplete</span>
+            <span class="c1"># go through every hole and extract received payload</span>
+            <span class="k">if</span> <span class="n">completion</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">hole_start</span><span class="p">,</span> <span class="n">hole_stop</span><span class="p">)</span> <span class="ow">in</span> <span class="n">holes</span><span class="p">:</span>
+                    <span class="n">byte</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">hole_start</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># strip empty payload</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">hole_stop</span><span class="p">)</span>
+                <span class="n">byte</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># strip empty payload</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>
+                    <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
+                        <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
+                        <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
+                            <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                            <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                            <span class="n">ack</span><span class="o">=</span><span class="n">ack</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">ind</span><span class="p">),</span>
+                        <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
+                        <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                        <span class="n">packet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+            <span class="c1"># if this buffer is complete -- or if it is not, and ``strict``</span>
+            <span class="c1"># asked for one contiguous payload rather than the received runs</span>
+            <span class="c1">#</span>
+            <span class="c1"># NOTE: ``strict=False`` reports the buffer with holes zero-filled, as</span>
+            <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` wants, and ``completed`` says so.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span>
+                <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>
+                    <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
+                        <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
+                        <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
+                            <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                            <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                            <span class="n">ack</span><span class="o">=</span><span class="n">ack</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">ind</span><span class="p">),</span>
+                        <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
+                        <span class="n">payload</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
+                        <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_analyze_payload</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">),</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">_make_ports</span><span class="p">(</span><span class="n">bufid</span><span class="p">),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
+                        <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">datagram</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_unwrap</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Place a 32-bit sequence number on the unwrapped line near ``ref``.</span>
@@ -1309,154 +1461,6 @@
         <span class="c1"># normaliser drifts from the maker path's; it is idempotent on members.</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">TCP_Protocol</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">),</span>  <span class="c1"># pylint: disable=protected-access</span>
                 <span class="n">TCP_Protocol</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">))</span>  <span class="c1"># pylint: disable=protected-access</span></div>
-
-
-<div class="viewcode-block" id="TCP.submit">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
-               <span class="n">expired</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            buf: :term:`buffer &lt;reasm.tcp.buffer&gt;` dict of reassembled packets</span>
-<span class="sd">            bufid: buffer identifier</span>
-<span class="sd">            expired: whether this buffer is being submitted because</span>
-<span class="sd">                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`</span>
-<span class="sd">                abandoned it under the reassembly timeout</span>
-<span class="sd">            store: whether ``buf`` has left</span>
-<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`</span>
-<span class="sd">                for good, so its datagrams join</span>
-<span class="sd">                :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`</span>
-<span class="sd">                before the callbacks run, and one that raises cannot lose them</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Reassembled :term:`packets &lt;reasm.tcp.datagram&gt;`. Where the payload</span>
-<span class="sd">            is one contiguous run, its ``packet`` is the parse</span>
-<span class="sd">            :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, by this</span>
-<span class="sd">            reassembly's own</span>
-<span class="sd">            :attr:`protocol &lt;pcapkit.foundation.reassembly.reassembly.Reassembly.protocol&gt;`,</span>
-<span class="sd">            deferred to its first read.</span>
-
-<span class="sd">        Important:</span>
-<span class="sd">            The ``(source, destination)`` pair handed to</span>
-<span class="sd">            :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is a pair</span>
-<span class="sd">            of :class:`~pcapkit.const.reg.apptype.tcp.TCP` members rather than</span>
-<span class="sd">            of the bare port numbers :data:`BufferID` holds (:issue:`2417`), so</span>
-<span class="sd">            a deferred analysis dispatches on the named service rather than on a</span>
-<span class="sd">            number. The resolution is :meth:`Transport._make_port</span>
-<span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport._make_port&gt;`, so it</span>
-<span class="sd">            is the one the maker path uses and cannot drift from it. See</span>
-<span class="sd">            :meth:`_make_ports` for why it is reached through</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through</span>
-<span class="sd">            :attr:`self.protocol</span>
-<span class="sd">            &lt;pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol&gt;`.</span>
-
-<span class="sd">            For a *registered* port that is the very member</span>
-<span class="sd">            :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.protocol.TCP.src&gt;` reads off</span>
-<span class="sd">            a parsed header. For an unassigned one the two are **equal but not</span>
-<span class="sd">            identical**, and not even equally named: the parse path builds its</span>
-<span class="sd">            member through :meth:`EnumField._unregistered_member</span>
-<span class="sd">            &lt;pcapkit.corekit.fields.numbers.EnumField._unregistered_member&gt;`,</span>
-<span class="sd">            whose ``.name`` is ``'&lt;unassigned&gt;'``, where ``get`` builds its own,</span>
-<span class="sd">            named ``'unknown'`` -- measured on port ``50000``. Both are real</span>
-<span class="sd">            members of the same registry carrying the same :attr:`AppType.port</span>
-<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.port&gt;`, which is what</span>
-<span class="sd">            every reader of this pair goes on to use, so the distinction costs</span>
-<span class="sd">            nothing here; it is recorded because "the same member the header</span>
-<span class="sd">            carries" would be an overstatement of it.</span>
-
-<span class="sd">        .. versionchanged:: 1.7.0</span>
-
-<span class="sd">           ``timeout`` is renamed ``expired``, with no alias (:issue:`2839`).</span>
-
-<span class="sd">        """</span>
-        <span class="n">datagram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Datagram] # reassembled datagram</span>
-
-        <span class="c1"># check through every buffer with ACK</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">ack</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buf</span><span class="o">.</span><span class="n">ack</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># Translate this payload buffer's own gap list, kept in unwrapped</span>
-            <span class="c1"># sequence numbers, into offsets into the buffer, which is indexed</span>
-            <span class="c1"># from its own initial sequence number. The buffer-wide hole</span>
-            <span class="c1"># descriptor list cannot answer this: it is shared by every</span>
-            <span class="c1"># acknowledgement number, so another payload buffer filling a hole</span>
-            <span class="c1"># there says nothing about this one, and it never learns of a gap</span>
-            <span class="c1"># opened below the first segment to arrive. Entries are clipped to</span>
-            <span class="c1"># the buffer rather than being allowed to index from its far end.</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
-            <span class="n">holes</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
-            <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buffer</span><span class="o">.</span><span class="n">gap</span><span class="p">:</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="n">first</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span>            <span class="c1"># inclusive lower bound</span>
-                <span class="n">stop</span> <span class="o">=</span> <span class="n">last</span> <span class="o">-</span> <span class="n">buffer</span><span class="o">.</span><span class="n">isn</span> <span class="o">+</span> <span class="mi">1</span>          <span class="c1"># exclusive upper bound</span>
-                <span class="k">if</span> <span class="n">stop</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">length</span><span class="p">:</span>
-                    <span class="k">continue</span>                          <span class="c1"># gap lies outside the buffer</span>
-                <span class="n">holes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">length</span><span class="p">)))</span>
-            <span class="n">holes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-            <span class="c1"># reported in sequence space proper, i.e. modulo 2**32</span>
-            <span class="n">conflict</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">first</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFF</span><span class="p">,</span> <span class="n">last</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFF</span><span class="p">)</span>
-                             <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">buffer</span><span class="o">.</span><span class="n">conflict</span><span class="p">)</span>
-
-            <span class="c1"># How completely this buffer came out, and why it stopped. Derived</span>
-            <span class="c1"># once per buffer, so the two branches cannot disagree about it.</span>
-            <span class="c1"># Any gap entry counts, including one lying wholly outside ``raw``:</span>
-            <span class="c1"># that is the range a split stream left out (see ``reassembly``).</span>
-            <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">buffer</span><span class="o">.</span><span class="n">gap</span> <span class="k">else</span> <span class="p">(</span>
-                <span class="n">Completion</span><span class="o">.</span><span class="n">TIMEOUT</span> <span class="k">if</span> <span class="n">expired</span> <span class="k">else</span> <span class="n">Completion</span><span class="o">.</span><span class="n">PARTIAL</span>
-            <span class="p">)</span>
-
-            <span class="c1"># if this buffer is incomplete</span>
-            <span class="c1"># go through every hole and extract received payload</span>
-            <span class="k">if</span> <span class="n">completion</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="p">(</span><span class="n">hole_start</span><span class="p">,</span> <span class="n">hole_stop</span><span class="p">)</span> <span class="ow">in</span> <span class="n">holes</span><span class="p">:</span>
-                    <span class="n">byte</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">hole_start</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># strip empty payload</span>
-                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
-                    <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">hole_stop</span><span class="p">)</span>
-                <span class="n">byte</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
-                <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># strip empty payload</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
-                <span class="k">if</span> <span class="n">data</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>
-                    <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
-                        <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
-                        <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
-                            <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                            <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
-                            <span class="n">ack</span><span class="o">=</span><span class="n">ack</span><span class="p">,</span>
-                        <span class="p">),</span>
-                        <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">ind</span><span class="p">),</span>
-                        <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
-                        <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-                        <span class="n">packet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-
-            <span class="c1"># if this buffer is complete -- or if it is not, and ``strict``</span>
-            <span class="c1"># asked for one contiguous payload rather than the received runs</span>
-            <span class="c1">#</span>
-            <span class="c1"># NOTE: ``strict=False`` reports the buffer with holes zero-filled, as</span>
-            <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` wants, and ``completed`` says so.</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">payload</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span>
-                <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>
-                    <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
-                        <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
-                        <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
-                            <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                            <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
-                            <span class="n">ack</span><span class="o">=</span><span class="n">ack</span><span class="p">,</span>
-                        <span class="p">),</span>
-                        <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">ind</span><span class="p">),</span>
-                        <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
-                        <span class="n">payload</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
-                        <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_analyze_payload</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">),</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">_make_ports</span><span class="p">(</span><span class="n">bufid</span><span class="p">),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
-                        <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">datagram</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

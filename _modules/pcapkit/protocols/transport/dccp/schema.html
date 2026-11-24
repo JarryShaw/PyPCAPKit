@@ -582,7 +582,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.dccp.feature</span><span class="w"> </span><span class="kn">import</span> <span class="n">Feature</span> <span class="k">as</span> <span class="n">Enum_Feature</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.dccp.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.dccp.packet_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">PacketType</span> <span class="k">as</span> <span class="n">Enum_PacketType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.dccp.reset_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResetCode</span> <span class="k">as</span> <span class="n">Enum_ResetCode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportProtocol</span> <span class="k">as</span> <span class="n">Enum_TransportProtocol</span>
@@ -592,6 +591,9 @@
                                             <span class="n">UInt32Field</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ACK_TYPES</span><span class="p">,</span> <span class="n">DCCP_MIN_HEADER_LEN</span><span class="p">,</span>
+                                                    <span class="n">DCCP_SINGLE_OCTET_OPTION_MAX</span><span class="p">,</span> <span class="n">RESET_TYPE</span><span class="p">,</span>
+                                                    <span class="n">SERVICE_TYPES</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -607,34 +609,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-
-<span class="c1">#: Length of the generic header with 24-bit sequence numbers (``X`` clear), the</span>
-<span class="c1">#: shortest a DCCP header can be, :rfc:`4340#section-5.1`. The one home of this</span>
-<span class="c1">#: value (:issue:`1739`); it is fixed by the RFC, so it is never configurable.</span>
-<span class="n">DCCP_MIN_HEADER_LEN</span> <span class="o">=</span> <span class="mi">12</span>
-
-<span class="c1">#: Option types up to this one are single octets, without a length,</span>
-<span class="c1">#: :rfc:`4340#section-5.8`.</span>
-<span class="n">DCCP_SINGLE_OCTET_OPTION_MAX</span> <span class="o">=</span> <span class="mi">31</span>
-
-<span class="c1">#: Packet types carrying an Acknowledgement Number Subheader -- every one</span>
-<span class="c1">#: :rfc:`4340#section-5` defines but DCCP-Request and DCCP-Data. DCCP-Listen</span>
-<span class="c1">#: (:rfc:`5596#section-2.2.1`) carries none either.</span>
-<span class="n">ACK_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
-    <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Response</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Ack</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_DataAck</span><span class="p">,</span>
-    <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_CloseReq</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Close</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Reset</span><span class="p">,</span>
-    <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Sync</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_SyncAck</span><span class="p">,</span>
-<span class="p">})</span>
-
-<span class="c1">#: Packet types carrying a Service Code -- DCCP-Request, DCCP-Response and</span>
-<span class="c1">#: DCCP-Listen (:rfc:`4340#section-5.2`, :rfc:`5596#section-2.2.1`).</span>
-<span class="n">SERVICE_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
-    <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Request</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Response</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Listen</span><span class="p">,</span>
-<span class="p">})</span>
-
-<span class="c1">#: Packet type of DCCP-Reset, which carries a Reset Code and three Data octets,</span>
-<span class="c1">#: :rfc:`4340#section-5.6`.</span>
-<span class="n">RESET_TYPE</span> <span class="o">=</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Reset</span>
 
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>

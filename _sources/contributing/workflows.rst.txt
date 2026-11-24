@@ -746,7 +746,11 @@ cancelled at 95% of its cap or later timed out and counts, even in a run that re
 ``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the ``ci-timing-report`` artifact (90
-days), and the newest earlier report is the next run's baseline. The
+days), and the newest earlier report is the next run's baseline. ``H3`` alone
+compares only like windows (:issue:`2915`): its baseline is the newest earlier
+report of the same ``days``, whose figures each report carries forward, so a
+one-day dispatch is not the next weekly report's. With none, ``H3`` is not
+evaluated, a p90 over its floor is ``W9``, and a note says so. The
 ``discussion`` job then posts it to the ``ci-timing: weekly CI timing report``
 thread (see `CI Reports`_). It is not a
 ``workflow_run`` on Unit Tests, which would add a job per run to a runner pool
@@ -786,7 +790,7 @@ measured on the issue:
      - ``protocols (rest)``: 319 s
    * - ``H3``
      - ``W9``'s p90 is at or over 30 min and 25% or more above the baseline's (needs a
-       baseline)
+       baseline of the same ``days``)
      - --
    * - ``H4``
      - a job's or capped step's linear fit reaches its cap within 14 days
@@ -840,6 +844,12 @@ The finding keeps its ``H`` id and says it is non-blocking. A
 KTLO leg past its job's ``timeout-minutes`` is still cancelled, and its check run
 reads red, though since :issue:`1738` nothing gating waits on it, so that warning is worth
 acting on before the cap.
+
+A job's trend, and so its ``H4``, is fitted only on the runs that reached its test
+step (``TEST_STEPS`` in the script, :issue:`2915`): a leg that failed installing its
+dependencies after seconds times no tests, and a few such runs opening the window
+read as a steep rise. They stay in the tables and in ``H1``'s p90, and a note names
+their jobs. A job with no test step, such as ``Lint``, is fitted on every run.
 
 No cap finding fires on a job the workflow no longer runs, such as a leg renamed or
 split inside the window (:issue:`2904`); its rows stay in the tables, marked *(no longer
@@ -940,7 +950,7 @@ one runs everything:
      - skipped
      - skipped
    * - ``unit-tests.yml``: ``project-tests``
-     - :file:`tests/project` and the root-level modules under plain unittest, a half
+     - :file:`tests/project` and the root-level modules under plain unittest, a part
        per cell, and the docs readers
      - the project pins, a half per cell
    * - ``experimental.yml``: ``experimental``, ``windows``
@@ -1609,16 +1619,16 @@ answer. Under ``gate-only``, ``gate``'s full suite runs the pins with everything
 one interpreter, in file order and without xdist, which is a question about the module
 rather than the Python version.
 
-``project-tests`` runs a cell per half of :file:`tests/project` (:issue:`2798`), as its
-docs-only path, run whole, comes near the job's cap. Both paths cut at
-``PROJECT_BOUNDARY`` in :file:`tests/_tiers.py`, which ``--half`` of
-:file:`util/run_unittest_leg.py` cuts at too: a cell runs its half of the pins on a
-code diff, and its half of the leg on a docs-only one, half 1 the other docs readers
-as well. ``unittest-ordering``'s ``project`` cells cut the leg in three instead, at the
-names its ``SHARD_BOUNDARIES`` holds, a ``--part`` per cell, as its cells for the rest
-of :file:`tests/protocols` do (:issue:`2913`).
+``project-tests`` runs as several cells (:issue:`2798`), as its docs-only path, run
+whole, comes near the job's cap, and its matrix reads the diff. On a code diff a cell
+runs a half of the pins, cut at ``PROJECT_BOUNDARY`` in :file:`tests/_tiers.py`. On a
+docs-only one a cell runs a part of the leg, a ``--part`` of
+:file:`util/run_unittest_leg.py`, part 1 the other docs readers as well
+(:issue:`2916`): the parts ``unittest-ordering``'s ``project`` cells run, cut at the
+names the script's ``SHARD_BOUNDARIES`` holds (:issue:`2913`), so the two jobs cannot
+cut the leg in different places, and a code diff starts its halves alone.
 :file:`tests/project/test_unittest_ordering_shards.py` fails when a module or a pin
-runs in no cell of a job or in two.
+runs in no cell of a job or in two, or when the two jobs' parts differ.
 
 A pin's skip where ``tomllib`` is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner's own ``python3``, and
@@ -1794,6 +1804,10 @@ every version the matrices hold, the experimental tier included. :file:`util/apt
 ``/usr/bin/python3``, as the apt shell needed no interpreter of the leg's, and runs
 under ``sudo`` the commands that shell ran. Its ``plan`` and ``install`` both read
 the job's ``APT_PACKAGES``, so the cache key always describes the set installed.
+A ``plan`` whose updates both fail warns, sets ``degraded`` and writes no key, so
+the cache steps skip and ``install``, with its fallback mirror, updates again: a
+slow mirror costs the cache rather than the job, and a dead one still fails
+``install`` (:issue:`2923`).
 Its bounds are still ``timeout`` run as root inside ``sudo``, given no option, so
 uutils' ``timeout`` behaves as GNU's (:issue:`2020`),
 and the bound reaches
@@ -1848,7 +1862,7 @@ script not listed here is CI-only.
        to regenerate :file:`CHANGELOG.md`.
    * - :file:`util/run_unittest_leg.py`
      - ``unit-tests.yml``'s ``unittest-ordering``, once per cell, and
-       ``project-tests``, once per half of :file:`tests/project`.
+       ``project-tests`` on a docs-only diff, once per part of :file:`tests/project`.
      - ``python util/run_unittest_leg.py <directory>`` over the :file:`tests/`
        directory a change touches, when it moves imports or module state (see
        :doc:`conventions/test-coverage`).

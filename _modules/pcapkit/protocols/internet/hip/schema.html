@@ -605,6 +605,7 @@
                                             <span class="n">UInt32Field</span><span class="p">,</span> <span class="n">UInt64Field</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.hip.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">LOCATOR_SET_LEN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
@@ -1066,29 +1067,6 @@
 
 
 
-<span class="c1">#: Packet-context key under which :class:`LocatorSetParameter` keeps its own</span>
-<span class="c1">#: ``Length`` for the benefit of :func:`locator_set_padding_len`.</span>
-<span class="c1">#:</span>
-<span class="c1">#: It exists because the contents of ``LOCATOR_SET`` are a</span>
-<span class="c1">#: :class:`~pcapkit.corekit.fields.collections.ListField` of nested schemas,</span>
-<span class="c1">#: and a nested schema packed through one **shares the</span>
-<span class="c1">#: enclosing packet context**: :meth:`Schema.pack</span>
-<span class="c1">#: &lt;pcapkit.protocols.schema.Schema.pack&gt;` opens with</span>
-<span class="c1">#: ``packet.update(self.__dict__)``, and :class:`Locator` declares a ``len`` of</span>
-<span class="c1">#: its own. So by the time ``padding`` is evaluated -- after the list, since</span>
-<span class="c1">#: fields are packed in declaration order -- ``pkt['len']`` is the *last</span>
-<span class="c1">#: locator's* ``len``, not the parameter's -- 4 for any IPv6 locator,</span>
-<span class="c1">#: whatever the locator count.</span>
-<span class="c1">#:</span>
-<span class="c1">#: The shadowing is specific to the packing path. :meth:`Schema.unpack</span>
-<span class="c1">#: &lt;pcapkit.protocols.schema.Schema.unpack&gt;` hands each field</span>
-<span class="c1">#: ``packet.copy()``, so nested writes do not propagate back and ``pkt['len']``</span>
-<span class="c1">#: stays the parameter's there. Snapshotting under a key no nested schema</span>
-<span class="c1">#: declares is what makes one callback correct on both paths rather than</span>
-<span class="c1">#: accidentally correct on one.</span>
-<span class="n">LOCATOR_SET_LEN</span> <span class="o">=</span> <span class="s1">'__locator_set_len__'</span>
-
-
 <div class="viewcode-block" id="locator_set_len_callback">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.schema.locator_set_len_callback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">locator_set_len_callback</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="s1">'ListField'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -1099,8 +1077,9 @@
 <span class="sd">    :meth:`ListField.__call__</span>
 <span class="sd">    &lt;pcapkit.corekit.fields.collections.ListField.__call__&gt;` runs when the field</span>
 <span class="sd">    is resolved against the packet -- i.e. before any nested :class:`Locator` has</span>
-<span class="sd">    been packed into it. See :data:`LOCATOR_SET_LEN` for why the snapshot is</span>
-<span class="sd">    needed at all.</span>
+<span class="sd">    been packed into it. See</span>
+<span class="sd">    :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` for why the</span>
+<span class="sd">    snapshot is needed at all.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        field: The field being resolved. Unused; the signature is</span>
@@ -1119,8 +1098,8 @@
 
 <span class="sd">    The same arithmetic as :func:`parameter_padding_len` -- it defers to it</span>
 <span class="sd">    rather than repeating it -- but read off the snapshot</span>
-<span class="sd">    :func:`locator_set_len_callback` took, for the reason :data:`LOCATOR_SET_LEN`</span>
-<span class="sd">    gives.</span>
+<span class="sd">    :func:`locator_set_len_callback` took, for the reason</span>
+<span class="sd">    :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` gives.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: Parameter unpacked schema.</span>
@@ -1288,8 +1267,9 @@
     <span class="c1">#: List of locators.</span>
     <span class="c1">#:</span>
     <span class="c1">#: The ``length`` callback is the parameter's own ``Length``, and that is</span>
-    <span class="c1">#: correct on the unpacking path for the reason :data:`LOCATOR_SET_LEN`</span>
-    <span class="c1">#: gives -- nothing has shadowed ``len`` yet when this field is resolved,</span>
+    <span class="c1">#: correct on the unpacking path for the reason</span>
+    <span class="c1">#: :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` gives --</span>
+    <span class="c1">#: nothing has shadowed ``len`` yet when this field is resolved,</span>
     <span class="c1">#: since ``type`` and ``len`` are the only fields ahead of it. What matters</span>
     <span class="c1">#: is the *quantity* it is handed: :rfc:`7401` Section 5.2.1's ``Length`` is</span>
     <span class="c1">#: a byte count, not the 4-octet units :rfc:`8046#section-4` gives</span>
@@ -1315,8 +1295,9 @@
     <span class="c1">#: Not :func:`parameter_padding_len`, which every other parameter in this</span>
     <span class="c1">#: module uses, but :func:`locator_set_padding_len` -- the same arithmetic</span>
     <span class="c1">#: read off a snapshot of this parameter's ``Length`` rather than off</span>
-    <span class="c1">#: ``pkt['len']`` directly. :data:`LOCATOR_SET_LEN` documents why the direct</span>
-    <span class="c1">#: read does not work here: the nested :class:`Locator` schemas share this</span>
+    <span class="c1">#: ``pkt['len']`` directly.</span>
+    <span class="c1">#: :data:`~pcapkit.protocols.internet.hip.const.LOCATOR_SET_LEN` documents why</span>
+    <span class="c1">#: the direct read does not work here: the nested :class:`Locator` schemas share this</span>
     <span class="c1">#: parameter's packet context while they pack, and their own ``len``</span>
     <span class="c1">#: overwrites it before ``padding`` is reached.</span>
     <span class="c1">#:</span>

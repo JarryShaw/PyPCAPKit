@@ -187,7 +187,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -585,7 +585,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -1044,15 +1044,11 @@ with no CRLF is a start line with zero field lines, which
 </div>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol._HTTP2_PREFACE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.http.protocol.</span></span><span class="sig-name descname"><span class="pre">_HTTP2_PREFACE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0\r\n\r\nSM\r\n\r\n'</span></span><a class="headerlink" href="#pcapkit.protocols.application.http.protocol._HTTP2_PREFACE" title="Link to this definition">¶</a></dt>
-<dd><p>The HTTP/2 connection preface (<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>), which opens every
-HTTP/2 connection. Its method <code class="docutils literal notranslate"><span class="pre">PRI</span></code> is registered as one no actual client
-uses (<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7540.html#section-11.6"><strong>RFC 7540 Section 11.6</strong></a>), so a prefix match identifies HTTP/2, and
-<a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP._guess_version" title="pcapkit.protocols.application.http.protocol.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version()</span></code></a> tests it before any parse.</p>
-</dd></dl>
-
+<section id="module-pcapkit.protocols.application.http.const">
+<span id="constants"></span><h2>Constants<a class="headerlink" href="#module-pcapkit.protocols.application.http.const" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
@@ -1060,6 +1056,7 @@ uses (<span class="target" id="index-11"></span><a class="rfc reference external
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol</a></p>
 </aside>
 </aside>
+</section>
 </section>
 
         </article>
@@ -1105,8 +1102,27 @@ uses (<span class="target" id="index-11"></span><a class="rfc reference external
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">HTTP - Hypertext Transfer Protocol</a><ul>
+<li><a class="reference internal" href="#module-pcapkit.protocols.application.http.const">Constants</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

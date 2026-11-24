@@ -22,7 +22,8 @@ House Conventions
      package, modules and classes are named and imported, and how quietly a
      next-layer fallback keeps a refused layer as
      :class:`~pcapkit.protocols.misc.raw.protocol.Raw`;
-   * :ref:`protocol-member-order` -- the order of members in a protocol class body;
+   * :ref:`protocol-member-order` -- the order of members in a protocol class body,
+     and the section comment each member of any class sits under;
    * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
    * :ref:`process` -- the repository rather than any of its code;
    * :ref:`documentation` -- the prose itself, on these pages and in the API
@@ -33,8 +34,8 @@ House Conventions
      :mod:`pcapkit.corekit` a support module belongs in, how a ``utilities``
      module is named, where a context variable lives, where a schema helper used
      outside the schema layer or outside its own protocol lives, where a format
-     constant or a helper referenced beyond its own protocol lives, and what reads
-     a capture cut;
+     constant or a helper referenced beyond its own protocol lives, where a
+     protocol's other constants live, and what reads a capture cut;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`, how its callbacks and those of

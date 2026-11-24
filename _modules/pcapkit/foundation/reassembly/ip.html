@@ -689,42 +689,6 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_rectify_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Adapt a fragment's header into the reassembled datagram's header.</span>
-
-<span class="sd">        The base implementation returns ``header`` unchanged, which is what IPv4</span>
-<span class="sd">        wants: an IPv4 fragment's header needs nothing removed to describe the</span>
-<span class="sd">        datagram it belongs to. IPv6 overrides this, because</span>
-<span class="sd">        :rfc:`8200#section-4.5` drops the Fragment header from the reassembled</span>
-<span class="sd">        packet and hands its Next Header field to the header before it.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            header: Raw header octets of the fragment at fragment offset zero.</span>
-<span class="sd">            proto: Payload protocol type, i.e. ``bufid[3]``.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Header octets to keep for the reassembled datagram.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">header</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_header_overhead</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Count the header octets that a datagram's length field includes.</span>
-
-<span class="sd">        The base implementation counts them all, which is what IPv4 wants: its</span>
-<span class="sd">        Total Length is the header's length plus the data's</span>
-<span class="sd">        (:rfc:`791#section-3.1`). IPv6 overrides this, because its Payload</span>
-<span class="sd">        Length leaves out the fixed header (:rfc:`8200#section-3`).</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            length: Length of the datagram's header.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            How many of those octets the length field counts.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">length</span>
-
 <div class="viewcode-block" id="IP.reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.reassembly">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -926,150 +890,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_is_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Tell whether a buffer holds its whole datagram.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            buf: buffer to check</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Whether the total data length is known, the datagram is no longer</span>
-<span class="sd">            than it may be, and every 8-octet block up to it is marked</span>
-<span class="sd">            received.</span>
-
-<span class="sd">        A datagram is no longer than</span>
-<span class="sd">        :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` with its header, as</span>
-<span class="sd">        :meth:`_header_overhead` counts it: IPv4's Total Length counts the</span>
-<span class="sd">        whole header, and IPv6's Payload Length every header but the fixed one.</span>
-<span class="sd">        A longer datagram cannot be declared, so it is never complete, and</span>
-<span class="sd">        Linux's ``ip_frag_reasm`` and ``ip6_frag_reasm`` reject it too</span>
-<span class="sd">        (:issue:`1585`). A fragment with Total Length 0 declares no length, so</span>
-<span class="sd">        a buffer it has grown past that bounds the datagram by its own length</span>
-<span class="sd">        alone (:issue:`1555`). Checking ``RCVBT`` does not show either bound:</span>
-<span class="sd">        slicing it past its end stops silently, so the blocks past the buffer</span>
-<span class="sd">        would read as received (:issue:`1566`).</span>
-
-<span class="sd">        """</span>
-        <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">IP_MAX_LENGTH</span><span class="p">:</span>
-            <span class="n">limit</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">limit</span> <span class="o">=</span> <span class="n">IP_MAX_LENGTH</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_overhead</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">header</span><span class="p">))</span>
-        <span class="k">return</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">TDL</span> <span class="o">&lt;=</span> <span class="n">limit</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[:(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">])</span>
-
-<div class="viewcode-block" id="IP._detect_conflicts">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP._detect_conflicts">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_detect_conflicts</span><span class="p">(</span><span class="n">rcvbt</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">tdl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span>
-                           <span class="n">start</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Find where an arriving fragment disagrees with already-received bytes.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            rcvbt: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT`</span>
-<span class="sd">                as it stood *before* the arriving fragment's own bits are set,</span>
-<span class="sd">                i.e. what earlier fragments had already claimed, in 8-octet</span>
-<span class="sd">                blocks.</span>
-<span class="sd">            tdl: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.TDL`</span>
-<span class="sd">                as it stood *before* the arriving fragment's own update --</span>
-<span class="sd">                ``-1`` while the final fragment (``MF=0``) has not yet</span>
-<span class="sd">                arrived.</span>
-<span class="sd">            datagram: this buffer's data buffer, read *before* the arriving</span>
-<span class="sd">                fragment's payload is written into it.</span>
-<span class="sd">            payload: the arriving fragment's payload.</span>
-<span class="sd">            start: absolute octet offset of ``payload[0]`` in ``datagram``,</span>
-<span class="sd">                i.e. this fragment's ``FO``.</span>
-<span class="sd">            stop: absolute octet offset one past ``payload[-1]``, i.e.</span>
-<span class="sd">                ``start + len(payload)``.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            ``(first, last)`` absolute octet ranges, inclusive, where</span>
-<span class="sd">            ``datagram`` and ``payload`` disagree over octets this buffer had</span>
-<span class="sd">            already genuinely received.</span>
-
-<span class="sd">        :rfc:`791` marks receipt in 8-octet blocks (``RCVBT``), coarser than</span>
-<span class="sd">        the octet granularity a conflict needs, so an octet is compared only if</span>
-<span class="sd">        its block is marked. A fragment's ``FO`` is *always* a multiple of 8 --</span>
-<span class="sd">        it is wire-encoded in 8-octet units -- and the ``RCVBT`` update in</span>
-<span class="sd">        :meth:`reassembly` marks the blocks a fragment fills whole. Only the</span>
-<span class="sd">        final fragment, held in full, also marks its partial last block, across</span>
-<span class="sd">        its full 8 octets even though only the octets up to ``tdl`` were ever</span>
-<span class="sd">        actually written, the rest still being ``datagram``'s zero-fill.</span>
-
-<span class="sd">        So once ``tdl`` is known, an octet at or past it is excluded here</span>
-<span class="sd">        regardless of its block's bit -- comparing it would manufacture a</span>
-<span class="sd">        conflict against a byte nothing ever really sent, over a distinction</span>
-<span class="sd">        :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need</span>
-<span class="sd">        anyway, since it never reports a payload past ``tdl``. Before ``tdl``</span>
-<span class="sd">        is known (``tdl &lt; 0``), every set ``rcvbt`` bit came from a non-final</span>
-<span class="sd">        fragment's whole block and is exact on its own, with nothing to clip.</span>
-
-<span class="sd">        Any other partial last block -- a non-final, truncated or clipped</span>
-<span class="sd">        fragment's -- is written but left clear (:issue:`1567`), so its octets</span>
-<span class="sd">        are deliberately not compared: a later fragment that overwrites them</span>
-<span class="sd">        records no conflict, whether or not it agrees (:issue:`1585`). Telling</span>
-<span class="sd">        which octets of a clear block were written would take receipt state per</span>
-<span class="sd">        octet, which ``RCVBT`` does not keep. Linux never compares a non-final</span>
-<span class="sd">        fragment's partial block either: it trims an IPv4 one to a multiple of</span>
-<span class="sd">        8 (``ip_frag_queue``) and drops an IPv6 one (``ip6_frag_queue``).</span>
-
-<span class="sd">        """</span>
-        <span class="n">conflicts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="n">stop</span> <span class="o">-</span> <span class="n">start</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
-            <span class="n">pos</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">index</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">rcvbt</span><span class="p">[</span><span class="n">pos</span> <span class="o">//</span> <span class="mi">8</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">tdl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="n">tdl</span><span class="p">)):</span>
-                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">datagram</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="n">payload</span><span class="p">[</span><span class="n">index</span><span class="p">]:</span>
-                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">continue</span>
-            <span class="n">run_stop</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="k">while</span> <span class="n">run_stop</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
-                <span class="n">pos</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">run_stop</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">rcvbt</span><span class="p">[</span><span class="n">pos</span> <span class="o">//</span> <span class="mi">8</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">tdl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="n">tdl</span><span class="p">)):</span>
-                    <span class="k">break</span>
-                <span class="k">if</span> <span class="n">datagram</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="n">payload</span><span class="p">[</span><span class="n">run_stop</span><span class="p">]:</span>
-                    <span class="k">break</span>
-                <span class="n">run_stop</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">conflicts</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span> <span class="o">+</span> <span class="n">index</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">run_stop</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">run_stop</span>
-        <span class="k">return</span> <span class="n">conflicts</span></div>
-
-
-<div class="viewcode-block" id="IP._find_overlap">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP._find_overlap">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_find_overlap</span><span class="p">(</span><span class="n">extent</span><span class="p">:</span> <span class="s1">'list[tuple[int, int, bool]]'</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                      <span class="n">stop</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, int, bool]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Find a merged fragment that an arriving one overlaps.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            extent: this buffer's</span>
-<span class="sd">                :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.extent`,</span>
-<span class="sd">                sorted and pairwise disjoint.</span>
-<span class="sd">            start: the arriving fragment's first octet, i.e. its ``FO``.</span>
-<span class="sd">            stop: one past the arriving fragment's last octet.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The extent of a merged fragment sharing an octet with the arriving</span>
-<span class="sd">            one, or :data:`None` if none does.</span>
-
-<span class="sd">        Since the extents are disjoint, only the last one starting at or before</span>
-<span class="sd">        ``start`` and the first one starting after it can reach the arriving</span>
-<span class="sd">        fragment.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">stop</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">after</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_right</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">after</span> <span class="ow">and</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">start</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">after</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">extent</span><span class="p">)</span> <span class="ow">and</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span><span class="p">]</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
-
-
 <div class="viewcode-block" id="IP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.submit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, _AT, int, TransType]'</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
@@ -1227,6 +1047,190 @@
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span></div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rectify_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Adapt a fragment's header into the reassembled datagram's header.</span>
+
+<span class="sd">        The base implementation returns ``header`` unchanged, which is what IPv4</span>
+<span class="sd">        wants: an IPv4 fragment's header needs nothing removed to describe the</span>
+<span class="sd">        datagram it belongs to. IPv6 overrides this, because</span>
+<span class="sd">        :rfc:`8200#section-4.5` drops the Fragment header from the reassembled</span>
+<span class="sd">        packet and hands its Next Header field to the header before it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            header: Raw header octets of the fragment at fragment offset zero.</span>
+<span class="sd">            proto: Payload protocol type, i.e. ``bufid[3]``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Header octets to keep for the reassembled datagram.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">header</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_header_overhead</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Count the header octets that a datagram's length field includes.</span>
+
+<span class="sd">        The base implementation counts them all, which is what IPv4 wants: its</span>
+<span class="sd">        Total Length is the header's length plus the data's</span>
+<span class="sd">        (:rfc:`791#section-3.1`). IPv6 overrides this, because its Payload</span>
+<span class="sd">        Length leaves out the fixed header (:rfc:`8200#section-3`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of the datagram's header.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            How many of those octets the length field counts.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">length</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Tell whether a buffer holds its whole datagram.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf: buffer to check</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether the total data length is known, the datagram is no longer</span>
+<span class="sd">            than it may be, and every 8-octet block up to it is marked</span>
+<span class="sd">            received.</span>
+
+<span class="sd">        A datagram is no longer than</span>
+<span class="sd">        :data:`~pcapkit.corekit.const.ipheader.IP_MAX_LENGTH` with its header, as</span>
+<span class="sd">        :meth:`_header_overhead` counts it: IPv4's Total Length counts the</span>
+<span class="sd">        whole header, and IPv6's Payload Length every header but the fixed one.</span>
+<span class="sd">        A longer datagram cannot be declared, so it is never complete, and</span>
+<span class="sd">        Linux's ``ip_frag_reasm`` and ``ip6_frag_reasm`` reject it too</span>
+<span class="sd">        (:issue:`1585`). A fragment with Total Length 0 declares no length, so</span>
+<span class="sd">        a buffer it has grown past that bounds the datagram by its own length</span>
+<span class="sd">        alone (:issue:`1555`). Checking ``RCVBT`` does not show either bound:</span>
+<span class="sd">        slicing it past its end stops silently, so the blocks past the buffer</span>
+<span class="sd">        would read as received (:issue:`1566`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">IP_MAX_LENGTH</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">IP_MAX_LENGTH</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_overhead</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">header</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">TDL</span> <span class="o">&lt;=</span> <span class="n">limit</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[:(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">])</span>
+
+<div class="viewcode-block" id="IP._detect_conflicts">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP._detect_conflicts">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_detect_conflicts</span><span class="p">(</span><span class="n">rcvbt</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">tdl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span>
+                           <span class="n">start</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Find where an arriving fragment disagrees with already-received bytes.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            rcvbt: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT`</span>
+<span class="sd">                as it stood *before* the arriving fragment's own bits are set,</span>
+<span class="sd">                i.e. what earlier fragments had already claimed, in 8-octet</span>
+<span class="sd">                blocks.</span>
+<span class="sd">            tdl: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.TDL`</span>
+<span class="sd">                as it stood *before* the arriving fragment's own update --</span>
+<span class="sd">                ``-1`` while the final fragment (``MF=0``) has not yet</span>
+<span class="sd">                arrived.</span>
+<span class="sd">            datagram: this buffer's data buffer, read *before* the arriving</span>
+<span class="sd">                fragment's payload is written into it.</span>
+<span class="sd">            payload: the arriving fragment's payload.</span>
+<span class="sd">            start: absolute octet offset of ``payload[0]`` in ``datagram``,</span>
+<span class="sd">                i.e. this fragment's ``FO``.</span>
+<span class="sd">            stop: absolute octet offset one past ``payload[-1]``, i.e.</span>
+<span class="sd">                ``start + len(payload)``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``(first, last)`` absolute octet ranges, inclusive, where</span>
+<span class="sd">            ``datagram`` and ``payload`` disagree over octets this buffer had</span>
+<span class="sd">            already genuinely received.</span>
+
+<span class="sd">        :rfc:`791` marks receipt in 8-octet blocks (``RCVBT``), coarser than</span>
+<span class="sd">        the octet granularity a conflict needs, so an octet is compared only if</span>
+<span class="sd">        its block is marked. A fragment's ``FO`` is *always* a multiple of 8 --</span>
+<span class="sd">        it is wire-encoded in 8-octet units -- and the ``RCVBT`` update in</span>
+<span class="sd">        :meth:`reassembly` marks the blocks a fragment fills whole. Only the</span>
+<span class="sd">        final fragment, held in full, also marks its partial last block, across</span>
+<span class="sd">        its full 8 octets even though only the octets up to ``tdl`` were ever</span>
+<span class="sd">        actually written, the rest still being ``datagram``'s zero-fill.</span>
+
+<span class="sd">        So once ``tdl`` is known, an octet at or past it is excluded here</span>
+<span class="sd">        regardless of its block's bit -- comparing it would manufacture a</span>
+<span class="sd">        conflict against a byte nothing ever really sent, over a distinction</span>
+<span class="sd">        :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need</span>
+<span class="sd">        anyway, since it never reports a payload past ``tdl``. Before ``tdl``</span>
+<span class="sd">        is known (``tdl &lt; 0``), every set ``rcvbt`` bit came from a non-final</span>
+<span class="sd">        fragment's whole block and is exact on its own, with nothing to clip.</span>
+
+<span class="sd">        Any other partial last block -- a non-final, truncated or clipped</span>
+<span class="sd">        fragment's -- is written but left clear (:issue:`1567`), so its octets</span>
+<span class="sd">        are deliberately not compared: a later fragment that overwrites them</span>
+<span class="sd">        records no conflict, whether or not it agrees (:issue:`1585`). Telling</span>
+<span class="sd">        which octets of a clear block were written would take receipt state per</span>
+<span class="sd">        octet, which ``RCVBT`` does not keep. Linux never compares a non-final</span>
+<span class="sd">        fragment's partial block either: it trims an IPv4 one to a multiple of</span>
+<span class="sd">        8 (``ip_frag_queue``) and drops an IPv6 one (``ip6_frag_queue``).</span>
+
+<span class="sd">        """</span>
+        <span class="n">conflicts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">stop</span> <span class="o">-</span> <span class="n">start</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">index</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">rcvbt</span><span class="p">[</span><span class="n">pos</span> <span class="o">//</span> <span class="mi">8</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">tdl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="n">tdl</span><span class="p">)):</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">datagram</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="n">payload</span><span class="p">[</span><span class="n">index</span><span class="p">]:</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="n">run_stop</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="n">run_stop</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">run_stop</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">rcvbt</span><span class="p">[</span><span class="n">pos</span> <span class="o">//</span> <span class="mi">8</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">tdl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="n">tdl</span><span class="p">)):</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">datagram</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="n">payload</span><span class="p">[</span><span class="n">run_stop</span><span class="p">]:</span>
+                    <span class="k">break</span>
+                <span class="n">run_stop</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">conflicts</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span> <span class="o">+</span> <span class="n">index</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">run_stop</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">run_stop</span>
+        <span class="k">return</span> <span class="n">conflicts</span></div>
+
+
+<div class="viewcode-block" id="IP._find_overlap">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP._find_overlap">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_overlap</span><span class="p">(</span><span class="n">extent</span><span class="p">:</span> <span class="s1">'list[tuple[int, int, bool]]'</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                      <span class="n">stop</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, int, bool]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Find a merged fragment that an arriving one overlaps.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            extent: this buffer's</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.extent`,</span>
+<span class="sd">                sorted and pairwise disjoint.</span>
+<span class="sd">            start: the arriving fragment's first octet, i.e. its ``FO``.</span>
+<span class="sd">            stop: one past the arriving fragment's last octet.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The extent of a merged fragment sharing an octet with the arriving</span>
+<span class="sd">            one, or :data:`None` if none does.</span>
+
+<span class="sd">        Since the extents are disjoint, only the last one starting at or before</span>
+<span class="sd">        ``start`` and the first one starting after it can reach the arriving</span>
+<span class="sd">        fragment.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">stop</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">after</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_right</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">after</span> <span class="ow">and</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">start</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">after</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">extent</span><span class="p">)</span> <span class="ow">and</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">extent</span><span class="p">[</span><span class="n">after</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 </div>
 
 </pre></div>

@@ -586,7 +586,8 @@
 <span class="sd">:mod:`pcapkit.const` packages (:issue:`2729`) and the :mod:`pcapkit.protocols`</span>
 <span class="sd">packages (:issue:`2730`) import their exports that way. It also holds</span>
 <span class="sd">:data:`import_lock`, under which every such first import, and that of a</span>
-<span class="sd">:class:`~pcapkit.corekit.module.ModuleDescriptor`, is made.</span>
+<span class="sd">:class:`~pcapkit.corekit.module.ModuleDescriptor`, is made, and the namespaces</span>
+<span class="sd">those imports write are copied.</span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
 
@@ -601,13 +602,16 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'lazy_exports'</span><span class="p">,</span> <span class="s1">'import_lock'</span><span class="p">]</span>
 
-<span class="c1"># NOTE: no pcapkit module resolves a lazy name or a descriptor on import: imported directly,</span>
-<span class="c1"># it would wait on this lock holding its own import lock, which the holder may need (#2771).</span>
+<span class="c1"># NOTE: no pcapkit module resolves a lazy name, a descriptor or an Info's nested types on import: imported</span>
+<span class="c1"># directly, it would wait on this lock holding its own import lock, which the holder may need (#2771).</span>
 <span class="c1">#: threading.RLock: Held by every first import :func:`lazy_exports`</span>
 <span class="c1">#: makes, and by :attr:`ModuleDescriptor.klass</span>
 <span class="c1">#: &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` when its module is not imported</span>
 <span class="c1">#: yet, so threads make them one at a time; unserialised, they deadlock the import</span>
-<span class="c1">#: system (:issue:`2771`). Re-entrant, as one first import can nest another.</span>
+<span class="c1">#: system (:issue:`2771`). Re-entrant, as one first import can nest another. Also</span>
+<span class="c1">#: held by the first :meth:`Info.from_dict &lt;pcapkit.corekit.infoclass.Info.from_dict&gt;`</span>
+<span class="c1">#: of a class, which copies namespaces those imports and its own cache write</span>
+<span class="c1">#: (:issue:`2870`).</span>
 <span class="n">import_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
 
 

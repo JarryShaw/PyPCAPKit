@@ -692,6 +692,30 @@ tracing does not otherwise pay, and tracing’s per-packet cost is something
 this package deliberately keeps low. Nothing is reassembled, parsed
 or retained unless it is asked for.</p>
 </div>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.name" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol name of current flow tracing object.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The same value is also available as a class attribute, from the
+property of the same name on
+<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.protocol">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">pcapkit.protocols.protocol.ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol of current flow tracing object.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The same value is also available as a class attribute, from the
+property of the same name on
+<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a>.</p>
+</div>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__">
 <span class="sig-name descname"><span class="pre">__callback_fn__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow._IT" title="pcapkit.foundation.traceflow.traceflow._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.__callback_fn__" title="Link to this definition">¶</a></dt>
@@ -807,6 +831,66 @@ so on, so that each flow keeps its own output file; see
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.finish">
+<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP.finish"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="Link to this definition">¶</a></dt>
+<dd><p>Finalise every flow still being traced.</p>
+<p>The end of the capture can prove a bidirectional flow is over, as a new
+connection on the same endpoints can. Draining the buffer here is what lets a flow keep the
+acknowledgement that completes its close and <em>still</em> have its callback
+fired, rather than having to choose between the two.</p>
+<p>Idempotent: it drains the buffer, so a second call finds nothing to do.
+It also closes every output file still kept open, as
+<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.finish</span></code></a>
+does, even when a callback raises: the flow it was handed is finalised,
+and the flows after it stay in the buffer, unfinalised, for a later call.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submit traced TCP flows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Traced TCP flow (<a class="reference internal" href="#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This reports flows still being traced <strong>without</strong> finalising them, so
+that reading
+<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.index" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.index"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TraceFlow.index</span></code></a>
+part-way through a capture cannot disturb the tracing – popping a
+buffer there would strand the rest of its conversation in a second
+flow. Such a flow is therefore reported here but has not fired its
+callback; <a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a> is what does that, at the end of the capture.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">analyze=True</span></code> that makes an open flow’s
+<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index.packet" title="pcapkit.foundation.traceflow.data.tcp.Index.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Index.packet</span></code></a>
+a <strong>snapshot</strong>, and a mid-capture one. The
+<a class="reference internal" href="index.html#pcapkit.foundation.traceflow.data.data.Deferred" title="pcapkit.foundation.traceflow.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> resolves when
+it is first read and is then fixed in place, so it holds the flow as it
+stood at <em>that read</em> – not as it stood when this method returned, and
+not as it will stand once the conversation ends. Read it while the flow
+is open and the datagrams cover only the segments seen so far; segments
+arriving afterwards are reassembled into the buffer but cannot reach an
+already-resolved snapshot, and nothing on the returned
+<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>
+distinguishes one from the final result that <a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a> produces.</p>
+<p>This call’s own cache is not the cause and does not soften it: both
+<a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.trace" title="pcapkit.foundation.traceflow.tcp.TCP.trace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">trace()</span></code></a> and <a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a> clear <code class="docutils literal notranslate"><span class="pre">__cached__['submit']</span></code>, so a
+later call rebuilds the tuple with fresh
+<a class="reference internal" href="index.html#pcapkit.foundation.traceflow.data.data.Deferred" title="pcapkit.foundation.traceflow.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> objects. It is
+the <em>previously returned</em>
+<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>, if a caller kept
+one, that cannot catch up. For a result that is final, read after
+<a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<p class="rubric">Utilities</p>
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP._unique_label">
 <span class="sig-name descname"><span class="pre">_unique_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP._unique_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP._unique_label" title="Link to this definition">¶</a></dt>
 <dd><p>Make a new flow’s label unique within this tracer.</p>
@@ -886,66 +970,6 @@ still follow. It is used to tell a new connection’s SYN from the peer’s
 SYN-ACK, which is a question the flag alone cannot answer.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.finish">
-<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP.finish"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="Link to this definition">¶</a></dt>
-<dd><p>Finalise every flow still being traced.</p>
-<p>The end of the capture can prove a bidirectional flow is over, as a new
-connection on the same endpoints can. Draining the buffer here is what lets a flow keep the
-acknowledgement that completes its close and <em>still</em> have its callback
-fired, rather than having to choose between the two.</p>
-<p>Idempotent: it drains the buffer, so a second call finds nothing to do.
-It also closes every output file still kept open, as
-<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.finish</span></code></a>
-does, even when a callback raises: the flow it was handed is finalised,
-and the flows after it stay in the buffer, unfinalised, for a later call.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.tcp.TCP.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/tcp.html#TCP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.tcp.TCP.submit" title="Link to this definition">¶</a></dt>
-<dd><p>Submit traced TCP flows.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Traced TCP flow (<a class="reference internal" href="#term-trace.tcp.index"><span class="xref std std-term">trace.tcp.index</span></a>).</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This reports flows still being traced <strong>without</strong> finalising them, so
-that reading
-<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.index" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.index"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TraceFlow.index</span></code></a>
-part-way through a capture cannot disturb the tracing – popping a
-buffer there would strand the rest of its conversation in a second
-flow. Such a flow is therefore reported here but has not fired its
-callback; <a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a> is what does that, at the end of the capture.</p>
-<p>With <code class="docutils literal notranslate"><span class="pre">analyze=True</span></code> that makes an open flow’s
-<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index.packet" title="pcapkit.foundation.traceflow.data.tcp.Index.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Index.packet</span></code></a>
-a <strong>snapshot</strong>, and a mid-capture one. The
-<a class="reference internal" href="index.html#pcapkit.foundation.traceflow.data.data.Deferred" title="pcapkit.foundation.traceflow.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> resolves when
-it is first read and is then fixed in place, so it holds the flow as it
-stood at <em>that read</em> – not as it stood when this method returned, and
-not as it will stand once the conversation ends. Read it while the flow
-is open and the datagrams cover only the segments seen so far; segments
-arriving afterwards are reassembled into the buffer but cannot reach an
-already-resolved snapshot, and nothing on the returned
-<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>
-distinguishes one from the final result that <a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a> produces.</p>
-<p>This call’s own cache is not the cause and does not soften it: both
-<a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.trace" title="pcapkit.foundation.traceflow.tcp.TCP.trace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">trace()</span></code></a> and <a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a> clear <code class="docutils literal notranslate"><span class="pre">__cached__['submit']</span></code>, so a
-later call rebuilds the tuple with fresh
-<a class="reference internal" href="index.html#pcapkit.foundation.traceflow.data.data.Deferred" title="pcapkit.foundation.traceflow.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> objects. It is
-the <em>previously returned</em>
-<a class="reference internal" href="#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>, if a caller kept
-one, that cannot catch up. For a result that is final, read after
-<a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.finish" title="pcapkit.foundation.traceflow.tcp.TCP.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a>.</p>
-</div>
-</dd></dl>
-
-<p class="rubric">Properties</p>
 </dd></dl>
 
 <section id="terminology">

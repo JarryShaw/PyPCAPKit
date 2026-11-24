@@ -1052,12 +1052,6 @@ of the eight flags is read there.</p>
 
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.protocol.SUBTYPE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.protocol.</span></span><span class="sig-name descname"><span class="pre">SUBTYPE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><span class="pre">ManagementSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.control_subtype.ControlSubtype" title="pcapkit.const.ieee802_11.control_subtype.ControlSubtype"><span class="pre">ControlSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.data_subtype.DataSubtype" title="pcapkit.const.ieee802_11.data_subtype.DataSubtype"><span class="pre">DataSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype" title="pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype"><span class="pre">ExtensionSubtype</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.protocol.SUBTYPE" title="Link to this definition">¶</a></dt>
-<dd><p>Subtype registry of each frame type (IEEE Std 802.11-2020, Table 9-1).</p>
-</dd></dl>
-
 </section>
 <section id="module-pcapkit.protocols.link.ieee802_11.schema">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.link.ieee802_11.schema" title="Link to this heading">¶</a></h2>
@@ -1141,8 +1135,8 @@ subfield</em>).</p></li>
 both set, QoS Control when the QoS bit (B7) of its subtype is set, and HT
 Control when that bit and +HTC/Order are both set (§9.3.2, <em>Data frames</em>).</p></li>
 <li><p>A Control frame carries Address 2 for the subtypes in
-<a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.schema.CONTROL_WITH_ADDR2" title="pcapkit.protocols.link.ieee802_11.schema.CONTROL_WITH_ADDR2"><code class="xref py py-data docutils literal notranslate"><span class="pre">CONTROL_WITH_ADDR2</span></code></a>, and Address 1 alone for CTS and Ack (§9.3.1,
-<em>Control frames</em>).</p></li>
+<a class="reference internal" href="#pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2" title="pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2"><code class="xref py py-data docutils literal notranslate"><span class="pre">CONTROL_WITH_ADDR2</span></code></a>, and
+Address 1 alone for CTS and Ack (§9.3.1, <em>Control frames</em>).</p></li>
 <li><p>Every other frame – a reserved Control subtype, a Control Wrapper, whose
 octets after Address 1 are Carried Frame Control and HT Control, and
 every Extension frame – is read as the minimal frame format that §9.2.3,
@@ -1208,17 +1202,6 @@ off the wire.</p>
 <dd><p>HT Control.</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.schema.CONTROL_WITH_ADDR2">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.schema.</span></span><span class="sig-name descname"><span class="pre">CONTROL_WITH_ADDR2</span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.schema.CONTROL_WITH_ADDR2" title="Link to this definition">¶</a></dt>
-<dd><p>Control frame subtypes whose MAC header carries a TA (or BSSID) as
-Address 2 after the RA; IEEE Std 802.11-2020 §9.3.1, <em>Control frames</em>, and
-IEEE Std 802.11ax-2021 for <code class="docutils literal notranslate"><span class="pre">Trigger</span></code>. CTS and Ack carry the RA alone. A
-Control Frame Extension frame takes the six octets after the RA as Address 2,
-as the Linux kernel’s <code class="docutils literal notranslate"><span class="pre">ieee80211_hdrlen()</span></code> reads it; in a DMG DTS
-(extension 6) they are NAV-SA rather than a TA, and NAV-DA stays in the body.</p>
 </dd></dl>
 
 </section>
@@ -1463,6 +1446,29 @@ and bit 1 clear, and <code class="docutils literal notranslate"><span class="pre
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.protocols.link.ieee802_11.const">
+<span id="constants"></span><h2>Constants<a class="headerlink" href="#module-pcapkit.protocols.link.ieee802_11.const" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.const.SUBTYPE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.const.</span></span><span class="sig-name descname"><span class="pre">SUBTYPE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><span class="pre">ManagementSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.control_subtype.ControlSubtype" title="pcapkit.const.ieee802_11.control_subtype.ControlSubtype"><span class="pre">ControlSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.data_subtype.DataSubtype" title="pcapkit.const.ieee802_11.data_subtype.DataSubtype"><span class="pre">DataSubtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/ieee802_11.html#pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype" title="pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype"><span class="pre">ExtensionSubtype</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.const.SUBTYPE" title="Link to this definition">¶</a></dt>
+<dd><p>Subtype registry of each frame type (IEEE Std 802.11-2020, Table 9-1).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ieee802_11.const.</span></span><span class="sig-name descname"><span class="pre">CONTROL_WITH_ADDR2</span></span><a class="headerlink" href="#pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2" title="Link to this definition">¶</a></dt>
+<dd><p>Control frame subtypes whose MAC header carries a TA (or BSSID) as
+Address 2 after the RA; IEEE Std 802.11-2020 §9.3.1, <em>Control frames</em>, and
+IEEE Std 802.11ax-2021 for <code class="docutils literal notranslate"><span class="pre">Trigger</span></code>. CTS and Ack carry the RA alone. A
+Control Frame Extension frame takes the six octets after the RA as Address 2,
+as the Linux kernel’s <code class="docutils literal notranslate"><span class="pre">ieee80211_hdrlen()</span></code> reads it; in a DMG DTS
+(extension 6) they are NAV-SA rather than a TA, and NAV-DA stays in the body.</p>
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
@@ -1534,6 +1540,7 @@ it cites one: §9.2.4.1.10, §9.2.4.6, §9.2.4.7 and §9.8.</p>
 <li><a class="reference internal" href="#scope">Scope</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.link.ieee802_11.schema">Header Schemas</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.link.ieee802_11.data">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.link.ieee802_11.const">Constants</a></li>
 </ul>
 </li>
 </ul>

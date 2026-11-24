@@ -2414,18 +2414,6 @@ body as given.</p>
 </dl>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.HEADER_LENGTH">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">HEADER_LENGTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.HEADER_LENGTH" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the fixed header, before the sections.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.schema.POINTER_LIMIT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.schema.</span></span><span class="sig-name descname"><span class="pre">POINTER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16383</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.schema.POINTER_LIMIT" title="Link to this definition">¶</a></dt>
-<dd><p>Largest offset a compression pointer can carry, in its 14 bits.</p>
-</dd></dl>
-
 <section id="module-pcapkit.protocols.application.dns.data">
 <span id="data-models"></span><h3>Data Models<a class="headerlink" href="#module-pcapkit.protocols.application.dns.data" title="Link to this heading">¶</a></h3>
 <dl class="py class">
@@ -3081,6 +3069,21 @@ carries, its fields named as its specification names them.</p>
 
 </dd></dl>
 
+<section id="module-pcapkit.protocols.application.dns.const">
+<span id="constants"></span><h3>Constants<a class="headerlink" href="#module-pcapkit.protocols.application.dns.const" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.const.HEADER_LENGTH">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.const.</span></span><span class="sig-name descname"><span class="pre">HEADER_LENGTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.const.HEADER_LENGTH" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the fixed header, before the sections (<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1035.html#section-4.1.1"><strong>RFC 1035 Section 4.1.1</strong></a>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dns.const.POINTER_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dns.const.</span></span><span class="sig-name descname"><span class="pre">POINTER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16383</span></span><a class="headerlink" href="#pcapkit.protocols.application.dns.const.POINTER_LIMIT" title="Link to this definition">¶</a></dt>
+<dd><p>Largest offset a compression pointer can carry, in its 14 bits.</p>
+</dd></dl>
+
+</section>
 </section>
 </section>
 
@@ -3149,7 +3152,10 @@ carries, its fields named as its specification names them.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#rdata">RDATA</a></li>
-<li><a class="reference internal" href="#edns-0-options">EDNS(0) Options</a></li>
+<li><a class="reference internal" href="#edns-0-options">EDNS(0) Options</a><ul>
+<li><a class="reference internal" href="#module-pcapkit.protocols.application.dns.const">Constants</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

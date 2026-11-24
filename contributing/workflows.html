@@ -1330,7 +1330,11 @@ cancelled at 95% of its cap or later timed out and counts, even in a run that re
 <code class="docutils literal notranslate"><span class="pre">cancelled</span></code> for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the <code class="docutils literal notranslate"><span class="pre">ci-timing-report</span></code> artifact (90
-days), and the newest earlier report is the next run’s baseline. The
+days), and the newest earlier report is the next run’s baseline. <code class="docutils literal notranslate"><span class="pre">H3</span></code> alone
+compares only like windows (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2915">#2915</a>): its baseline is the newest earlier
+report of the same <code class="docutils literal notranslate"><span class="pre">days</span></code>, whose figures each report carries forward, so a
+one-day dispatch is not the next weekly report’s. With none, <code class="docutils literal notranslate"><span class="pre">H3</span></code> is not
+evaluated, a p90 over its floor is <code class="docutils literal notranslate"><span class="pre">W9</span></code>, and a note says so. The
 <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job then posts it to the <code class="docutils literal notranslate"><span class="pre">ci-timing:</span> <span class="pre">weekly</span> <span class="pre">CI</span> <span class="pre">timing</span> <span class="pre">report</span></code>
 thread (see <a class="reference internal" href="#ci-reports">CI Reports</a>). It is not a
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> on Unit Tests, which would add a job per run to a runner pool
@@ -1376,7 +1380,7 @@ measured on the issue:</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">H3</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">W9</span></code>’s p90 is at or over 30 min and 25% or more above the baseline’s (needs a
-baseline)</p></td>
+baseline of the same <code class="docutils literal notranslate"><span class="pre">days</span></code>)</p></td>
 <td><p>–</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">H4</span></code></p></td>
@@ -1442,6 +1446,11 @@ The finding keeps its <code class="docutils literal notranslate"><span class="pr
 KTLO leg past its job’s <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is still cancelled, and its check run
 reads red, though since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a> nothing gating waits on it, so that warning is worth
 acting on before the cap.</p>
+<p>A job’s trend, and so its <code class="docutils literal notranslate"><span class="pre">H4</span></code>, is fitted only on the runs that reached its test
+step (<code class="docutils literal notranslate"><span class="pre">TEST_STEPS</span></code> in the script, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2915">#2915</a>): a leg that failed installing its
+dependencies after seconds times no tests, and a few such runs opening the window
+read as a steep rise. They stay in the tables and in <code class="docutils literal notranslate"><span class="pre">H1</span></code>’s p90, and a note names
+their jobs. A job with no test step, such as <code class="docutils literal notranslate"><span class="pre">Lint</span></code>, is fitted on every run.</p>
 <p>No cap finding fires on a job the workflow no longer runs, such as a leg renamed or
 split inside the window (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2904">#2904</a>); its rows stay in the tables, marked <em>(no longer
 run)</em>, and a note names it. A leg’s old name still matches its job’s template, so the
@@ -1541,7 +1550,7 @@ one runs everything:</p>
 <td><p>skipped</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">project-tests</span></code></p></td>
-<td><p><code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> and the root-level modules under plain unittest, a half
+<td><p><code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> and the root-level modules under plain unittest, a part
 per cell, and the docs readers</p></td>
 <td><p>the project pins, a half per cell</p></td>
 </tr>
@@ -2194,16 +2203,16 @@ answer. Under <code class="docutils literal notranslate"><span class="pre">gate-
 <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code> cells keep them, as they ask how a module runs in
 one interpreter, in file order and without xdist, which is a question about the module
 rather than the Python version.</p>
-<p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs a cell per half of <code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2798">#2798</a>), as its
-docs-only path, run whole, comes near the job’s cap. Both paths cut at
-<code class="docutils literal notranslate"><span class="pre">PROJECT_BOUNDARY</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>, which <code class="docutils literal notranslate"><span class="pre">--half</span></code> of
-<code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code> cuts at too: a cell runs its half of the pins on a
-code diff, and its half of the leg on a docs-only one, half 1 the other docs readers
-as well. <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code> cells cut the leg in three instead, at the
-names its <code class="docutils literal notranslate"><span class="pre">SHARD_BOUNDARIES</span></code> holds, a <code class="docutils literal notranslate"><span class="pre">--part</span></code> per cell, as its cells for the rest
-of <code class="file docutils literal notranslate"><span class="pre">tests/protocols</span></code> do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2913">#2913</a>).
+<p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs as several cells (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2798">#2798</a>), as its docs-only path, run
+whole, comes near the job’s cap, and its matrix reads the diff. On a code diff a cell
+runs a half of the pins, cut at <code class="docutils literal notranslate"><span class="pre">PROJECT_BOUNDARY</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>. On a
+docs-only one a cell runs a part of the leg, a <code class="docutils literal notranslate"><span class="pre">--part</span></code> of
+<code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code>, part 1 the other docs readers as well
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2916">#2916</a>): the parts <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code> cells run, cut at the
+names the script’s <code class="docutils literal notranslate"><span class="pre">SHARD_BOUNDARIES</span></code> holds (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2913">#2913</a>), so the two jobs cannot
+cut the leg in different places, and a code diff starts its halves alone.
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_unittest_ordering_shards.py</span></code> fails when a module or a pin
-runs in no cell of a job or in two.</p>
+runs in no cell of a job or in two, or when the two jobs’ parts differ.</p>
 <p>A pin’s skip where <code class="docutils literal notranslate"><span class="pre">tomllib</span></code> is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> checks those skips in a child
@@ -2395,6 +2404,10 @@ every version the matrices hold, the experimental tier included. <code class="fi
 <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>, as the apt shell needed no interpreter of the leg’s, and runs
 under <code class="docutils literal notranslate"><span class="pre">sudo</span></code> the commands that shell ran. Its <code class="docutils literal notranslate"><span class="pre">plan</span></code> and <code class="docutils literal notranslate"><span class="pre">install</span></code> both read
 the job’s <code class="docutils literal notranslate"><span class="pre">APT_PACKAGES</span></code>, so the cache key always describes the set installed.
+A <code class="docutils literal notranslate"><span class="pre">plan</span></code> whose updates both fail warns, sets <code class="docutils literal notranslate"><span class="pre">degraded</span></code> and writes no key, so
+the cache steps skip and <code class="docutils literal notranslate"><span class="pre">install</span></code>, with its fallback mirror, updates again: a
+slow mirror costs the cache rather than the job, and a dead one still fails
+<code class="docutils literal notranslate"><span class="pre">install</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2923">#2923</a>).
 Its bounds are still <code class="docutils literal notranslate"><span class="pre">timeout</span></code> run as root inside <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, given no option, so
 uutils’ <code class="docutils literal notranslate"><span class="pre">timeout</span></code> behaves as GNU’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2020">#2020</a>),
 and the bound reaches
@@ -2452,7 +2465,7 @@ to regenerate <code class="file docutils literal notranslate"><span class="pre">
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, once per cell, and
-<code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, once per half of <code class="file docutils literal notranslate"><span class="pre">tests/project</span></code>.</p></td>
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> on a docs-only diff, once per part of <code class="file docutils literal notranslate"><span class="pre">tests/project</span></code>.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/run_unittest_leg.py</span> <span class="pre">&lt;directory&gt;</span></code> over the <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>
 directory a change touches, when it moves imports or module state (see
 <a class="reference internal" href="conventions/test-coverage.html"><span class="doc">Testing a Change</span></a>).</p></td>

@@ -156,9 +156,6 @@ An extraction runs in this order; a third-party engine implements its own
 
    .. automethod:: register_dumper
    .. automethod:: register_engine
-
-   .. automethod:: _register_internal_engine
-
    .. automethod:: register_reassembly
    .. automethod:: make_reassembly
 
@@ -171,7 +168,6 @@ An extraction runs in this order; a third-party engine implements its own
    .. automethod:: make_name
 
    .. automethod:: record_header
-   .. automethod:: _open_output
    .. automethod:: record_frames
 
    .. rubric:: Data Models
@@ -187,6 +183,8 @@ An extraction runs in this order; a third-party engine implements its own
 
    .. rubric:: Utilities
 
+   .. automethod:: _register_internal_engine
+   .. automethod:: _open_output
    .. automethod:: _owns_input
    .. automethod:: _note_eof_progress
    .. automethod:: _cleanup

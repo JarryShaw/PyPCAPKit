@@ -645,12 +645,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.content_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContentType</span> <span class="k">as</span> <span class="n">Enum_ContentType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_TLS_VERSION_MAJOR</span><span class="p">,</span> <span class="n">_WIRE_CONTENT_TYPES</span><span class="p">,</span>
-                                                        <span class="n">SSL</span><span class="p">,</span> <span class="n">TLS13_VERSION</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_TLS_VERSION_MAJOR</span><span class="p">,</span> <span class="n">_WIRE_CONTENT_TYPES</span><span class="p">,</span>
+                                                     <span class="n">TLS13_VERSION</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.sslv2.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientHello</span> <span class="k">as</span> <span class="n">SSLv2_ClientHello</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.sslv2.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServerHello</span> <span class="k">as</span> <span class="n">SSLv2_ServerHello</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.sslv2.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSLv2</span> <span class="k">as</span> <span class="n">SSLv2_Data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.sslv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSLv2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.tls.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_RECORD_HEADER_LENGTH</span><span class="p">,</span> <span class="n">_SSLV3_VERSION</span><span class="p">,</span>
+                                                     <span class="n">_TLS13_LEGACY_VERSIONS</span><span class="p">,</span> <span class="n">_TLS_VERSION_ALIASES</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.tls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLS</span> <span class="k">as</span> <span class="n">Data_TLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.tls.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLS</span> <span class="k">as</span> <span class="n">Schema_TLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholding</span>
@@ -673,26 +676,6 @@
 <span class="c1">#: (:issue:`1538`), so its first import holds</span>
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_TCP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_TCP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">)</span>
-
-<span class="c1">#: Length of the record header -- content type, legacy version and length</span>
-<span class="c1">#: (:rfc:`9846#section-5.1`).</span>
-<span class="n">_RECORD_HEADER_LENGTH</span> <span class="o">=</span> <span class="mi">5</span>
-
-<span class="c1">#: Legacy record version SSLv3 carries, the one tier with its own :attr:`~TLS.name`.</span>
-<span class="n">_SSLV3_VERSION</span> <span class="o">=</span> <span class="mh">0x0300</span>
-
-<span class="c1">#: Legacy record version to alias. TLS 1.3 reuses ``0x0303``; see</span>
-<span class="c1">#: :data:`_TLS13_LEGACY_VERSIONS`.</span>
-<span class="n">_TLS_VERSION_ALIASES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">_SSLV3_VERSION</span><span class="p">:</span> <span class="s1">'SSLv3'</span><span class="p">,</span>
-    <span class="mh">0x0301</span><span class="p">:</span> <span class="s1">'TLS 1.0'</span><span class="p">,</span>
-    <span class="mh">0x0302</span><span class="p">:</span> <span class="s1">'TLS 1.1'</span><span class="p">,</span>
-    <span class="mh">0x0303</span><span class="p">:</span> <span class="s1">'TLS 1.2'</span><span class="p">,</span>
-<span class="p">}</span>  <span class="c1"># type: dict[int, Literal["SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2"]]</span>
-
-<span class="c1">#: Legacy record versions a TLS 1.3 record may carry -- ``0x0303`` always, and</span>
-<span class="c1">#: ``0x0301`` on an initial ``ClientHello`` (:rfc:`9846#section-5.1`).</span>
-<span class="n">_TLS13_LEGACY_VERSIONS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="mh">0x0301</span><span class="p">,</span> <span class="mh">0x0303</span><span class="p">})</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_opens_whole_record</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>

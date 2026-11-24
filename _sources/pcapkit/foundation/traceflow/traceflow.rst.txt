@@ -96,12 +96,14 @@ built-in TCP flow tracing class derive from.
    .. automethod:: finish
    .. automethod:: close
 
-   .. automethod:: _write
-
    .. rubric:: Data Models
 
    .. automethod:: __init_subclass__
    .. automethod:: __call__
+
+   .. rubric:: Utilities
+
+   .. automethod:: _write
 
 Internal Definitions
 --------------------

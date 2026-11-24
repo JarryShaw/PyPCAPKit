@@ -686,6 +686,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_CID_MAX_LENGTH</span><span class="p">,</span> <span class="n">_CID_OFFSET</span><span class="p">,</span>
+                                                      <span class="n">_CIPHERTEXT_MIN_LENGTH</span><span class="p">,</span>
+                                                      <span class="n">_DTLS13_LEGACY_VERSIONS</span><span class="p">,</span> <span class="n">_DTLSV1_0_VERSION</span><span class="p">,</span>
+                                                      <span class="n">_DTLSV1_2_VERSION</span><span class="p">,</span> <span class="n">_LEGACY_HEADER_LENGTH</span><span class="p">,</span>
+                                                      <span class="n">_UNIFIED_PREFIX</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Data_DTLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCIDCiphertext</span> <span class="k">as</span> <span class="n">Data_DTLSCIDCiphertext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCiphertext</span> <span class="k">as</span> <span class="n">Data_DTLSCiphertext</span>
@@ -693,9 +698,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Schema_DTLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCIDCiphertext</span> <span class="k">as</span> <span class="n">Schema_DTLSCIDCiphertext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCiphertext</span> <span class="k">as</span> <span class="n">Schema_DTLSCiphertext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_DTLS_VERSION_MAJOR</span><span class="p">,</span> <span class="n">_WIRE_CONTENT_TYPES</span><span class="p">,</span>
+                                                     <span class="n">DTLS13_VERSION</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConnectionId</span> <span class="k">as</span> <span class="n">Data_ConnectionId</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_DTLS_VERSION_MAJOR</span><span class="p">,</span> <span class="n">_WIRE_CONTENT_TYPES</span><span class="p">,</span>
-                                                        <span class="n">DTLS13_VERSION</span><span class="p">,</span> <span class="n">SSL</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaughtByCaller</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -716,35 +722,12 @@
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_UDP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_UDP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.udp'</span><span class="p">,</span> <span class="s1">'UDP'</span><span class="p">)</span>
 
-<span class="c1">#: Length of a legacy record header -- content type, legacy version, epoch,</span>
-<span class="c1">#: sequence number and length (:rfc:`9147#section-4`).</span>
-<span class="n">_LEGACY_HEADER_LENGTH</span> <span class="o">=</span> <span class="mi">13</span>
-
-<span class="c1">#: Legacy record version DTLS 1.0 carries (:rfc:`4347#section-4.1`).</span>
-<span class="n">_DTLSV1_0_VERSION</span> <span class="o">=</span> <span class="mh">0xFEFF</span>
-<span class="c1">#: Legacy record version DTLS 1.2 carries, and the value DTLS 1.3 freezes its</span>
-<span class="c1">#: own legacy-format records at (:rfc:`9147#section-4`).</span>
-<span class="n">_DTLSV1_2_VERSION</span> <span class="o">=</span> <span class="mh">0xFEFD</span>
-<span class="c1">#: Legacy record versions a DTLS 1.3 record may carry -- DTLS 1.2's always, and</span>
-<span class="c1">#: DTLS 1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4`).</span>
-<span class="n">_DTLS13_LEGACY_VERSIONS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">_DTLSV1_0_VERSION</span><span class="p">,</span> <span class="n">_DTLSV1_2_VERSION</span><span class="p">})</span>
-<span class="c1">#: Top three bits of a unified-header first octet, ``001`` (:rfc:`9147#section-4.1`).</span>
-<span class="n">_UNIFIED_PREFIX</span> <span class="o">=</span> <span class="mb">0b001</span>
-<span class="c1">#: Shortest ciphertext a unified-header record may carry. The record-number</span>
-<span class="c1">#: sample is taken from its first 16 octets (:rfc:`9147#section-4.2.3`).</span>
-<span class="n">_CIPHERTEXT_MIN_LENGTH</span> <span class="o">=</span> <span class="mi">16</span>
-<span class="c1">#: Offset of a ``tls12_cid`` record's connection ID, after its content type,</span>
-<span class="c1">#: legacy version, epoch and sequence number (:rfc:`9146#section-4`).</span>
-<span class="n">_CID_OFFSET</span> <span class="o">=</span> <span class="mi">11</span>
-<span class="c1">#: Longest connection ID. Its length is one octet (:rfc:`9146#section-3`).</span>
-<span class="n">_CID_MAX_LENGTH</span> <span class="o">=</span> <span class="mi">255</span>
-
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_is_cid</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Whether ``value`` can be a record's connection ID.</span>
 
 <span class="sd">    A ``tls12_cid`` record's is one or more octets (:rfc:`9146#section-4`),</span>
-<span class="sd">    and at most :data:`_CID_MAX_LENGTH`.</span>
+<span class="sd">    and at most :data:`~pcapkit.protocols.application.dtls.const._CID_MAX_LENGTH`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        value: Candidate connection ID.</span>

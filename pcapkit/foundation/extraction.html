@@ -1225,32 +1225,6 @@ took as <code class="docutils literal notranslate"><span class="pre">engine</spa
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._register_internal_engine">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_register_internal_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._register_internal_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._register_internal_engine" title="Link to this definition">¶</a></dt>
-<dd><p>Register an engine for pcapkit’s own use, bypassing the public guard.</p>
-<p>Unlike <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.register_engine" title="pcapkit.foundation.extraction.Extractor.register_engine"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_engine()</span></code></a>, accepts a class deriving only from
-<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>, which is how every
-built-in engine is written. Not part of the public API.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – engine name, lower-cased</p></li>
-<li><p><strong>engine</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>[<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>]</span>) – module descriptor or an
-<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> subclass</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is not a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, or <code class="docutils literal notranslate"><span class="pre">engine</span></code> is not an
-    <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> subclass.</p>
-</dd>
-<dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different class is already registered under
-<code class="docutils literal notranslate"><span class="pre">name</span></code>; it is overwritten.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.register_reassembly">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reassembly</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor.register_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.register_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Register a new reassembly engine.</p>
@@ -1575,30 +1549,6 @@ setup, so their output opens with the header record dumped above and
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._open_output">
-<span class="sig-name descname"><span class="pre">_open_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._open_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._open_output" title="Link to this definition">¶</a></dt>
-<dd><p>Create the output writer.</p>
-<p>The built-in engines call this at their global-header step. The PCAP
-engine passes the header’s fields as <code class="docutils literal notranslate"><span class="pre">protocol</span></code>, <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>,
-<code class="docutils literal notranslate"><span class="pre">nanosecond</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, <code class="docutils literal notranslate"><span class="pre">thiszone</span></code>, <code class="docutils literal notranslate"><span class="pre">sigfigs</span></code> and <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>:
-<a class="reference internal" href="../dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a> writes its own global header from
-them, <a class="reference internal" href="../dumpkit/pcapng.html#pcapkit.dumpkit.pcapng.PCAPNGIO" title="pcapkit.dumpkit.pcapng.PCAPNGIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGIO</span></code></a> its section and interface
-from those it takes, and the other writers ignore them. The PCAP-NG
-engine passes its first section’s <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>.
-<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> calls it again, without arguments, after the engine has
-started, for the engines that have no such step. Only the first call has
-an effect.</p>
-<p>Under split mode, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_f" title="pcapkit.foundation.extraction.Extractor._flag_f"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_f</span></code></a> is
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ofile" title="pcapkit.foundation.extraction.Extractor._ofile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._ofile</span></code></a> stays a factory,
-with <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> bound, that the engines call once per output file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Global header fields for the writer.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.record_frames">
 <span class="sig-name descname"><span class="pre">record_frames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor.record_frames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.record_frames" title="Link to this definition">¶</a></dt>
 <dd><p>Read packet frames.</p>
@@ -1811,6 +1761,56 @@ being what a close during interpreter shutdown can fail at.</p>
 </dd></dl>
 
 <p class="rubric">Utilities</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._register_internal_engine">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_register_internal_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._register_internal_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._register_internal_engine" title="Link to this definition">¶</a></dt>
+<dd><p>Register an engine for pcapkit’s own use, bypassing the public guard.</p>
+<p>Unlike <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.register_engine" title="pcapkit.foundation.extraction.Extractor.register_engine"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_engine()</span></code></a>, accepts a class deriving only from
+<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>, which is how every
+built-in engine is written. Not part of the public API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – engine name, lower-cased</p></li>
+<li><p><strong>engine</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>[<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>]</span>) – module descriptor or an
+<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> subclass</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is not a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, or <code class="docutils literal notranslate"><span class="pre">engine</span></code> is not an
+    <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> subclass.</p>
+</dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different class is already registered under
+<code class="docutils literal notranslate"><span class="pre">name</span></code>; it is overwritten.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._open_output">
+<span class="sig-name descname"><span class="pre">_open_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._open_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._open_output" title="Link to this definition">¶</a></dt>
+<dd><p>Create the output writer.</p>
+<p>The built-in engines call this at their global-header step. The PCAP
+engine passes the header’s fields as <code class="docutils literal notranslate"><span class="pre">protocol</span></code>, <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nanosecond</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, <code class="docutils literal notranslate"><span class="pre">thiszone</span></code>, <code class="docutils literal notranslate"><span class="pre">sigfigs</span></code> and <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>:
+<a class="reference internal" href="../dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a> writes its own global header from
+them, <a class="reference internal" href="../dumpkit/pcapng.html#pcapkit.dumpkit.pcapng.PCAPNGIO" title="pcapkit.dumpkit.pcapng.PCAPNGIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGIO</span></code></a> its section and interface
+from those it takes, and the other writers ignore them. The PCAP-NG
+engine passes its first section’s <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>.
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> calls it again, without arguments, after the engine has
+started, for the engines that have no such step. Only the first call has
+an effect.</p>
+<p>Under split mode, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_f" title="pcapkit.foundation.extraction.Extractor._flag_f"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_f</span></code></a> is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ofile" title="pcapkit.foundation.extraction.Extractor._ofile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._ofile</span></code></a> stays a factory,
+with <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> bound, that the engines call once per output file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Global header fields for the writer.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._owns_input">
 <span class="sig-name descname"><span class="pre">_owns_input</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._owns_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._owns_input" title="Link to this definition">¶</a></dt>

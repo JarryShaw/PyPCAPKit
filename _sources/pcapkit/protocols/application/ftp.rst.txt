@@ -99,6 +99,19 @@ Data Models
    :members:
    :show-inheritance:
 
+Constants
+---------
+
+.. module:: pcapkit.protocols.application.ftp.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.application.ftp.const.FTP_REQUEST
+   :no-value:
+
+.. autodata:: pcapkit.protocols.application.ftp.const.FTP_RESPONSE
+   :no-value:
+
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol

@@ -612,6 +612,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http.const</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_HTTP2_FRAME_RULES</span><span class="p">,</span> <span class="n">_HTTP2_PREFACE</span><span class="p">,</span>
+                                                      <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">,</span> <span class="n">_RE_METHOD</span><span class="p">,</span> <span class="n">_RE_STATUS</span><span class="p">,</span>
+                                                      <span class="n">_RE_VERSION</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
@@ -635,30 +638,6 @@
 <span class="c1">#: (:issue:`1538`), so its first import holds</span>
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_TCP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_TCP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">)</span>
-
-<span class="c1">#: The HTTP/2 connection preface (:rfc:`9113#section-3.4`), which opens every</span>
-<span class="c1">#: HTTP/2 connection. Its method ``PRI`` is registered as one no actual client</span>
-<span class="c1">#: uses (:rfc:`7540#section-11.6`), so a prefix match identifies HTTP/2, and</span>
-<span class="c1">#: :meth:`HTTP._guess_version` tests it before any parse.</span>
-<span class="n">_HTTP2_PREFACE</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'PRI * HTTP/2.0</span><span class="se">\r\n\r\n</span><span class="s1">SM</span><span class="se">\r\n\r\n</span><span class="s1">'</span>
-
-<span class="c1">#: What :rfc:`9113#section-6` allows a sender to put in the frame header of each</span>
-<span class="c1">#: frame type it defines: the flags that type defines, and the stream identifier</span>
-<span class="c1">#: it is sent on -- ``True`` for a non-zero stream, ``False`` for stream 0 and</span>
-<span class="c1">#: :obj:`None` for either. :meth:`HTTP._guess_version` checks a bare frame</span>
-<span class="c1">#: against this before its HTTP/2 trial parse; see :func:`_test_http2_frame`.</span>
-<span class="n">_HTTP2_FRAME_RULES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="mh">0x0</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x09</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># DATA: END_STREAM, PADDED (Section 6.1)</span>
-    <span class="mh">0x1</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x2D</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># HEADERS: END_STREAM, END_HEADERS, PADDED, PRIORITY (Section 6.2)</span>
-    <span class="mh">0x2</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># PRIORITY (Section 6.3)</span>
-    <span class="mh">0x3</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># RST_STREAM (Section 6.4)</span>
-    <span class="mh">0x4</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x01</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>   <span class="c1"># SETTINGS: ACK (Section 6.5)</span>
-    <span class="mh">0x5</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x0C</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># PUSH_PROMISE: END_HEADERS, PADDED (Section 6.6)</span>
-    <span class="mh">0x6</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x01</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>   <span class="c1"># PING: ACK (Section 6.7)</span>
-    <span class="mh">0x7</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>   <span class="c1"># GOAWAY (Section 6.8)</span>
-    <span class="mh">0x8</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>    <span class="c1"># WINDOW_UPDATE: either stream (Section 6.9)</span>
-    <span class="mh">0x9</span><span class="p">:</span> <span class="p">(</span><span class="mh">0x04</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>    <span class="c1"># CONTINUATION: END_HEADERS (Section 6.10)</span>
-<span class="p">}</span>  <span class="c1"># type: dict[int, tuple[int, Optional[bool]]]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_test_http2_frame</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
@@ -699,21 +678,6 @@
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span> <span class="ow">is</span> <span class="n">stream</span>
 
-
-<span class="c1"># HTTP method token, case-sensitive (RFC 9110, section 9.1). Anchored at the end</span>
-<span class="c1"># too, as ``re.match`` anchors only at the start and would take ``G`` of ``Get``.</span>
-<span class="n">_RE_METHOD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"(?P&lt;method&gt;[A-Z][A-Z-]*)\Z"</span><span class="p">)</span>  <span class="c1"># RFC 9110, section 16.1.1, 9.1, 5.6.2</span>
-<span class="c1"># Regular expression to match HTTP version string.</span>
-<span class="n">_RE_VERSION</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"HTTP/(?P&lt;version&gt;\d\.\d)"</span><span class="p">)</span>
-<span class="c1"># HTTP status code, ``3DIGIT`` (RFC 9112, section 4). Anchored as ``_RE_METHOD``</span>
-<span class="c1"># is: ``HTTPv1`` takes ``int()`` of the raw token, so a prefix match would let</span>
-<span class="c1"># ``200x`` through to a bare ``ValueError`` rather than a ``ProtocolError``.</span>
-<span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\d</span><span class="si">{3}</span><span class="s1">\Z'</span><span class="p">)</span>
-
-<span class="c1"># The HTTP/2 preface's header block, ``PRI * HTTP/2.0``, as ``HTTPv1.read`` splits</span>
-<span class="c1"># it off at the first CRLFCRLF. The patterns above accept it, so</span>
-<span class="c1"># ``HTTPv1._read_http_header`` and ``test_start_line`` refuse it by name.</span>
-<span class="n">_HTTP2_PREFACE_HEADER</span> <span class="o">=</span> <span class="n">_HTTP2_PREFACE</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1">#: The member :class:`HTTP` hands an HTTP/1.* message to; it, the HTTP/2 member and</span>
 <span class="c1">#: their data models are resolved where used rather than imported, so a member's first</span>

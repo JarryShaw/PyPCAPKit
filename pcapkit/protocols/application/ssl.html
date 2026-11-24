@@ -621,6 +621,12 @@ accepting bytes that cannot be a genuine record.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.7.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ssl.protocol.TLS13_VERSION</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ssl.protocol.DTLS13_VERSION</span></code>, now
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.const.TLS13_VERSION" title="pcapkit.protocols.application.ssl.const.TLS13_VERSION"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ssl.const.TLS13_VERSION</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.const.DTLS13_VERSION" title="pcapkit.protocols.application.ssl.const.DTLS13_VERSION"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ssl.const.DTLS13_VERSION</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2896">#2896</a>).</p>
+</div>
 <br /><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ssl.protocol.</span></span><span class="sig-name descname"><span class="pre">SSL</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><span class="pre">Data</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ST</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><span class="pre">Schema</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL" title="Link to this definition">¶</a></dt>
@@ -2475,7 +2481,8 @@ struct {
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello">
 <span class="sig-name descname"><span class="pre">_read_tls_server_hello</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._read_tls_server_hello"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello" title="Link to this definition">¶</a></dt>
 <dd><p>Decode a <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code> handshake message body, or a
-<code class="docutils literal notranslate"><span class="pre">HelloRetryRequest</span></code>’s, whose <code class="docutils literal notranslate"><span class="pre">random</span></code> is <code class="xref py py-data docutils literal notranslate"><span class="pre">_HRR_RANDOM</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">HelloRetryRequest</span></code>’s, whose <code class="docutils literal notranslate"><span class="pre">random</span></code> is
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.const._HRR_RANDOM" title="pcapkit.protocols.application.ssl.const._HRR_RANDOM"><code class="xref py py-data docutils literal notranslate"><span class="pre">_HRR_RANDOM</span></code></a>.</p>
 <p>Structure of <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code> [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-4.2.3"><strong>RFC 9846 Section 4.2.3</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>struct {
     ProtocolVersion legacy_version = 0x0303;    /* TLS v1.2 */
@@ -4640,6 +4647,31 @@ the raw octets for any other, which a client skips.</p>
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.protocols.application.ssl.const">
+<span id="constants"></span><h2>Constants<a class="headerlink" href="#module-pcapkit.protocols.application.ssl.const" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.const.TLS13_VERSION">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ssl.const.</span></span><span class="sig-name descname"><span class="pre">TLS13_VERSION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">772</span></span><a class="headerlink" href="#pcapkit.protocols.application.ssl.const.TLS13_VERSION" title="Link to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">supported_versions</span></code> value for TLS 1.3 (<span class="target" id="index-138"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-4.3.1"><strong>RFC 9846 Section 4.3.1</strong></a>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.const.DTLS13_VERSION">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ssl.const.</span></span><span class="sig-name descname"><span class="pre">DTLS13_VERSION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65276</span></span><a class="headerlink" href="#pcapkit.protocols.application.ssl.const.DTLS13_VERSION" title="Link to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">supported_versions</span></code> value for DTLS 1.3 (<span class="target" id="index-139"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html#section-5.3"><strong>RFC 9147 Section 5.3</strong></a>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.const._HRR_RANDOM">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ssl.const.</span></span><span class="sig-name descname"><span class="pre">_HRR_RANDOM</span></span><a class="headerlink" href="#pcapkit.protocols.application.ssl.const._HRR_RANDOM" title="Link to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">random</span></code> that makes a <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code> a <code class="docutils literal notranslate"><span class="pre">HelloRetryRequest</span></code> – the
+SHA-256 of <code class="docutils literal notranslate"><span class="pre">&quot;HelloRetryRequest&quot;</span></code> (<span class="target" id="index-140"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-4.2.3"><strong>RFC 9846 Section 4.2.3</strong></a>).</p>
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
@@ -4708,6 +4740,7 @@ the raw octets for any other, which a client skips.</p>
 <li><a class="reference internal" href="#">SSL - Secure Sockets Layer</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.protocols.application.ssl.schema">Header Schemas</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.application.ssl.data">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.application.ssl.const">Constants</a></li>
 </ul>
 </li>
 </ul>

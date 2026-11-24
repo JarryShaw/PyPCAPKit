@@ -588,11 +588,11 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">NamedTuple</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ieee802_11.control_subtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControlSubtype</span> <span class="k">as</span> <span class="n">Enum_ControlSubtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ieee802_11.type</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Enum_Type</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">PayloadField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ieee802_11.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONTROL_WITH_ADDR2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IEEE802_11'</span><span class="p">]</span>
@@ -601,26 +601,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-
-<span class="c1">#: Control frame subtypes whose MAC header carries a TA (or BSSID) as</span>
-<span class="c1">#: Address 2 after the RA; IEEE Std 802.11-2020 §9.3.1, *Control frames*, and</span>
-<span class="c1">#: IEEE Std 802.11ax-2021 for ``Trigger``. CTS and Ack carry the RA alone. A</span>
-<span class="c1">#: Control Frame Extension frame takes the six octets after the RA as Address 2,</span>
-<span class="c1">#: as the Linux kernel's ``ieee80211_hdrlen()`` reads it; in a DMG DTS</span>
-<span class="c1">#: (extension 6) they are NAV-SA rather than a TA, and NAV-DA stays in the body.</span>
-<span class="n">CONTROL_WITH_ADDR2</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">Trigger</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">TACK</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">Beamforming_Report_Poll</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">VHT_HE_NDP_Announcement</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">Control_Frame_Extension</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">Block_Ack_Request</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">Block_Ack</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">PS_Poll</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">RTS</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">CF_End</span><span class="p">,</span>
-    <span class="n">Enum_ControlSubtype</span><span class="o">.</span><span class="n">CF_End_CF_ACK</span><span class="p">,</span>
-<span class="p">})</span>
 
 
 <div class="viewcode-block" id="Layout">
@@ -656,8 +636,8 @@
 <span class="sd">      both set, QoS Control when the QoS bit (B7) of its subtype is set, and HT</span>
 <span class="sd">      Control when that bit and +HTC/Order are both set (§9.3.2, *Data frames*).</span>
 <span class="sd">    * A Control frame carries Address 2 for the subtypes in</span>
-<span class="sd">      :data:`CONTROL_WITH_ADDR2`, and Address 1 alone for CTS and Ack (§9.3.1,</span>
-<span class="sd">      *Control frames*).</span>
+<span class="sd">      :data:`~pcapkit.protocols.link.ieee802_11.const.CONTROL_WITH_ADDR2`, and</span>
+<span class="sd">      Address 1 alone for CTS and Ack (§9.3.1, *Control frames*).</span>
 <span class="sd">    * Every other frame -- a reserved Control subtype, a Control Wrapper, whose</span>
 <span class="sd">      octets after Address 1 are Carried Frame Control and HT Control, and</span>
 <span class="sd">      every Extension frame -- is read as the minimal frame format that §9.2.3,</span>

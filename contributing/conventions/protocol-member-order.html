@@ -598,6 +598,15 @@
 <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Properties.</span></code>, <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Methods.</span></code>, <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Data</span> <span class="pre">models.</span></code> and <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Utilities.</span></code> Those
 comments also title the member groups on the API pages
 (<a class="reference internal" href="documentation.html#documentation-member-lists"><span class="std std-ref">Class Member Lists</span></a>).</p>
+<p><strong>Every class with section comments.</strong> The four comments mean the same in any
+class body that uses section comments, not only a protocol’s: every <code class="docutils literal notranslate"><span class="pre">&#64;property</span></code>
+goes under <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Properties.</span></code>, public methods under <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Methods.</span></code>, every dunder
+under <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Data</span> <span class="pre">models.</span></code>, and everything else under <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Utilities.</span></code>, which a class
+adds where it has none. A topic section, such as <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Defaults.</span></code>,
+<code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Reassembly.</span></code> or <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Availability.</span></code>, keeps what it gathers. Ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2911">#2911</a>, so one rule files every class and the API pages follow from the
+source; <code class="file docutils literal notranslate"><span class="pre">tests/project/test_section_meanings_2911_unit.py</span></code> holds every class
+under <code class="file docutils literal notranslate"><span class="pre">pcapkit/</span></code> to it. The order below binds protocol classes.</p>
 <section id="the-order">
 <h2>The Order<a class="headerlink" href="#the-order" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">

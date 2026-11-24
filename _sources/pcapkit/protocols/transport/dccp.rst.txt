@@ -97,24 +97,10 @@ header 12 octets long. The fields of the packet type, then the options, follow.
    .. automethod:: _make_opt_data_checksum
    .. automethod:: _verify_pseudo_checksum
 
-.. autodata:: pcapkit.protocols.transport.dccp.protocol.DCCP_MAX_HEADER_LEN
-
 Header Schemas
 --------------
 
 .. module:: pcapkit.protocols.transport.dccp.schema
-
-.. autodata:: pcapkit.protocols.transport.dccp.schema.DCCP_MIN_HEADER_LEN
-
-.. autodata:: pcapkit.protocols.transport.dccp.schema.DCCP_SINGLE_OCTET_OPTION_MAX
-
-.. autodata:: pcapkit.protocols.transport.dccp.schema.ACK_TYPES
-   :no-value:
-
-.. autodata:: pcapkit.protocols.transport.dccp.schema.SERVICE_TYPES
-   :no-value:
-
-.. autodata:: pcapkit.protocols.transport.dccp.schema.RESET_TYPE
 
 .. autofunction:: pcapkit.protocols.transport.dccp.schema.header_length
 
@@ -266,6 +252,27 @@ Data Models
 .. autoclass:: pcapkit.protocols.transport.dccp.data.DataChecksum
    :members:
    :show-inheritance:
+
+Constants
+---------
+
+.. module:: pcapkit.protocols.transport.dccp.const
+
+.. versionadded:: 1.7.0
+
+.. autodata:: pcapkit.protocols.transport.dccp.const.DCCP_MIN_HEADER_LEN
+
+.. autodata:: pcapkit.protocols.transport.dccp.const.DCCP_MAX_HEADER_LEN
+
+.. autodata:: pcapkit.protocols.transport.dccp.const.DCCP_SINGLE_OCTET_OPTION_MAX
+
+.. autodata:: pcapkit.protocols.transport.dccp.const.ACK_TYPES
+   :no-value:
+
+.. autodata:: pcapkit.protocols.transport.dccp.const.SERVICE_TYPES
+   :no-value:
+
+.. autodata:: pcapkit.protocols.transport.dccp.const.RESET_TYPE
 
 .. rubric:: Footnotes
 

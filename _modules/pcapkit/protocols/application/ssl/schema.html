@@ -599,6 +599,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">_ECH_CONFIG_VERSION</span><span class="p">,</span> <span class="n">_ECH_CONFIRMATION_LENGTH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -628,11 +629,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span>
-
-<span class="c1">#: The ``ECHConfig`` version whose ``contents`` :rfc:`9849#section-4` defines.</span>
-<span class="n">_ECH_CONFIG_VERSION</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Enum_ExtensionType</span><span class="o">.</span><span class="n">encrypted_client_hello</span><span class="p">)</span>
-<span class="c1">#: Length of an ``ECHHelloRetryRequest``'s ``confirmation`` (:rfc:`9849#section-5`).</span>
-<span class="n">_ECH_CONFIRMATION_LENGTH</span> <span class="o">=</span> <span class="mi">8</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_item</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[Schema]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'SchemaField'</span><span class="p">:</span>

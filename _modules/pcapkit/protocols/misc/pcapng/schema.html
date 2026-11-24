@@ -619,6 +619,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.byteorder</span><span class="w"> </span><span class="kn">import</span> <span class="n">byteorder_callback</span><span class="p">,</span> <span class="n">packet_byteorder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">_SWAPPED_BYTE_ORDER_MAGIC</span><span class="p">,</span> <span class="n">PACKET_FLAGS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
@@ -774,10 +775,6 @@
         <span class="c1">#: Link-layer-dependent error - symbol error (bit 31).</span>
         <span class="n">symbol_error</span><span class="p">:</span> <span class="nb">int</span></div>
 
-
-<span class="c1">#: :data:`~pcapkit.corekit.const.capture.BYTE_ORDER_MAGIC` read in the other</span>
-<span class="c1">#: byte order, i.e. as a big-endian reader sees a little-endian section's.</span>
-<span class="n">_SWAPPED_BYTE_ORDER_MAGIC</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">BYTE_ORDER_MAGIC</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">),</span> <span class="s1">'big'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="shb_byteorder_callback">
@@ -1500,28 +1497,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span> <span class="o">=</span> <span class="n">namespace</span></div>
 
-
-
-<span class="c1">#: Sub-fields of the ``epb_flags`` and ``pack_flags`` words. ``reserved`` keeps</span>
-<span class="c1">#: bits 12 to 23 verbatim -- the reserved bits 12-15 and the link-layer-dependent</span>
-<span class="c1">#: error bits 16-23 that the data model does not name.</span>
-<span class="n">PACKET_FLAGS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">'direction'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-    <span class="s1">'reception'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-    <span class="s1">'fcs_len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-    <span class="s1">'checksum_not_ready'</span><span class="p">:</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'checksum_valid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'tcp_segmentation_offloaded'</span><span class="p">:</span> <span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
-    <span class="s1">'crc_error'</span><span class="p">:</span> <span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'too_long'</span><span class="p">:</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'too_short'</span><span class="p">:</span> <span class="p">(</span><span class="mi">26</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'gap_error'</span><span class="p">:</span> <span class="p">(</span><span class="mi">27</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'unaligned_error'</span><span class="p">:</span> <span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'delimiter_error'</span><span class="p">:</span> <span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'preamble_error'</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="s1">'symbol_error'</span><span class="p">:</span> <span class="p">(</span><span class="mi">31</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-<span class="p">}</span>  <span class="c1"># type: dict[str, tuple[int, int]]</span>
 
 
 <div class="viewcode-block" id="OptionEnumField">

@@ -1773,51 +1773,8 @@ end of the packet is invalid (<span class="target" id="index-20"></span><a class
 
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.protocol.DCCP_MAX_HEADER_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.protocol.</span></span><span class="sig-name descname"><span class="pre">DCCP_MAX_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1020</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.protocol.DCCP_MAX_HEADER_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Longest a DCCP header can be – a Data Offset of 255 words, <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a>.</p>
-</dd></dl>
-
 <section id="module-pcapkit.protocols.transport.dccp.schema">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.transport.dccp.schema" title="Link to this heading">¶</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.DCCP_MIN_HEADER_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.schema.</span></span><span class="sig-name descname"><span class="pre">DCCP_MIN_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.DCCP_MIN_HEADER_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>Length of the generic header with 24-bit sequence numbers (<code class="docutils literal notranslate"><span class="pre">X</span></code> clear), the
-shortest a DCCP header can be, <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.1"><strong>RFC 4340 Section 5.1</strong></a>. The one home of this
-value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); it is fixed by the RFC, so it is never configurable.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.DCCP_SINGLE_OCTET_OPTION_MAX">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.schema.</span></span><span class="sig-name descname"><span class="pre">DCCP_SINGLE_OCTET_OPTION_MAX</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.DCCP_SINGLE_OCTET_OPTION_MAX" title="Link to this definition">¶</a></dt>
-<dd><p>Option types up to this one are single octets, without a length,
-<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.8"><strong>RFC 4340 Section 5.8</strong></a>.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.ACK_TYPES">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.schema.</span></span><span class="sig-name descname"><span class="pre">ACK_TYPES</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.ACK_TYPES" title="Link to this definition">¶</a></dt>
-<dd><p>Packet types carrying an Acknowledgement Number Subheader – every one
-<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a> defines but DCCP-Request and DCCP-Data. DCCP-Listen
-(<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5596.html#section-2.2.1"><strong>RFC 5596 Section 2.2.1</strong></a>) carries none either.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.SERVICE_TYPES">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.schema.</span></span><span class="sig-name descname"><span class="pre">SERVICE_TYPES</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.SERVICE_TYPES" title="Link to this definition">¶</a></dt>
-<dd><p>Packet types carrying a Service Code – DCCP-Request, DCCP-Response and
-DCCP-Listen (<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.2"><strong>RFC 4340 Section 5.2</strong></a>, <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5596.html#section-2.2.1"><strong>RFC 5596 Section 2.2.1</strong></a>).</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.RESET_TYPE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.schema.</span></span><span class="sig-name descname"><span class="pre">RESET_TYPE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PacketType.DCCP_Reset:</span> <span class="pre">7&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.RESET_TYPE" title="Link to this definition">¶</a></dt>
-<dd><p>Packet type of DCCP-Reset, which carries a Reset Code and three Data octets,
-<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.6"><strong>RFC 4340 Section 5.6</strong></a>.</p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.header_length">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.schema.</span></span><span class="sig-name descname"><span class="pre">header_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/dccp/schema.html#header_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.header_length" title="Link to this definition">¶</a></dt>
@@ -1830,7 +1787,7 @@ DCCP-Listen (<span class="target" id="index-26"></span><a class="rfc reference e
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The octets ahead of the options, <span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a>.</p>
+<dd class="field-odd"><p>The octets ahead of the options, <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2062,7 +2019,7 @@ DCCP-Listen (<span class="target" id="index-26"></span><a class="rfc reference e
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.Change.value">
 <span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">value&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.Change.value" title="Link to this definition">¶</a></dt>
 <dd><p>Preference list or value; a length under 2 is refused, as in every
-option that has a length (<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.8"><strong>RFC 4340 Section 5.8</strong></a>).</p>
+option that has a length (<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.8"><strong>RFC 4340 Section 5.8</strong></a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -2083,7 +2040,7 @@ option that has a length (<span class="target" id="index-30"></span><a class="rf
 <span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">value&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.Confirm.value" title="Link to this definition">¶</a></dt>
 <dd><p>Value, then the preference list for a server-priority feature; a length
 under 2 is refused, as in every option that has a length
-(<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.8"><strong>RFC 4340 Section 5.8</strong></a>).</p>
+(<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.8"><strong>RFC 4340 Section 5.8</strong></a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -2110,7 +2067,7 @@ under 2 is refused, as in every option that has a length
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.schema.NDPCount.count">
 <span class="sig-name descname"><span class="pre">count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NumberField</span> <span class="pre">count&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.schema.NDPCount.count" title="Link to this definition">¶</a></dt>
 <dd><p>NDP count, <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">-</span> <span class="pre">2</span></code> octets, read and rebuilt at that width;
-<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-7.7"><strong>RFC 4340 Section 7.7</strong></a> allows one to six.</p>
+<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-7.7"><strong>RFC 4340 Section 7.7</strong></a> allows one to six.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2575,6 +2532,55 @@ the wire.</p>
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.protocols.transport.dccp.const">
+<span id="constants"></span><h2>Constants<a class="headerlink" href="#module-pcapkit.protocols.transport.dccp.const" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.const.DCCP_MIN_HEADER_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.const.</span></span><span class="sig-name descname"><span class="pre">DCCP_MIN_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.const.DCCP_MIN_HEADER_LEN" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the generic header with 24-bit sequence numbers (<code class="docutils literal notranslate"><span class="pre">X</span></code> clear), the
+shortest a DCCP header can be, <span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.1"><strong>RFC 4340 Section 5.1</strong></a>. The one home of this
+value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); it is fixed by the RFC, so it is never configurable.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.const.DCCP_MAX_HEADER_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.const.</span></span><span class="sig-name descname"><span class="pre">DCCP_MAX_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1020</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.const.DCCP_MAX_HEADER_LEN" title="Link to this definition">¶</a></dt>
+<dd><p>Longest a DCCP header can be – a Data Offset of 255 words, <span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.const.DCCP_SINGLE_OCTET_OPTION_MAX">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.const.</span></span><span class="sig-name descname"><span class="pre">DCCP_SINGLE_OCTET_OPTION_MAX</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.const.DCCP_SINGLE_OCTET_OPTION_MAX" title="Link to this definition">¶</a></dt>
+<dd><p>Option types up to this one are single octets, without a length,
+<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.8"><strong>RFC 4340 Section 5.8</strong></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.const.ACK_TYPES">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.const.</span></span><span class="sig-name descname"><span class="pre">ACK_TYPES</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.const.ACK_TYPES" title="Link to this definition">¶</a></dt>
+<dd><p>Packet types carrying an Acknowledgement Number Subheader – every one
+<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a> defines but DCCP-Request and DCCP-Data. DCCP-Listen
+(<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5596.html#section-2.2.1"><strong>RFC 5596 Section 2.2.1</strong></a>) carries none either.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.const.SERVICE_TYPES">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.const.</span></span><span class="sig-name descname"><span class="pre">SERVICE_TYPES</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.const.SERVICE_TYPES" title="Link to this definition">¶</a></dt>
+<dd><p>Packet types carrying a Service Code – DCCP-Request, DCCP-Response and
+DCCP-Listen (<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.2"><strong>RFC 4340 Section 5.2</strong></a>, <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5596.html#section-2.2.1"><strong>RFC 5596 Section 2.2.1</strong></a>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.const.RESET_TYPE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.const.</span></span><span class="sig-name descname"><span class="pre">RESET_TYPE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PacketType.DCCP_Reset:</span> <span class="pre">7&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.const.RESET_TYPE" title="Link to this definition">¶</a></dt>
+<dd><p>Packet type of DCCP-Reset, which carries a Reset Code and three Data octets,
+<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.6"><strong>RFC 4340 Section 5.6</strong></a>.</p>
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
@@ -2643,6 +2649,7 @@ the wire.</p>
 <li><a class="reference internal" href="#">DCCP - Datagram Congestion Control Protocol</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.protocols.transport.dccp.schema">Header Schemas</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.transport.dccp.data">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.transport.dccp.const">Constants</a></li>
 </ul>
 </li>
 </ul>

@@ -640,6 +640,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ieee802_11.management_subtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">ManagementSubtype</span> <span class="k">as</span> <span class="n">Enum_ManagementSubtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ieee802_11.type</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Enum_Type</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ieee802_11.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">SUBTYPE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ieee802_11.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IEEE802_11</span> <span class="k">as</span> <span class="n">Data_IEEE802_11</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ieee802_11.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameControl</span> <span class="k">as</span> <span class="n">Data_FrameControl</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ieee802_11.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTControl</span> <span class="k">as</span> <span class="n">Data_HTControl</span>
@@ -651,7 +652,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
@@ -661,14 +662,6 @@
     <span class="n">Subtype</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Enum_ManagementSubtype</span><span class="p">,</span> <span class="n">Enum_ControlSubtype</span><span class="p">,</span> <span class="n">Enum_DataSubtype</span><span class="p">,</span> <span class="n">Enum_ExtensionSubtype</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IEEE802_11'</span><span class="p">]</span>
-
-<span class="c1">#: Subtype registry of each frame type (IEEE Std 802.11-2020, Table 9-1).</span>
-<span class="n">SUBTYPE</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Management</span><span class="p">:</span> <span class="n">Enum_ManagementSubtype</span><span class="p">,</span>
-    <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Control</span><span class="p">:</span> <span class="n">Enum_ControlSubtype</span><span class="p">,</span>
-    <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Data</span><span class="p">:</span> <span class="n">Enum_DataSubtype</span><span class="p">,</span>
-    <span class="n">Enum_Type</span><span class="o">.</span><span class="n">Extension</span><span class="p">:</span> <span class="n">Enum_ExtensionSubtype</span><span class="p">,</span>
-<span class="p">}</span>  <span class="c1"># type: dict[int, Type[Subtype]]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_header_length</span><span class="p">(</span><span class="n">fields</span><span class="p">:</span> <span class="s1">'Layout'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>

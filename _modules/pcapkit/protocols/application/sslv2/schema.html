@@ -587,6 +587,7 @@
                                          <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.sslv2.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">_HELLO_PROBE_LENGTH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -633,12 +634,6 @@
         <span class="k">return</span> <span class="p">((</span><span class="n">indicator</span> <span class="o">&amp;</span> <span class="mh">0x7F</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">length_low</span>
     <span class="k">return</span> <span class="p">((</span><span class="n">indicator</span> <span class="o">&amp;</span> <span class="mh">0x3F</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">length_low</span></div>
 
-
-
-<span class="c1">#: Octets of a hello body's own fixed-width sub-header a forward-match probe</span>
-<span class="c1">#: ever needs to peek -- enough for the longer of the two,</span>
-<span class="c1">#: ``SERVER-HELLO``'s 10-octet one (``CLIENT-HELLO``'s is 8).</span>
-<span class="n">_HELLO_PROBE_LENGTH</span> <span class="o">=</span> <span class="mi">10</span>
 
 
 <div class="viewcode-block" id="sslv2_hello_probe_length">

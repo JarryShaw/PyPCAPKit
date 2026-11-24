@@ -139,6 +139,13 @@ Data Models
    :members:
    :show-inheritance:
 
+Constants
+---------
+
+.. module:: pcapkit.protocols.application.sslv2.const
+
+.. versionadded:: 1.7.0
+
 .. rubric:: Footnotes
 
 .. [*] https://datatracker.ietf.org/doc/html/draft-hickman-netscape-ssl-00

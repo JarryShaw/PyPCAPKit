@@ -1029,46 +1029,6 @@
 <span class="sd">        """</span>
         <span class="n">_close_files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fopen</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">'Dumper'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">hold</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Write a frame to a flow's output file, keeping the file open.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            dumper: the flow's output dumper</span>
-<span class="sd">            value: the frame</span>
-<span class="sd">            name: name of the frame's block</span>
-<span class="sd">            hold: whether the flow takes more frames, and so whether its file is</span>
-<span class="sd">                worth keeping open</span>
-
-<span class="sd">        Keeping the file open between frames, through</span>
-<span class="sd">        :meth:`~pcapkit.dumpkit.common.DumperBase.open`, saves reopening it per</span>
-<span class="sd">        frame (:issue:`2815`). At most</span>
-<span class="sd">        :data:`~pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT` files are kept</span>
-<span class="sd">        open: past it, the one written least recently is closed, and reopened on</span>
-<span class="sd">        its flow's next frame.</span>
-
-<span class="sd">        """</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fopen</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">dumper</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">files</span><span class="o">.</span><span class="n">move_to_end</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">hold</span> <span class="ow">and</span> <span class="p">(</span><span class="n">limit</span> <span class="o">:=</span> <span class="n">config</span><span class="o">.</span><span class="n">TRACE_OPEN_FILE_LIMIT</span><span class="p">):</span>
-            <span class="k">while</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">limit</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
-                <span class="n">files</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="n">dumper</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
-            <span class="n">files</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">dumper</span>
-        <span class="n">dumper</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">'Dumper'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Close a flow's output file, once the flow takes no more frames.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            dumper: the flow's output dumper</span>
-
-<span class="sd">        """</span>
-        <span class="n">held</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fopen</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">dumper</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">held</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">held</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
@@ -1168,7 +1128,51 @@
 <span class="sd">        unnecessary registry calls and simplify the customisation process.</span>
 
 <span class="sd">        """</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span> <span class="o">=</span> <span class="p">[]</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__callback_fn__</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">'Dumper'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">hold</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Write a frame to a flow's output file, keeping the file open.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            dumper: the flow's output dumper</span>
+<span class="sd">            value: the frame</span>
+<span class="sd">            name: name of the frame's block</span>
+<span class="sd">            hold: whether the flow takes more frames, and so whether its file is</span>
+<span class="sd">                worth keeping open</span>
+
+<span class="sd">        Keeping the file open between frames, through</span>
+<span class="sd">        :meth:`~pcapkit.dumpkit.common.DumperBase.open`, saves reopening it per</span>
+<span class="sd">        frame (:issue:`2815`). At most</span>
+<span class="sd">        :data:`~pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT` files are kept</span>
+<span class="sd">        open: past it, the one written least recently is closed, and reopened on</span>
+<span class="sd">        its flow's next frame.</span>
+
+<span class="sd">        """</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fopen</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">dumper</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">move_to_end</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">hold</span> <span class="ow">and</span> <span class="p">(</span><span class="n">limit</span> <span class="o">:=</span> <span class="n">config</span><span class="o">.</span><span class="n">TRACE_OPEN_FILE_LIMIT</span><span class="p">):</span>
+            <span class="k">while</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">limit</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">dumper</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+            <span class="n">files</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">dumper</span>
+        <span class="n">dumper</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dumper</span><span class="p">:</span> <span class="s1">'Dumper'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Close a flow's output file, once the flow takes no more frames.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            dumper: the flow's output dumper</span>
+
+<span class="sd">        """</span>
+        <span class="n">held</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fopen</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">dumper</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">held</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">held</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
 

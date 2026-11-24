@@ -5062,14 +5062,6 @@ defines neither <code class="docutils literal notranslate"><span class="pre">get
 <a class="reference internal" href="../../corekit/const/capture.html#pcapkit.corekit.const.capture.BLOCK_MINIMUM" title="pcapkit.corekit.const.capture.BLOCK_MINIMUM"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.const.capture.BLOCK_MINIMUM</span></code></a> and
 <a class="reference internal" href="../../corekit/const/capture.html#pcapkit.corekit.const.capture.DEFAULT_RESOLUTION" title="pcapkit.corekit.const.capture.DEFAULT_RESOLUTION"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.const.capture.DEFAULT_RESOLUTION</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2883">#2883</a>).</p>
 </div>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.schema.PACKET_FLAGS">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.schema.</span></span><span class="sig-name descname"><span class="pre">PACKET_FLAGS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.schema.PACKET_FLAGS" title="Link to this definition">¶</a></dt>
-<dd><p>Sub-fields of the <code class="docutils literal notranslate"><span class="pre">epb_flags</span></code> and <code class="docutils literal notranslate"><span class="pre">pack_flags</span></code> words. <code class="docutils literal notranslate"><span class="pre">reserved</span></code> keeps
-bits 12 to 23 verbatim – the reserved bits 12-15 and the link-layer-dependent
-error bits 16-23 that the data model does not name.</p>
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.schema.PCAPNG">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.schema.</span></span><span class="sig-name descname"><span class="pre">PCAPNG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng/schema.html#PCAPNG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.schema.PCAPNG" title="Link to this definition">¶</a></dt>
@@ -9659,6 +9651,20 @@ verbatim on rebuild (<a class="extlink-issue reference external" href="https://g
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.protocols.misc.pcapng.const">
+<span id="constants"></span><h2>Constants<a class="headerlink" href="#module-pcapkit.protocols.misc.pcapng.const" title="Link to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0.</span></p>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.const.PACKET_FLAGS">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.const.</span></span><span class="sig-name descname"><span class="pre">PACKET_FLAGS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.const.PACKET_FLAGS" title="Link to this definition">¶</a></dt>
+<dd><p>Sub-fields of the <code class="docutils literal notranslate"><span class="pre">epb_flags</span></code> and <code class="docutils literal notranslate"><span class="pre">pack_flags</span></code> words. <code class="docutils literal notranslate"><span class="pre">reserved</span></code> keeps
+bits 12 to 23 verbatim – the reserved bits 12-15 and the link-layer-dependent
+error bits 16-23 that the data model does not name.</p>
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
@@ -9730,6 +9736,7 @@ verbatim on rebuild (<a class="extlink-issue reference external" href="https://g
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcapng.data">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.pcapng.const">Constants</a></li>
 </ul>
 </li>
 </ul>

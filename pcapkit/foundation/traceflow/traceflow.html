@@ -1052,32 +1052,6 @@ collected.</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._write">
-<span class="sig-name descname"><span class="pre">_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._write" title="Link to this definition">¶</a></dt>
-<dd><p>Write a frame to a flow’s output file, keeping the file open.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dumper</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a></span>) – the flow’s output dumper</p></li>
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – the frame</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – name of the frame’s block</p></li>
-<li><p><strong>hold</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether the flow takes more frames, and so whether its file is
-worth keeping open</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
-</dd>
-</dl>
-<p>Keeping the file open between frames, through
-<a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.DumperBase.open" title="pcapkit.dumpkit.common.DumperBase.open"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open()</span></code></a>, saves reopening it per
-frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2815">#2815</a>). At most
-<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT" title="pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">TRACE_OPEN_FILE_LIMIT</span></code></a> files are kept
-open: past it, the one written least recently is closed, and reopened on
-its flow’s next frame.</p>
-</dd></dl>
-
 <p class="rubric">Data Models</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__init_subclass__">
@@ -1131,6 +1105,33 @@ registered; only the keyword decides registration.</p>
 </dl>
 <p>An error closes every output file kept open (<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.close" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a>), since the
 caller may then stop before <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.finish" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.finish"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish()</span></code></a>.</p>
+</dd></dl>
+
+<p class="rubric">Utilities</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._write">
+<span class="sig-name descname"><span class="pre">_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._write" title="Link to this definition">¶</a></dt>
+<dd><p>Write a frame to a flow’s output file, keeping the file open.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dumper</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper</span></code></a></span>) – the flow’s output dumper</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – the frame</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – name of the frame’s block</p></li>
+<li><p><strong>hold</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether the flow takes more frames, and so whether its file is
+worth keeping open</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
+<p>Keeping the file open between frames, through
+<a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.DumperBase.open" title="pcapkit.dumpkit.common.DumperBase.open"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open()</span></code></a>, saves reopening it per
+frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2815">#2815</a>). At most
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT" title="pcapkit.utilities.config.TRACE_OPEN_FILE_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">TRACE_OPEN_FILE_LIMIT</span></code></a> files are kept
+open: past it, the one written least recently is closed, and reopened on
+its flow’s next frame.</p>
 </dd></dl>
 
 </dd></dl>
