@@ -190,15 +190,19 @@ class TestPlan(_InProcess):
         self.assertEqual(runner.commands[:2], [UPDATE, UPDATE])
         self.assertTrue(output.startswith('::warning title=apt-get update attempt 1 of 2 failed (PyShark)::'
                                           'apt-get update failed or exceeded its 60s bound.\nTo download:\n'), output)
+        self.assertNotIn('degraded', self.output.read_text(encoding='utf-8'))
 
-    def test_two_failed_updates_fail_before_the_simulation(self) -> None:
+    def test_two_failed_updates_degrade_before_the_simulation(self) -> None:
+        """#2923: no key and ``degraded``, and a clean exit, so the install step updates again."""
         status, output, runner = self.main(['plan'], answers(update=(100, b'')))
-        self.assertEqual(status, 1)
+        self.assertEqual(status, 0)
         self.assertEqual(runner.commands, [UPDATE, UPDATE])
         self.assertEqual(output.splitlines(), [
-            f'::warning title=apt-get update attempt {n} of 2 failed (PyShark)::apt-get update failed or '
-            'exceeded its 60s bound.' for n in (1, 2)])
-        self.assertEqual(self.output.read_text(encoding='utf-8'), 'earlier=1\n')
+            '::warning title=apt-get update attempt 1 of 2 failed (PyShark)::apt-get update failed or '
+            'exceeded its 60s bound.',
+            '::warning title=apt-get update attempt 2 of 2 failed (PyShark)::apt-get update failed or '
+            'exceeded its 60s bound; no cache this run, and the install step updates again.'])
+        self.assertEqual(self.output.read_text(encoding='utf-8'), 'earlier=1\ndegraded=true\n')
 
     def test_a_failed_simulation_ends_with_its_status(self) -> None:
         for code, expected in ((100, 100), (-9, 137)):
@@ -410,8 +414,13 @@ REFERENCE_PLAN = textwrap.dedent(r'''
       if sudo timeout 60 apt-get update; then
         break
       fi
-      echo "::warning title=apt-get update attempt $attempt of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound."
-      [ "$attempt" = 1 ] || exit 1
+      if [ "$attempt" = 1 ]; then
+        echo "::warning title=apt-get update attempt 1 of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound."
+      else
+        echo "::warning title=apt-get update attempt 2 of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound; no cache this run, and the install step updates again."
+        echo "degraded=true" >> "$GITHUB_OUTPUT"
+        exit 0
+      fi
     done
     # shellcheck disable=SC2086
     sim=$(apt-get install -s --no-install-recommends $APT_PACKAGES)
@@ -641,7 +650,7 @@ class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
     def test_plan(self) -> None:
         simulations = (SIMULATION, b'', b'NOTE: This is only a simulation!\n', SIMULATION[::-1],
                        b'Inst b (1)\nInst a (2)\nInst B (3)\nInst a-b (1)\nInst a.b (1)\n')
-        keyed = 0
+        keyed = degraded = 0
         for job, step, reference, _ in self.scenarios():
             if reference is not REFERENCE_PLAN:
                 continue
@@ -654,7 +663,9 @@ class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
                                              lambda: (self.tmp / 'sim').write_bytes(simulation), **env)
                         self.assertEqual(new, old)
                         keyed += 'key=' in str(old[3])
+                        degraded += 'degraded=true' in str(old[3])
         self.assertTrue(keyed)
+        self.assertTrue(degraded)
 
     def test_seed(self) -> None:
         """The seed steps' own shell: ``sudo cp`` of the top-level files, then the count of every ``.deb``."""

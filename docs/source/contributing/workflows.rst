@@ -1794,6 +1794,10 @@ every version the matrices hold, the experimental tier included. :file:`util/apt
 ``/usr/bin/python3``, as the apt shell needed no interpreter of the leg's, and runs
 under ``sudo`` the commands that shell ran. Its ``plan`` and ``install`` both read
 the job's ``APT_PACKAGES``, so the cache key always describes the set installed.
+A ``plan`` whose updates both fail warns, sets ``degraded`` and writes no key, so
+the cache steps skip and ``install``, with its fallback mirror, updates again: a
+slow mirror costs the cache rather than the job, and a dead one still fails
+``install`` (:issue:`2923`).
 Its bounds are still ``timeout`` run as root inside ``sudo``, given no option, so
 uutils' ``timeout`` behaves as GNU's (:issue:`2020`),
 and the bound reaches

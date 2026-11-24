@@ -783,6 +783,10 @@ jobs:
       # * **On a miss, attempt 2 goes to another mirror.** apt fails over
       #   within /etc/apt/apt-mirrors.txt only on an error, never on slowness,
       #   so azure is dropped from it before the retry.
+      # * **A plan whose updates both fail degrades** (#2923). It warns, sets
+      #   `degraded` and writes no key, so the cache steps skip and the install
+      #   step, which has the fallback mirror, updates again. A dead mirror
+      #   still fails there, within its bounds (#974).
       #
       # TestAptRetry in tests/project/test_unit_tests_queue.py pins the 180s
       # bound. APT_PACKAGES, the job's env, is what both the plan and the
