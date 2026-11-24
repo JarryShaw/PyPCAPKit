@@ -26,6 +26,8 @@ this tier has no network and no token:
   just short of all of them.
 * :class:`TestNoLongerRun` -- no cap finding on a job the workflow no longer runs
   (#2904), and the runs that decide which those are.
+* :class:`TestLikeForLike` -- a job's trend fitted only on the runs that reached its
+  test step, and H3's baseline taken only from a report of the same window (#2915).
 * :class:`TestUnfinishedRuns` -- runs listed without the ``status`` filter, which
   lags behind runs already completed (#2906), and those still in flight dropped.
 * :class:`TestTimingArtifacts` and :class:`TestReviewWorkflow` -- what the script
@@ -298,13 +300,14 @@ class TestWorkflowText(unittest.TestCase):
 
         A pattern, or one alternative of a ``(?:...)`` group in it, that no step
         matches is dead, and makes the steps reported look wider than they are.
+        A dead one of :data:`TEST_STEPS` (#2915) leaves its job fitted on every run.
 
         """
         names = {step['name'] for path in sorted(WORKFLOWS.glob('*.yml'))
                  for spec in ci_timing.parse_workflow(path.read_text(encoding='utf-8'))
                  for step in spec['steps']}
         self.assertTrue(names)
-        for pattern in ci_timing.STEPS_OF_INTEREST:
+        for pattern in ci_timing.STEPS_OF_INTEREST + ci_timing.TEST_STEPS:
             groups = list(re.finditer(r'\(\?:([^()]*)\)', pattern))
             # Only a group's alternatives are split out, so a bare one would go unchecked.
             self.assertNotIn('|', re.sub(r'\(\?:[^()]*\)', '', pattern), pattern)
@@ -619,7 +622,7 @@ class TestEndToEnd(unittest.TestCase):
         self.assertNotIn('H3', self.ids())
 
     def test_a_regression_on_the_baseline_is_hard(self) -> 'None':
-        before = {'runs': {'pull_request': {'mergeable': {'n': 1, 'p90': 20.0}}}}
+        before = {'window': {'days': 7.0}, 'runs': {'pull_request': {'mergeable': {'n': 1, 'p90': 20.0}}}}
         with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1):
             _, stdout, report, _ = run_main(api=FakeAPI(), baseline=before)
         ids = [item['id'] for item in report['findings']]
@@ -1155,6 +1158,7 @@ def quiet() -> 'tuple[dict, dict]':
     """A report and baseline held just short of every threshold."""
     modules = [[f'tests.m{i}', 30.0 - i] for i in range(10)]
     report = {
+        'window': {'days': 7.0},
         'jobs': [{'workflow': 'unit-tests.yml', 'name': 'Python 3.14', 'n': 20, 'median': 10.0,
                   'p90': 22.4, 'cap': 45, 'slope_per_day': 0.5, 'days_to_cap': 14.1}],
         'steps': [{'workflow': 'unit-tests.yml', 'job': 'Plain unittest ordering (protocols (rest))',
@@ -1170,6 +1174,7 @@ def quiet() -> 'tuple[dict, dict]':
         'critical_path': {'pull_request': {'leader': 'Python 3.14'}, 'push': {'leader': 'Python 3.14'}},
     }
     baseline = {
+        'window': {'days': 7.0},
         'jobs': [{'workflow': 'unit-tests.yml', 'name': 'Python 3.14', 'n': 20, 'median': 8.4}],
         'runs': {'pull_request': {'mergeable': {'n': 20, 'p90': 25.0}}},
         'derived': {'ms_per_test': {'median': 100.0}},
@@ -1342,6 +1347,147 @@ class TestNonBlockingLegs(unittest.TestCase):
         self.assertIn('``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings', page)
         self.assertIn('a job whose name ends in ``(KTLO)``', page)
         self.assertIn('``(experimental)`` counts by its workflow, not its name', page)
+
+
+def leg_run(number: 'int', begun: 'datetime.datetime', took: 'float', tests: 'str' = 'success') -> 'dict':
+    """A push run of one ``Python 3.14`` job of ``took`` minutes, its tests step concluding ``tests``.
+
+    ``skipped`` is a leg that failed installing, as #2915's did, so its tests never ran.
+
+    """
+    at = lambda moment: moment.strftime('%Y-%m-%dT%H:%M:%SZ')  # noqa: E731
+    ended, ran = begun + datetime.timedelta(minutes=took), tests != 'skipped'
+    conclusion = {'success': 'success', 'failure': 'failure', 'skipped': 'failure', 'cancelled': 'cancelled'}[tests]
+    steps = [{'name': 'Install package and test dependencies', 'conclusion': 'success' if ran else 'failure',
+              'started_at': at(begun), 'completed_at': at(begun if ran else ended)},
+             {'name': ci_timing.TESTS_STEP, 'conclusion': tests,
+              'started_at': at(begun) if ran else None, 'completed_at': at(ended) if ran else None}]
+    return {'id': number, 'event': 'push', 'conclusion': conclusion, 'head_sha': 'a', 'created_at': at(begun),
+            'jobs': [{'name': 'Python 3.14', 'conclusion': conclusion, 'runner_name': 'GitHub Actions 1',
+                      'run_attempt': 1, 'created_at': at(begun), 'started_at': at(begun),
+                      'completed_at': at(ended), 'steps': steps}]}
+
+
+def unit_data(runs: 'list[dict]') -> 'dict':
+    """What :func:`collect` reads, for Unit Tests ``runs`` in a 7-day window, against the excerpt."""
+    return {'repo': REPO, 'since': '2026-10-03T00:00:00Z', 'until': '2026-10-10T00:00:00Z', 'days': 7,
+            'junit': [], 'workflows': {'unit-tests.yml': {'runs': runs, 'specs': {
+                'newest': ('a', fixture('workflow-unit-tests.yml').decode())}}}}
+
+
+class TestLikeForLike(unittest.TestCase):
+    """#2915: a job's trend and H3 each compare like with like."""
+
+    START = datetime.datetime(2026, 10, 3, tzinfo=datetime.timezone.utc)
+
+    def test_a_run_that_never_reached_its_tests_is_no_trend_sample(self) -> 'None':
+        hour = datetime.timedelta(hours=1)
+        # Six legs failed installing as the window opened, as the vendor bumps' did.
+        runs = [leg_run(n, self.START + 4 * n * hour, 0.2, 'skipped') for n in range(1, 7)]
+        runs += [leg_run(10 + n, self.START + (36 + 8 * n) * hour, 20.0) for n in range(14)]
+        report = ci_timing.analyse(unit_data(runs))
+        findings = ci_timing.evaluate(report, None)
+        row = next(row for row in report['jobs'] if row['name'] == 'Python 3.14')
+        self.assertNotIn('H4', [item['id'] for item in findings])
+        self.assertEqual((row['slope_per_day'], row['days_to_cap']), (0.0, None))
+        # Fitted on every run, the line would reach the cap inside H4's window.
+        jobs = [run['jobs'][0] for run in runs]
+        every = [((stamp(job['started_at']) - stamp('2026-10-03T00:00:00Z')).total_seconds() / 86400,
+                  span(job['started_at'], job['completed_at'])) for job in jobs]
+        self.assertLessEqual(ci_timing.projection(every, 45)['days_to_cap'], ci_timing.HARD_PROJECTION_DAYS)
+        # The tables keep every run, and a note says which were left out.
+        self.assertEqual((row['n'], row['fit_n']), (20, 14))
+        self.assertAlmostEqual(row['median'], statistics.median(took for _, took in every))
+        self.assertIn('| unit-tests.yml | Python 3.14 | 20 |', ci_timing.summary(report, findings))
+        self.assertIn('Runs that never reached their test step, left out of the job trends and H4: '
+                      'unit-tests.yml: Python 3.14 (6)', report['notes'])
+
+    def test_tests_that_ran_at_all_count(self) -> 'None':
+        """Failed or cut off by a cap, they ran; skipped, or never listed, they did not."""
+        specs = ci_timing.parse_workflow(fixture('workflow-unit-tests.yml').decode())
+        test = ci_timing.match_job(specs, 'Python 3.14')
+
+        def reached(job: 'dict', spec: 'Optional[dict]' = test) -> 'bool':
+            return ci_timing._reached_tests(job, spec, spec['timeout'] if spec else ci_timing.DEFAULT_TIMEOUT)
+
+        for tests, took, want in (('success', 20.0, True), ('failure', 3.0, True), ('skipped', 0.2, False),
+                                  ('cancelled', 44.0, True), ('cancelled', 6.0, False)):
+            with self.subTest(tests=tests, took=took):
+                self.assertIs(reached(leg_run(1, self.START, took, tests)['jobs'][0]), want)
+        # Stopped before the API listed its tests step: the spec says it has one.
+        stopped = {**leg_run(1, self.START, 0.5, 'skipped')['jobs'][0],
+                   'steps': [{'name': 'Set up job', 'conclusion': 'failure'}]}
+        self.assertFalse(reached(stopped))
+        self.assertTrue(reached(stopped, None))
+        # A step cut off at its own cap ran.
+        ordering = ci_timing.match_job(specs, 'Plain unittest ordering (protocols)')
+        cut = {'name': 'Plain unittest ordering (protocols)', 'conclusion': 'failure', 'steps': [{
+            'name': 'Run tests/protocols and the root-level modules under plain unittest', 'conclusion': 'cancelled',
+            'started_at': '2026-10-03T00:00:00Z', 'completed_at': '2026-10-03T00:19:30Z'}]}
+        self.assertTrue(reached(cut, ordering))
+        self.assertFalse(reached({**cut, 'steps': [{**cut['steps'][0], 'completed_at': '2026-10-03T00:05:00Z'}]},
+                                 ordering))
+        # A job with no tests step is fitted on every run.
+        classify = {'name': 'Classify changed files', 'steps': [{'name': 'Classify the diff', 'conclusion': 'failure'}]}
+        self.assertTrue(reached(classify, ci_timing.match_job(specs, 'Classify changed files')))
+
+    def test_every_job_that_runs_tests_has_a_test_step(self) -> 'None':
+        """Or a run that failed before its tests would be fitted all the same."""
+        for workflow in (ci_timing.UNIT_TESTS,) + ci_timing.OTHER_WORKFLOWS:
+            for job_id, job in _workflows.load(workflow)['jobs'].items():
+                steps = job.get('steps') or ()
+                if not any(re.search(r'-m (?:pytest|unittest)\b|run_unittest_leg', step.get('run') or '')
+                           for step in steps):
+                    continue
+                with self.subTest(workflow=workflow, job=job_id):
+                    self.assertTrue([step for step in steps if any(
+                        re.fullmatch(pattern, step.get('name') or '') for pattern in ci_timing.TEST_STEPS)])
+
+    def test_h3_takes_its_baseline_from_a_report_of_its_own_window(self) -> 'None':
+        def fired(change: 'Callable[[dict], Any]') -> 'list[str]':
+            report, baseline = quiet()
+            report['runs']['pull_request']['mergeable'].update(p90=30.0)
+            baseline['runs']['pull_request']['mergeable'].update(p90=24.0)
+            change(baseline)
+            return [item['id'] for item in ci_timing.evaluate(report, baseline)]
+
+        self.assertEqual(fired(lambda b: None), ['H3'])
+        # A one-day dispatch's: the same rise, on another window, is no regression.
+        self.assertEqual(fired(lambda b: b['window'].update(days=1.0)), ['W9'])
+        # It carries the newest weekly report's figures forward, and H3 reads those.
+        weekly = {'n': 20, 'p90': 24.0, 'until': '2026-10-03T00:00:00Z'}
+        carried = {'1': {'n': 20, 'p90': 40.0}, '7': weekly}
+        self.assertEqual(fired(lambda b: (b['window'].update(days=1.0), b.update(mergeable_by_window=carried))),
+                         ['H3'])
+        self.assertEqual(fired(lambda b: b.update(mergeable_by_window={'7': {**weekly, 'p90': 25.0}})), ['W9'])
+
+    @unittest.skipUnless(HAS_LXML, NO_LXML)
+    def test_a_one_day_dispatch_is_not_the_weekly_reports_baseline(self) -> 'None':
+        """A one-day report is no 7-day report's H3 baseline, and passes the weekly figures on."""
+        daily = {'window': {'days': 1.0, 'until': '2026-10-09T17:44:34Z'},
+                 'runs': {'pull_request': {'mergeable': {'n': 1, 'p90': 20.0}}}}
+        note = 'No earlier 7-day report to take H3\'s baseline from, so H3 was not evaluated.'
+        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1):
+            _, _, weekly, summary = run_main(api=FakeAPI(), baseline=daily)
+            ids = [item['id'] for item in weekly['findings']]
+            self.assertNotIn('H3', ids)
+            self.assertIn('W9', ids)
+            self.assertIn(note, weekly['notes'])
+            self.assertIn(note, summary)
+            own = weekly['runs']['pull_request']['mergeable']
+            self.assertEqual(weekly['mergeable_by_window'], {
+                '1': {'until': daily['window']['until'], 'n': 1, 'p90': 20.0},
+                '7': {'until': weekly['window']['until'], **own}})
+            # A one-day dispatch carries the weekly figures on to the next weekly report.
+            _, _, dispatch, _ = run_main('--days', '1', api=FakeAPI(), baseline=weekly)
+            self.assertEqual(dispatch['mergeable_by_window']['7'], weekly['mergeable_by_window']['7'])
+            _, _, after, _ = run_main(api=FakeAPI(), baseline=dispatch)
+            self.assertNotIn(note, after['notes'])
+
+    def test_the_rules_are_documented(self) -> 'None':
+        page = ' '.join(DOC.read_text(encoding='utf-8').split())
+        self.assertIn('is fitted only on the runs that reached its test step (``TEST_STEPS`` in the script', page)
+        self.assertIn('its baseline is the newest earlier report of the same ``days``', page)
 
 
 def step_blocks(text: 'str', name: 'str') -> 'list[str]':

@@ -41,6 +41,9 @@ What is read, and the rules for reading it:
 * **A job the workflow no longer runs**, as a leg renamed or split inside the
   window, keeps its rows, marked, but no cap finding (#2904). The newest runs'
   jobs say which those are (:func:`no_longer_run`).
+* **Like is compared with like** (#2915): a job's trend is fitted only on the runs
+  that reached its test step (:data:`TEST_STEPS`), and H3's baseline is the newest
+  earlier report of the same ``--days`` (:func:`mergeable_by_window`).
 * **Test timings** come from the ``junit-unit-*`` artifacts the unit legs upload,
   for the newest :data:`JUNIT_RUNS` successful push runs. Each testcase's own
   ``time`` is used; a suite's ``tests=`` count includes subtests and is not.
@@ -164,6 +167,17 @@ STEPS_OF_INTEREST = (
     r'Run full test suite',
     r'Run tests/.* under plain unittest',
     r'Run the KTLO cells.*',
+)
+#: The steps that run a job's tests, or a compat leg's check, by full-match pattern.
+#: A job given one is a trend sample only on a run that reached it (#2915): a leg
+#: that failed installing after seconds times no tests.
+TEST_STEPS = (
+    r'Run unit tests',
+    r'Run full test suite',
+    r'Run tests/.* under plain unittest',
+    r'Run the project pins',
+    r'Run the (?:supported|KTLO) cells.*',
+    r'Verify package',
 )
 
 # Thresholds. Each is anchored to a value measured on 2026-10-05..09 for #1538,
@@ -873,6 +887,23 @@ def _counted(item: 'dict[str, Any]', cap: 'Optional[float]') -> 'bool':
     return item.get('conclusion') in ('success', 'failure') or _timed_out(item, cap)
 
 
+def _reached_tests(job: 'dict[str, Any]', spec: 'Optional[dict[str, Any]]', cap: 'float') -> 'bool':
+    """Whether ``job`` ran its :data:`TEST_STEPS` step, or neither it nor its spec has one (#2915).
+
+    The step ran if it finished, hit its own cap, or was cut off by the job's. The
+    spec counts too, for a job that stopped before the API listed its later steps.
+
+    """
+    def testing(step: 'dict[str, Any]') -> 'bool':
+        return any(re.fullmatch(pattern, step['name']) for pattern in TEST_STEPS)
+
+    steps = [step for step in job.get('steps') or () if testing(step)]
+    if not steps and not any(testing(step) for step in (spec or {}).get('steps', ())):
+        return True
+    return any(_counted(step, step_cap(spec, step['name']))
+               or (_timed_out(job, cap) and step.get('conclusion') == 'cancelled') for step in steps)
+
+
 def _job_cap(specs: 'list[dict[str, Any]]', name: 'str') -> 'int':
     spec = match_job(specs, name)
     return spec['timeout'] if spec else DEFAULT_TIMEOUT
@@ -982,6 +1013,7 @@ def analyse(data: 'dict[str, Any]') -> 'dict[str, Any]':
     gone = {workflow: no_longer_run(info['runs'], specs.get(workflow, []))
             for workflow, info in data['workflows'].items()}
     unmatched = set()
+    untested = []  # type: list[str]
     for (workflow, name), samples in sorted(jobs.items()):
         spec = match_job(specs.get(workflow, []), name)
         if spec is None:
@@ -989,16 +1021,23 @@ def analyse(data: 'dict[str, Any]') -> 'dict[str, Any]':
         cap = spec['timeout'] if spec else DEFAULT_TIMEOUT
         durations = [(_days(job['started_at'], origin), minutes(job['started_at'], job['completed_at']))
                      for job in samples]
+        # #2915: the tables keep every run; the trend, only those that ran the tests.
+        fitted = [point for point, job in zip(durations, samples) if _reached_tests(job, spec, cap)]
+        if len(fitted) < len(durations):
+            untested.append(f'{workflow}: {name} ({len(durations) - len(fitted)})')
         row = {'workflow': workflow, 'name': name, 'cap': cap, 'still_run': name not in gone[workflow],
-               **describe(value for _, value in durations),
+               **describe(value for _, value in durations), 'fit_n': len(fitted),
                'queue': describe(minutes(job.get('created_at') or job['started_at'], job['started_at'])
                                  for job in samples)}
         row['p90_share_of_cap'] = row['p90'] / cap
-        row.update(projection(durations, cap))
+        row.update(projection(fitted, cap))
         report['jobs'].append(row)
     if unmatched:
         report['notes'].append('Matched no job in the workflow file, so judged against the '
                                f'{DEFAULT_TIMEOUT}-minute default cap: ' + ', '.join(sorted(unmatched)))
+    if untested:
+        report['notes'].append('Runs that never reached their test step, left out of the job trends '
+                               'and H4: ' + ', '.join(untested))
     retired = [f'{row["workflow"]}: {row["name"]}' for row in report['jobs'] if not row['still_run']]
     if retired:
         report['notes'].append('No longer run, so judged by no cap finding (H1, H2, H4): '
@@ -1199,11 +1238,38 @@ def non_blocking(workflow: 'str', job: 'str') -> 'bool':
     return workflow in NON_BLOCKING_WORKFLOWS or job.endswith(KTLO_SUFFIX)
 
 
+def window_key(report: 'Optional[dict[str, Any]]') -> 'Optional[str]':
+    """``report``'s ``days``, as :func:`mergeable_by_window` files it: ``'7'`` for 7.0."""
+    days = ((report or {}).get('window') or {}).get('days')
+    return None if days is None else f'{float(days):g}'
+
+
+def mergeable_by_window(baseline: 'Optional[dict[str, Any]]') -> 'dict[str, dict[str, Any]]':
+    """Pull-request time to mergeable in the newest report of each window, as ``baseline`` carries it.
+
+    H3 compares a report only with one of its own ``days`` (#2915), and the baseline
+    is the newest earlier report whatever its window, so each report carries the
+    figures forward. A report written before #2915 carries only its own.
+
+    """
+    if not baseline:
+        return {}
+    if 'mergeable_by_window' in baseline:
+        return dict(baseline['mergeable_by_window'])
+    key = window_key(baseline)
+    own = ((baseline.get('runs') or {}).get('pull_request') or {}).get('mergeable')
+    if key is None or not own:
+        return {}
+    return {key: {'until': baseline['window'].get('until'), **own}}
+
+
 def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 'list[dict[str, str]]':
     """Every HARD (``H*``) and WARN (``W*``) threshold that fires on ``report``.
 
     A cap finding on a :func:`non_blocking` job keeps its ``H`` id but is a warning,
-    and none fires on a job, or its steps, that :func:`no_longer_run` names.
+    and none fires on a job, or its steps, that :func:`no_longer_run` names. H3's
+    baseline is the newest earlier report of the same ``days``
+    (:func:`mergeable_by_window`); the other comparisons take ``baseline`` itself.
 
     """
     found = []  # type: list[dict[str, str]]
@@ -1241,12 +1307,14 @@ def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 
     pr = report['runs'].get('pull_request', {})
     mergeable = pr.get('mergeable', {})
     slow = mergeable.get('n', 0) >= MIN_SAMPLES and mergeable['p90'] >= MERGEABLE_P90
-    before = ((baseline or {}).get('runs', {}).get('pull_request', {}).get('mergeable') or {})
+    key = window_key(report)
+    before = mergeable_by_window(baseline).get(key) or {}
     if (slow and before.get('n', 0) >= MIN_SAMPLES and before.get('p90')
             and mergeable['p90'] >= (1 + HARD_MERGEABLE_RISE) * before['p90']):
+        until = f' to {before["until"][:10]}' if before.get('until') else ''
         fire('H3', f'pull-request time to `{REQUIRED_JOB}` p90 rose from {_fmt(before["p90"])} '
-                   f'to {_fmt(mergeable["p90"])} min, at least {HARD_MERGEABLE_RISE:.0%} and over '
-                   f'{MERGEABLE_P90:.0f}.')
+                   f'(the {key}-day report{until}) to {_fmt(mergeable["p90"])} min, at least '
+                   f'{HARD_MERGEABLE_RISE:.0%} and over {MERGEABLE_P90:.0f}.')
     elif slow:
         fire('W9', f'pull-request time to `{REQUIRED_JOB}` p90 is {_fmt(mergeable["p90"])} min, '
                    f'at or above {MERGEABLE_P90:.0f}; HARD (H3) only as a rise on the baseline.')
@@ -1478,8 +1546,15 @@ def _report(args: 'argparse.Namespace', client: 'Client', data: 'dict[str, Any]'
     elif args.baseline:
         report['notes'].append(f'No baseline at {args.baseline}, so H3, W1, W4, W7\'s new '
                                'entrants and W8 were not evaluated.')
+    carried, key = mergeable_by_window(baseline), window_key(report)
+    if baseline and key not in carried:
+        report['notes'].append(f'No earlier {key}-day report to take H3\'s baseline from, so H3 '
+                               'was not evaluated.')
     findings = evaluate(report, baseline)
     report['findings'] = findings
+    # #2915: carried forward, so a run of another window is not the next one's H3 baseline.
+    report['mergeable_by_window'] = {**carried, key: {
+        'until': report['window']['until'], **report['runs']['pull_request']['mergeable']}}
 
     text = summary(report, findings)
     if args.out:
