@@ -688,16 +688,29 @@ gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>
 <span class="w">    </span>--json<span class="w"> </span>commits<span class="w"> </span>-q<span class="w"> </span><span class="s1">'.[].commits|length'</span>
 </pre></div>
 </div>
-<p>The grouping scheme was settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>: <strong>a section per top-level module, with</strong>
-<code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module granularity, not
-per-file and not per-subpackage. No entry in the file carries an inline kind label:</p>
+<p><strong>Every final release has a page of its own</strong>, <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/X.Y.Z.rst</span></code>.
+A pre- or post-release gets none: its changes fold into the page of the final release
+that follows it, as 1.5.0’s pre-releases and <code class="docutils literal notranslate"><span class="pre">1.6.1.post1</span></code>’s refresh do. The owner
+kept that rule on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>.</p>
+<p><strong>How a page groups its entries depends on its size</strong>, ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>:</p>
+<ul>
+<li><p><strong>Many entries</strong> – more than about 15, or spanning three or more top-level
+modules – take the scheme settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>: <strong>a section per top-level
+module, with</strong> <code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module
+granularity, not per-file and not per-subpackage – and no inline kind label, as
+in 1.5.0:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
 0
 </pre></div>
 </div>
-<p>Each section names a module except <em>Project infrastructure</em>, which is for what
-belongs to none. The map is one-to-one with the package list below – every package,
-<a class="reference internal" href="../../pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a> included, has a section of its own:</p>
+</li>
+<li><p><strong>Few entries</strong>, as in a patch release or a small minor, take flat bullets led by
+their kind – <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">**Added**</span> <span class="pre">--</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">**Changed**</span> <span class="pre">--</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">**Fixed**</span> <span class="pre">--</span></code> – as
+1.6.1 and 1.6.2 do.</p></li>
+</ul>
+<p>Under the module scheme each section names a module except <em>Project infrastructure</em>,
+which is for what belongs to none. The map is one-to-one with the package list below –
+every package, <a class="reference internal" href="../../pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a> included, has a section of its own:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-d<span class="w"> </span>pcapkit/*/<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s|pcapkit/||;s|/||'</span><span class="w">   </span><span class="c1"># const corekit dumpkit foundation</span>
 <span class="w">                                              </span><span class="c1"># interface protocols toolkit</span>
 <span class="w">                                              </span><span class="c1"># utilities vendor</span>
@@ -705,10 +718,9 @@ belongs to none. The map is one-to-one with the package list below – every pac
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>One case the rule does not settle by itself: an entry whose change spans modules –
-the reassembly and extraction ones touch <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> and
-<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> together. Ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/952">#952</a>: file it under the
+<p>One case the module scheme does not settle by itself: an entry whose change spans
+modules – the reassembly and extraction ones touch <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> together. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/952">#952</a>: file it under the
 module the change is <em>about</em>, name the others in the entry’s own text, and do
 <strong>not</strong> duplicate the entry into each section. A reader scanning one module’s
 section wants that module’s changes; the same prose appearing twice reads as two
@@ -919,10 +931,12 @@ gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </sp
 <section id="milestones-and-the-project-board">
 <h2>Milestones and the Project Board<a class="headerlink" href="#milestones-and-the-project-board" title="Link to this heading">¶</a></h2>
 <p><strong>Milestones are release lines</strong>, titled by minor version (<code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">v1.4</span></code>,
-<code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">v1.5</span></code>). An issue or pull request belongs to the line it ships in: the
-open milestone collects work targeting the next release, and it is closed when that release’s final tag is cut,
-with <code class="docutils literal notranslate"><span class="pre">due_on</span></code> set to the tag date. Work closed without shipping – an unmerged pull
-request, an issue closed as not planned – takes no milestone.
+<code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">v1.5</span></code>). An issue or pull request belongs to the line it ships in: a
+milestone collects the work of its line’s <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> release <strong>and of its patch
+releases</strong>, as v1.6 stayed open through 1.6.2 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>), and it is closed when the
+line’s last final tag is cut, with <code class="docutils literal notranslate"><span class="pre">due_on</span></code> set to that tag’s date. Work closed
+without shipping – an unmerged pull request, an issue closed as not planned – takes
+no milestone.
 <code class="file docutils literal notranslate"><span class="pre">.github/workflows/milestone.yml</span></code> gives an item the open milestone as it opens,
 and settles it as the item closes; a milestone already set by hand to another
 release is kept, and a manual run backfills the items without one
@@ -989,13 +1003,27 @@ being set by hand.</p>
 Status; <em>Needs decision</em> and <em>Blocked</em>, each the open items in that state; <em>Open
 pull requests</em>; <em>History</em>, everything <em>Done</em>; and a <em>Release X.Y</em> board for each
 milestone, grouped by Status, filtered on it and showing the earlier release views’
-fields. A new line gets both: the milestone <code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">vX.Y</span></code>, described <em>Changes for
-the vX.Y.0 release.</em>, and its view; <a class="reference internal" href="../releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a> has the steps that follow.
-Sorting and grouping are set in the web interface; names, layouts, filters and columns
-can also be set through the GraphQL API (<code class="docutils literal notranslate"><span class="pre">updateProjectV2View</span></code>).</p>
-<p>Link neither from docstrings, code comments or Markdown files. Both are tracking
-metadata that changes as work moves, and a link to them goes stale the way a line
-number does; the changelog’s <code class="docutils literal notranslate"><span class="pre">:issue:</span></code> and <code class="docutils literal notranslate"><span class="pre">:pr:</span></code> roles are the durable trail.
+fields. Sorting and grouping are set in the web interface. Through the GraphQL API,
+<code class="docutils literal notranslate"><span class="pre">createProjectV2View</span></code> creates a view, and <code class="docutils literal notranslate"><span class="pre">updateProjectV2View</span></code> sets its name,
+layout, filter and columns.</p>
+<p id="process-release-scope"><strong>A new line is set up in full as it opens</strong>, on the owner’s ask on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>:</p>
+<ol class="arabic simple">
+<li><p><strong>the milestone</strong> <code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">vX.Y</span></code>, described <em>Changes for the vX.Y.0 release and
+its vX.Y.x patch releases.</em>, with the line’s issues and open pull requests attached;</p></li>
+<li><p><strong>its</strong> <em>Release X.Y</em> <strong>view</strong>;</p></li>
+<li><p><strong>its scope issue</strong>, <code class="docutils literal notranslate"><span class="pre">release:</span> <span class="pre">X.Y.0</span> <span class="pre">scope</span></code>, in the milestone and labelled
+<code class="docutils literal notranslate"><span class="pre">release</span></code>.</p></li>
+</ol>
+<p><a class="reference internal" href="../releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a> has the steps that follow.</p>
+<p><strong>The scope issue is the line’s plan</strong>, ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>, which is 1.7.0’s
+own. Every other issue in the milestone is one of its sub-issues, or a sub-issue of
+one, and its body lists the items, what moved out, and the closing steps with the
+status of each. An issue has one parent, so an issue that moves milestone is
+re-parented under its new line’s scope issue as it moves.</p>
+<p>Link neither the board nor a milestone from docstrings, code comments or Markdown
+files. Both are tracking metadata that changes as work moves, and a link to them goes
+stale the way a line number does; the changelog’s <code class="docutils literal notranslate"><span class="pre">:issue:</span></code> and <code class="docutils literal notranslate"><span class="pre">:pr:</span></code> roles are
+the durable trail.
 The repository wiki is disabled – contributor documentation lives on these pages.</p>
 </section>
 <section id="ci-timing-review">

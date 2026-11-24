@@ -806,7 +806,8 @@ closed items, issues and pull requests both, by name – a bare label <code clas
 removes every label – reading them back from the item rather than from the search
 index, which lags. Beyond the one a worker sets on opening its pull request,
 milestones are left to their automation.</p></li>
-<li><p><strong>Prune spent worktrees</strong> (<a class="reference internal" href="#worktree-cleanup">Worktree Cleanup</a>).</p></li>
+<li><p><strong>Prune spent worktrees and branches</strong> (<a class="reference internal" href="#worktree-cleanup">Worktree Cleanup</a>,
+<a class="reference internal" href="#remote-branch-cleanup">Remote Branch Cleanup</a>).</p></li>
 <li><p><strong>Lead the report with what is ready to merge</strong>: <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> at the
 current head, every required check run completed, none failed. Experimental legs
 count against neither condition; a <a class="reference internal" href="workflows.html#ktlo-tier"><span class="std std-ref">KTLO</span></a> leg is left out of the
@@ -955,6 +956,12 @@ pull request already merged or a concern genuinely apart from it.</p></li>
 Kinds refresh, every number it adds has its kind confirmed on GitHub. A Python
 Versions proposal’s new line enters <code class="docutils literal notranslate"><span class="pre">supported</span></code>, so its legs block and are read
 green before merge.</p></li>
+<li><p><strong>Dependabot’s paired docs bumps get one review.</strong> Where a root <code class="docutils literal notranslate"><span class="pre">pip</span></code> pull request
+bumps both <code class="file docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code> and the <code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code> <code class="docutils literal notranslate"><span class="pre">docs</span></code>
+extra, and a <code class="docutils literal notranslate"><span class="pre">/docs</span></code> one bumps only the requirements file, which fails
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_typehints_pin_1856_unit.py</span></code> on its own, the root one
+is reviewed. The <code class="docutils literal notranslate"><span class="pre">/docs</span></code> one is labelled <code class="docutils literal notranslate"><span class="pre">duplicate</span></code> and its CI cancelled, and
+Dependabot closes it once the root one merges, as with <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2931">#2931</a> and <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2932">#2932</a>.</p></li>
 </ul>
 </section>
 <section id="the-decision-loop">
@@ -1032,14 +1039,16 @@ branches to be up to date, every push to <code class="docutils literal notransla
 behind, and the owner merges through the bypass.</p></li>
 <li><p><strong>The changelog fold</strong>: the merged pull request’s entry is written into the
 release’s central changelog pull request (<a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>).</p></li>
-<li><p><strong>Worktrees</strong>: the merged pull request’s worktrees become prunable.</p></li>
+<li><p><strong>Worktrees and branch</strong>: the merged pull request’s worktrees become prunable, and
+its branch is deleted (<a class="reference internal" href="#remote-branch-cleanup">Remote Branch Cleanup</a>).</p></li>
 </ol>
 <p>On a pull request no run is cancelled: a cancelled run leaves a red mark on its
 commit that reads as a failure, which is why the owner ruled out cancelling
-superseded runs on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>. A <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">needs-changes</span></code> head is the exception –
-every run on it is cancelled except the board-sync ones, Project Status and Milestone,
-since that head is going to be replaced. Experimental Tests lets a newer commit
-supersede its run, which it skips or stops rather than cancels (<a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p>
+superseded runs on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>. A <code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">needs-changes</span></code> head and a <code class="docutils literal notranslate"><span class="pre">duplicate</span></code>
+Dependabot pull request are the exceptions – every run on them is cancelled except the
+board-sync ones, Project Status and Milestone, since the head is going to be replaced
+or the pull request closed. Experimental Tests lets a newer commit supersede its run,
+which it skips or stops rather than cancels (<a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p>
 <pre  class="mermaid">
         flowchart TD
     S[&quot;Each sweep and each merge:&lt;br/&gt;main's push runs, read per job&quot;] --&gt; F{&quot;A check run on main&lt;br/&gt;ended other than success?&quot;}
@@ -1152,6 +1161,18 @@ request’s head, and a tree whose every commit is upstream. Save its diff first
 never force past a lock: the lock is the signal.</p></li>
 <li><p><strong>Never commit inside a live agent’s worktree</strong>; copy its diff out to a tree of your
 own. A state change the agent did not make looks to it like a fault.</p></li>
+</ul>
+</section>
+<section id="remote-branch-cleanup">
+<h3>Remote Branch Cleanup<a class="headerlink" href="#remote-branch-cleanup" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>A pull request’s branch is deleted once it merges or closes.</strong> The repository does
+not delete it on merge.</p></li>
+<li><p><strong>One branch per call, through the REST API</strong>:
+<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span> <span class="pre">-X</span> <span class="pre">DELETE</span> <span class="pre">repos/JarryShaw/PyPCAPKit/git/refs/heads/&lt;branch&gt;</span></code>. A
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--delete</span></code> naming more than five refs is refused: a repository rule
+caps a push at five branch or tag updates (<code class="docutils literal notranslate"><span class="pre">GH013</span></code>).</p></li>
+<li><p><strong>Branches under</strong> <code class="docutils literal notranslate"><span class="pre">test/</span></code> <strong>are kept.</strong></p></li>
 </ul>
 </section>
 </section>
@@ -1381,13 +1402,16 @@ the Main-CI Watch</a>)</p></td>
 <tr class="row-odd"><td><p>A prune selected live agents’ trees</p></td>
 <td><p>keep rules (<a class="reference internal" href="#worktree-cleanup">Worktree Cleanup</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A measurement read the shared checkout</p></td>
+<tr class="row-even"><td><p>A multi-ref <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--delete</span></code> was refused</p></td>
+<td><p>one REST delete per branch (<a class="reference internal" href="#remote-branch-cleanup">Remote Branch Cleanup</a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>A measurement read the shared checkout</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pcapkit.__file__</span></code> assert (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>A cross-review likely ran on the author’s model</p></td>
+<tr class="row-even"><td><p>A cross-review likely ran on the author’s model</p></td>
 <td><p>another model (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A worker posted and spawned on its own</p></td>
+<tr class="row-odd"><td><p>A worker posted and spawned on its own</p></td>
 <td><p>the worker rules (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
 </tbody>
@@ -1465,6 +1489,7 @@ the Main-CI Watch</a>)</p></td>
 <li><a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and the Main-CI Watch</a></li>
 <li><a class="reference internal" href="#throttles-and-guards">Throttles and Guards</a><ul>
 <li><a class="reference internal" href="#worktree-cleanup">Worktree Cleanup</a></li>
+<li><a class="reference internal" href="#remote-branch-cleanup">Remote Branch Cleanup</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#briefs">Briefs</a></li>

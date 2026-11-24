@@ -606,7 +606,12 @@ else – the <code class="docutils literal notranslate"><span class="pre">v*</sp
 <p>A minor release, <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code>, carries the roadmap work (<a class="reference internal" href="pep.html"><span class="doc">Help Wanted</span></a>) its milestone
 tracks; a patch release, <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code>, ships fixes and vendor refreshes; and a vendor bump
 between releases is a <code class="docutils literal notranslate"><span class="pre">.postN</span></code> of the release before it. A line is planned on its
-milestone and its <em>Release X.Y</em> view on the project board (<a class="reference internal" href="conventions/process.html#process"><span class="std std-ref">Running the Repository</span></a>).</p>
+milestone, its scope issue and its <em>Release X.Y</em> view on the project board, set up as
+<a class="reference internal" href="conventions/process.html#process-release-scope"><span class="std std-ref">a new line opens</span></a>.</p>
+<p><strong>A major release,</strong> <code class="docutils literal notranslate"><span class="pre">X.0.0</span></code>, <strong>isolates one change to the core model</strong> and carries
+nothing else. The roadmap work that can or should be done ships first, a batch per
+minor, so the major lands on a mostly closed-out roadmap. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>; which
+work goes in which version is in the milestones and their scope issues.</p>
 <p>A final release, <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> or <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code>, runs these steps in order, ruled on
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>:</p>
 <ol class="arabic simple">
@@ -667,11 +672,25 @@ every module the crawl wrote under <code class="docutils literal notranslate"><s
     BUMP --&gt; COMMIT[&quot;Commit changes, new&lt;br/&gt;const modules too&quot;]
     DOCS --&gt;|committed| PUSH[&quot;Push changes to main&lt;br/&gt;not on a manual run&quot;]
     COMMIT --&gt; PUSH
-    </pre><p>The same script is the manual entry point: run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code> and
-commit the result to <code class="docutils literal notranslate"><span class="pre">main</span></code> for a release that is not a vendor-registry refresh.
-While <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version is a <code class="docutils literal notranslate"><span class="pre">.devN</span></code> one it only advances that counter
-(<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to <code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>), producing another blocked dev version, not a
-release (see the dev-release note below).</p>
+    </pre><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>A scheduled bump ships whatever</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>holds.</strong> While <code class="docutils literal notranslate"><span class="pre">main</span></code> carries
+unreleased minor work, a Vendor Update whose crawl changed code bumps the released
+line to its next <code class="docutils literal notranslate"><span class="pre">.postN</span></code>, and that release would publish the unreleased work
+under the old line’s number. Until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a> moves that work onto <code class="docutils literal notranslate"><span class="pre">develop</span></code>,
+the owner rejects such a run’s <code class="docutils literal notranslate"><span class="pre">github-release</span></code> approval (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>).</p>
+</div>
+<p><strong>A new minor or patch release is a hand edit.</strong> The script takes no target version: it
+advances a <code class="docutils literal notranslate"><span class="pre">devN</span></code>, pre-release or <code class="docutils literal notranslate"><span class="pre">postN</span></code> counter, and gives a final release
+<code class="docutils literal notranslate"><span class="pre">.post1</span></code>, so <code class="docutils literal notranslate"><span class="pre">1.6.2</span></code> becomes <code class="docutils literal notranslate"><span class="pre">1.6.2.post1</span></code>. So <code class="docutils literal notranslate"><span class="pre">X.Y.0</span></code> or <code class="docutils literal notranslate"><span class="pre">X.Y.Z</span></code> is one
+commit to <code class="docutils literal notranslate"><span class="pre">main</span></code> that sets <code class="docutils literal notranslate"><span class="pre">__version__</span></code> in <code class="file docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s <code class="docutils literal notranslate"><span class="pre">version</span></code> and <code class="docutils literal notranslate"><span class="pre">date-released</span></code>, the latter to the commit’s
+UTC date, and checks that <code class="file docutils literal notranslate"><span class="pre">conda/build</span></code> reads <code class="docutils literal notranslate"><span class="pre">0</span></code>, as the script would leave it.</p>
+<p>The script is the manual entry point for the next counter: run
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code> and commit the result to <code class="docutils literal notranslate"><span class="pre">main</span></code>. While <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
+version is a <code class="docutils literal notranslate"><span class="pre">.devN</span></code> one it only advances that counter (<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to
+<code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>), producing another blocked dev version, not a release (see the
+dev-release note below).</p>
 <p>Editing <code class="docutils literal notranslate"><span class="pre">__version__</span></code> by hand without moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s <code class="docutils literal notranslate"><span class="pre">version</span></code>
 field to match <strong>blocks the release</strong>.
 <code class="docutils literal notranslate"><span class="pre">tests/project/test_bump_version.py</span></code>’s
