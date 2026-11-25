@@ -76,7 +76,7 @@ class TestFTPReturnCodeEveryValue(unittest.TestCase):
     def test_make_keeps_the_leading_zero(self) -> None:
         from pcapkit.protocols.application.ftp.protocol import FTP
 
-        proto = FTP(code=99, args='x')
+        proto = FTP.from_fields(code=99, args='x')
         self.assertEqual(proto.data, b'099 x\r\n')
         self.assertEqual(FTP(proto.data, len(proto.data)).data, b'099 x\r\n')
 
@@ -120,7 +120,7 @@ class TestHTTPStatusCodeEveryValue(unittest.TestCase):
     def test_make_keeps_the_leading_zero(self) -> None:
         from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
-        proto = HTTPv1(status=99, message='X', http_version='1.1')
+        proto = HTTPv1.from_fields(status=99, message='X', http_version='1.1')
         self.assertEqual(proto.data, b'HTTP/1.1 099 X\r\n\r\n')
         reparsed = HTTPv1(proto.data, len(proto.data))
         self.assertEqual(int(reparsed.info.receipt.status), 99)

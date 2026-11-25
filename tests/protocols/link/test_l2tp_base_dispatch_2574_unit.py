@@ -99,10 +99,10 @@ class L2TPBaseDispatchTests(unittest.TestCase):
 
         for fields in ({}, {'tunnel_id': 0x1234, 'session_id': 0x5678}):
             with self.subTest(fields=fields):
-                layer = L2TP(version=2, **fields)
+                layer = L2TP.from_fields(version=2, **fields)
                 self.assertIs(type(layer), L2TPv2)
-                self.assertEqual(layer.data, L2TPv2(version=2, **fields).data)
-                self.assertEqual(layer.data, L2TPv2(**fields).data)
+                self.assertEqual(layer.data, L2TPv2.from_fields(version=2, **fields).data)
+                self.assertEqual(layer.data, L2TPv2.from_fields(**fields).data)
                 parsed = L2TP(layer.data)
                 self.assertIs(type(parsed), L2TPv2)
                 self.assertEqual(parsed.data, layer.data)
@@ -115,7 +115,7 @@ class L2TPBaseDispatchTests(unittest.TestCase):
         for fields in ({}, {'tunnel_id': 0x1234, 'session_id': 0x5678}):
             with self.subTest(fields=fields):
                 with self.assertRaisesRegex(ProtocolError, NO_VERSION):
-                    L2TP(**fields)
+                    L2TP.from_fields(**fields)
 
     def test_version_is_the_only_check(self) -> None:
         """A version no member reads raises; a field the member lacks fails its check."""
@@ -125,9 +125,9 @@ class L2TPBaseDispatchTests(unittest.TestCase):
         for version in (1, 3, True, '2', 2.0):
             with self.subTest(version=version):
                 with self.assertRaisesRegex(ProtocolError, f'^L2TP: invalid version: {version!r}$'):
-                    L2TP(version=version)
+                    L2TP.from_fields(version=version)
         with self.assertRaisesRegex(UnsupportedCall, "^L2TPv2: unexpected keyword\\(s\\): 'ttl'"):
-            L2TP(version=2, ttl=3)
+            L2TP.from_fields(version=2, ttl=3)
         with self.assertRaisesRegex(ProtocolError, '^L2TP: invalid version: 3$'):
             L2TP.from_data({'version': 3})
         with self.assertRaisesRegex(ProtocolError, '^L2TP: invalid version: None$'):
@@ -161,9 +161,9 @@ class L2TPBaseDispatchTests(unittest.TestCase):
 
         octets = OCTETS['data message']
         self.assertIs(type(L2TP(octets)), L2TPv2)
-        self.assertIs(type(L2TP(version=2, tunnel_id=1)), L2TPv2)
+        self.assertIs(type(L2TP.from_fields(version=2, tunnel_id=1)), L2TPv2)
         self.assertIs(type(Custom(octets)), Custom)
-        self.assertIs(type(Custom(tunnel_id=1)), Custom)
+        self.assertIs(type(Custom.from_fields(tunnel_id=1)), Custom)
         self.assertIs(type(Custom.from_data(Custom(octets).info)), Custom)
         with self.assertRaisesRegex(TypeError, 'abstract'):
             Abstract(octets)

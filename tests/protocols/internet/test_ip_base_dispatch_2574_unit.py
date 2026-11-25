@@ -102,9 +102,9 @@ class IPBaseDispatchTests(unittest.TestCase):
 
         for label, (fields, version) in FIELDS.items():
             with self.subTest(fields=label):
-                layer = IP(version=version, **fields)
+                layer = IP.from_fields(version=version, **fields)
                 self.assertIs(type(layer), self.member(version))
-                self.assertEqual(layer.data, self.member(version)(**fields).data)
+                self.assertEqual(layer.data, self.member(version).from_fields(**fields).data)
                 parsed = IP(layer.data)
                 self.assertIs(type(parsed), type(layer))
                 self.assertEqual(parsed.data, layer.data)
@@ -166,7 +166,7 @@ class IPBaseDispatchTests(unittest.TestCase):
         for label, fields in cases.items():
             with self.subTest(fields=label):
                 with self.assertRaisesRegex(ProtocolError, NO_VERSION):
-                    IP(**fields)
+                    IP.from_fields(**fields)
 
     def test_version_is_the_only_check(self) -> None:
         """A bad ``version`` raises; a field the member lacks fails the member's check."""
@@ -176,18 +176,18 @@ class IPBaseDispatchTests(unittest.TestCase):
         for version in (5, True, '4', 4.0, 6.0):
             with self.subTest(version=version):
                 with self.assertRaisesRegex(ProtocolError, f'^IP: invalid version: {version!r}$'):
-                    IP(version=version)
+                    IP.from_fields(version=version)
 
         class Version(enum.IntEnum):
             """An :class:`~enum.IntEnum` member is an :obj:`int`, and accepted."""
 
             IPV6 = 6
 
-        self.assertIs(type(IP(version=Version.IPV6)), self.member(6))
+        self.assertIs(type(IP.from_fields(version=Version.IPV6)), self.member(6))
         with self.assertRaisesRegex(UnsupportedCall, "^IPv4: unexpected keyword\\(s\\): 'hop_limit'"):
-            IP(version=4, hop_limit=3)
+            IP.from_fields(version=4, hop_limit=3)
         with self.assertRaisesRegex(UnsupportedCall, "^IPv6: unexpected keyword\\(s\\): 'ttl'"):
-            IP(version=6, ttl=3)
+            IP.from_fields(version=6, ttl=3)
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
         """Building, ``version`` must name the member; parsing, it is handed on unread."""
@@ -195,12 +195,12 @@ class IPBaseDispatchTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
-        self.assertEqual(IPv4(version=4).data, IPv4().data)
-        self.assertEqual(IPv6(version=6).data, IPv6().data)
+        self.assertEqual(IPv4.from_fields(version=4).data, IPv4.from_fields().data)
+        self.assertEqual(IPv6.from_fields(version=6).data, IPv6.from_fields().data)
         with self.assertRaisesRegex(ProtocolError, '^IPv4: version=6 names another member$'):
-            IPv4(version=6)
+            IPv4.from_fields(version=6)
         with self.assertRaisesRegex(ProtocolError, '^IPv6: version=4 names another member$'):
-            IPv6(version=4)
+            IPv6.from_fields(version=4)
         # NOTE: The enclosing IP layer hands its own version to the one it
         # carries under this name, so IPv6 in IPv4 is parsed with ``version=4``.
         six_in_four = ipv4(OCTETS['IPv6 UDP'][0], 41)
@@ -262,7 +262,7 @@ class IPBaseDispatchTests(unittest.TestCase):
         octets = OCTETS['IPv4 UDP'][0]
         self.assertIs(type(IP(octets)), IPv4)
         self.assertIs(type(Custom(octets)), Custom)
-        self.assertIs(type(Custom(ttl=3, version=4)), Custom)
+        self.assertIs(type(Custom.from_fields(ttl=3, version=4)), Custom)
         self.assertIs(type(Custom.from_data(Custom(octets).info)), Custom)
         with self.assertRaisesRegex(TypeError, 'abstract'):
             Abstract(octets)

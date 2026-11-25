@@ -56,6 +56,10 @@ class IP(Internet[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-met
 
     """
 
+    #: ``version``, which names the member and which :meth:`make` does not
+    #: take, as a construction keyword (:issue:`2840`).
+    __keywords__ = frozenset({'version'})
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -71,7 +75,7 @@ class IP(Internet[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-met
         return ('IPv4', 'IPv6')
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -203,3 +207,41 @@ class IP(Internet[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-met
             if version == 6:
                 return cast('Type[IP]', IPv6)
         raise ProtocolError(f'IP: invalid version: {version!r}')
+
+    @classmethod
+    def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
+        """The member :meth:`from_fields` and :meth:`from_data` construct.
+
+        Picked and checked as constructing this class directly does: on this
+        class, the member ``version`` names; on another, the class itself, of
+        which ``version`` must name the member it is or derives from. ``version``
+        is taken out of ``fields``, as :meth:`make` does not read it.
+
+        Args:
+            fields: Construction keywords.
+
+        Returns:
+            The member, or the class itself.
+
+        Raises:
+            ProtocolError: If, on this class, ``version`` is missing; if it names
+                neither member; or if it is not the class's own version, which a
+                subclass outside the members does not have.
+
+        .. versionadded:: 1.8.0
+
+        """
+        version = fields.pop('version', None)
+        if cls is IP:
+            if version is None:
+                raise ProtocolError('IP: no version to build with; pass version=4 or version=6')
+            return cast('Type[Self]', cls._member_of_version(version))
+        if version is not None and not issubclass(cls, cls._member_of_version(version)):
+            from pcapkit.protocols.internet.ipv4.protocol import IPv4  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.internet.ipv6.protocol import IPv6  # isort: skip # pylint: disable=import-outside-toplevel
+
+            if not issubclass(cls, (IPv4, IPv6)):
+                raise ProtocolError(f'{cls.__name__}: no version of its own to match '
+                                    f'version={version!r}')
+            raise ProtocolError(f'{cls.__name__}: version={version!r} names another member')
+        return cls

@@ -212,7 +212,7 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
         )
         return self._decode_next_layer(frad, _nlpid, length - _hdr_len)
 
-    def make(self,
+    def make(self, *,
              dlci: 'int' = 0,
              cr: 'int' = 0,
              fecn: 'int' = 0,

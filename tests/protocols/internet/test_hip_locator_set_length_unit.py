@@ -272,7 +272,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
 
         for name, locators, contents in SHAPES:
             with self.subTest(shape=name):
-                built = HIP(
+                built = HIP.from_fields(
                     parameters=[(Parameter.LOCATOR_SET,
                                  {'locator_set': [dict(x) for x in locators]})],
                     extension=True, **HIP_BASE)

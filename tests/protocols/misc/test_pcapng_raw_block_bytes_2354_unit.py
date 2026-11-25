@@ -88,10 +88,10 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
-        interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                           block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
         context.interfaces.append(interface.info)
         return context
 
@@ -103,8 +103,8 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         body = _dsb_body(TLS_LOG)
-        block = PCAPNG(num=2, sct=1, ctx=self._context(),
-                       type=BlockType.Decryption_Secrets_Block, block=body)
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(),
+                                   type=BlockType.Decryption_Secrets_Block, block=body)
 
         self.assertEqual(block.info.secrets_type, SecretsType.TLS_Key_Log)
         self.assertEqual(block.info.secrets_length, len(TLS_LOG))
@@ -126,8 +126,8 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
                 with warnings.catch_warnings():
                     # a Packet Block warns that the block is obsolete
                     warnings.simplefilter('ignore')
-                    built = PCAPNG(num=2, sct=1, ctx=context, type=type_, block=keywords)
-                    again = PCAPNG(num=2, sct=1, ctx=context, type=type_, block=built.data[4:])
+                    built = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=type_, block=keywords)
+                    again = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=type_, block=built.data[4:])
 
                 self.assertEqual(again.data, built.data)
                 self.assertEqual(str(again.info), str(built.info))
@@ -143,8 +143,8 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         for body in (b'', b'raw', b'\x00' * 7):
             with self.subTest(body=body):
                 with self.assertRaisesRegex(StreamEOFError, r'fewer than the 12 a block needs'):
-                    PCAPNG(num=2, sct=1, ctx=context,
-                           type=BlockType.Decryption_Secrets_Block, block=body)
+                    PCAPNG.from_fields(num=2, sct=1, ctx=context,
+                                       type=BlockType.Decryption_Secrets_Block, block=body)
 
         # Long enough, but declaring a Block Total Length of zero.
         for body in (b'\x00' * 8, b'\x00' * 12):
@@ -152,8 +152,8 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     with self.assertRaisesRegex(ProtocolError, r'invalid length: 0'):
-                        PCAPNG(num=2, sct=1, ctx=context,
-                               type=BlockType.Decryption_Secrets_Block, block=body)
+                        PCAPNG.from_fields(num=2, sct=1, ctx=context,
+                                           type=BlockType.Decryption_Secrets_Block, block=body)
 
 
 if __name__ == '__main__':

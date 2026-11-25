@@ -45,6 +45,7 @@ layout on all.
    .. rubric:: Utilities
 
    .. automethod:: _member_of_version
+   .. automethod:: _construction_member
 
 Versions Not Implemented
 ------------------------

@@ -39,7 +39,7 @@ class TestHTTPv2ErrorCodeDefault(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
-        return HTTPv2(type=Frame[name], sid=sid, frame=frame)
+        return HTTPv2.from_fields(type=Frame[name], sid=sid, frame=frame)
 
     def test_rst_stream_defaults_to_no_error(self) -> None:
         from pcapkit.const.http.error_code import ErrorCode

@@ -76,7 +76,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
 
         for type_ in (0, 2, 3, 4, 5):
             with self.subTest(type=type_):
-                built = IPv6_Route(next=59, type=type_, data=b'\x00' * 20)
+                built = IPv6_Route.from_fields(next=59, type=type_, data=b'\x00' * 20)
                 octets = built.data
                 self.assertEqual(octets, bytes([59, 2, type_, 0]) + bytes(20))
                 parsed = IPv6_Route(io.BytesIO(octets), len(octets), extension=True)
@@ -89,7 +89,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
         # An RPL header whose Pad (15) exceeds the octets that follow it.
         with self.assertRaises(ProtocolError), warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            IPv6_Route(next=59, type=3, data=b'\x00\xf0\x00\x00')
+            IPv6_Route.from_fields(next=59, type=3, data=b'\x00\xf0\x00\x00')
 
     def test_frag_keeps_reserved_bits(self) -> None:
         from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag

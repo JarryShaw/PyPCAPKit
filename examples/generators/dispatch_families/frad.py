@@ -37,8 +37,8 @@ def _build(nlpid: 'int') -> 'Any':
     from pcapkit.protocols.link.frad.protocol import FRAD
     from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
-    frad = bytes(FRAD(nlpid=int(nlpid), payload=_payload(nlpid)))
-    record = bytes(LinuxSLL1(arphrd_type=ARPHRD.FRAD, protocol_type=0, payload=frad))
+    frad = bytes(FRAD.from_fields(nlpid=int(nlpid), payload=_payload(nlpid)))
+    record = bytes(LinuxSLL1.from_fields(arphrd_type=ARPHRD.FRAD, protocol_type=0, payload=frad))
     return generator._extract_first(generator._pcap_bytes((record,), linktype=113), '.pcap')
 
 

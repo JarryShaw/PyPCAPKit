@@ -67,7 +67,7 @@ def mptcp_option(opt: 'Any' = None, *, syn: 'bool' = False, ack: 'bool' = False,
 
     options = ([(Option.Multipath_TCP, kwargs)] if opt is None else
                OrderedMultiDict([(Option.Multipath_TCP, opt)]))
-    return TCP(syn=syn, ack=ack, options=options).__header__.options[0]  # type: ignore[arg-type]
+    return TCP.from_fields(syn=syn, ack=ack, options=options).__header__.options[0]  # type: ignore[arg-type]
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -1227,7 +1227,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(processed.subtype, MPTCPOption.Reserved_for_Private_Use)
 
     def test_construction_accepts_bare_integer_ports(self) -> None:
-        """``TCP(srcport=80, dstport=443)`` is the documented construction path.
+        """``TCP.from_fields(srcport=80, dstport=443)`` is the documented construction path.
 
         :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` advertises
         ``Enum_AppType | int``. Guards against the schema field converting an
@@ -1244,14 +1244,14 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        tcp = TCP(srcport=80, dstport=443)
+        tcp = TCP.from_fields(srcport=80, dstport=443)
         self.assertEqual(bytes(tcp)[:4], b'\x00\x50\x01\xbb')
         self.assertIsInstance(tcp.info.srcport, AppType)
         self.assertEqual(tcp.info.srcport.port, 80)
         self.assertEqual(tcp.info.dstport.port, 443)
         self.assertEqual(tcp.src.port, 80)
 
-        udp = UDP(srcport=53, dstport=5353, payload=b'data')
+        udp = UDP.from_fields(srcport=53, dstport=5353, payload=b'data')
         self.assertEqual(bytes(udp)[:4], b'\x00\x35\x14\xe9')
         self.assertIsInstance(udp.info.dstport, AppType)
         self.assertEqual(udp.info.srcport.port, 53)
@@ -1260,7 +1260,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         # A port with no IANA service name resolves just the same, and an
         # AppType passed in is kept as it is rather than round-tripped.
         member = AppType.get(80, proto=TransportProtocol.tcp)
-        unnamed = TCP(srcport=53406, dstport=member)
+        unnamed = TCP.from_fields(srcport=53406, dstport=member)
         self.assertEqual(unnamed.info.srcport.port, 53406)
         self.assertIs(unnamed.info.dstport, member)
 
@@ -1290,17 +1290,17 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         for value in (None, b''):
             with self.subTest(cookie=value):
-                built = TCP(srcport=1, dstport=2, ack=True,
-                            options=[(Option.TCP_Fast_Open_Cookie, {'cookie': value}),
-                                     (Option.No_Operation, {}), (Option.No_Operation, {})])
+                built = TCP.from_fields(srcport=1, dstport=2, ack=True,
+                                        options=[(Option.TCP_Fast_Open_Cookie, {'cookie': value}),
+                                                 (Option.No_Operation, {}), (Option.No_Operation, {})])
                 self.assertEqual(built.data, wire)
                 self.assertEqual(built.info.options[Option.TCP_Fast_Open_Cookie], cookie)
 
-        again = TCP(srcport=1, dstport=2, ack=True, options=parsed.info.options)
+        again = TCP.from_fields(srcport=1, dstport=2, ack=True, options=parsed.info.options)
         self.assertEqual(again.data, wire)
-        from_dict = TCP(srcport=1, dstport=2, ack=True,
-                        options=[(Option.TCP_Fast_Open_Cookie, cookie.to_dict()),
-                                 (Option.No_Operation, {}), (Option.No_Operation, {})])
+        from_dict = TCP.from_fields(srcport=1, dstport=2, ack=True,
+                                    options=[(Option.TCP_Fast_Open_Cookie, cookie.to_dict()),
+                                             (Option.No_Operation, {}), (Option.No_Operation, {})])
         self.assertEqual(from_dict.data, wire)
 
     def test_a_sack_option_overrunning_the_option_area_raises(self) -> None:

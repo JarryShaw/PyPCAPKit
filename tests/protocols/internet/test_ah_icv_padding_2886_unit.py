@@ -62,7 +62,7 @@ class AHICVPaddingTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            return AH(next=59, spi=0x1234, seq=7, icv=icv, **kwargs).data
+            return AH.from_fields(next=59, spi=0x1234, seq=7, icv=icv, **kwargs).data
 
     def test_icv_is_kept_whole_and_padded_to_the_minimum(self) -> None:
         for kwargs, align in MODES:
@@ -114,7 +114,7 @@ class AHICVPaddingTests(unittest.TestCase):
             with self.subTest(**kwargs):
                 self.assertEqual(len(self.make(bytes(most), **kwargs)), most + FIXED)
                 with self.assertRaises(ProtocolError) as caught:
-                    AH(icv=bytes(most + 1), **kwargs)
+                    AH.from_fields(icv=bytes(most + 1), **kwargs)
                 self.assertEqual(str(caught.exception), f'AH: invalid ICV length: must be at most {most} '
                                                         f'octets under IPv{ip}, not {most + 1}')
 
@@ -125,7 +125,7 @@ class AHICVPaddingTests(unittest.TestCase):
         for version in (5, True, None):
             with self.subTest(version=version):
                 with self.assertRaises(ProtocolError) as caught:
-                    AH(icv=bytes(2), version=version)
+                    AH.from_fields(icv=bytes(2), version=version)
                 self.assertEqual(str(caught.exception), f'AH: invalid version: must be 4 or 6, not {version!r}')
 
 
@@ -141,7 +141,7 @@ class AHPayloadLengthTests(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             # 28 octets as an extension header: not aligned for IPv6, but asked for.
-            made = AH(next=59, icv=b'\x01' * 16, payload_length=5, extension=True).data
+            made = AH.from_fields(next=59, icv=b'\x01' * 16, payload_length=5, extension=True).data
         self.assertEqual((len(made), made[1], made[FIXED:]), (28, 5, b'\x01' * 16))
 
     def test_a_payload_length_not_describing_the_icv_is_refused(self) -> None:
@@ -157,7 +157,7 @@ class AHPayloadLengthTests(unittest.TestCase):
                                      (16, 256, 'AH: invalid payload length: 256')):
             with self.subTest(icv=icv, payload_length=length):
                 with self.assertRaises(ProtocolError) as caught:
-                    AH(icv=bytes(icv), payload_length=length)
+                    AH.from_fields(icv=bytes(icv), payload_length=length)
                 self.assertEqual(str(caught.exception), message)
 
     def test_a_captured_extension_header_rebuilds_as_captured(self) -> None:
@@ -186,7 +186,7 @@ class AHInIPv6Tests(unittest.TestCase):
             with self.subTest(**kwargs), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 # A 128-bit ICV leaves 28 octets, so IPv6 pads it to 32.
-                made = IPv6(next=51, payload=AH(next=59, icv=b'\xcd' * 16, **kwargs)).data
+                made = IPv6.from_fields(next=51, payload=AH.from_fields(next=59, icv=b'\xcd' * 16, **kwargs)).data
                 parsed = IPv6(io.BytesIO(made), len(made))
                 (ah,) = [ext for ext in parsed.extension_headers.values() if isinstance(ext, AH)]
                 self.assertEqual(ah.info.length, 32)
@@ -200,16 +200,16 @@ class AHInIPv6Tests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = {
-            'plain AH': (51, lambda: AH(next=59, icv=bytes(16))),
-            'behind HOPOPT': (0, lambda: HOPOPT(next=51, payload=AH(next=59, icv=bytes(16)))),
-            'given payload length': (51, lambda: AH(next=59, icv=bytes(16), payload_length=5, extension=True)),
+            'plain AH': (51, lambda: AH.from_fields(next=59, icv=bytes(16))),
+            'behind HOPOPT': (0, lambda: HOPOPT.from_fields(next=51, payload=AH.from_fields(next=59, icv=bytes(16)))),
+            'given payload length': (51, lambda: AH.from_fields(next=59, icv=bytes(16), payload_length=5, extension=True)),
         }
         for label, (first, build) in cases.items():
             with self.subTest(case=label), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 payload = build()
                 with self.assertRaises(ProtocolError) as caught:
-                    IPv6(next=first, payload=payload)
+                    IPv6.from_fields(next=first, payload=payload)
                 self.assertEqual(str(caught.exception),
                                  'IPv6: invalid AH header length: must be a multiple of 8 octets, not 28')
 
@@ -221,11 +221,11 @@ class AHInIPv6Tests(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             # ESP runs to the end of the packet, padded to 4 octets (RFC 4303 section 2.4).
-            esp = IPv6(next=50, payload=ESP(spi=1, seq=1, payload=b'abcd')).data
+            esp = IPv6.from_fields(next=50, payload=ESP.from_fields(spi=1, seq=1, payload=b'abcd')).data
             # A 20-octet AH given as octets, as IPv6._make_data rebuilds a captured chain.
-            raw = IPv6(next=51, payload=ah_header(20)).data
+            raw = IPv6.from_fields(next=51, payload=ah_header(20)).data
             # Next Header 17 names UDP, so a receiver reads no extension header there.
-            udp = IPv6(next=17, payload=AH(next=59, icv=bytes(16))).data
+            udp = IPv6.from_fields(next=17, payload=AH.from_fields(next=59, icv=bytes(16))).data
         self.assertEqual(len(esp), 40 + 12)
         self.assertEqual(raw[40:], ah_header(20))
         self.assertEqual(len(udp), 40 + 28)

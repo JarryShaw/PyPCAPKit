@@ -120,7 +120,7 @@ class OptionLengthCutTests(unittest.TestCase):
         from pcapkit.const.ipv6.option import Option
 
         options = [(Option.PadN, {'length': 4})] * lead + [(code, kwargs)]
-        whole = bytes(cls(next=59, options=options, payload=b''))
+        whole = bytes(cls.from_fields(next=59, options=options, payload=b''))
         start = 2
         for key, option in cls(whole).info.options.items(multi=True):
             if key == code:

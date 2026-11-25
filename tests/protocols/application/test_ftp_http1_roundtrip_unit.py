@@ -66,7 +66,7 @@ class FTPRoundTripTests(unittest.TestCase):
     def test_make_terminates_with_crlf(self) -> None:
         from pcapkit.protocols.application.ftp.protocol import FTP
 
-        self.assertEqual(bytes(FTP(cmmd='USER', args='x')), b'USER x\r\n')
+        self.assertEqual(bytes(FTP.from_fields(cmmd='USER', args='x')), b'USER x\r\n')
         self.assertEqual(object.__new__(FTP).make(cmmd='USER', args='anonymous').data,
                          b'USER anonymous\r\n')
 

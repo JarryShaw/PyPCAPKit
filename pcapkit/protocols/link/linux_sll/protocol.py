@@ -177,6 +177,10 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
     #: :attr:`Link.__proto_key__ <pcapkit.protocols.link.link.Link.__proto_key__>` is.
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_ARPHRD, False)
 
+    #: ``version``, which names the member and which :meth:`make` does not
+    #: take, as a construction keyword (:issue:`2840`).
+    __keywords__ = frozenset({'version'})
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -234,7 +238,7 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         cls.__proto__[code] = entry
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -419,3 +423,38 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             if version == 2:
                 return cast('Type[LinuxSLL]', _LINUX_SLL2.klass)
         raise ProtocolError(f'LinuxSLL: invalid version: {version!r}')
+
+    @classmethod
+    def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
+        """The member :meth:`from_fields` and :meth:`from_data` construct.
+
+        Picked and checked as constructing this class directly does: on this
+        class, the member ``version`` names; on another, the class itself, of
+        which ``version`` must name the member it is or derives from. ``version``
+        is taken out of ``fields``, as :meth:`make` does not read it.
+
+        Args:
+            fields: Construction keywords.
+
+        Returns:
+            The member, or the class itself.
+
+        Raises:
+            ProtocolError: If, on this class, ``version`` is missing; if it names
+                neither member; or if it is not the class's own version, which a
+                subclass outside the members does not have.
+
+        .. versionadded:: 1.8.0
+
+        """
+        version = fields.pop('version', None)
+        if cls is LinuxSLL:
+            if version is None:
+                raise ProtocolError('LinuxSLL: no version to build with; pass version=1 or version=2')
+            return cast('Type[Self]', cls._member_of_version(version))
+        if version is not None and not issubclass(cls, cls._member_of_version(version)):
+            if not any(issubclass(cls, cls._member_of_version(own)) for own in (1, 2)):
+                raise ProtocolError(f'{cls.__name__}: no version of its own to match '
+                                    f'version={version!r}')
+            raise ProtocolError(f'{cls.__name__}: version={version!r} names another member')
+        return cls

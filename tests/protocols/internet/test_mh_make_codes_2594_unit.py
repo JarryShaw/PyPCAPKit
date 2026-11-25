@@ -242,7 +242,7 @@ class MHMakeCodeTests(unittest.TestCase):
             option, key, sub_spec, sub = target
             header['data'] = {'options': [(Option[option], {
                 key: [(load(sub_spec)[sub], {**base, field: value})]})]}
-        return bytes(MH(**header))
+        return bytes(MH.from_fields(**header))
 
     def _read(self, row: 'tuple', octets: 'bytes') -> 'object':
         """The ``row`` field as ``octets`` parse it back."""
@@ -315,8 +315,8 @@ class MHMakeCodeTests(unittest.TestCase):
                 octets = self._build(row, code)
                 self.assertEqual(int(self._read(row, octets)), code)  # type: ignore[call-overload]
                 info = MH(io.BytesIO(octets), len(octets), extension=True).info
-                rebuilt = bytes(MH(next=info.next, type=info.type, checksum=info.chksum,
-                                   data=info, payload=b''))
+                rebuilt = bytes(MH.from_fields(next=info.next, type=info.type, checksum=info.chksum,
+                                               data=info, payload=b''))
                 self.assertEqual(rebuilt.hex(), octets.hex())
 
     def test_a_parsed_code_builds_the_same_octets(self) -> None:
@@ -382,8 +382,8 @@ class MHListTypeTests(unittest.TestCase):
             options = [(Option.CGA_Parameters, {'parameters': [param]})]
         else:
             options = [(getattr(Option, carrier[0]), {carrier[1]: items})]
-        return bytes(MH(next=59, type=Packet.Binding_Refresh_Request, checksum=b'\x00\x00',
-                        payload=b'', data={'options': options}))
+        return bytes(MH.from_fields(next=59, type=Packet.Binding_Refresh_Request, checksum=b'\x00\x00',
+                                    payload=b'', data={'options': options}))
 
     def _parsed(self, row: 'tuple', octets: 'bytes') -> 'Any':
         """The ``row`` list as ``octets`` parse it back."""
@@ -444,8 +444,8 @@ class MHListTypeTests(unittest.TestCase):
                     # the options of the message end in the padding that aligns them
                     self.assertEqual(int(list(self._parsed(row, octets))[0]), code)
                     info = MH(io.BytesIO(octets), len(octets), extension=True).info
-                    rebuilt = bytes(MH(next=info.next, type=info.type, checksum=info.chksum,
-                                       data=info, payload=b''))
+                    rebuilt = bytes(MH.from_fields(next=info.next, type=info.type, checksum=info.chksum,
+                                                   data=info, payload=b''))
                     self.assertEqual(rebuilt.hex(), octets.hex())
 
     def test_a_member_and_its_code_build_the_same_octets(self) -> None:

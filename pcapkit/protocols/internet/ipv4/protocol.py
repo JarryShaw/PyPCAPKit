@@ -479,7 +479,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__, declared=declared)
         return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__, declared=declared)
 
-    def make(self,
+    def make(self, *,
              tos_pre: 'Enum_ToSPrecedence | int' = Enum_ToSPrecedence.Routine,
              tos_del: 'Enum_ToSDelay | int' = Enum_ToSDelay.NORMAL,
              tos_thr: 'Enum_ToSThroughput | int' = Enum_ToSThroughput.NORMAL,

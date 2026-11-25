@@ -175,11 +175,11 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
             return ipv6_frag
         return self._decode_next_layer(ipv6_frag, schema.next, length - self.length)
 
-    def make(self,
+    def make(self, *,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              reserved_octet: 'bytes' = b'\x00',
              offset: 'int' = 0,

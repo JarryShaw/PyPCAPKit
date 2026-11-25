@@ -105,7 +105,7 @@ class TCPFlagsWireMasksTests(unittest.TestCase):
     def test_make_builds_the_header_bits_its_connection_names(self) -> None:
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        made = TCP(srcport=1, dstport=2, syn=True, ack=True)
+        made = TCP.from_fields(srcport=1, dstport=2, syn=True, ack=True)
         self.assertEqual(int(made.connection), 0x012)
         self.assertEqual(struct.unpack('!H', made.data[12:14])[0] & 0x0FFF, int(made.connection))
 

@@ -90,9 +90,9 @@ class TestIPv4TimestampSlots(unittest.TestCase):
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        datagram = IPv4(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
-                        options=[(OptionNumber.TS, {'counts': 3, 'timestamp': [1],
-                                                    'remaining': [2]})], payload=b'')
+        datagram = IPv4.from_fields(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
+                                    options=[(OptionNumber.TS, {'counts': 3, 'timestamp': [1],
+                                                                'remaining': [2]})], payload=b'')
         self.assertEqual(bytes(datagram)[20:].hex(), '44100900' '000000010000000200000000')
 
 

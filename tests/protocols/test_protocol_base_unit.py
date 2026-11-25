@@ -60,7 +60,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
                 self._next = next_protocol
                 if self._next is None:
                     from pcapkit.protocols.misc.no_payload.protocol import NoPayload
-                    self._next = NoPayload()
+                    self._next = NoPayload.from_fields()
                 self._protos = ProtoChain(self.__class__, self.alias, basis=self._next.protochain)
                 return data
 
@@ -78,7 +78,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol, _, _ = self._make_protocol_class()
         from pcapkit.utilities.exceptions import UnsupportedCall
 
-        proto = DummyProtocol(packet=b'abcd', value=7)
+        proto = DummyProtocol.from_fields(packet=b'abcd', value=7)
 
         self.assertEqual(proto.name, 'Dummy Protocol')
         self.assertEqual(proto.alias, 'DummyProtocol')
@@ -122,7 +122,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
     def test_pack_unpack_from_schema_and_from_data(self) -> None:
         DummyProtocol, DummyData, RawSchema = self._make_protocol_class()
 
-        proto = DummyProtocol(packet=b'xy')
+        proto = DummyProtocol.from_fields(packet=b'xy')
         self.assertEqual(proto.pack(packet=b'zz'), b'zz')
 
         schema_from_dict = RawSchema(payload=b'12')
@@ -158,8 +158,8 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolNotFound
 
-        payload = Raw(packet=b'body')
-        proto = DummyProtocol(packet=b'ab', next_protocol=payload)
+        payload = Raw.from_fields(packet=b'body')
+        proto = DummyProtocol.from_fields(packet=b'ab', next_protocol=payload)
 
         self.assertEqual(DummyProtocol.expand_comp(DummyProtocol),
                          (DummyProtocol, 'DUMMYPROTOCOL'))
@@ -188,7 +188,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
             one = 1
             two = 2
 
-        proto = DummyProtocol(packet=b'\x01\x02\x03\x04\x05\x06\x07\x08')
+        proto = DummyProtocol.from_fields(packet=b'\x01\x02\x03\x04\x05\x06\x07\x08')
 
         self.assertEqual(proto._read_unpack(1), 1)
         self.assertEqual(proto._read_unpack(2), 0x0203)
@@ -242,7 +242,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol, _, _ = self._make_protocol_class()
         from pcapkit.utilities.exceptions import StructError
 
-        proto = DummyProtocol(packet=b'\x01')
+        proto = DummyProtocol.from_fields(packet=b'\x01')
         for size in (2, 3, 4, 5, 8):
             for signed in (False, True):
                 with self.subTest(size=size, signed=signed):
@@ -345,17 +345,17 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         self.assertIsInstance(DummyProtocol.analyze(3, b''), NoPayload)
 
-        proto = DummyProtocol(packet=b'abpayload')
+        proto = DummyProtocol.from_fields(packet=b'abpayload')
         decoded = proto._decode_next_layer(DummyData(value=3), 1, length=3)
         self.assertIs(decoded.__next_type__, Raw)
         self.assertEqual(decoded.__next_name__, 'raw')
         self.assertIsInstance(proto.payload, Raw)
         self.assertIn('Raw', str(proto.protochain))
 
-        proto_zero = DummyProtocol(packet=b'ab')
+        proto_zero = DummyProtocol.from_fields(packet=b'ab')
         self.assertIsInstance(proto_zero._import_next_layer(1, 0), NoPayload)
 
-        proto_module = DummyProtocol(packet=b'abmodule')
+        proto_module = DummyProtocol.from_fields(packet=b'abmodule')
         proto_module._sigterm = False
         proto_module.__proto__ = collections.defaultdict(
             lambda: Raw,
@@ -384,7 +384,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol, _, _ = self._make_protocol_class()
         from pcapkit.utilities.exceptions import StructError
 
-        proto = DummyProtocol(packet=b'\x01')
+        proto = DummyProtocol.from_fields(packet=b'\x01')
         proto._file = io.BytesIO(b'')
         with self.assertRaises(StructError) as context:
             proto._read_binary()
@@ -498,7 +498,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         # ``analyze`` and ``_import_next_layer`` both go through the lookup, so
         # neither of them records an unregistered code either.
         self.assertIsInstance(DummyProtocol.analyze(99, b'body'), Raw)
-        proto = DummyProtocol(packet=b'abpayload')
+        proto = DummyProtocol.from_fields(packet=b'abpayload')
         proto._sigterm = False
         self.assertIsInstance(proto._import_next_layer(99, 3), Raw)
         self.assertEqual(set(DummyProtocol.__proto__), {7, 8})
@@ -580,7 +580,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
         # ... and the un-prefixed pair reaches ``make()`` untouched when there is
         # no source stream, i.e. nothing is being parsed.
-        made = DummyProtocol(packet=b'abpayload', protocol='dummyprotocol', layer='Internet')
+        made = DummyProtocol.from_fields(packet=b'abpayload', protocol='dummyprotocol', layer='Internet')
         self.assertIsNone(made._exlayer)
         self.assertIsNone(made._exproto)
         self.assertFalse(made._sigterm)

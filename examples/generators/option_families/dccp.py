@@ -60,7 +60,7 @@ def _dccp_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _dccp_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.transport.dccp.protocol import DCCP
-    return DCCP(options=[(code, kwargs)], **DCCP_BASE)
+    return DCCP.from_fields(options=[(code, kwargs)], **DCCP_BASE)
 
 
 def _dccp_parse(octets: 'bytes') -> 'Any':
@@ -74,7 +74,7 @@ def _dccp_extract(parsed: 'Any') -> 'Any':
 
 def _dccp_rebuild(options: 'Any') -> 'Any':
     from pcapkit.protocols.transport.dccp.protocol import DCCP
-    return DCCP(options=options, **DCCP_BASE)
+    return DCCP.from_fields(options=options, **DCCP_BASE)
 
 
 #: The families this module adds.

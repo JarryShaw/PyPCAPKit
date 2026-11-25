@@ -178,7 +178,7 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
         return ('L2TP', 'L2TPv2')
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -283,3 +283,31 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
         if isinstance(version, int) and not isinstance(version, bool) and version == 2:
             return cast('Type[L2TP]', _L2TPV2.klass)
         raise ProtocolError(f'L2TP: invalid version: {version!r}')
+
+    @classmethod
+    def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
+        """The member :meth:`from_fields` and :meth:`from_data` construct.
+
+        Picked as constructing this class directly does: on this class, the
+        member the ``version`` field names, which stays in ``fields``; on
+        another, the class itself.
+
+        Args:
+            fields: Construction keywords.
+
+        Returns:
+            The member, or the class itself.
+
+        Raises:
+            ProtocolError: If, on this class, ``version`` is missing or no member
+                reads it.
+
+        .. versionadded:: 1.8.0
+
+        """
+        if cls is not L2TP:
+            return cls
+        version = fields.get('version')
+        if version is None:
+            raise ProtocolError('L2TP: no version to build with; pass version=2')
+        return cast('Type[Self]', cls._member_of_version(version))

@@ -132,24 +132,24 @@ class DeclaredLengthConstructionTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        self.assertEqual(IPv4(payload=b'\x00' * 10).info.len, 30)
-        self.assertEqual(UDP(payload=b'\x00' * 10).info.len, 18)
-        self.assertEqual(IPv6(payload=b'\x00' * 10).info.payload, 10)
+        self.assertEqual(IPv4.from_fields(payload=b'\x00' * 10).info.len, 30)
+        self.assertEqual(UDP.from_fields(payload=b'\x00' * 10).info.len, 18)
+        self.assertEqual(IPv6.from_fields(payload=b'\x00' * 10).info.payload, 10)
 
     def test_explicit_length_is_written_as_given(self) -> None:
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        ipv4 = IPv4(total_length=1186, payload=b'\x00' * 10)
+        ipv4 = IPv4.from_fields(total_length=1186, payload=b'\x00' * 10)
         self.assertEqual(ipv4.info.len, 1186)
         self.assertEqual(ipv4.data[2:4], (1186).to_bytes(2, 'big'))
 
-        udp = UDP(total_length=0x048e, payload=b'\x00' * 10)
+        udp = UDP.from_fields(total_length=0x048e, payload=b'\x00' * 10)
         self.assertEqual(udp.info.len, 0x048e)
         self.assertEqual(udp.data[4:6], (0x048e).to_bytes(2, 'big'))
 
-        ipv6 = IPv6(payload_length=1146, payload=b'\x00' * 10)
+        ipv6 = IPv6.from_fields(payload_length=1146, payload=b'\x00' * 10)
         self.assertEqual(ipv6.info.payload, 1146)
         self.assertEqual(ipv6.data[4:6], (1146).to_bytes(2, 'big'))
 

@@ -63,10 +63,10 @@ def _payload(code: 'Any') -> 'tuple[bytes, bool]':
         return generator._ppp(_ip4(6, _tcp(9999))), False
     if code == LinkType.PPP_ETHER:
         from pcapkit.protocols.link.pppoe.protocol import PPPoE
-        return bytes(PPPoE(session_id=1, payload=generator._ppp(_ip4(6, _tcp(9999)), acfc=True))), False
+        return bytes(PPPoE.from_fields(session_id=1, payload=generator._ppp(_ip4(6, _tcp(9999)), acfc=True))), False
     if code == LinkType.FRELAY:  # direct NLPID 0xCC, IPv4
         from pcapkit.protocols.link.frad.protocol import FRAD
-        return bytes(FRAD(nlpid=0xCC, payload=_ip4(6, _tcp(9999)))), False
+        return bytes(FRAD.from_fields(nlpid=0xCC, payload=_ip4(6, _tcp(9999)))), False
     raise LookupError(f'linktype: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -75,13 +75,13 @@ def _wlan_ack() -> 'bytes':
     from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
     from pcapkit.const.ieee802_11.type import Type
     from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
-    return bytes(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
+    return bytes(IEEE802_11.from_fields(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
 
 
 def _radiotap(payload: 'bytes') -> 'bytes':
     """A minimal radiotap header carrying ``payload``."""
     from pcapkit.protocols.link.radiotap.protocol import Radiotap
-    return bytes(Radiotap(payload=payload))
+    return bytes(Radiotap.from_fields(payload=payload))
 
 
 def _pcap_frame_build(code: 'Any') -> 'Any':

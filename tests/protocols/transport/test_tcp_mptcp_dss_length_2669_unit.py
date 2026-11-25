@@ -105,7 +105,7 @@ class TestTCPMPTCPDSSLength(unittest.TestCase):
         for shape in shapes:
             option = (Enum_Option.Multipath_TCP, dict(shape, subtype=Enum_MPTCPOption.DSS))
             for options in ([option], [option] + tail):
-                whole = TCP(srcport=50000, dstport=80, ack=True, options=options).data
+                whole = TCP.from_fields(srcport=50000, dstport=80, ack=True, options=options).data
                 for pos, raw in _mutants(whole):
                     with self.subTest(shape=shape, pos=pos, raw=raw.hex()):
                         try:

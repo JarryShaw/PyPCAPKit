@@ -207,7 +207,7 @@ class TestToDictRebuild(unittest.TestCase):
             for source, data in (('info', transport.info), ('to_dict()', transport.info.to_dict())):
                 with self.subTest(case=label, source=source):
                     # NOTE: the rebuilt layer parses its payload again, which a connection ID needs a context for.
-                    rebuilt = cls.from_data(data, **kwargs)
+                    rebuilt = cls.from_data(data, context=kwargs.get('__context__'))
                     self.assertEqual(bytes(rebuilt).hex(), wire.hex())
                     self.assertEqual(self._chain(rebuilt.payload, chain.count(':') + 1), chain)
 

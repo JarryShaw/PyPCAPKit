@@ -74,8 +74,8 @@ class TestLinuxSLLSelector(unittest.TestCase):
         self.assertEqual(LinuxSLL1.id(), ('LinuxSLL1',))
         self.assertEqual(LinuxSLL2.id(), ('LinuxSLL2',))
 
-        self.assertEqual(LinuxSLL1(payload=b'').alias, 'LINUX_SLL1')
-        self.assertEqual(LinuxSLL2(payload=b'').alias, 'LINUX_SLL2')
+        self.assertEqual(LinuxSLL1.from_fields(payload=b'').alias, 'LINUX_SLL1')
+        self.assertEqual(LinuxSLL2.from_fields(payload=b'').alias, 'LINUX_SLL2')
 
     def test_family_base_has_no_registry_index(self) -> None:
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
@@ -95,8 +95,8 @@ class TestLinuxSLLSelector(unittest.TestCase):
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
-        v1 = LinuxSLL1(payload=b'')
-        v2 = LinuxSLL2(payload=b'')
+        v1 = LinuxSLL1.from_fields(payload=b'')
+        v2 = LinuxSLL2.from_fields(payload=b'')
 
         self.assertIn('LinuxSLL', v1)
         self.assertIn('LinuxSLL', v2)
@@ -107,8 +107,8 @@ class TestLinuxSLLSelector(unittest.TestCase):
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
-        v1 = LinuxSLL1(payload=b'')
-        v2 = LinuxSLL2(payload=b'')
+        v1 = LinuxSLL1.from_fields(payload=b'')
+        v2 = LinuxSLL2.from_fields(payload=b'')
 
         self.assertIn('LinuxSLL1', v1)
         self.assertNotIn('LinuxSLL1', v2)
@@ -119,8 +119,8 @@ class TestLinuxSLLSelector(unittest.TestCase):
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
-        v1 = LinuxSLL1(payload=b'')
-        v2 = LinuxSLL2(payload=b'')
+        v1 = LinuxSLL1.from_fields(payload=b'')
+        v2 = LinuxSLL2.from_fields(payload=b'')
 
         self.assertIn(LinuxSLL1, v1)
         self.assertNotIn(LinuxSLL1, v2)
@@ -131,7 +131,7 @@ class TestLinuxSLLSelector(unittest.TestCase):
         """String ``==`` compares against ``(cls, *id())`` only, so a family name is not ``==``."""
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
-        v1 = LinuxSLL1(payload=b'')
+        v1 = LinuxSLL1.from_fields(payload=b'')
 
         self.assertTrue(v1 == 'LinuxSLL1')
         self.assertFalse(v1 == 'LinuxSLL')

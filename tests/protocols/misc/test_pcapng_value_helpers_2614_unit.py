@@ -67,9 +67,9 @@ class TestPCAPNGValueHelpers(PCAPNGTestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        return PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
-                      block={'linktype': LinkType.ETHERNET, 'snaplen': snaplen,
-                             'options': [(OptionType[code], args) for code, args in options.items()]})
+        return PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+                                  block={'linktype': LinkType.ETHERNET, 'snaplen': snaplen,
+                                         'options': [(OptionType[code], args) for code, args in options.items()]})
 
     def _reparse(self, made: 'Any') -> 'Any':
         """Parse the octets of a made block back into its data model."""
@@ -160,8 +160,8 @@ class TestPCAPNGSectionLength(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        return PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
-                      block={'byteorder': 'little', **block})
+        return PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
+                                  block={'byteorder': 'little', **block})
 
     def test_section_length_outside_the_field_is_refused(self) -> None:
         """Each was written masked or failed bare: ``2**64`` as 0, ``True`` as 1, ``None`` as the sentinel."""
@@ -226,9 +226,9 @@ class TestPCAPNGPacketBlockDropCount(PCAPNGTestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            return PCAPNG(num=2, sct=1, ctx=self._context() if context is None else context,
-                          type=BlockType.Packet_Block,
-                          block={'packet_data': b'abcd', 'timestamp': 0, **block})
+            return PCAPNG.from_fields(num=2, sct=1, ctx=self._context() if context is None else context,
+                                      type=BlockType.Packet_Block,
+                                      block={'packet_data': b'abcd', 'timestamp': 0, **block})
 
     def test_drop_count_outside_the_unsigned_field_is_refused(self) -> None:
         """Each was written masked: -1 as 0xFFFF, 65536 as 0, ``True`` as 1, ``None`` raised bare."""
@@ -286,7 +286,7 @@ class TestPCAPNGPadLength(PCAPNGTestCase):
         """Make a custom block of ``type_`` with private enterprise number 1."""
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        return PCAPNG(num=2, sct=1, ctx=None, type=type_, block={'pen': 1, 'data': data, 'options': options})
+        return PCAPNG.from_fields(num=2, sct=1, ctx=None, type=type_, block={'pen': 1, 'data': data, 'options': options})
 
     def _custom_types(self) -> 'Any':
         """Both custom block types, which one maker makes."""

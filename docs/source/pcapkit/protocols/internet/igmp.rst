@@ -108,6 +108,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _verify_checksum
    .. automethod:: _dispatch
    .. automethod:: _member_of_version
+   .. automethod:: _construction_member
 
 Header Schemas
 --------------

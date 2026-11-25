@@ -40,8 +40,8 @@ def _build(code: 'Any') -> 'Any':
 
     if code != LinkType.IEEE802_11:
         raise ValueError(f'no radiotap case for link type {code!r}')
-    ack = bytes(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
-    frame = bytes(LinuxSLL1(arphrd_type=ARPHRD.IEEE80211_RADIOTAP, payload=bytes(Radiotap(payload=ack))))
+    ack = bytes(IEEE802_11.from_fields(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
+    frame = bytes(LinuxSLL1.from_fields(arphrd_type=ARPHRD.IEEE80211_RADIOTAP, payload=bytes(Radiotap.from_fields(payload=ack))))
     return generator._extract_first(generator._pcap_bytes((frame,), linktype=int(LinkType.LINUX_SLL)),
                                     '.pcap')
 

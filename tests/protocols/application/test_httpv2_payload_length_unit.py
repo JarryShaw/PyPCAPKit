@@ -658,7 +658,7 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            raw = bytes(HTTPv2(**kwargs))
+            raw = bytes(HTTPv2.from_fields(**kwargs))
 
         self.assertEqual([str(entry.message) for entry in caught], [],
                          'constructing a well-formed frame must not warn')

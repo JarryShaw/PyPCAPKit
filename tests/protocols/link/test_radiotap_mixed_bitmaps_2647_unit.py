@@ -75,7 +75,7 @@ class TestRadiotapMixedBitmaps(unittest.TestCase):
         self.assertEqual(parsed.data, raw)
         for data in (parsed.info, parsed.info.to_dict()):
             self.assertEqual(Radiotap.from_data(data).data, raw)
-        self.assertEqual(Radiotap(present=parsed.info.present, fields=parsed.info.decoded).data, raw)
+        self.assertEqual(Radiotap.from_fields(present=parsed.info.present, fields=parsed.info.decoded).data, raw)
         return parsed
 
     def test_the_layouts_match_linux_wireshark_and_radiotap_org(self) -> None:
@@ -159,8 +159,8 @@ class TestRadiotapMixedBitmaps(unittest.TestCase):
                 'data3': 0, 'data4': 0, 'data5': 0, 'data6': 0}
         for known in (HEData1Known.HE_DATA1_BSS_COLOR_KNOWN, HEData1Known.get(0x0004), 0x0004):
             with self.subTest(known=known):
-                made = Radiotap(present=(1 << 23,), fields=[(23, {'data1': {'ppdu_format': 2, 'known': known},
-                                                                  **rest})])
+                made = Radiotap.from_fields(present=(1 << 23,), fields=[(23, {'data1': {'ppdu_format': 2, 'known': known},
+                                                                              **rest})])
                 self.assertEqual(made.data, expected)
 
     def test_make_refuses_what_a_bitmap_cannot_hold(self) -> None:
@@ -177,13 +177,13 @@ class TestRadiotapMixedBitmaps(unittest.TestCase):
         }
         for name, entry in cases.items():
             with self.subTest(case=name), self.assertRaises(ProtocolError):
-                Radiotap(present=(1 << 19,), fields=[(19, {'known': 0, 'mcs': 0, **entry})])
+                Radiotap.from_fields(present=(1 << 19,), fields=[(19, {'known': 0, 'mcs': 0, **entry})])
         common = {'phy_version': 0, 'bandwidth': 0, 'ul_dl': 0, 'bss_color': 0, 'txop': 0}
         for name, known in (('known bits of a value', 0x1000), ('known bits past the word', 1 << 32),
                             ('a missing known', None)):
             with self.subTest(case=name), self.assertRaises(ProtocolError):
                 value = {**common} if known is None else {**common, 'known': known}
-                Radiotap(present=(1 << 28,), fields=[(28, {'tlvs': [
+                Radiotap.from_fields(present=(1 << 28,), fields=[(28, {'tlvs': [
                     {'type': 33, 'data': {'common': value, 'value': 0, 'mask': 0}}]})])
 
 

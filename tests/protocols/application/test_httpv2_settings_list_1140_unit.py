@@ -65,7 +65,7 @@ class HTTPv2SettingsListUnitTests(unittest.TestCase):
             raw = scapy_frame(pairs, ack)
             with self.subTest(frame=name):
                 info = HTTPv2(io.BytesIO(raw), len(raw)).info
-                self.assertEqual(bytes(HTTPv2(type=info.type, sid=info.sid, frame=info)), raw)
+                self.assertEqual(bytes(HTTPv2.from_fields(type=info.type, sid=info.sid, frame=info)), raw)
 
 
 if __name__ == '__main__':

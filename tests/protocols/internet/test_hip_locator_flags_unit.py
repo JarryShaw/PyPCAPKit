@@ -40,7 +40,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        octets = bytearray(HIP(
+        octets = bytearray(HIP.from_fields(
             parameters=[(Parameter.LOCATOR_SET,
                          {'locator_set': [{'ip': '2001:db8::1'}]})],
             extension=True, **HIP_BASE).data)
@@ -77,7 +77,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        built = HIP(
+        built = HIP.from_fields(
             parameters=[(Parameter.LOCATOR_SET,
                          {'locator_set': [{'ip': '2001:db8::1', 'reserved': 0x7f,
                                            'preferred': False}]})],
@@ -89,7 +89,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        built = HIP(
+        built = HIP.from_fields(
             parameters=[(Parameter.LOCATOR_SET,
                          {'locator_set': [{'ip': '2001:db8::1', 'preferred': True}]})],
             extension=True, **HIP_BASE)

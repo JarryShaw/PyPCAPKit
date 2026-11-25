@@ -52,7 +52,7 @@ class ProtocolPayloadTests(unittest.TestCase):
         """A TCP header's octets, and the protocol and schema that pack to them."""
         from pcapkit.protocols.transport.tcp import TCP
 
-        tcp = TCP(srcport=1, dstport=2)
+        tcp = TCP.from_fields(srcport=1, dstport=2)
         return bytes(tcp), {'protocol': tcp, 'schema': tcp.schema}
 
     def test_each_make_mode_packs_a_protocol_payload(self) -> None:
@@ -75,7 +75,7 @@ class ProtocolPayloadTests(unittest.TestCase):
             for kind, payload in payloads.items():
                 with self.subTest(mode=mode, payload=kind):
                     extra = {} if context is None else {'__context__': context}
-                    built = ESP(spi=SPI, seq=SEQ, payload=payload, **kwargs, **extra)
+                    built = ESP.from_fields(spi=SPI, seq=SEQ, payload=payload, **kwargs, context=context)
                     wire = bytes(built)
                     self.assertEqual(wire, HEADER + body)
                     self.assertEqual(built.info.length, len(wire))
@@ -92,7 +92,7 @@ class ProtocolPayloadTests(unittest.TestCase):
                         self.assertEqual(parsed.info.payload_data, body)
                         self.assertEqual(parsed.payload.data, body)
 
-                    rebuilt = ESP.from_data(parsed.info, **extra)
+                    rebuilt = ESP.from_data(parsed.info, context=context)
                     self.assertEqual(bytes(rebuilt), wire)
                     self.assertEqual(rebuilt.info, parsed.info)
 

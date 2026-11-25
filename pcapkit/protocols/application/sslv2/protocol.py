@@ -237,7 +237,7 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         )
         return self._decode_next_layer(sslv2, -1, length - header_len - record_length)
 
-    def make(self,
+    def make(self, *,
              msg_type: 'Enum_HandshakeType | int' = Enum_HandshakeType.CLIENT_HELLO,
              two_byte_header: 'bool' = True,
              is_escape: 'bool' = False,

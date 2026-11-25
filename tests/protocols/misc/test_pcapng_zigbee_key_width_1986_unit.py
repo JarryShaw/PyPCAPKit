@@ -152,8 +152,8 @@ class TestPCAPNGZigBeeKeyWidth(PCAPNGTestCase):
         for secrets_type, fields in cases:
             with self.subTest(secrets_type=secrets_type):
                 context = self._context()
-                made = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Decryption_Secrets_Block,
-                              block={'secrets_type': secrets_type, 'secrets_data': fields}).data
+                made = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Decryption_Secrets_Block,
+                                          block={'secrets_type': secrets_type, 'secrets_data': fields}).data
                 width = WIDTH[int(secrets_type)]
                 self.assertEqual(struct.unpack('<I', made[12:16])[0], width, made.hex())
                 with warnings.catch_warnings(record=True) as caught:

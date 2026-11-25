@@ -1484,11 +1484,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
             return mh
         return self._decode_next_layer(mh, schema.next, length - mh.length)
 
-    def make(self,
+    def make(self, *,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              type: 'Enum_Packet | int' = Enum_Packet.Binding_Refresh_Request,
              reserved: 'int' = 0,

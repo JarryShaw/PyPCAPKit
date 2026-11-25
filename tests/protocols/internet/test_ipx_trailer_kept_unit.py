@@ -87,7 +87,7 @@ class TestIPXTrailerKept(unittest.TestCase):
     def test_make_writes_trailer_outside_the_length(self) -> None:
         from pcapkit.protocols.internet.ipx.protocol import IPX
 
-        made = IPX(payload=b'abcd', trailer=b'\x00\x01')
+        made = IPX.from_fields(payload=b'abcd', trailer=b'\x00\x01')
         self.assertEqual(made.info.len, 34)
         self.assertEqual(len(made.data), 36)
         self.assertEqual(made.data[-6:], b'abcd\x00\x01')
