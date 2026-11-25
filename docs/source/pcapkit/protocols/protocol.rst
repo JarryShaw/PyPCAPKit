@@ -111,6 +111,8 @@ The built-in families, those bases included, derive from
    .. automethod:: _empty_next_layer
    .. automethod:: _parse_next_layer
    .. automethod:: _analyze_next_layer
+   .. automethod:: _from_parent
+   .. automethod:: _next_layer_state
    .. automethod:: _get_context
 
    .. autoattribute:: _data
@@ -122,6 +124,7 @@ The built-in families, those bases included, derive from
    .. autoattribute:: _sigterm
    .. autoattribute:: __reconstructing__
    .. autoattribute:: __short_read__
+   .. autoattribute:: __next_layer__
    .. autoattribute:: _past_layer_limit
    .. autoattribute:: __data__
 
@@ -202,7 +205,7 @@ How a layer picks and builds the layer it carries, and where it keeps
        LOOK --> LIM
        LIM{"\_parse\_next\_layer:<br/>past FRAME\_LAYER\_LIMIT,<br/>and not already Raw or NoPayload?"}
        LIM -->|yes| RAWL["Raw, marked \_past\_layer\_limit<br/>one ProtocolWarning"]
-       LIM -->|no| NEW["klass(file\_, length, ...)"]
+       LIM -->|no| NEW["klass.\_from\_parent(file\_, length, ...)<br/>the stops and context to \_\_init\_\_,<br/>the state on \_\_next\_layer\_\_"]
        NEW -->|raises| BEH["beholder: NoPayload for an end-of-file StructError,<br/>else Raw carrying the error"]
        NEW -->|parsed| SHORT{"captured fewer octets than both<br/>\_\_length\_hint\_\_() and its length?"}
        SHORT -->|yes| RAWS["Raw, its held warnings dropped"]
@@ -218,6 +221,7 @@ How a layer picks and builds the layer it carries, and where it keeps
        click EMP "protocol.html#pcapkit.protocols.protocol.Protocol._empty_next_layer"
        click LOOK "protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer"
        click LIM "protocol.html#pcapkit.protocols.protocol.Protocol._parse_next_layer"
+       click NEW "protocol.html#pcapkit.protocols.protocol.Protocol._from_parent"
        click BEH "../corekit/decorators.html#pcapkit.corekit.decorators.beholder"
 
 Some layers add steps of their own:
@@ -368,6 +372,8 @@ Internal Definitions
                   _import_next_layer
                   _parse_next_layer
                   _analyze_next_layer
+                  _from_parent
+                  _next_layer_state
                   _get_context
                   __init__
                   __post_init__
@@ -404,6 +410,7 @@ Internal Definitions
       :meth:`~Protocol._decode_next_layer`,
       :meth:`~Protocol._import_next_layer`,
       :meth:`~Protocol._parse_next_layer`, :meth:`~Protocol._analyze_next_layer`,
+      :meth:`~Protocol._from_parent`, :meth:`~Protocol._next_layer_state`,
       :meth:`~Protocol._get_context`,
       :meth:`~Protocol.__init__`, :meth:`~Protocol.__post_init__`,
       :meth:`~Protocol.__repr__`, :meth:`~Protocol.__str__`,
@@ -449,6 +456,9 @@ Internal Definitions
    .. autoproperty:: registry
 
 .. autodata:: pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS
+   :no-value:
+
+.. autodata:: pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS
    :no-value:
 
 .. autodata:: pcapkit.protocols.protocol._KEYWORD_CONSUMERS

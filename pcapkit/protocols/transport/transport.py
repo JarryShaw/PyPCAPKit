@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
+    from pcapkit.corekit.context import ContextRegistry
 
 __all__ = ['Transport']
 
@@ -275,15 +276,22 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         return klass
 
     @staticmethod
-    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int',
-                          **kwargs: 'Any') -> 'ProtocolBase':
+    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int', /, *,
+                          layer: 'Optional[str]' = None,
+                          protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                          context: 'Optional[ContextRegistry]' = None,
+                          **state: 'Any') -> 'ProtocolBase':
         r"""Parse the next layer, resolving a family base to its member first.
 
         Arguments:
             klass: next layer protocol class
             file\_: payload of the current layer
             length: valid (*non-padding*) length
-            **kwargs: keyword arguments for the next layer's constructor
+            layer: parse the next layer until such layer
+            protocol: parse the next layer until such protocol
+            context: caller supplied parsing context
+            **state: next-layer state, as for :meth:`Protocol._parse_next_layer
+                <pcapkit.protocols.protocol.Protocol._parse_next_layer>`
 
         Returns:
             As :meth:`Protocol._parse_next_layer
@@ -292,7 +300,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         """
         return ProtocolBase._parse_next_layer(Transport._dispatch_family(klass, file_, length),
-                                              file_, length, **kwargs)
+                                              file_, length, layer=layer, protocol=protocol,
+                                              context=context, **state)
 
     @classmethod
     def _make_port(cls, port: 'Enum_AppType | int',

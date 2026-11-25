@@ -395,7 +395,7 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
 
         return self._parse_next_layer(protocol, file_, length, alias=proto, packet=packet,
                                       layer=self._exlayer, protocol=self._exproto,
-                                      __context__=self._exctx)
+                                      context=self._exctx)
 
     @staticmethod
     def _member_of_version(version: 'Any') -> 'Type[LinuxSLL]':

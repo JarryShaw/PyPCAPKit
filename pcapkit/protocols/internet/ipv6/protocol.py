@@ -757,4 +757,4 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         protocol, extra = self._next_layer_class(proto, file_, length, extension)
         return self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx, **extra)
+                                      protocol=self._exproto, context=self._exctx, **extra)

@@ -153,6 +153,11 @@ class InternetBaseUnitTests(unittest.TestCase):
                 self.length = length
                 self.kwargs = kwargs
 
+            # NOTE: ``_parse_next_layer`` builds a next layer through ``_from_parent`` (#2840).
+            @classmethod
+            def _from_parent(cls, file_: bytes, length: int, /, **kwargs: object) -> 'FakePayload':
+                return cls(file_, length, **kwargs)
+
         DummyInternet = self._make_internet_class(FakePayload)
         DummyInternet.__dict__['__proto__'][TransType.get(250)] = FakePayload
         DummyInternet.__dict__['__proto__'][TransType.get(251)] = ModuleDescriptor(

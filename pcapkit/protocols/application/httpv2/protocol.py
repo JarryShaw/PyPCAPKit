@@ -1721,4 +1721,4 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         file_ = self._get_payload()
         return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx)
+                                      protocol=self._exproto, context=self._exctx)
