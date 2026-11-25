@@ -359,8 +359,9 @@ Milestones and the Project Board
 **Milestones are release lines**, titled by minor version (``PyPCAPKit v1.4``,
 ``PyPCAPKit v1.5``). An issue or pull request belongs to the line it ships in: a
 milestone collects the work of its line's ``X.Y.0`` release **and of its patch
-releases**, as v1.6 stayed open through 1.6.2 (:issue:`2805`), and it is closed when the
-line's last final tag is cut, with ``due_on`` set to that tag's date. Work closed
+releases**, as v1.6 stayed open through 1.6.2 (:issue:`2805`), until work on the next
+line starts. It is closed then, with ``due_on`` set to its last final tag's date, as the
+owner ruled for 1.7 and every line after (:issue:`2942`). Work closed
 without shipping -- an unmerged pull request, an issue closed as not planned -- takes
 no milestone.
 :file:`.github/workflows/milestone.yml` gives an item the open milestone as it opens,
@@ -438,6 +439,10 @@ own. Every other issue in the milestone is one of its sub-issues, or a sub-issue
 one, and its body lists the items, what moved out, and the closing steps with the
 status of each. An issue has one parent, so an issue that moves milestone is
 re-parented under its new line's scope issue as it moves.
+
+**The scope issue closes when its** ``X.Y.0`` **is released or ready to release**, at
+the owner's ask: once its items and closing steps are done, short of the publishing
+run itself. Its milestone closes later, once work on the next line starts.
 
 **A protocol, header or extension is in scope however deprecated or superseded**,
 ruled on :issue:`2805`. Only work with no specification to implement it from is left
