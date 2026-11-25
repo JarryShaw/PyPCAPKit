@@ -7568,8 +7568,8 @@ class UDP(AppType):
     #: - [UDP] Infowave Mobility Server
     infowave = 2082, 'infowave', TransportProtocol.udp
 
-    #: - [TCP] Secure Radius Service [:rfc:`6614`]
-    #: - [UDP] Secure Radius Service [:rfc:`7360`]
+    #: - [TCP] Secure RADIUS Service [RFC-ietf-radext-radiusdtls-bis-18]
+    #: - [UDP] Secure RADIUS Service [RFC-ietf-radext-radiusdtls-bis-18]
     radsec = 2083, 'radsec', TransportProtocol.udp
 
     #: - [TCP] SunCluster Geographic
