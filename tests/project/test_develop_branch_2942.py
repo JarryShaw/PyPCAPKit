@@ -6,7 +6,8 @@
   requests as on ``main``'s, and Lint on its pull requests.
 * :class:`TestGitHubPagesBuildsDevelopPullRequests` pins GitHub Pages' docs build
   on ``develop``'s pull requests, and evaluates its jobs to show a pull request's
-  run, or a ``develop`` push's Unit Tests run, publishes nothing.
+  run, or a ``develop`` push's Unit Tests run, publishes nothing, while the push
+  itself publishes ``develop``'s build under ``dev/`` (#3077).
 * :class:`TestUnittestOrderingRunsOnDevelop` evaluates ``unittest-ordering``'s
   ``if:`` on a ``develop`` push, once the trigger lets that push run Unit Tests.
 * :class:`TestDependabotTargetsDevelop` checks every update entry of
@@ -56,15 +57,15 @@ class TestCIRunsOnDevelop(unittest.TestCase):
 
 
 class TestGitHubPagesBuildsDevelopPullRequests(unittest.TestCase):
-    """The docs build runs for a pull request to either branch; publishing stays on ``main``."""
+    """The docs build runs for a pull request to either branch; ``develop`` publishes on its own push alone."""
 
     PULL = {'event_name': 'pull_request', 'ref': 'refs/pull/2942/merge', 'event': {}}
 
     @staticmethod
-    def runs(job: 'str', github: 'dict[str, Any]') -> 'bool':
+    def runs(job: 'str', github: 'dict[str, Any]', head: 'str' = 'success') -> 'bool':
         jobs = job_blocks((_workflows.WORKFLOWS / 'deploy-pages.yml').read_text(encoding='utf-8'))
         context = {STATUS: {'cancelled': False}, 'github': github,
-                   'needs': {'head': {'result': 'success', 'outputs': {'verified': 'true'}},
+                   'needs': {'head': {'result': head, 'outputs': {'verified': 'true'}},
                              'deploy-pages': {'result': 'success', 'outputs': {}},
                              'publish-pages': {'result': 'skipped', 'outputs': {}}}}
         return job_runs(jobs, job, context)
@@ -81,6 +82,14 @@ class TestGitHubPagesBuildsDevelopPullRequests(unittest.TestCase):
             github = {'event_name': 'workflow_run', 'ref': 'refs/heads/main', 'event': {'workflow_run': run}}
             with self.subTest(head_branch=branch):
                 self.assertIs(self.runs('deploy-pages', github), expected)
+
+    def test_a_develop_push_publishes_its_build_and_posts_nothing(self) -> None:
+        """#3077: ``develop``'s own push, with ``head`` skipped, builds and publishes ``dev/``."""
+        self.assertEqual(on('deploy-pages.yml')['push'], {'branches': ['develop']})
+        push = {'event_name': 'push', 'ref': 'refs/heads/develop', 'event': {}}
+        for job, expected in (('deploy-pages', True), ('publish-pages', True), ('discussion', False)):
+            with self.subTest(job=job):
+                self.assertIs(self.runs(job, push, head='skipped'), expected)
 
 
 class TestUnittestOrderingRunsOnDevelop(unittest.TestCase):

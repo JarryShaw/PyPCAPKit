@@ -72,7 +72,7 @@ At a Glance
      - ``workflow_dispatch``
    * - GitHub Pages
      - :file:`deploy-pages.yml`
-     - --
+     - ``develop``
      - ``main``, ``develop``
      - Sat 02:00
      - **Unit Tests**
@@ -168,9 +168,10 @@ At a Glance
 the publishing ones on ``main`` alone: Vendor Update, Conda Update and GitHub Pages
 each skip a Unit Tests run whose ``.head_branch`` is not ``main``, so the Create
 Release run that follows releases nothing, as for a pull request's run. GitHub Pages
-builds the docs for a pull request to either branch and publishes none, as
-``publish-pages`` skips every ``pull_request`` run. Every schedule runs on ``main``,
-the default branch.
+also publishes ``develop``'s build, on each push to it (`Documentation Hosting
+(#3077)`_), and builds the docs for a pull request to either branch and publishes
+none, as ``publish-pages`` skips every ``pull_request`` run. Every schedule runs on
+``main``, the default branch.
 
 The Graph
 ---------
@@ -188,6 +189,7 @@ run id.
    flowchart LR
        PUSH["push: main, develop"]
        PUSHMAIN["push: main"]
+       PUSHDEV["push: develop"]
        PR["pull_request: main, develop"]
        SAT["schedule: Saturday"]
        MON["schedule: Monday"]
@@ -229,6 +231,7 @@ run id.
        PR --> CQ
        SAT -->|02:00| CQ
 
+       PUSHDEV --> GP
        PR --> GP
        SAT -->|02:00| GP
        DISPATCH --> GP
@@ -270,7 +273,7 @@ run id.
        TAG --> CR
 
        classDef trig fill:none,stroke-dasharray:2 2
-       class PUSH,PUSHMAIN,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+       class PUSH,PUSHMAIN,PUSHDEV,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
 
 .. mermaid::
 
@@ -2358,10 +2361,63 @@ through an ``environment:``-gated deployment. Its ``deploy-pages`` job builds
 the site, a pull request's included, with ``contents: read``, and uploads it
 for ``publish-pages``, which alone holds ``contents: write`` and never runs on
 a pull request. Its ``Check gh-pages holds no newer build`` step skips the
-deploy when ``gh-pages`` already holds the build of a commit this run's commit
-is behind, so a build that finishes late cannot replace newer documentation
-(:issue:`1968`). Of these environments, only
+deploy when ``gh-pages`` already holds a build of its target from a commit this
+run's commit is behind, so a build that finishes late cannot replace newer
+documentation (:issue:`1968`, `Documentation Hosting (#3077)`_). Of these environments, only
 ``github-release`` carries a required reviewer; :doc:`releasing`
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
 repeating it here.
+
+.. _documentation-hosting:
+
+Documentation Hosting (:issue:`3077`)
+-------------------------------------
+
+**GitHub Pages** serves two builds from the ``gh-pages`` branch, at
+https://jarryshaw.github.io/PyPCAPKit/:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 40 46
+
+   * - Folder
+     - Holds
+     - Published by
+   * - the root
+     - ``main``'s build
+     - ``publish-pages``, after a ``workflow_run`` whose verdict covers ``main``'s tip
+       and on the Saturday schedule
+   * - ``latest/``
+     - a redirect stub per page of the root build, to that page at the root
+     - the root publish, carrying what ``Write the /latest/ redirects`` writes with
+       :file:`util/pages_latest.py`
+   * - ``dev/``
+     - ``develop``'s build
+     - ``publish-pages``, on each push to ``develop``, with no ``head`` gate and no
+       report
+
+Each build names its folder to :file:`docs/source/conf.py` in ``PAGES_FOLDER``, which
+sets its canonical and edit links, and the sidebar links each page to its copy in the
+other build. The two publishes cannot clobber each other:
+
+*  **Each waits in its target's own concurrency group**, ``publish-pages-root`` or
+   ``publish-pages-dev``, so neither cancels the other's pending publish.
+*  **Each writes its own folder alone.** ``develop``'s deploys into ``dev/`` through
+   ``target-folder``, and the root's ``clean`` keeps ``dev/`` through
+   ``clean-exclude``.
+*  **Neither force-pushes** (``force: false``): a push the other target landed first
+   is fetched and rebased onto, not overwritten.
+
+``Check gh-pages holds no newer build`` compares against the newest build of its own
+target among the last 100 ``gh-pages`` commits, which name it in their message.
+
+**Read the Docs** builds the ``pypcapkit`` project outside GitHub Actions, at
+https://pypcapkit.jarryshaw.me/: ``latest`` from ``main``, ``develop``, and each
+release tag from the first that carries :file:`.readthedocs.yaml`, since a version
+builds from that file in its own tree. It installs as the Pages build does. Its flyout
+menu switches versions, so :file:`docs/source/conf.py` leaves out the sidebar switch
+there and takes the canonical URL from ``READTHEDOCS_CANONICAL_URL``.
+
+:file:`tests/project/test_pages_dev_latest_3077.py` and
+:file:`tests/project/test_readthedocs_config_3077.py` pin both.

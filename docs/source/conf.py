@@ -340,6 +340,17 @@ html_theme = 'furo'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+#: The folder GitHub Pages serves this build from (#3077): ``''``, the site root,
+#: for ``main``'s build, and ``dev`` for ``develop``'s, which deploy-pages.yml sets
+#: in ``PAGES_FOLDER``. ``_templates/sidebar/versions.html`` reads it as
+#: ``pages_folder``.
+PAGES_FOLDER = os.environ.get('PAGES_FOLDER', '')
+if PAGES_FOLDER not in ('', 'dev'):
+    raise ValueError(f"PAGES_FOLDER is '' for the site root or 'dev', not {PAGES_FOLDER!r}")
+#: Whether Read the Docs is building this, which sets ``READTHEDOCS`` and gives the
+#: version's URL in ``READTHEDOCS_CANONICAL_URL`` (#3077).
+READTHEDOCS = bool(os.environ.get('READTHEDOCS'))
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -359,7 +370,7 @@ html_theme_options = {
     "top_of_page_button": "edit",  # None
 
     "source_repository": "https://github.com/JarryShaw/PyPCAPKit/",
-    "source_branch": "main",
+    "source_branch": "develop" if PAGES_FOLDER == 'dev' else "main",
     "source_directory": "docs/source/",
 
     "light_css_variables": {
@@ -372,8 +383,30 @@ html_theme_options = {
     },
 }
 html_title = "PyPCAPKit"
+html_context = {'pages_folder': PAGES_FOLDER}
+# furo's own sidebar list, from its ``theme.conf``, with the version switch under
+# the brand on GitHub Pages (#3077). Read the Docs' flyout menu switches there.
+html_sidebars = {
+    '**': [
+        'sidebar/brand.html',
+        *([] if READTHEDOCS else ['sidebar/versions.html']),
+        'sidebar/search.html',
+        'sidebar/scroll-start.html',
+        'sidebar/navigation.html',
+        'sidebar/ethical-ads.html',
+        'sidebar/scroll-end.html',
+        'sidebar/variant-selector.html',
+    ],
+}
 
-ogp_site_url = "https://pypcapkit.jarryshaw.me/"
+# Where this build is served, which each page's canonical link and Open Graph URL
+# name (#3077): the version's own URL on Read the Docs, and on GitHub Pages the
+# site root for ``main``'s build or ``dev/`` for ``develop``'s.
+if READTHEDOCS:
+    ogp_site_url = os.environ['READTHEDOCS_CANONICAL_URL']
+else:
+    ogp_site_url = 'https://jarryshaw.github.io/PyPCAPKit/' + (f'{PAGES_FOLDER}/' if PAGES_FOLDER else '')
+html_baseurl = ogp_site_url
 
 # Mermaid diagrams render at their natural size and shrink only to fit the page
 # width. The ``sphinxcontrib-mermaid`` defaults -- ``mermaid_height = '500px'`` with
@@ -395,7 +428,7 @@ mermaid_init_config = {
     'state': {'useMaxWidth': False},
     'sequence': {'useMaxWidth': False},
 }
-html_css_files = ['mermaid.css']
+html_css_files = ['mermaid.css', 'versions.css']
 
 
 def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument

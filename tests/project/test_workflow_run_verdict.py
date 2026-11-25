@@ -569,7 +569,8 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
     def test_every_acting_workflow_calls_one_head(self) -> None:
         """#1967: one copy of the gate and the verdict, called the same way from each.
 
-        The ``head`` jobs differ in their ``name:`` alone, no acting workflow
+        The ``head`` jobs differ in their ``name:`` alone, bar GitHub Pages' ``if:``,
+        which skips the call on a push to ``develop`` (#3077); no acting workflow
         keeps a gate or a ``verdict`` of its own, and nothing else calls
         :data:`HEAD`.
 
@@ -581,7 +582,12 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
                 self.assertNotIn('verdict', jobs)
                 self.assertNotIn('uses: ./.github/workflows/unit-tests.yml', self.texts[workflow])
                 self.assertNotIn('run: python3 util/verdict_covers_checkout.py\n', self.texts[workflow])
-                blocks[workflow] = re.sub(r'(?m)^    name: .*\n', '', jobs['head'] + '\n')
+                block = re.sub(r'(?m)^    name: .*\n', '', jobs['head'] + '\n')
+                if workflow == 'deploy-pages.yml':
+                    skip = "    if: ${{ github.event_name != 'push' }}\n"
+                    self.assertIn(skip, block)
+                    block = block.replace(skip, '')
+                blocks[workflow] = block
         self.assertEqual(len(set(blocks.values())), 1, blocks)
         callers = sorted(path.name for path in WORKFLOWS.glob('*.yml')
                          if _CALL in path.read_text(encoding='utf-8'))
@@ -705,6 +711,9 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
             with self.subTest(workflow=workflow, job='head'):
                 self.assertEqual(parsed['uses'], f'./.github/workflows/{HEAD}')
                 self.assertEqual(parsed['permissions'], {'contents': 'read'})
+                # GitHub Pages skips the call on a push to `develop` (#3077).
+                if workflow == 'deploy-pages.yml':
+                    self.assertEqual(parsed.pop('if'), "${{ github.event_name != 'push' }}")
                 for key in ('if', 'with', 'secrets'):
                     self.assertNotIn(key, parsed)
 

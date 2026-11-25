@@ -28,7 +28,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import bash_argv, scale_timeout
-from tests.project.test_release_gates import STATUS, job_blocks, job_runs
+from tests.project.test_release_gates import STATUS, evaluate_expression, job_blocks, job_runs
 
 try:
     import yaml
@@ -247,6 +247,9 @@ class TestEveryWorkflowDeclaresPermissions(unittest.TestCase):
             ('workflow_run', 'success', 'skipped', False),
             ('workflow_run', 'success', 'failure', False),
             ('schedule', 'success', 'cancelled', False),
+            # #3077: a push to `develop` publishes dev/, with `head` skipped.
+            ('push', 'skipped', 'success', True),
+            ('push', 'skipped', 'failure', False),
         )
         for event, head, built, expected in rows:
             context = {STATUS: {'cancelled': False}, 'github': {'event_name': event, 'event': {}}, 'needs': {
@@ -294,11 +297,12 @@ class TestEveryWorkflowDeclaresPermissions(unittest.TestCase):
 
 
 #: A ``gh`` that answers the ``gh api`` calls the check makes from the
-#: environment, and logs each call. ``$2`` is the endpoint.
+#: environment, and logs each call. ``$2`` is the endpoint; the commit listing
+#: answers ``STUB_MESSAGE``, one message per line, newest first.
 GH_STUB = '''#!/bin/sh
 printf '%s\\n' "$*" >> "$STUB_LOG"
 case "$2" in
-  */commits/gh-pages) [ -z "$STUB_COMMITS_FAIL" ] || exit 1; printf '%s\\n' "$STUB_MESSAGE" ;;
+  *'/commits?sha=gh-pages&per_page=100') [ -z "$STUB_COMMITS_FAIL" ] || exit 1; printf '%s\\n' "$STUB_MESSAGE" ;;
   */compare/*) [ -z "$STUB_COMPARE_FAIL" ] || exit 1; printf '%s\\n' "$STUB_STATUS" ;;
   *) exit 2 ;;
 esac
@@ -307,6 +311,10 @@ esac
 #: This run's commit, and the one ``gh-pages`` last published.
 OURS = '1' * 40
 THEIRS = '2' * 40
+#: A commit the other target published (#3077).
+OTHER = '3' * 40
+#: Each target's event (#3077): ``develop``'s push, and the schedule for the root.
+TARGETS = {'root': 'schedule', 'dev': 'push'}
 
 
 @unittest.skipIf(yaml is None, 'PyYAML, from the test extra, is not installed')
@@ -314,7 +322,8 @@ class TestPublishSkipsAnOlderBuild(unittest.TestCase):
     """``Check gh-pages holds no newer build``, run as ``bash -e`` runs it, ``gh`` stubbed.
 
     Builds finish in any order, so an older run's publish can reach ``gh-pages``
-    after a newer one's; the check is what stops it replacing the newer docs.
+    after a newer one's; the check is what stops it replacing the newer docs. The
+    root and ``dev/`` each compare against their own builds alone (#3077).
 
     """
 
@@ -326,13 +335,24 @@ class TestPublishSkipsAnOlderBuild(unittest.TestCase):
         stub.parent.mkdir()
         stub.write_text(GH_STUB, encoding='utf-8')
         stub.chmod(0o755)
-        self.steps = workflow('deploy-pages.yml')['jobs']['publish-pages']['steps']
+        publish = workflow('deploy-pages.yml')['jobs']['publish-pages']
+        self.steps = publish['steps']
         self.check = next(entry for entry in self.steps if entry.get('id') == 'fresh')
         deploy = next(entry for entry in self.steps if 'JamesIves' in str(entry.get('uses', '')))
-        #: What the deploy writes as the ``gh-pages`` commit for ``THEIRS``.
-        self.ours_message = deploy['with']['commit-message'].replace('${{ github.sha }}', THEIRS)
+        self.template = deploy['with']['commit-message']
+        #: Each target's ``PUBLISHED``, as the job's ``env:`` evaluates it.
+        self.published = {target: evaluate_expression(publish['env']['PUBLISHED'], {'github': {'event_name': event}})
+                          for target, event in TARGETS.items()}
+        #: What the deploy writes as the root's ``gh-pages`` commit for ``THEIRS``.
+        self.ours_message = self.message(THEIRS)
 
-    def run_check(self, message: 'str', status: 'str' = '', **flags: 'str') -> 'tuple[dict[str, str], str, str]':
+    def message(self, sha: 'str', target: 'str' = 'root') -> 'str':
+        """The deploy's commit message for ``sha`` in ``target``."""
+        return self.template.replace('${{ env.PUBLISHED }}', str(self.published[target])).replace(
+            '${{ github.sha }}', sha)
+
+    def run_check(self, message: 'str', status: 'str' = '', target: 'str' = 'root',
+                  **flags: 'str') -> 'tuple[dict[str, str], str, str]':
         """The check's outputs, its stdout, and the ``gh`` calls it made."""
         script = self.root / 'check.sh'
         script.write_text(self.check['run'], encoding='utf-8')
@@ -341,7 +361,8 @@ class TestPublishSkipsAnOlderBuild(unittest.TestCase):
         log.write_text('', encoding='utf-8')
         env = {'PATH': f'{self.root / "bin"}{os.pathsep}{os.environ.get("PATH", "")}', 'LC_ALL': 'C',
                'GITHUB_SHA': OURS, 'GITHUB_REPOSITORY': 'JarryShaw/PyPCAPKit', 'GITHUB_OUTPUT': str(output),
-               'STUB_LOG': str(log), 'STUB_MESSAGE': message, 'STUB_STATUS': status, **flags}
+               'STUB_LOG': str(log), 'STUB_MESSAGE': message, 'STUB_STATUS': status,
+               'PUBLISHED': str(self.published[target]), **flags}
         result = subprocess.run(bash_argv('-e', str(script)), cwd=self.root, env=env, capture_output=True,
                                 text=True, check=False, timeout=scale_timeout(30))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -371,6 +392,26 @@ class TestPublishSkipsAnOlderBuild(unittest.TestCase):
         self.assertEqual(self.run_check(default, 'behind')[0], {'publish': 'true'})
         self.assertEqual(self.run_check(self.ours_message, 'behind', STUB_COMMITS_FAIL='1')[0], {'publish': 'true'})
         self.assertEqual(self.run_check(self.ours_message, 'behind', STUB_COMPARE_FAIL='1')[0], {'publish': 'true'})
+
+    def test_each_target_compares_against_its_own_newest_build(self) -> None:
+        """#3077: the other target's commits land between a target's own, and are passed over."""
+        self.assertNotEqual(self.published['root'], self.published['dev'])
+        for target, other in (('root', 'dev'), ('dev', 'root')):
+            listing = '\n'.join((self.message(OTHER, other), self.message(THEIRS, target),
+                                  self.message(OTHER, target)))
+            with self.subTest(target=target):
+                outputs, _, calls = self.run_check(listing, 'behind', target=target)
+                self.assertEqual(outputs, {'publish': 'false'})
+                self.assertIn(f'compare/{THEIRS}...{OURS}', calls)
+                self.assertNotIn(f'compare/{OTHER}', calls)
+
+    def test_a_first_build_of_a_target_publishes(self) -> None:
+        """Only the other target's builds on ``gh-pages``: nothing to compare against (#3077)."""
+        for target, other in (('root', 'dev'), ('dev', 'root')):
+            with self.subTest(target=target):
+                outputs, _, calls = self.run_check(self.message(THEIRS, other), 'behind', target=target)
+                self.assertEqual(outputs, {'publish': 'true'})
+                self.assertNotIn('compare/', calls)
 
 
 if __name__ == '__main__':
