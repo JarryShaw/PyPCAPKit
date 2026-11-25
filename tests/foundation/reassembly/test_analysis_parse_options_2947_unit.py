@@ -154,7 +154,9 @@ class StopTests(unittest.TestCase):
                 with self.subTest(function=function.__name__, options=options):
                     with mock.patch.object(klass, 'analyze', wraps=klass.analyze) as analyze:
                         function(datagram, **options)
-                    self.assertEqual(analyze.call_args.kwargs, {})
+                    # NOTE: An IP payload also gets the next-layer state a frame's IP layer hands on (#2945).
+                    state = {'packet', 'version'} if klass is IPv4 else set()
+                    self.assertEqual(set(analyze.call_args.kwargs), state)
 
 
 class ContextTests(unittest.TestCase):

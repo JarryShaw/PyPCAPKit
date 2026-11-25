@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
+from pcapkit.protocols.protocol import ProtocolBase
 
 if TYPE_CHECKING:
     from typing import Any, Iterable, Mapping, Optional, Type
@@ -26,7 +27,6 @@ if TYPE_CHECKING:
     from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
     from pcapkit.protocols.internet.ip.protocol import IP as IP_Protocol
-    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['ip_datagram']
 
@@ -75,7 +75,11 @@ def ip_datagram(datagram: 'IP_Datagram', *,
        Takes keyword-only ``layer``, ``protocol`` and ``context``, as the
        parse behind :attr:`Datagram.packet
        <pcapkit.foundation.reassembly.ip.data.Datagram.packet>` does
-       (:issue:`2947`).
+       (:issue:`2947`). The payload gets the datagram's addresses and IP
+       version, as a frame's IP layer hands its next layer, so an ESP
+       Security Association keyed by destination applies as it does to a
+       frame; and a stop at an IPv6 datagram's Fragment header keeps its
+       payload raw (:issue:`2945`).
 
     """
     if isinstance(datagram.payload, tuple):
@@ -84,23 +88,32 @@ def ip_datagram(datagram: 'IP_Datagram', *,
     # NOTE: Only those set, as the engine hands them (``EngineBase._setup_reassembly``).
     options = (('layer', layer), ('protocol', protocol), ('__context__', context))
     kwargs = {name: value for (name, value) in options if value is not None}  # type: dict[str, Any]
-    return _analyze_payload(klass, datagram.id.proto, datagram.payload, **kwargs)
+    return _analyze_payload(klass, datagram.id.proto, datagram.payload,
+                            packet={'src': datagram.id.src, 'dst': datagram.id.dst}, **kwargs)
 
 
 def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
-                     payload: 'bytes', /, **kwargs: 'Any') -> 'ProtocolBase':
+                     payload: 'bytes', /, *, packet: 'Optional[Mapping[str, Any]]' = None,
+                     **kwargs: 'Any') -> 'ProtocolBase':
     """Parse a reassembled payload by its payload protocol type.
 
     :func:`ip_datagram` runs this, and so does the
     :class:`~pcapkit.foundation.reassembly.data.Deferred` that
     :meth:`IP.submit <pcapkit.foundation.reassembly.ip.reassembly.IP.submit>` stores as a
     datagram's ``packet``, with the reassembly's own protocol bound as
-    ``protocol`` and the keywords its engine hands it as ``kwargs``.
+    ``protocol``, the datagram's addresses as ``packet``, and the keywords its
+    engine hands it as ``kwargs``.
 
     Args:
         protocol: The IP protocol whose ``analyze`` parses ``payload``.
         proto: The payload protocol type.
         payload: The reassembled payload.
+        packet: The datagram's ``src`` and ``dst``. They and their IP version,
+            as ``version``, go to the ``analyze`` of a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, which
+            hands them to the payload as a frame's IP layer hands its next
+            layer; any other analyser, as a custom ``__protocol_type__`` may
+            be, is called without them (:issue:`2945`).
         **kwargs: Keyword arguments for ``analyze``: the stops and context
             the engine parses its frames with, which the reassembly hands on,
             or those :func:`ip_datagram` is given.
@@ -109,4 +122,7 @@ def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
         The parsed payload.
 
     """
+    if packet is not None and isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
+        # NOTE: Next-layer state, which ``analyze`` hands on through ``_from_parent`` (#2945).
+        kwargs.update(packet=dict(packet), version=packet['dst'].version)
     return protocol.analyze(proto, payload, **kwargs)

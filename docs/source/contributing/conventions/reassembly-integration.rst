@@ -84,7 +84,10 @@ Parse Ownership
   :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` take them as keyword-only
   ``layer``, ``protocol`` and ``context``, so given the same they return that
   ``packet`` (:issue:`2947`). The reassembler a TCP flow tracer builds for
-  ``analyze`` takes them the same way (:issue:`2946`).
+  ``analyze`` takes them the same way (:issue:`2946`). For IP both also hand a
+  protocol class's ``analyze`` the datagram's addresses and IP version, as a frame's IP
+  layer hands its next layer, so its payload is dispatched as a frame's is
+  (:issue:`2945`).
 * Protocol code never imports :mod:`pcapkit.foundation` to do its own work; the
   dependency runs from ``foundation`` to the protocols. The protocol base's import from
   :mod:`pcapkit.foundation.registry.protocols` registers a class rather than parsing.

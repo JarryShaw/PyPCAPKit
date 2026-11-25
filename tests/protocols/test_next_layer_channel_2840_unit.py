@@ -259,10 +259,12 @@ class NextLayerChannelTests(unittest.TestCase):
         self.assertEqual((read[0][1]['packet'], read[0][1]['version']), ({'outer': 1}, 4))
         self.assertIs(result._exctx, context)
 
-        # NOTE: A keyword neither a stop nor state is the caller's, for the public constructor.
-        with spy(TCP, '__init__') as init:
-            IPv4.analyze(6, SEGMENT, unread=True)
-        self.assertEqual(init, [('TCP', {'unread': True, 'alias': TransType.TCP})])
+        # NOTE: A keyword neither a stop nor state is the caller's, for the public constructor;
+        # the state takes the channel beside it (#2945).
+        with spy(TCP, '__init__') as init, spy(TCP, 'read') as read:
+            IPv4.analyze(6, SEGMENT, unread=True, version=4)
+        self.assertEqual(init, [('TCP', {'unread': True, **dict.fromkeys(INIT_KEYWORDS)})])
+        self.assertEqual((read[0][1]['alias'], read[0][1]['version']), (TransType.TCP, 4))
 
     def test_stops_named_none_and_null_are_no_stop(self) -> None:
         """As ``Extractor`` spells an omitted stop, which ``__init__`` still reads as none."""
