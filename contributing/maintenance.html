@@ -886,7 +886,10 @@ keyword per issue, so every <code class="docutils literal notranslate"><span cla
 and closed by hand where the keyword did not. <strong>A merge into</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>closes
 nothing</strong>, since GitHub acts on the keyword only on the default branch: the coordinator
 closes each target by hand as completed, with a comment naming the merge commit and the
-release it ships in (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3062">#3062</a>).</p>
+release it ships in (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3062">#3062</a>). GitHub also ignores the keyword on a pull request
+into <code class="docutils literal notranslate"><span class="pre">develop</span></code> and creates no link, so the coordinator links each target when the pull
+request opens, through the GraphQL <code class="docutils literal notranslate"><span class="pre">addCloseIssueReferences</span></code> mutation, which is what
+the sidebar’s Development section does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3062">#3062</a>).</p>
 <p><code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> goes on when the verdict lands; the CI gate belongs to
 reporting the pull request as ready.</p>
 <pre  class="mermaid">
