@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="1.7.0 – unreleased" />
+<meta property="og:title" content="1.7.0 – 2026-11-25" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/changelog/1.7.0.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
@@ -12,7 +12,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="1.6.2 – 2026-11-21" href="1.6.2.html"><link rel="prev" title="Changelog" href="../changelog.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>1.7.0 – unreleased - PyPCAPKit</title>
+        <title>1.7.0 – 2026-11-25 - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -480,7 +480,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" checked="" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1.7.0 – unreleased</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -591,8 +591,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="unreleased">
-<h1>1.7.0 – unreleased<a class="headerlink" href="#unreleased" title="Link to this heading">¶</a></h1>
+          <section id="id1">
+<h1>1.7.0 – 2026-11-25<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
 <p>1.7.0 adds dissectors for PPP, PPPoE and DNS, decodes MLD in ICMPv6, SCTP’s
 I-DATA, FORWARD TSN and PAD chunks and the TLS extensions a current handshake
 carries, writes PCAP-NG, and lets an extraction feed any registered reassembler
@@ -670,8 +670,8 @@ already holds (<a class="extlink-issue reference external" href="https://github.
 </section>
 <section id="pcapkit-dumpkit">
 <h2>pcapkit.dumpkit<a class="headerlink" href="#pcapkit-dumpkit" title="Link to this heading">¶</a></h2>
-<section id="id1">
-<h3>Added<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<section id="id2">
+<h3>Added<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../pcapkit/dumpkit/pcapng.html#pcapkit.dumpkit.pcapng.PCAPNGIO" title="pcapkit.dumpkit.pcapng.PCAPNGIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGIO</span></code></a>, a PCAP-NG writer, as the
 <code class="docutils literal notranslate"><span class="pre">pcapng</span></code> format, with the <code class="docutils literal notranslate"><span class="pre">.pcapng</span></code> extension, of an extraction’s output, a
@@ -682,14 +682,16 @@ dissecting the frame again, and falls back to JSON under the same engines as
 the PCAP writer. A PCAP-NG frame keeps its interface’s options and its own, a
 Simple or obsolete Packet Block written as an Enhanced Packet Block; Name
 Resolution, Interface Statistics, Decryption Secrets, custom and journal
-blocks are not written.</p></li>
+blocks are not written. <a class="reference internal" href="../pcapkit/interface/core.html#pcapkit.interface.core.PCAP_NG" title="pcapkit.interface.core.PCAP_NG"><code class="xref py py-data docutils literal notranslate"><span class="pre">PCAP_NG</span></code></a> names the
+format beside <code class="docutils literal notranslate"><span class="pre">PCAP</span></code>, since <code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code> already names the protocol class
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3047">#3047</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3051">#3051</a>).</p></li>
 </ul>
 </section>
 </section>
 <section id="pcapkit-foundation">
 <h2>pcapkit.foundation<a class="headerlink" href="#pcapkit-foundation" title="Link to this heading">¶</a></h2>
-<section id="id2">
-<h3>Changed<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<section id="id3">
+<h3>Changed<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>a breaking change to</strong>
 <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
@@ -879,8 +881,8 @@ on the tracer alone; JSON output, dominated by serialising, gains nothing
 measurable.</p></li>
 </ul>
 </section>
-<section id="id3">
-<h3>Fixed<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<section id="id4">
+<h3>Fixed<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>a reassembly or flow-tracing callback that raised lost what it
 was handed: a TCP flow dropped out of the tracer’s <code class="docutils literal notranslate"><span class="pre">index</span></code> and
@@ -929,8 +931,8 @@ its port as <code class="docutils literal notranslate"><span class="pre">protoco
 </section>
 <section id="pcapkit-protocols">
 <h2>pcapkit.protocols<a class="headerlink" href="#pcapkit-protocols" title="Link to this heading">¶</a></h2>
-<section id="id4">
-<h3>Added<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<section id="id5">
+<h3>Added<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../pcapkit/protocols/link/ppp.html#pcapkit.protocols.link.ppp.protocol.PPP" title="pcapkit.protocols.link.ppp.protocol.PPP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPP</span></code></a> (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1661.html"><strong>RFC 1661</strong></a>,
 <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1662.html"><strong>RFC 1662</strong></a>) and <a class="reference internal" href="../pcapkit/protocols/link/pppoe.html#pcapkit.protocols.link.pppoe.protocol.PPPoE" title="pcapkit.protocols.link.pppoe.protocol.PPPoE"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPPoE</span></code></a>
@@ -1035,8 +1037,8 @@ its maker taking a member or an <a class="reference external" href="https://docs
 <code class="docutils literal notranslate"><span class="pre">DHKEM(X25519,</span> <span class="pre">HKDF-SHA256)</span></code> is <code class="docutils literal notranslate"><span class="pre">DHKEM_X25519_HKDF_SHA256</span></code>.</p></li>
 </ul>
 </section>
-<section id="id5">
-<h3>Changed<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<section id="id6">
+<h3>Changed<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>a breaking change to</strong> TLS extensions. Each type
 <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL.__extension__" title="pcapkit.protocols.application.ssl.protocol.SSL.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SSL.__extension__</span></code></a>
@@ -1113,8 +1115,8 @@ package’s logger, <a class="reference internal" href="../pcapkit/utilities/log
 removed one.</p></li>
 </ul>
 </section>
-<section id="id6">
-<h3>Fixed<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<section id="id7">
+<h3>Fixed<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>a layer parsed on its own from octets that end inside its header
 warned <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> for each field past the cut, and most protocols
@@ -1178,10 +1180,22 @@ at once (<a class="extlink-issue reference external" href="https://github.com/Ja
 </ul>
 </section>
 </section>
+<section id="pcapkit-vendor">
+<h2>pcapkit.vendor<a class="headerlink" href="#pcapkit-vendor" title="Link to this heading">¶</a></h2>
+<section id="id8">
+<h3>Fixed<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>a generated member comment that opens with reST block markup, such as IANA’s
+<code class="docutils literal notranslate"><span class="pre">*</span></code> for <a class="reference internal" href="../pcapkit/const/dns.html#pcapkit.const.dns.rr_type.RRType.ANY" title="pcapkit.const.dns.rr_type.RRType.ANY"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RRType.ANY</span></code></a>, rendered
+as a list or a block on its API page. The crawlers now escape it, so the
+comment reads as written (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3049">#3049</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3052">#3052</a>).</p></li>
+</ul>
+</section>
+</section>
 <section id="project-infrastructure">
 <h2>Project infrastructure<a class="headerlink" href="#project-infrastructure" title="Link to this heading">¶</a></h2>
-<section id="id7">
-<h3>Changed<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<section id="id9">
+<h3>Changed<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>the API pages group a class’s members under a subtitle for each
 section comment of its body – <em>Properties</em>, <em>Methods</em>, <em>Data Models</em> and the
@@ -1191,6 +1205,9 @@ alone, with no subtitles. <code class="docutils literal notranslate"><span class
 project test fails on a page out of step (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2907">#2907</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2909">#2909</a>).</p></li>
 <li><p>the <code class="docutils literal notranslate"><span class="pre">docs</span></code> extra pins <code class="docutils literal notranslate"><span class="pre">sphinx-autodoc-typehints</span></code> 3.17.6,
 where 1.6.2 pinned 3.17.5 (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2931">#2931</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SECURITY.md</span></code> names PyPy 3.11 and 3.12 among the supported interpreters, as
+part of the blocking tier, and <code class="docutils literal notranslate"><span class="pre">util/update_python_versions.py</span></code> keeps the
+list in step with the tier file (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3048">#3048</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3053">#3053</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1251,7 +1268,7 @@ where 1.6.2 pinned 3.17.5 (<a class="extlink-pr reference external" href="https:
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">1.7.0 – unreleased</a><ul>
+<li><a class="reference internal" href="#">1.7.0 – 2026-11-25</a><ul>
 <li><a class="reference internal" href="#pcapkit-corekit">pcapkit.corekit</a><ul>
 <li><a class="reference internal" href="#added">Added</a></li>
 <li><a class="reference internal" href="#changed">Changed</a></li>
@@ -1259,22 +1276,26 @@ where 1.6.2 pinned 3.17.5 (<a class="extlink-pr reference external" href="https:
 </ul>
 </li>
 <li><a class="reference internal" href="#pcapkit-dumpkit">pcapkit.dumpkit</a><ul>
-<li><a class="reference internal" href="#id1">Added</a></li>
+<li><a class="reference internal" href="#id2">Added</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#pcapkit-foundation">pcapkit.foundation</a><ul>
-<li><a class="reference internal" href="#id2">Changed</a></li>
-<li><a class="reference internal" href="#id3">Fixed</a></li>
+<li><a class="reference internal" href="#id3">Changed</a></li>
+<li><a class="reference internal" href="#id4">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#pcapkit-protocols">pcapkit.protocols</a><ul>
-<li><a class="reference internal" href="#id4">Added</a></li>
-<li><a class="reference internal" href="#id5">Changed</a></li>
-<li><a class="reference internal" href="#id6">Fixed</a></li>
+<li><a class="reference internal" href="#id5">Added</a></li>
+<li><a class="reference internal" href="#id6">Changed</a></li>
+<li><a class="reference internal" href="#id7">Fixed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pcapkit-vendor">pcapkit.vendor</a><ul>
+<li><a class="reference internal" href="#id8">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#project-infrastructure">Project infrastructure</a><ul>
-<li><a class="reference internal" href="#id7">Changed</a></li>
+<li><a class="reference internal" href="#id9">Changed</a></li>
 </ul>
 </li>
 </ul>
@@ -1288,7 +1309,7 @@ where 1.6.2 pinned 3.17.5 (<a class="extlink-pr reference external" href="https:
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=469f8872"></script>
+</div><script src="../_static/documentation_options.js?v=aba1b6bb"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

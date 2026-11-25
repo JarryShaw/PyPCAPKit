@@ -473,7 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -656,6 +656,38 @@
 <span class="c1">#: f-string because an f-string replacement field may not contain a backslash</span>
 <span class="c1">#: before Python 3.12, and this package still builds on 3.8.</span>
 <span class="n">PROTO_DEST_IMPORT</span> <span class="o">=</span> <span class="s1">'from pcapkit.corekit.module import ModuleDescriptor</span><span class="se">\n</span><span class="s1">'</span>
+
+<span class="c1"># NOTE: docutils' ``enum``, ``optarg`` and ``option`` pattern fragments.</span>
+<span class="n">_ENUM</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">'(?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)'</span>
+<span class="n">_OPTARG</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">'(?:[a-zA-Z][a-zA-Z0-9_-]*|&lt;[^&lt;&gt;]+&gt;)'</span>
+<span class="n">_OPTION</span> <span class="o">=</span> <span class="sa">rf</span><span class="s1">'(?:[-+][a-zA-Z0-9](?: ?</span><span class="si">{</span><span class="n">_OPTARG</span><span class="si">}</span><span class="s1">)?|(?:--|/)[a-zA-Z0-9][a-zA-Z0-9_-]*(?:[ =]</span><span class="si">{</span><span class="n">_OPTARG</span><span class="si">}</span><span class="s1">)?)'</span>
+
+<span class="c1">#: re.Pattern: The start of a comment's text that docutils opens a list, a</span>
+<span class="c1">#: block, a table or a transition with instead of a paragraph, which</span>
+<span class="c1">#: :meth:`Vendor.wrap_comment` backslash-escapes (:issue:`3049`). It follows the</span>
+<span class="c1">#: initial transitions of docutils' ``Body`` state, matched against the text</span>
+<span class="c1">#: before it is wrapped:</span>
+<span class="c1">#:</span>
+<span class="c1">#: * a bullet, an enumerator, a doctest's ``&gt;&gt;&gt;``, a line block's ``|``,</span>
+<span class="c1">#:   explicit markup's ``..`` or an anonymous target's ``__``, followed by a</span>
+<span class="c1">#:   space or nothing;</span>
+<span class="c1">#: * a field marker, such as ``:Name:``, followed by a space or nothing;</span>
+<span class="c1">#: * an option marker, such as ``-v``, ``--long=arg`` or ``/V``, followed by two</span>
+<span class="c1">#:   spaces. After one space or none it opens no list, as no description</span>
+<span class="c1">#:   follows;</span>
+<span class="c1">#: * a text of one punctuation character repeated four times or more, a</span>
+<span class="c1">#:   transition or section adornment, or a simple or grid table's top border,</span>
+<span class="c1">#:   such as ``=== ===`` or ``+---+``.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.7.0</span>
+<span class="n">BLOCK_MARKER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">'|'</span><span class="o">.</span><span class="n">join</span><span class="p">((</span>
+    <span class="sa">rf</span><span class="s1">'(?:[-*+\u2022\u2023\u2043]|\(</span><span class="si">{</span><span class="n">_ENUM</span><span class="si">}</span><span class="s1">\)|</span><span class="si">{</span><span class="n">_ENUM</span><span class="si">}</span><span class="s1">[.)]|&gt;&gt;&gt;|\||\.\.|__)(?: |\Z)'</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s1">':(?![: ])(?:[^:</span><span class="se">\\</span><span class="s1">]|</span><span class="se">\\</span><span class="s1">.|:(?![ `]|\Z))*(?&lt;! ):(?: |\Z)'</span><span class="p">,</span>
+    <span class="sa">rf</span><span class="s1">'</span><span class="si">{</span><span class="n">_OPTION</span><span class="si">}</span><span class="s1">(?:, </span><span class="si">{</span><span class="n">_OPTION</span><span class="si">}</span><span class="s1">)*  '</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s1">'(?P&lt;adornment&gt;[!-/:-@[-`{-~])(?P=adornment){3,}\Z'</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s1">'=+(?: +=+)+\Z'</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s1">'\+-[-+]+-\+\Z'</span><span class="p">,</span>
+<span class="p">)))</span>
 
 
 <div class="viewcode-block" id="render_proto_dest">
@@ -944,8 +976,10 @@
 <span class="sd">          directly, as in ``[http://ele2.io][Damir Franusic]``. docutils reads</span>
 <span class="sd">          ``]`` and ``[`` as URL characters, so the autolink would run on into</span>
 <span class="sd">          the next citation;</span>
-<span class="sd">        * a leading enumerator, such as the ``(S)`` of ``(S) flag``, is</span>
-<span class="sd">          backslash-escaped, since reST would render it as an enumerated list.</span>
+<span class="sd">        * a leading block marker, which :data:`BLOCK_MARKER` matches, is</span>
+<span class="sd">          backslash-escaped, since reST would render the text as a list, a</span>
+<span class="sd">          block, a table or a transition: an enumerator, such as the ``(S)`` of</span>
+<span class="sd">          ``(S) flag``, or a bullet, such as DNS's ``*`` record type.</span>
 
 <span class="sd">        A line never breaks at a hyphen, which would render ``run-time`` as</span>
 <span class="sd">        ``run- time``. Only a word longer than a whole line is split inside.</span>
@@ -956,6 +990,11 @@
 <span class="sd">           leading enumerator (:issue:`1846`), and no longer breaks a line at a</span>
 <span class="sd">           hyphen (:issue:`1847`).</span>
 
+<span class="sd">        .. versionchanged:: 1.7.0</span>
+
+<span class="sd">           Escapes every leading block marker of :data:`BLOCK_MARKER`, not an</span>
+<span class="sd">           enumerator alone (:issue:`3049`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            text: Source text.</span>
 
@@ -964,10 +1003,8 @@
 
 <span class="sd">        """</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'(://[^\s\[\]]*\])(?=\[)'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'\1 '</span><span class="p">,</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-        <span class="c1"># NOTE: the enumerator forms docutils recognises -- ``1.``, ``(a)``,</span>
-        <span class="c1"># ``iv)``, ``#.`` and so on -- each followed by a space or nothing.</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\A(?=(?:\((?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)\)'</span>
-                      <span class="sa">r</span><span class="s1">'|(?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)[.)])(?: |\Z))'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'</span><span class="se">\\</span><span class="s1">'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">BLOCK_MARKER</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="se">\\</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">return</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">    #: '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="n">break_on_hyphens</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
 
 
@@ -1475,7 +1512,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=469f8872"></script>
+</div><script src="../../../_static/documentation_options.js?v=aba1b6bb"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

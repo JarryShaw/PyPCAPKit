@@ -473,7 +473,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.7.0.html">1.7.0 – 2026-11-25</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.2.html">1.6.2 – 2026-11-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.1.html">1.6.1 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
@@ -606,7 +606,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'extract'</span><span class="p">,</span> <span class="s1">'reassemble'</span><span class="p">,</span> <span class="s1">'trace'</span><span class="p">,</span>                       <span class="c1"># interface functions</span>
-    <span class="s1">'TREE'</span><span class="p">,</span> <span class="s1">'JSON'</span><span class="p">,</span> <span class="s1">'PLIST'</span><span class="p">,</span> <span class="s1">'PCAP'</span><span class="p">,</span>                        <span class="c1"># format macros</span>
+    <span class="s1">'TREE'</span><span class="p">,</span> <span class="s1">'JSON'</span><span class="p">,</span> <span class="s1">'PLIST'</span><span class="p">,</span> <span class="s1">'PCAP'</span><span class="p">,</span> <span class="s1">'PCAP_NG'</span><span class="p">,</span>             <span class="c1"># format macros</span>
     <span class="s1">'LINK'</span><span class="p">,</span> <span class="s1">'INET'</span><span class="p">,</span> <span class="s1">'TRANS'</span><span class="p">,</span> <span class="s1">'APP'</span><span class="p">,</span> <span class="s1">'RAW'</span><span class="p">,</span>                  <span class="c1"># layer macros</span>
     <span class="s1">'DPKT'</span><span class="p">,</span> <span class="s1">'Scapy'</span><span class="p">,</span> <span class="s1">'PyShark'</span><span class="p">,</span> <span class="s1">'PCAPKit'</span><span class="p">,</span>                  <span class="c1"># engine macros</span>
     <span class="s1">'PyPCAP'</span><span class="p">,</span> <span class="s1">'PCAP_CT'</span><span class="p">,</span> <span class="s1">'PyPCAPFile'</span><span class="p">,</span>                      <span class="c1"># engine macros</span>
@@ -617,6 +617,8 @@
 <span class="n">JSON</span> <span class="o">=</span> <span class="s1">'json'</span>
 <span class="n">PLIST</span> <span class="o">=</span> <span class="s1">'plist'</span>
 <span class="n">PCAP</span> <span class="o">=</span> <span class="s1">'pcap'</span>
+<span class="c1"># NOTE: not ``PCAPNG``, which ``pcapkit`` and ``pcapkit.all`` bind to the protocol (#3047).</span>
+<span class="n">PCAP_NG</span> <span class="o">=</span> <span class="s1">'pcapng'</span>
 
 <span class="c1"># layer thresholds</span>
 <span class="n">RAW</span> <span class="o">=</span> <span class="s1">'none'</span>
@@ -870,7 +872,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=469f8872"></script>
+</div><script src="../../../_static/documentation_options.js?v=aba1b6bb"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

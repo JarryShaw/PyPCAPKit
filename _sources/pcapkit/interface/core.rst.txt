@@ -30,6 +30,11 @@ Output File Formats
 .. data:: PCAP
    :value: 'pcap'
 
+.. data:: PCAP_NG
+   :value: 'pcapng'
+
+   .. versionadded:: 1.7.0
+
 Layer Thresholds
 ~~~~~~~~~~~~~~~~
 
