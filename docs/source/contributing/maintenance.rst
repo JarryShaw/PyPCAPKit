@@ -278,7 +278,10 @@ keyword per issue, so every ``wip`` issue is checked against its pull request's 
 and closed by hand where the keyword did not. **A merge into** ``develop`` **closes
 nothing**, since GitHub acts on the keyword only on the default branch: the coordinator
 closes each target by hand as completed, with a comment naming the merge commit and the
-release it ships in (:issue:`3062`).
+release it ships in (:issue:`3062`). GitHub also ignores the keyword on a pull request
+into ``develop`` and creates no link, so the coordinator links each target when the pull
+request opens, through the GraphQL ``addCloseIssueReferences`` mutation, which is what
+the sidebar's Development section does (:issue:`3062`).
 
 ``review: good-to-go`` goes on when the verdict lands; the CI gate belongs to
 reporting the pull request as ready.
