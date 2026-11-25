@@ -305,7 +305,7 @@ class RRType(EnumRegistry, IntEnum):
     #: MAILA -- mail agent RRs (OBSOLETE - see MX) [:rfc:`1035`]
     MAILA = 254
 
-    #: * -- A request for some or all records the server has available
+    #: \* -- A request for some or all records the server has available
     #: [:rfc:`1035`][:rfc:`6895`][:rfc:`8482`]
     ANY = 255
 

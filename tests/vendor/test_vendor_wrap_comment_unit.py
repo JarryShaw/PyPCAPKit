@@ -13,6 +13,10 @@ the same way.
 * GitHub issue #1847: guards against :mod:`textwrap` breaking lines at
   hyphens, under which the docs read ``run- time`` and a URL split that way in
   a cell loses the rest of its autolink. Neither wrapper breaks at a hyphen.
+* GitHub issue #3049: guards against DNS's ``* -- A request ...`` rendering as a
+  bullet list. The wrapper backslash-escapes any leading marker that opens a
+  list, a block, a table or a transition, and no committed comment opens one,
+  AppType's multi-transport bullets aside.
 
 The committed :mod:`pcapkit.const` files are rendered by the same wrappers, so
 the last cases check the tree as well as the generators.
@@ -64,9 +68,38 @@ BOARDGAME = ('[TCP] Two-player board game play '
 HYPHEN_BREAK = re.compile(r'(?:[^\d\W]{2}|[^\d\W]-[^\d\W])-\n *#:(?: - | +)?[^\d\W]-?[^\d\W]')
 
 
+#: Texts docutils opens a list, a block, a table or a transition with, which the
+#: wrapper must escape: bullets, line blocks, explicit markup, doctests, anonymous
+#: targets, field and option lists, transitions and table tops.
+MARKERS = ('*', '- one', '+ one', '\u2022 one', '\u2023 one', '\u2043 one', '| one', '.. one', '>>> one',
+           '__ one', ':a: b', ':a:', ':Field Name: value', '-v  verbose', '--long  x', '/V  x', '-f FILE  x',
+           '--long=arg  x', '-a, -b  x', '+o  x', '-1 one  two', '----', '=====', '****', '+---+---+',
+           '=== ===')
+
+#: Texts close to one of :data:`MARKERS` that docutils reads as a paragraph,
+#: which the wrapper must leave alone.
+PLAIN = ('*emphasis* one', '-1 one', '+5V', '|sub|', '..one', '>>>one', 'one * two', '# of users',
+         '-v verbose', '-v', '--long x', '/V x', ':rfc:`1035` one', ':a:b', 'a:b: c', '__init__ one',
+         '---', '-- one', '=== one', '+---+ one', '----one')
+
+
 def _lines(wrapped: 'str') -> 'list[str]':
     """The text of each line of a wrapped comment, without its ``#:`` prefix."""
     return [re.sub(r'^ *#: *', '', line) for line in wrapped.split('\n')]
+
+
+def _comments(source: 'str') -> 'list[str]':
+    """The text of each ``#:`` comment in ``source``, as Sphinx reads it."""
+    comments = []  # type: list[str]
+    block = []  # type: list[str]
+    for line in source.splitlines() + ['']:
+        match = re.match(r' *#: ?(.*)$', line)
+        if match is not None:
+            block.append(match.group(1))
+        elif block:
+            comments.append(textwrap.dedent('\n'.join(block)))
+            block = []
+    return comments
 
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
@@ -109,6 +142,18 @@ class WrapCommentTests(unittest.TestCase):
                 self.assertEqual(Vendor.wrap_comment(text), expected)
         # Only an enumerator, and only at the start of the text.
         for text in ('(S)flag', '(SS) flag', 'S flag', 'the (S) flag', 'Unassigned', '3GPP TS 38.463'):
+            with self.subTest(text=text):
+                self.assertEqual(Vendor.wrap_comment(text), text)
+
+    def test_leading_block_marker_is_escaped(self) -> None:
+        from pcapkit.vendor.default import Vendor
+
+        self.assertEqual(Vendor.wrap_comment('* -- A request for some or all records [RFC1035]'),
+                         r'\* -- A request for some or all records [RFC1035]')
+        for text in MARKERS:
+            with self.subTest(text=text):
+                self.assertEqual(Vendor.wrap_comment(text), '\\' + text)
+        for text in PLAIN:
             with self.subTest(text=text):
                 self.assertEqual(Vendor.wrap_comment(text), text)
 
@@ -166,6 +211,16 @@ class WrapCommentTests(unittest.TestCase):
         self.assertEqual([type(node) for node in tree.children], [nodes.paragraph])
         self.assertEqual([node['refuri'] for node in tree.findall(nodes.reference)], ['http://ele2.io'])
 
+        for text in MARKERS:
+            with self.subTest(text=text):
+                tree = publish_doctree(Vendor.wrap_comment(text), settings_overrides=settings)
+                self.assertEqual([type(node) for node in tree.children], [nodes.paragraph])
+                self.assertEqual(tree.astext(), text)
+        for text in PLAIN:
+            with self.subTest(text=text):
+                tree = publish_doctree(Vendor.wrap_comment(text), settings_overrides=settings)
+                self.assertEqual([type(node) for node in tree.children], [nodes.paragraph])
+
 
 class CommittedConstTests(unittest.TestCase):
     """The committed :mod:`pcapkit.const` files carry the re-rendered text."""
@@ -186,6 +241,30 @@ class CommittedConstTests(unittest.TestCase):
         self.assertIn('    #: (NG-PON2) system', tcp)
         self.assertIn('           [https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-protocol.md]\n',
                       tcp)
+
+    def test_issue_3049_lines(self) -> None:
+        self.assertIn('    #: \\* -- A request for some or all records the server has available\n'
+                      '    #: [:rfc:`1035`][:rfc:`6895`][:rfc:`8482`]\n    ANY = 255\n',
+                      self._read('dns', 'rr_type.py'))
+
+    @unittest.skipUnless(HAS_DOCUTILS, 'docutils not installed')
+    def test_no_comment_opens_a_list_or_a_block(self) -> None:
+        from docutils import nodes
+        from docutils.core import publish_doctree
+
+        settings = {'report_level': 5, 'halt_level': 5}
+        for path in sorted(ROOT.joinpath('pcapkit', 'const').rglob('*.py')):
+            # AppType's multi-transport comments are bullet lists by design.
+            comments = [text for text in _comments(path.read_text(encoding='utf-8'))
+                        if not text.startswith('- [')]
+            tree = publish_doctree('\n\n'.join(comments), settings_overrides=settings)
+            with self.subTest(path=str(path.relative_to(ROOT))):
+                self.assertEqual([node.astext()[:76] for node in tree.children
+                                  if not isinstance(node, (nodes.paragraph, nodes.system_message))], [])
+                # A Sphinx role is unknown to bare docutils, and is no fault.
+                self.assertEqual([node.astext()[:76] for node in tree.findall(nodes.system_message)
+                                  if node['level'] >= 2 and 'Unknown interpreted text role' not in node.astext()],
+                                 [])
 
     def test_no_comment_or_cell_is_broken_at_a_hyphen(self) -> None:
         cell = re.compile(r'(?:[^\d\W]{2}|[^\d\W]-[^\d\W])-\n {11}[^\d\W]-?[^\d\W]')
