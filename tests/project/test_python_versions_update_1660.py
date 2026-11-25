@@ -409,8 +409,9 @@ class TestTheTiers(unittest.TestCase):
         _, plan, texts = plan_for(self, snapshot())
         self.assertEqual(changes(plan), {'pypy3.12': (None, {'tier': 'supported'})})
         self.assertEqual(plan['latest'], ['3.15', '3.15'])
-        # Only the tier file: releasing.rst counts no wheels (#1811), so a new PyPy leaves it alone.
-        self.assertEqual(sorted(texts), ['.github/python-versions.toml'])
+        # The tier file, and SECURITY.md, which names each blocking PyPy version (#3048);
+        # releasing.rst counts no wheels (#1811), so a new PyPy leaves it alone.
+        self.assertEqual(sorted(texts), ['.github/python-versions.toml', 'SECURITY.md'])
         self.assertEqual(plan['required'], {'remove': [], 'add': []})
         # #1958: a supported PyPy gets a `test` and an `integration` leg too; #2899: `test`'s
         # a leg per part, each its own check run.
@@ -695,6 +696,16 @@ class TestTheRewrite(unittest.TestCase):
                     problems += more
                 self.assertEqual(problems, [])
                 self.assertEqual(rewritten, text)
+
+    def test_the_security_policy_names_each_blocking_pypy_version(self) -> None:
+        """PyPy's supported legs block too (#3048), so SECURITY.md names each, as PyPy's tier moves."""
+        module = updater()
+        root, _, texts = plan_for(self, three_eleven_ends_and_three_sixteen_ships(snapshot()))
+        before = module.prose_view((root / 'SECURITY.md').read_text(encoding='utf-8'))[0]
+        self.assertIn('blocking tier: CPython 3.11 through 3.15, and PyPy 3.11.', before)
+        after = module.prose_view(texts['SECURITY.md'])[0]
+        self.assertIn('blocking tier: CPython 3.12 through 3.16, and PyPy 3.11 and 3.12.', after)
+        self.assertEqual(module.listed(['pypy3.11', 'pypy3.12', 'pypy3.13']), ('3.11, 3.12 and 3.13',))
 
     def test_a_claim_rewrites_each_group_and_never_spans_a_break(self) -> None:
         """A claim states versions: never a count or its spelt-out word (#1811), nor a line number (#2165)."""
