@@ -153,8 +153,9 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Reassembled payload (application layer data).
     payload: 'bytes | tuple[bytes, ...]'
     #: Parsed TCP payload, as :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`
-    #: returns it unless the reassembly's ``__protocol_type__`` names another
-    #: protocol, which then parses it. Analysed on first read rather than at
+    #: returns it given the extraction's stops and context, unless the
+    #: reassembly's ``__protocol_type__`` names another protocol, which then
+    #: parses it. Analysed on first read rather than at
     #: construction; a :class:`~pcapkit.foundation.reassembly.data.Deferred`
     #: may be passed in its place, and reading this attribute then runs it and
     #: keeps the result.

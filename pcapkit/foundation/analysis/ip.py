@@ -20,9 +20,10 @@ from pcapkit.protocols.internet.ipv4.protocol import IPv4
 from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Iterable, Mapping, Optional, Type
 
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.foundation.reassembly.ip.data import Datagram as IP_Datagram
     from pcapkit.protocols.internet.ip.protocol import IP as IP_Protocol
     from pcapkit.protocols.protocol import ProtocolBase
@@ -30,7 +31,10 @@ if TYPE_CHECKING:
 __all__ = ['ip_datagram']
 
 
-def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
+def ip_datagram(datagram: 'IP_Datagram', *,
+                layer: 'Optional[str]' = None,
+                protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None) -> 'Optional[ProtocolBase]':  # pylint: disable=line-too-long
     """Parse the payload of an IP datagram reassembled by
     :class:`~pcapkit.foundation.reassembly.ipv4.reassembly.IPv4` or
     :class:`~pcapkit.foundation.reassembly.ipv6.reassembly.IPv6`.
@@ -46,6 +50,12 @@ def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
     Args:
         datagram: Reassembled datagram (:term:`reasm.ipv4.datagram` or
             :term:`reasm.ipv6.datagram`).
+        layer: Layer to parse until, by name; :data:`None` sets no stop.
+        protocol: Protocol to parse until, by name, class or instance;
+            :data:`None` sets no stop.
+        context: Caller supplied parsing context, in any shape
+            :func:`~pcapkit.interface.core.extract` takes (cf.
+            :mod:`pcapkit.corekit.context`); :data:`None` supplies none.
 
     Returns:
         The parsed payload. A payload reported as one contiguous run is parsed
@@ -55,16 +65,26 @@ def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
 
     Note:
         :attr:`Datagram.packet <pcapkit.foundation.reassembly.ip.data.Datagram.packet>`
-        holds the same result, parsed on its first read, unless the
-        reassembly's ``__protocol_type__`` names another protocol, which then
-        parses it instead, or the engine parsed its frames with stops or a
-        context, which that parse takes too (:issue:`2933`).
+        holds what this returns given the stops and context the extraction's
+        engine parses its frames with (:issue:`2933`), parsed on its first
+        read, unless the reassembly's ``__protocol_type__`` names another
+        protocol, which then parses it instead.
+
+    .. versionchanged:: 1.8.0
+
+       Takes keyword-only ``layer``, ``protocol`` and ``context``, as the
+       parse behind :attr:`Datagram.packet
+       <pcapkit.foundation.reassembly.ip.data.Datagram.packet>` does
+       (:issue:`2947`).
 
     """
     if isinstance(datagram.payload, tuple):
         return None
-    protocol = IPv6 if isinstance(datagram.id.src, IPv6Address) else IPv4
-    return _analyze_payload(protocol, datagram.id.proto, datagram.payload)
+    klass = IPv6 if isinstance(datagram.id.src, IPv6Address) else IPv4
+    # NOTE: Only those set, as the engine hands them (``EngineBase._setup_reassembly``).
+    options = (('layer', layer), ('protocol', protocol), ('__context__', context))
+    kwargs = {name: value for (name, value) in options if value is not None}  # type: dict[str, Any]
+    return _analyze_payload(klass, datagram.id.proto, datagram.payload, **kwargs)
 
 
 def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
@@ -82,7 +102,8 @@ def _analyze_payload(protocol: 'Type[IP_Protocol]', proto: 'TransType',
         proto: The payload protocol type.
         payload: The reassembled payload.
         **kwargs: Keyword arguments for ``analyze``: the stops and context
-            the engine parses its frames with, which the reassembly hands on.
+            the engine parses its frames with, which the reassembly hands on,
+            or those :func:`ip_datagram` is given.
 
     Returns:
         The parsed payload.

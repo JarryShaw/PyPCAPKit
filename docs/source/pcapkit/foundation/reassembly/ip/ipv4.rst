@@ -99,9 +99,9 @@ Terminology
        .. note::
 
           ``packet`` is what :func:`~pcapkit.foundation.analysis.ip.ip_datagram`
-          parses ``payload`` to, unless ``__protocol_type__`` names another
-          protocol, or the extraction's engine parses its frames with stops or a
-          context, which this parse takes too (:issue:`2933`). It is analysed on
+          parses ``payload`` to, given the stops and context the extraction's
+          engine parses its frames with (:issue:`2933`), unless
+          ``__protocol_type__`` names another protocol. It is analysed on
           the first read, not when the datagram is submitted. A datagram is
           submitted for *every* frame
           whose **DF** flag is clear -- an unfragmented one included -- and the analysis
