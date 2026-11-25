@@ -59,6 +59,7 @@ Octets      Bits        Name                    Description
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: analyze
    .. automethod:: register
    .. automethod:: register_chunk
    .. automethod:: register_parameter
