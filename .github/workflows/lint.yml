@@ -25,10 +25,10 @@ name: "Lint"
 #     `no-member` false positives.
 
 on:
-  # No `push: [main]`: the pull request already linted the commit, and runners
+  # No `push`: the pull request already linted the commit, and runners
   # are oversubscribed. The schedule covers main's drift.
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   schedule:
     # Saturdays, at an hour no other Saturday job uses.
     - cron: '0 6 * * 6'

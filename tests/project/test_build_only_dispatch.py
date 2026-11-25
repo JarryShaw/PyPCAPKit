@@ -60,8 +60,8 @@ _GUARDS = re.compile(r"(github\.event_name != 'workflow_dispatch'|needs\.mode\.o
                      r"(\s*&&\s*)?")
 #: Scheduled workflows with no manual run, and why none is needed.
 EXEMPT = {
-    'codeql-analysis.yml': 'runs on every push to main and every pull request',
-    'python-compatibility.yml': 'runs on every push to main and every pull request',
+    'codeql-analysis.yml': 'runs on every push to main or develop and every pull request',
+    'python-compatibility.yml': 'runs on every push to main or develop and every pull request',
 }
 #: The workflows whose manual run builds only.
 BUILD_ONLY = ('cron-conda.yml', 'cron-vendor.yml', 'deploy-pages.yml')

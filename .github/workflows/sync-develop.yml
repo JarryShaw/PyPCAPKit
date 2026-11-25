@@ -1,0 +1,112 @@
+name: Sync Develop
+
+# #2942: main is the released line and develop carries the next minor, so a fix
+# merged to main reaches develop through a pull request from main into develop.
+# `check` compares the two with a read-only token; `pr` opens that pull request,
+# or updates the open one, while develop lacks commits of main.
+# util/sync_develop.py holds the rule. Nothing here merges or pushes: the pull
+# request is merged by hand, with a merge commit, so develop keeps main's
+# history. `pr` uses the release App's token, not GITHUB_TOKEN, whose pull
+# requests start no workflow, so the pull request's own checks run.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+# One run at a time, so two pushes cannot both open the pull request. A queued
+# run is kept, not cancelled: it compares the branches afresh.
+concurrency:
+  group: sync-develop
+  cancel-in-progress: false
+
+jobs:
+  # No secret and a read-only token. A develop that does not exist yet is a
+  # notice and `behind=false`; so is a comparison that could not be read, with a
+  # warning instead.
+  check:
+    name: Compare develop with main
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      behind: ${{ steps.compare.outputs.behind }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            util/_actions.py
+            util/sync_develop.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Check whether develop lacks commits of main
+        id: compare
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 util/sync_develop.py --check
+
+      - name: Say why no pull request opens
+        if: ${{ steps.compare.outputs.behind == 'true' && vars.RELEASE_APP_CLIENT_ID == '' }}
+        run: >-
+          echo "::warning title=No pull request without the release App::vars.RELEASE_APP_CLIENT_ID is unset,
+          so the pr job skips. Set up the App as docs/source/contributing/releasing.rst describes."
+
+  # #2648: the release App's key is a secret of `release-app`, which has no
+  # reviewer and deploys from main alone. The token holds pull requests write
+  # and contents read, enough to open and edit a pull request and no more.
+  pr:
+    name: Open or update the pull request
+    needs: check
+    if: >-
+      ${{ needs.check.outputs.behind == 'true' && vars.RELEASE_APP_CLIENT_ID != '' &&
+      github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: release-app
+    # GITHUB_TOKEN only checks out the script; the App's token does the rest.
+    permissions:
+      contents: read
+
+    steps:
+      # Without the key in `release-app`, warn and skip the rest rather than fail
+      # at minting. The expression keeps the key itself out of the step's env.
+      - name: Check for the release App's key
+        id: key
+        env:
+          KEY_SET: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+        run: |
+          echo "set=$KEY_SET" >> "$GITHUB_OUTPUT"
+          if [ "$KEY_SET" != true ]; then
+            echo "::warning title=No pull request without the release App's key::the release-app environment has no RELEASE_APP_PRIVATE_KEY secret, so the pr job skips. Store the App's key there as docs/source/contributing/releasing.rst describes."
+          fi
+
+      - name: Mint the release App's token
+        id: app
+        if: ${{ steps.key.outputs.set == 'true' }}
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-pull-requests: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ steps.key.outputs.set == 'true' }}
+        with:
+          sparse-checkout: |
+            util/_actions.py
+            util/sync_develop.py
+            .github/PULL_REQUEST_TEMPLATE.md
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Open or update the pull request from main into develop
+        if: ${{ steps.key.outputs.set == 'true' }}
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 util/sync_develop.py --propose --sha "$GITHUB_SHA" --run-url "$RUN_URL"

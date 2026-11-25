@@ -23,36 +23,36 @@ At a Glance
      - other
    * - CodeQL
      - :file:`codeql-analysis.yml`
-     - ``main``
-     - ``main``
+     - ``main``, ``develop``
+     - ``main``, ``develop``
      - Sat 02:00
      - --
      - --
    * - Unit Tests
      - :file:`unit-tests.yml`
-     - ``main``
-     - ``main``
+     - ``main``, ``develop``
+     - ``main``, ``develop``
      - --
      - --
      - ``workflow_call`` (reusable)
    * - Experimental Tests
      - :file:`experimental.yml`
-     - ``main``
-     - ``main``
+     - ``main``, ``develop``
+     - ``main``, ``develop``
      - --
      - --
      - --
    * - Python Compatibility
      - :file:`python-compatibility.yml`
-     - ``main``
-     - ``main``
+     - ``main``, ``develop``
+     - ``main``, ``develop``
      - Sat 04:00
      - --
      - --
    * - Lint
      - :file:`lint.yml`
      - --
-     - ``main``
+     - ``main``, ``develop``
      - Sat 06:00
      - --
      - ``workflow_dispatch``
@@ -73,7 +73,7 @@ At a Glance
    * - GitHub Pages
      - :file:`deploy-pages.yml`
      - --
-     - ``main``
+     - ``main``, ``develop``
      - Sat 02:00
      - **Unit Tests**
      - ``workflow_dispatch``
@@ -140,6 +140,13 @@ At a Glance
      - Mon 06:17
      - --
      - ``workflow_dispatch``
+   * - Sync Develop
+     - :file:`sync-develop.yml`
+     - ``main``
+     - --
+     - --
+     - --
+     - ``workflow_dispatch``
    * - Engine Benchmark
      - :file:`benchmark.yml`
      - --
@@ -156,6 +163,15 @@ At a Glance
    Update, Conda Update and GitHub Pages, a ``v*`` tag push for Create Release --
    for when no upstream run exists to chain from.
 
+``develop`` **carries the next minor, and** ``main`` **stays the released line**
+(:issue:`2942`, :ref:`release-lines`). The test workflows run on both branches, and
+the publishing ones on ``main`` alone: Vendor Update, Conda Update and GitHub Pages
+each skip a Unit Tests run whose ``.head_branch`` is not ``main``, so the Create
+Release run that follows releases nothing, as for a pull request's run. GitHub Pages
+builds the docs for a pull request to either branch and publishes none, as
+``publish-pages`` skips every ``pull_request`` run. Every schedule runs on ``main``,
+the default branch.
+
 The Graph
 ---------
 
@@ -170,8 +186,9 @@ run id.
 .. mermaid::
 
    flowchart LR
-       PUSH["push: main"]
-       PR["pull_request: main"]
+       PUSH["push: main, develop"]
+       PUSHMAIN["push: main"]
+       PR["pull_request: main, develop"]
        SAT["schedule: Saturday"]
        MON["schedule: Monday"]
        WED["schedule: Wednesday"]
@@ -193,6 +210,7 @@ run id.
        IK["Issue and PR Kinds<br/>cron-issue-pr-kinds.yml"]
        CT["CI Timing<br/>ci-timing.yml"]
        BM["Engine Benchmark<br/>benchmark.yml"]
+       SD["Sync Develop<br/>sync-develop.yml"]
        PS["Project Status<br/>project-status.yml"]
        MS["Milestone<br/>milestone.yml"]
        CR["Create Release<br/>create-release.yml"]
@@ -237,6 +255,9 @@ run id.
        WED -->|03:17| BM
        DISPATCH --> BM
 
+       PUSHMAIN --> SD
+       DISPATCH --> SD
+
        DISPATCH --> PS
        DAILY -->|00:37| PS
        ISSUES --> PS
@@ -249,7 +270,7 @@ run id.
        TAG --> CR
 
        classDef trig fill:none,stroke-dasharray:2 2
-       class PUSH,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+       class PUSH,PUSHMAIN,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
 
 .. mermaid::
 
@@ -504,8 +525,8 @@ source entry) and ``python-versions``, which reads ``gate``'s version (see
 ``engine-tests`` (a job per engine, each looping over its Python versions),
 ``pypcap-parity``, ``pypcap-parity-ktlo``, ``unittest-ordering`` and
 ``project-tests``, each of which has already run for this commit from Unit Tests'
-own ``push`` trigger (and, all but ``unittest-ordering``, which runs on ``main``
-pushes only, from its ``pull_request`` trigger), so a caller would only retest the
+own ``push`` trigger (and, all but ``unittest-ordering``, which runs on pushes
+only, from its ``pull_request`` trigger), so a caller would only retest the
 commit; ``gate``'s full suite runs the project pins too (see `Project Pins`_ below).
 It also skips ``changes``, ``coverage``, which combines what ``test`` and
 ``test-latest-tier`` measured, and ``required-checks`` (see `Required Status
@@ -858,8 +879,9 @@ runs decide: for each event but ``pull_request``, the newest run in the sample t
 the job and succeeded, failed or timed out must omit the name, and be newer than every
 run listing it, since that run can predate a merge. A light pull request
 (:issue:`2243`) runs a subset of the legs, so none is consulted. A job no such run ran
-keeps every name, and each event is judged on its own runs, so no job run on some
-events alone is exempted.
+keeps every name, and each event and each branch is judged on its own runs, since
+``main`` and ``develop`` run their own workflow files, so no job run on some events
+alone is exempted.
 
 Work Kept Off the Pull-Request Queue (:issue:`1538`)
 -----------------------------------------------------------------------------------------------------
@@ -868,8 +890,8 @@ Cuts in :file:`unit-tests.yml` keep work that cannot gate a merge from competing
 with pull-request jobs for the 20-runner pool. None touches a required check or adds a
 permission to the reusable workflow.
 
-* ``unittest-ordering`` runs on ``main`` pushes only, per :issue:`1052`
-  item H, and has
+* ``unittest-ordering`` runs on pushes only, to ``main`` or ``develop``, per
+  :issue:`1052` item H, and has
   ``needs: [test]``, so its cells join the queue once ``test`` finishes rather
   than when the push run is created, ahead of that run's own ``Python`` legs and of
   pull-request jobs created later in a merge wave. Its ``if:`` opens with
@@ -890,9 +912,9 @@ Light Pull Requests (:issue:`2243`)
 
 A docs-only or test-only pull request runs only the jobs its files can affect, by the
 owner's ruling on :issue:`2243`: a docs-only one the docs build and ``Lint``, a
-test-only one the tests on ``latest`` and ``Lint``. A push to ``main``, the schedule
-and every other event run everything, and ``Required checks passed`` stays required on
-both paths.
+test-only one the tests on ``latest`` and ``Lint``. A push to ``main`` or ``develop``,
+the schedule and every other event run everything, and ``Required checks passed``
+stays required on both paths.
 
 The ``changes`` job ("Classify changed files") of ``unit-tests.yml``,
 ``experimental.yml`` and ``python-compatibility.yml`` runs
@@ -1234,10 +1256,10 @@ Tests run completes without it, and with it ``Required checks passed``,
 (``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
 ``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
 skips a docs-only or test-only pull request by the same ``changes`` script, and lets a newer
-commit supersede a run, a pull request's or, unlike Unit Tests, a push to ``main``'s
-(:issue:`1903`): since nothing
-waits on the legs, ``main``'s newest commit is the one worth testing, whereas Unit
-Tests keeps a run per push for ``unittest-ordering``, which runs only there.
+commit supersede a pull request's run or, unlike Unit Tests, a push run on ``main`` or
+``develop`` (:issue:`1903`): since nothing
+waits on the legs, a branch's newest commit is the one worth testing, whereas Unit
+Tests keeps a run per push for ``unittest-ordering``, which runs only on pushes.
 
 A superseded run is skipped or stopped, never cancelled (`#1938
 <https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__): GitHub counts a
@@ -1246,8 +1268,9 @@ The workflow has no ``concurrency`` group either, since a group cancels its pend
 run once a newer one queues. Its first job, ``current`` ("Check the commit is still
 current"), sets up ``latest`` and installs ``requests``, which the script fetches with,
 then runs :file:`util/superseded.py`'s ``check``. A push's commit is current
-while it is the head of ``main``; a pull request's while the pull request is open and
-its head is still the event's ``pull_request.head.sha``; any other event's always.
+while it is the head of its branch, ``main`` or ``develop``; a pull request's while
+the pull request is open and its head is still the event's ``pull_request.head.sha``;
+any other event's always.
 Every other job needs ``current`` and skips where its output is ``false``, so a run
 superseded before it starts ends with ``skipped`` checks and a ``Superseded`` notice.
 Each of those ``if:`` conditions opens with ``!cancelled()``, which drops the implicit
@@ -1604,7 +1627,7 @@ that import ``pcapkit`` are no pins either; those the tiers send to ``latest`` r
 in a half of ``test-latest-tier``, under coverage.
 
 ``project-tests`` runs the pins under pytest, with ``test``'s flags, on ``latest``,
-on every push to ``main`` and every pull request but a docs-only one, which runs
+on every push and every pull request but a docs-only one, which runs
 :file:`tests/project` under plain unittest instead (see `Light Pull Requests
 (#2243)`_), and ``required-checks`` needs it.
 Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
@@ -1989,7 +2012,8 @@ run the same steps, and alone hold ``discussions: write``, with ``contents: read
 for a checkout of the default branch's scripts, never the run's head,
 ``checks: read`` for the run's check suite and ``actions: read`` for its
 artifacts. A push run posts as ``push`` to ``<workflow file stem>: <branch> push
-runs``, so ``main``'s Unit Tests thread is ``unit-tests: main push runs``; a
+runs``, so ``main``'s Unit Tests thread is ``unit-tests: main push runs`` and
+``develop``'s ``unit-tests: develop push runs``; a
 scheduled one posts as ``scheduled`` to ``<workflow file stem>: <branch> scheduled
 runs``. Each relayed run's concurrency group is its own, since a group cancels a
 pending run when a newer one joins it.
@@ -2045,8 +2069,9 @@ run with.
 
 ``codeql-analysis.yml`` posts to ``codeql-analysis: CodeQL report``, as
 ``scheduled`` on its ``schedule`` and ``push`` on a push to ``main``, and never on
-a pull request, whose findings belong to the pull request. Its ``discussion`` job
-runs after ``analyze`` and alone holds ``security-events: read``, beside
+a pull request, whose findings belong to the pull request, or on a push to
+``develop``, since the alerts it lists are the default branch's. Its ``discussion``
+job runs after ``analyze`` and alone holds ``security-events: read``, beside
 ``discussions: write`` and ``contents: read``. ``Write the report`` runs
 :file:`util/codeql_report.py`, which lists the default branch's open CodeQL alerts
 by severity, read through GitHub's `List code scanning alerts for a repository
@@ -2157,6 +2182,13 @@ Dependabot opens every dependency bump, weekly, from :file:`.github/dependabot.y
   :file:`requirements-*.txt` files are watched because nothing else moves them.
 * ``github-actions`` over ``/``, per `Action Pins`_ above.
 
+Each entry's ``target-branch`` is ``develop``, so a version update lands with the next
+minor rather than on the released line (:issue:`2942`). A security update still targets
+``main``, and none of an entry's options applies to it once ``target-branch`` is set
+(`Dependabot options reference
+<https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference>`__,
+``target-branch``).
+
 Neither :file:`conda/requirements.txt` nor the benchmark's image digests are
 watched: Conda Update's ``Refresh the platform pins`` and ``Setup Conda
 Distribution`` steps rewrite the former, and Dependabot reads only a ``FROM`` line
@@ -2250,6 +2282,22 @@ Where moving the branch would change a workflow file ``main`` changed since, whi
 that token cannot push, it deletes the branch and pushes it afresh, which closes
 the old pull request and opens a new one.
 
+Sync Develop (:issue:`2942`)
+-------------------------------------------------------------------------------
+
+**Sync Develop** (:file:`sync-develop.yml`) keeps ``develop`` level with ``main``, so a
+fix merged to the released line reaches the next minor, as the owner asked in review of
+:pr:`3056` (:issue:`2942`). On each push to ``main``, and
+on dispatch, its ``check`` job compares the two with a read-only token. Where
+``develop`` lacks commits of ``main``, ``pr`` opens the pull request from ``main`` into
+``develop``, ``chore: merge main into develop``, or updates the open one, never a
+second. ``pr`` runs in ``release-app`` and opens it with the release App's token, as
+the Python Versions and Issue and PR Kinds ``pr`` jobs do, so the pull request's checks
+run. Nothing here merges or pushes, the body asks for a merge commit rather than a
+squash, and a ``develop`` that does not exist yet is a notice.
+:file:`util/sync_develop.py` holds the rule, and
+:file:`tests/project/test_sync_develop_2942.py` pins it.
+
 Deployment ``environment:``
 ----------------------------
 
@@ -2261,11 +2309,12 @@ These jobs of ``create-release.yml`` declare a deployment ``environment:``, and
 * ``pypi`` -- ``environment: pypi``
 * ``conda`` -- ``environment: anaconda``
 
-The ``pr`` jobs of ``cron-python-versions.yml`` and ``cron-issue-pr-kinds.yml``
-declare ``environment: release-app``, for the release App's key (see
-`Python Versions`_ and `Issue and PR Kinds (#2561)`_). That environment has no
-reviewer, as the owner ruled on :issue:`2648` that only Create Release waits for
-an approval, and it deploys from ``main`` alone, where those jobs run.
+The ``pr`` jobs of ``cron-python-versions.yml``, ``cron-issue-pr-kinds.yml`` and
+``sync-develop.yml`` declare ``environment: release-app``, for the release App's key
+(see `Python Versions`_, `Issue and PR Kinds (#2561)`_ and `Sync Develop (#2942)`_).
+That environment has no reviewer, as the owner ruled on :issue:`2648` that only
+Create Release waits for an approval, and it deploys from ``main`` alone, where
+those jobs run.
 :doc:`releasing`'s "The Release App" says why the key is stored there as well
 as in ``github-release``. Where ``release-app`` has no key, each ``pr`` warns
 from its ``Check for the release App's key`` step and skips its other steps.

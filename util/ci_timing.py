@@ -927,15 +927,16 @@ def no_longer_run(runs: 'list[dict[str, Any]]', specs: 'list[dict[str, Any]]') -
 
     The text names no leg of a ``fromJSON`` matrix, and a leg's old name still
     matches its job's template, so the runs decide. For each event but
-    ``pull_request``, take the newest :func:`_measured` run that ran the job: a name
-    is gone when each such run omits it and is newer than every run listing it, as
-    that run can predate a merge whose own push is not yet measured. A light pull
-    request runs a subset of the legs, so none is consulted, and a job no such run
-    ran, as one run on pull requests alone, keeps every name.
+    ``pull_request``, and each branch, since ``main`` and ``develop`` run their own
+    workflow files (#2942), take the newest :func:`_measured` run that ran the job:
+    a name is gone when each such run omits it and is newer than every run listing
+    it, as that run can predate a merge whose own push is not yet measured. A light
+    pull request runs a subset of the legs, so none is consulted, and a job no such
+    run ran, as one run on pull requests alone, keeps every name.
 
     """
     seen = {}  # type: dict[str, str]
-    newest = {}  # type: dict[tuple[str, str], tuple[str, set[str]]]
+    newest = {}  # type: dict[tuple[str, str, str], tuple[str, set[str]]]
     for run in sorted(runs, key=lambda run: run['created_at'], reverse=True):
         jobs = run.get('jobs') or ()
         for job in jobs:
@@ -951,11 +952,12 @@ def no_longer_run(runs: 'list[dict[str, Any]]', specs: 'list[dict[str, Any]]') -
                 if _ran(job):
                     ran.add(spec['id'])
         for job_id in ran:
-            newest.setdefault((job_id, run['event']), (run['created_at'], listed[job_id]))
+            newest.setdefault((job_id, run['event'], run.get('head_branch') or ''),
+                              (run['created_at'], listed[job_id]))
     gone = set()  # type: set[str]
     for name, last in seen.items():
         spec = match_job(specs, name)
-        held = [ref for (job_id, _), ref in newest.items() if spec and job_id == spec['id']]
+        held = [ref for (job_id, _, _), ref in newest.items() if spec and job_id == spec['id']]
         if held and all(name not in names and last < created for created, names in held):
             gone.add(name)
     return gone

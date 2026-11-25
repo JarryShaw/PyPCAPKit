@@ -9,8 +9,9 @@ script instead, which ends a superseded run green.
 
 A run's commit is **current** when
 
-* for a ``push`` to ``main``: the run's ``GITHUB_SHA`` is still the head of
-  ``main`` (``GET /repos/{repo}/commits/main``);
+* for a ``push`` to ``main`` or ``develop`` (:data:`BRANCHES`): the run's
+  ``GITHUB_SHA`` is still the head of that branch
+  (``GET /repos/{repo}/commits/{branch}``);
 * for a ``pull_request``: the pull request is still open, and its head is still
   the event's ``pull_request.head.sha`` (``GET /repos/{repo}/pulls/{number}``);
 * for any other event: always.
@@ -91,6 +92,8 @@ if TYPE_CHECKING:
 
 #: The REST API's root, where ``GITHUB_API_URL`` does not name one.
 API = 'https://api.github.com'
+#: The branches a newer push supersedes a push run on (#2942).
+BRANCHES = ('main', 'develop')
 #: The answers :func:`check` gives.
 CURRENT, SUPERSEDED = 'current', 'superseded'
 #: Seconds between two checks while ``watch`` runs its command.
@@ -151,9 +154,16 @@ class Context:
         return cls(event, env.get('GITHUB_REF', ''), sha, env.get('GITHUB_REPOSITORY', ''), number)
 
     @property
+    def branch(self) -> 'Optional[str]':
+        """The branch of :data:`BRANCHES` a push run is on, else :data:`None`."""
+        if self.event != 'push':
+            return None
+        return next((name for name in BRANCHES if self.ref == f'refs/heads/{name}'), None)
+
+    @property
     def watched(self) -> 'bool':
         """Whether a newer commit can supersede this run at all."""
-        return (self.event == 'push' and self.ref == 'refs/heads/main') or self.event == 'pull_request'
+        return self.branch is not None or self.event == 'pull_request'
 
 
 class Verdict:
@@ -230,11 +240,12 @@ def check(context: 'Context', api: 'Api') -> 'Verdict':
     """Whether ``context``'s commit is still current; an API failure is current."""
     short = context.sha[:9]
     try:
-        if context.event == 'push' and context.ref == 'refs/heads/main':
-            head = str(api.get(f'repos/{context.repo}/commits/main')['sha'])
+        branch = context.branch
+        if branch is not None:
+            head = str(api.get(f'repos/{context.repo}/commits/{branch}')['sha'])
             if head != context.sha:
-                return Verdict(SUPERSEDED, f'main is at {head[:9]}, no longer at {short}')
-            return Verdict(CURRENT, f'{short} is the head of main')
+                return Verdict(SUPERSEDED, f'{branch} is at {head[:9]}, no longer at {short}')
+            return Verdict(CURRENT, f'{short} is the head of {branch}')
         if context.event == 'pull_request':
             if not (context.number and context.sha):
                 return Verdict(CURRENT, 'the event file names no pull request head, so nothing can supersede it')
