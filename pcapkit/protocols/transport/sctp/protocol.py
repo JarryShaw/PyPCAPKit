@@ -795,6 +795,52 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return schema
 
     @classmethod
+    def analyze(cls, ppid: 'Optional[Enum_PayloadProtocolIdentifier | int]', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':  # type: ignore[override] # pylint: disable=arguments-renamed,line-too-long
+        """Analyse packet payload.
+
+        Args:
+            ppid: Payload protocol identifier of the DATA or I-DATA chunk
+                carrying ``payload``, as :attr:`ppid` reads it off a parsed
+                packet.
+            payload: Packet payload, that chunk's user data.
+            **kwargs: Keyword arguments for the payload's constructor, as for
+                :meth:`Transport.analyze
+                <pcapkit.protocols.transport.transport.Transport.analyze>`.
+
+        Returns:
+            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
+            instance, looked up by ``ppid`` as :meth:`_decode_next_layer` looks a
+            frame's next layer up. A payload that fails to parse is kept as
+            :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+            keeps one, its ``protocol`` ``ppid``, as a frame's fallback records the
+            PPID it arrived with. An empty payload is
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, and one
+            past a stop this class meets is ``Raw``, as in a frame.
+
+        Important:
+            This bypasses :meth:`Transport.analyze
+            <pcapkit.protocols.transport.transport.Transport.analyze>`, which looks
+            a payload up by port, since :attr:`self.__proto__ <SCTP.__proto__>` is
+            keyed by PPID.
+
+        .. versionchanged:: 1.8.0
+
+           Takes the PPID rather than the port pair :meth:`Transport.analyze
+           <pcapkit.protocols.transport.transport.Transport.analyze>` takes, whose
+           ports it looked up as PPIDs (:issue:`3068`).
+
+        """
+        if TYPE_CHECKING:
+            protocol: 'Type[ProtocolBase]'
+
+        if cls._stops_next_layer(kwargs):
+            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        else:
+            protocol = cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, ppid),  # type: ignore[arg-type]
+                                            payload, len(payload))
+        return cls._analyze_next_layer(protocol, payload, ppid, **kwargs)
+
+    @classmethod
     def register(cls, code: 'Enum_PayloadProtocolIdentifier | int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # pylint: disable=line-too-long
         r"""Register a new protocol class for a payload protocol identifier.
 

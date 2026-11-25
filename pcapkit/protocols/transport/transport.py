@@ -149,8 +149,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             frame, and one past a stop this class meets is ``Raw``.
 
         Important:
-            The annotation names the **base** registry because every transport
-            protocol shares this method while resolving its ports in a registry
+            The annotation names the **base** registry because each port-keyed
+            transport shares this method while resolving its ports in a registry
             of its own, such as :class:`~pcapkit.const.reg.apptype.tcp.TCP`. A
             caller that knows its transport gets the narrower type from
             whatever handed it the pair, e.g. :meth:`TCP._make_ports
