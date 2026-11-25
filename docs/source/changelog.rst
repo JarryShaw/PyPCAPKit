@@ -36,7 +36,7 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
-* **1.7.0** (unreleased) -- Dissectors for PPP, PPPoE and DNS, MLD, newer SCTP
+* **1.7.0** (2026-11-25) -- Dissectors for PPP, PPPoE and DNS, MLD, newer SCTP
   chunks and current TLS extensions decoded, a PCAP-NG writer, every registered
   reassembler and flow tracer fed, and grouped, keyword-only extraction and
   reassembly signatures. :doc:`Full changelog <changelog/1.7.0>`.

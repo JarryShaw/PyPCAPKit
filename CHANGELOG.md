@@ -1,4 +1,4 @@
-## 1.7.0 -- unreleased
+## 1.7.0 -- 2026-11-25
 
 1.7.0 adds dissectors for PPP, PPPoE and DNS, decodes MLD in ICMPv6, SCTP's I-DATA, FORWARD TSN and PAD chunks and the TLS extensions a current handshake carries, writes PCAP-NG, and lets an extraction feed any registered reassembler and flow tracer, not the built-ins alone. Its breaking changes, each marked **a breaking change to** and ending with how to migrate, are mostly to public signatures: extraction takes grouped options, and the reassembly, flow-tracing and registry interfaces take keyword-only parameters, one name per concept.
 

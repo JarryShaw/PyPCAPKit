@@ -1,4 +1,4 @@
-1.7.0 -- unreleased
+1.7.0 -- 2026-11-25
 ===================
 
 1.7.0 adds dissectors for PPP, PPPoE and DNS, decodes MLD in ICMPv6, SCTP's
