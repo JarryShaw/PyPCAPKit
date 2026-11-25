@@ -127,6 +127,13 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
          :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
          (:issue:`2594`).
 
+    .. versionchanged:: 1.8.0
+
+       A ``protocol=`` stop at an extension header the walk parses, by name or
+       by class, ends the walk there, and the rest of the packet is the
+       :class:`~pcapkit.protocols.misc.raw.protocol.Raw` upper layer, as at a
+       stop at this layer (:issue:`3067`).
+
     """
 
     #: The ``Raw`` a header-walk stopped on, returned unparsed as the upper layer.
@@ -618,6 +625,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 if not self._is_first_fragment(info):
                     opaque = True
                     break
+
+            # NOTE: A stop met at this header keeps the rest as the raw upper layer, as one met at
+            # this layer does, so the frame ends where ``analyze`` does (#3067).
+            if next_._sigterm:  # pylint: disable=protected-access
+                self._sigterm = True
+                break
 
         # record real header & payload length (headers exclude)
         ipv6.__update__({
