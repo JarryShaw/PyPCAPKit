@@ -275,7 +275,10 @@ are the loops' moves.
 
 A merged pull request closes only the issue its own ``Closes`` keyword names, one
 keyword per issue, so every ``wip`` issue is checked against its pull request's state
-and closed by hand where the keyword did not.
+and closed by hand where the keyword did not. **A merge into** ``develop`` **closes
+nothing**, since GitHub acts on the keyword only on the default branch: the coordinator
+closes each target by hand as completed, with a comment naming the merge commit and the
+release it ships in (:issue:`3062`).
 
 ``review: good-to-go`` goes on when the verdict lands; the CI gate belongs to
 reporting the pull request as ready.
@@ -429,13 +432,14 @@ After every merge the sweep runs, in order:
 
 #. **Labels**: strip the merged pull request's labels and settle its issues' -- close
    any its keyword did not, unblock any whose condition was this merge.
-#. **Superseded runs on** ``main``: cancel the queued and running push runs of Unit
-   Tests, Python Compatibility, CodeQL and Experimental Tests on every ``main`` sha
-   older than the head, whose results the head makes moot. The head is read afresh
-   inside the cancelling script, since a stale local ``origin/main`` would cancel the
-   real head's runs, and when the head is docs-only, the newest code-changing
-   commit keeps its runs. **Never cancelled**: Create Release, Project Status,
-   Milestone, CI Reports, any scheduled run, and the head's own runs.
+#. **Superseded runs on** ``main`` **and** ``develop`` (:issue:`3062`): cancel the
+   queued and running push runs of Unit Tests, Python Compatibility, CodeQL and
+   Experimental Tests on every sha of either branch older than its head, whose results
+   the head makes moot. The head is read afresh from the API inside the cancelling
+   script, since a stale local ``origin/main`` or ``origin/develop`` would cancel the
+   real head's runs, and when the head is docs-only, the newest code-changing commit
+   keeps its runs. **Never cancelled**: Create Release, Project Status, Milestone, CI
+   Reports, any scheduled run, and the head's own runs.
 #. **The latest-tier sweeps, locally**: the project modules that only CI's
    ``latest`` leg runs (Test Tiers on :doc:`workflows`) are run on a scratch tree of
    the new ``main``, because a merge wave supersedes ``main``'s runs before they
@@ -472,6 +476,10 @@ which it skips or stops rather than cancels (:doc:`workflows`).
 job already failed. A non-blocking leg's red check is a defect as well: such a leg may
 only warn and end green, so a step that can lose its runner is contained -- capped,
 bounded, timed out -- rather than excused.
+
+**The scheduled workflows run on** ``main`` **alone, with no** ``develop`` **leg**, as
+ruled on :issue:`3062`: they catch upstream drift, which both branches share, and
+``develop``'s own push and pull-request CI covers its changes.
 
 **What may go straight to** ``main``. A change that only touches docs -- pages,
 docstrings and comments, under :file:`pcapkit/` as anywhere else, conventions and
