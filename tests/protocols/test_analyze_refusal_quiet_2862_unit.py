@@ -80,8 +80,8 @@ class FromParent:
     """A stand-in next layer, which the library builds through ``_from_parent`` (#2840)."""
 
     @classmethod
-    def _from_parent(cls, file: 'Any', length: int, /, **kwargs: 'Any') -> 'Any':
-        return cls(file, length, **kwargs)  # type: ignore[call-arg]
+    def _from_parent(cls, file: 'Any', length: int, extra: 'Any' = None, /, **kwargs: 'Any') -> 'Any':
+        return cls(file, length, **(extra or {}), **kwargs)  # type: ignore[call-arg]
 
 
 def _layer(refuse: bool) -> type:

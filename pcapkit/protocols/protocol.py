@@ -1171,7 +1171,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             proto: Protocol registry number.
             payload: Packet payload.
             **kwargs: Keyword arguments for the payload's constructor, such as
-                the stops and context a frame's next layer is parsed with.
+                the stops and context a frame's next layer is parsed with. The
+                next-layer state among them, such as ``packet`` and ``version``,
+                reaches the payload as a frame hands it, through
+                :meth:`_from_parent`.
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
@@ -1197,6 +1200,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            ``NoPayload`` (:issue:`2880`). A payload past a stop is ``Raw``, and
            the parse gets ``proto`` as ``alias``, as a frame's next layer does
            (:issue:`2933`).
+
+        .. versionchanged:: 1.8.0
+
+           The next-layer state reaches the payload through :meth:`_from_parent`
+           even beside a keyword for its constructor, so a family base's
+           ``__new__`` no longer reads an enclosing ``version`` as its own
+           (:issue:`2945`).
 
         """
         if TYPE_CHECKING:
@@ -3130,9 +3140,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
             The trial and a layer kept instead are built by :meth:`_from_parent`,
             from the stops, the context and the next-layer state among ``kwargs``
-            (:issue:`2840`). A call whose ``kwargs`` hold any other keyword parses
-            the trial with ``klass``'s public constructor, which ``analyze`` hands
-            its keywords to.
+            (:issue:`2840`). Any other keyword of ``kwargs`` goes to ``klass``'s
+            public constructor for the trial, which ``analyze`` hands its keywords
+            to, while the state still takes the channel, so an enclosing IP
+            version never picks a family base's member (:issue:`2945`).
 
         """
         # NOTE: The parse takes ``alias`` as a frame's next layer does, its fallback too (#2933).
@@ -3143,7 +3154,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             prefixed = kwargs.get(f'_{name}')
             stops[name] = kwargs.get(name) if prefixed is None else prefixed
         state = ProtocolBase._next_layer_state(kwargs)
-        own = set(kwargs) - set(state) - {'_layer', 'layer', '_protocol', 'protocol', '__context__'}
+        own = {key: value for key, value in kwargs.items() if key not in state
+               and key not in ('_layer', 'layer', '_protocol', 'protocol', '__context__')}
 
         payload_io = io.BytesIO(payload)
         # NOTE: No octets are no layer, as a frame's ``_empty_next_layer`` keeps them (#2880).
@@ -3158,12 +3170,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             with hold_warnings() as held:
                 try:
                     with CaughtByCaller(ProtocolError):
-                        # NOTE: A keyword neither a stop nor state is the caller's, for the payload's
-                        # constructor, as ``analyze`` documents its keywords.
-                        if own:
-                            return klass(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
+                        # NOTE: A keyword neither a stop nor state is for the payload's constructor,
+                        # as ``analyze`` documents; the state takes the channel all the same (#2945).
                         # pylint: disable-next=protected-access
-                        return klass._from_parent(payload_io, len(payload), **stops, **state)
+                        return klass._from_parent(payload_io, len(payload), own, **stops, **state)
                 except Exception:
                     held.discard = True
                     raise
@@ -3192,7 +3202,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return protocol._from_parent(payload_io, len(payload), **stops, **state)  # pylint: disable=protected-access
 
     @classmethod
-    def _from_parent(cls, file: 'IO[bytes] | bytes', length: 'Optional[int]', /, *,
+    def _from_parent(cls, file: 'IO[bytes] | bytes', length: 'Optional[int]',
+                     extra: 'Optional[Mapping[str, Any]]' = None, /, *,
                      layer: 'Optional[str]' = None,
                      protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
                      context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
@@ -3200,7 +3211,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Parse a layer with the state the layer carrying it hands on.
 
         :meth:`__new__` and then :meth:`__init__` run as calling the class runs
-        them, given the stops and the context alone. ``state`` travels on
+        them, given the stops, the context and ``extra`` alone. ``state`` travels on
         :attr:`__next_layer__` and reaches only the hooks from
         :meth:`__post_init__` on, so the enclosing IP version it may carry
         never picks a family base's member (:issue:`2840`).
@@ -3208,6 +3219,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Args:
             file: Source packet stream.
             length: Length of packet data.
+            extra: Other keywords for the public constructor, the caller's of
+                :meth:`analyze <Protocol.analyze>` (:issue:`2945`).
             layer: Parse packet until such layer.
             protocol: Parse packet until such protocol.
             context: Caller supplied parsing context.
@@ -3230,7 +3243,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                                   f'{", ".join(map(repr, unknown))}')
 
         # NOTE: ``__init__`` takes the context as ``__context__``.
-        keywords = {'layer': layer, 'protocol': protocol, '__context__': context}
+        keywords = {**(extra or {}), 'layer': layer, 'protocol': protocol, '__context__': context}
         made = cast('object', cls.__new__(cls, file, length, **keywords))
         if not isinstance(made, cls):
             return cast('Self', made)
