@@ -114,7 +114,7 @@ class NextLayerChannelTests(unittest.TestCase):
     def test_framed_reaches_the_next_dns_message(self) -> None:
         from pcapkit.protocols.application.dns.protocol import DNS
 
-        octets = DNS(id=1, framed=True).data + DNS(id=2, framed=True).data
+        octets = DNS.from_fields(id=1, framed=True).data + DNS.from_fields(id=2, framed=True).data
         with spy(DNS, '__init__') as init, spy(DNS, '__post_init__') as post:
             parsed = DNS(octets, len(octets))
 

@@ -451,7 +451,7 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
         header_len = _FIXED_HEADER_LEN + tail_offset
         return self._decode_next_layer(radiotap, Enum_LinkType.IEEE802_11, max(0, length - header_len))
 
-    def make(self,
+    def make(self, *,
              it_version: 'int' = 0,
              it_pad: 'int' = 0,
              present: 'Sequence[int]' = (0,),

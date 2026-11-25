@@ -225,7 +225,7 @@ class GRE(Link[Data_GRE, Schema_GRE],
             ])
         return self._decode_next_layer(gre, schema.protocol_type, length - _hdr_len)
 
-    def make(self,
+    def make(self, *,
              checksum: 'Optional[int]' = None,
              reserved1: 'Optional[int]' = None,
              checksum_present: 'Optional[bool]' = None,

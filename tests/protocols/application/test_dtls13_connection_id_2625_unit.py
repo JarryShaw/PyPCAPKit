@@ -500,7 +500,7 @@ class RoundTripTests(unittest.TestCase):
                 self.assertEqual(bytes(rebuilt).hex(), payload.hex())
                 self.assertEqual(str(rebuilt.protochain), str(udp.payload.protochain))
 
-                again = UDP.from_data(udp.info, __context__=registry)
+                again = UDP.from_data(udp.info, context=registry)
                 self.assertEqual(bytes(again).hex(), datagram.hex())
                 self.assertEqual(str(again.protochain), str(udp.protochain))
                 with warnings.catch_warnings():
@@ -524,8 +524,8 @@ class RoundTripTests(unittest.TestCase):
                 again = DTLS(made, len(made), __context__=DTLSContext(CLIENT_CID, SERVER_CID))
                 self.assertEqual(_cid_layers(again), _cid_layers(parsed))
 
-        made = DTLS(ciphertext=True, epoch=2, sequence_number=0x1234, sequence_long=True, cid=b'\x0a\x0b',
-                    content=FRAGMENT)
+        made = DTLS.from_fields(ciphertext=True, epoch=2, sequence_number=0x1234, sequence_long=True, cid=b'\x0a\x0b',
+                                content=FRAGMENT)
         self.assertEqual(bytes(made).hex(), _unified(b'\x0a\x0b', sequence=b'\x12\x34', epoch=2).hex())
         self.assertEqual((made.alias, made.length, made.info.cid, made.info.length), ('DTLS 1.3', 7, b'\x0a\x0b', 16))
 
@@ -535,12 +535,12 @@ class RoundTripTests(unittest.TestCase):
         from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         def build(**kwargs: 'Any') -> 'Any':
-            inner = DTLS(ciphertext=True, epoch=3, sequence_number=9, cid=SERVER_CID, content=FRAGMENT)
-            return DTLS(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
-                        content=b'\x01', payload=inner, **kwargs)
+            inner = DTLS.from_fields(ciphertext=True, epoch=3, sequence_number=9, cid=SERVER_CID, content=FRAGMENT)
+            return DTLS.from_fields(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
+                                    content=b'\x01', payload=inner, **kwargs)
 
         context = DTLSContext()
-        outer = build(__context__=context)
+        outer = build(context=context)
         self.assertEqual(str(outer.protochain), 'DTLS 1.2:DTLS 1.3')
         self.assertEqual(_cid_layers(outer), ((SERVER_CID, 3, 9, 16),))
         self.assertEqual(context.connection_ids, (SERVER_CID,))

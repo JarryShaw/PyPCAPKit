@@ -270,7 +270,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         proto = Enum_EtherType.Point_to_Point_Protocol if flags.type == Enum_Type.Data else -1
         return self._decode_next_layer(l2tp, proto, length - hdr_len)
 
-    def make(self,
+    def make(self, *,
              version: 'Literal[2]' = 2,
              type: 'Enum_Type | int' = Enum_Type.Data,
              priority: 'bool' = False,

@@ -239,7 +239,7 @@ class PPP(Link[Data_PPP, Schema_PPP],
         proto = -1 if control_packet is not None else schema.protocol
         return self._decode_next_layer(ppp, proto, length - self.length)
 
-    def make(self,
+    def make(self, *,
              protocol: 'Enum_Protocol | int' = Enum_Protocol.Internet_Protocol_version_4,
              acfc: 'bool' = False,
              pfc: 'bool' = False,

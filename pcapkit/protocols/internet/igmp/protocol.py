@@ -83,6 +83,10 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
     """
 
+    #: ``version``, which names the member and which :meth:`make` does not
+    #: take, as a construction keyword (:issue:`2840`).
+    __keywords__ = frozenset({'version'})
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -168,7 +172,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         # as ``Raw``.
         return self._decode_next_layer(igmp, None, length - self.length)
 
-    def make(self,
+    def make(self, *,
              type: 'Enum_Type | int' = Enum_Type.IGMP_Membership_Query,
              max_resp_time: 'int' = 0,
              checksum: 'Optional[bytes]' = None,
@@ -221,7 +225,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         return schema  # type: ignore[return-value]
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -489,3 +493,39 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
                 if version == number:
                     return member.klass
         raise ProtocolError(f'IGMP: invalid version: {version!r}')
+
+    @classmethod
+    def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
+        """The version class :meth:`from_fields` and :meth:`from_data` construct.
+
+        Picked and checked as constructing this class directly does: on this
+        class, the version class ``version`` names; on another, the class
+        itself, whose :attr:`version` ``version`` must be. ``version`` is taken
+        out of ``fields``, as :meth:`make` does not read it.
+
+        Args:
+            fields: Construction keywords.
+
+        Returns:
+            The version class, or the class itself.
+
+        Raises:
+            ProtocolError: If, on this class, ``version`` is missing; if it names
+                no version class; or if it is not the class's own
+                :attr:`version`.
+
+        .. versionadded:: 1.8.0
+
+        """
+        version = fields.pop('version', None)
+        if cls is IGMP:
+            if version is None:
+                raise ProtocolError('IGMP: no version to build with; pass version=1, 2 or 3')
+            return cast('Type[Self]', cls._member_of_version(version))
+        if version is not None:
+            cls._member_of_version(version)
+            # NOTE: ``version`` is a property, read as ``__init__`` reads it, off a bare instance.
+            if version != cls.__new__(cls).version:
+                raise ProtocolError(f'{cls.__name__}: version={version!r} '
+                                    'names another member')
+        return cls

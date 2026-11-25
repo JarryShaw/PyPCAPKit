@@ -246,7 +246,7 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
         )
         return self._decode_next_layer(netlink, netlink.nlmsg_type, length - self.length)
 
-    def make(self,
+    def make(self, *,
              nlmsg_type: 'int' = 0,
              nlmsg_flags: 'int' = 0,
              nlmsg_seq: 'int' = 0,

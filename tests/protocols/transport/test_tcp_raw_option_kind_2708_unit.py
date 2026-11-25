@@ -58,8 +58,8 @@ class TestTCPRawOptionKind(unittest.TestCase):
         for kind in _refused_kinds():
             with self.subTest(kind=kind):
                 raw = bytes([kind, 4]) + b'ab'
-                built = TCP(options=[raw]).data
-                self.assertEqual(built, TCP(options=[(kind, {'data': b'ab'})]).data)
+                built = TCP.from_fields(options=[raw]).data
+                self.assertEqual(built, TCP.from_fields(options=[(kind, {'data': b'ab'})]).data)
                 # Data Offset is 6 words: the 20-octet header and the option.
                 self.assertEqual(built[12] >> 4, 6)
                 self.assertEqual(built[20:], raw)
@@ -69,14 +69,14 @@ class TestTCPRawOptionKind(unittest.TestCase):
 
         for kind in _refused_kinds():
             with self.subTest(kind=kind):
-                packet = TCP(options=[(kind, {'data': b'ab'})]).data
+                packet = TCP.from_fields(options=[(kind, {'data': b'ab'})]).data
                 parsed = TCP(packet)
                 (option,) = parsed.info.options.values()
                 self.assertEqual(int(option.kind), kind)
                 self.assertEqual(option.data, b'ab')
 
                 octets = packet[20:20 + option.length]
-                self.assertEqual(TCP(options=[octets]).data, packet)
+                self.assertEqual(TCP.from_fields(options=[octets]).data, packet)
 
     def test_empty_octets_are_refused(self) -> None:
         """Raw octets with no kind octet raise ``ProtocolError``, not ``IndexError``."""
@@ -86,7 +86,7 @@ class TestTCPRawOptionKind(unittest.TestCase):
         for options in ([b''], [b'\x01', b'']):
             with self.subTest(options=options):
                 with self.assertRaisesRegex(ProtocolError, 'holds no kind octet'):
-                    TCP(options=options)
+                    TCP.from_fields(options=options)
 
 
 if __name__ == '__main__':

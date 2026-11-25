@@ -32,7 +32,7 @@ class PCAPHeaderLoneEndianFlagUnitTests(unittest.TestCase):
         )
         for kwargs, magic, byteorder in cases:
             with self.subTest(**kwargs):
-                header = Header(**kwargs)
+                header = Header.from_fields(**kwargs)
                 self.assertEqual(header.data[:4], magic)
                 self.assertEqual(header.info.magic_number.byteorder, byteorder)
 
@@ -43,7 +43,7 @@ class PCAPHeaderLoneEndianFlagUnitTests(unittest.TestCase):
         for flag in (True, False):
             with self.subTest(flag=flag):
                 with self.assertRaises(EndianError):
-                    Header(lilendian=flag, bigendian=flag)
+                    Header.from_fields(lilendian=flag, bigendian=flag)
 
 
 if __name__ == '__main__':

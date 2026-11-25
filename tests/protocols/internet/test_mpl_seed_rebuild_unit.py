@@ -74,8 +74,8 @@ class TestMPLSeedRebuild(unittest.TestCase):
 
         for name, (cls, _, _) in _classes().items():
             with self.subTest(proto=name):
-                built = cls(options=[(Option.MPL_Option, {'seed': SRC, 'seq': 7, 'max': True})],
-                            next=TransType.IPv6_NoNxt, payload=b'')
+                built = cls.from_fields(options=[(Option.MPL_Option, {'seed': SRC, 'seq': 7, 'max': True})],
+                                        next=TransType.IPv6_NoNxt, payload=b'')
                 # HEADERS[0] ends in two Pad1, which a parsed header keeps; two
                 # octets of fresh padding are one PadN of length 0 (#1793)
                 self.assertEqual(built.data, HEADERS[0][:-2] + b'\x01\x00')
@@ -89,7 +89,7 @@ class TestMPLSeedRebuild(unittest.TestCase):
             for kwargs in ({'seed_type': 1, 'seed': 0x10000}, {'seed_type': 2}, {'seed': 1 << 128}):
                 with self.subTest(proto=name, kwargs=kwargs):
                     with self.assertRaises(ProtocolError):
-                        cls(options=[(Option.MPL_Option, kwargs)], next=TransType.IPv6_NoNxt, payload=b'')
+                        cls.from_fields(options=[(Option.MPL_Option, kwargs)], next=TransType.IPv6_NoNxt, payload=b'')
 
 
 if __name__ == '__main__':

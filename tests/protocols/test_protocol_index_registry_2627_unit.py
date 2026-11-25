@@ -168,20 +168,20 @@ def _instances() -> 'dict[str, Any]':
     dtls = b'\x14\xfe\xfd\x00\x00' + (1).to_bytes(6, 'big') + b'\x00\x01\x01'
 
     return {
-        'pcapkit.protocols.application.dns.protocol.DNS': DNS(id=1),
+        'pcapkit.protocols.application.dns.protocol.DNS': DNS.from_fields(id=1),
         'pcapkit.protocols.application.dtls.protocol.DTLS': DTLS(dtls),
         'pcapkit.protocols.application.ftp.protocol.FTP': FTP(b'USER anonymous\r\n'),
         'pcapkit.protocols.application.ftp_data.protocol.FTP_DATA': FTP_DATA(b'abc'),
         'pcapkit.protocols.application.http.protocol.HTTP': HTTP(b'GET / HTTP/1.1\r\n\r\n'),
-        'pcapkit.protocols.application.httpv1.protocol.HTTPv1': HTTPv1(method='GET', uri='/',
+        'pcapkit.protocols.application.httpv1.protocol.HTTPv1': HTTPv1.from_fields(method='GET', uri='/',
                                                               http_version='1.1'),
-        'pcapkit.protocols.application.httpv2.protocol.HTTPv2': HTTPv2(type=Frame.DATA, sid=1,
+        'pcapkit.protocols.application.httpv2.protocol.HTTPv2': HTTPv2.from_fields(type=Frame.DATA, sid=1,
                                                               frame={'data': b'x'}),
         # unparsed, since decoding NGAP needs the optional pycrate
         'pcapkit.protocols.application.ngap.protocol.NGAP': object.__new__(NGAP),
         'pcapkit.protocols.application.sslv3.protocol.SSLv3': SSLv3(sslv3),
         'pcapkit.protocols.application.tls.protocol.TLS': TLS(tls),
-        'pcapkit.protocols.link.l2tpv2.protocol.L2TPv2': L2TPv2(version=2, tunnel_id=1, session_id=2),
+        'pcapkit.protocols.link.l2tpv2.protocol.L2TPv2': L2TPv2.from_fields(version=2, tunnel_id=1, session_id=2),
     }
 
 

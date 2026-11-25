@@ -644,7 +644,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         return self._decode_next_layer(tcp, (tcp.srcport.port, tcp.dstport.port), length - tcp.hdr_len)
 
-    def make(self,
+    def make(self, *,
              srcport: 'Enum_AppType | int' = 0,
              dstport: 'Enum_AppType | int' = 0,
              seq_no: 'int' = 0,
@@ -731,7 +731,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         for key, val in flags.items():
             if val == 1:
                 _flag |= Enum_Flags.get(key.upper())
-        self._flags = _flag
+        self._flags = _flag  # pylint: disable=attribute-defined-outside-init
 
         if options is not None:
             options_value, total_length = self._make_tcp_options(options, padding)

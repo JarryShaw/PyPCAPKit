@@ -34,6 +34,7 @@ model it is handed (:issue:`2574`).
    .. rubric:: Utilities
 
    .. automethod:: _member_of_version
+   .. automethod:: _construction_member
 
 .. rubric:: Footnotes
 

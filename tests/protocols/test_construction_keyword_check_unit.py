@@ -31,8 +31,8 @@ pins both halves of it in one place.
 What is checked, and what is deliberately not
 ---------------------------------------------
 
-The check runs in :meth:`ProtocolBase.__init__
-<pcapkit.protocols.protocol.ProtocolBase.__init__>` rather than in ``make``,
+The check runs in :meth:`ProtocolBase.from_fields
+<pcapkit.protocols.protocol.ProtocolBase.from_fields>` rather than in ``make``,
 because ``make`` is not the only consumer of the keywords it is handed:
 :meth:`ProtocolBase.__post_init__
 <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` passes one ``**kwargs``
@@ -54,7 +54,8 @@ These are left alone on purpose, and each has a test saying so:
 
 :meth:`ScopeTests.test_out_of_band_keywords_are_accepted_while_constructing`
     The out-of-band keywords, which configure the call rather than naming a
-    field and are consumed before any ``make`` sees them.
+    field and are consumed before any ``make`` sees them. ``Proto(**fields)``
+    takes them, and ``from_fields`` does not (#2840).
 
 And one thing is softened rather than left alone, in :class:`ReconstructionTests`:
 :meth:`ProtocolBase.from_data <pcapkit.protocols.protocol.ProtocolBase.from_data>`
@@ -156,7 +157,7 @@ def _protocol_class(**namespace: 'Any') -> 'Any':
         def read(self, length: 'int | None' = None, **kwargs: 'Any') -> 'DummyData':
             from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
-            self._next = NoPayload()
+            self._next = NoPayload.from_fields()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
             return DummyData(value=0)
 
@@ -200,7 +201,7 @@ class RejectionTests(unittest.TestCase):
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
                     with self.assertRaises(UnsupportedCall) as context:
-                        TCP(**keywords)
+                        TCP.from_fields(**keywords)
 
                 message = str(context.exception)
                 self.assertIn('TCP', message)
@@ -219,7 +220,7 @@ class RejectionTests(unittest.TestCase):
         """
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        segment = TCP(**GOOD_HEADER)
+        segment = TCP.from_fields(**GOOD_HEADER)
         octets = bytes(segment)
 
         self.assertEqual(segment.info.seq, 1)
@@ -260,7 +261,7 @@ class RejectionTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with self.assertRaises(UnsupportedCall) as context:
-            TCP(srcport=1, dstport=2, zzz_second=2, aaa_first=1)
+            TCP.from_fields(srcport=1, dstport=2, zzz_second=2, aaa_first=1)
 
         message = str(context.exception)
         self.assertIn(repr('aaa_first'), message)
@@ -280,38 +281,33 @@ class RejectionTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with self.assertRaises(UnsupportedCall) as context:
-            TCP(**{**GOOD_HEADER, 'seq': GOOD_HEADER['seq_no']})
+            TCP.from_fields(**{**GOOD_HEADER, 'seq': GOOD_HEADER['seq_no']})
 
         self.assertIn("did you mean 'seq_no'?", str(context.exception))
 
     def test_the_exception_is_the_one_the_library_already_uses(self) -> None:
-        """``UnsupportedCall``, as for an unexpected *class* keyword.
+        """An ``UnsupportedCall``, as for an unexpected *class* keyword, and a ``TypeError``.
 
-        Not a new exception type: the library already answers "you passed a
-        keyword I do not accept" with
+        The library answers "you passed a keyword I do not accept" with
         :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, with this exact
         message shape, in the ``__init_subclass__`` of ``ProtocolBase``,
-        ``Dumper``, ``Reassembly``, ``Engine`` and ``TraceFlow``. Reusing it keeps one answer to
-        one question rather than adding a second.
-
-        The honest caveat, recorded so it is a decision rather than an oversight:
-        all of those reject a *class* keyword at ``__init_subclass__`` time,
-        which is a narrower kind of "unexpected keyword" than a field value passed
-        to a constructor. And ``UnsupportedCall`` carries :exc:`AttributeError`,
-        where a reader expecting the stdlib's ``unexpected keyword argument`` would
-        reach for :exc:`TypeError` -- and where an ``except AttributeError`` written
-        for duck-typing could swallow this. Consistency with those precedents is
-        preferred to another spelling of the same idea, but the trade is real.
+        ``Dumper``, ``Reassembly``, ``Engine`` and ``TraceFlow``, and that is an
+        :exc:`AttributeError`. A reader expecting the stdlib's ``unexpected keyword
+        argument`` reaches for :exc:`TypeError`, which a parse refusing an unknown
+        keyword raises, so the owner ruled on #2840 that a refused construction
+        keyword is both: :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`.
 
         """
         from pcapkit.protocols.transport.tcp.protocol import TCP
-        from pcapkit.utilities.exceptions import BaseError, UnsupportedCall
+        from pcapkit.utilities.exceptions import BaseError, UnexpectedKeyword, UnsupportedCall
 
         with self.assertRaises(UnsupportedCall) as context:
-            TCP(srcport=1, no_such_tcp_field=1)
+            TCP.from_fields(srcport=1, no_such_tcp_field=1)
 
+        self.assertIs(type(context.exception), UnexpectedKeyword)
         self.assertIsInstance(context.exception, BaseError)
         self.assertIsInstance(context.exception, AttributeError)
+        self.assertIsInstance(context.exception, TypeError)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -380,13 +376,13 @@ class ForwardedKeywordTests(unittest.TestCase):
             from pcapkit.corekit.protochain import ProtoChain
             from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
-            self._next = NoPayload()
+            self._next = NoPayload.from_fields()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
             self.seen_eggs = eggs
             return type(self).__data__(value=eggs)
 
         protocol = _protocol_class(read=read)
-        instance = protocol(spam=b'ab', eggs=7)
+        instance = protocol.from_fields(spam=b'ab', eggs=7)
 
         self.assertEqual(instance.seen_eggs, 7)
         self.assertEqual(bytes(instance), b'ab')
@@ -407,7 +403,7 @@ class ForwardedKeywordTests(unittest.TestCase):
             from pcapkit.corekit.protochain import ProtoChain
             from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
-            self._next = NoPayload()
+            self._next = NoPayload.from_fields()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
             self.seen_eggs = kwargs.get('eggs')
             return type(self).__data__(value=0)
@@ -416,10 +412,10 @@ class ForwardedKeywordTests(unittest.TestCase):
 
         undeclared = _protocol_class(read=read)
         with self.assertRaises(UnsupportedCall):
-            undeclared(spam=b'ab', eggs=7)
+            undeclared.from_fields(spam=b'ab', eggs=7)
 
         declared = _protocol_class(read=read, __keywords__=frozenset({'eggs'}))
-        self.assertEqual(declared(spam=b'ab', eggs=7).seen_eggs, 7)
+        self.assertEqual(declared.from_fields(spam=b'ab', eggs=7).seen_eggs, 7)
 
     def test_a_subclass_inherits_the_declarations_of_its_parents(self) -> None:
         """The accepted set is the union over the MRO, not the most derived.
@@ -475,7 +471,7 @@ class ForwardedKeywordTests(unittest.TestCase):
         for klass in (base, Inheriting):
             with self.subTest(klass=klass.__name__):
                 self.assertIn('spam', _declared_keywords(klass))
-        self.assertEqual(bytes(Inheriting(spam=b'xy')), b'xy')
+        self.assertEqual(bytes(Inheriting.from_fields(spam=b'xy')), b'xy')
 
         for klass, own in ((Overriding, {'ham'}), (Grandchild, {'ham', 'beans'})):
             with self.subTest(klass=klass.__name__):
@@ -484,10 +480,10 @@ class ForwardedKeywordTests(unittest.TestCase):
                 self.assertTrue(own | {'eggs'} <= accepted)
 
         with self.assertRaisesRegex(UnsupportedCall, r"unexpected keyword\(s\): 'spam'"):
-            Overriding(spam=b'xy')
+            Overriding.from_fields(spam=b'xy')
         # Its own keyword, and the base's ``__keywords__``.
-        self.assertEqual(bytes(Overriding(ham=b'xy', eggs=1)), b'xy')
-        self.assertEqual(bytes(Grandchild(beans=b'xy')), b'xy')
+        self.assertEqual(bytes(Overriding.from_fields(ham=b'xy', eggs=1)), b'xy')
+        self.assertEqual(bytes(Grandchild.from_fields(beans=b'xy')), b'xy')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -507,7 +503,7 @@ class ScopeTests(unittest.TestCase):
         """
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        octets = bytes(TCP(**GOOD_HEADER))
+        octets = bytes(TCP.from_fields(**GOOD_HEADER))
         parsed = TCP(io.BytesIO(octets), len(octets),
                      no_such_field=1, alias='whatever')
 
@@ -517,9 +513,9 @@ class ScopeTests(unittest.TestCase):
     def test_a_direct_make_call_is_not_checked(self) -> None:
         """The limitation, recorded rather than left to be discovered.
 
-        The check sits in :meth:`ProtocolBase.__init__
-        <pcapkit.protocols.protocol.ProtocolBase.__init__>`, where every producer's
-        keywords converge, so ``SomeProtocol(...)`` is covered and a *direct*
+        The check sits in :meth:`ProtocolBase.from_fields
+        <pcapkit.protocols.protocol.ProtocolBase.from_fields>`, which hands the
+        keywords on, so ``SomeProtocol.from_fields(...)`` is covered and a *direct*
         ``SomeProtocol.make(...)`` is not: it still absorbs an undeclared keyword
         and discards it. ``object.__new__(cls).make(**kwargs)`` is the idiom that
         reaches it -- used by several modules of this suite, and by
@@ -551,12 +547,12 @@ class ScopeTests(unittest.TestCase):
         ``_layer``, ``_protocol``, ``__context__`` and ``__packet__`` are
         consumed by :meth:`ProtocolBase.__init__
         <pcapkit.protocols.protocol.ProtocolBase.__init__>` or by the schema
-        layer, so no ``make`` declares them and the check has to know them by
-        name. A regression here would refuse a caller that is setting a parse
-        limit on something it is constructing.
-
-        ``packet`` is one more, and is there for a different reason -- see
-        :meth:`test_from_data_survives_the_injected_packet_keyword`.
+        layer, so no ``make`` declares them and ``Proto(**fields)`` has to know
+        them by name, ``packet`` with them. A regression here would refuse a
+        caller that is setting a parse limit on something it is constructing.
+        :meth:`ProtocolBase.from_fields
+        <pcapkit.protocols.protocol.ProtocolBase.from_fields>` takes ``context``
+        and refuses the rest but ``__packet__`` (#2840).
 
         """
         from pcapkit.protocols.protocol import OUT_OF_BAND_KEYWORDS
@@ -575,17 +571,20 @@ class ScopeTests(unittest.TestCase):
         """Rebuilding a parsed packet is not a caller misspelling something.
 
         :meth:`ProtocolBase.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>`
-        injects ``packet=self.packet.payload`` into every parsed ``_info``, and the
-        default :meth:`ProtocolBase._make_data
-        <pcapkit.protocols.protocol.ProtocolBase._make_data>` is ``data.to_dict()``
-        -- so ``from_data`` hands ``packet`` to a ``make`` that very often does not
-        declare it. :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` is the case
+        injects ``packet=self.packet.payload`` into every parsed ``_info``, which
+        ``data.to_dict()`` carries -- so ``from_data`` would hand ``packet`` to a
+        ``make`` that very often does not declare it.
+        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` is the case
         that matters, because :meth:`ProtocolBase._make_payload
         <pcapkit.protocols.protocol.ProtocolBase._make_payload>` reaches it for the
         innermost layer of every packet: refusing ``packet`` breaks ``from_data``
         for all of them. Measured with ``packet`` not out-of-band::
 
             UnsupportedCall: NoPayload: unexpected keyword(s): 'packet'
+
+        The default :meth:`ProtocolBase._make_data
+        <pcapkit.protocols.protocol.ProtocolBase._make_data>` leaves it out unless
+        the protocol declares it (#2840).
 
         What is asserted is that the rebuild happens at all. Whether it reproduces
         the original octets is a separate question about ``from_data``'s fidelity,
@@ -594,7 +593,7 @@ class ScopeTests(unittest.TestCase):
         """
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        octets = bytes(IPv4(src='127.0.0.1', dst='127.0.0.2'))
+        octets = bytes(IPv4.from_fields(src='127.0.0.1', dst='127.0.0.2'))
         parsed = IPv4(io.BytesIO(octets), len(octets))
         rebuilt = IPv4.from_data(parsed.info)
 
@@ -647,7 +646,7 @@ class ScopeTests(unittest.TestCase):
                 self.assertIsNotNone(accepted)
                 self.assertIn(keyword, accepted)
 
-        proto = HTTP(version=1, http_version='1.1', method='GET', uri='/')
+        proto = HTTP.from_fields(version=1, http_version='1.1', method='GET', uri='/')
         self.assertEqual(proto.data, b'GET / HTTP/1.1\r\n\r\n')
         self.assertEqual(proto.version, '1.1')
 
@@ -680,7 +679,7 @@ class ReconstructionTests(unittest.TestCase):
             def _make_data(cls, data: 'Any') -> 'dict[str, Any]':
                 return {**super()._make_data(data), 'prio': True}
 
-        octets = bytes(L2TPv2(version=2, tunnel_id=1, session_id=2, payload=b'ab'))
+        octets = bytes(L2TPv2.from_fields(version=2, tunnel_id=1, session_id=2, payload=b'ab'))
         parsed = L2TPv2(io.BytesIO(octets), len(octets))
 
         with warnings.catch_warnings(record=True) as caught:
@@ -724,7 +723,7 @@ class AsymmetryTests(unittest.TestCase):
         self.assertIn('not a valid field name', str(caught[0].message))
 
         with self.assertRaises(UnsupportedCall):
-            TCP(srcport=1, dstport=2, no_such_field=3)
+            TCP.from_fields(srcport=1, dstport=2, no_such_field=3)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -843,7 +842,7 @@ class SentinelTests(unittest.TestCase):
         with the whole MRO silent.
 
         """
-        from pcapkit.protocols.protocol import OUT_OF_BAND_KEYWORDS, _declared_keywords
+        from pcapkit.protocols.protocol import _declared_keywords
 
         class Bare:
             """No ``__keywords__``, so every class in the MRO takes the absent branch."""
@@ -856,10 +855,7 @@ class SentinelTests(unittest.TestCase):
 
         declared = _declared_keywords(Bare)
 
-        self.assertIsNotNone(declared)
-        self.assertIn('spam', declared)
-        self.assertTrue(OUT_OF_BAND_KEYWORDS <= declared)
-        self.assertEqual([name for name in declared if not isinstance(name, str)], [])
+        self.assertEqual(declared, frozenset({'spam'}))
 
     def test_the_three_answers_stay_distinct_across_the_swap(self) -> None:
         """Absent, :obj:`None`, and a declared set are still three outcomes.
@@ -887,7 +883,7 @@ class SentinelTests(unittest.TestCase):
         self.assertIn('ham', named)
         self.assertIn('spam', named)
 
-        # Absent: nothing of its own, so it takes ``ProtocolBase``'s empty set.
+        # Absent: nothing of its own, so it takes ``ProtocolBase``'s set.
         absent = _declared_keywords(_protocol_class())
         self.assertIsNotNone(absent)
         self.assertNotIn('ham', absent)

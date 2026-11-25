@@ -216,7 +216,7 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             zero=schema.zero,
         )
 
-    def make(self,
+    def make(self, *,
              ip: 'Optional[IPv4 | IPv6]' = None,
              src: 'Optional[IPv4Address | IPv6Address | str | int | bytes]' = None,
              dst: 'Optional[IPv4Address | IPv6Address | str | int | bytes]' = None,
@@ -346,7 +346,7 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
         #: pcapkit.protocols.misc.no_payload.protocol.NoPayload: Next layer (no payload).
-        self._next = NoPayload()
+        self._next = NoPayload.from_fields()
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
         self._protos = ProtoChain(self.__class__, self.alias)
 
@@ -665,8 +665,8 @@ def pseudo_header(pseudo: 'IP_Pseudo', length: 'int') -> 'bytes':
     """
     if pseudo.info.len == length:
         return pseudo.data
-    return type(pseudo)(src=pseudo.src, dst=pseudo.dst, protocol=pseudo.protocol,
-                        upper_length=length, zero=pseudo.info.zero).data
+    return type(pseudo).from_fields(src=pseudo.src, dst=pseudo.dst, protocol=pseudo.protocol,
+                                    upper_length=length, zero=pseudo.info.zero).data
 
 
 def compute_upper(ip: 'Schema_IPv4 | Schema_IPv6') -> 'Optional[bytes]':
@@ -725,7 +725,7 @@ def compute_upper(ip: 'Schema_IPv4 | Schema_IPv6') -> 'Optional[bytes]':
         try:
             with CaughtByCaller(ProtocolError, FieldValueError):
                 packet = (IPv4 if isinstance(ip, Schema_IPv4) else IPv6)(ip.pack())
-                pseudo = IP_Pseudo(ip=packet)
+                pseudo = IP_Pseudo.from_fields(ip=packet)
                 if pseudo._upper(packet) != (code, before):  # pylint: disable=protected-access
                     return None
         except (ProtocolError, FieldValueError):
@@ -741,11 +741,11 @@ def compute_upper(ip: 'Schema_IPv4 | Schema_IPv6') -> 'Optional[bytes]':
         finally:
             rebuilding.reset(token)
         # NOTE: The upper layer puts its own length in the pseudo-header.
-        pseudo = IP_Pseudo(ip=header, protocol=code, upper_length=0)
+        pseudo = IP_Pseudo.from_fields(ip=header, protocol=code, upper_length=0)
     else:
         # NOTE: The upper layer follows the fixed header, so no extension header
         # moves an address; it puts its own length in the pseudo-header.
-        pseudo = IP_Pseudo(src=ip.src, dst=ip.dst, protocol=code, upper_length=0)
+        pseudo = IP_Pseudo.from_fields(src=ip.src, dst=ip.dst, protocol=code, upper_length=0)
 
     octets = cast('ProtocolBase', payload).data
     computed = upper.from_data(upper.info, checksum=None, pseudo=pseudo).data
@@ -798,7 +798,7 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
             # NOTE: Quietly, as the refusal is recorded as NO_PSEUDO_HEADER (#2859).
             try:
                 with CaughtByCaller(ProtocolError, FieldValueError):
-                    pseudo = IP_Pseudo(ip=ip)
+                    pseudo = IP_Pseudo.from_fields(ip=ip)
             except (ProtocolError, FieldValueError):
                 pseudo = None
         verify(pseudo if pseudo is not None and pseudo.protocol == layer.__index__() else None)

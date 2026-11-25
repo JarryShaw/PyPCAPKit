@@ -63,13 +63,13 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
-                         block={'byteorder': order})
+        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
+                                     block={'byteorder': order})
         self.assertEqual(section.info.byteorder, order)
 
         context = Context(section.info)  # type: Any
-        interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                           block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
         context.interfaces.append(interface.info)
         return context
 
@@ -88,8 +88,8 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         option = _raw(OptionType.if_name, IF_NAME, sys.byteorder)
-        block = PCAPNG(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,
-                       block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,
+                                   block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]})
         self.assertEqual(block.info.options_raw, option)
 
         parsed = self._reparse(block.data, None)
@@ -106,8 +106,8 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         record = _raw(RecordType.nrb_record_ipv4, NRB_RECORD, sys.byteorder)
-        block = PCAPNG(num=2, sct=1, ctx=None, type=BlockType.Name_Resolution_Block,
-                       block={'records': [record]})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=None, type=BlockType.Name_Resolution_Block,
+                                   block={'records': [record]})
         self.assertEqual(block.info.records_raw, record)
 
         parsed = self._reparse(block.data, None)
@@ -124,9 +124,9 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
             with self.subTest(order=order):
                 context = self._context(order)
                 option = _raw(OptionType.if_name, IF_NAME, order)
-                block = PCAPNG(num=2, sct=1, ctx=context,
-                               type=BlockType.Interface_Description_Block,
-                               block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]})
+                block = PCAPNG.from_fields(num=2, sct=1, ctx=context,
+                                           type=BlockType.Interface_Description_Block,
+                                           block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]})
                 self.assertEqual(block.byteorder, order)
                 # The Block Type is the block's first field, so the section's
                 # byte order is visible in the octets emitted.
@@ -151,9 +151,9 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
             with self.subTest(order=order):
                 context = self._context(order)
                 record = _raw(RecordType.nrb_record_ipv4, NRB_RECORD, order)
-                block = PCAPNG(num=2, sct=1, ctx=context,
-                               type=BlockType.Name_Resolution_Block,
-                               block={'records': [record]})
+                block = PCAPNG.from_fields(num=2, sct=1, ctx=context,
+                                           type=BlockType.Name_Resolution_Block,
+                                           block={'records': [record]})
                 self.assertEqual(block.byteorder, order)
                 self.assertIn(record, block.data)
 
@@ -182,11 +182,11 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
                 context = self._context(order)
                 with self.assertRaisesRegex(ProtocolError,
                                             r'\[if_name\] option must be only one, not 2'):
-                    PCAPNG(num=2, sct=1, ctx=context,
-                           type=BlockType.Interface_Description_Block,
-                           block={'linktype': 1, 'snaplen': 0xFFFF,
-                                  'options': [_raw(OptionType.if_name, IF_NAME, order),
-                                              (OptionType.if_name, {'name': 'eth1'})]})
+                    PCAPNG.from_fields(num=2, sct=1, ctx=context,
+                                       type=BlockType.Interface_Description_Block,
+                                       block={'linktype': 1, 'snaplen': 0xFFFF,
+                                              'options': [_raw(OptionType.if_name, IF_NAME, order),
+                                                          (OptionType.if_name, {'name': 'eth1'})]})
 
     def test_a_raw_option_code_is_read_in_the_packet_byte_order(self) -> None:
         """#2353: with no section, the byte order the packet data declares is used.
@@ -205,12 +205,12 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
             with self.subTest(order=order):
                 with self.assertRaisesRegex(ProtocolError,
                                             r'\[if_name\] option must be only one, not 2'):
-                    PCAPNG(num=2, sct=1, ctx=None,
-                           type=BlockType.Interface_Description_Block,
-                           block={'linktype': 1, 'snaplen': 0xFFFF,
-                                  'options': [_raw(OptionType.if_name, IF_NAME, order),
-                                              (OptionType.if_name, {'name': 'eth1'})]},
-                           __packet__={'byteorder': order})
+                    PCAPNG.from_fields(num=2, sct=1, ctx=None,
+                                       type=BlockType.Interface_Description_Block,
+                                       block={'linktype': 1, 'snaplen': 0xFFFF,
+                                              'options': [_raw(OptionType.if_name, IF_NAME, order),
+                                                          (OptionType.if_name, {'name': 'eth1'})]},
+                                       __packet__={'byteorder': order})
 
     def test_a_raw_option_code_is_read_in_the_host_byte_order(self) -> None:
         """#2353: with neither a section nor packet data, the host's order is used.
@@ -233,11 +233,11 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         other = 'big' if sys.byteorder == 'little' else 'little'  # type: Literal['little', 'big']
 
         def build(order: 'Literal["little", "big"]') -> 'Any':
-            return PCAPNG(num=2, sct=1, ctx=None,
-                          type=BlockType.Interface_Description_Block,
-                          block={'linktype': 1, 'snaplen': 0xFFFF,
-                                 'options': [_raw(OptionType.if_name, IF_NAME, order),
-                                             (OptionType.if_name, {'name': 'eth1'})]})
+            return PCAPNG.from_fields(num=2, sct=1, ctx=None,
+                                      type=BlockType.Interface_Description_Block,
+                                      block={'linktype': 1, 'snaplen': 0xFFFF,
+                                             'options': [_raw(OptionType.if_name, IF_NAME, order),
+                                                         (OptionType.if_name, {'name': 'eth1'})]})
 
         with self.assertRaisesRegex(ProtocolError,
                                     r'\[if_name\] option must be only one, not 2'):
@@ -263,22 +263,22 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         for order in ('little', 'big'):  # type: Literal['little', 'big']
             other = 'big' if order == 'little' else 'little'  # type: Literal['little', 'big']
             with self.subTest(order=order, declared=other):
-                block = PCAPNG(num=2, sct=1, ctx=self._context(order),
-                               type=BlockType.Interface_Description_Block,
-                               block={'linktype': 1, 'snaplen': 0xFFFF},
-                               __packet__={'byteorder': other})
+                block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(order),
+                                           type=BlockType.Interface_Description_Block,
+                                           block={'linktype': 1, 'snaplen': 0xFFFF},
+                                           __packet__={'byteorder': other})
                 self.assertEqual(block.byteorder, order)
                 self.assertEqual(block.data[:4],
                                  int(BlockType.Interface_Description_Block).to_bytes(4, order))
 
                 with self.assertRaisesRegex(ProtocolError,
                                             r'\[if_name\] option must be only one, not 2'):
-                    PCAPNG(num=2, sct=1, ctx=self._context(order),
-                           type=BlockType.Interface_Description_Block,
-                           block={'linktype': 1, 'snaplen': 0xFFFF,
-                                  'options': [_raw(OptionType.if_name, IF_NAME, order),
-                                              (OptionType.if_name, {'name': 'eth1'})]},
-                           __packet__={'byteorder': other})
+                    PCAPNG.from_fields(num=2, sct=1, ctx=self._context(order),
+                                       type=BlockType.Interface_Description_Block,
+                                       block={'linktype': 1, 'snaplen': 0xFFFF,
+                                              'options': [_raw(OptionType.if_name, IF_NAME, order),
+                                                          (OptionType.if_name, {'name': 'eth1'})]},
+                                       __packet__={'byteorder': other})
 
     def test_a_nested_packet_byte_order_is_read_one_level_up(self) -> None:
         """#2353: a byte order nested under ``__packet__`` is the one resolved.
@@ -299,22 +299,22 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
         for order in ('little', 'big'):  # type: Literal['little', 'big']
             with self.subTest(order=order):
-                block = PCAPNG(num=2, sct=1, ctx=None,
-                               type=BlockType.Interface_Description_Block,
-                               block={'linktype': 1, 'snaplen': 0xFFFF},
-                               __packet__={'__packet__': {'byteorder': order}})
+                block = PCAPNG.from_fields(num=2, sct=1, ctx=None,
+                                           type=BlockType.Interface_Description_Block,
+                                           block={'linktype': 1, 'snaplen': 0xFFFF},
+                                           __packet__={'__packet__': {'byteorder': order}})
                 self.assertEqual(block.byteorder, order)
                 self.assertEqual(block.data[:4],
                                  int(BlockType.Interface_Description_Block).to_bytes(4, order))
 
                 with self.assertRaisesRegex(ProtocolError,
                                             r'\[if_name\] option must be only one, not 2'):
-                    PCAPNG(num=2, sct=1, ctx=None,
-                           type=BlockType.Interface_Description_Block,
-                           block={'linktype': 1, 'snaplen': 0xFFFF,
-                                  'options': [_raw(OptionType.if_name, IF_NAME, order),
-                                              (OptionType.if_name, {'name': 'eth1'})]},
-                           __packet__={'__packet__': {'byteorder': order}})
+                    PCAPNG.from_fields(num=2, sct=1, ctx=None,
+                                       type=BlockType.Interface_Description_Block,
+                                       block={'linktype': 1, 'snaplen': 0xFFFF,
+                                              'options': [_raw(OptionType.if_name, IF_NAME, order),
+                                                          (OptionType.if_name, {'name': 'eth1'})]},
+                                       __packet__={'__packet__': {'byteorder': order}})
 
     def test_packet_data_handed_over_as_none_resolves_the_host_byte_order(self) -> None:
         """A ``__packet__`` of :data:`None` means no packet data, not a type error.
@@ -335,17 +335,17 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         option = _raw(OptionType.if_name, IF_NAME, sys.byteorder)
-        block = PCAPNG(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,
-                       block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]},
-                       __packet__=None)
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,
+                                   block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]},
+                                   __packet__=None)
         self.assertEqual(block.byteorder, sys.byteorder)
         self.assertEqual(block.info.options_raw, option)
         self.assertEqual(block.data[:4],
                          int(BlockType.Interface_Description_Block).to_bytes(4, sys.byteorder))
 
         # The same block, with the key omitted rather than handed over empty.
-        omitted = PCAPNG(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,
-                         block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]})
+        omitted = PCAPNG.from_fields(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,
+                                     block={'linktype': 1, 'snaplen': 0xFFFF, 'options': [option]})
         self.assertEqual(block.data, omitted.data)
 
 

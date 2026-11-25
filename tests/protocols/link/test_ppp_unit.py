@@ -245,7 +245,7 @@ class TestPPP(unittest.TestCase):
         for kwargs, head in cases:
             with self.subTest(kwargs=kwargs):
                 payload = b'' if 'control_packet' in kwargs else IPV4
-                made = PPP(**kwargs, payload=payload)
+                made = PPP.from_fields(**kwargs, payload=payload)
                 self.assertEqual(made.data, head + payload)
                 parsed = self._parse(made.data)
                 self.assertEqual(bytes(PPP.from_data(parsed.info)), made.data)
@@ -280,7 +280,7 @@ class TestPPP(unittest.TestCase):
         )
         for kwargs, message in cases:
             with self.subTest(kwargs=kwargs), self.assertRaisesRegex(ProtocolError, message):
-                PPP(**kwargs)
+                PPP.from_fields(**kwargs)
 
     ##########################################################################
     # Bindings.

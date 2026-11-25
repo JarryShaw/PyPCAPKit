@@ -408,7 +408,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         # whole frame, dissected as one, or else the undissected remainder (#2536).
         return self._decode_next_layer(http, -1, length - 9 - schema.length)
 
-    def make(self,  # type: ignore[override]
+    def make(self, *,  # type: ignore[override]
              type: 'Enum_Frame | int' = Enum_Frame.DATA,
              flags: 'Flags' = 0,  # type: ignore[assignment]
              reserved: 'int' = 0,

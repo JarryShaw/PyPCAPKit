@@ -311,7 +311,7 @@ class TestIEEE802_11(unittest.TestCase):
                         self.assertEqual(parsed.length, hdr_len)
                         self.assertEqual(parsed.payload.data, body)
 
-                        made = IEEE802_11(**IEEE802_11._make_data(parsed.info))
+                        made = IEEE802_11.from_fields(**IEEE802_11._make_data(parsed.info))
                         self.assertEqual(made.data.hex(), raw.hex())
                         self.assertEqual(IEEE802_11(made.data, len(made.data)).data, raw)
                         if type_ == Type.Control:
@@ -324,7 +324,7 @@ class TestIEEE802_11(unittest.TestCase):
         from pcapkit.const.ieee802_11.type import Type
         from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
-        made = IEEE802_11(type=Type.Data, subtype=DataSubtype.QoS_Data, order=True)
+        made = IEEE802_11.from_fields(type=Type.Data, subtype=DataSubtype.QoS_Data, order=True)
         self.assertEqual(made.data, bytes.fromhex('8880') + bytes(2 + 18 + 2 + 2 + 4))
         info = made.info
         self.assertEqual((info.seq_ctrl.fragment_number, info.seq_ctrl.sequence_number), (0, 0))
@@ -412,24 +412,24 @@ class TestIEEE802_11(unittest.TestCase):
         from pcapkit.const.ieee802_11.type import Type
         from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
-        made = IEEE802_11(type=Type.Data, subtype=DataSubtype.QoS_Data, to_ds=True, from_ds=True,
-                          order=True, duration_id=0x2c, addr1=_mac(1), addr2=_mac(2), addr3=_mac(3),
-                          seq_ctrl={'fragment_number': 1, 'sequence_number': 0x345}, addr4=_mac(4),
-                          qos_control={'tid': 5, 'eosp': True, 'ack_policy': 1, 'amsdu_present': True,
-                                       'bits_8_15': 0x7e},
-                          ht_control=0x8000_0001, payload=b'body')
+        made = IEEE802_11.from_fields(type=Type.Data, subtype=DataSubtype.QoS_Data, to_ds=True, from_ds=True,
+                                      order=True, duration_id=0x2c, addr1=_mac(1), addr2=_mac(2), addr3=_mac(3),
+                                      seq_ctrl={'fragment_number': 1, 'sequence_number': 0x345}, addr4=_mac(4),
+                                      qos_control={'tid': 5, 'eosp': True, 'ack_policy': 1, 'amsdu_present': True,
+                                                   'bits_8_15': 0x7e},
+                                      ht_control=0x8000_0001, payload=b'body')
         expected = (bytes.fromhex('8883') + b'\x2c\x00' + ADDR[0] + ADDR[1] + ADDR[2] + b'\x51\x34'
                     + ADDR[3] + bytes([0b1011_0101, 0x7e]) + b'\x01\x00\x00\x80' + b'body')
         self.assertEqual(made.data.hex(), expected.hex())
         self._parse(made.data)
 
-        self.assertEqual(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1=_mac(1)).data,
+        self.assertEqual(IEEE802_11.from_fields(type=Type.Control, subtype=ControlSubtype.ACK, addr1=_mac(1)).data,
                          bytes.fromhex('d4000000') + ADDR[0])
-        self.assertEqual(IEEE802_11(type=0, subtype=8).data,
+        self.assertEqual(IEEE802_11.from_fields(type=0, subtype=8).data,
                          bytes.fromhex('80000000') + bytes(20))
-        self.assertEqual(IEEE802_11(type=1, subtype=6, control_frame_extension=0b0101).data,
+        self.assertEqual(IEEE802_11.from_fields(type=1, subtype=6, control_frame_extension=0b0101).data,
                          bytes.fromhex('64050000') + bytes(12))
-        self.assertEqual(IEEE802_11(type=3, subtype=1, s1g_beacon_flags=0b1010_0101).data,
+        self.assertEqual(IEEE802_11.from_fields(type=3, subtype=1, s1g_beacon_flags=0b1010_0101).data,
                          bytes.fromhex('1ca50000') + bytes(6))
 
     def test_make_rejects_what_the_frame_does_not_carry(self) -> None:
@@ -450,7 +450,7 @@ class TestIEEE802_11(unittest.TestCase):
             {'type': 3, 'subtype': 0, 's1g_beacon_flags': 0},
         ):
             with self.subTest(**{k: repr(v) for k, v in kwargs.items()}), self.assertRaises(ProtocolError):
-                IEEE802_11(**kwargs)
+                IEEE802_11.from_fields(**kwargs)
 
     def test_make_rejects_what_does_not_fit(self) -> None:
         from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
@@ -471,7 +471,7 @@ class TestIEEE802_11(unittest.TestCase):
             {'more_data': 2},
         ):
             with self.subTest(**{k: repr(v) for k, v in kwargs.items()}), self.assertRaises(ProtocolError):
-                IEEE802_11(**kwargs)
+                IEEE802_11.from_fields(**kwargs)
 
     def test_id_index_and_names(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
@@ -479,7 +479,7 @@ class TestIEEE802_11(unittest.TestCase):
 
         self.assertEqual(IEEE802_11.id(), ('IEEE802_11',))
         self.assertIs(IEEE802_11.__index__(), LinkType.IEEE802_11)  # 105 (#2608)
-        made = IEEE802_11()
+        made = IEEE802_11.from_fields()
         self.assertEqual((made.name, made.alias), ('IEEE 802.11 Wireless LAN', '802.11'))
         self.assertEqual(made.__length_hint__(), 36)
 
@@ -501,7 +501,7 @@ class TestIEEE802_11WidestValues(unittest.TestCase):
         for name, bits, kwargs, read, octets in WIDEST:
             with self.subTest(field=name):
                 widest = (1 << bits) - 1
-                raw = Radiotap(payload=IEEE802_11(**kwargs(widest))).data
+                raw = Radiotap.from_fields(payload=IEEE802_11.from_fields(**kwargs(widest))).data
                 self.assertEqual(raw.hex(), (RADIOTAP + octets).hex())
 
                 parsed = Radiotap(raw, len(raw))
@@ -519,7 +519,7 @@ class TestIEEE802_11WidestValues(unittest.TestCase):
         for name, bits, kwargs, _, _ in WIDEST:
             pattern = rf'^802\.11: invalid {name}: {1 << bits}$'
             with self.subTest(field=name), self.assertRaisesRegex(ProtocolError, pattern):
-                Radiotap(payload=IEEE802_11(**kwargs(1 << bits)))
+                Radiotap.from_fields(payload=IEEE802_11.from_fields(**kwargs(1 << bits)))
 
 
 class TestIEEE802_11Registries(unittest.TestCase):

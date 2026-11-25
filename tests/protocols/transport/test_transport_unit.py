@@ -477,11 +477,11 @@ class TransportUnitTests(unittest.TestCase):
                 for kwargs in ({'srcport': value, 'dstport': 53}, {'srcport': 53, 'dstport': value}):
                     with self.subTest(protocol=cls.__name__, **kwargs):
                         with self.assertRaises(ProtocolError) as ctx:
-                            cls(**kwargs)
+                            cls.from_fields(**kwargs)
                         self.assertEqual(str(ctx.exception), f'{cls.__name__}: invalid port: {value!r}')
 
         # An ``int`` port resolves to its application type.
-        self.assertEqual(UDP(srcport=1, dstport=53).info.srcport.port, 1)
+        self.assertEqual(UDP.from_fields(srcport=1, dstport=53).info.srcport.port, 1)
 
 
 if __name__ == '__main__':

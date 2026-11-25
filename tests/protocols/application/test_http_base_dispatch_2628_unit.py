@@ -60,7 +60,7 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
                               ('false preface', {'preface': False})):
             with self.subTest(fields=label):
                 with self.assertRaisesRegex(ProtocolError, NO_VERSION_FIELDS):
-                    HTTP(**kwargs)
+                    HTTP.from_fields(**kwargs)
 
     def test_make_has_no_default_version(self) -> None:
         from pcapkit.protocols.application.http.protocol import HTTP
@@ -71,7 +71,7 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
                 with self.assertRaisesRegex(ProtocolError, NO_VERSION_FIELDS):
                     HTTP.make(object.__new__(HTTP), **fields(version))  # type: ignore[arg-type]
                 schema = HTTP.make(object.__new__(HTTP), version=version, **fields(version))  # type: ignore[arg-type]
-                self.assertEqual(schema.pack(), self.member(version)(**fields(version)).data)
+                self.assertEqual(schema.pack(), self.member(version).from_fields(**fields(version)).data)
 
     def test_version_is_the_only_check(self) -> None:
         """A bad ``version`` raises on either path; a field the member lacks fails its check."""
@@ -81,11 +81,11 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
         for version in (0, 3, True, '1', 1.0, 2.0):
             with self.subTest(version=version):
                 with self.assertRaisesRegex(ProtocolError, f'^HTTP: invalid version: {version!r}$'):
-                    HTTP(version=version, **fields(1))
+                    HTTP.from_fields(version=version, **fields(1))
                 with self.assertRaisesRegex(ProtocolError, f'^HTTP: invalid version: {version!r}$'):
                     HTTP(OCTETS[1], version=version)
         with self.assertRaisesRegex(UnsupportedCall, "^HTTPv1: unexpected keyword\\(s\\): 'sid'"):
-            HTTP(version=1, sid=1, **fields(1))
+            HTTP.from_fields(version=1, sid=1, **fields(1))
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
         """Building, ``version`` must name the member; parsing, it is handed on unread."""
@@ -102,13 +102,13 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
         for version, other in ((1, 2), (2, 1)):
             klass = self.member(version)
             with self.subTest(member=klass.__name__):
-                self.assertEqual(klass(version=version, **fields(version)).data,
-                                 klass(**fields(version)).data)
+                self.assertEqual(klass.from_fields(version=version, **fields(version)).data,
+                                 klass.from_fields(**fields(version)).data)
                 with self.assertRaisesRegex(ProtocolError,
                                             f'^{klass.__name__}: version={other} names another member$'):
                     klass(version=other, **fields(version))
                 self.assertEqual(klass(OCTETS[version], version=other).data, OCTETS[version])
-        self.assertIs(type(Custom(version=1, **fields(1))), Custom)
+        self.assertIs(type(Custom.from_fields(version=1, **fields(1))), Custom)
         with self.assertRaisesRegex(ProtocolError, '^Custom: version=2 names another member$'):
             Custom(version=2, **fields(1))
 
@@ -141,14 +141,14 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
         from pcapkit.protocols.application.http.protocol import HTTP
         from pcapkit.utilities.exceptions import ProtocolError
 
-        for label, build in (('base', lambda: HTTP(version=1, preface=True, **fields(1))),
+        for label, build in (('base', lambda: HTTP.from_fields(version=1, preface=True, **fields(1))),
                              ('member', lambda: self.member(1)(preface=True, **fields(1))),
                              ('make', lambda: HTTP.make(object.__new__(HTTP), version=1,  # type: ignore[arg-type]
                                                         preface=True, **fields(1)))):
             with self.subTest(built=label):
                 with self.assertRaisesRegex(ProtocolError, '^HTTP/1: connection preface is HTTP/2 only$'):
                     build()
-        self.assertEqual(self.member(1)(preface=False, **fields(1)).data, self.member(1)(**fields(1)).data)
+        self.assertEqual(self.member(1).from_fields(preface=False, **fields(1)).data, self.member(1).from_fields(**fields(1)).data)
 
     def test_from_data_dispatches_by_class_and_refuses_a_dict(self) -> None:
         """No key picks a member, though ``receipt`` or ``sid`` would tell them apart."""

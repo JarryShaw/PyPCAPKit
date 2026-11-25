@@ -37,7 +37,7 @@ class TestHIPParameterlessLength(unittest.TestCase):
 
         for version in (1, 2):
             with self.subTest(version=version):
-                proto = HIP(parameters=None, version=version, **KWARGS)
+                proto = HIP.from_fields(parameters=None, version=version, **KWARGS)
                 self.assertEqual(len(proto.data), 40)
                 self.assertEqual(proto.data[1], 4)
                 self.assertEqual(proto.info.length, 40)
@@ -48,7 +48,7 @@ class TestHIPParameterlessLength(unittest.TestCase):
 
         for version in (1, 2):
             with self.subTest(version=version):
-                data = HIP(parameters=None, version=version, **KWARGS).data
+                data = HIP.from_fields(parameters=None, version=version, **KWARGS).data
                 parsed = HIP(data)
                 self.assertEqual(parsed.info.length, 40)
                 self.assertEqual(parsed.info.version, version)

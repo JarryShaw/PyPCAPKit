@@ -182,7 +182,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         return header
 
-    def make(self,
+    def make(self, *,
              byteorder: 'Literal["big", "little"]' = sys.byteorder,
              lilendian: 'Optional[bool]' = None,
              bigendian: 'Optional[bool]' = None,
@@ -237,7 +237,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
         )
 
     @classmethod
-    def from_data(cls, data: 'Data_Header | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: 'Data_Header | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:

@@ -36,14 +36,14 @@ class TestARPProtocolAddress(unittest.TestCase):
     """Pin the wire form of non-IP protocol addresses."""
 
     def test_non_ip_str_packs_as_octets(self) -> None:
-        proto = ARP(ptype=NON_IP, spa='a1b2c3', tpa='d4e5f6',
-                    sha='01:23:45:67:89:ab', tha='fe:dc:ba:98:76:54')
+        proto = ARP.from_fields(ptype=NON_IP, spa='a1b2c3', tpa='d4e5f6',
+                                sha='01:23:45:67:89:ab', tha='fe:dc:ba:98:76:54')
         self.assertEqual(proto.data, ARP_NON_IP)
         self.assertEqual(proto.info.spa, 'a1b2c3')
 
     def test_non_ip_str_not_hex_raises(self) -> None:
         with self.assertRaises(ProtocolError):
-            ARP(ptype=NON_IP, spa='raw', tpa='raw')
+            ARP.from_fields(ptype=NON_IP, spa='raw', tpa='raw')
 
     def test_from_data_round_trips(self) -> None:
         for name, data in (('IPv4', ARP_IPV4), ('IPv6', ARP_IPV6), ('non-IP', ARP_NON_IP)):
@@ -70,18 +70,18 @@ class TestARPNonIPAddressType(unittest.TestCase):
             for value in (True, False):
                 with self.subTest(case=name, value=value):
                     with self.assertRaises(FieldValueError) as context:
-                        ARP(spa=value, tpa=value, **kwargs)
+                        ARP.from_fields(spa=value, tpa=value, **kwargs)
                     self.assertIn('must not be a bool', str(context.exception))
 
     def test_non_bytes_raises_protocol_error(self) -> None:
         for value in (5, 1.5, None, ['a1', 'b2', 'c3']):
             with self.subTest(value=value):
                 with self.assertRaises(ProtocolError):
-                    ARP(ptype=NON_IP, spa=value, tpa=value)
+                    ARP.from_fields(ptype=NON_IP, spa=value, tpa=value)
 
     def test_bytes_and_bytearray_pack_as_given(self) -> None:
-        proto = ARP(ptype=NON_IP, spa=b'\xa1\xb2\xc3', tpa=bytearray(b'\xd4\xe5\xf6'),
-                    sha='01:23:45:67:89:ab', tha='fe:dc:ba:98:76:54')
+        proto = ARP.from_fields(ptype=NON_IP, spa=b'\xa1\xb2\xc3', tpa=bytearray(b'\xd4\xe5\xf6'),
+                                sha='01:23:45:67:89:ab', tha='fe:dc:ba:98:76:54')
         self.assertEqual(proto.data, ARP_NON_IP)
 
 
@@ -107,7 +107,7 @@ class TestARPHardwareAddressType(unittest.TestCase):
             for value in (True, False, 5, None, 1.5):
                 with self.subTest(htype=name, value=value):
                     with self.assertRaises(ProtocolError) as context:
-                        ARP(htype=htype, sha=value, tha=value)
+                        ARP.from_fields(htype=htype, sha=value, tha=value)
                     self.assertNotIsInstance(context.exception, FieldValueError)
                     self.assertEqual(
                         str(context.exception),
@@ -118,7 +118,7 @@ class TestARPHardwareAddressType(unittest.TestCase):
         for name, htype in self.HTYPES.items():
             with self.subTest(htype=name):
                 with self.assertRaises(ProtocolError) as context:
-                    ARP(htype=htype, sha='zz', tha='zz')
+                    ARP.from_fields(htype=htype, sha='zz', tha='zz')
                 self.assertEqual(str(context.exception),
                                  f"ARP: invalid {self.NOUNS[name]}: 'zz'")
 
@@ -127,7 +127,7 @@ class TestARPHardwareAddressType(unittest.TestCase):
             for value in (5, None, [1, 2, 3, 4, 5, 6], memoryview(b'\x01' * 6)):
                 with self.subTest(htype=name, value=value):
                     with self.assertRaises(ProtocolError):
-                        ARP(htype=htype, sha=value, tha=value)
+                        ARP.from_fields(htype=htype, sha=value, tha=value)
 
     def test_supported_forms_still_pack(self) -> None:
         raw = bytes.fromhex('0123456789ab')
@@ -143,7 +143,7 @@ class TestARPHardwareAddressType(unittest.TestCase):
         )
         for htype, value in cases:
             with self.subTest(htype=htype.name, value=value):
-                proto = ARP(htype=htype, sha=value, tha=value)
+                proto = ARP.from_fields(htype=htype, sha=value, tha=value)
                 self.assertEqual(proto.data[8:14], raw)
                 self.assertEqual(proto.data[18:24], raw)
 
@@ -152,9 +152,9 @@ class TestARPLengthFields(unittest.TestCase):
     """``hlen``/``plen`` are derived when omitted and checked when given."""
 
     def test_lengths_derived_from_addresses(self) -> None:
-        proto = ARP(ptype=EtherType.Internet_Protocol_version_6,
-                    sha='01:23:45:67:89:ab', spa='2001:db8::1',
-                    tha='fe:dc:ba:98:76:54', tpa='2001:db8::2')
+        proto = ARP.from_fields(ptype=EtherType.Internet_Protocol_version_6,
+                                sha='01:23:45:67:89:ab', spa='2001:db8::1',
+                                tha='fe:dc:ba:98:76:54', tpa='2001:db8::2')
         self.assertEqual(proto.data, ARP_IPV6)
 
     def test_mismatched_lengths_raise(self) -> None:
@@ -169,11 +169,11 @@ class TestARPLengthFields(unittest.TestCase):
         for name, kwargs in cases.items():
             with self.subTest(case=name):
                 with self.assertRaises(ProtocolError):
-                    ARP(**kwargs)
+                    ARP.from_fields(**kwargs)
 
     def test_matching_explicit_lengths_pass(self) -> None:
-        proto = ARP(hlen=6, plen=4, sha='01:23:45:67:89:ab', spa='192.0.2.1',
-                    tha='fe:dc:ba:98:76:54', tpa='192.0.2.2')
+        proto = ARP.from_fields(hlen=6, plen=4, sha='01:23:45:67:89:ab', spa='192.0.2.1',
+                                tha='fe:dc:ba:98:76:54', tpa='192.0.2.2')
         self.assertEqual(proto.data, ARP_IPV4)
 
 

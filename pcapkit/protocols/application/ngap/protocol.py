@@ -448,7 +448,7 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
                 raise ProtocolError(f'NGAP: malformed NGAP-PDU: {exc}') from exc
         return ngap
 
-    def make(self,
+    def make(self, *,
              kind: 'PDUKind | str' = PDUKind.INITIATING_MESSAGE,
              procedure: 'Optional[Enum_ProcedureCode | int]' = None,
              criticality: 'Criticality | int' = Criticality.reject,

@@ -325,8 +325,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             self._protos = ProtoChain(self.__class__, self.alias, basis=next_.protochain)
         return info
 
-    def make(self,
-             version: 'Optional[Literal[1, 2]]' = None, *,
+    def make(self, *,
+             version: 'Optional[Literal[1, 2]]' = None,
              preface: 'bool' = False,
              **kwargs: 'Any') -> '_ST':
         """Make (construct) packet data.
@@ -373,7 +373,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         return data
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -689,6 +689,48 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             if version == 2:
                 return HTTPv2
         raise ProtocolError(f'HTTP: invalid version: {version!r}')
+
+    @classmethod
+    def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
+        """The member :meth:`from_fields` and :meth:`from_data` construct.
+
+        Picked and checked as constructing this class directly does: on this
+        class, the member ``version`` names; on another, the class itself, of
+        which ``version`` must name the member it is or derives from. ``version``
+        is taken out of ``fields``, as the member's :meth:`make` does not read it.
+
+        Args:
+            fields: Construction keywords.
+
+        Returns:
+            The member, or the class itself.
+
+        Raises:
+            ProtocolError: If, on this class, ``version`` is missing; if it names
+                neither member; if it is not the class's own version, which a
+                subclass outside the members does not have; or if ``preface`` is
+                asked of HTTP/1.
+
+        .. versionadded:: 1.8.0
+
+        """
+        version = fields.pop('version', None)
+        klass = cls  # type: Type[HTTP]
+        if cls is HTTP:
+            if version is None:
+                raise ProtocolError('HTTP: no version to build with; pass version=1 or version=2')
+            klass = cls._member_of_version(version)
+
+        HTTPv1, HTTPv2 = _HTTPV1.klass, _HTTPV2.klass  # pylint: disable=invalid-name
+        if version is not None and not issubclass(klass, cls._member_of_version(version)):
+            if not issubclass(klass, (HTTPv1, HTTPv2)):
+                raise ProtocolError(f'{klass.__name__}: no version of its own to match '
+                                    f'version={version!r}')
+            raise ProtocolError(f'{klass.__name__}: version={version!r} names another member')
+        # NOTE: ``pack`` writes the preface for any member, so HTTP/1 refuses it here.
+        if fields.get('preface') and issubclass(klass, HTTPv1):
+            raise ProtocolError('HTTP/1: connection preface is HTTP/2 only')
+        return cast('Type[Self]', klass)
 
     @classmethod
     def _dispatch_version(cls, data: 'bytes', length: 'int') -> 'Type[ProtocolBase]':

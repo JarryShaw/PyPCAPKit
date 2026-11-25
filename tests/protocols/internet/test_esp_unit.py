@@ -816,8 +816,8 @@ class ESPProtocolTests(unittest.TestCase):
                                        integrity_key=ikey)
 
         registry = ContextRegistry.make(ESPContext(association()))
-        built = ESP(spi=0x1234, seq=7, next=TransType.IPv4, encrypt=True, iv=iv,
-                    payload=INNER_TCP, __context__=registry)
+        built = ESP.from_fields(spi=0x1234, seq=7, next=TransType.IPv4, encrypt=True, iv=iv,
+                                payload=INNER_TCP, context=registry)
         wire = bytes(built)
 
         # RFC 4303 s2.8: the ICV covers the SPI, the sequence number, the
@@ -879,7 +879,7 @@ class ESPProtocolTests(unittest.TestCase):
     def test_make_verbatim_round_trip(self) -> None:
         from pcapkit.protocols.internet.esp.protocol import ESP, ESPStatus
 
-        built = ESP(spi=9, seq=3, payload=b'opaque-ciphertext', icv=b'ICV!')
+        built = ESP.from_fields(spi=9, seq=3, payload=b'opaque-ciphertext', icv=b'ICV!')
         wire = bytes(built)
         self.assertEqual(wire, struct.pack('!II', 9, 3) + b'opaque-ciphertextICV!')
 
@@ -912,8 +912,8 @@ class ESPProtocolTests(unittest.TestCase):
 
         for size in range(0, 20):
             with self.subTest(size=size):
-                built = ESP(spi=0x77, seq=1, next=TransType.UDP, encrypt=True,
-                            iv=bytes(16), payload=bytes(size), __context__=registry)
+                built = ESP.from_fields(spi=0x77, seq=1, next=TransType.UDP, encrypt=True,
+                                        iv=bytes(16), payload=bytes(size), context=registry)
                 wire = bytes(built)
                 # 8 octets of header, 16 of IV, then whole AES blocks
                 self.assertEqual((len(wire) - 24) % 16, 0)
@@ -928,11 +928,11 @@ class ESPProtocolTests(unittest.TestCase):
 
         # an explicit pad length that breaks the alignment is refused
         with self.assertRaises(ProtocolError):
-            ESP(spi=0x77, seq=1, encrypt=True, pad_len=1, payload=bytes(8),
-                __context__=registry)
+            ESP.from_fields(spi=0x77, seq=1, encrypt=True, pad_len=1, payload=bytes(8),
+                            context=registry)
         # ... as is asking to encrypt with no SA at all
         with self.assertRaises(ProtocolError):
-            ESP(spi=0x99, seq=1, encrypt=True, payload=b'x')
+            ESP.from_fields(spi=0x99, seq=1, encrypt=True, payload=b'x')
         # ... and a payload that is neither bytes, a schema nor a protocol
         with self.assertRaises(ProtocolUnbound):
             object.__new__(ESP)._payload_bytes(object())
@@ -953,8 +953,8 @@ class ESPProtocolTests(unittest.TestCase):
                 self.assertEqual(sa.icv_length, icv_length)
                 registry = ContextRegistry.make(ESPContext(sa))
 
-                built = ESP(spi=0x88, seq=5, next=TransType.IPv4, encrypt=True,
-                            iv=bytes(range(8)), payload=INNER_TCP, __context__=registry)
+                built = ESP.from_fields(spi=0x88, seq=5, next=TransType.IPv4, encrypt=True,
+                                        iv=bytes(range(8)), payload=INNER_TCP, context=registry)
                 wire = bytes(built)
                 esp = ESP(wire, len(wire), __context__=registry)
 
@@ -1021,8 +1021,8 @@ class ESPProtocolTests(unittest.TestCase):
                                  encryption_key=CASE5_KEY)
         registry = ContextRegistry.make(ESPContext(sa))
 
-        built = ESP(spi=0x66, seq=1, next=TransType.TCP, encrypt=True, iv=bytes(16),
-                    payload=INNER_TCP[20:], __context__=registry)
+        built = ESP.from_fields(spi=0x66, seq=1, next=TransType.TCP, encrypt=True, iv=bytes(16),
+                                payload=INNER_TCP[20:], context=registry)
         body = bytes(built)
 
         # IPv6 header with next header 50 (ESP)
@@ -1184,13 +1184,13 @@ class ESPErrorMessageTests(unittest.TestCase):
 
         registry = ContextRegistry.make(ESPContext(SecurityAssociation(spi=0x77)))
         self.assertMessage('ESP: no security association for SPI 0x00000099; '
-                           'encrypt=True needs one', ESP, spi=0x99, seq=1, encrypt=True,
+                           'encrypt=True needs one', ESP.from_fields, spi=0x99, seq=1, encrypt=True,
                            payload=b'x')
         self.assertMessage('ESP: invalid pad length: 1 leaves 5 octets, which is not a '
-                           'multiple of the required 4-octet alignment', ESP, spi=0x77, seq=1,
-                           encrypt=True, pad_len=1, payload=bytes(2), __context__=registry)
-        self.assertMessage('ESP: invalid pad length: 256', ESP, spi=0x77, seq=1, encrypt=True,
-                           pad_len=256, payload=bytes(2), __context__=registry)
+                           'multiple of the required 4-octet alignment', ESP.from_fields, spi=0x77, seq=1,
+                           encrypt=True, pad_len=1, payload=bytes(2), context=registry)
+        self.assertMessage('ESP: invalid pad length: 256', ESP.from_fields, spi=0x77, seq=1, encrypt=True,
+                           pad_len=256, payload=bytes(2), context=registry)
 
 
 if __name__ == '__main__':

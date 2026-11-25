@@ -119,8 +119,8 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.protocols.misc.raw.protocol import Raw
 
-        made = IPv4(protocol=TransType.UDP, offset=185, payload=Raw(bytes(range(40))),
-                    src='1.1.1.1', dst='2.2.2.2')
+        made = IPv4.from_fields(protocol=TransType.UDP, offset=185, payload=Raw(bytes(range(40))),
+                                src='1.1.1.1', dst='2.2.2.2')
         ipv4 = self._parse(made.data)
         self.assertEqual(ipv4.info.offset, 1480)
         self.assertEqual(str(ipv4.protochain), 'IPv4:Raw')
@@ -143,12 +143,12 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
         from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        upper = UDP(srcport=51234, dstport=5001, payload=bytes(range(0x40, 0x60)))
+        upper = UDP.from_fields(srcport=51234, dstport=5001, payload=bytes(range(0x40, 0x60)))
         for options in (None, [bytes((1, 1, 1, 0))]):
             with self.subTest(options=options):
                 kwargs = {} if options is None else {'options': options}
-                made = IPv4(protocol=TransType.UDP, offset=185, mf=True, payload=upper,
-                            src='1.1.1.1', dst='2.2.2.2', **kwargs)
+                made = IPv4.from_fields(protocol=TransType.UDP, offset=185, mf=True, payload=upper,
+                                        src='1.1.1.1', dst='2.2.2.2', **kwargs)
                 self.assertEqual(made.data[made.info.hdr_len:], upper.data)
                 self.assertNotIn('UDP', made)
                 self.assertIs(type(made.payload), Raw)

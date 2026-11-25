@@ -112,7 +112,7 @@ class TestLinkMakeCodes(unittest.TestCase):
 
     def build(self, row: 'Row', value: 'Any') -> 'bytes':
         """The octets ``row``'s maker builds with ``value`` for its field."""
-        return load(row.cls)(**arguments(row, value)).data
+        return load(row.cls).from_fields(**arguments(row, value)).data
 
     def test_a_code_wider_than_the_field_is_refused(self) -> None:
         from pcapkit.utilities.exceptions import ProtocolError

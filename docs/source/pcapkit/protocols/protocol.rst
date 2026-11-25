@@ -24,6 +24,18 @@ The built-in families, those bases included, derive from
    its header is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, where it
    was parsed with zero-filled fields (:issue:`1170`).
 
+.. versionchanged:: 1.8.0
+
+   A protocol is constructed with :meth:`~Protocol.from_fields`, whose unknown
+   keyword raises :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a
+   :exc:`TypeError` too, and every ``make`` takes its fields as keywords only
+   (:issue:`2840`).
+
+.. versionremoved:: 1.8.0
+
+   ``Protocol.__reconstructing__``, with no replacement: :meth:`~Protocol.from_data`
+   no longer runs :meth:`~Protocol.__init__` (:issue:`2840`).
+
 .. autoclass:: pcapkit.protocols.protocol.Protocol
    :no-members:
    :show-inheritance:
@@ -46,6 +58,7 @@ The built-in families, those bases included, derive from
    .. automethod:: analyze
 
    .. automethod:: from_schema
+   .. automethod:: from_fields
    .. automethod:: from_data
 
    .. automethod:: read
@@ -81,6 +94,8 @@ The built-in families, those bases included, derive from
    .. automethod:: _make_index
    .. automethod:: _make_payload
    .. automethod:: _packing_target
+   .. automethod:: _construction_member
+   .. automethod:: _initialise
 
    .. automethod:: _read_unpack
    .. automethod:: _read_octets
@@ -122,7 +137,6 @@ The built-in families, those bases included, derive from
    .. autoattribute:: _protos
    .. autoattribute:: _seekset
    .. autoattribute:: _sigterm
-   .. autoattribute:: __reconstructing__
    .. autoattribute:: __short_read__
    .. autoattribute:: __next_layer__
    .. autoattribute:: _past_layer_limit
@@ -147,20 +161,24 @@ The built-in families, those bases included, derive from
 Parsing and Construction
 ------------------------
 
-Parsing, construction, :meth:`~Protocol.from_schema` and :meth:`~Protocol.from_data`
-share one path:
+Parsing and construction, :meth:`~Protocol.from_schema`, :meth:`~Protocol.from_fields`
+and :meth:`~Protocol.from_data` included, end in one path:
 
 .. mermaid::
 
    flowchart TD
        FS["from\_schema(schema)"] -->|"\_\_header\_\_ = schema,<br/>then its octets"| P
-       FD["from\_data(data)"] -->|"\_make\_data(data) gives the fields,<br/>\_\_reconstructing\_\_ set"| C
        P["Proto(file, length, ...)<br/>parse"] --> INIT
-       C["Proto(field=value, ...)<br/>construct"] --> INIT
+       C["Proto(field=value, ...)"] --> INIT
        INIT["\_\_init\_\_<br/>consumes \_layer, \_protocol and \_\_context\_\_"]
-       INIT -->|construct| CHK["\_check\_construction\_keywords<br/>an undeclared keyword: UnsupportedCall,<br/>or a warning when reconstructing"]
-       CHK --> PACK["\_\_post\_init\_\_: pack(...)<br/>make() gives the schema, kept as \_\_header\_\_,<br/>and its octets"]
-       INIT -->|parse| OCT["\_\_post\_init\_\_: the octets given,<br/>or file.read(length)"]
+       FF["from\_fields(field=value, ...)<br/>construct"] --> MEM
+       FD["from\_data(data)"] -->|"\_make\_data(data) gives the fields"| MEM
+       MEM["\_construction\_member<br/>a versioned family's base picks its member"] --> CHK
+       INIT -->|construct| CHK["\_check\_construction\_keywords<br/>an undeclared keyword: UnexpectedKeyword,<br/>or a warning for one \_make\_data gives"]
+       INIT -->|parse| IN
+       CHK --> IN["\_initialise<br/>the stops and the context"]
+       IN -->|construct| PACK["\_\_post\_init\_\_: pack(...)<br/>make() gives the schema, kept as \_\_header\_\_,<br/>and its octets"]
+       IN -->|parse| OCT["\_\_post\_init\_\_: the octets given,<br/>or file.read(length)"]
        PACK --> DATA["\_data, and \_file over it"]
        OCT --> DATA
        DATA --> UNP{"unpack: \_\_header\_\_ set?"}
@@ -168,11 +186,14 @@ share one path:
        UNP -->|yes| KEPT["kept, or replaced by the parse of its octets<br/>where it holds raw items"]
        SCH --> READ
        KEPT --> READ
-       READ["read(): the data model,<br/>calling \_decode\_next\_layer"] --> INFO["\_\_init\_\_: \_info updated with packet"]
+       READ["read(): the data model,<br/>calling \_decode\_next\_layer"] --> INFO["\_info updated with packet"]
 
        click FS "protocol.html#pcapkit.protocols.protocol.Protocol.from_schema"
+       click FF "protocol.html#pcapkit.protocols.protocol.Protocol.from_fields"
        click FD "protocol.html#pcapkit.protocols.protocol.Protocol.from_data"
+       click MEM "protocol.html#pcapkit.protocols.protocol.Protocol._construction_member"
        click INIT "protocol.html#pcapkit.protocols.protocol.Protocol.__init__"
+       click IN "protocol.html#pcapkit.protocols.protocol.Protocol._initialise"
        click PACK "protocol.html#pcapkit.protocols.protocol.Protocol.pack"
        click UNP "protocol.html#pcapkit.protocols.protocol.Protocol.unpack"
        click READ "protocol.html#protocol-next-layer-dispatch"
@@ -332,6 +353,7 @@ Internal Definitions
                   register
                   analyze
                   from_schema
+                  from_fields
                   from_data
                   read
                   make
@@ -347,6 +369,8 @@ Internal Definitions
                   _make_index
                   _make_payload
                   _packing_target
+                  _construction_member
+                  _initialise
                   _read_unpack
                   _read_octets
                   _read_uint
@@ -388,14 +412,15 @@ Internal Definitions
 
       :meth:`~Protocol.id`, :meth:`~Protocol.register`,
       :meth:`~Protocol.analyze`, :meth:`~Protocol.from_schema`,
-      :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
+      :meth:`~Protocol.from_fields`, :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
       :meth:`~Protocol.make`, :meth:`~Protocol.unpack`, :meth:`~Protocol.pack`,
       :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,
       :meth:`~Protocol.resolve_index`, :meth:`~Protocol.expand_comp`,
       :meth:`~Protocol._read_packet`, :meth:`~Protocol._get_payload`,
       :meth:`~Protocol._make_data`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
-      :meth:`~Protocol._packing_target`, :meth:`~Protocol._read_unpack`,
+      :meth:`~Protocol._packing_target`, :meth:`~Protocol._construction_member`,
+      :meth:`~Protocol._initialise`, :meth:`~Protocol._read_unpack`,
       :meth:`~Protocol._read_octets`, :meth:`~Protocol._read_uint`,
       :meth:`~Protocol._read_sint`, :meth:`~Protocol._read_vector`,
       :meth:`~Protocol._read_whole_vector`, :meth:`~Protocol._read_uints`,

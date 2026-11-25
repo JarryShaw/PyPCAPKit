@@ -61,7 +61,7 @@ class UserTimeoutLengthTests(unittest.TestCase):
         from pcapkit.const.tcp.option import Option
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP(options=[(Option.User_Timeout_Option, {'timeout': 30})])
+        tcp = TCP.from_fields(options=[(Option.User_Timeout_Option, {'timeout': 30})])
         raw = tcp.data
         self.assertIn(bytes.fromhex('1c04001e'), raw)
 

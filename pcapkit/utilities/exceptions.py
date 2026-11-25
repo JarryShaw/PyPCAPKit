@@ -41,6 +41,7 @@ __all__ = [
     'InfoError', 'IPError', 'EnumError', 'ComparisonError',         # TypeError
     'RegistryError', 'FieldError',                                  # TypeError
     'FormatError', 'UnsupportedCall',                               # AttributeError
+    'UnexpectedKeyword',                                            # AttributeError, TypeError
     'FileError', 'UnsupportedOperation',                            # IOError
     'FileExists',                                                   # FileExistsError
     'FileNotFound',                                                 # FileNotFoundError
@@ -614,6 +615,18 @@ class FormatError(BaseError, AttributeError):
 
 class UnsupportedCall(BaseError, AttributeError):
     """Unsupported function or property call."""
+
+
+class UnexpectedKeyword(UnsupportedCall, TypeError):
+    """Unexpected keyword argument(s).
+
+    A :exc:`TypeError` as well, as Python's own refusal of an unknown keyword
+    is, so ``except TypeError`` catches a refused construction keyword
+    (:issue:`2840`).
+
+    .. versionadded:: 1.8.0
+
+    """
 
 
 ##############################################################################

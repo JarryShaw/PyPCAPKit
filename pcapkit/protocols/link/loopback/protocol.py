@@ -191,7 +191,7 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
         )
         return self._decode_next_layer(loopback, _family, length - self.length)
 
-    def make(self,
+    def make(self, *,
              family: 'int' = 2,
              byteorder: 'Literal["big", "little"]' = sys.byteorder,
              payload: 'bytes | ProtocolBase | Schema' = b'',

@@ -48,48 +48,48 @@ def _payload(code: 'int') -> 'bytes':
     _ip4, _ip6, _tcp, _udp = generator._ip4, generator._ip6, generator._tcp, generator._udp
     if code == TransType.HOPOPT:
         from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
-        return bytes(HOPOPT(options=[], next=6, payload=_tcp(9999)))
+        return bytes(HOPOPT.from_fields(options=[], next=6, payload=_tcp(9999)))
     if code == TransType.IPv4:  # IP-in-IP.
         return _ip4(6, _tcp(9999))
     if code == TransType.ICMP:
         from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         # NOTE: the checksum is left uncomputed (#2470).
-        return bytes(ICMPv4(type=8, code=0,
-                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
+        return bytes(ICMPv4.from_fields(type=8, code=0,
+                                        body={'id': 1, 'seq': 1, 'data': b'ping'}))
     if code == TransType.IPv6_ICMP:
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
         # NOTE: the checksum is left uncomputed (#2470).
-        return bytes(ICMPv6(type=128, code=0,
-                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
+        return bytes(ICMPv6.from_fields(type=128, code=0,
+                                        body={'id': 1, 'seq': 1, 'data': b'ping'}))
     if code == TransType.TCP:
         return _tcp(9999)
     if code == TransType.UDP:
         return _udp(9999)
     if code == TransType.DCCP:
         from pcapkit.protocols.transport.dccp.protocol import DCCP
-        return bytes(DCCP(srcport=50000, dstport=9999, seq=1, payload=b'\x01\x02\x03'))
+        return bytes(DCCP.from_fields(srcport=50000, dstport=9999, seq=1, payload=b'\x01\x02\x03'))
     if code == TransType.IPv6:
         return _ip6(6, _tcp(9999))
     if code == TransType.IPv6_Route:
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
-        return bytes(IPv6_Route(type=Routing.Type_2_Routing_Header, data={'ip': '2001:db8::2'},
-                                next=6, seg_left=0, payload=_tcp(9999)))
+        return bytes(IPv6_Route.from_fields(type=Routing.Type_2_Routing_Header, data={'ip': '2001:db8::2'},
+                                            next=6, seg_left=0, payload=_tcp(9999)))
     if code == TransType.IPv6_Frag:
         from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
-        return bytes(IPv6_Frag(next=17, id=1, offset=0, mf=False, payload=_udp(9999)))
+        return bytes(IPv6_Frag.from_fields(next=17, id=1, offset=0, mf=False, payload=_udp(9999)))
     if code == TransType.GRE:
         from pcapkit.protocols.link.gre.protocol import GRE
-        return bytes(GRE(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
+        return bytes(GRE.from_fields(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
     if code == TransType.ESP:
         from pcapkit.protocols.internet.esp.protocol import ESP
-        return bytes(ESP(spi=0x1234, seq=1, payload=b'\x01\x02\x03\x04'))
+        return bytes(ESP.from_fields(spi=0x1234, seq=1, payload=b'\x01\x02\x03\x04'))
     if code == TransType.AH:
         from pcapkit.protocols.internet.ah.protocol import AH
-        return bytes(AH(next=TransType.TCP, spi=0x1234, seq=1, icv=b'\x00' * 12,
-                        payload=_tcp(9999)))
+        return bytes(AH.from_fields(next=TransType.TCP, spi=0x1234, seq=1, icv=b'\x00' * 12,
+                                    payload=_tcp(9999)))
     if code == TransType.IGMP:
         from pcapkit.const.igmp.type import Type
         from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
@@ -97,7 +97,7 @@ def _payload(code: 'int') -> 'bytes':
         # A General Query: an IGMPv1/v2 message is the 8-octet header and
         # nothing else, so there is no further payload to wrap. A nonzero
         # max_resp_time makes it IGMPv2, the class IGMP dispatches it to.
-        return bytes(IGMPv2(type=Type.IGMP_Membership_Query, max_resp_time=100, group='0.0.0.0'))
+        return bytes(IGMPv2.from_fields(type=Type.IGMP_Membership_Query, max_resp_time=100, group='0.0.0.0'))
     if code == TransType.IPv6_NoNxt:
         # The registered target for this code *is* Raw -- there is no
         # dissector to hand it, "no next header" is the whole point -- so any
@@ -105,32 +105,32 @@ def _payload(code: 'int') -> 'bytes':
         return b'\x01\x02\x03'
     if code == TransType.IPv6_Opts:
         from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
-        return bytes(IPv6_Opts(options=[], next=6, payload=_tcp(9999)))
+        return bytes(IPv6_Opts.from_fields(options=[], next=6, payload=_tcp(9999)))
     if code == TransType.IPX_in_IP:
         from pcapkit.protocols.internet.ipx.protocol import IPX
-        return bytes(IPX())
+        return bytes(IPX.from_fields())
     if code == TransType.SCTP:
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.protocols.transport.sctp.protocol import SCTP
-        return bytes(SCTP(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
-                          chunks=[(Chunk.Payload_Data, {'data': b'\x01\x02\x03'})]))
+        return bytes(SCTP.from_fields(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
+                                      chunks=[(Chunk.Payload_Data, {'data': b'\x01\x02\x03'})]))
     if code == TransType.Mobility_Header:
         from pcapkit.const.mh.packet import Packet
         from pcapkit.protocols.internet.mh.protocol import MH
-        return bytes(MH(next=6, checksum=b'\x00\x00', type=Packet.Binding_Refresh_Request,
-                        data={'options': []}, payload=_tcp(9999)))
+        return bytes(MH.from_fields(next=6, checksum=b'\x00\x00', type=Packet.Binding_Refresh_Request,
+                                    data={'options': []}, payload=_tcp(9999)))
     if code == TransType.HIP:
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         # Only the dispatch into HIP is under test here, so which parameter
         # travels inside it does not matter.
-        return bytes(HIP(parameters=[(Parameter.SEQ, {})], extension=True,
-                         next=6, packet=1, version=2, checksum=b'\x00\x00',
-                         controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
+        return bytes(HIP.from_fields(parameters=[(Parameter.SEQ, {})], extension=True,
+                                     next=6, packet=1, version=2, checksum=b'\x00\x00',
+                                     controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
     if code == TransType.OSPFIGP:
         from pcapkit.protocols.application.ospf.protocol import OSPF
-        return bytes(OSPF())
+        return bytes(OSPF.from_fields())
     if code == TransType.Shim6:
         # #904: no dedicated dissector exists for Shim6 -- IPv6_Ext
         # parses only the two octets RFC 6564 §4 guarantees (next header,

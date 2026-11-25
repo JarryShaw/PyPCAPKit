@@ -87,14 +87,14 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
     def test_make_accepts_dict_auth_data(self) -> None:
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
-        proto = OSPF(router_id='1.1.1.1', auth_type=2,
-                     auth_data={'reserved': b'\xbe\xef', 'key_id': 255, 'len': 16, 'seq': 0xffffffff})
+        proto = OSPF.from_fields(router_id='1.1.1.1', auth_type=2,
+                                 auth_data={'reserved': b'\xbe\xef', 'key_id': 255, 'len': 16, 'seq': 0xffffffff})
         self.assertEqual(proto.data, packet(2, crypto(reserved=0xbeef, key_id=255, seq=0xffffffff)))
 
     def test_make_dict_auth_data_defaults_reserved_to_zero(self) -> None:
         from pcapkit.protocols.application.ospf.protocol import OSPF
 
-        proto = OSPF(router_id='1.1.1.1', auth_type=2, auth_data={'key_id': 1, 'len': 16, 'seq': 7})
+        proto = OSPF.from_fields(router_id='1.1.1.1', auth_type=2, auth_data={'key_id': 1, 'len': 16, 'seq': 7})
         self.assertEqual(proto.data, packet(2, crypto()))
 
     def test_make_dict_auth_data_missing_key_is_refused(self) -> None:
@@ -102,7 +102,7 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r"^OSPF: missing 'seq' in auth_data: "):
-            OSPF(auth_type=2, auth_data={'key_id': 1, 'len': 16})
+            OSPF.from_fields(auth_type=2, auth_data={'key_id': 1, 'len': 16})
 
 
 if __name__ == '__main__':

@@ -81,7 +81,7 @@ class TestPCAPNGDefaultTimestamp(PCAPNGTestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
         self._add_interface(context, resolution=resolution, offset=offset)
         return context
@@ -105,10 +105,10 @@ class TestPCAPNGDefaultTimestamp(PCAPNGTestCase):
         if offset is not None:
             options.append((OptionType.if_tsoffset, {'offset': offset}))
 
-        interface = PCAPNG(num=len(context.interfaces) + 1, sct=1, ctx=context,
-                           type=BlockType.Interface_Description_Block,
-                           block={'linktype': LinkType.ETHERNET, 'snaplen': 0,
-                                  'options': options})
+        interface = PCAPNG.from_fields(num=len(context.interfaces) + 1, sct=1, ctx=context,
+                                       type=BlockType.Interface_Description_Block,
+                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0,
+                                              'options': options})
         context.interfaces.append(interface.info)
         return interface.info
 
@@ -136,7 +136,7 @@ class TestPCAPNGDefaultTimestamp(PCAPNGTestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # the Packet Block is obsolete
-            return PCAPNG(num=2, sct=1, ctx=context, type=BlockType.get(name), block=block)
+            return PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.get(name), block=block)
 
     def test_default_is_the_current_time(self) -> None:
         """The issue's case: no ``timestamp`` makes one, and it is now."""

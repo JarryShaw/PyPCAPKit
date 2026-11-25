@@ -34,7 +34,7 @@ class TestHTTPv2SettingsPlainDict(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
-        return bytes(HTTPv2(type=Frame.SETTINGS, frame={'settings': settings}))
+        return bytes(HTTPv2.from_fields(type=Frame.SETTINGS, frame={'settings': settings}))
 
     def test_plain_dict_builds_the_list_octets(self) -> None:
         from pcapkit.const.http.setting import Setting

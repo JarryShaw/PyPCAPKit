@@ -86,13 +86,13 @@ def _tls_client_hello(extensions: 'Any') -> 'Any':
     if codes & _dtls_only():
         hello = ClientHello(version=0xFEFD, random=bytes(32), session_id=b'', cookie=b'',
                             cipher_suites=(0x1301,), compression_methods=(0,), extensions=extensions)
-        return DTLS(content_type=Enum_ContentType.handshake, version=0xFEFD, content=(DTLSHandshake(
+        return DTLS.from_fields(content_type=Enum_ContentType.handshake, version=0xFEFD, content=(DTLSHandshake(
             msg_type=msg_type, length=0, body=hello, message_seq=0, fragment_offset=0, fragment_length=0,
             is_fragmented=False),))
     hello = ClientHello(version=0x0303, random=bytes(32), session_id=b'', cookie=None,
                         cipher_suites=(0x1301,), compression_methods=(0,), extensions=extensions)
-    return TLS(content_type=Enum_ContentType.handshake, version=0x0303,
-               content=(Handshake(msg_type=msg_type, length=0, body=hello),))
+    return TLS.from_fields(content_type=Enum_ContentType.handshake, version=0x0303,
+                           content=(Handshake(msg_type=msg_type, length=0, body=hello),))
 
 
 def _tls_extension_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':

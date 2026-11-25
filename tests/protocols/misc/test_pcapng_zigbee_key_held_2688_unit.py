@@ -135,9 +135,9 @@ class TestPCAPNGZigBeeKeyHeld(PCAPNGTestCase):
                 with _reported():
                     parsed = PCAPNG(octets, len(octets), num=2, sct=1, ctx=context)
                 with _reported() as messages:
-                    made = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Decryption_Secrets_Block,
-                                  block={'secrets_type': parsed.info.secrets_type,  # type: ignore[attr-defined]
-                                         'secrets_data': parsed.info.secrets_data}).data  # type: ignore[attr-defined]
+                    made = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Decryption_Secrets_Block,
+                                              block={'secrets_type': parsed.info.secrets_type,  # type: ignore[attr-defined]
+                                                     'secrets_data': parsed.info.secrets_data}).data  # type: ignore[attr-defined]
                     rebuilt = PCAPNG.from_data(parsed.info, num=2, sct=1, ctx=context).data
                 self.assertEqual(made.hex(), octets.hex())
                 self.assertEqual(rebuilt.hex(), octets.hex())

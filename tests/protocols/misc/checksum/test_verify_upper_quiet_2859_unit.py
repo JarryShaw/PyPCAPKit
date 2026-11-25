@@ -78,11 +78,11 @@ class VerifyUpperTestCase(unittest.TestCase):
 
     def segment(self) -> object:
         """A TCP segment carrying a few octets."""
-        return self.TCP(srcport=40000, dstport=80, payload=b'pending')
+        return self.TCP.from_fields(srcport=40000, dstport=80, payload=b'pending')
 
     def route(self, kind: int, **kwargs: object) -> object:
         """A Routing header of ``kind`` with a segment left, carrying a TCP segment."""
-        return self.IPv6_Route(next=6, type=kind, seg_left=1, payload=self.segment(), **kwargs)
+        return self.IPv6_Route.from_fields(next=6, type=kind, seg_left=1, payload=self.segment(), **kwargs)
 
     def cases(self) -> 'dict[str, tuple[type, dict[str, object]]]':
         """Each IP layer as ``(class, make() arguments)``, by the refusal it meets."""
@@ -91,7 +91,7 @@ class VerifyUpperTestCase(unittest.TestCase):
             'routing type 200': (self.IPv6, {'src': V6_SRC, 'dst': V6_DST, 'next': 43,
                                              'payload': self.route(200)}),
             'IPv6 first fragment': (self.IPv6, {'src': V6_SRC, 'dst': V6_DST, 'next': 44, 'payload':
-                                                self.IPv6_Frag(next=6, mf=True, payload=self.segment())}),
+                                                self.IPv6_Frag.from_fields(next=6, mf=True, payload=self.segment())}),
             'IPv4 first fragment': (self.IPv4, {'src': V4_SRC, 'dst': V4_DST, 'protocol': 6, 'mf': True,
                                                 'payload': self.segment()}),
         }
@@ -101,7 +101,7 @@ class VerifyUpperTestCase(unittest.TestCase):
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', True), capture(self.logger) as recorder, \
                 warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            layer = klass(*args, **kwargs)
+            layer = klass(*args) if args else klass.from_fields(**kwargs)  # type: ignore[attr-defined]
         return layer, recorder.messages
 
     def assertQuiet(self, layer: object, messages: 'list[tuple[str, str]]', status: object) -> None:
@@ -117,7 +117,7 @@ class RefusedTests(VerifyUpperTestCase):
     def test_parsed(self) -> None:
         for name, (klass, kwargs) in self.cases().items():
             with self.subTest(name):
-                octets = klass(**kwargs).data
+                octets = klass.from_fields(**kwargs).data
                 self.assertQuiet(*self.verified(klass, octets), self.Status.NO_PSEUDO_HEADER)
 
     def test_built(self) -> None:
@@ -136,7 +136,7 @@ class RefusedTests(VerifyUpperTestCase):
         self.assertEqual(exceptions._caught_here.get(), ())  # pylint: disable=protected-access
         # Building the pseudo-header directly, with nothing to catch it, stays loud.
         with capture(self.logger) as recorder, self.assertRaises(ProtocolError) as context:
-            IP_Pseudo(ip=layer)
+            IP_Pseudo.from_fields(ip=layer)
         self.assertEqual(str(context.exception), ROUTE_ERROR)
         self.assertEqual(recorder.messages, [('CRITICAL', f'ProtocolError: {ROUTE_ERROR}')])
         if not DEVMODE:
@@ -154,7 +154,7 @@ class DerivedTests(VerifyUpperTestCase):
                                          'payload': self.route(self.Routing.Source_Route,
                                                                data={'ip': [FINAL]})}),
             'atomic fragment': (self.IPv6, {'src': V6_SRC, 'dst': V6_DST, 'next': 44,
-                                            'payload': self.IPv6_Frag(next=6, payload=self.segment())}),
+                                            'payload': self.IPv6_Frag.from_fields(next=6, payload=self.segment())}),
             'IPv4': (self.IPv4, {'src': V4_SRC, 'dst': V4_DST, 'protocol': 6, 'payload': self.segment()}),
         }
         for name, (klass, kwargs) in cases.items():

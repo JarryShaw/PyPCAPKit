@@ -218,20 +218,20 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2484).
-            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
             return ah
         # NOTE: The payload is the rest of the parent's, so a frame's cut the
         # parent handed on is handed on in turn (#2689).
         return self._decode_next_layer(ah, schema.next, length - ah.length, declared=False)
 
-    def make(self,
+    def make(self, *,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              reserved: 'int' = 0,
              spi: 'int' = 0,
              seq: 'int' = 0,
              icv: 'bytes' = b'',
              payload: 'bytes | ProtocolBase | Schema' = b'',
-             *, payload_length: 'Optional[int]' = None,
+             payload_length: 'Optional[int]' = None,
              version: 'Literal[4, 6]' = 4,
              extension: 'bool' = False,
              **kwargs: 'Any') -> 'Schema_AH':

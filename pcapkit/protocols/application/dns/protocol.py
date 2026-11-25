@@ -445,7 +445,7 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
         rest = (len(self._data) if length is None else length) - self._length
         return self._decode_next_layer(dns, -1, rest)
 
-    def make(self,  # pylint: disable=redefined-builtin
+    def make(self, *,  # pylint: disable=redefined-builtin
              id: 'int' = 0,
              qr: 'bool' = False,
              opcode: 'Enum_Opcode | int' = Enum_Opcode.Query,

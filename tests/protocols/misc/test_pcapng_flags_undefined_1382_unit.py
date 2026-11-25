@@ -72,9 +72,9 @@ class TestPCAPNGFlagsUndefined(PCAPNGTestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
-        block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
-                       block={'packet_data': b'abcd', 'timestamp': 0,
-                              'options': [(OptionType.epb_flags, {'direction': 0b11, 'reception': 0b110})]})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
+                                   block={'packet_data': b'abcd', 'timestamp': 0,
+                                          'options': [(OptionType.epb_flags, {'direction': 0b11, 'reception': 0b110})]})
         self.assertIn(H('0200 0400 1b000000'), block.data)
         self.assertRebuilds(block.data, context)
 
@@ -98,9 +98,9 @@ class TestPCAPNGFlagsUndefined(PCAPNGTestCase):
                              ({'tcp_segmentation_offloaded': True}, '00080000'),
                              ({'reserved': 1}, '00100000')):
             with self.subTest(**kwargs):
-                block = PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Enhanced_Packet_Block,
-                               block={'packet_data': b'abcd', 'timestamp': 0,
-                                      'options': [(OptionType.epb_flags, kwargs)]})
+                block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Enhanced_Packet_Block,
+                                           block={'packet_data': b'abcd', 'timestamp': 0,
+                                                  'options': [(OptionType.epb_flags, kwargs)]})
                 self.assertIn(H('0200 0400' + word), block.data)
 
     def test_out_of_range_value_still_raises(self) -> None:

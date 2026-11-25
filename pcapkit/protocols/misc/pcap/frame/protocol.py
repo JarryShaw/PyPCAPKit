@@ -383,7 +383,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         finally:
             frame_length.reset(token)
 
-    def make(self,
+    def make(self, *,
              timestamp: 'Optional[float | Decimal | int | dt_type]' = None,
              ts_sec: 'Optional[int]' = None,
              ts_usec: 'Optional[int]' = None,

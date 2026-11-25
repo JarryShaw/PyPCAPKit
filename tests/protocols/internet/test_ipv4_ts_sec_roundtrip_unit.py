@@ -89,15 +89,15 @@ class TestIPv4TimestampSecurityRoundTrip(unittest.TestCase):
         for msec in (1001, 1009, 2048006, 2147483644):
             stamp = datetime.timedelta(milliseconds=msec)
             with self.subTest(msec=msec, flag='timestamp only'):
-                datagram = IPv4(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
-                                options=[(OptionNumber.TS, {'counts': 1, 'timestamp': [stamp]})],
-                                payload=b'')
+                datagram = IPv4.from_fields(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
+                                            options=[(OptionNumber.TS, {'counts': 1, 'timestamp': [stamp]})],
+                                            payload=b'')
                 self.assertEqual(bytes(datagram)[24:28], msec.to_bytes(4, 'big'))
             with self.subTest(msec=msec, flag='address and timestamp'):
-                datagram = IPv4(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
-                                options=[(OptionNumber.TS, {'counts': 1, 'timestamp': {
-                                    ipaddress.ip_address('192.0.2.1'): stamp,
-                                }})], payload=b'')
+                datagram = IPv4.from_fields(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
+                                            options=[(OptionNumber.TS, {'counts': 1, 'timestamp': {
+                                                ipaddress.ip_address('192.0.2.1'): stamp,
+                                            }})], payload=b'')
                 self.assertEqual(bytes(datagram)[28:32], msec.to_bytes(4, 'big'))
 
     def test_trailing_partial_slot_is_data(self) -> None:

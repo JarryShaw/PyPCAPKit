@@ -242,7 +242,7 @@ class TestRadiotap(unittest.TestCase):
     def test_make_then_parse_minimal(self) -> None:
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
-        made = Radiotap().data
+        made = Radiotap.from_fields().data
         self.assertEqual(made, _radiotap(8, [0]))
 
         parsed = Radiotap(made, len(made))
@@ -253,7 +253,7 @@ class TestRadiotap(unittest.TestCase):
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         fields = bytes.fromhex('0102030405060708090a')
-        made = Radiotap(present=(0b111,), fields=fields, payload=ACK).data
+        made = Radiotap.from_fields(present=(0b111,), fields=fields, payload=ACK).data
         self.assertEqual(made, _radiotap(8 + len(fields), [0b111], fields) + ACK)
 
         parsed = Radiotap(made, len(made))
@@ -267,7 +267,7 @@ class TestRadiotap(unittest.TestCase):
 
         word0 = (1 << 31) | 0b1
         word1 = 0b10
-        made = Radiotap(present=(word0, word1)).data
+        made = Radiotap.from_fields(present=(word0, word1)).data
         self.assertEqual(made, _radiotap(12, [word0, word1]))
 
         parsed = Radiotap(made, len(made))
@@ -277,7 +277,7 @@ class TestRadiotap(unittest.TestCase):
     def test_make_computes_it_len_from_present_and_fields(self) -> None:
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
-        made = Radiotap(present=(0, 0), fields=bytes(5), payload=bytes(3))
+        made = Radiotap.from_fields(present=(0, 0), fields=bytes(5), payload=bytes(3))
         self.assertEqual(made.info.it_len, 8 + 4 + 5)
 
     def test_make_explicit_it_len_is_written_as_given(self) -> None:
@@ -289,7 +289,7 @@ class TestRadiotap(unittest.TestCase):
         """
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
-        made = Radiotap(it_len=999)
+        made = Radiotap.from_fields(it_len=999)
         self.assertEqual(made.info.it_len, 999)
 
     def test_make_rejects_what_does_not_fit(self) -> None:
@@ -305,7 +305,7 @@ class TestRadiotap(unittest.TestCase):
             {'it_len': -1}, {'it_len': 0x1_0000}, {'it_len': True},
         ):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
-                Radiotap(**kwargs)
+                Radiotap.from_fields(**kwargs)
 
     def _snapshot(self) -> None:
         """Put back every registry ``register_radiotap`` writes after the test."""

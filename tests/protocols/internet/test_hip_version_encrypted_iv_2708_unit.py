@@ -59,11 +59,11 @@ class TestHIPDefaultVersion(unittest.TestCase):
 
         for kwargs in ({'next': 59}, {'next': 59, 'parameters': []}):
             with self.subTest(**kwargs):
-                proto = HIP(**kwargs)
+                proto = HIP.from_fields(**kwargs)
                 self.assertEqual(proto.info.version, default)
                 # Version 2, three reserved zero bits, then the fixed bit 1.
                 self.assertEqual(proto.data[3], 0x21)
-                self.assertEqual(proto.data, HIP(version=default, **kwargs).data)
+                self.assertEqual(proto.data, HIP.from_fields(version=default, **kwargs).data)
                 self.assertEqual(proto.data, proto.make(**kwargs).pack())
 
     def test_explicit_version_is_written(self) -> None:
@@ -71,7 +71,7 @@ class TestHIPDefaultVersion(unittest.TestCase):
 
         for version in (1, 2):
             with self.subTest(version=version):
-                proto = HIP(next=59, version=version)
+                proto = HIP.from_fields(next=59, version=version)
                 self.assertEqual(proto.info.version, version)
                 self.assertEqual(proto.data[3], version << 4 | 0x01)
 
@@ -79,7 +79,7 @@ class TestHIPDefaultVersion(unittest.TestCase):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
-            data = HIP(next=59, version=version).data
+            data = HIP.from_fields(next=59, version=version).data
             for ip_version in (4, 6):
                 with self.subTest(version=version, ip_version=ip_version):
                     parsed = HIP(data, version=ip_version)
@@ -98,7 +98,7 @@ class TestHIPEncryptedIV(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        return HIP(next=59, parameters=[
+        return HIP.from_fields(next=59, parameters=[
             (Parameter.HIP_CIPHER, {'ciphers': [cipher]}),
             (Parameter.ENCRYPTED, {'cipher': cipher, 'iv': iv, 'data': b'abcd'}),
         ]).data
@@ -136,11 +136,11 @@ class TestHIPEncryptedIV(unittest.TestCase):
                     param = EncryptedParameter(type=Parameter.ENCRYPTED, critical=True, length=8,
                                                reserved=bytes(4), cipher=cipher, iv=iv, data=b'abcd')
                     if iv is None:
-                        schema = HIP()._make_param_encrypted(Parameter.ENCRYPTED, param, version=2)
+                        schema = HIP.from_fields()._make_param_encrypted(Parameter.ENCRYPTED, param, version=2)
                         self.assertEqual(bytes(schema), b'\x02\x81\x00\x08' + bytes(4) + b'abcd' + bytes(4))
                     else:
                         with self.assertRaisesRegex(ProtocolError, 'IV is not used by cipher'):
-                            HIP()._make_param_encrypted(Parameter.ENCRYPTED, param, version=2)
+                            HIP.from_fields()._make_param_encrypted(Parameter.ENCRYPTED, param, version=2)
 
     def test_other_cipher_without_iv_round_trips(self) -> None:
         from pcapkit.protocols.internet.hip.protocol import HIP
@@ -210,7 +210,7 @@ class TestHIPEncryptedCipherOnParse(unittest.TestCase):
 
         ciphers = [Cipher.AES_256_CBC, Cipher.NULL_ENCRYPT, Cipher.AES_128_CBC]
         ivs = [bytes(16), None, bytes(range(16))]
-        data = HIP(next=59, parameters=[
+        data = HIP.from_fields(next=59, parameters=[
             (Parameter.HIP_CIPHER, {'ciphers': ciphers[:1]}),
             (Parameter.HIP_CIPHER, {'ciphers': ciphers[1:]}),
             *[(Parameter.ENCRYPTED, {'cipher': cipher, 'iv': iv, 'data': b'abcd'})
@@ -228,10 +228,10 @@ class TestHIPEncryptedCipherOnParse(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        lone = HIP(next=59, parameters=[
+        lone = HIP.from_fields(next=59, parameters=[
             (Parameter.ENCRYPTED, {'cipher': Cipher.NULL_ENCRYPT, 'data': b'abcd'}),
         ]).data
-        extra = HIP(next=59, parameters=[
+        extra = HIP.from_fields(next=59, parameters=[
             (Parameter.HIP_CIPHER, {'ciphers': [Cipher.NULL_ENCRYPT]}),
             (Parameter.ENCRYPTED, {'cipher': Cipher.NULL_ENCRYPT, 'data': b'abcd'}),
             (Parameter.ENCRYPTED, {'cipher': Cipher.NULL_ENCRYPT, 'data': b'efgh'}),

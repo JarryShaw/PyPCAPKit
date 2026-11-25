@@ -43,12 +43,12 @@ class TestDCCPEmptyRawOption(unittest.TestCase):
         for options in ([b''], [SLOW_RECEIVER, b''], [b'', SLOW_RECEIVER]):
             with self.subTest(options=options):
                 with self.assertRaisesRegex(ProtocolError, r"invalid option: b'' holds no type octet"):
-                    DCCP(options=options)
+                    DCCP.from_fields(options=options)
 
     def test_raw_option_builds_as_given(self) -> None:
         from pcapkit.protocols.transport.dccp.protocol import DCCP
 
-        built = DCCP(options=[SLOW_RECEIVER]).data
+        built = DCCP.from_fields(options=[SLOW_RECEIVER]).data
         self.assertEqual(built[4], 6)  # Data Offset: the 20-octet header and one word of options
         self.assertEqual(built[20:], SLOW_RECEIVER + b'\x00\x00\x00')
 

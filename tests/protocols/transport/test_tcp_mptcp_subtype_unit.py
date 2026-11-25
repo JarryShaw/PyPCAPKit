@@ -136,7 +136,7 @@ def build_mptcp_option(subtype: 'object', *, header: 'Optional[dict[str, object]
     args['subtype'] = subtype
     base = dict(TCP_BASE)
     base.update(header or {})
-    return TCP(options=[(Enum_Option.Multipath_TCP, args)], **base)  # type: ignore[arg-type]
+    return TCP.from_fields(options=[(Enum_Option.Multipath_TCP, args)], **base)  # type: ignore[arg-type]
 
 
 class TCPMPTCPSubtypeUnitTests(unittest.TestCase):

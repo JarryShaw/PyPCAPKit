@@ -196,7 +196,7 @@ class IPv6OptionMakerTests(_Case):
             for option, args, name, value in self.REFUSED:
                 with self.subTest(protocol=alias, option=option, args=args):
                     self.assertRefused(f'{alias}: invalid {name}: {value!r}',
-                                       cls, next=59, options=[(Option[option], args)])
+                                       cls.from_fields, next=59, options=[(Option[option], args)])
 
     def test_field_maxima_build(self) -> None:
         from pcapkit.const.ipv6.option import Option
@@ -212,7 +212,7 @@ class IPv6OptionMakerTests(_Case):
         for alias, cls in self._classes().items():
             for option, args, octets in cases:
                 with self.subTest(protocol=alias, option=option):
-                    data = cls(next=59, options=[(Option[option], args)]).data
+                    data = cls.from_fields(next=59, options=[(Option[option], args)]).data
                     self.assertEqual(data[2:2 + len(octets) // 2].hex(), octets)
                     parsed = cls(data, len(data), extension=True)
                     self.assertEqual(cls.from_data(parsed.info).data, data)
@@ -228,7 +228,7 @@ class IPv6OptionMakerTests(_Case):
                                  ('SMF_DPD', {'mode': 1, 'hav': bytes(255)}),
                                  ('RFC3692_style_Experiment_0x1E', {'data': bytes(255)})):
                 with self.subTest(protocol=alias, option=option, args=sorted(args)):
-                    data = cls(next=59, options=[(Option[option], args)]).data
+                    data = cls.from_fields(next=59, options=[(Option[option], args)]).data
                     self.assertEqual(data[2:4], bytes([Option[option], 255]))
                     parsed = cls(data, len(data), extension=True)
                     self.assertEqual(cls.from_data(parsed.info).data, data)
@@ -241,7 +241,7 @@ class IPv6OptionMakerTests(_Case):
         for alias, cls in self._classes().items():
             for nonce, size in ((0, 1), (0xFF, 1), (0x100, 2), (1 << 64, 9)):
                 with self.subTest(protocol=alias, nonce=nonce):
-                    data = cls(next=59, options=[(Option.ILNP_Nonce, {'nonce': nonce})]).data
+                    data = cls.from_fields(next=59, options=[(Option.ILNP_Nonce, {'nonce': nonce})]).data
                     self.assertEqual(data[2:4], bytes([Option.ILNP_Nonce, size]))
                     self.assertEqual(int.from_bytes(data[4:4 + size], 'big'), nonce)
 
@@ -253,11 +253,11 @@ class IPv6OptionMakerTests(_Case):
         tun = (Option.Tunnel_Encapsulation_Limit, {'limit': 1})
         for alias, cls in self._classes().items():
             with self.subTest(protocol=alias):
-                data = cls(next=59, options=[tun] * 256).data
+                data = cls.from_fields(next=59, options=[tun] * 256).data
                 self.assertEqual((len(data), data[1]), (2048, 255))
                 self.assertEqual(cls.from_data(cls(data, len(data), extension=True).info).data, data)
-                self.assertRefused(f'{alias}: invalid Hdr Ext Len: 256', cls, next=59, options=[tun] * 257)
-                self.assertRefused(f'{alias}: invalid Hdr Ext Len: 499', cls, next=59, options=[tun] * 500)
+                self.assertRefused(f'{alias}: invalid Hdr Ext Len: 256', cls.from_fields, next=59, options=[tun] * 257)
+                self.assertRefused(f'{alias}: invalid Hdr Ext Len: 499', cls.from_fields, next=59, options=[tun] * 500)
 
     def test_calipso_bitmap_octets_are_refused_out_of_range(self) -> None:
         from pcapkit.const.ipv6.option import Option
@@ -265,7 +265,7 @@ class IPv6OptionMakerTests(_Case):
         for alias, cls in self._classes().items():
             for octet in (-1, 256, True):
                 with self.subTest(protocol=alias, octet=octet):
-                    self.assertRefused(f'{alias}: invalid CALIPSO bitmap octet: {octet!r}', cls, next=59,
+                    self.assertRefused(f'{alias}: invalid CALIPSO bitmap octet: {octet!r}', cls.from_fields, next=59,
                                        options=[(Option.CALIPSO, {'bitmap': (octet, 0, 0, 0)})])
 
     def test_pad_length_is_refused_out_of_range(self) -> None:
@@ -294,7 +294,7 @@ class IPv4MakerTests(_Case):
                                   ({'ttl': -1}, 'TTL', -1),
                                   ({'total_length': 1 << 16}, 'total length', 1 << 16)):
             with self.subTest(args=args):
-                self.assertRefused(f'IPv4: invalid {name}: {value!r}', IPv4, protocol=253, **args)
+                self.assertRefused(f'IPv4: invalid {name}: {value!r}', IPv4.from_fields, protocol=253, **args)
 
     def test_option_fields_are_refused_out_of_range(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
@@ -336,7 +336,7 @@ class IPv4MakerTests(_Case):
                 (OptionNumber.SEC, {'authorities': [1 << 200]}, 'protection authority', 1 << 200)):
             with self.subTest(code=code, args=args):
                 self.assertRefused(f'IPv4: invalid {name}: {value!r}',
-                                   IPv4, options=[(code, args)], protocol=253)
+                                   IPv4.from_fields, options=[(code, args)], protocol=253)
 
     def test_counted_options_reach_their_one_octet_length(self) -> None:
         # RFC 791: each option's length is one octet. A route option holds 63
@@ -360,9 +360,9 @@ class IPv4MakerTests(_Case):
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        data = IPv4(protocol=253, options=[(OptionNumber.RR, {'counts': 9})]).data
+        data = IPv4.from_fields(protocol=253, options=[(OptionNumber.RR, {'counts': 9})]).data
         self.assertEqual(data[0], 0x4F)
-        self.assertRefused('IPv4: invalid IHL: 16', IPv4, protocol=253,
+        self.assertRefused('IPv4: invalid IHL: 16', IPv4.from_fields, protocol=253,
                            options=[(OptionNumber.RR, {'counts': 10})])
 
     def test_field_maxima_build(self) -> None:
@@ -370,8 +370,8 @@ class IPv4MakerTests(_Case):
         from pcapkit.const.ipv4.qs_function import QSFunction
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        data = IPv4(id=0xFFFF, reserved=True, offset=0x1FFF, ttl=255, protocol=253,
-                    options=[(OptionNumber.SID, {'sid': 0xFFFF})]).data
+        data = IPv4.from_fields(id=0xFFFF, reserved=True, offset=0x1FFF, ttl=255, protocol=253,
+                                options=[(OptionNumber.SID, {'sid': 0xFFFF})]).data
         # RFC 791: Identification, then the flags above the 13-bit offset.
         self.assertEqual(data[4:9].hex(), 'ffff9fffff')
         self.assertEqual(data[20:24].hex(), '8804ffff')
@@ -382,7 +382,7 @@ class IPv4MakerTests(_Case):
                 (OptionNumber.E_SEC, {'format': 255}, 22, 'ff'),
                 (OptionNumber.QS, {'func': QSFunction.Report_of_Approved_Rate, 'unused': 255}, 23, 'ff')):
             with self.subTest(code=code):
-                data = IPv4(protocol=253, options=[(code, args)]).data
+                data = IPv4.from_fields(protocol=253, options=[(code, args)]).data
                 self.assertEqual(data[offset:offset + 1].hex(), octets)
                 self.assertEqual(IPv4.from_data(IPv4(data).info).data, data)
 
@@ -397,16 +397,16 @@ class IPv6RouteMakerTests(_Case):
                                   ({'seg_left': True}, 'Segments Left', True),
                                   ({'hdr_ext_len': -1}, 'Hdr Ext Len', -1)):
             with self.subTest(args=args):
-                self.assertRefused(f'IPv6-Route: invalid {name}: {value!r}', IPv6_Route, **args)
+                self.assertRefused(f'IPv6-Route: invalid {name}: {value!r}', IPv6_Route.from_fields, **args)
         for reserved in (1 << 20, -1, True):
             with self.subTest(reserved=reserved):
-                self.assertRefused(f'IPv6-Route: invalid RPL reserved bits: {reserved!r}', IPv6_Route,
+                self.assertRefused(f'IPv6-Route: invalid RPL reserved bits: {reserved!r}', IPv6_Route.from_fields,
                                    type=3, data={'ip': ['2001:db8::1'], 'reserved': reserved})
 
     def test_rpl_reserved_maximum_round_trips(self) -> None:
         from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
-        data = IPv6_Route(type=3, data={'ip': ['2001:db8::1'], 'reserved': 0xFFFFF}).data
+        data = IPv6_Route.from_fields(type=3, data={'ip': ['2001:db8::1'], 'reserved': 0xFFFFF}).data
         # RFC 6554 section 3: Pad in the top four bits, then 20 reserved bits.
         self.assertEqual(data[5:8].hex(), '0fffff')
         self.assertEqual(IPv6_Route.from_data(IPv6_Route(data, len(data), extension=True).info).data, data)
@@ -594,8 +594,8 @@ class MHMakerTests(_Case):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        return bytes(MH(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
-                        data={'options': [(Option[name], args) for name, args in options]}, **kwargs))
+        return bytes(MH.from_fields(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
+                                    data={'options': [(Option[name], args) for name, args in options]}, **kwargs))
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
         from pcapkit.protocols.internet.mh.protocol import MH
@@ -611,7 +611,7 @@ class MHMakerTests(_Case):
         from pcapkit.protocols.internet.mh.protocol import MH
 
         def message(packet: 'str', arg: 'str') -> 'object':
-            return lambda value: bytes(MH(next=59, type=Packet[packet], data={arg: value}))
+            return lambda value: bytes(MH.from_fields(next=59, type=Packet[packet], data={arg: value}))
 
         def option(code: 'str', base: 'dict', arg: 'str') -> 'object':
             return lambda value: self._make((code, {**base, arg: value}))
@@ -877,10 +877,10 @@ class HIPMakerTests(_Case):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         def header(arg: 'str') -> 'object':
-            return lambda value: bytes(HIP(version=2, **{arg: value}))
+            return lambda value: bytes(HIP.from_fields(version=2, **{arg: value}))
 
         def parameter(code: 'str', args: 'object') -> 'object':
-            return lambda value: bytes(HIP(version=2, parameters=[
+            return lambda value: bytes(HIP.from_fields(version=2, parameters=[
                 (Parameter[code], args(value))]))  # type: ignore[operator]
 
         rows = []
@@ -914,7 +914,7 @@ class HIPMakerTests(_Case):
 
         for version in (-1, 16, True):
             with self.subTest(version=version):
-                self.assertRefused(f'HIPv{version}: invalid version: {version!r}', HIP, version=version)
+                self.assertRefused(f'HIPv{version}: invalid version: {version!r}', HIP.from_fields, version=version)
 
     def test_header_too_long_for_header_length_is_refused(self) -> None:
         # RFC 7401 section 5.1: Header Length counts 8-octet units after the
@@ -923,10 +923,10 @@ class HIPMakerTests(_Case):
         from pcapkit.protocols.internet.hip.protocol import HIP
 
         seq = (Parameter.SEQ, {'update_id': 1})
-        data = HIP(version=2, parameters=[seq] * 251).data
+        data = HIP.from_fields(version=2, parameters=[seq] * 251).data
         self.assertEqual((len(data), data[1]), (2048, 255))
         self.assertEqual(self._rebuild(data), data)
-        self.assertRefused('HIPv2: invalid header length: 256', HIP, version=2, parameters=[seq] * 252)
+        self.assertRefused('HIPv2: invalid header length: 256', HIP.from_fields, version=2, parameters=[seq] * 252)
 
     def test_locator_type_is_refused_out_of_range(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
@@ -934,7 +934,7 @@ class HIPMakerTests(_Case):
 
         for kind in (-1, 256):
             with self.subTest(type=kind):
-                self.assertRefused(f'HIPv2: invalid locator type: {kind}', HIP, version=2, parameters=[
+                self.assertRefused(f'HIPv2: invalid locator type: {kind}', HIP.from_fields, version=2, parameters=[
                     (Parameter.LOCATOR_SET, {'locator_set': [{'type': kind}]})])
 
     def test_lifetimes_and_identifiers_are_refused(self) -> None:
@@ -966,7 +966,7 @@ class HIPMakerTests(_Case):
             for value in (True, float('inf'), float('nan'), '1'):
                 with self.subTest(code=code, argument=arg, value=value):
                     with self.assertRaises(ProtocolError) as caught:
-                        HIP(version=2, parameters=[(Parameter[code], {arg: value})])
+                        HIP.from_fields(version=2, parameters=[(Parameter[code], {arg: value})])
                     self.assertIn(f'invalid lifetime: {value!r} is not a ', str(caught.exception))
 
     def test_rhash_len_is_refused_unless_a_width_the_length_counts(self) -> None:
@@ -978,7 +978,7 @@ class HIPMakerTests(_Case):
         for code, base in (('PUZZLE', {'lifetime': 1}), ('SOLUTION', {})):
             for value in (True, 8.0, -8, 8 << 16, 1 << 200):
                 with self.subTest(code=code, rhash_len=value):
-                    self.assertRefused(f'HIPv2: invalid RHASH_len: {value!r}', HIP, version=2,
+                    self.assertRefused(f'HIPv2: invalid RHASH_len: {value!r}', HIP.from_fields, version=2,
                                        parameters=[(Parameter[code], {**base, 'rhash_len': value})])
 
 
@@ -997,11 +997,11 @@ class OptionCodeTests(_Case):
         from pcapkit.protocols.internet.mh.protocol import MH
 
         return [
-            (HOPOPT, lambda code, args: HOPOPT(next=59, options=[(code, args)])),
-            (IPv6_Opts, lambda code, args: IPv6_Opts(next=59, options=[(code, args)])),
-            (IPv4, lambda code, args: IPv4(protocol=253, options=[(code, args)])),
-            (MH, lambda code, args: MH(next=59, type=Packet.Binding_Refresh_Request,
-                                       data={'options': [(code, args)]})),
+            (HOPOPT, lambda code, args: HOPOPT.from_fields(next=59, options=[(code, args)])),
+            (IPv6_Opts, lambda code, args: IPv6_Opts.from_fields(next=59, options=[(code, args)])),
+            (IPv4, lambda code, args: IPv4.from_fields(protocol=253, options=[(code, args)])),
+            (MH, lambda code, args: MH.from_fields(next=59, type=Packet.Binding_Refresh_Request,
+                                                   data={'options': [(code, args)]})),
         ]
 
     def test_registry_codes_are_refused_out_of_range(self) -> None:

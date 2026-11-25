@@ -96,7 +96,7 @@ def _protocol(outer):  # type: ignore[no-untyped-def]
             from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
             schema = self.__header__
-            self._next = NoPayload()
+            self._next = NoPayload.from_fields()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
             # NOTE: A made header still holds the mapping ``make`` was given.
             inner = schema.inner if isinstance(schema.inner, dict) else schema.inner.to_dict()

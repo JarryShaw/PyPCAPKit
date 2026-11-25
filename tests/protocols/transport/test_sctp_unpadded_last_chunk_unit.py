@@ -99,16 +99,16 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
             for code, value in info.chunks.items(multi=True):
                 chunks.add(code, value)
 
-        data = SCTP(srcport=5000, dstport=5001, vtag=0xdeadbeef, chksum=bytes(4),
-                    chunks=chunks).data
+        data = SCTP.from_fields(srcport=5000, dstport=5001, vtag=0xdeadbeef, chksum=bytes(4),
+                                chunks=chunks).data
         self.assertEqual(data[12:], chunk(0x3f, 0, b'a') + chunk(0x3f, 0, b'ab'))
 
         chunks = OrderedMultiDict()
         for info in (fresh, short):
             for code, value in info.chunks.items(multi=True):
                 chunks.add(code, value)
-        data = SCTP(srcport=5000, dstport=5001, vtag=0xdeadbeef, chksum=bytes(4),
-                    chunks=chunks).data
+        data = SCTP.from_fields(srcport=5000, dstport=5001, vtag=0xdeadbeef, chksum=bytes(4),
+                                chunks=chunks).data
         self.assertEqual(data[12:], chunk(0x3f, 0, b'ab') + chunk(0x3f, 0, b'a', pad=b''))
 
     def test_short_record_on_a_non_last_chunk_rebuilds_aligned(self) -> None:
@@ -177,7 +177,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.protocols.transport.sctp.protocol import SCTP
 
-        data = SCTP(chunks=[(Chunk.State_Cookie, {'cookie': b'abcde'})]).data
+        data = SCTP.from_fields(chunks=[(Chunk.State_Cookie, {'cookie': b'abcde'})]).data
         self.assertEqual(data[12:], chunk(10, 0, b'abcde'))
 
 

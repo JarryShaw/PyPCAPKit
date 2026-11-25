@@ -147,8 +147,8 @@ class TSOTotalLengthTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         segment = _records()[1][0][3][34:]
-        made = IPv4(total_length=0, protocol=TransType.TCP, ttl=64, src='10.20.30.130', dst='10.20.30.131',
-                    payload=segment)
+        made = IPv4.from_fields(total_length=0, protocol=TransType.TCP, ttl=64, src='10.20.30.130', dst='10.20.30.131',
+                                payload=segment)
         self.assertEqual(made.data[2:4], b'\x00\x00')
         self.assertEqual(made.data[20:], segment)
 
@@ -159,7 +159,7 @@ class TSOTotalLengthTests(unittest.TestCase):
         self.assertEqual(IPv4.from_data(parsed.info.to_dict()).data, made.data)
 
         # Without an explicit Total Length it is computed.
-        computed = IPv4(protocol=TransType.TCP, payload=segment)
+        computed = IPv4.from_fields(protocol=TransType.TCP, payload=segment)
         self.assertEqual(struct.unpack('!H', computed.data[2:4])[0], 20 + len(segment))
 
     def test_schema_splits_payload_and_trailer(self) -> None:
@@ -217,7 +217,7 @@ class TSOTotalLengthTests(unittest.TestCase):
                     self.assertEqual(IPv4.from_data(ipv4.info.to_dict()).data, octets[14:])
 
         # make -> parse -> rebuild
-        made = IPv4(total_length=10, protocol=TransType.TCP, trailer=frame[34:])
+        made = IPv4.from_fields(total_length=10, protocol=TransType.TCP, trailer=frame[34:])
         self.assertEqual(made.data[2:4], b'\x00\x0a')
         parsed_made = IPv4(made.data, len(made.data))
         self.assertIsInstance(parsed_made.payload, NoPayload)

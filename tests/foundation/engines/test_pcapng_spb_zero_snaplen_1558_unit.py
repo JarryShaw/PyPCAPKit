@@ -95,10 +95,10 @@ class TestSPBZeroSnaplen(unittest.TestCase):
         octets = _spb()
         for snaplen in (0, 65535):
             with self.subTest(interface_snaplen=snaplen):
-                section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+                section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
                 context = Context(section.info)
-                interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                   block={'linktype': 1, 'snaplen': snaplen})
+                interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                               block={'linktype': 1, 'snaplen': snaplen})
                 context.interfaces.append(interface.info)
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')

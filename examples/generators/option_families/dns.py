@@ -50,8 +50,8 @@ def _dns_rdata_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _dns_rdata_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.application.dns.protocol import DNS
-    return DNS(id=1, qr=True, answer=({'name': 'example.com', 'type': code, 'ttl': 300,
-                                       'rdata': dict(kwargs)},), compress=True)
+    return DNS.from_fields(id=1, qr=True, answer=({'name': 'example.com', 'type': code, 'ttl': 300,
+                                                   'rdata': dict(kwargs)},), compress=True)
 
 
 def _dns_parse(octets: 'bytes') -> 'Any':
@@ -65,7 +65,7 @@ def _dns_rdata_extract(parsed: 'Any') -> 'Any':
 
 def _dns_rdata_rebuild(answer: 'Any') -> 'Any':
     from pcapkit.protocols.application.dns.protocol import DNS
-    return DNS(id=1, qr=True, answer=answer)
+    return DNS.from_fields(id=1, qr=True, answer=answer)
 
 
 def _dns_option_registry() -> 'Any':
@@ -92,9 +92,9 @@ def _dns_opt_message(options: 'Any') -> 'Any':
     """A query carrying one OPT pseudo-record with ``options``."""
     from pcapkit.const.dns.rr_type import RRType as Enum_RRType
     from pcapkit.protocols.application.dns.protocol import DNS
-    return DNS(id=1, question=({'name': 'example.com'},),
-               additional=({'type': Enum_RRType.OPT, 'udp_payload_size': 1232, 'do': True,
-                            'options': options},))
+    return DNS.from_fields(id=1, question=({'name': 'example.com'},),
+                           additional=({'type': Enum_RRType.OPT, 'udp_payload_size': 1232, 'do': True,
+                                        'options': options},))
 
 
 def _dns_option_extract(parsed: 'Any') -> 'Any':

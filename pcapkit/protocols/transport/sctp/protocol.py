@@ -738,7 +738,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return self._decode_next_layer(sctp, self._ppid, len(self._payload))
 
-    def make(self,
+    def make(self, *,
              srcport: 'Enum_AppType | int' = 0,
              dstport: 'Enum_AppType | int' = 0,
              vtag: 'int' = 0,

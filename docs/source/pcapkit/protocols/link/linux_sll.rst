@@ -57,6 +57,7 @@ whose data model it is handed (:issue:`2574`).
 
    .. automethod:: _import_next_layer
    .. automethod:: _member_of_version
+   .. automethod:: _construction_member
 
 Auxiliary Functions
 -------------------

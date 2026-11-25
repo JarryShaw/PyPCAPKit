@@ -28,7 +28,7 @@ def _payload(code: 'int') -> 'bytes':
 
     if code == EtherType.Address_Resolution_Protocol:
         from pcapkit.protocols.link.arp.protocol import ARP
-        return bytes(ARP(oper=1))
+        return bytes(ARP.from_fields(oper=1))
     if code == EtherType.Reverse_Address_Resolution_Protocol:
         from pcapkit.protocols.application.rarp.protocol import RARP
 
@@ -37,30 +37,30 @@ def _payload(code: 'int') -> 'bytes':
         # pcapkit/protocols/link/arp/protocol.py, per #496), so ``oper`` has to land in
         # the RARP range (3, 4) or this would silently probe ARP instead while
         # still "passing".
-        return bytes(RARP(oper=3))
+        return bytes(RARP.from_fields(oper=3))
     if code == EtherType.Customer_VLAN_Tag_Type:
         from pcapkit.protocols.link.c_tag.protocol import C_Tag
-        return bytes(C_Tag(vid=200, type=0x0800, payload=generator._ip4(6, generator._tcp(9999))))
+        return bytes(C_Tag.from_fields(vid=200, type=0x0800, payload=generator._ip4(6, generator._tcp(9999))))
     if code == EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier:
         from pcapkit.protocols.link.s_tag.protocol import S_Tag
-        return bytes(S_Tag(vid=100, type=0x0800, payload=generator._ip4(6, generator._tcp(9999))))
+        return bytes(S_Tag.from_fields(vid=100, type=0x0800, payload=generator._ip4(6, generator._tcp(9999))))
     if code == EtherType.Internet_Protocol_version_4:
         return generator._ip4(6, generator._tcp(9999))
     if code == EtherType.Internet_Protocol_version_6:
         return generator._ip6(6, generator._tcp(9999))
     if code == 0x8137:  # Novell IPX.
         from pcapkit.protocols.internet.ipx.protocol import IPX
-        return bytes(IPX())
+        return bytes(IPX.from_fields())
     if code == EtherType.Point_to_Point_Protocol:
         return generator._ppp(generator._ip4(6, generator._tcp(9999)))
     if code == EtherType.PPP_over_Ethernet_Discovery_Stage:
         from pcapkit.const.pppoe.code import Code
         from pcapkit.protocols.link.pppoe.protocol import PPPoE
-        return bytes(PPPoE(code=Code.PADI_Initiation, tags=[(0x0101, b'')]))
+        return bytes(PPPoE.from_fields(code=Code.PADI_Initiation, tags=[(0x0101, b'')]))
     if code == EtherType.PPP_over_Ethernet_Session_Stage:
         from pcapkit.protocols.link.pppoe.protocol import PPPoE
-        return bytes(PPPoE(session_id=1, payload=generator._ppp(generator._ip4(6, generator._tcp(9999)),
-                                                                acfc=True)))
+        return bytes(PPPoE.from_fields(session_id=1, payload=generator._ppp(generator._ip4(6, generator._tcp(9999)),
+                                                                            acfc=True)))
     raise LookupError(f'link: no payload builder for {code!r}')  # pragma: no cover
 
 

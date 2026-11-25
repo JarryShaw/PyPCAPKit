@@ -1464,7 +1464,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         return block
 
-    def make(self,
+    def make(self, *,
              type: 'Enum_BlockType | int' = Enum_BlockType.Simple_Packet_Block,
              block: 'bytes | Data_PCAPNG | Schema_BlockType | dict[str, Any]' = b'',
              **kwargs: 'Any') -> 'Schema_PCAPNG':

@@ -265,7 +265,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         return self._decode_next_layer(ipv6, schema.next, extent, packet=__packet__)  # pylint: disable=no-member
 
-    def make(self,
+    def make(self, *,
              traffic_class: 'int' = 0,
              flow_label: 'int' = 0,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,

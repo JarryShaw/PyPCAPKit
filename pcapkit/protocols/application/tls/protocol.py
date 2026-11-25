@@ -212,7 +212,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             length = len(self)
         return self._read_tls_record(length, **kwargs)
 
-    def make(self,
+    def make(self, *,
              content_type: 'Enum_ContentType | int' = Enum_ContentType.application_data,
              version: 'int' = 0x0303,
              content: 'Any' = b'',
@@ -312,7 +312,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
                 return parsed
 
     @classmethod
-    def from_data(cls, data: 'Any', **kwargs: 'Any') -> 'Any':
+    def from_data(cls, data: 'Any', /, **kwargs: 'Any') -> 'Any':
         """Create protocol instance from data.
 
         An SSLv2 record that :meth:`unpack` adopted from port 443 is rebuilt as

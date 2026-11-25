@@ -143,7 +143,7 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
         )
         return self._decode_next_layer(ethernet, _type, length - self.length)
 
-    def make(self,
+    def make(self, *,
              dst: 'str | bytes | bytearray' = '00:00:00:00:00:00',
              src: 'str | bytes | bytearray' = '00:00:00:00:00:00',
              type: 'Enum_EtherType | int' = Enum_EtherType.Internet_Protocol_version_4,

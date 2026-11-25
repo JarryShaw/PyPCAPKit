@@ -491,7 +491,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         """
         return self._read_dtls_record(length, **kwargs)
 
-    def make(self,
+    def make(self, *,
              content_type: 'Enum_ContentType | int' = Enum_ContentType.application_data,
              version: 'int' = 0xFEFD,
              epoch: 'int' = 0,
