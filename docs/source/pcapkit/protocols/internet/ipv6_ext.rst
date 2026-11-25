@@ -149,17 +149,20 @@ header chain, and where it stops:
        Q4 -->|no| STOP["walk ends<br/>a plain Raw is reused as the upper layer"]
        Q4 -->|yes| REC["recorded among the extension headers<br/>payload moves past it; proto = its next"]
        REC --> Q5{"an IPv6-Frag header?"}
-       Q5 -->|no| Q1
+       Q5 -->|no| Q7{"a stop met at it?"}
        Q5 -->|yes| J{"the first Fragment header,<br/>in a jumbogram?"}
        J -->|yes| ERR["ProtocolError"]
        J -->|no| Q6{"Fragment Offset zero?"}
-       Q6 -->|yes| Q1
+       Q6 -->|yes| Q7
        Q6 -->|no| OPQ["walk ends opaque<br/>the upper layer gets no code, so Raw"]
+       Q7 -->|no| Q1
+       Q7 -->|yes| TERM["walk ends at the stop<br/>the rest kept Raw, as at a stop at IPv6"]
        Q1 -->|no| EXIT
        Q2 -->|"yes: the rest kept Raw, one warning"| EXIT
        Q3 -->|"yes: the rest kept Raw, one warning"| EXIT
        STOP --> EXIT
        OPQ --> EXIT
+       TERM --> EXIT
        EXIT["Internet.\_decode\_next\_layer<br/>the upper layer, with the extension header chain"]
 
        click S "ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer"
