@@ -2289,12 +2289,21 @@ Sync Develop (:issue:`2942`)
 fix merged to the released line reaches the next minor, as the owner asked in review of
 :pr:`3056` (:issue:`2942`). On each push to ``main``, and
 on dispatch, its ``check`` job compares the two with a read-only token. Where
-``develop`` lacks commits of ``main``, ``pr`` opens the pull request from ``main`` into
-``develop``, ``chore: merge main into develop``, or updates the open one, never a
-second. ``pr`` runs in ``release-app`` and opens it with the release App's token, as
-the Python Versions and Issue and PR Kinds ``pr`` jobs do, so the pull request's checks
-run. Nothing here merges or pushes, the body asks for a merge commit rather than a
-squash, and a ``develop`` that does not exist yet is a notice.
+``develop`` lacks commits of ``main``, ``pr`` force-updates ``sync/main`` to ``main``'s
+head, then opens the pull request from ``sync/main`` into ``develop``,
+``chore: merge main into develop``, or updates the open one, never a second. ``pr``
+runs in ``release-app`` and does both with the release App's token, as the Python
+Versions and Issue and PR Kinds ``pr`` jobs do, so the pull request's checks run. Its
+token holds contents and pull requests write, and workflows write, without which the
+mirror could not move past a change ``main`` made to a workflow.
+
+The head is a mirror rather than ``main``, as the owner ruled on :pr:`3075`, which no
+issue holds: "Update branch" merges a pull request's base into its head, so on this
+pull request it writes ``develop`` into ``sync/main``, which the next run overwrites,
+and never into ``main``. A pull request a run finds open from ``main`` itself is
+closed with a comment naming its replacement, since a head cannot be changed. Nothing
+here merges, no ref but ``sync/main`` is written, the body asks for a merge commit
+rather than a squash, and a ``develop`` that does not exist yet is a notice.
 :file:`util/sync_develop.py` holds the rule, and
 :file:`tests/project/test_sync_develop_2942.py` pins it.
 
