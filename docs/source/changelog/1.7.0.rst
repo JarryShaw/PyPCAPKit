@@ -89,7 +89,9 @@ Added
   the PCAP writer. A PCAP-NG frame keeps its interface's options and its own, a
   Simple or obsolete Packet Block written as an Enhanced Packet Block; Name
   Resolution, Interface Statistics, Decryption Secrets, custom and journal
-  blocks are not written.
+  blocks are not written. :data:`~pcapkit.interface.core.PCAP_NG` names the
+  format beside ``PCAP``, since ``PCAPNG`` already names the protocol class
+  (:issue:`3047`, :pr:`3051`).
 
 pcapkit.foundation
 ------------------
@@ -578,6 +580,17 @@ Fixed
   resizing it raised :exc:`BufferError`. It is copied through a view released
   at once (:issue:`2807`, :pr:`2808`).
 
+pcapkit.vendor
+--------------
+
+Fixed
+~~~~~
+
+* a generated member comment that opens with reST block markup, such as IANA's
+  ``*`` for :attr:`RRType.ANY <pcapkit.const.dns.rr_type.RRType.ANY>`, rendered
+  as a list or a block on its API page. The crawlers now escape it, so the
+  comment reads as written (:issue:`3049`, :pr:`3052`).
+
 Project infrastructure
 ----------------------
 
@@ -592,3 +605,6 @@ Changed
   project test fails on a page out of step (:issue:`2907`, :pr:`2909`).
 * the ``docs`` extra pins ``sphinx-autodoc-typehints`` 3.17.6,
   where 1.6.2 pinned 3.17.5 (:pr:`2931`).
+* ``SECURITY.md`` names PyPy 3.11 and 3.12 among the supported interpreters, as
+  part of the blocking tier, and ``util/update_python_versions.py`` keeps the
+  list in step with the tier file (:issue:`3048`, :pr:`3053`).

@@ -21,7 +21,7 @@
 
 #### Added
 
-- `PCAPNGIO`, a PCAP-NG writer, as the `pcapng` format, with the `.pcapng` extension, of an extraction's output, a flow tracer's output and the command line's `--format` ([#2835](https://github.com/JarryShaw/PyPCAPKit/issues/2835), [#2864](https://github.com/JarryShaw/PyPCAPKit/pull/2864)). It writes one Section Header Block, an Interface Description Block per distinct interface and an Enhanced Packet Block per frame, without dissecting the frame again, and falls back to JSON under the same engines as the PCAP writer. A PCAP-NG frame keeps its interface's options and its own, a Simple or obsolete Packet Block written as an Enhanced Packet Block; Name Resolution, Interface Statistics, Decryption Secrets, custom and journal blocks are not written.
+- `PCAPNGIO`, a PCAP-NG writer, as the `pcapng` format, with the `.pcapng` extension, of an extraction's output, a flow tracer's output and the command line's `--format` ([#2835](https://github.com/JarryShaw/PyPCAPKit/issues/2835), [#2864](https://github.com/JarryShaw/PyPCAPKit/pull/2864)). It writes one Section Header Block, an Interface Description Block per distinct interface and an Enhanced Packet Block per frame, without dissecting the frame again, and falls back to JSON under the same engines as the PCAP writer. A PCAP-NG frame keeps its interface's options and its own, a Simple or obsolete Packet Block written as an Enhanced Packet Block; Name Resolution, Interface Statistics, Decryption Secrets, custom and journal blocks are not written. `PCAP_NG` names the format beside `PCAP`, since `PCAPNG` already names the protocol class ([#3047](https://github.com/JarryShaw/PyPCAPKit/issues/3047), [#3051](https://github.com/JarryShaw/PyPCAPKit/pull/3051)).
 
 ### pcapkit.foundation
 
@@ -69,12 +69,19 @@
 - `ESP`'s `make()` and `from_schema()` raised `TypeError` for a protocol or schema payload, as `ESP(spi=1, seq=1, payload=TCP(srcport=1, dstport=2))` did. Each takes the payload's packed octets, and the packet rebuilds byte-exact ([#2860](https://github.com/JarryShaw/PyPCAPKit/issues/2860), [#2865](https://github.com/JarryShaw/PyPCAPKit/pull/2865)).
 - on PyPy, building a CALIPSO option in `HOPOPT` or `IPv6_Opts` from a `bytearray` bitmap left the bitmap exported until collected, so resizing it raised `BufferError`. It is copied through a view released at once ([#2807](https://github.com/JarryShaw/PyPCAPKit/issues/2807), [#2808](https://github.com/JarryShaw/PyPCAPKit/pull/2808)).
 
+### pcapkit.vendor
+
+#### Fixed
+
+- a generated member comment that opens with reST block markup, such as IANA's `*` for `RRType.ANY`, rendered as a list or a block on its API page. The crawlers now escape it, so the comment reads as written ([#3049](https://github.com/JarryShaw/PyPCAPKit/issues/3049), [#3052](https://github.com/JarryShaw/PyPCAPKit/pull/3052)).
+
 ### Project infrastructure
 
 #### Changed
 
 - the API pages group a class's members under a subtitle for each section comment of its body -- *Properties*, *Methods*, *Data Models* and the like -- in the order the source gives them, inherited members after the class's own, base by base in method resolution order; 1.6.x ordered the protocol pages alone, with no subtitles. `util/member_sections.py` writes the lists, and a project test fails on a page out of step ([#2907](https://github.com/JarryShaw/PyPCAPKit/issues/2907), [#2909](https://github.com/JarryShaw/PyPCAPKit/pull/2909)).
 - the `docs` extra pins `sphinx-autodoc-typehints` 3.17.6, where 1.6.2 pinned 3.17.5 ([#2931](https://github.com/JarryShaw/PyPCAPKit/pull/2931)).
+- `SECURITY.md` names PyPy 3.11 and 3.12 among the supported interpreters, as part of the blocking tier, and `util/update_python_versions.py` keeps the list in step with the tier file ([#3048](https://github.com/JarryShaw/PyPCAPKit/issues/3048), [#3053](https://github.com/JarryShaw/PyPCAPKit/pull/3053)).
 
 ---
 
