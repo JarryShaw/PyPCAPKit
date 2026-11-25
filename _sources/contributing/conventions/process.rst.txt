@@ -353,6 +353,14 @@ carrying it are that kind:
       gh issue list -R JarryShaw/PyPCAPKit --state all --label breaking --limit 100 \
           --json number -q '[.[].number]|sort|@json'
 
+Branches
+~~~~~~~~
+
+``main`` is the released line and the default branch, and ``develop`` carries the next
+minor's work (:issue:`2805`, :issue:`2942`). **A pull request targets** ``develop``,
+**except a fix for the released line**, which targets ``main``. Dependabot's version
+updates target ``develop`` too. :ref:`release-lines` has how the two branches merge.
+
 Milestones and the Project Board
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -23,6 +23,11 @@ between releases is a ``.postN`` of the release before it. A line is planned on 
 milestone, its scope issue and its *Release X.Y* view on the project board, set up as
 :ref:`a new line opens <process-release-scope>`.
 
+``main`` **is the released line, and** ``develop`` **carries the next minor's work**
+(:issue:`2942`). A patch fix merges to ``main``, which then merges back into
+``develop`` through the pull request Sync Develop opens (:doc:`workflows`), with a
+merge commit rather than a squash.
+
 **A major release,** ``X.0.0``, **isolates one change to the core model** and carries
 nothing else. The roadmap work that can or should be done ships first, a batch per
 minor, so the major lands on a mostly closed-out roadmap. Ruled on :issue:`2805`; which
@@ -41,6 +46,7 @@ A final release, ``X.Y.0`` or ``X.Y.Z``, runs these steps in order, ruled on
 #. **A docs sweep** runs once they have closed and before the bump: the documentation
    re-checked against the code and the rules on :ref:`documentation`. It also brings
    :doc:`the roadmap <pep>` up to date, a page feature pull requests leave alone.
+#. **At a minor release,** ``develop`` **merges into** ``main`` (:issue:`2942`).
 #. **The version-bump push** (`The One Manual Step`_) starts the release. The changelog
    pull request merges no later than that push, since the release ships its run's
    commit, whose :file:`CHANGELOG.md` leads the release body.
@@ -94,11 +100,10 @@ The steps of a ``vendor-update`` run, from the crawl to the push:
 
 .. note::
 
-   **A scheduled bump ships whatever** ``main`` **holds.** While ``main`` carries
-   unreleased minor work, a Vendor Update whose crawl changed code bumps the released
-   line to its next ``.postN``, and that release would publish the unreleased work
-   under the old line's number. Until :issue:`2942` moves that work onto ``develop``,
-   the owner rejects such a run's ``github-release`` approval (:issue:`2805`).
+   **A scheduled bump ships whatever** ``main`` **holds.** A Vendor Update whose crawl
+   changed code bumps the released line to its next ``.postN``, which would publish
+   unreleased work on ``main`` under the old line's number (:issue:`2805`). So
+   unreleased minor work stays on ``develop`` until its release (:issue:`2942`).
 
 **A new minor or patch release is a hand edit.** The script takes no target version: it
 advances a ``devN``, pre-release or ``postN`` counter, and gives a final release
@@ -362,7 +367,8 @@ One-time setup:
    **Pull requests** at read and write too, and accept it on the installation:
    the Python Versions and Issue and PR Kinds workflows' ``pr`` jobs open their
    pull requests with a token of this App, with contents and pull requests write
-   only (:issue:`1660`, :issue:`2561`, :doc:`workflows`).
+   only (:issue:`1660`, :issue:`2561`, :doc:`workflows`), and Sync Develop's with
+   contents read and pull requests write (:issue:`2942`).
 2. Add repository variables ``RELEASE_APP_CLIENT_ID``, the App's Client ID, and
    ``RELEASE_APP_BOT_ID``, its bot's user id (``gh api
    "/users/<app-slug>[bot]" --jq .id``, as the action's README reads it).
@@ -373,11 +379,11 @@ One-time setup:
    * ``github-release``, for ``github``: "If the environment requires approval,
      a job cannot access environment secrets until one of the required reviewers
      approves it".
-   * ``release-app``, for the ``pr`` jobs of Python Versions and Issue and PR
-     Kinds. Create it with no required reviewer and its deployment branches
-     limited to ``main``, where those jobs run.
+   * ``release-app``, for the ``pr`` jobs of Python Versions, Issue and PR
+     Kinds, and Sync Develop. Create it with no required reviewer and its
+     deployment branches limited to ``main``, where those jobs run.
 
-   A job reads only the secrets of the environment it names, so the scheduled
+   A job reads only the secrets of the environment it names, so those ``pr``
    jobs need a copy outside ``github-release``, or they would wait on its
    approval, which the owner ruled on :issue:`2648` is for Create Release alone.
    ``github`` is the only job naming ``github-release``, and those ``pr`` jobs

@@ -610,6 +610,10 @@ tracks; a patch release, <code class="docutils literal notranslate"><span class=
 between releases is a <code class="docutils literal notranslate"><span class="pre">.postN</span></code> of the release before it. A line is planned on its
 milestone, its scope issue and its <em>Release X.Y</em> view on the project board, set up as
 <a class="reference internal" href="conventions/process.html#process-release-scope"><span class="std std-ref">a new line opens</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>is the released line, and</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>carries the next minor’s work</strong>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>). A patch fix merges to <code class="docutils literal notranslate"><span class="pre">main</span></code>, which then merges back into
+<code class="docutils literal notranslate"><span class="pre">develop</span></code> through the pull request Sync Develop opens (<a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>), with a
+merge commit rather than a squash.</p>
 <p><strong>A major release,</strong> <code class="docutils literal notranslate"><span class="pre">X.0.0</span></code>, <strong>isolates one change to the core model</strong> and carries
 nothing else. The roadmap work that can or should be done ships first, a batch per
 minor, so the major lands on a mostly closed-out roadmap. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>; which
@@ -627,6 +631,7 @@ that change’s own pull request instead.</p></li>
 <li><p><strong>A docs sweep</strong> runs once they have closed and before the bump: the documentation
 re-checked against the code and the rules on <a class="reference internal" href="conventions/documentation.html#documentation"><span class="std std-ref">Writing the Documentation</span></a>. It also brings
 <a class="reference internal" href="pep.html"><span class="doc">the roadmap</span></a> up to date, a page feature pull requests leave alone.</p></li>
+<li><p><strong>At a minor release,</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>merges into</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>).</p></li>
 <li><p><strong>The version-bump push</strong> (<a class="reference internal" href="#the-one-manual-step">The One Manual Step</a>) starts the release. The changelog
 pull request merges no later than that push, since the release ships its run’s
 commit, whose <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> leads the release body.</p></li>
@@ -676,11 +681,10 @@ every module the crawl wrote under <code class="docutils literal notranslate"><s
     COMMIT --&gt; PUSH
     </pre><div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><strong>A scheduled bump ships whatever</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>holds.</strong> While <code class="docutils literal notranslate"><span class="pre">main</span></code> carries
-unreleased minor work, a Vendor Update whose crawl changed code bumps the released
-line to its next <code class="docutils literal notranslate"><span class="pre">.postN</span></code>, and that release would publish the unreleased work
-under the old line’s number. Until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a> moves that work onto <code class="docutils literal notranslate"><span class="pre">develop</span></code>,
-the owner rejects such a run’s <code class="docutils literal notranslate"><span class="pre">github-release</span></code> approval (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>).</p>
+<p><strong>A scheduled bump ships whatever</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>holds.</strong> A Vendor Update whose crawl
+changed code bumps the released line to its next <code class="docutils literal notranslate"><span class="pre">.postN</span></code>, which would publish
+unreleased work on <code class="docutils literal notranslate"><span class="pre">main</span></code> under the old line’s number (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2805">#2805</a>). So
+unreleased minor work stays on <code class="docutils literal notranslate"><span class="pre">develop</span></code> until its release (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>).</p>
 </div>
 <p><strong>A new minor or patch release is a hand edit.</strong> The script takes no target version: it
 advances a <code class="docutils literal notranslate"><span class="pre">devN</span></code>, pre-release or <code class="docutils literal notranslate"><span class="pre">postN</span></code> counter, and gives a final release
@@ -925,7 +929,8 @@ permissions at read and write, and install it on this repository only. Add
 <strong>Pull requests</strong> at read and write too, and accept it on the installation:
 the Python Versions and Issue and PR Kinds workflows’ <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs open their
 pull requests with a token of this App, with contents and pull requests write
-only (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2561">#2561</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p></li>
+only (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2561">#2561</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>), and Sync Develop’s with
+contents read and pull requests write (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>).</p></li>
 <li><p>Add repository variables <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_CLIENT_ID</span></code>, the App’s Client ID, and
 <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_BOT_ID</span></code>, its bot’s user id (<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span>
 <span class="pre">&quot;/users/&lt;app-slug&gt;[bot]&quot;</span> <span class="pre">--jq</span> <span class="pre">.id</span></code>, as the action’s README reads it).</p></li>
@@ -936,11 +941,11 @@ rotation, rather than at the repository, where every job could read it:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">github-release</span></code>, for <code class="docutils literal notranslate"><span class="pre">github</span></code>: “If the environment requires approval,
 a job cannot access environment secrets until one of the required reviewers
 approves it”.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">release-app</span></code>, for the <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs of Python Versions and Issue and PR
-Kinds. Create it with no required reviewer and its deployment branches
-limited to <code class="docutils literal notranslate"><span class="pre">main</span></code>, where those jobs run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">release-app</span></code>, for the <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs of Python Versions, Issue and PR
+Kinds, and Sync Develop. Create it with no required reviewer and its
+deployment branches limited to <code class="docutils literal notranslate"><span class="pre">main</span></code>, where those jobs run.</p></li>
 </ul>
-<p>A job reads only the secrets of the environment it names, so the scheduled
+<p>A job reads only the secrets of the environment it names, so those <code class="docutils literal notranslate"><span class="pre">pr</span></code>
 jobs need a copy outside <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, or they would wait on its
 approval, which the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2648">#2648</a> is for Create Release alone.
 <code class="docutils literal notranslate"><span class="pre">github</span></code> is the only job naming <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, and those <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs

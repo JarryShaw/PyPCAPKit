@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/workflows.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="At a Glance:,,,,,,, Workflow, File, push, pull_request, schedule, workflow_run(from), other,,, CodeQL, codeql-analysis.yml, main, main, Sat 02:00, –, –,, Unit Tests, unit-tests.yml, main, main, –, ..." />
-<meta name="description" content="At a Glance:,,,,,,, Workflow, File, push, pull_request, schedule, workflow_run(from), other,,, CodeQL, codeql-analysis.yml, main, main, Sat 02:00, –, –,, Unit Tests, unit-tests.yml, main, main, –, ..." />
+<meta property="og:description" content="At a Glance:,,,,,,, Workflow, File, push, pull_request, schedule, workflow_run(from), other,,, CodeQL, codeql-analysis.yml, main, develop, main, develop, Sat 02:00, –, –,, Unit Tests, unit-tests.ym..." />
+<meta name="description" content="At a Glance:,,,,,,, Workflow, File, push, pull_request, schedule, workflow_run(from), other,,, CodeQL, codeql-analysis.yml, main, develop, main, develop, Sat 02:00, –, –,, Unit Tests, unit-tests.ym..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Maintenance Workflow" href="maintenance.html"><link rel="prev" title="Release Process" href="releasing.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -617,32 +617,32 @@ page is the repository-wide graph; the release pipeline, job by job, is on
 <tbody>
 <tr class="row-even"><td><p>CodeQL</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
 <td><p>Sat 02:00</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 </tr>
 <tr class="row-odd"><td><p>Unit Tests</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">unit-tests.yml</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_call</span></code> (reusable)</p></td>
 </tr>
 <tr class="row-even"><td><p>Experimental Tests</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 </tr>
 <tr class="row-odd"><td><p>Python Compatibility</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
 <td><p>Sat 04:00</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -650,7 +650,7 @@ page is the repository-wide graph; the release pipeline, job by job, is on
 <tr class="row-even"><td><p>Lint</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">lint.yml</span></code></p></td>
 <td><p>–</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
 <td><p>Sat 06:00</p></td>
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
@@ -674,7 +674,7 @@ page is the repository-wide graph; the release pipeline, job by job, is on
 <tr class="row-odd"><td><p>GitHub Pages</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code></p></td>
 <td><p>–</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></td>
 <td><p>Sat 02:00</p></td>
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
@@ -751,7 +751,15 @@ page is the repository-wide graph; the release pipeline, job by job, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>Engine Benchmark</p></td>
+<tr class="row-odd"><td><p>Sync Develop</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">sync-develop.yml</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Engine Benchmark</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">benchmark.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -770,6 +778,14 @@ with one pairs it with a direct trigger – a Saturday <code class="docutils lit
 Update, Conda Update and GitHub Pages, a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag push for Create Release –
 for when no upstream run exists to chain from.</p>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>carries the next minor, and</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>stays the released line</strong>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>, <a class="reference internal" href="releasing.html#release-lines"><span class="std std-ref">Release Lines</span></a>). The test workflows run on both branches, and
+the publishing ones on <code class="docutils literal notranslate"><span class="pre">main</span></code> alone: Vendor Update, Conda Update and GitHub Pages
+each skip a Unit Tests run whose <code class="docutils literal notranslate"><span class="pre">.head_branch</span></code> is not <code class="docutils literal notranslate"><span class="pre">main</span></code>, so the Create
+Release run that follows releases nothing, as for a pull request’s run. GitHub Pages
+builds the docs for a pull request to either branch and publishes none, as
+<code class="docutils literal notranslate"><span class="pre">publish-pages</span></code> skips every <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> run. Every schedule runs on <code class="docutils literal notranslate"><span class="pre">main</span></code>,
+the default branch.</p>
 </section>
 <section id="the-graph">
 <h2>The Graph<a class="headerlink" href="#the-graph" title="Link to this heading">¶</a></h2>
@@ -782,8 +798,9 @@ edges, a reusable-workflow call that runs <em>inside</em> the caller’s run, sh
 run id.</p>
 <pre  class="mermaid">
         flowchart LR
-    PUSH[&quot;push: main&quot;]
-    PR[&quot;pull_request: main&quot;]
+    PUSH[&quot;push: main, develop&quot;]
+    PUSHMAIN[&quot;push: main&quot;]
+    PR[&quot;pull_request: main, develop&quot;]
     SAT[&quot;schedule: Saturday&quot;]
     MON[&quot;schedule: Monday&quot;]
     WED[&quot;schedule: Wednesday&quot;]
@@ -805,6 +822,7 @@ run id.</p>
     IK[&quot;Issue and PR Kinds&lt;br/&gt;cron-issue-pr-kinds.yml&quot;]
     CT[&quot;CI Timing&lt;br/&gt;ci-timing.yml&quot;]
     BM[&quot;Engine Benchmark&lt;br/&gt;benchmark.yml&quot;]
+    SD[&quot;Sync Develop&lt;br/&gt;sync-develop.yml&quot;]
     PS[&quot;Project Status&lt;br/&gt;project-status.yml&quot;]
     MS[&quot;Milestone&lt;br/&gt;milestone.yml&quot;]
     CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
@@ -849,6 +867,9 @@ run id.</p>
     WED --&gt;|03:17| BM
     DISPATCH --&gt; BM
 
+    PUSHMAIN --&gt; SD
+    DISPATCH --&gt; SD
+
     DISPATCH --&gt; PS
     DAILY --&gt;|00:37| PS
     ISSUES --&gt; PS
@@ -861,7 +882,7 @@ run id.</p>
     TAG --&gt; CR
 
     classDef trig fill:none,stroke-dasharray:2 2
-    class PUSH,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+    class PUSH,PUSHMAIN,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
     </pre><pre  class="mermaid">
         ---
 config:
@@ -1111,8 +1132,8 @@ source entry) and <code class="docutils literal notranslate"><span class="pre">p
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (a job per engine, each looping over its Python versions),
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> and
 <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, each of which has already run for this commit from Unit Tests’
-own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code>
-pushes only, from its <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so a caller would only retest the
+own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs on pushes
+only, from its <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so a caller would only retest the
 commit; <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s full suite runs the project pins too (see <a class="reference internal" href="#project-pins">Project Pins</a> below).
 It also skips <code class="docutils literal notranslate"><span class="pre">changes</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>, which combines what <code class="docutils literal notranslate"><span class="pre">test</span></code> and
 <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code> measured, and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status
@@ -1459,8 +1480,9 @@ runs decide: for each event but <code class="docutils literal notranslate"><span
 the job and succeeded, failed or timed out must omit the name, and be newer than every
 run listing it, since that run can predate a merge. A light pull request
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>) runs a subset of the legs, so none is consulted. A job no such run ran
-keeps every name, and each event is judged on its own runs, so no job run on some
-events alone is exempted.</p>
+keeps every name, and each event and each branch is judged on its own runs, since
+<code class="docutils literal notranslate"><span class="pre">main</span></code> and <code class="docutils literal notranslate"><span class="pre">develop</span></code> run their own workflow files, so no job run on some events
+alone is exempted.</p>
 </section>
 <section id="work-kept-off-the-pull-request-queue-1538">
 <h2>Work Kept Off the Pull-Request Queue (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#work-kept-off-the-pull-request-queue-1538" title="Link to this heading">¶</a></h2>
@@ -1468,8 +1490,8 @@ events alone is exempted.</p>
 with pull-request jobs for the 20-runner pool. None touches a required check or adds a
 permission to the reusable workflow.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, per <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a>
-item H, and has
+<li><p><code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> runs on pushes only, to <code class="docutils literal notranslate"><span class="pre">main</span></code> or <code class="docutils literal notranslate"><span class="pre">develop</span></code>, per
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a> item H, and has
 <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[test]</span></code>, so its cells join the queue once <code class="docutils literal notranslate"><span class="pre">test</span></code> finishes rather
 than when the push run is created, ahead of that run’s own <code class="docutils literal notranslate"><span class="pre">Python</span></code> legs and of
 pull-request jobs created later in a merge wave. Its <code class="docutils literal notranslate"><span class="pre">if:</span></code> opens with
@@ -1489,9 +1511,9 @@ on every leg. What that gives up is the file in a venv holding only <code class=
 <h2>Light Pull Requests (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>)<a class="headerlink" href="#light-pull-requests-2243" title="Link to this heading">¶</a></h2>
 <p>A docs-only or test-only pull request runs only the jobs its files can affect, by the
 owner’s ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>: a docs-only one the docs build and <code class="docutils literal notranslate"><span class="pre">Lint</span></code>, a
-test-only one the tests on <code class="docutils literal notranslate"><span class="pre">latest</span></code> and <code class="docutils literal notranslate"><span class="pre">Lint</span></code>. A push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, the schedule
-and every other event run everything, and <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> stays required on
-both paths.</p>
+test-only one the tests on <code class="docutils literal notranslate"><span class="pre">latest</span></code> and <code class="docutils literal notranslate"><span class="pre">Lint</span></code>. A push to <code class="docutils literal notranslate"><span class="pre">main</span></code> or <code class="docutils literal notranslate"><span class="pre">develop</span></code>,
+the schedule and every other event run everything, and <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>
+stays required on both paths.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">changes</span></code> job (“Classify changed files”) of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>,
 <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> runs
 <code class="file docutils literal notranslate"><span class="pre">util/classify_changes.py</span></code> in its <code class="docutils literal notranslate"><span class="pre">Classify</span> <span class="pre">the</span> <span class="pre">diff</span></code> step, on the workflow’s
@@ -1832,18 +1854,19 @@ Tests run completes without it, and with it <code class="docutils literal notran
 (<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> and
 <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>). It runs on Unit Tests’ <code class="docutils literal notranslate"><span class="pre">push</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> events,
 skips a docs-only or test-only pull request by the same <code class="docutils literal notranslate"><span class="pre">changes</span></code> script, and lets a newer
-commit supersede a run, a pull request’s or, unlike Unit Tests, a push to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1903">#1903</a>): since nothing
-waits on the legs, <code class="docutils literal notranslate"><span class="pre">main</span></code>’s newest commit is the one worth testing, whereas Unit
-Tests keeps a run per push for <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs only there.</p>
+commit supersede a pull request’s run or, unlike Unit Tests, a push run on <code class="docutils literal notranslate"><span class="pre">main</span></code> or
+<code class="docutils literal notranslate"><span class="pre">develop</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1903">#1903</a>): since nothing
+waits on the legs, a branch’s newest commit is the one worth testing, whereas Unit
+Tests keeps a run per push for <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs only on pushes.</p>
 <p>A superseded run is skipped or stopped, never cancelled (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1938">#1938</a>): GitHub counts a
 <code class="docutils literal notranslate"><span class="pre">cancelled</span></code> check against its commit, so a cancelled run marks the commit red.
 The workflow has no <code class="docutils literal notranslate"><span class="pre">concurrency</span></code> group either, since a group cancels its pending
 run once a newer one queues. Its first job, <code class="docutils literal notranslate"><span class="pre">current</span></code> (“Check the commit is still
 current”), sets up <code class="docutils literal notranslate"><span class="pre">latest</span></code> and installs <code class="docutils literal notranslate"><span class="pre">requests</span></code>, which the script fetches with,
 then runs <code class="file docutils literal notranslate"><span class="pre">util/superseded.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">check</span></code>. A push’s commit is current
-while it is the head of <code class="docutils literal notranslate"><span class="pre">main</span></code>; a pull request’s while the pull request is open and
-its head is still the event’s <code class="docutils literal notranslate"><span class="pre">pull_request.head.sha</span></code>; any other event’s always.
+while it is the head of its branch, <code class="docutils literal notranslate"><span class="pre">main</span></code> or <code class="docutils literal notranslate"><span class="pre">develop</span></code>; a pull request’s while
+the pull request is open and its head is still the event’s <code class="docutils literal notranslate"><span class="pre">pull_request.head.sha</span></code>;
+any other event’s always.
 Every other job needs <code class="docutils literal notranslate"><span class="pre">current</span></code> and skips where its output is <code class="docutils literal notranslate"><span class="pre">false</span></code>, so a run
 superseded before it starts ends with <code class="docutils literal notranslate"><span class="pre">skipped</span></code> checks and a <code class="docutils literal notranslate"><span class="pre">Superseded</span></code> notice.
 Each of those <code class="docutils literal notranslate"><span class="pre">if:</span></code> conditions opens with <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, which drops the implicit
@@ -2190,7 +2213,7 @@ and a <code class="docutils literal notranslate"><span class="pre">tests/project
 that import <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> are no pins either; those the tiers send to <code class="docutils literal notranslate"><span class="pre">latest</span></code> run
 in a half of <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code>, under coverage.</p>
 <p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs the pins under pytest, with <code class="docutils literal notranslate"><span class="pre">test</span></code>’s flags, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
-on every push to <code class="docutils literal notranslate"><span class="pre">main</span></code> and every pull request but a docs-only one, which runs
+on every push and every pull request but a docs-only one, which runs
 <code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> under plain unittest instead (see <a class="reference internal" href="#light-pull-requests-2243">Light Pull Requests
 (#2243)</a>), and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> needs it.
 Every <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">experimental</span></code> leg passes each pin as an
@@ -2593,7 +2616,8 @@ run the same steps, and alone hold <code class="docutils literal notranslate"><s
 for a checkout of the default branch’s scripts, never the run’s head,
 <code class="docutils literal notranslate"><span class="pre">checks:</span> <span class="pre">read</span></code> for the run’s check suite and <code class="docutils literal notranslate"><span class="pre">actions:</span> <span class="pre">read</span></code> for its
 artifacts. A push run posts as <code class="docutils literal notranslate"><span class="pre">push</span></code> to <code class="docutils literal notranslate"><span class="pre">&lt;workflow</span> <span class="pre">file</span> <span class="pre">stem&gt;:</span> <span class="pre">&lt;branch&gt;</span> <span class="pre">push</span>
-<span class="pre">runs</span></code>, so <code class="docutils literal notranslate"><span class="pre">main</span></code>’s Unit Tests thread is <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">main</span> <span class="pre">push</span> <span class="pre">runs</span></code>; a
+<span class="pre">runs</span></code>, so <code class="docutils literal notranslate"><span class="pre">main</span></code>’s Unit Tests thread is <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">main</span> <span class="pre">push</span> <span class="pre">runs</span></code> and
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>’s <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">develop</span> <span class="pre">push</span> <span class="pre">runs</span></code>; a
 scheduled one posts as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> to <code class="docutils literal notranslate"><span class="pre">&lt;workflow</span> <span class="pre">file</span> <span class="pre">stem&gt;:</span> <span class="pre">&lt;branch&gt;</span> <span class="pre">scheduled</span>
 <span class="pre">runs</span></code>. Each relayed run’s concurrency group is its own, since a group cancels a
 pending run when a newer one joins it.</p>
@@ -2646,8 +2670,9 @@ to the relayed run’s workflow, which <code class="file docutils literal notran
 run with.</p>
 <p><code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code> posts to <code class="docutils literal notranslate"><span class="pre">codeql-analysis:</span> <span class="pre">CodeQL</span> <span class="pre">report</span></code>, as
 <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> on its <code class="docutils literal notranslate"><span class="pre">schedule</span></code> and <code class="docutils literal notranslate"><span class="pre">push</span></code> on a push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and never on
-a pull request, whose findings belong to the pull request. Its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job
-runs after <code class="docutils literal notranslate"><span class="pre">analyze</span></code> and alone holds <code class="docutils literal notranslate"><span class="pre">security-events:</span> <span class="pre">read</span></code>, beside
+a pull request, whose findings belong to the pull request, or on a push to
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>, since the alerts it lists are the default branch’s. Its <code class="docutils literal notranslate"><span class="pre">discussion</span></code>
+job runs after <code class="docutils literal notranslate"><span class="pre">analyze</span></code> and alone holds <code class="docutils literal notranslate"><span class="pre">security-events:</span> <span class="pre">read</span></code>, beside
 <code class="docutils literal notranslate"><span class="pre">discussions:</span> <span class="pre">write</span></code> and <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>. <code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">report</span></code> runs
 <code class="file docutils literal notranslate"><span class="pre">util/codeql_report.py</span></code>, which lists the default branch’s open CodeQL alerts
 by severity, read through GitHub’s <a class="reference external" href="https://docs.github.com/en/rest/code-scanning/code-scanning#list-code-scanning-alerts-for-a-repository">List code scanning alerts for a repository</a>
@@ -2741,6 +2766,11 @@ reviewed against the docs build rather than held back. The benchmark’s
 <code class="file docutils literal notranslate"><span class="pre">requirements-*.txt</span></code> files are watched because nothing else moves them.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">github-actions</span></code> over <code class="docutils literal notranslate"><span class="pre">/</span></code>, per <a class="reference internal" href="#action-pins">Action Pins</a> above.</p></li>
 </ul>
+<p>Each entry’s <code class="docutils literal notranslate"><span class="pre">target-branch</span></code> is <code class="docutils literal notranslate"><span class="pre">develop</span></code>, so a version update lands with the next
+minor rather than on the released line (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>). A security update still targets
+<code class="docutils literal notranslate"><span class="pre">main</span></code>, and none of an entry’s options applies to it once <code class="docutils literal notranslate"><span class="pre">target-branch</span></code> is set
+(<a class="reference external" href="https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference">Dependabot options reference</a>,
+<code class="docutils literal notranslate"><span class="pre">target-branch</span></code>).</p>
 <p>Neither <code class="file docutils literal notranslate"><span class="pre">conda/requirements.txt</span></code> nor the benchmark’s image digests are
 watched: Conda Update’s <code class="docutils literal notranslate"><span class="pre">Refresh</span> <span class="pre">the</span> <span class="pre">platform</span> <span class="pre">pins</span></code> and <code class="docutils literal notranslate"><span class="pre">Setup</span> <span class="pre">Conda</span>
 <span class="pre">Distribution</span></code> steps rewrite the former, and Dependabot reads only a <code class="docutils literal notranslate"><span class="pre">FROM</span></code> line
@@ -2829,6 +2859,21 @@ Where moving the branch would change a workflow file <code class="docutils liter
 that token cannot push, it deletes the branch and pushes it afresh, which closes
 the old pull request and opens a new one.</p>
 </section>
+<section id="sync-develop-2942">
+<h2>Sync Develop (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>)<a class="headerlink" href="#sync-develop-2942" title="Link to this heading">¶</a></h2>
+<p><strong>Sync Develop</strong> (<code class="file docutils literal notranslate"><span class="pre">sync-develop.yml</span></code>) keeps <code class="docutils literal notranslate"><span class="pre">develop</span></code> level with <code class="docutils literal notranslate"><span class="pre">main</span></code>, so a
+fix merged to the released line reaches the next minor, as the owner asked in review of
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/3056">#3056</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2942">#2942</a>). On each push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and
+on dispatch, its <code class="docutils literal notranslate"><span class="pre">check</span></code> job compares the two with a read-only token. Where
+<code class="docutils literal notranslate"><span class="pre">develop</span></code> lacks commits of <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">pr</span></code> opens the pull request from <code class="docutils literal notranslate"><span class="pre">main</span></code> into
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>, <code class="docutils literal notranslate"><span class="pre">chore:</span> <span class="pre">merge</span> <span class="pre">main</span> <span class="pre">into</span> <span class="pre">develop</span></code>, or updates the open one, never a
+second. <code class="docutils literal notranslate"><span class="pre">pr</span></code> runs in <code class="docutils literal notranslate"><span class="pre">release-app</span></code> and opens it with the release App’s token, as
+the Python Versions and Issue and PR Kinds <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs do, so the pull request’s checks
+run. Nothing here merges or pushes, the body asks for a merge commit rather than a
+squash, and a <code class="docutils literal notranslate"><span class="pre">develop</span></code> that does not exist yet is a notice.
+<code class="file docutils literal notranslate"><span class="pre">util/sync_develop.py</span></code> holds the rule, and
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_sync_develop_2942.py</span></code> pins it.</p>
+</section>
 <section id="deployment-environment">
 <h2>Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code><a class="headerlink" href="#deployment-environment" title="Link to this heading">¶</a></h2>
 <p>These jobs of <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> declare a deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code>, and
@@ -2839,11 +2884,12 @@ the old pull request and opens a new one.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code></p></li>
 </ul>
-<p>The <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs of <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">cron-issue-pr-kinds.yml</span></code>
-declare <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">release-app</span></code>, for the release App’s key (see
-<a class="reference internal" href="#python-versions">Python Versions</a> and <a class="reference internal" href="#issue-and-pr-kinds-2561">Issue and PR Kinds (#2561)</a>). That environment has no
-reviewer, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2648">#2648</a> that only Create Release waits for
-an approval, and it deploys from <code class="docutils literal notranslate"><span class="pre">main</span></code> alone, where those jobs run.
+<p>The <code class="docutils literal notranslate"><span class="pre">pr</span></code> jobs of <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-issue-pr-kinds.yml</span></code> and
+<code class="docutils literal notranslate"><span class="pre">sync-develop.yml</span></code> declare <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">release-app</span></code>, for the release App’s key
+(see <a class="reference internal" href="#python-versions">Python Versions</a>, <a class="reference internal" href="#issue-and-pr-kinds-2561">Issue and PR Kinds (#2561)</a> and <a class="reference internal" href="#sync-develop-2942">Sync Develop (#2942)</a>).
+That environment has no reviewer, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2648">#2648</a> that only
+Create Release waits for an approval, and it deploys from <code class="docutils literal notranslate"><span class="pre">main</span></code> alone, where
+those jobs run.
 <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>’s “The Release App” says why the key is stored there as well
 as in <code class="docutils literal notranslate"><span class="pre">github-release</span></code>. Where <code class="docutils literal notranslate"><span class="pre">release-app</span></code> has no key, each <code class="docutils literal notranslate"><span class="pre">pr</span></code> warns
 from its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">App's</span> <span class="pre">key</span></code> step and skips its other steps.
@@ -2972,6 +3018,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#dependency-updates-1968">Dependency Updates (#1968)</a></li>
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>
 <li><a class="reference internal" href="#issue-and-pr-kinds-2561">Issue and PR Kinds (#2561)</a></li>
+<li><a class="reference internal" href="#sync-develop-2942">Sync Develop (#2942)</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
 </ul>
 </li>
