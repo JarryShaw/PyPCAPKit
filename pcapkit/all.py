@@ -129,7 +129,7 @@ __all__ = [
 
     # pcapkit.interface
     'extract', 'reassemble', 'trace',                       # Interface Functions
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
+    'TREE', 'JSON', 'PLIST', 'PCAP', 'PCAP_NG',             # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # Engine Macros
     'PyPCAP', 'PCAP_CT', 'PyPCAPFile',                      # Engine Macros
