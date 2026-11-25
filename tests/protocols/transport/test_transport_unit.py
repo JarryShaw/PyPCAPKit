@@ -13,6 +13,15 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 
+class FromParent:
+    """A stand-in payload, which ``analyze`` builds through ``_from_parent`` (#2840)."""
+
+    @classmethod
+    def _from_parent(cls, file: io.BytesIO, length: int, /, *, layer: object = None,
+                     protocol: object = None, context: object = None, **state: object) -> object:
+        return cls(file, length, **state)  # type: ignore[call-arg]
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TransportUnitTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -115,13 +124,13 @@ class TransportUnitTests(unittest.TestCase):
     def test_analyze_prefers_source_port_match(self) -> None:
         from pcapkit.protocols.transport.transport import Transport
 
-        class SourceProtocol:
+        class SourceProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
                 self.kwargs = kwargs
 
-        class DestinationProtocol:
+        class DestinationProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
@@ -157,7 +166,7 @@ class TransportUnitTests(unittest.TestCase):
     def test_analyze_falls_back_to_destination_port_match(self) -> None:
         from pcapkit.protocols.transport.transport import Transport
 
-        class DestinationProtocol:
+        class DestinationProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
@@ -191,17 +200,17 @@ class TransportUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.transport import Transport
         from pcapkit.utilities.exceptions import StructError
 
-        class EOFProtocol:
+        class EOFProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 raise StructError('truncated payload', eof=True, quiet=True)
 
-        class FakeRaw:
+        class FakeRaw(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
                 self.kwargs = kwargs
 
-        class FakeNoPayload:
+        class FakeNoPayload(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
@@ -241,17 +250,17 @@ class TransportUnitTests(unittest.TestCase):
     def test_analyze_uses_raw_after_non_struct_error(self) -> None:
         from pcapkit.protocols.transport.transport import Transport
 
-        class BrokenProtocol:
+        class BrokenProtocol(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 raise ValueError('boom')
 
-        class FakeRaw:
+        class FakeRaw(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length
                 self.kwargs = kwargs
 
-        class FakeNoPayload:
+        class FakeNoPayload(FromParent):
             def __init__(self, payload_io: io.BytesIO, length: int, **kwargs: object) -> None:
                 self.payload = payload_io.read()
                 self.length = length

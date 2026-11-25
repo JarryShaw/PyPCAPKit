@@ -1754,4 +1754,4 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
         file_ = self._get_payload()
         return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx, framed=True)
+                                      protocol=self._exproto, context=self._exctx, framed=True)

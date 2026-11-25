@@ -298,7 +298,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 raise ProtocolError(f'HTTP: invalid version: {version!r}')
 
             try:
-                http = protocol(self._data, length, **kwargs)
+                # pylint: disable-next=protected-access
+                http = protocol._from_parent(self._data, length, **self._next_layer_state(kwargs))
             except ProtocolError:
                 raise
             # NOTE: ``struct.error`` is no ``ValueError``, and a payload too
@@ -627,7 +628,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 raise ProtocolError('HTTP/2: connection preface with no frame')
 
             try:
-                http = HTTPv2(self._data[preface_len:length], length - preface_len, **kwargs)
+                # pylint: disable-next=protected-access
+                http = HTTPv2._from_parent(self._data[preface_len:length], length - preface_len,
+                                           **self._next_layer_state(kwargs))
             except ProtocolError:
                 raise
             # NOTE: Converted, unlike on the HTTP/1 arm, so a bad frame is catchable; only a
@@ -643,13 +646,14 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
 
         # NOTE: A start line, matched with ``HTTPv1``'s own patterns, identifies HTTP/1; a
         # malformed one is then reported, not retried as HTTP/2, which would mislabel it.
+        state = self._next_layer_state(kwargs)
         if test_start_line(self._data[:length]):
-            return HTTPv1(self._data, length, **kwargs)
+            return HTTPv1._from_parent(self._data, length, **state)  # pylint: disable=protected-access
 
         # NOTE: Trial parse for a mid-stream payload; ``struct.error`` escapes it, since
         # absorbing its subclass ``StructError`` would hand valid HTTP/1 to the HTTP/2 arm.
         with contextlib.suppress(ProtocolError):
-            return HTTPv1(self._data, length, **kwargs)
+            return HTTPv1._from_parent(self._data, length, **state)  # pylint: disable=protected-access
 
         # NOTE: Nine octets with a small Length parse as a frame (RFC 9113, section 4.1), so
         # this guess, unlike an explicit ``version=2``, first needs ``_test_http2_frame``.
@@ -657,7 +661,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             raise ProtocolError('HTTP: unknown version')
 
         with contextlib.suppress(ProtocolError, struct.error):
-            return _HTTPV2.klass(self._data, length, **kwargs)
+            return _HTTPV2.klass._from_parent(self._data, length, **state)  # pylint: disable=protected-access
 
         raise ProtocolError('HTTP: unknown version')
 
