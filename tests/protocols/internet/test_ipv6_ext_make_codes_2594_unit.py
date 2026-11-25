@@ -151,9 +151,10 @@ class _Row:
         if self.cls == 'IPv6':
             return cls(octets, len(octets)).info.next
         if self.cls == 'ESP':
-            return cls(octets, len(octets), __context__=_esp_context()).info.next
+            return cls(octets, len(octets), context=_esp_context()).info.next
         if self.cls == 'IPv6_Ext':
-            return cls(octets, len(octets), extension=True, alias=ExtensionHeader.Shim6).info.next
+            # NOTE: The dispatch code is state the enclosing layer hands on (#2840).
+            return cls._from_parent(octets, len(octets), extension=True, alias=ExtensionHeader.Shim6).info.next  # pylint: disable=protected-access
         info = cls(octets, len(octets), extension=True).info
         if self.argument == 'options':
             return list(info.options.keys())[0]

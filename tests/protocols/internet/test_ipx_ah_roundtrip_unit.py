@@ -58,7 +58,7 @@ class TestIPXRoundTrip(unittest.TestCase):
         for name, packet in IPX_PACKETS.items():
             with self.subTest(packet=name), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                parsed = IPX(io.BytesIO(packet), len(packet), extension=True)
+                parsed = IPX._from_parent(io.BytesIO(packet), len(packet), extension=True)  # pylint: disable=protected-access
                 self.assertEqual(IPX.from_data(parsed.info).data, packet)
 
     def test_make_computes_length_when_not_given(self) -> None:

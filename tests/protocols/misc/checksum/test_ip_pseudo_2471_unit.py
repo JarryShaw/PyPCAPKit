@@ -217,8 +217,8 @@ class IPPseudoUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(ProtocolError, 'invalid length 13'):
             IP_Pseudo(bytes(13))
         with self.assertRaisesRegex(ProtocolError, 'invalid length 13'):
-            IP_Pseudo(io.BytesIO(bytes(40)), length=13)
-        self.assertEqual(IP_Pseudo(io.BytesIO(bytes(41)), length=40).version, 6)
+            IP_Pseudo(io.BytesIO(bytes(40)), 13)
+        self.assertEqual(IP_Pseudo(io.BytesIO(bytes(41)), 40).version, 6)
         with self.assertRaisesRegex(ProtocolError, 'required without ip'):
             IP_Pseudo.from_fields(src='10.0.0.1', dst='10.0.0.2', protocol=6)
         with self.assertRaisesRegex(ProtocolError, 'unsupported enclosing layer Raw'):
@@ -415,9 +415,9 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ProtocolError, 'invalid length 0; expected 12 or 40'):
             IP_Pseudo(io.BytesIO(b''))
         with self.assertRaisesRegex(ProtocolError, 'length 12 disagrees with 40 octets'):
-            IP_Pseudo(bytes(40), length=12)
+            IP_Pseudo(bytes(40), 12)
         with self.assertRaisesRegex(ProtocolError, 'length 12 disagrees with 5 octets'):
-            IP_Pseudo(io.BytesIO(bytes(5)), length=12)
+            IP_Pseudo(io.BytesIO(bytes(5)), 12)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -586,7 +586,7 @@ class IPPseudoWalkTests(unittest.TestCase):
         packet = bytes.fromhex('00004321' '00000001') + self.UDP + bytes([0, 17])
         registry = ContextRegistry.make(ESPContext(SecurityAssociation(spi=0x4321)))
         ip = IPv6(bytes.fromhex('60000000') + len(packet).to_bytes(2, 'big') + bytes([50, 64])
-                  + self.SRC6 + self.DST6 + packet, __context__=registry)
+                  + self.SRC6 + self.DST6 + packet, context=registry)
         with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
             IP_Pseudo.from_fields(ip=ip)
 

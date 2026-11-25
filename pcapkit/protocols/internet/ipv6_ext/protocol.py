@@ -143,10 +143,11 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stackle
 from pcapkit.utilities.warnings import SchemaWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, NoReturn, Optional, Protocol
+    from typing import IO, Any, Iterable, Mapping, NoReturn, Optional, Protocol, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.corekit.protochain import ProtoChain
 
     class _NextHeaderData(Protocol):
@@ -576,6 +577,38 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+                 extension: 'bool' = False,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            extension: If the protocol is used as an IPv6 extension header. As
+                the next layer of an IP header, the one that header hands on.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        .. versionchanged:: 1.8.0
+
+           Declares ``extension``, its only keyword besides the stops and the
+           context; the enclosing IP version reaches it from the layer
+           carrying it alone (:issue:`2840`).
+
+        """
+        # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
+        keywords = self._start_parse(file, layer, protocol, context, {'extension': extension})
+        self.__post_init__(file, length, **keywords)
+        self._info.__update__(packet=self.packet.payload)
 
     @overload
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ

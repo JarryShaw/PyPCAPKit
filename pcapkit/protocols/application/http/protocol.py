@@ -40,15 +40,16 @@ from pcapkit.protocols.application.http.const import (_HTTP2_FRAME_RULES, _HTTP2
                                                       _HTTP2_PREFACE_HEADER, _RE_METHOD, _RE_STATUS,
                                                       _RE_VERSION)
 from pcapkit.protocols.misc.no_payload.protocol import NoPayload
-from pcapkit.protocols.protocol import _PT, _ST
+from pcapkit.protocols.protocol import _PT, _ST, _nothing_to_parse
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Optional, Type
+    from typing import IO, Any, Iterable, Mapping, Optional, Type
 
     from typing_extensions import Literal, Self
 
     from pcapkit.const.reg.apptype.tcp import TCP as AppType_TCP
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.application.httpv1.data import HTTPv1 as Data_HTTPv1
     from pcapkit.protocols.application.httpv1.protocol import HTTPv1
     from pcapkit.protocols.application.httpv2.data import HTTPv2 as Data_HTTPv2
@@ -429,54 +430,50 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         """
         return int(_TCP.klass.http)  # type: ignore[call-overload]
 
-    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
-                 length: 'Optional[int]' = None, *,
-                 version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'None':
-        """Initialisation.
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+                 version: 'Optional[Literal[1, 2]]' = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            version: Version of HTTP, ``1`` or ``2``: the member :meth:`__new__`
-                picks. Building from fields, it must be this class's own. Parsing,
-                it is handed on unread.
-            **kwargs: As :meth:`Protocol.__init__
+            version: Version of HTTP, ``1`` or ``2``: the member :meth:`__new__` picks, which must be this
+                class's own.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         Raises:
-            ProtocolError: If, building from fields, ``version`` names neither
-                member, or is not this class's own version: that of the member
-                it is or derives from, which a subclass outside the members
-                does not have; or if ``preface`` is asked of HTTP/1.
+            ProtocolError: If ``version`` names neither member, or is not this
+                class's own version: that of the member it is or derives from,
+                which a subclass outside the members does not have.
+
+        .. versionchanged:: 1.8.0
+
+           Parses only, and ``version`` is checked against the member, as
+           :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).
 
         """
-        if file is not None:
-            if version is not None:
-                kwargs['version'] = version
-        else:
-            HTTPv1, HTTPv2 = _HTTPV1.klass, _HTTPV2.klass  # pylint: disable=invalid-name
-
-            if version is not None and not isinstance(self, self._member_of_version(version)):
-                if not isinstance(self, (HTTPv1, HTTPv2)):
-                    raise ProtocolError(f'{type(self).__name__}: no version of its own to match '
-                                        f'version={version!r}')
-                raise ProtocolError(f'{type(self).__name__}: version={version!r} '
-                                    'names another member')
-            # NOTE: ``pack`` writes the preface for any member, so HTTP/1 refuses it here.
-            if kwargs.get('preface') and isinstance(self, HTTPv1):
-                raise ProtocolError('HTTP/1: connection preface is HTTP/2 only')
-        super().__init__(file, length, **kwargs)  # type: ignore[arg-type]
+        if version is not None:
+            type(self)._construction_member({'version': version})
+        # NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).
+        self._parse(file, length, layer=layer, protocol=protocol, context=context)
 
     def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,  # type: ignore[misc]
                 length: 'Optional[int]' = None, **kwargs: 'Any') -> 'HTTP':
-        """Create the member a construction of this class describes.
+        """Create the member a parse of this class describes.
 
-        The ``version`` keyword names the member, on either path. Without it,
-        parsing octets gives the member :meth:`_dispatch_version` identifies,
-        since HTTP octets carry their own version, and building from fields is
-        refused, since no field picks a member (:issue:`2574`). That member's
-        ``__init__`` then runs with the same arguments. A subclass of this class
-        is created as itself.
+        The ``version`` keyword names the member. Without it, the octets give the
+        member :meth:`_dispatch_version` identifies, since HTTP octets carry their
+        own version (:issue:`2574`). That member's ``__init__`` then runs with the
+        same arguments. A subclass of this class is created as itself.
 
         Args:
             file: Source packet stream, read here without being consumed.
@@ -487,17 +484,18 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             An uninitialised instance of the member.
 
         Raises:
+            TypeError: If ``file`` is :obj:`None`, on this class.
             ProtocolError: If ``version`` names neither member; or, without it,
-                if building from fields, or if the octets are neither version's,
-                including an HTTP/2 connection preface with no frame after it.
+                if the octets are neither version's, including an HTTP/2
+                connection preface with no frame after it.
 
         """
         if cls is not HTTP:
             return super().__new__(cls, file, length, **kwargs)  # type: ignore[call-arg]
+        if file is None:
+            raise _nothing_to_parse(HTTP)
         if kwargs.get('version') is not None:
             member = cls._member_of_version(kwargs['version'])
-        elif file is None:
-            raise ProtocolError('HTTP: no version to build with; pass version=1 or version=2')
         else:
             if isinstance(file, bytes):
                 data = file

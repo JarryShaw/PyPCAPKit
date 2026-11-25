@@ -29,7 +29,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: The keywords ``_from_parent`` gives ``__init__``: the stops and the context.
-INIT_KEYWORDS = {'layer', 'protocol', '__context__'}
+INIT_KEYWORDS = {'layer', 'protocol', 'context'}
 
 #: A TCP segment with a payload no port of its dispatches.
 SEGMENT = wire.tcp(b'payload', seq=1)
@@ -84,7 +84,7 @@ class NextLayerChannelTests(unittest.TestCase):
             raw = ProtocolBase._parse_next_layer(Raw, b'four', 4, layer='Link', protocol='TCP',
                                                  context=context, alias=7, packet=packet)
 
-        self.assertEqual(init, [('Raw', {'layer': 'Link', 'protocol': 'TCP', '__context__': context})])
+        self.assertEqual(init, [('Raw', {'layer': 'Link', 'protocol': 'TCP', 'context': context})])
         self.assertEqual(read[0][1]['alias'], 7)
         self.assertIs(read[0][1]['packet'], packet)
         self.assertEqual(read[0][1]['__packet__']['outer'], 1)
@@ -118,7 +118,7 @@ class NextLayerChannelTests(unittest.TestCase):
         with spy(DNS, '__init__') as init, spy(DNS, '__post_init__') as post:
             parsed = DNS(octets, len(octets))
 
-        self.assertNotIn('framed', post[0][1])
+        self.assertIsNone(post[0][1]['framed'])
         self.assertIs(post[1][1]['framed'], True)
         self.assertStopsAlone(init[1:])
         self.assertEqual((parsed.info.id, parsed.payload.info.id), (1, 2))
@@ -231,15 +231,14 @@ class NextLayerChannelTests(unittest.TestCase):
         for label, payload, kept in (('refused', refused, Raw), ('empty', b'', NoPayload)):
             with self.subTest(label), spy(kept, '__init__') as init, \
                     spy(kept, '__post_init__') as post:
-                result = IPv4.analyze(6, payload, _layer='Link', protocol='TCP',
-                                      __context__=context, packet={'outer': 1}, unread=True)
+                result = IPv4._analyze_from_parent(6, payload, layer='Link', protocol='TCP',
+                                                   context=context, packet={'outer': 1})
 
                 self.assertIsInstance(result, kept)
                 self.assertEqual(init, [(kept.__name__, {'layer': 'Link', 'protocol': 'TCP',
-                                                         '__context__': context})])
+                                                         'context': context})])
                 self.assertEqual(post[0][1]['alias'], TransType.TCP)
                 self.assertEqual(post[0][1]['packet'], {'outer': 1})
-                self.assertNotIn('unread', post[0][1])
                 self.assertIs(result._exctx, context)
 
     def test_analyze_s_trial_gets_the_stops_and_context_alone(self) -> None:
@@ -250,29 +249,33 @@ class NextLayerChannelTests(unittest.TestCase):
 
         context = ContextRegistry()
         with spy(TCP, '__init__') as init, spy(TCP, 'read') as read:
-            result = IPv4.analyze(6, SEGMENT, _layer='Transport', __context__=context,
-                                  packet={'outer': 1}, version=4)
+            result = IPv4._analyze_from_parent(6, SEGMENT, layer='Transport', context=context,
+                                               packet={'outer': 1}, version=4)
 
         self.assertIsInstance(result, TCP)
-        self.assertEqual(init, [('TCP', {'layer': 'Transport', 'protocol': None, '__context__': context})])
+        self.assertEqual(init, [('TCP', {'layer': 'Transport', 'protocol': None, 'context': context})])
         self.assertEqual(read[0][1]['alias'], TransType.TCP)
         self.assertEqual((read[0][1]['packet'], read[0][1]['version']), ({'outer': 1}, 4))
         self.assertIs(result._exctx, context)
 
-        # NOTE: A keyword neither a stop nor state is the caller's, for the public constructor;
-        # the state takes the channel beside it (#2945).
+        # NOTE: ``analyze`` is the same parse with no state, and refuses any (#2840).
         with spy(TCP, '__init__') as init, spy(TCP, 'read') as read:
-            IPv4.analyze(6, SEGMENT, unread=True, version=4)
-        self.assertEqual(init, [('TCP', {'unread': True, **dict.fromkeys(INIT_KEYWORDS)})])
-        self.assertEqual((read[0][1]['alias'], read[0][1]['version']), (TransType.TCP, 4))
+            IPv4.analyze(6, SEGMENT, layer='Transport', context=context)
+        self.assertEqual(init, [('TCP', {'layer': 'Transport', 'protocol': None, 'context': context})])
+        self.assertNotIn('version', read[0][1])
+        with self.assertRaisesRegex(TypeError, "unexpected keyword argument 'version'"):
+            IPv4.analyze(6, SEGMENT, version=4)
 
-    def test_stops_named_none_and_null_are_no_stop(self) -> None:
-        """As ``Extractor`` spells an omitted stop, which ``__init__`` still reads as none."""
+    def test_stops_named_none_and_null_are_refused_or_a_name(self) -> None:
+        """No sentinel string means no stop: ``'none'`` is no layer, ``'null'`` a protocol name (#2840)."""
         from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.utilities.exceptions import FormatError
 
         frame = wire.ethernet(wire.ipv4(SEGMENT, proto=6), 0x0800)
-        parsed = Ethernet._from_parent(frame, len(frame), layer='none', protocol='null')
-        self.assertEqual((parsed._exlayer, parsed._exproto), (None, None))
+        with self.assertRaisesRegex(FormatError, "unknown layer: 'none'"):
+            Ethernet._from_parent(frame, len(frame), layer='none')
+        parsed = Ethernet._from_parent(frame, len(frame), protocol='null')
+        self.assertEqual((parsed._exlayer, parsed._exproto), (None, 'null'))
         self.assertEqual(str(parsed.protochain), 'Ethernet:IPv4:TCP:Raw')
 
 

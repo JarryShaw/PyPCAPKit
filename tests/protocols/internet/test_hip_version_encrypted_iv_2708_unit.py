@@ -82,7 +82,7 @@ class TestHIPDefaultVersion(unittest.TestCase):
             data = HIP.from_fields(next=59, version=version).data
             for ip_version in (4, 6):
                 with self.subTest(version=version, ip_version=ip_version):
-                    parsed = HIP(data, version=ip_version)
+                    parsed = HIP._from_parent(data, len(data), version=ip_version)  # pylint: disable=protected-access
                     self.assertEqual(parsed.info.version, version)
                     self.assertEqual(HIP.from_data(parsed.info).data, data)
 

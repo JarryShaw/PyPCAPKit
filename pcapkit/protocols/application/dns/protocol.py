@@ -81,12 +81,13 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable, DefaultDict, Iterable, Mapping, Optional, Union
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Type, Union
 
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
 
     from pcapkit.const.reg.apptype.udp import UDP as AppType_UDP
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.application.dns.data import OptionData as Data_OptionData
     from pcapkit.protocols.application.dns.data import RData as Data_RData
     from pcapkit.protocols.protocol import ProtocolBase
@@ -633,6 +634,39 @@ class DNS(Application[Data_DNS, Schema_DNS], schema=Schema_DNS, data=Data_DNS):
 
         """
         return int(_UDP.klass.domain)  # type: ignore[call-overload]
+
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+                 framed: 'Optional[bool]' = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            framed: Whether the TCP length field precedes the message. When
+                :obj:`None`, it does where :func:`_frames_message` finds a whole
+                message behind a length field that reads better than the octets
+                as a plain one, which is how a TCP segment carries one.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        .. versionchanged:: 1.8.0
+
+           Declares ``framed``, its only keyword besides the stops and the
+           context (:issue:`2840`).
+
+        """
+        # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
+        keywords = self._start_parse(file, layer, protocol, context, {'framed': framed})
+        self.__post_init__(file, length, **keywords)
+        self._info.__update__(packet=self.packet.payload)
 
     def __post_init__(self, file: 'Optional[Any]' = None, length: 'Optional[int]' = None,
                       **kwargs: 'Any') -> 'None':

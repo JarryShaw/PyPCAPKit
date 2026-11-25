@@ -88,7 +88,7 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
             HTTP.from_fields(version=1, sid=1, **fields(1))
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
-        """Building, ``version`` must name the member; parsing, it is handed on unread."""
+        """Building or parsing, ``version`` must name the member (#2840)."""
         from pcapkit.protocols.application.httpv1.protocol import HTTPv1
         from pcapkit.protocols.application.httpv1.data import \
             HTTPv1 as Data_HTTPv1
@@ -106,11 +106,14 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
                                  klass.from_fields(**fields(version)).data)
                 with self.assertRaisesRegex(ProtocolError,
                                             f'^{klass.__name__}: version={other} names another member$'):
-                    klass(version=other, **fields(version))
-                self.assertEqual(klass(OCTETS[version], version=other).data, OCTETS[version])
+                    klass.from_fields(version=other, **fields(version))
+                with self.assertRaisesRegex(ProtocolError,
+                                            f'^{klass.__name__}: version={other} names another member$'):
+                    klass(OCTETS[version], version=other)
+                self.assertEqual(klass(OCTETS[version], version=version).data, OCTETS[version])
         self.assertIs(type(Custom.from_fields(version=1, **fields(1))), Custom)
         with self.assertRaisesRegex(ProtocolError, '^Custom: version=2 names another member$'):
-            Custom(version=2, **fields(1))
+            Custom.from_fields(version=2, **fields(1))
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
@@ -134,7 +137,7 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
             with self.subTest(version=version):
                 with self.assertRaisesRegex(ProtocolError,
                                             f'^Outside: no version of its own to match version={version}$'):
-                    Outside(version=version)
+                    Outside.from_fields(version=version)
 
     def test_http1_refuses_a_preface(self) -> None:
         """``pack`` writes the preface for any member, so HTTP/1 refuses it, built directly too."""
@@ -142,7 +145,7 @@ class HTTPBaseVersionRuleTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         for label, build in (('base', lambda: HTTP.from_fields(version=1, preface=True, **fields(1))),
-                             ('member', lambda: self.member(1)(preface=True, **fields(1))),
+                             ('member', lambda: self.member(1).from_fields(preface=True, **fields(1))),
                              ('make', lambda: HTTP.make(object.__new__(HTTP), version=1,  # type: ignore[arg-type]
                                                         preface=True, **fields(1)))):
             with self.subTest(built=label):

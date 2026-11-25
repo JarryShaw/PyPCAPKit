@@ -140,16 +140,27 @@ class SCTPAnalyzeTests(unittest.TestCase):
                 self.assertIs(type(packet), Raw)
                 self.assertSameLayer(packet, frame.payload)
 
-    def test_keywords_reach_the_payload_beside_the_ppid(self) -> None:
+    def test_the_stops_and_the_context_alone_reach_the_payload(self) -> None:
+        """Any other keyword is refused, and state takes the private route, beside the PPID (#2840)."""
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.corekit.context import ContextRegistry
         from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         ppid = PayloadProtocolIdentifier.Diameter_in_a_SCTP_DATA_chunk
+        with self.assertRaisesRegex(TypeError, "unexpected keyword argument 'marker'"):
+            SCTP.analyze(ppid, b'payload', marker=True)
+
+        registry = ContextRegistry()
         with _spy(Raw) as calls:
-            packet = SCTP.analyze(ppid, b'payload', marker=True)
+            packet = SCTP.analyze(ppid, b'payload', context=registry)
         self.assertIs(type(packet), Raw)
-        self.assertEqual(calls, [{'marker': True, 'alias': ppid}])
+        self.assertIs(packet._exctx, registry)  # pylint: disable=protected-access
+        self.assertEqual(calls, [{'alias': ppid}])
+
+        with _spy(Raw) as calls:
+            SCTP._analyze_from_parent(ppid, b'payload', packet={'src': 1})  # pylint: disable=protected-access
+        self.assertEqual((calls[0]['alias'], calls[0]['packet']), (ppid, {'src': 1}))
 
 
 if __name__ == '__main__':

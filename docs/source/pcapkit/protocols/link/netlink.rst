@@ -60,6 +60,7 @@ so :func:`nlmsg_byteorder` guesses it; either way it is kept as
 
    .. automethod:: __length_hint__
    .. automethod:: __index__
+   .. automethod:: __init__
 
    .. rubric:: Utilities
 

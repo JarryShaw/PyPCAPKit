@@ -48,9 +48,9 @@ and says so:
 Why a documented name may legitimately be absent from the signature, which is
 the trap this module has to avoid: this project documents keyword arguments
 consumed from ``**kwargs``, and does so correctly.
-:meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>`
-documents ``_layer`` and ``_protocol`` and really does read them
-(``kwargs.pop('_layer', None)``), and :meth:`Frame.unpack
+:meth:`DNS.__post_init__ <pcapkit.protocols.application.dns.protocol.DNS.__post_init__>`
+documents ``framed`` and really does read it
+(``kwargs.pop('framed', None)``), and :meth:`Frame.unpack
 <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>` documents ``\\_seek_set`` as
 "forwarded to :meth:`self.read <read>` through ``**kwargs``", which is exactly
 true. Deleting either would destroy real documentation, so the presence of

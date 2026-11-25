@@ -74,7 +74,7 @@ class ProtocolPayloadTests(unittest.TestCase):
         for mode, (kwargs, context, body, status, chain) in modes.items():
             for kind, payload in payloads.items():
                 with self.subTest(mode=mode, payload=kind):
-                    extra = {} if context is None else {'__context__': context}
+                    extra = {} if context is None else {'context': context}
                     built = ESP.from_fields(spi=SPI, seq=SEQ, payload=payload, **kwargs, context=context)
                     wire = bytes(built)
                     self.assertEqual(wire, HEADER + body)

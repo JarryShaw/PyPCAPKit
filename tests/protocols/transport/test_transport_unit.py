@@ -149,12 +149,12 @@ class TransportUnitTests(unittest.TestCase):
             def make(self, **kwargs: object) -> object:
                 raise NotImplementedError
 
-        report = DummyTransport.analyze((53, 5353), b'payload', marker=True)
+        report = DummyTransport.analyze((53, 5353), b'payload')
 
         self.assertIsInstance(report, UnknownProtocol)
         self.assertEqual(report.payload, b'payload')
         self.assertEqual(report.length, 7)
-        self.assertEqual((report.kwargs['marker'], report.kwargs['alias']), (True, 53))
+        self.assertEqual(report.kwargs, {'alias': 53})
 
     def test_analyze_takes_the_lower_port_at_the_destination(self) -> None:
         from pcapkit.protocols.transport.transport import Transport

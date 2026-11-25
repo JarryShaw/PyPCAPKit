@@ -25,15 +25,16 @@ from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.fields.numbers import EnumField
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.link.link import Link
-from pcapkit.protocols.protocol import _PT, _ST
+from pcapkit.protocols.protocol import _PT, _ST, _nothing_to_parse
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, ClassVar, DefaultDict, NoReturn, Optional, Type
+    from typing import IO, Any, ClassVar, DefaultDict, Iterable, Mapping, NoReturn, Optional, Type
 
     from typing_extensions import Literal, Self
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.link.linux_sll1.data import LinuxSLL1 as Data_LinuxSLL1
     from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
@@ -280,45 +281,50 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
-    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
-                 length: 'Optional[int]' = None, *,
-                 version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'None':
-        """Initialisation.
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+                 version: 'Optional[Literal[1, 2]]' = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            version: Version of the header, ``1`` or ``2``: the member
-                :meth:`__new__` picks. Building from fields, it must be this
-                class's own. Parsing, it is handed on unread.
-            **kwargs: As :meth:`Protocol.__init__
+            version: Version of the header, ``1`` or ``2``: the member :meth:`__new__` picks, which must be this
+                class's own.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         Raises:
-            ProtocolError: If, building from fields, ``version`` names neither
-                member, or is not this class's own version: that of the member
-                it is or derives from, which a subclass outside the members
-                does not have.
+            ProtocolError: If ``version`` names neither member, or is not this
+                class's own version: that of the member it is or derives from,
+                which a subclass outside the members does not have.
+
+        .. versionchanged:: 1.8.0
+
+           Parses only, and ``version`` is checked against the member, as
+           :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).
 
         """
-        if file is not None:
-            if version is not None:
-                kwargs['version'] = version
-        elif version is not None and not isinstance(self, self._member_of_version(version)):
-            if not any(isinstance(self, self._member_of_version(own)) for own in (1, 2)):
-                raise ProtocolError(f'{type(self).__name__}: no version of its own to match '
-                                    f'version={version!r}')
-            raise ProtocolError(f'{type(self).__name__}: version={version!r} names another member')
-        super().__init__(file, length, **kwargs)  # type: ignore[arg-type]
+        if version is not None:
+            type(self)._construction_member({'version': version})
+        # NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).
+        self._parse(file, length, layer=layer, protocol=protocol, context=context)
 
     def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
                 length: 'Optional[int]' = None, **kwargs: 'Any') -> 'LinuxSLL':
-        """Create the member a construction of this class describes.
+        """Create the member a parse of this class describes.
 
-        The ``version`` keyword names the member, on either path, and nothing
-        else does: the header carries no version of its own, and no field picks
-        a member. That member's ``__init__`` then runs with the same arguments. A
-        subclass of this class is created as itself.
+        The ``version`` keyword names the member, and nothing else does: the
+        header carries no version of its own. That member's ``__init__`` then
+        runs with the same arguments. A subclass of this class is created as
+        itself.
 
         Args:
             file: Source packet stream.
@@ -329,19 +335,20 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             An uninitialised instance of the member.
 
         Raises:
-            ProtocolError: If ``version`` is missing, or names neither member.
-                Without it, octets are refused as fields are: the link type names
-                the version, ``LINUX_SLL`` (113) or ``LINUX_SLL2`` (276).
+            TypeError: If ``file`` is :obj:`None`, on this class.
+            ProtocolError: If ``version`` is missing, or names neither member:
+                the link type names the version, ``LINUX_SLL`` (113) or
+                ``LINUX_SLL2`` (276).
 
         """
         if cls is not LinuxSLL:
             return super().__new__(cls, file, length, **kwargs)
+        if file is None:
+            raise _nothing_to_parse(LinuxSLL)
         version = kwargs.get('version')
         if version is None:
-            if file is not None:
-                raise ProtocolError('LinuxSLL: no version field; pass version=1 or version=2, '
-                                    'or parse with LinuxSLL1 or LinuxSLL2')
-            raise ProtocolError('LinuxSLL: no version to build with; pass version=1 or version=2')
+            raise ProtocolError('LinuxSLL: no version field; pass version=1 or version=2, '
+                                'or parse with LinuxSLL1 or LinuxSLL2')
         member = cls._member_of_version(version)
         return member.__new__(member, file, length, **kwargs)
 

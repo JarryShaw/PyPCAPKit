@@ -971,7 +971,7 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
         registry = ContextRegistry(context)
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):
-                tcp, _ = _behind_tcp_443(wire, __context__=registry)
+                tcp, _ = _behind_tcp_443(wire, context=registry)
                 layers, _ = _layers(tcp.payload.payload)
                 self.assertEqual(len(layers), len(_split_records(wire)) - 1)
                 for layer in layers:

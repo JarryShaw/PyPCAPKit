@@ -133,7 +133,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
             LinuxSLL.from_fields(version=1, interface_index=3)
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
-        """Building, ``version`` must name the member; parsing, it is handed on unread."""
+        """Building or parsing, ``version`` must name the member (#2840)."""
         from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
         from pcapkit.utilities.exceptions import ProtocolError
@@ -144,7 +144,9 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
             LinuxSLL1.from_fields(version=2)
         with self.assertRaisesRegex(ProtocolError, '^LinuxSLL2: version=1 names another member$'):
             LinuxSLL2.from_fields(version=1)
-        self.assertEqual(LinuxSLL2(OCTETS[2], version=1).data, OCTETS[2])
+        with self.assertRaisesRegex(ProtocolError, '^LinuxSLL2: version=1 names another member$'):
+            LinuxSLL2(OCTETS[2], version=1)
+        self.assertEqual(LinuxSLL2(OCTETS[2], version=2).data, OCTETS[2])
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
@@ -163,7 +165,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
                 raise NotImplementedError
 
         with self.assertRaisesRegex(ProtocolError, '^Outside: no version of its own to match version=2$'):
-            Outside(version=2)
+            Outside.from_fields(version=2)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         """By the data model's class; a ``dict`` carries none, and is refused."""

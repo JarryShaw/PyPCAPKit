@@ -81,7 +81,7 @@ def tcp_datagram(datagram: 'TCP_Datagram', *,
     ports = (TCP._make_port(datagram.id.src[1], transport),  # pylint: disable=protected-access
              TCP._make_port(datagram.id.dst[1], transport))  # pylint: disable=protected-access
     # NOTE: Only those set, as the engine hands them (``EngineBase._setup_reassembly``).
-    options = (('layer', layer), ('protocol', protocol), ('__context__', context))
+    options = (('layer', layer), ('protocol', protocol), ('context', context))
     kwargs = {name: value for (name, value) in options if value is not None}  # type: dict[str, Any]
     return _analyze_payload(TCP, ports, datagram.payload, **kwargs)
 

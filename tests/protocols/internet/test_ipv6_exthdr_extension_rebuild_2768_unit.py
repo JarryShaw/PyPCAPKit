@@ -104,7 +104,7 @@ class TestExtensionModeRebuild(unittest.TestCase):
         for name, klass in sorted(self._family().items()):
             with self.subTest(header=name):
                 header = self._header(klass)
-                parsed = klass(header, extension=True, alias=CODES[name])
+                parsed = klass._from_parent(header, len(header), extension=True, alias=CODES[name])  # pylint: disable=protected-access
                 self._assert_rebuilds(klass, parsed.info, header)
 
     def test_chain_header_rebuilds_its_info(self) -> None:
@@ -124,14 +124,15 @@ class TestExtensionModeRebuild(unittest.TestCase):
         for name, klass in sorted(self._family().items()):
             with self.subTest(header=name):
                 header = self._header(klass)
-                parsed = klass(header, alias=CODES[name])
+                parsed = klass._from_parent(header, len(header), alias=CODES[name])  # pylint: disable=protected-access
                 self.assertIn('__next_type__', parsed.info)
                 self._assert_rebuilds(klass, parsed.info, header)
 
     def test_keywords_override_the_replayed_mode(self) -> None:
         for name, klass in sorted(self._family().items()):
             with self.subTest(header=name):
-                parsed = klass(self._header(klass), extension=True, alias=CODES[name])
+                header = self._header(klass)
+                parsed = klass._from_parent(header, len(header), extension=True, alias=CODES[name])  # pylint: disable=protected-access
                 self.assertIn('__next_type__', klass.from_data(parsed.info, extension=False).info)
 
     def test_shim6_keeps_its_protocol(self) -> None:
@@ -139,7 +140,7 @@ class TestExtensionModeRebuild(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         header = self._header(IPv6_Ext)
-        parsed = IPv6_Ext(header, extension=True, alias=CODES['IPv6_Ext'])  # type: Any
+        parsed = IPv6_Ext._from_parent(header, len(header), extension=True, alias=CODES['IPv6_Ext'])  # type: Any # pylint: disable=protected-access
         self.assertIs(parsed.info.protocol, ExtensionHeader.Shim6)
         for source, value in (('info', parsed.info), ('to_dict', parsed.info.to_dict())):
             with self.subTest(source=source):

@@ -50,7 +50,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
         for name, octets in cases.items():
             with self.subTest(case=name), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                parsed = IPv6_Ext(io.BytesIO(octets), len(octets), extension=True, alias=140)
+                parsed = IPv6_Ext._from_parent(io.BytesIO(octets), len(octets), extension=True, alias=140)  # pylint: disable=protected-access
                 self.assertEqual(IPv6_Ext.from_data(parsed.info).data, octets)
         self.assertIsNone(parsed.info.next)
 
