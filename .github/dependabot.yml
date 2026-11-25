@@ -9,6 +9,8 @@
 # image digests, which its Dockerfile takes from examples/benchmark/python-images.txt.
 # The pip entry's `exclude-paths` keeps conda/requirements.txt out: the `/` job
 # otherwise reads requirements files one directory down, conda/ included.
+# Every entry's `target-branch` is `develop`, which carries the next minor
+# (#2942); `main` is the released line.
 
 version: 2
 updates:
@@ -21,11 +23,13 @@ updates:
       - "conda/requirements.txt"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
 
   - package-ecosystem: "github-actions" # Every `uses:` under .github/workflows
     directory: "/" # Dependabot reads .github/workflows from the repository root
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     groups: # codeql-action now refuses to run unless every step in a workflow
       codeql-action: # (init, autobuild, analyze) is on the same version (#2384-#2386)
         patterns:

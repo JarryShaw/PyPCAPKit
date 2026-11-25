@@ -489,11 +489,15 @@ ROWS = [
     ('Unit Tests completed on a branch that is not main',
      _context(head_branch='dependabot/pip/scapy-2.6.2', verdict='skipped', verified=NULL),
      False, False, False),
+    # #2942: each gate's own `head_branch == 'main'` decides, so the row holds a verdict
+    # that covers the checkout; dropping any one gate's clause runs that job.
+    ("a develop push's Unit Tests completed, even under a covering verdict",
+     _context(head_branch='develop'), False, False, False),
     ('the run was cancelled',
      _context(cancelled=True), None, None, False),
 ]
 
-#: GitHub Pages also builds, without deploying, for a pull request against ``main``.
+#: GitHub Pages also builds, without deploying, for a pull request against ``main`` or ``develop``.
 PAGES_ROWS = [
     ('a pull request against main',
      _context(event_name='pull_request', verdict='skipped', verified=NULL), False, False, True),

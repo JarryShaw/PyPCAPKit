@@ -17,9 +17,9 @@ name: Experimental Tests
 # it skips the KTLO jobs there (#2243).
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -35,9 +35,9 @@ permissions:
 
 jobs:
   # #1938: the gate. util/superseded.py's `check` writes `current`, `false`
-  # only where this run's commit is no longer the head of main or of its open
-  # pull request, and every other job skips on `false`, so a superseded run's
-  # checks read `skipped`, which marks no commit red. Every step is
+  # only where this run's commit is no longer the head of its branch or of its
+  # open pull request, and every other job skips on `false`, so a superseded
+  # run's checks read `skipped`, which marks no commit red. Every step is
   # `continue-on-error` and each job's `if:` opens with `!cancelled()`, so a
   # failure here, of a step or of the job, runs the rest.
   current:

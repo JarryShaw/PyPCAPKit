@@ -2716,6 +2716,10 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
          release_context(vendor_updated='false'), False),
         ("Vendor Update's jobs could not be read, so updated is unset",
          release_context(vendor_updated=NULL), True),
+        # #2942: a develop push's Unit Tests run raises Vendor Update, whose
+        # `vendor-update` skips on `head_branch`; Create Release sees only that.
+        ("a develop push's Vendor Update, vendor-update skipped, so updated=false",
+         release_context(vendor_updated='false'), False),
     ]
 
     #: ``(row name, context, whether the release test gate must run)``. #1052:

@@ -19,13 +19,14 @@ covers installation.
 
 ## Contribution flow
 
-- Create a topic branch, usually from `main`.
+- Create a topic branch from `develop`, which carries the next minor, or from `main`, the released
+  line, for a fix to the current release.
 - Make commits of logical units, and add a test case if the change fixes a bug or adds functionality.
 - Run the tests and make sure they pass (see below).
 - Describe a user-visible change in the pull request, and leave its changelog entry to the
   maintainer (see below).
 - Format the commit messages as below.
-- Push the branch to your fork and open a pull request.
+- Push the branch to your fork and open a pull request against the branch you started from.
 
 ## Running the tests
 
@@ -70,10 +71,10 @@ python util/changelog_md.py --check    # exits 0 when they agree, prints a diff 
 ```
 
 The generator needs only the standard library. The `Changelog drift` job in
-`.github/workflows/unit-tests.yml` runs `--check` on every push to `main`, every pull request
-targeting it, and whenever another workflow calls that one as a gate (the vendor and conda updates,
-the pages deploy and the release), with no `gate-only` guard to opt out. A hand-edited
-`CHANGELOG.md` fails it.
+`.github/workflows/unit-tests.yml` runs `--check` on every push to `main` or `develop`, every pull
+request targeting either, and whenever another workflow calls that one as a gate (the vendor and
+conda updates, the pages deploy and the release), with no `gate-only` guard to opt out. A
+hand-edited `CHANGELOG.md` fails it.
 
 ## Documentation
 
@@ -149,7 +150,7 @@ make vermin    # minimum-Python-version check
 ```
 
 `pylint`, `mypy`, `bandit` and `vermin` also run as the `Lint` job in `.github/workflows/lint.yml`:
-on every pull request against `main`, on a weekly Saturday schedule and through
+on every pull request against `main` or `develop`, on a weekly Saturday schedule and through
 `workflow_dispatch`, on the newest supported Python alone (`latest` in
 `.github/python-versions.toml`). The job drives them through the `Makefile` (`vermin` by its
 `vermin-ci` variant), with `RUN=` emptying the `pipenv run` prefix, so local and CI runs read the

@@ -4,8 +4,8 @@
 ``github-release`` is the environment with a required reviewer, and it holds the
 release App's key, ``RELEASE_APP_PRIVATE_KEY``, for Create Release's ``github``.
 The owner ruled on #2648 that an approval at a deployment gate is for Create
-Release alone, so the scheduled ``pr`` jobs of Python Versions and Issue and PR
-Kinds read the same key from ``release-app``, which has no reviewer.
+Release alone, so the ``pr`` jobs of Python Versions, Issue and PR Kinds and
+Sync Develop (#2942) read the same key from ``release-app``, which has no reviewer.
 
 * :class:`TestOnlyCreateReleaseNamesTheGate` scans every workflow: Create
   Release's ``github`` is the only job naming ``github-release``, and every other
@@ -45,8 +45,8 @@ if TYPE_CHECKING:
 GATE, APP = 'github-release', 'release-app'
 #: Create Release, and its job that names :data:`GATE`.
 RELEASE, RELEASE_JOB = 'create-release.yml', 'github'
-#: The scheduled jobs reading the key from :data:`APP`.
-CRON_READERS = {('cron-issue-pr-kinds.yml', 'pr'), ('cron-python-versions.yml', 'pr')}
+#: The jobs reading the key from :data:`APP`.
+CRON_READERS = {('cron-issue-pr-kinds.yml', 'pr'), ('cron-python-versions.yml', 'pr'), ('sync-develop.yml', 'pr')}
 #: A read of the App's private key, as ``secrets.X`` or ``secrets['X']``.
 KEY = re.compile(r"""secrets\s*(?:\.\s*|\[\s*['"])RELEASE_APP_PRIVATE_KEY\b""")
 

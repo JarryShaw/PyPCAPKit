@@ -862,6 +862,15 @@ class TestNoLongerRun(unittest.TestCase):
         self.assertEqual({ci_timing.match_job(self.specs, name)['id'] for name in self.PYPY}, {'test'})
         self.assertEqual(self.gone(before), set())
 
+    def test_a_leg_renamed_on_develop_stays_while_main_runs_it(self) -> 'None':
+        """#2942: each branch runs its own workflow file, so a rename on ``develop`` alone retires nothing."""
+        main = {**listed(1, 'push', 5, self.PYPY + (self.LIVE,)), 'head_branch': 'main'}
+        develop = {**listed(2, 'push', 8, self.PARTS + (self.LIVE,)), 'head_branch': 'develop'}
+        self.assertEqual(self.gone(main, develop), set())
+        # Once main runs the new legs too, the old names are gone.
+        merged = {**listed(3, 'push', 9, self.PARTS + (self.LIVE,)), 'head_branch': 'main'}
+        self.assertEqual(self.gone(main, develop, merged), set(self.PYPY))
+
     def test_a_light_pull_request_exempts_nothing(self) -> 'None':
         """A newer pull-request run of the ``latest`` leg alone says nothing about the rest."""
         light = listed(3, 'pull_request', 9, (self.LIVE,))

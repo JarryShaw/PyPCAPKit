@@ -4,7 +4,8 @@
 * :class:`TestTheJob` pins :file:`codeql-analysis.yml`: ``analyze`` with the
   permissions :data:`ANALYZE` records, ``discussion`` the one job holding
   ``security-events: read`` and ``discussions: write``, run after ``analyze`` on a
-  push or the schedule and never on a pull request, the mode each event maps to,
+  push to ``main`` or the schedule, and never on a pull request or a push to
+  ``develop`` (#2942), the mode each event maps to,
   the thread's title, and the status the report step hands on.
 * :class:`TestThePostStep` runs ``Post the report to Discussions`` with a
   stand-in ``python3``: the report step's status, or ``analyze``'s result where
@@ -126,16 +127,27 @@ class TestTheJob(unittest.TestCase):
                 else:
                     self.assertIs(entry['continue-on-error'], True)
 
+    @staticmethod
+    def runs(event: 'str', ref: 'str', result: 'str') -> 'bool':
+        jobs = job_blocks((WORKFLOWS / NAME).read_text(encoding='utf-8'))
+        context = {STATUS: {'cancelled': result == 'cancelled'}, 'github': {'event_name': event, 'ref': ref},
+                   'needs': {'analyze': {'result': result, 'outputs': {}}}}  # type: dict[str, Any]
+        return job_runs(jobs, 'discussion', context)
+
     def test_it_runs_after_a_push_or_the_schedule_but_never_a_pull_request(self) -> None:
         self.assertEqual(sorted(load(NAME)['on']), ['pull_request', 'push', 'schedule'])
-        jobs = job_blocks((WORKFLOWS / NAME).read_text(encoding='utf-8'))
-        for event in ('push', 'schedule', 'pull_request'):
+        for event, ref in (('push', 'refs/heads/main'), ('schedule', 'refs/heads/main'),
+                           ('pull_request', 'refs/pull/2942/merge')):
             for result in RESULTS:
-                context = {STATUS: {'cancelled': result == 'cancelled'}, 'github': {'event_name': event},
-                           'needs': {'analyze': {'result': result, 'outputs': {}}}}  # type: dict[str, Any]
                 with self.subTest(event=event, analyze=result):
-                    self.assertEqual(job_runs(jobs, 'discussion', context),
-                                     event != 'pull_request' and result != 'skipped')
+                    self.assertEqual(self.runs(event, ref, result), event != 'pull_request' and result != 'skipped')
+
+    def test_a_push_to_develop_posts_nothing(self) -> None:
+        """#2942: the report lists the default branch's alerts, so a ``develop`` push has none of its own."""
+        self.assertIn('develop', load(NAME)['on']['push']['branches'])
+        for result in RESULTS:
+            with self.subTest(analyze=result):
+                self.assertFalse(self.runs('push', 'refs/heads/develop', result))
 
     def test_the_mode_follows_the_event(self) -> None:
         expression = named('Post the report to Discussions')['env']['MODE']

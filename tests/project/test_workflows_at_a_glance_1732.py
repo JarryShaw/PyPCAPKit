@@ -6,7 +6,8 @@ workflow under :file:`.github/workflows/` and draws them as a graph. A file can
 land with neither a row nor a node, as :file:`experimental.yml` did (#1732), so
 each is checked here against the ``on:`` block of every file: one table row per file with its name and
 triggers, and one graph node per file with an edge for each ``push``,
-``pull_request`` and ``workflow_run`` trigger. The page states no count of the
+``pull_request`` and ``workflow_run`` trigger, a branch trigger's from the node
+labelled with its branches (#2942). The page states no count of the
 files (#1103's ruling, #1811); the row and node per file are what keep it whole.
 
 """
@@ -109,11 +110,26 @@ def graph(page: 'str') -> 'tuple[dict[str, str], set[str]]':
     return nodes, edges
 
 
+def trigger_nodes(page: 'str') -> 'dict[str, str]':
+    """The first graph's branch-trigger nodes, by label, as ``push: main, develop``."""
+    section = page.split('.. mermaid::', 1)[1].split('\nThe double relationship', 1)[0]
+    return {match.group(2): match.group(1)
+            for match in re.finditer(r'(?m)^ +(\w+)\["((?:push|pull_request): [^"]+)"\]$', section)}
+
+
+def branch_label(event: 'str', body: 'str') -> 'str':
+    """The label of the trigger node an ``event`` with ``body`` comes from."""
+    found = re.search(r'branches:\s*\[([^\]]*)\]', body)
+    assert found is not None, f'{event} has no branches'
+    return f'{event}: ' + ', '.join(item.strip() for item in found.group(1).split(','))
+
+
 def problems(page: 'str', files: 'dict[pathlib.Path, str]') -> 'list[str]':
     """Every way the page disagrees with the workflow files."""
     found = []  # type: list[str]
     rows = {row[1]: row for row in table_rows(page)}
     nodes, edges = graph(page)
+    sources = trigger_nodes(page)
     by_name = {workflow_name(text): nodes.get(path.name) for path, text in files.items()}
     for path, text in sorted(files.items()):
         want = expected_row(path, text)
@@ -132,9 +148,10 @@ def problems(page: 'str', files: 'dict[pathlib.Path, str]') -> 'list[str]':
         events = triggers(text)
         wanted = set()
         if 'push' in events:
-            wanted.add(f'{"TAG" if "tags:" in events["push"] else "PUSH"} --> {node}')
+            source = 'TAG' if 'tags:' in events['push'] else sources.get(branch_label('push', events['push']))
+            wanted.add(f'{source} --> {node}')
         if 'pull_request' in events:
-            wanted.add(f'PR --> {node}')
+            wanted.add(f'{sources.get(branch_label("pull_request", events["pull_request"]))} --> {node}')
         for upstream in re.findall(r'"([^"]+)"', events.get('workflow_run', '')):
             wanted.add(f'{by_name.get(upstream.strip())} ==>|workflow_run: completed| {node}')
         for edge in sorted(wanted - edges):

@@ -2,9 +2,9 @@ name: Unit Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_call:
     inputs:
       gate-only:
@@ -1331,10 +1331,11 @@ jobs:
   # its track record, which is the maintainer's call.
   unittest-ordering:
     name: Plain unittest ordering (${{ matrix.label || matrix.leg }})
-    # Every push to main and no PR (#1052 item H): not required, and its cells
-    # would add a large share of each PR push's jobs. `needs: [test]` (#1538)
-    # queues them behind this push's own legs; `!cancelled()` still runs them
-    # if `test` fails, so a red cell still fails the run that gates publishing.
+    # Every push, to main or develop, and no PR (#1052 item H): not required,
+    # and its cells would add a large share of each PR push's jobs. `needs:
+    # [test]` (#1538) queues them behind this push's own legs; `!cancelled()`
+    # still runs them if `test` fails, so a red cell still fails the run that
+    # gates publishing.
     if: ${{ !cancelled() && inputs.gate-only != true && github.event_name != 'pull_request' }}
     needs: [test]
     runs-on: ubuntu-latest

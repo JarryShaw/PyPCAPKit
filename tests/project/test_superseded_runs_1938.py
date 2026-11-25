@@ -282,6 +282,18 @@ class TestCheck(unittest.TestCase):
         self.assertEqual(url, f'https://api.github.com/repos/{REPO}/commits/main')
         self.assertEqual(headers['Authorization'], 'Bearer token')
 
+    def test_a_push_to_develop(self) -> None:
+        """#2942: ``develop`` carries the next minor, and its newest push supersedes an older one."""
+        develop = superseded.Context('push', 'refs/heads/develop', OURS, REPO)
+        self.assertTrue(develop.watched)
+        at = {f'repos/{REPO}/commits/develop': {'sha': NEWER}}
+        stale = self.verdict(develop, at)
+        self.assertEqual((stale.state, stale.reason),
+                         (superseded.SUPERSEDED, f'develop is at {NEWER[:9]}, no longer at {OURS[:9]}'))
+        self.assertEqual(self.api.requests[0][0], f'https://api.github.com/repos/{REPO}/commits/develop')
+        current = self.verdict(develop, {f'repos/{REPO}/commits/develop': {'sha': OURS}})
+        self.assertEqual((current.state, current.reason), (superseded.CURRENT, f'{OURS[:9]} is the head of develop'))
+
     def test_a_pull_request(self) -> None:
         self.assertEqual(self.verdict(pull(), pull_is('open')).state, superseded.CURRENT)
         moved = self.verdict(pull(), pull_is('open', head=NEWER))
