@@ -74,6 +74,8 @@ built-in TCP flow tracing class derive from.
       :no-value:
    .. autoattribute:: _analyze
       :no-value:
+   .. autoattribute:: _parse_keywords
+      :no-value:
 
    .. rubric:: Defaults
 

@@ -295,12 +295,30 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
             ext._reasm = ReassemblyManager((name, reasm) for (name, reasm) in ext._reasm.items()
                                            if name in adapters)
 
-        # NOTE: Only as the extraction's engine: a third-party one runs this one's ``run`` for the
-        # global header alone (``Extractor.record_header``), and parses no frame with them.
-        if not parse or getattr(ext, '_exeng', None) is not self:
+        keywords = self._frame_keywords() if parse else None
+        if keywords is None:
             return
-        # NOTE: Only those set, so an ``analyze`` taking no keywords, as a custom
-        # ``__protocol_type__``'s may, is called as before when the extraction sets none.
+        for (_, reasm) in ext._reasm.items():
+            reasm._parse_keywords = dict(keywords)
+
+    def _frame_keywords(self) -> 'Optional[dict[str, Any]]':
+        """The stops and context this engine parses its frames with, those set.
+
+        Returns:
+            The extraction's ``layer``, ``protocol`` and ``__context__`` keywords,
+            only those set, so an ``analyze`` taking no keywords, as a custom
+            ``__protocol_type__``'s may, is called as before when the extraction
+            sets none; :data:`None` unless this engine is the extraction's, since a
+            third-party one runs this one's ``run`` for the global header alone
+            (:meth:`Extractor.record_header
+            <pcapkit.foundation.extraction.Extractor.record_header>`) and parses
+            no frame with them.
+
+        """
+        ext = self._extractor
+        if getattr(ext, '_exeng', None) is not self:
+            return None
+
         keywords = {}  # type: dict[str, Any]
         if ext._exlyr != 'none':
             keywords['layer'] = ext._exlyr
@@ -308,8 +326,7 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
             keywords['protocol'] = ext._exptl
         if ext._exctx:
             keywords['__context__'] = ext._exctx
-        for (_, reasm) in ext._reasm.items():
-            reasm._parse_keywords = dict(keywords)
+        return keywords
 
     def _reassemble(self, timestamp: 'float', *args: 'Any', **kwargs: 'Any') -> 'None':
         """Feed a frame to every enabled reassembler.
@@ -371,8 +388,15 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         """
         cls._register_adapter('__traceflow__', 'flow tracing', protocol, adapter)
 
-    def _setup_traceflow(self) -> 'None':
+    def _setup_traceflow(self, *, parse: 'bool' = False) -> 'None':
         """Drop each enabled flow tracer this engine has no adapter for.
+
+        Args:
+            parse: whether this engine parses its frames with the extraction's
+                stops and context; as the extraction's engine, it then hands them
+                to each flow tracer kept, whose ``analyze`` reassemblers parse
+                their payloads with them as the frames' next layers are
+                (:issue:`2946`)
 
         Warns:
             AttributeWarning: For each flow tracer dropped; once, naming them
@@ -388,6 +412,12 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         held = [name for (name, tracer) in ext._trace.items() if tracer is not None]
         adapters = self.__traceflow__
         unsupported = [name for name in held if name not in adapters]
+
+        keywords = self._frame_keywords() if parse else None
+        if keywords is not None:
+            for (name, tracer) in ext._trace.items():
+                if tracer is not None and name not in unsupported:
+                    tracer._parse_keywords = dict(keywords)
         if not unsupported:
             return
 
