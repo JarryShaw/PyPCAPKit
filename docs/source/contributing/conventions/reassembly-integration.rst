@@ -80,7 +80,10 @@ Parse Ownership
   same method, on the reassembly's own ``__protocol_type__``. For IP and TCP it
   passes the stops and context the extraction's engine parses its frames with: the
   default engine's, and none from a third-party engine, whose frames ignore them
-  (:issue:`2933`).
+  (:issue:`2933`). :func:`~pcapkit.foundation.analysis.ip.ip_datagram` and
+  :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` take them as keyword-only
+  ``layer``, ``protocol`` and ``context``, so given the same they return that
+  ``packet`` (:issue:`2947`).
 * Protocol code never imports :mod:`pcapkit.foundation` to do its own work; the
   dependency runs from ``foundation`` to the protocols. The protocol base's import from
   :mod:`pcapkit.foundation.registry.protocols` registers a class rather than parsing.
