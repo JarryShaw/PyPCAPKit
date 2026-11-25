@@ -72,14 +72,17 @@ def _declarations(path: 'str', name: 'str') -> 'tuple[tuple[str, int], ...]':
     for node in body:
         if not isinstance(node, ast.Assign):
             continue
-        # A member is ``name = port, 'svc', TransportProtocol.x``. Any other
+        # A member is ``name = port`` or ``name = port, 'svc'`` (#3055). Any other
         # assignment is refused rather than skipped, so a change of shape in the
         # generator fails here instead of quietly shrinking the oracle.
         value = node.value
+        port, *svc = value.elts if isinstance(value, ast.Tuple) else (value,)
         if not (len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
-                and isinstance(value, ast.Tuple) and len(value.elts) == 3):
+                and isinstance(port, ast.Constant) and type(port.value) is int
+                and len(svc) <= 1 and all(isinstance(item, ast.Constant)
+                                          and type(item.value) is str for item in svc)):
             raise ValueError(f'{path}:{node.lineno}: not a member declaration')
-        rows.append((node.targets[0].id, ast.literal_eval(value.elts[0])))
+        rows.append((node.targets[0].id, port.value))
     return tuple(rows)
 
 

@@ -944,591 +944,591 @@ class TCP(AppType):
 
     #: - [TCP] Reserved [:rfc:`6335`]
     #: - [UDP] Reserved [:rfc:`6335`]
-    reserved_0 = 0, 'reserved', TransportProtocol.tcp
+    reserved_0 = 0, 'reserved'
 
     #: - [TCP] TCP Port Service Multiplexer
     #: - [UDP] TCP Port Service Multiplexer
-    tcpmux = 1, 'tcpmux', TransportProtocol.tcp
+    tcpmux = 1
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_2 = 2, 'reserved', TransportProtocol.tcp
+    reserved_2 = 2, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_3 = 3, 'reserved', TransportProtocol.tcp
+    reserved_3 = 3, 'reserved'
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_4 = 4, 'unassigned', TransportProtocol.tcp
+    unassigned_4 = 4, 'unassigned'
 
     #: - [TCP] Remote Job Entry
     #: - [UDP] Remote Job Entry
-    rje = 5, 'rje', TransportProtocol.tcp
+    rje = 5
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_6 = 6, 'unassigned', TransportProtocol.tcp
+    unassigned_6 = 6, 'unassigned'
 
     #: - [TCP] Echo
     #: - [UDP] Echo
-    echo = 7, 'echo', TransportProtocol.tcp
+    echo = 7
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_8 = 8, 'unassigned', TransportProtocol.tcp
+    unassigned_8 = 8, 'unassigned'
 
     #: - [TCP] Discard
     #: - [UDP] Discard
     #: - [SCTP] Discard [:rfc:`9260`]
     #: - [DCCP] Discard [:rfc:`4340`]
-    discard = 9, 'discard', TransportProtocol.tcp
+    discard = 9
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_10 = 10, 'unassigned', TransportProtocol.tcp
+    unassigned_10 = 10, 'unassigned'
 
     #: - [TCP] Active Users
     #: - [UDP] Active Users
-    systat = 11, 'systat', TransportProtocol.tcp
+    systat = 11
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_12 = 12, 'unassigned', TransportProtocol.tcp
+    unassigned_12 = 12, 'unassigned'
 
     #: - [TCP] Daytime [:rfc:`867`]
     #: - [UDP] Daytime [:rfc:`867`]
-    daytime = 13, 'daytime', TransportProtocol.tcp
+    daytime = 13
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_14 = 14, 'unassigned', TransportProtocol.tcp
+    unassigned_14 = 14, 'unassigned'
 
     #: [TCP] Unassigned [was netstat]
-    unassigned_was_netstat = 15, 'unassigned_was_netstat', TransportProtocol.tcp
+    unassigned_was_netstat = 15
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_16 = 16, 'unassigned', TransportProtocol.tcp
+    unassigned_16 = 16, 'unassigned'
 
     #: - [TCP] Quote of the Day
     #: - [UDP] Quote of the Day
-    qotd = 17, 'qotd', TransportProtocol.tcp
+    qotd = 17
 
     #: - [TCP] Character Generator
     #: - [UDP] Character Generator
-    chargen = 19, 'chargen', TransportProtocol.tcp
+    chargen = 19
 
     #: - [TCP] File Transfer [Default Data]
     #: - [UDP] File Transfer [Default Data]
     #: - [SCTP] FTP [:rfc:`9260`]
-    ftp_data = 20, 'ftp-data', TransportProtocol.tcp
+    ftp_data = 20, 'ftp-data'
 
     #: - [TCP] File Transfer Protocol [Control] [:rfc:`959`]
     #: - [UDP] File Transfer Protocol [Control] [:rfc:`959`]
     #: - [SCTP] FTP [:rfc:`9260`]
-    ftp = 21, 'ftp', TransportProtocol.tcp
+    ftp = 21
 
     #: - [TCP] Telnet [:rfc:`854`]
     #: - [UDP] Telnet [:rfc:`854`]
-    telnet = 23, 'telnet', TransportProtocol.tcp
+    telnet = 23
 
     #: - [TCP] any private mail system
     #: - [UDP] any private mail system
-    any_private_mail_system = 24, 'any_private_mail_system', TransportProtocol.tcp
+    any_private_mail_system = 24
 
     #: - [TCP] Simple Mail Transfer [RFC-ietf-emailcore-rfc5321bis-43]
     #: - [UDP] Simple Mail Transfer [RFC-ietf-emailcore-rfc5321bis-43]
-    smtp = 25, 'smtp', TransportProtocol.tcp
+    smtp = 25
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_26 = 26, 'unassigned', TransportProtocol.tcp
+    unassigned_26 = 26, 'unassigned'
 
     #: - [TCP] NSW User System FE
     #: - [UDP] NSW User System FE
-    nsw_fe = 27, 'nsw-fe', TransportProtocol.tcp
+    nsw_fe = 27, 'nsw-fe'
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_28 = 28, 'unassigned', TransportProtocol.tcp
+    unassigned_28 = 28, 'unassigned'
 
     #: - [TCP] MSG ICP
     #: - [UDP] MSG ICP
-    msg_icp = 29, 'msg-icp', TransportProtocol.tcp
+    msg_icp = 29, 'msg-icp'
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_30 = 30, 'unassigned', TransportProtocol.tcp
+    unassigned_30 = 30, 'unassigned'
 
     #: - [TCP] MSG Authentication
     #: - [UDP] MSG Authentication
-    msg_auth = 31, 'msg-auth', TransportProtocol.tcp
+    msg_auth = 31, 'msg-auth'
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_32 = 32, 'unassigned', TransportProtocol.tcp
+    unassigned_32 = 32, 'unassigned'
 
     #: - [TCP] Display Support Protocol
     #: - [UDP] Display Support Protocol
-    dsp = 33, 'dsp', TransportProtocol.tcp
+    dsp = 33
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_34 = 34, 'unassigned', TransportProtocol.tcp
+    unassigned_34 = 34, 'unassigned'
 
     #: - [TCP] any private printer server
     #: - [UDP] any private printer server
-    any_private_printer_server = 35, 'any_private_printer_server', TransportProtocol.tcp
+    any_private_printer_server = 35
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_36 = 36, 'unassigned', TransportProtocol.tcp
+    unassigned_36 = 36, 'unassigned'
 
     #: - [TCP] Time
     #: - [UDP] Time
-    time = 37, 'time', TransportProtocol.tcp
+    time = 37
 
     #: - [TCP] Resource Location Protocol
     #: - [UDP] Resource Location Protocol
-    rlp = 39, 'rlp', TransportProtocol.tcp
+    rlp = 39
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_40 = 40, 'unassigned', TransportProtocol.tcp
+    unassigned_40 = 40, 'unassigned'
 
     #: - [TCP] Graphics
     #: - [UDP] Graphics
-    graphics = 41, 'graphics', TransportProtocol.tcp
+    graphics = 41
 
     #: - [TCP] Host Name Server
     #: - [UDP] Host Name Server
-    name = 42, 'name', TransportProtocol.tcp
+    name = 42
 
     #: - [TCP] Host Name Server
     #: - [UDP] Host Name Server
-    nameserver = 42, 'nameserver', TransportProtocol.tcp
+    nameserver = 42
 
     #: - [TCP] Who Is
     #: - [UDP] Who Is
-    nicname = 43, 'nicname', TransportProtocol.tcp
+    nicname = 43
 
     #: - [TCP] MPM FLAGS Protocol
     #: - [UDP] MPM FLAGS Protocol
-    mpm_flags = 44, 'mpm-flags', TransportProtocol.tcp
+    mpm_flags = 44, 'mpm-flags'
 
     #: - [TCP] Message Processing Module [recv]
     #: - [UDP] Message Processing Module [recv]
-    mpm = 45, 'mpm', TransportProtocol.tcp
+    mpm = 45
 
     #: - [TCP] MPM [default send]
     #: - [UDP] MPM [default send]
-    mpm_snd = 46, 'mpm-snd', TransportProtocol.tcp
+    mpm_snd = 46, 'mpm-snd'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_47 = 47, 'reserved', TransportProtocol.tcp
+    reserved_47 = 47, 'reserved'
 
     #: - [TCP] Digital Audit Daemon
     #: - [UDP] Digital Audit Daemon
-    auditd = 48, 'auditd', TransportProtocol.tcp
+    auditd = 48
 
     #: - [TCP] Login Host Protocol (TACACS)
     #: - [UDP] Login Host Protocol (TACACS)
-    tacacs = 49, 'tacacs', TransportProtocol.tcp
+    tacacs = 49
 
     #: - [TCP] Remote Mail Checking Protocol
     #: - [UDP] Remote Mail Checking Protocol
-    re_mail_ck = 50, 're-mail-ck', TransportProtocol.tcp
+    re_mail_ck = 50, 're-mail-ck'
 
     #: - [TCP] XNS Time Protocol
     #: - [UDP] XNS Time Protocol
-    xns_time = 52, 'xns-time', TransportProtocol.tcp
+    xns_time = 52, 'xns-time'
 
     #: - [TCP] Domain Name Server
     #: - [UDP] Domain Name Server
-    domain = 53, 'domain', TransportProtocol.tcp
+    domain = 53
 
     #: - [TCP] XNS Clearinghouse
     #: - [UDP] XNS Clearinghouse
-    xns_ch = 54, 'xns-ch', TransportProtocol.tcp
+    xns_ch = 54, 'xns-ch'
 
     #: - [TCP] ISI Graphics Language
     #: - [UDP] ISI Graphics Language
-    isi_gl = 55, 'isi-gl', TransportProtocol.tcp
+    isi_gl = 55, 'isi-gl'
 
     #: - [TCP] XNS Authentication
     #: - [UDP] XNS Authentication
-    xns_auth = 56, 'xns-auth', TransportProtocol.tcp
+    xns_auth = 56, 'xns-auth'
 
     #: - [TCP] any private terminal access
     #: - [UDP] any private terminal access
-    any_private_terminal_access = 57, 'any_private_terminal_access', TransportProtocol.tcp
+    any_private_terminal_access = 57
 
     #: - [TCP] XNS Mail
     #: - [UDP] XNS Mail
-    xns_mail = 58, 'xns-mail', TransportProtocol.tcp
+    xns_mail = 58, 'xns-mail'
 
     #: - [TCP] any private file service
     #: - [UDP] any private file service
-    any_private_file_service = 59, 'any_private_file_service', TransportProtocol.tcp
+    any_private_file_service = 59
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_60 = 60, 'unassigned', TransportProtocol.tcp
+    unassigned_60 = 60, 'unassigned'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_61 = 61, 'reserved', TransportProtocol.tcp
+    reserved_61 = 61, 'reserved'
 
     #: - [TCP] ACA Services
     #: - [UDP] ACA Services
-    acas = 62, 'acas', TransportProtocol.tcp
+    acas = 62
 
     #: - [TCP] whois++ IANA assigned this well-formed service name as a replacement
     #:   for "whois++".
     #: - [UDP] whois++ IANA assigned this well-formed service name as a replacement
     #:   for "whois++".
-    whoispp = 63, 'whoispp', TransportProtocol.tcp
+    whoispp = 63
 
     #: - [TCP] whois++
     #: - [UDP] whois++
-    whois = 63, 'whois++', TransportProtocol.tcp
+    whois = 63, 'whois++'
 
     #: - [TCP] Communications Integrator (CI)
     #: - [UDP] Communications Integrator (CI)
-    covia = 64, 'covia', TransportProtocol.tcp
+    covia = 64
 
     #: - [TCP] TACACS-Database Service
     #: - [UDP] TACACS-Database Service
-    tacacs_ds = 65, 'tacacs-ds', TransportProtocol.tcp
+    tacacs_ds = 65, 'tacacs-ds'
 
     #: - [TCP] Bootstrap Protocol Server [:rfc:`951`]
     #: - [UDP] Bootstrap Protocol Server
-    bootps = 67, 'bootps', TransportProtocol.tcp
+    bootps = 67
 
     #: - [TCP] Bootstrap Protocol Client
     #: - [UDP] Bootstrap Protocol Client
-    bootpc = 68, 'bootpc', TransportProtocol.tcp
+    bootpc = 68
 
     #: - [TCP] Trivial File Transfer
     #: - [UDP] Trivial File Transfer
-    tftp = 69, 'tftp', TransportProtocol.tcp
+    tftp = 69
 
     #: - [TCP] Gopher
     #: - [UDP] Gopher
-    gopher = 70, 'gopher', TransportProtocol.tcp
+    gopher = 70
 
     #: - [TCP] Remote Job Service
     #: - [UDP] Remote Job Service
-    netrjs_1 = 71, 'netrjs-1', TransportProtocol.tcp
+    netrjs_1 = 71, 'netrjs-1'
 
     #: - [TCP] Remote Job Service
     #: - [UDP] Remote Job Service
-    netrjs_2 = 72, 'netrjs-2', TransportProtocol.tcp
+    netrjs_2 = 72, 'netrjs-2'
 
     #: - [TCP] Remote Job Service
     #: - [UDP] Remote Job Service
-    netrjs_3 = 73, 'netrjs-3', TransportProtocol.tcp
+    netrjs_3 = 73, 'netrjs-3'
 
     #: - [TCP] Remote Job Service
     #: - [UDP] Remote Job Service
-    netrjs_4 = 74, 'netrjs-4', TransportProtocol.tcp
+    netrjs_4 = 74, 'netrjs-4'
 
     #: - [TCP] any private dial out service
     #: - [UDP] any private dial out service
-    any_private_dial_out_service = 75, 'any_private_dial_out_service', TransportProtocol.tcp
+    any_private_dial_out_service = 75
 
     #: - [TCP] Distributed External Object Store
     #: - [UDP] Distributed External Object Store
-    deos = 76, 'deos', TransportProtocol.tcp
+    deos = 76
 
     #: - [TCP] any private RJE service
     #: - [UDP] any private RJE service
-    any_private_rje_service = 77, 'any_private_rje_service', TransportProtocol.tcp
+    any_private_rje_service = 77
 
     #: - [TCP] vettcp
     #: - [UDP] vettcp
-    vettcp = 78, 'vettcp', TransportProtocol.tcp
+    vettcp = 78
 
     #: - [TCP] Finger
     #: - [UDP] Finger
-    finger = 79, 'finger', TransportProtocol.tcp
+    finger = 79
 
     #: - [TCP] World Wide Web HTTP [:rfc:`9110`]
     #: - [UDP] World Wide Web HTTP [:rfc:`9110`]
     #: - [SCTP] HTTP [:rfc:`9260`]
-    http = 80, 'http', TransportProtocol.tcp
+    http = 80
 
     #: - [TCP] World Wide Web HTTP [:rfc:`9110`]
     #: - [UDP] World Wide Web HTTP [:rfc:`9110`]
-    www = 80, 'www', TransportProtocol.tcp
+    www = 80
 
     #: - [TCP] World Wide Web HTTP
     #: - [UDP] World Wide Web HTTP
-    www_http = 80, 'www-http', TransportProtocol.tcp
+    www_http = 80, 'www-http'
 
     #: - [TCP] XFER Utility
     #: - [UDP] XFER Utility
-    xfer = 82, 'xfer', TransportProtocol.tcp
+    xfer = 82
 
     #: - [TCP] Common Trace Facility
     #: - [UDP] Common Trace Facility
-    ctf = 84, 'ctf', TransportProtocol.tcp
+    ctf = 84
 
     #: - [TCP] MIT ML Device
     #: - [UDP] MIT ML Device
-    mit_ml_dev_83 = 83, 'mit-ml-dev', TransportProtocol.tcp
+    mit_ml_dev_83 = 83, 'mit-ml-dev'
 
     #: - [TCP] MIT ML Device
     #: - [UDP] MIT ML Device
-    mit_ml_dev_85 = 85, 'mit-ml-dev', TransportProtocol.tcp
+    mit_ml_dev_85 = 85, 'mit-ml-dev'
 
     #: - [TCP] Micro Focus Cobol
     #: - [UDP] Micro Focus Cobol
-    mfcobol = 86, 'mfcobol', TransportProtocol.tcp
+    mfcobol = 86
 
     #: - [TCP] any private terminal link
     #: - [UDP] any private terminal link
-    any_private_terminal_link = 87, 'any_private_terminal_link', TransportProtocol.tcp
+    any_private_terminal_link = 87
 
     #: - [TCP] Kerberos [:rfc:`4120`]
     #: - [UDP] Kerberos [:rfc:`4120`]
-    kerberos = 88, 'kerberos', TransportProtocol.tcp
+    kerberos = 88
 
     #: - [TCP] SU/MIT Telnet Gateway
     #: - [UDP] SU/MIT Telnet Gateway
-    su_mit_tg = 89, 'su-mit-tg', TransportProtocol.tcp
+    su_mit_tg = 89, 'su-mit-tg'
 
     #: - [TCP] DNSIX Securit Attribute Token Map
     #: - [UDP] DNSIX Securit Attribute Token Map
-    dnsix = 90, 'dnsix', TransportProtocol.tcp
+    dnsix = 90
 
     #: - [TCP] MIT Dover Spooler
     #: - [UDP] MIT Dover Spooler
-    mit_dov = 91, 'mit-dov', TransportProtocol.tcp
+    mit_dov = 91, 'mit-dov'
 
     #: - [TCP] Device Control Protocol
     #: - [UDP] Device Control Protocol
-    dcp = 93, 'dcp', TransportProtocol.tcp
+    dcp = 93
 
     #: - [TCP] Tivoli Object Dispatcher
     #: - [UDP] Tivoli Object Dispatcher
-    objcall = 94, 'objcall', TransportProtocol.tcp
+    objcall = 94
 
     #: - [TCP] SUPDUP
     #: - [UDP] SUPDUP
-    supdup = 95, 'supdup', TransportProtocol.tcp
+    supdup = 95
 
     #: - [TCP] DIXIE Protocol Specification
     #: - [UDP] DIXIE Protocol Specification
-    dixie = 96, 'dixie', TransportProtocol.tcp
+    dixie = 96
 
     #: - [TCP] Swift Remote Virtural File Protocol
     #: - [UDP] Swift Remote Virtural File Protocol
-    swift_rvf = 97, 'swift-rvf', TransportProtocol.tcp
+    swift_rvf = 97, 'swift-rvf'
 
     #: - [TCP] TAC News
     #: - [UDP] TAC News
-    tacnews = 98, 'tacnews', TransportProtocol.tcp
+    tacnews = 98
 
     #: - [TCP] Metagram Relay
     #: - [UDP] Metagram Relay
-    metagram = 99, 'metagram', TransportProtocol.tcp
+    metagram = 99
 
     #: - [TCP] NIC Host Name Server
     #: - [UDP] NIC Host Name Server
-    hostname = 101, 'hostname', TransportProtocol.tcp
+    hostname = 101
 
     #: - [TCP] ISO-TSAP Class 0
     #: - [UDP] ISO-TSAP Class 0
-    iso_tsap = 102, 'iso-tsap', TransportProtocol.tcp
+    iso_tsap = 102, 'iso-tsap'
 
     #: - [TCP] Genesis Point-to-Point Trans Net
     #: - [UDP] Genesis Point-to-Point Trans Net
-    gppitnp = 103, 'gppitnp', TransportProtocol.tcp
+    gppitnp = 103
 
     #: - [TCP] ACR-NEMA Digital Imag. & Comm. 300
     #: - [UDP] ACR-NEMA Digital Imag. & Comm. 300
-    acr_nema = 104, 'acr-nema', TransportProtocol.tcp
+    acr_nema = 104, 'acr-nema'
 
     #: - [TCP] CCSO name server protocol
     #: - [UDP] CCSO name server protocol
-    cso = 105, 'cso', TransportProtocol.tcp
+    cso = 105
 
     #: - [TCP] Mailbox Name Nameserver
     #: - [UDP] Mailbox Name Nameserver
-    csnet_ns = 105, 'csnet-ns', TransportProtocol.tcp
+    csnet_ns = 105, 'csnet-ns'
 
     #: - [TCP] 3COM-TSMUX
     #: - [UDP] 3COM-TSMUX
-    TCP_3com_tsmux = 106, '3com-tsmux', TransportProtocol.tcp
+    TCP_3com_tsmux = 106, '3com-tsmux'
 
     #: - [TCP] Remote Telnet Service
     #: - [UDP] Remote Telnet Service
-    rtelnet = 107, 'rtelnet', TransportProtocol.tcp
+    rtelnet = 107
 
     #: - [TCP] SNA Gateway Access Server
     #: - [UDP] SNA Gateway Access Server
-    snagas = 108, 'snagas', TransportProtocol.tcp
+    snagas = 108
 
     #: - [TCP] Post Office Protocol - Version 2
     #: - [UDP] Post Office Protocol - Version 2
-    pop2 = 109, 'pop2', TransportProtocol.tcp
+    pop2 = 109
 
     #: - [TCP] Post Office Protocol - Version 3
     #: - [UDP] Post Office Protocol - Version 3
-    pop3 = 110, 'pop3', TransportProtocol.tcp
+    pop3 = 110
 
     #: - [TCP] SUN Remote Procedure Call
     #: - [UDP] SUN Remote Procedure Call
-    sunrpc = 111, 'sunrpc', TransportProtocol.tcp
+    sunrpc = 111
 
     #: - [TCP] McIDAS Data Transmission Protocol
     #: - [UDP] McIDAS Data Transmission Protocol
-    mcidas = 112, 'mcidas', TransportProtocol.tcp
+    mcidas = 112
 
     #: [TCP]
-    ident = 113, 'ident', TransportProtocol.tcp
+    ident = 113
 
     #: - [TCP] Authentication Service
     #: - [UDP] Authentication Service
-    auth = 113, 'auth', TransportProtocol.tcp
+    auth = 113
 
     #: - [TCP] Simple File Transfer Protocol
     #: - [UDP] Simple File Transfer Protocol
-    sftp = 115, 'sftp', TransportProtocol.tcp
+    sftp = 115
 
     #: - [TCP] ANSA REX Notify
     #: - [UDP] ANSA REX Notify
-    ansanotify = 116, 'ansanotify', TransportProtocol.tcp
+    ansanotify = 116
 
     #: - [TCP] UUCP Path Service
     #: - [UDP] UUCP Path Service
-    uucp_path = 117, 'uucp-path', TransportProtocol.tcp
+    uucp_path = 117, 'uucp-path'
 
     #: - [TCP] SQL Services
     #: - [UDP] SQL Services
-    sqlserv = 118, 'sqlserv', TransportProtocol.tcp
+    sqlserv = 118
 
     #: - [TCP] Network News Transfer Protocol [:rfc:`3977`]
     #: - [UDP] Network News Transfer Protocol [:rfc:`3977`]
-    nntp = 119, 'nntp', TransportProtocol.tcp
+    nntp = 119
 
     #: - [TCP] CFDPTKT
     #: - [UDP] CFDPTKT
-    cfdptkt = 120, 'cfdptkt', TransportProtocol.tcp
+    cfdptkt = 120
 
     #: - [TCP] Encore Expedited Remote Pro.Call
     #: - [UDP] Encore Expedited Remote Pro.Call
-    erpc = 121, 'erpc', TransportProtocol.tcp
+    erpc = 121
 
     #: - [TCP] SMAKYNET
     #: - [UDP] SMAKYNET
-    smakynet = 122, 'smakynet', TransportProtocol.tcp
+    smakynet = 122
 
     #: - [TCP] Network Time Protocol [:rfc:`5905`]
     #: - [UDP] Network Time Protocol [:rfc:`5905`]
-    ntp = 123, 'ntp', TransportProtocol.tcp
+    ntp = 123
 
     #: - [TCP] ANSA REX Trader
     #: - [UDP] ANSA REX Trader
-    ansatrader = 124, 'ansatrader', TransportProtocol.tcp
+    ansatrader = 124
 
     #: - [TCP] Locus PC-Interface Net Map Ser
     #: - [UDP] Locus PC-Interface Net Map Ser
-    locus_map = 125, 'locus-map', TransportProtocol.tcp
+    locus_map = 125, 'locus-map'
 
     #: - [TCP] NXEdit
     #: - [UDP] NXEdit
-    nxedit = 126, 'nxedit', TransportProtocol.tcp
+    nxedit = 126
 
     #: - [TCP] Locus PC-Interface Conn Server
     #: - [UDP] Locus PC-Interface Conn Server
-    locus_con = 127, 'locus-con', TransportProtocol.tcp
+    locus_con = 127, 'locus-con'
 
     #: - [TCP] GSS X License Verification
     #: - [UDP] GSS X License Verification
-    gss_xlicen = 128, 'gss-xlicen', TransportProtocol.tcp
+    gss_xlicen = 128, 'gss-xlicen'
 
     #: - [TCP] Password Generator Protocol
     #: - [UDP] Password Generator Protocol
-    pwdgen = 129, 'pwdgen', TransportProtocol.tcp
+    pwdgen = 129
 
     #: - [TCP] cisco FNATIVE
     #: - [UDP] cisco FNATIVE
-    cisco_fna = 130, 'cisco-fna', TransportProtocol.tcp
+    cisco_fna = 130, 'cisco-fna'
 
     #: - [TCP] cisco TNATIVE
     #: - [UDP] cisco TNATIVE
-    cisco_tna = 131, 'cisco-tna', TransportProtocol.tcp
+    cisco_tna = 131, 'cisco-tna'
 
     #: - [TCP] cisco SYSMAINT
     #: - [UDP] cisco SYSMAINT
-    cisco_sys = 132, 'cisco-sys', TransportProtocol.tcp
+    cisco_sys = 132, 'cisco-sys'
 
     #: - [TCP] Statistics Service
     #: - [UDP] Statistics Service
-    statsrv = 133, 'statsrv', TransportProtocol.tcp
+    statsrv = 133
 
     #: - [TCP] INGRES-NET Service
     #: - [UDP] INGRES-NET Service
-    ingres_net = 134, 'ingres-net', TransportProtocol.tcp
+    ingres_net = 134, 'ingres-net'
 
     #: - [TCP] DCE endpoint resolution
     #: - [UDP] DCE endpoint resolution
-    epmap = 135, 'epmap', TransportProtocol.tcp
+    epmap = 135
 
     #: - [TCP] PROFILE Naming System
     #: - [UDP] PROFILE Naming System
-    profile = 136, 'profile', TransportProtocol.tcp
+    profile = 136
 
     #: - [TCP] NETBIOS Name Service
     #: - [UDP] NETBIOS Name Service
-    netbios_ns = 137, 'netbios-ns', TransportProtocol.tcp
+    netbios_ns = 137, 'netbios-ns'
 
     #: - [TCP] NETBIOS Datagram Service
     #: - [UDP] NETBIOS Datagram Service
-    netbios_dgm = 138, 'netbios-dgm', TransportProtocol.tcp
+    netbios_dgm = 138, 'netbios-dgm'
 
     #: - [TCP] NETBIOS Session Service
     #: - [UDP] NETBIOS Session Service
-    netbios_ssn = 139, 'netbios-ssn', TransportProtocol.tcp
+    netbios_ssn = 139, 'netbios-ssn'
 
     #: - [TCP] EMFIS Data Service
     #: - [UDP] EMFIS Data Service
-    emfis_data = 140, 'emfis-data', TransportProtocol.tcp
+    emfis_data = 140, 'emfis-data'
 
     #: - [TCP] EMFIS Control Service
     #: - [UDP] EMFIS Control Service
-    emfis_cntl = 141, 'emfis-cntl', TransportProtocol.tcp
+    emfis_cntl = 141, 'emfis-cntl'
 
     #: - [TCP] Britton-Lee IDM
     #: - [UDP] Britton-Lee IDM
-    bl_idm = 142, 'bl-idm', TransportProtocol.tcp
+    bl_idm = 142, 'bl-idm'
 
     #: [TCP] Internet Message Access Protocol [:rfc:`3501`][:rfc:`9051`]
-    imap = 143, 'imap', TransportProtocol.tcp
+    imap = 143
 
     #: - [TCP] UAAC Protocol
     #: - [UDP] UAAC Protocol
-    uaac = 145, 'uaac', TransportProtocol.tcp
+    uaac = 145
 
     #: - [TCP] ISO-IP0
     #: - [UDP] ISO-IP0
-    iso_tp0 = 146, 'iso-tp0', TransportProtocol.tcp
+    iso_tp0 = 146, 'iso-tp0'
 
     #: - [TCP] ISO-IP
     #: - [UDP] ISO-IP
-    iso_ip = 147, 'iso-ip', TransportProtocol.tcp
+    iso_ip = 147, 'iso-ip'
 
     #: - [TCP] Jargon
     #: - [UDP] Jargon
-    jargon = 148, 'jargon', TransportProtocol.tcp
+    jargon = 148
 
     #: - [TCP] AED 512 Emulation Service
     #: - [UDP] AED 512 Emulation Service
-    aed_512 = 149, 'aed-512', TransportProtocol.tcp
+    aed_512 = 149, 'aed-512'
 
     #: - [TCP] Oracle SQL*NET IANA assigned this well-formed service name as a
     #:   replacement for "sql*net".
@@ -1536,95 +1536,95 @@ class TCP(AppType):
     #: - [UDP] Oracle SQL*NET IANA assigned this well-formed service name as a
     #:   replacement for "sql*net".
     #: - [UDP] Oracle SQL*NET
-    sql_net_66 = 66, 'sql-net', TransportProtocol.tcp
+    sql_net_66 = 66, 'sql-net'
 
     #: - [TCP] SQL-NET
     #: - [UDP] SQL-NET
-    sql_net_150 = 150, 'sql-net', TransportProtocol.tcp
+    sql_net_150 = 150, 'sql-net'
 
     #: - [TCP] HEMS
     #: - [UDP] HEMS
-    hems = 151, 'hems', TransportProtocol.tcp
+    hems = 151
 
     #: - [TCP] Background File Transfer Program
     #: - [UDP] Background File Transfer Program
-    bftp = 152, 'bftp', TransportProtocol.tcp
+    bftp = 152
 
     #: - [TCP] SGMP
     #: - [UDP] SGMP
-    sgmp = 153, 'sgmp', TransportProtocol.tcp
+    sgmp = 153
 
     #: - [TCP] NETSC
     #: - [UDP] NETSC
-    netsc_prod = 154, 'netsc-prod', TransportProtocol.tcp
+    netsc_prod = 154, 'netsc-prod'
 
     #: - [TCP] NETSC
     #: - [UDP] NETSC
-    netsc_dev = 155, 'netsc-dev', TransportProtocol.tcp
+    netsc_dev = 155, 'netsc-dev'
 
     #: - [TCP] SQL Service
     #: - [UDP] SQL Service
-    sqlsrv = 156, 'sqlsrv', TransportProtocol.tcp
+    sqlsrv = 156
 
     #: - [TCP] KNET/VM Command/Message Protocol
     #: - [UDP] KNET/VM Command/Message Protocol
-    knet_cmp = 157, 'knet-cmp', TransportProtocol.tcp
+    knet_cmp = 157, 'knet-cmp'
 
     #: - [TCP] PCMail Server
     #: - [UDP] PCMail Server
-    pcmail_srv = 158, 'pcmail-srv', TransportProtocol.tcp
+    pcmail_srv = 158, 'pcmail-srv'
 
     #: - [TCP] NSS-Routing
     #: - [UDP] NSS-Routing
-    nss_routing = 159, 'nss-routing', TransportProtocol.tcp
+    nss_routing = 159, 'nss-routing'
 
     #: - [TCP] SGMP-TRAPS
     #: - [UDP] SGMP-TRAPS
-    sgmp_traps = 160, 'sgmp-traps', TransportProtocol.tcp
+    sgmp_traps = 160, 'sgmp-traps'
 
     #: - [TCP] SNMP
     #: - [UDP] SNMP
-    snmp = 161, 'snmp', TransportProtocol.tcp
+    snmp = 161
 
     #: - [TCP] SNMPTRAP
     #: - [UDP] SNMPTRAP
-    snmptrap = 162, 'snmptrap', TransportProtocol.tcp
+    snmptrap = 162
 
     #: - [TCP] CMIP/TCP Manager
     #: - [UDP] CMIP/TCP Manager
-    cmip_man = 163, 'cmip-man', TransportProtocol.tcp
+    cmip_man = 163, 'cmip-man'
 
     #: - [TCP] CMIP/TCP Agent
     #: - [UDP] CMIP/TCP Agent
-    cmip_agent = 164, 'cmip-agent', TransportProtocol.tcp
+    cmip_agent = 164, 'cmip-agent'
 
     #: - [TCP] Xerox
     #: - [UDP] Xerox
-    xns_courier = 165, 'xns-courier', TransportProtocol.tcp
+    xns_courier = 165, 'xns-courier'
 
     #: - [TCP] Sirius Systems
     #: - [UDP] Sirius Systems
-    s_net = 166, 's-net', TransportProtocol.tcp
+    s_net = 166, 's-net'
 
     #: - [TCP] NAMP
     #: - [UDP] NAMP
-    namp = 167, 'namp', TransportProtocol.tcp
+    namp = 167
 
     #: - [TCP] RSVD
     #: - [UDP] RSVD
-    rsvd = 168, 'rsvd', TransportProtocol.tcp
+    rsvd = 168
 
     #: - [TCP] SEND
     #: - [UDP] SEND
-    send = 169, 'send', TransportProtocol.tcp
+    send = 169
 
     #: - [TCP] Network PostScript
     #: - [UDP] Network PostScript
-    print_srv = 170, 'print-srv', TransportProtocol.tcp
+    print_srv = 170, 'print-srv'
 
     #: - [TCP] Network Innovations Multiplex
     #: - [UDP] Network Innovations Multiplex
-    multiplex = 171, 'multiplex', TransportProtocol.tcp
+    multiplex = 171
 
     #: - [TCP] Network Innovations CL/1 IANA assigned this well-formed service name
     #:   as a replacement for "cl/1".
@@ -1632,152 +1632,152 @@ class TCP(AppType):
     #: - [UDP] Network Innovations CL/1 IANA assigned this well-formed service name
     #:   as a replacement for "cl/1".
     #: - [UDP] Network Innovations CL/1
-    cl_1 = 172, 'cl-1', TransportProtocol.tcp
+    cl_1 = 172, 'cl-1'
 
     #: - [TCP] Xyplex
     #: - [UDP] Xyplex
-    xyplex_mux = 173, 'xyplex-mux', TransportProtocol.tcp
+    xyplex_mux = 173, 'xyplex-mux'
 
     #: - [TCP] MAILQ
     #: - [UDP] MAILQ
-    mailq = 174, 'mailq', TransportProtocol.tcp
+    mailq = 174
 
     #: - [TCP] VMNET
     #: - [UDP] VMNET
-    vmnet = 175, 'vmnet', TransportProtocol.tcp
+    vmnet = 175
 
     #: - [TCP] GENRAD-MUX
     #: - [UDP] GENRAD-MUX
-    genrad_mux = 176, 'genrad-mux', TransportProtocol.tcp
+    genrad_mux = 176, 'genrad-mux'
 
     #: - [TCP] X Display Manager Control Protocol
     #: - [UDP] X Display Manager Control Protocol
-    xdmcp = 177, 'xdmcp', TransportProtocol.tcp
+    xdmcp = 177
 
     #: - [TCP] NextStep Window Server
     #: - [UDP] NextStep Window Server
-    nextstep = 178, 'nextstep', TransportProtocol.tcp
+    nextstep = 178
 
     #: - [TCP] Border Gateway Protocol
     #: - [UDP] Border Gateway Protocol
     #: - [SCTP] BGP [:rfc:`9260`]
-    bgp = 179, 'bgp', TransportProtocol.tcp
+    bgp = 179
 
     #: - [TCP] Intergraph
     #: - [UDP] Intergraph
-    ris = 180, 'ris', TransportProtocol.tcp
+    ris = 180
 
     #: - [TCP] Unify
     #: - [UDP] Unify
-    unify = 181, 'unify', TransportProtocol.tcp
+    unify = 181
 
     #: - [TCP] Unisys Audit SITP
     #: - [UDP] Unisys Audit SITP
-    audit = 182, 'audit', TransportProtocol.tcp
+    audit = 182
 
     #: - [TCP] OCBinder
     #: - [UDP] OCBinder
-    ocbinder = 183, 'ocbinder', TransportProtocol.tcp
+    ocbinder = 183
 
     #: - [TCP] OCServer
     #: - [UDP] OCServer
-    ocserver = 184, 'ocserver', TransportProtocol.tcp
+    ocserver = 184
 
     #: - [TCP] Remote-KIS
     #: - [UDP] Remote-KIS
-    remote_kis = 185, 'remote-kis', TransportProtocol.tcp
+    remote_kis = 185, 'remote-kis'
 
     #: - [TCP] KIS Protocol
     #: - [UDP] KIS Protocol
-    kis = 186, 'kis', TransportProtocol.tcp
+    kis = 186
 
     #: - [TCP] Application Communication Interface
     #: - [UDP] Application Communication Interface
-    aci = 187, 'aci', TransportProtocol.tcp
+    aci = 187
 
     #: - [TCP] Plus Five's MUMPS
     #: - [UDP] Plus Five's MUMPS
-    mumps = 188, 'mumps', TransportProtocol.tcp
+    mumps = 188
 
     #: - [TCP] Queued File Transport
     #: - [UDP] Queued File Transport
-    qft = 189, 'qft', TransportProtocol.tcp
+    qft = 189
 
     #: - [TCP] Gateway Access Control Protocol
     #: - [UDP] Gateway Access Control Protocol
-    gacp = 190, 'gacp', TransportProtocol.tcp
+    gacp = 190
 
     #: - [TCP] Prospero Directory Service
     #: - [UDP] Prospero Directory Service
-    prospero = 191, 'prospero', TransportProtocol.tcp
+    prospero = 191
 
     #: - [TCP] OSU Network Monitoring System
     #: - [UDP] OSU Network Monitoring System
-    osu_nms = 192, 'osu-nms', TransportProtocol.tcp
+    osu_nms = 192, 'osu-nms'
 
     #: - [TCP] Spider Remote Monitoring Protocol
     #: - [UDP] Spider Remote Monitoring Protocol
-    srmp = 193, 'srmp', TransportProtocol.tcp
+    srmp = 193
 
     #: - [TCP] Internet Relay Chat Protocol
     #: - [UDP] Internet Relay Chat Protocol
-    irc = 194, 'irc', TransportProtocol.tcp
+    irc = 194
 
     #: - [TCP] DNSIX Network Level Module Audit
     #: - [UDP] DNSIX Network Level Module Audit
-    dn6_nlm_aud = 195, 'dn6-nlm-aud', TransportProtocol.tcp
+    dn6_nlm_aud = 195, 'dn6-nlm-aud'
 
     #: - [TCP] DNSIX Session Mgt Module Audit Redir
     #: - [UDP] DNSIX Session Mgt Module Audit Redir
-    dn6_smm_red = 196, 'dn6-smm-red', TransportProtocol.tcp
+    dn6_smm_red = 196, 'dn6-smm-red'
 
     #: - [TCP] Directory Location Service Monitor
     #: - [UDP] Directory Location Service Monitor
-    dls_mon = 198, 'dls-mon', TransportProtocol.tcp
+    dls_mon = 198, 'dls-mon'
 
     #: - [TCP] SMUX
     #: - [UDP] SMUX
-    smux = 199, 'smux', TransportProtocol.tcp
+    smux = 199
 
     #: - [TCP] IBM System Resource Controller
     #: - [UDP] IBM System Resource Controller
-    src = 200, 'src', TransportProtocol.tcp
+    src = 200
 
     #: - [TCP] AppleTalk Routing Maintenance
     #: - [UDP] AppleTalk Routing Maintenance
-    at_rtmp = 201, 'at-rtmp', TransportProtocol.tcp
+    at_rtmp = 201, 'at-rtmp'
 
     #: - [TCP] AppleTalk Name Binding
     #: - [UDP] AppleTalk Name Binding
-    at_nbp = 202, 'at-nbp', TransportProtocol.tcp
+    at_nbp = 202, 'at-nbp'
 
     #: - [TCP] AppleTalk Unused
     #: - [UDP] AppleTalk Unused
-    at_3 = 203, 'at-3', TransportProtocol.tcp
+    at_3 = 203, 'at-3'
 
     #: - [TCP] AppleTalk Echo
     #: - [UDP] AppleTalk Echo
-    at_echo = 204, 'at-echo', TransportProtocol.tcp
+    at_echo = 204, 'at-echo'
 
     #: - [TCP] AppleTalk Unused
     #: - [UDP] AppleTalk Unused
-    at_5 = 205, 'at-5', TransportProtocol.tcp
+    at_5 = 205, 'at-5'
 
     #: - [TCP] AppleTalk Zone Information
     #: - [UDP] AppleTalk Zone Information
-    at_zis = 206, 'at-zis', TransportProtocol.tcp
+    at_zis = 206, 'at-zis'
 
     #: - [TCP] AppleTalk Unused
     #: - [UDP] AppleTalk Unused
-    at_7 = 207, 'at-7', TransportProtocol.tcp
+    at_7 = 207, 'at-7'
 
     #: - [TCP] AppleTalk Unused
     #: - [UDP] AppleTalk Unused
-    at_8 = 208, 'at-8', TransportProtocol.tcp
+    at_8 = 208, 'at-8'
 
     #: - [TCP] The Quick Mail Transfer Protocol
     #: - [UDP] The Quick Mail Transfer Protocol
-    qmtp = 209, 'qmtp', TransportProtocol.tcp
+    qmtp = 209
 
     #: - [TCP] ANSI Z39.50 IANA assigned this well-formed service name as a
     #:   replacement for "z39.50".
@@ -1785,7 +1785,7 @@ class TCP(AppType):
     #: - [UDP] ANSI Z39.50 IANA assigned this well-formed service name as a
     #:   replacement for "z39.50".
     #: - [UDP] ANSI Z39.50
-    z39_50 = 210, 'z39-50', TransportProtocol.tcp
+    z39_50 = 210, 'z39-50'
 
     #: - [TCP] Texas Instruments 914C/G Terminal IANA assigned this well-formed
     #:   service name as a replacement for "914c/g".
@@ -1793,79 +1793,79 @@ class TCP(AppType):
     #: - [UDP] Texas Instruments 914C/G Terminal IANA assigned this well-formed
     #:   service name as a replacement for "914c/g".
     #: - [UDP] Texas Instruments 914C/G Terminal
-    TCP_914c_g = 211, '914c-g', TransportProtocol.tcp
+    TCP_914c_g = 211, '914c-g'
 
     #: - [TCP] ATEXSSTR
     #: - [UDP] ATEXSSTR
-    anet = 212, 'anet', TransportProtocol.tcp
+    anet = 212
 
     #: - [TCP] IPX
     #: - [UDP] IPX
-    ipx = 213, 'ipx', TransportProtocol.tcp
+    ipx = 213
 
     #: - [TCP] VM PWSCS
     #: - [UDP] VM PWSCS
-    vmpwscs = 214, 'vmpwscs', TransportProtocol.tcp
+    vmpwscs = 214
 
     #: - [TCP] Insignia Solutions
     #: - [UDP] Insignia Solutions
-    softpc = 215, 'softpc', TransportProtocol.tcp
+    softpc = 215
 
     #: - [TCP] Computer Associates Int'l License Server
     #: - [UDP] Computer Associates Int'l License Server
-    cailic = 216, 'cailic', TransportProtocol.tcp
+    cailic = 216
 
     #: - [TCP] dBASE Unix
     #: - [UDP] dBASE Unix
-    dbase = 217, 'dbase', TransportProtocol.tcp
+    dbase = 217
 
     #: - [TCP] Netix Message Posting Protocol
     #: - [UDP] Netix Message Posting Protocol
-    mpp = 218, 'mpp', TransportProtocol.tcp
+    mpp = 218
 
     #: - [TCP] Unisys ARPs
     #: - [UDP] Unisys ARPs
-    uarps = 219, 'uarps', TransportProtocol.tcp
+    uarps = 219
 
     #: - [TCP] Interactive Mail Access Protocol v3
     #: - [UDP] Interactive Mail Access Protocol v3
-    imap3 = 220, 'imap3', TransportProtocol.tcp
+    imap3 = 220
 
     #: - [TCP] Berkeley rlogind with SPX auth
     #: - [UDP] Berkeley rlogind with SPX auth
-    fln_spx = 221, 'fln-spx', TransportProtocol.tcp
+    fln_spx = 221, 'fln-spx'
 
     #: - [TCP] Berkeley rshd with SPX auth
     #: - [UDP] Berkeley rshd with SPX auth
-    rsh_spx = 222, 'rsh-spx', TransportProtocol.tcp
+    rsh_spx = 222, 'rsh-spx'
 
     #: - [TCP] Certificate Distribution Center
     #: - [UDP] Certificate Distribution Center
-    cdc = 223, 'cdc', TransportProtocol.tcp
+    cdc = 223
 
     #: - [TCP] masqdialer
     #: - [UDP] masqdialer
-    masqdialer = 224, 'masqdialer', TransportProtocol.tcp
+    masqdialer = 224
 
     #: - [TCP] Direct
     #: - [UDP] Direct
-    direct = 242, 'direct', TransportProtocol.tcp
+    direct = 242
 
     #: - [TCP] Survey Measurement
     #: - [UDP] Survey Measurement
-    sur_meas = 243, 'sur-meas', TransportProtocol.tcp
+    sur_meas = 243, 'sur-meas'
 
     #: - [TCP] inbusiness
     #: - [UDP] inbusiness
-    inbusiness = 244, 'inbusiness', TransportProtocol.tcp
+    inbusiness = 244
 
     #: - [TCP] LINK
     #: - [UDP] LINK
-    link = 245, 'link', TransportProtocol.tcp
+    link = 245
 
     #: - [TCP] Display Systems Protocol
     #: - [UDP] Display Systems Protocol
-    dsp3270 = 246, 'dsp3270', TransportProtocol.tcp
+    dsp3270 = 246
 
     #: - [TCP] SUBNTBCST_TFTP IANA assigned this well-formed service name as a
     #:   replacement for "subntbcst_tftp".
@@ -1873,247 +1873,247 @@ class TCP(AppType):
     #: - [UDP] SUBNTBCST_TFTP IANA assigned this well-formed service name as a
     #:   replacement for "subntbcst_tftp".
     #: - [UDP] SUBNTBCST_TFTP
-    subntbcst_tftp = 247, 'subntbcst-tftp', TransportProtocol.tcp
+    subntbcst_tftp = 247, 'subntbcst-tftp'
 
     #: - [TCP] bhfhs
     #: - [UDP] bhfhs
-    bhfhs = 248, 'bhfhs', TransportProtocol.tcp
+    bhfhs = 248
 
     #: - [TCP] Route Access Protocol
     #: - [UDP] Route Access Protocol
-    rap_38 = 38, 'rap', TransportProtocol.tcp
+    rap_38 = 38, 'rap'
 
     #: - [TCP] RAP
     #: - [UDP] RAP
-    rap_256 = 256, 'rap', TransportProtocol.tcp
+    rap_256 = 256, 'rap'
 
     #: - [TCP] Secure Electronic Transaction
     #: - [UDP] Secure Electronic Transaction
-    set = 257, 'set', TransportProtocol.tcp
+    set = 257
 
     #: - [TCP] Efficient Short Remote Operations
     #: - [UDP] Efficient Short Remote Operations
-    esro_gen = 259, 'esro-gen', TransportProtocol.tcp
+    esro_gen = 259, 'esro-gen'
 
     #: - [TCP] Openport
     #: - [UDP] Openport
-    openport = 260, 'openport', TransportProtocol.tcp
+    openport = 260
 
     #: - [TCP] IIOP Name Service over TLS/SSL
     #: - [UDP] IIOP Name Service over TLS/SSL
-    nsiiops = 261, 'nsiiops', TransportProtocol.tcp
+    nsiiops = 261
 
     #: - [TCP] Arcisdms
     #: - [UDP] Arcisdms
-    arcisdms = 262, 'arcisdms', TransportProtocol.tcp
+    arcisdms = 262
 
     #: - [TCP] HDAP
     #: - [UDP] HDAP
-    hdap = 263, 'hdap', TransportProtocol.tcp
+    hdap = 263
 
     #: - [TCP] BGMP
     #: - [UDP] BGMP
-    bgmp = 264, 'bgmp', TransportProtocol.tcp
+    bgmp = 264
 
     #: - [TCP] X-Bone CTL
     #: - [UDP] X-Bone CTL
-    x_bone_ctl = 265, 'x-bone-ctl', TransportProtocol.tcp
+    x_bone_ctl = 265, 'x-bone-ctl'
 
     #: - [TCP] SCSI on ST
     #: - [UDP] SCSI on ST
-    sst = 266, 'sst', TransportProtocol.tcp
+    sst = 266
 
     #: - [TCP] Tobit David Service Layer
     #: - [UDP] Tobit David Service Layer
-    td_service = 267, 'td-service', TransportProtocol.tcp
+    td_service = 267, 'td-service'
 
     #: - [TCP] Tobit David Replica
     #: - [UDP] Tobit David Replica
-    td_replica = 268, 'td-replica', TransportProtocol.tcp
+    td_replica = 268, 'td-replica'
 
     #: - [TCP] MANET Protocols [:rfc:`5498`]
     #: - [UDP] MANET Protocols [:rfc:`5498`]
-    manet = 269, 'manet', TransportProtocol.tcp
+    manet = 269
 
     #: [TCP] Reserved
-    reserved_270 = 270, 'reserved', TransportProtocol.tcp
+    reserved_270 = 270, 'reserved'
 
     #: [TCP] IETF Network Endpoint Assessment (NEA) Posture Transport Protocol over
     #: TLS (PT-TLS) [:rfc:`6876`]
-    pt_tls = 271, 'pt-tls', TransportProtocol.tcp
+    pt_tls = 271, 'pt-tls'
 
     #: - [TCP] http-mgmt
     #: - [UDP] http-mgmt
-    http_mgmt = 280, 'http-mgmt', TransportProtocol.tcp
+    http_mgmt = 280, 'http-mgmt'
 
     #: - [TCP] Personal Link
     #: - [UDP] Personal Link
-    personal_link = 281, 'personal-link', TransportProtocol.tcp
+    personal_link = 281, 'personal-link'
 
     #: - [TCP] Cable Port A/X
     #: - [UDP] Cable Port A/X
-    cableport_ax = 282, 'cableport-ax', TransportProtocol.tcp
+    cableport_ax = 282, 'cableport-ax'
 
     #: - [TCP] rescap
     #: - [UDP] rescap
-    rescap = 283, 'rescap', TransportProtocol.tcp
+    rescap = 283
 
     #: - [TCP] corerjd
     #: - [UDP] corerjd
-    corerjd = 284, 'corerjd', TransportProtocol.tcp
+    corerjd = 284
 
     #: - [TCP] K-BLOCK
     #: - [UDP] K-BLOCK
-    k_block = 287, 'k-block', TransportProtocol.tcp
+    k_block = 287, 'k-block'
 
     #: [TCP] TLS Secure Login Host Protocol (TACACSS) [:rfc:`9887`]
-    tacacss = 300, 'tacacss', TransportProtocol.tcp
+    tacacss = 300
 
     #: - [TCP] Novastor Backup
     #: - [UDP] Novastor Backup
-    novastorbakcup = 308, 'novastorbakcup', TransportProtocol.tcp
+    novastorbakcup = 308
 
     #: - [TCP] EntrustTime
     #: - [UDP] EntrustTime
-    entrusttime = 309, 'entrusttime', TransportProtocol.tcp
+    entrusttime = 309
 
     #: - [TCP] bhmds
     #: - [UDP] bhmds
-    bhmds = 310, 'bhmds', TransportProtocol.tcp
+    bhmds = 310
 
     #: - [TCP] AppleShare IP WebAdmin
     #: - [UDP] AppleShare IP WebAdmin
-    asip_webadmin = 311, 'asip-webadmin', TransportProtocol.tcp
+    asip_webadmin = 311, 'asip-webadmin'
 
     #: - [TCP] VSLMP
     #: - [UDP] VSLMP
-    vslmp = 312, 'vslmp', TransportProtocol.tcp
+    vslmp = 312
 
     #: - [TCP] Magenta Logic
     #: - [UDP] Magenta Logic
-    magenta_logic = 313, 'magenta-logic', TransportProtocol.tcp
+    magenta_logic = 313, 'magenta-logic'
 
     #: - [TCP] Opalis Robot
     #: - [UDP] Opalis Robot
-    opalis_robot = 314, 'opalis-robot', TransportProtocol.tcp
+    opalis_robot = 314, 'opalis-robot'
 
     #: - [TCP] DPSI
     #: - [UDP] DPSI
-    dpsi = 315, 'dpsi', TransportProtocol.tcp
+    dpsi = 315
 
     #: - [TCP] decAuth
     #: - [UDP] decAuth
-    decauth = 316, 'decauth', TransportProtocol.tcp
+    decauth = 316
 
     #: - [TCP] Zannet
     #: - [UDP] Zannet
-    zannet = 317, 'zannet', TransportProtocol.tcp
+    zannet = 317
 
     #: - [TCP] PKIX TimeStamp
     #: - [UDP] PKIX TimeStamp
-    pkix_timestamp = 318, 'pkix-timestamp', TransportProtocol.tcp
+    pkix_timestamp = 318, 'pkix-timestamp'
 
     #: - [TCP] PTP Event
     #: - [UDP] PTP Event
-    ptp_event = 319, 'ptp-event', TransportProtocol.tcp
+    ptp_event = 319, 'ptp-event'
 
     #: - [TCP] PTP General
     #: - [UDP] PTP General
-    ptp_general = 320, 'ptp-general', TransportProtocol.tcp
+    ptp_general = 320, 'ptp-general'
 
     #: - [TCP] RTSPS
     #: - [UDP] RTSPS
-    rtsps = 322, 'rtsps', TransportProtocol.tcp
+    rtsps = 322
 
     #: [TCP] Resource PKI to Router Protocol [:rfc:`6810`]
-    rpki_rtr = 323, 'rpki-rtr', TransportProtocol.tcp
+    rpki_rtr = 323, 'rpki-rtr'
 
     #: [TCP] Resource PKI to Router Protocol over TLS [:rfc:`6810`]
-    rpki_rtr_tls = 324, 'rpki-rtr-tls', TransportProtocol.tcp
+    rpki_rtr_tls = 324, 'rpki-rtr-tls'
 
     #: - [TCP] Texar Security Port
     #: - [UDP] Texar Security Port
-    texar = 333, 'texar', TransportProtocol.tcp
+    texar = 333
 
     #: - [TCP] Prospero Data Access Protocol
     #: - [UDP] Prospero Data Access Protocol
-    pdap = 344, 'pdap', TransportProtocol.tcp
+    pdap = 344
 
     #: - [TCP] Perf Analysis Workbench
     #: - [UDP] Perf Analysis Workbench
-    pawserv = 345, 'pawserv', TransportProtocol.tcp
+    pawserv = 345
 
     #: - [TCP] Zebra server
     #: - [UDP] Zebra server
-    zserv = 346, 'zserv', TransportProtocol.tcp
+    zserv = 346
 
     #: - [TCP] Fatmen Server
     #: - [UDP] Fatmen Server
-    fatserv = 347, 'fatserv', TransportProtocol.tcp
+    fatserv = 347
 
     #: - [TCP] Cabletron Management Protocol
     #: - [UDP] Cabletron Management Protocol
-    csi_sgwp = 348, 'csi-sgwp', TransportProtocol.tcp
+    csi_sgwp = 348, 'csi-sgwp'
 
     #: - [TCP] MATIP Type A [:rfc:`2351`]
     #: - [UDP] MATIP Type A [:rfc:`2351`]
-    matip_type_a = 350, 'matip-type-a', TransportProtocol.tcp
+    matip_type_a = 350, 'matip-type-a'
 
     #: - [TCP] MATIP Type B [:rfc:`2351`]
     #: - [UDP] MATIP Type B [:rfc:`2351`]
-    matip_type_b = 351, 'matip-type-b', TransportProtocol.tcp
+    matip_type_b = 351, 'matip-type-b'
 
     #: - [TCP] bhoetty
     #: - [UDP] bhoetty
-    bhoetty = 351, 'bhoetty', TransportProtocol.tcp
+    bhoetty = 351
 
     #: - [TCP] DTAG
     #: - [UDP] DTAG
-    dtag_ste_sb = 352, 'dtag-ste-sb', TransportProtocol.tcp
+    dtag_ste_sb = 352, 'dtag-ste-sb'
 
     #: - [TCP] bhoedap4
     #: - [UDP] bhoedap4
-    bhoedap4 = 352, 'bhoedap4', TransportProtocol.tcp
+    bhoedap4 = 352
 
     #: - [TCP] NDSAUTH
     #: - [UDP] NDSAUTH
-    ndsauth = 353, 'ndsauth', TransportProtocol.tcp
+    ndsauth = 353
 
     #: - [TCP] bh611
     #: - [UDP] bh611
-    bh611 = 354, 'bh611', TransportProtocol.tcp
+    bh611 = 354
 
     #: - [TCP] DATEX-ASN
     #: - [UDP] DATEX-ASN
-    datex_asn = 355, 'datex-asn', TransportProtocol.tcp
+    datex_asn = 355, 'datex-asn'
 
     #: - [TCP] Cloanto Net 1
     #: - [UDP] Cloanto Net 1
-    cloanto_net_1 = 356, 'cloanto-net-1', TransportProtocol.tcp
+    cloanto_net_1 = 356, 'cloanto-net-1'
 
     #: - [TCP] bhevent
     #: - [UDP] bhevent
-    bhevent = 357, 'bhevent', TransportProtocol.tcp
+    bhevent = 357
 
     #: - [TCP] Shrinkwrap
     #: - [UDP] Shrinkwrap
-    shrinkwrap = 358, 'shrinkwrap', TransportProtocol.tcp
+    shrinkwrap = 358
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_359 = 359, 'reserved', TransportProtocol.tcp
+    reserved_359 = 359, 'reserved'
 
     #: - [TCP] scoi2odialog
     #: - [UDP] scoi2odialog
-    scoi2odialog = 360, 'scoi2odialog', TransportProtocol.tcp
+    scoi2odialog = 360
 
     #: - [TCP] Semantix
     #: - [UDP] Semantix
-    semantix = 361, 'semantix', TransportProtocol.tcp
+    semantix = 361
 
     #: - [TCP] SRS Send
     #: - [UDP] SRS Send
-    srssend = 362, 'srssend', TransportProtocol.tcp
+    srssend = 362
 
     #: - [TCP] RSVP Tunnel IANA assigned this well-formed service name as a
     #:   replacement for "rsvp_tunnel".
@@ -2121,263 +2121,263 @@ class TCP(AppType):
     #: - [UDP] RSVP Tunnel IANA assigned this well-formed service name as a
     #:   replacement for "rsvp_tunnel".
     #: - [UDP] RSVP Tunnel
-    rsvp_tunnel = 363, 'rsvp-tunnel', TransportProtocol.tcp
+    rsvp_tunnel = 363, 'rsvp-tunnel'
 
     #: - [TCP] Aurora CMGR
     #: - [UDP] Aurora CMGR
-    aurora_cmgr = 364, 'aurora-cmgr', TransportProtocol.tcp
+    aurora_cmgr = 364, 'aurora-cmgr'
 
     #: - [TCP] DTK
     #: - [UDP] DTK
-    dtk = 365, 'dtk', TransportProtocol.tcp
+    dtk = 365
 
     #: - [TCP] ODMR
     #: - [UDP] ODMR
-    odmr = 366, 'odmr', TransportProtocol.tcp
+    odmr = 366
 
     #: - [TCP] MortgageWare
     #: - [UDP] MortgageWare
-    mortgageware = 367, 'mortgageware', TransportProtocol.tcp
+    mortgageware = 367
 
     #: - [TCP] QbikGDP
     #: - [UDP] QbikGDP
-    qbikgdp = 368, 'qbikgdp', TransportProtocol.tcp
+    qbikgdp = 368
 
     #: - [TCP] rpc2portmap
     #: - [UDP] rpc2portmap
-    rpc2portmap = 369, 'rpc2portmap', TransportProtocol.tcp
+    rpc2portmap = 369
 
     #: - [TCP] codaauth2
     #: - [UDP] codaauth2
-    codaauth2 = 370, 'codaauth2', TransportProtocol.tcp
+    codaauth2 = 370
 
     #: - [TCP] Clearcase
     #: - [UDP] Clearcase
-    clearcase = 371, 'clearcase', TransportProtocol.tcp
+    clearcase = 371
 
     #: - [TCP] ListProcessor
     #: - [UDP] ListProcessor
-    ulistproc = 372, 'ulistproc', TransportProtocol.tcp
+    ulistproc = 372
 
     #: - [TCP] Legent Corporation
     #: - [UDP] Legent Corporation
-    legent_1 = 373, 'legent-1', TransportProtocol.tcp
+    legent_1 = 373, 'legent-1'
 
     #: - [TCP] Legent Corporation
     #: - [UDP] Legent Corporation
-    legent_2 = 374, 'legent-2', TransportProtocol.tcp
+    legent_2 = 374, 'legent-2'
 
     #: - [TCP] Hassle
     #: - [UDP] Hassle
-    hassle = 375, 'hassle', TransportProtocol.tcp
+    hassle = 375
 
     #: - [TCP] Amiga Envoy Network Inquiry Protocol
     #: - [UDP] Amiga Envoy Network Inquiry Protocol
-    nip = 376, 'nip', TransportProtocol.tcp
+    nip = 376
 
     #: - [TCP] NEC Corporation
     #: - [UDP] NEC Corporation
-    tnetos = 377, 'tnetos', TransportProtocol.tcp
+    tnetos = 377
 
     #: - [TCP] NEC Corporation
     #: - [UDP] NEC Corporation
-    dsetos = 378, 'dsetos', TransportProtocol.tcp
+    dsetos = 378
 
     #: - [TCP] TIA/EIA/IS-99 modem client
     #: - [UDP] TIA/EIA/IS-99 modem client
-    is99c = 379, 'is99c', TransportProtocol.tcp
+    is99c = 379
 
     #: - [TCP] TIA/EIA/IS-99 modem server
     #: - [UDP] TIA/EIA/IS-99 modem server
-    is99s = 380, 'is99s', TransportProtocol.tcp
+    is99s = 380
 
     #: - [TCP] hp performance data collector
     #: - [UDP] hp performance data collector
-    hp_collector = 381, 'hp-collector', TransportProtocol.tcp
+    hp_collector = 381, 'hp-collector'
 
     #: - [TCP] hp performance data managed node
     #: - [UDP] hp performance data managed node
-    hp_managed_node = 382, 'hp-managed-node', TransportProtocol.tcp
+    hp_managed_node = 382, 'hp-managed-node'
 
     #: - [TCP] hp performance data alarm manager
     #: - [UDP] hp performance data alarm manager
-    hp_alarm_mgr = 383, 'hp-alarm-mgr', TransportProtocol.tcp
+    hp_alarm_mgr = 383, 'hp-alarm-mgr'
 
     #: - [TCP] A Remote Network Server System
     #: - [UDP] A Remote Network Server System
-    arns = 384, 'arns', TransportProtocol.tcp
+    arns = 384
 
     #: - [TCP] IBM Application
     #: - [UDP] IBM Application
-    ibm_app = 385, 'ibm-app', TransportProtocol.tcp
+    ibm_app = 385, 'ibm-app'
 
     #: - [TCP] ASA Message Router Object Def.
     #: - [UDP] ASA Message Router Object Def.
-    asa = 386, 'asa', TransportProtocol.tcp
+    asa = 386
 
     #: - [TCP] Appletalk Update-Based Routing Pro.
     #: - [UDP] Appletalk Update-Based Routing Pro.
-    aurp = 387, 'aurp', TransportProtocol.tcp
+    aurp = 387
 
     #: - [TCP] Unidata LDM
     #: - [UDP] Unidata LDM
-    unidata_ldm = 388, 'unidata-ldm', TransportProtocol.tcp
+    unidata_ldm = 388, 'unidata-ldm'
 
     #: - [TCP] Lightweight Directory Access Protocol
     #: - [UDP] Lightweight Directory Access Protocol
-    ldap = 389, 'ldap', TransportProtocol.tcp
+    ldap = 389
 
     #: - [TCP] UIS
     #: - [UDP] UIS
-    uis = 390, 'uis', TransportProtocol.tcp
+    uis = 390
 
     #: - [TCP] SynOptics SNMP Relay Port
     #: - [UDP] SynOptics SNMP Relay Port
-    synotics_relay = 391, 'synotics-relay', TransportProtocol.tcp
+    synotics_relay = 391, 'synotics-relay'
 
     #: - [TCP] SynOptics Port Broker Port
     #: - [UDP] SynOptics Port Broker Port
-    synotics_broker = 392, 'synotics-broker', TransportProtocol.tcp
+    synotics_broker = 392, 'synotics-broker'
 
     #: - [TCP] Meta5
     #: - [UDP] Meta5
-    meta5 = 393, 'meta5', TransportProtocol.tcp
+    meta5 = 393
 
     #: - [TCP] EMBL Nucleic Data Transfer
     #: - [UDP] EMBL Nucleic Data Transfer
-    embl_ndt = 394, 'embl-ndt', TransportProtocol.tcp
+    embl_ndt = 394, 'embl-ndt'
 
     #: - [TCP] NetScout Control Protocol
     #: - [UDP] NetScout Control Protocol
-    netcp = 395, 'netcp', TransportProtocol.tcp
+    netcp = 395
 
     #: - [TCP] Novell Netware over IP
     #: - [UDP] Novell Netware over IP
-    netware_ip = 396, 'netware-ip', TransportProtocol.tcp
+    netware_ip = 396, 'netware-ip'
 
     #: - [TCP] Multi Protocol Trans. Net.
     #: - [UDP] Multi Protocol Trans. Net.
-    mptn = 397, 'mptn', TransportProtocol.tcp
+    mptn = 397
 
     #: - [TCP] Kryptolan
     #: - [UDP] Kryptolan
-    kryptolan = 398, 'kryptolan', TransportProtocol.tcp
+    kryptolan = 398
 
     #: - [TCP] ISO Transport Class 2 Non-Control over TCP
     #: - [UDP] ISO Transport Class 2 Non-Control over UDP
-    iso_tsap_c2 = 399, 'iso-tsap-c2', TransportProtocol.tcp
+    iso_tsap_c2 = 399, 'iso-tsap-c2'
 
     #: - [TCP] Oracle Secure Backup
     #: - [UDP] Oracle Secure Backup
-    osb_sd = 400, 'osb-sd', TransportProtocol.tcp
+    osb_sd = 400, 'osb-sd'
 
     #: - [TCP] Uninterruptible Power Supply
     #: - [UDP] Uninterruptible Power Supply
-    ups = 401, 'ups', TransportProtocol.tcp
+    ups = 401
 
     #: - [TCP] Genie Protocol
     #: - [UDP] Genie Protocol
-    genie = 402, 'genie', TransportProtocol.tcp
+    genie = 402
 
     #: - [TCP] decap
     #: - [UDP] decap
-    decap = 403, 'decap', TransportProtocol.tcp
+    decap = 403
 
     #: - [TCP] nced
     #: - [UDP] nced
-    nced = 404, 'nced', TransportProtocol.tcp
+    nced = 404
 
     #: - [TCP] ncld
     #: - [UDP] ncld
-    ncld = 405, 'ncld', TransportProtocol.tcp
+    ncld = 405
 
     #: - [TCP] Interactive Mail Support Protocol
     #: - [UDP] Interactive Mail Support Protocol
-    imsp = 406, 'imsp', TransportProtocol.tcp
+    imsp = 406
 
     #: - [TCP] Timbuktu
     #: - [UDP] Timbuktu
-    timbuktu = 407, 'timbuktu', TransportProtocol.tcp
+    timbuktu = 407
 
     #: - [TCP] Prospero Resource Manager Sys. Man.
     #: - [UDP] Prospero Resource Manager Sys. Man.
-    prm_sm = 408, 'prm-sm', TransportProtocol.tcp
+    prm_sm = 408, 'prm-sm'
 
     #: - [TCP] Prospero Resource Manager Node Man.
     #: - [UDP] Prospero Resource Manager Node Man.
-    prm_nm = 409, 'prm-nm', TransportProtocol.tcp
+    prm_nm = 409, 'prm-nm'
 
     #: - [TCP] DECLadebug Remote Debug Protocol
     #: - [UDP] DECLadebug Remote Debug Protocol
-    decladebug = 410, 'decladebug', TransportProtocol.tcp
+    decladebug = 410
 
     #: - [TCP] Remote MT Protocol
     #: - [UDP] Remote MT Protocol
-    rmt = 411, 'rmt', TransportProtocol.tcp
+    rmt = 411
 
     #: - [TCP] Trap Convention Port
     #: - [UDP] Trap Convention Port
-    synoptics_trap = 412, 'synoptics-trap', TransportProtocol.tcp
+    synoptics_trap = 412, 'synoptics-trap'
 
     #: - [TCP] Storage Management Services Protocol
     #: - [UDP] Storage Management Services Protocol
-    smsp = 413, 'smsp', TransportProtocol.tcp
+    smsp = 413
 
     #: - [TCP] InfoSeek
     #: - [UDP] InfoSeek
-    infoseek = 414, 'infoseek', TransportProtocol.tcp
+    infoseek = 414
 
     #: - [TCP] BNet
     #: - [UDP] BNet
-    bnet = 415, 'bnet', TransportProtocol.tcp
+    bnet = 415
 
     #: - [TCP] Silverplatter
     #: - [UDP] Silverplatter
-    silverplatter = 416, 'silverplatter', TransportProtocol.tcp
+    silverplatter = 416
 
     #: - [TCP] Onmux
     #: - [UDP] Onmux
-    onmux = 417, 'onmux', TransportProtocol.tcp
+    onmux = 417
 
     #: - [TCP] Hyper-G
     #: - [UDP] Hyper-G
-    hyper_g = 418, 'hyper-g', TransportProtocol.tcp
+    hyper_g = 418, 'hyper-g'
 
     #: - [TCP] Ariel 1
     #: - [UDP] Ariel 1
-    ariel1 = 419, 'ariel1', TransportProtocol.tcp
+    ariel1 = 419
 
     #: - [TCP] SMPTE
     #: - [UDP] SMPTE
-    smpte = 420, 'smpte', TransportProtocol.tcp
+    smpte = 420
 
     #: - [TCP] Ariel 2
     #: - [UDP] Ariel 2
-    ariel2 = 421, 'ariel2', TransportProtocol.tcp
+    ariel2 = 421
 
     #: - [TCP] Ariel 3
     #: - [UDP] Ariel 3
-    ariel3 = 422, 'ariel3', TransportProtocol.tcp
+    ariel3 = 422
 
     #: - [TCP] IBM Operations Planning and Control Start
     #: - [UDP] IBM Operations Planning and Control Start
-    opc_job_start = 423, 'opc-job-start', TransportProtocol.tcp
+    opc_job_start = 423, 'opc-job-start'
 
     #: - [TCP] IBM Operations Planning and Control Track
     #: - [UDP] IBM Operations Planning and Control Track
-    opc_job_track = 424, 'opc-job-track', TransportProtocol.tcp
+    opc_job_track = 424, 'opc-job-track'
 
     #: - [TCP] ICAD
     #: - [UDP] ICAD
-    icad_el = 425, 'icad-el', TransportProtocol.tcp
+    icad_el = 425, 'icad-el'
 
     #: - [TCP] smartsdp
     #: - [UDP] smartsdp
-    smartsdp = 426, 'smartsdp', TransportProtocol.tcp
+    smartsdp = 426
 
     #: - [TCP] Server Location
     #: - [UDP] Server Location
-    svrloc = 427, 'svrloc', TransportProtocol.tcp
+    svrloc = 427
 
     #: - [TCP] OCS_CMU IANA assigned this well-formed service name as a replacement
     #:   for "ocs_cmu".
@@ -2385,7 +2385,7 @@ class TCP(AppType):
     #: - [UDP] OCS_CMU IANA assigned this well-formed service name as a replacement
     #:   for "ocs_cmu".
     #: - [UDP] OCS_CMU
-    ocs_cmu = 428, 'ocs-cmu', TransportProtocol.tcp
+    ocs_cmu = 428, 'ocs-cmu'
 
     #: - [TCP] OCS_AMU IANA assigned this well-formed service name as a replacement
     #:   for "ocs_amu".
@@ -2393,55 +2393,55 @@ class TCP(AppType):
     #: - [UDP] OCS_AMU IANA assigned this well-formed service name as a replacement
     #:   for "ocs_amu".
     #: - [UDP] OCS_AMU
-    ocs_amu = 429, 'ocs-amu', TransportProtocol.tcp
+    ocs_amu = 429, 'ocs-amu'
 
     #: - [TCP] UTMPSD
     #: - [UDP] UTMPSD
-    utmpsd = 430, 'utmpsd', TransportProtocol.tcp
+    utmpsd = 430
 
     #: - [TCP] UTMPCD
     #: - [UDP] UTMPCD
-    utmpcd = 431, 'utmpcd', TransportProtocol.tcp
+    utmpcd = 431
 
     #: - [TCP] IASD
     #: - [UDP] IASD
-    iasd = 432, 'iasd', TransportProtocol.tcp
+    iasd = 432
 
     #: - [TCP] NNTP for transit servers (NNSP) [:rfc:`3977`]
     #: - [UDP] NNTP for transit servers (NNSP) [:rfc:`3977`]
-    nnsp = 433, 'nnsp', TransportProtocol.tcp
+    nnsp = 433
 
     #: - [TCP] MobileIP-Agent
     #: - [UDP] MobileIP-Agent
-    mobileip_agent = 434, 'mobileip-agent', TransportProtocol.tcp
+    mobileip_agent = 434, 'mobileip-agent'
 
     #: - [TCP] MobilIP-MN
     #: - [UDP] MobilIP-MN
-    mobilip_mn = 435, 'mobilip-mn', TransportProtocol.tcp
+    mobilip_mn = 435, 'mobilip-mn'
 
     #: - [TCP] DNA-CML
     #: - [UDP] DNA-CML
-    dna_cml = 436, 'dna-cml', TransportProtocol.tcp
+    dna_cml = 436, 'dna-cml'
 
     #: - [TCP] comscm
     #: - [UDP] comscm
-    comscm = 437, 'comscm', TransportProtocol.tcp
+    comscm = 437
 
     #: - [TCP] dsfgw
     #: - [UDP] dsfgw
-    dsfgw = 438, 'dsfgw', TransportProtocol.tcp
+    dsfgw = 438
 
     #: - [TCP] dasp
     #: - [UDP] dasp
-    dasp = 439, 'dasp', TransportProtocol.tcp
+    dasp = 439
 
     #: - [TCP] sgcp
     #: - [UDP] sgcp
-    sgcp = 440, 'sgcp', TransportProtocol.tcp
+    sgcp = 440
 
     #: - [TCP] decvms-sysmgt
     #: - [UDP] decvms-sysmgt
-    decvms_sysmgt = 441, 'decvms-sysmgt', TransportProtocol.tcp
+    decvms_sysmgt = 441, 'decvms-sysmgt'
 
     #: - [TCP] cvc_hostd IANA assigned this well-formed service name as a replacement
     #:   for "cvc_hostd".
@@ -2449,284 +2449,284 @@ class TCP(AppType):
     #: - [UDP] cvc_hostd IANA assigned this well-formed service name as a replacement
     #:   for "cvc_hostd".
     #: - [UDP] cvc_hostd
-    cvc_hostd = 442, 'cvc-hostd', TransportProtocol.tcp
+    cvc_hostd = 442, 'cvc-hostd'
 
     #: - [TCP] Simple Network Paging Protocol [:rfc:`1568`]
     #: - [UDP] Simple Network Paging Protocol [:rfc:`1568`]
-    snpp = 444, 'snpp', TransportProtocol.tcp
+    snpp = 444
 
     #: - [TCP] Microsoft-DS
     #: - [UDP] Microsoft-DS
-    microsoft_ds = 445, 'microsoft-ds', TransportProtocol.tcp
+    microsoft_ds = 445, 'microsoft-ds'
 
     #: - [TCP] DDM-Remote Relational Database Access
     #: - [UDP] DDM-Remote Relational Database Access
-    ddm_rdb = 446, 'ddm-rdb', TransportProtocol.tcp
+    ddm_rdb = 446, 'ddm-rdb'
 
     #: - [TCP] DDM-Distributed File Management
     #: - [UDP] DDM-Distributed File Management
-    ddm_dfm = 447, 'ddm-dfm', TransportProtocol.tcp
+    ddm_dfm = 447, 'ddm-dfm'
 
     #: - [TCP] DDM-Remote DB Access Using Secure Sockets
     #: - [UDP] DDM-Remote DB Access Using Secure Sockets
-    ddm_ssl = 448, 'ddm-ssl', TransportProtocol.tcp
+    ddm_ssl = 448, 'ddm-ssl'
 
     #: - [TCP] AS Server Mapper
     #: - [UDP] AS Server Mapper
-    as_servermap = 449, 'as-servermap', TransportProtocol.tcp
+    as_servermap = 449, 'as-servermap'
 
     #: - [TCP] Computer Supported Telecomunication Applications
     #: - [UDP] Computer Supported Telecomunication Applications
-    tserver = 450, 'tserver', TransportProtocol.tcp
+    tserver = 450
 
     #: - [TCP] Cray Network Semaphore server
     #: - [UDP] Cray Network Semaphore server
-    sfs_smp_net = 451, 'sfs-smp-net', TransportProtocol.tcp
+    sfs_smp_net = 451, 'sfs-smp-net'
 
     #: - [TCP] Cray SFS config server
     #: - [UDP] Cray SFS config server
-    sfs_config = 452, 'sfs-config', TransportProtocol.tcp
+    sfs_config = 452, 'sfs-config'
 
     #: [TCP] macon-tcp
-    macon_tcp = 456, 'macon-tcp', TransportProtocol.tcp
+    macon_tcp = 456, 'macon-tcp'
 
     #: - [TCP] scohelp
     #: - [UDP] scohelp
-    scohelp = 457, 'scohelp', TransportProtocol.tcp
+    scohelp = 457
 
     #: - [TCP] apple quick time
     #: - [UDP] apple quick time
-    appleqtc = 458, 'appleqtc', TransportProtocol.tcp
+    appleqtc = 458
 
     #: - [TCP] ampr-rcmd
     #: - [UDP] ampr-rcmd
-    ampr_rcmd = 459, 'ampr-rcmd', TransportProtocol.tcp
+    ampr_rcmd = 459, 'ampr-rcmd'
 
     #: - [TCP] skronk
     #: - [UDP] skronk
-    skronk = 460, 'skronk', TransportProtocol.tcp
+    skronk = 460
 
     #: - [TCP] DataRampSrv
     #: - [UDP] DataRampSrv
-    datasurfsrv = 461, 'datasurfsrv', TransportProtocol.tcp
+    datasurfsrv = 461
 
     #: - [TCP] DataRampSrvSec
     #: - [UDP] DataRampSrvSec
-    datasurfsrvsec = 462, 'datasurfsrvsec', TransportProtocol.tcp
+    datasurfsrvsec = 462
 
     #: - [TCP] alpes
     #: - [UDP] alpes
-    alpes = 463, 'alpes', TransportProtocol.tcp
+    alpes = 463
 
     #: - [TCP] kpasswd
     #: - [UDP] kpasswd
-    kpasswd = 464, 'kpasswd', TransportProtocol.tcp
+    kpasswd = 464
 
     #: [TCP] URL Rendezvous Directory for SSM
-    urd = 465, 'urd', TransportProtocol.tcp
+    urd = 465
 
     #: [TCP] Message Submission over TLS protocol [:rfc:`8314`]
-    submissions = 465, 'submissions', TransportProtocol.tcp
+    submissions = 465
 
     #: - [TCP] digital-vrc
     #: - [UDP] digital-vrc
-    digital_vrc = 466, 'digital-vrc', TransportProtocol.tcp
+    digital_vrc = 466, 'digital-vrc'
 
     #: - [TCP] mylex-mapd
     #: - [UDP] mylex-mapd
-    mylex_mapd = 467, 'mylex-mapd', TransportProtocol.tcp
+    mylex_mapd = 467, 'mylex-mapd'
 
     #: - [TCP] proturis
     #: - [UDP] proturis
-    photuris = 468, 'photuris', TransportProtocol.tcp
+    photuris = 468
 
     #: - [TCP] Radio Control Protocol
     #: - [UDP] Radio Control Protocol
-    rcp = 469, 'rcp', TransportProtocol.tcp
+    rcp = 469
 
     #: - [TCP] scx-proxy
     #: - [UDP] scx-proxy
-    scx_proxy = 470, 'scx-proxy', TransportProtocol.tcp
+    scx_proxy = 470, 'scx-proxy'
 
     #: - [TCP] Mondex
     #: - [UDP] Mondex
-    mondex = 471, 'mondex', TransportProtocol.tcp
+    mondex = 471
 
     #: - [TCP] ljk-login
     #: - [UDP] ljk-login
-    ljk_login = 472, 'ljk-login', TransportProtocol.tcp
+    ljk_login = 472, 'ljk-login'
 
     #: - [TCP] hybrid-pop
     #: - [UDP] hybrid-pop
-    hybrid_pop = 473, 'hybrid-pop', TransportProtocol.tcp
+    hybrid_pop = 473, 'hybrid-pop'
 
     #: [TCP] tn-tl-w1
-    tn_tl_w1 = 474, 'tn-tl-w1', TransportProtocol.tcp
+    tn_tl_w1 = 474, 'tn-tl-w1'
 
     #: - [TCP] tcpnethaspsrv
     #: - [UDP] tcpnethaspsrv
-    tcpnethaspsrv = 475, 'tcpnethaspsrv', TransportProtocol.tcp
+    tcpnethaspsrv = 475
 
     #: - [TCP] tn-tl-fd1
     #: - [UDP] tn-tl-fd1
-    tn_tl_fd1 = 476, 'tn-tl-fd1', TransportProtocol.tcp
+    tn_tl_fd1 = 476, 'tn-tl-fd1'
 
     #: - [TCP] ss7ns
     #: - [UDP] ss7ns
-    ss7ns = 477, 'ss7ns', TransportProtocol.tcp
+    ss7ns = 477
 
     #: - [TCP] spsc
     #: - [UDP] spsc
-    spsc = 478, 'spsc', TransportProtocol.tcp
+    spsc = 478
 
     #: - [TCP] iafserver
     #: - [UDP] iafserver
-    iafserver = 479, 'iafserver', TransportProtocol.tcp
+    iafserver = 479
 
     #: - [TCP] iafdbase
     #: - [UDP] iafdbase
-    iafdbase = 480, 'iafdbase', TransportProtocol.tcp
+    iafdbase = 480
 
     #: - [TCP] Ph service
     #: - [UDP] Ph service
-    ph = 481, 'ph', TransportProtocol.tcp
+    ph = 481
 
     #: - [TCP] bgs-nsi
     #: - [UDP] bgs-nsi
-    bgs_nsi = 482, 'bgs-nsi', TransportProtocol.tcp
+    bgs_nsi = 482, 'bgs-nsi'
 
     #: - [TCP] ulpnet
     #: - [UDP] ulpnet
-    ulpnet = 483, 'ulpnet', TransportProtocol.tcp
+    ulpnet = 483
 
     #: - [TCP] Integra Software Management Environment
     #: - [UDP] Integra Software Management Environment
-    integra_sme = 484, 'integra-sme', TransportProtocol.tcp
+    integra_sme = 484, 'integra-sme'
 
     #: - [TCP] Air Soft Power Burst
     #: - [UDP] Air Soft Power Burst
-    powerburst = 485, 'powerburst', TransportProtocol.tcp
+    powerburst = 485
 
     #: - [TCP] avian
     #: - [UDP] avian
-    avian = 486, 'avian', TransportProtocol.tcp
+    avian = 486
 
     #: - [TCP] saft Simple Asynchronous File Transfer
     #: - [UDP] saft Simple Asynchronous File Transfer
-    saft = 487, 'saft', TransportProtocol.tcp
+    saft = 487
 
     #: - [TCP] gss-http
     #: - [UDP] gss-http
-    gss_http = 488, 'gss-http', TransportProtocol.tcp
+    gss_http = 488, 'gss-http'
 
     #: - [TCP] nest-protocol
     #: - [UDP] nest-protocol
-    nest_protocol = 489, 'nest-protocol', TransportProtocol.tcp
+    nest_protocol = 489, 'nest-protocol'
 
     #: - [TCP] micom-pfs
     #: - [UDP] micom-pfs
-    micom_pfs = 490, 'micom-pfs', TransportProtocol.tcp
+    micom_pfs = 490, 'micom-pfs'
 
     #: - [TCP] go-login
     #: - [UDP] go-login
-    go_login = 491, 'go-login', TransportProtocol.tcp
+    go_login = 491, 'go-login'
 
     #: - [TCP] Transport Independent Convergence for FNA
     #: - [UDP] Transport Independent Convergence for FNA
-    ticf_1 = 492, 'ticf-1', TransportProtocol.tcp
+    ticf_1 = 492, 'ticf-1'
 
     #: - [TCP] Transport Independent Convergence for FNA
     #: - [UDP] Transport Independent Convergence for FNA
-    ticf_2 = 493, 'ticf-2', TransportProtocol.tcp
+    ticf_2 = 493, 'ticf-2'
 
     #: - [TCP] POV-Ray
     #: - [UDP] POV-Ray
-    pov_ray = 494, 'pov-ray', TransportProtocol.tcp
+    pov_ray = 494, 'pov-ray'
 
     #: - [TCP] intecourier
     #: - [UDP] intecourier
-    intecourier = 495, 'intecourier', TransportProtocol.tcp
+    intecourier = 495
 
     #: - [TCP] PIM-RP-DISC
     #: - [UDP] PIM-RP-DISC
-    pim_rp_disc = 496, 'pim-rp-disc', TransportProtocol.tcp
+    pim_rp_disc = 496, 'pim-rp-disc'
 
     #: - [TCP] siam
     #: - [UDP] siam
-    siam = 498, 'siam', TransportProtocol.tcp
+    siam = 498
 
     #: - [TCP] ISO ILL Protocol
     #: - [UDP] ISO ILL Protocol
-    iso_ill = 499, 'iso-ill', TransportProtocol.tcp
+    iso_ill = 499, 'iso-ill'
 
     #: - [TCP] isakmp
     #: - [UDP] isakmp
-    isakmp = 500, 'isakmp', TransportProtocol.tcp
+    isakmp = 500
 
     #: - [TCP] STMF
     #: - [UDP] STMF
-    stmf = 501, 'stmf', TransportProtocol.tcp
+    stmf = 501
 
     #: - [TCP] Modbus Application Protocol
     #: - [UDP] Modbus Application Protocol
-    mbap = 502, 'mbap', TransportProtocol.tcp
+    mbap = 502
 
     #: - [TCP] Intrinsa
     #: - [UDP] Intrinsa
-    intrinsa = 503, 'intrinsa', TransportProtocol.tcp
+    intrinsa = 503
 
     #: - [TCP] citadel
     #: - [UDP] citadel
-    citadel = 504, 'citadel', TransportProtocol.tcp
+    citadel = 504
 
     #: - [TCP] mailbox-lm
     #: - [UDP] mailbox-lm
-    mailbox_lm = 505, 'mailbox-lm', TransportProtocol.tcp
+    mailbox_lm = 505, 'mailbox-lm'
 
     #: - [TCP] ohimsrv
     #: - [UDP] ohimsrv
-    ohimsrv = 506, 'ohimsrv', TransportProtocol.tcp
+    ohimsrv = 506
 
     #: - [TCP] crs
     #: - [UDP] crs
-    crs = 507, 'crs', TransportProtocol.tcp
+    crs = 507
 
     #: - [TCP] xvttp
     #: - [UDP] xvttp
-    xvttp = 508, 'xvttp', TransportProtocol.tcp
+    xvttp = 508
 
     #: - [TCP] snare
     #: - [UDP] snare
-    snare = 509, 'snare', TransportProtocol.tcp
+    snare = 509
 
     #: - [TCP] FirstClass Protocol
     #: - [UDP] FirstClass Protocol
-    fcp = 510, 'fcp', TransportProtocol.tcp
+    fcp = 510
 
     #: - [TCP] PassGo
     #: - [UDP] PassGo
-    passgo = 511, 'passgo', TransportProtocol.tcp
+    passgo = 511
 
     #: [TCP] remote process execution; authentication performed using passwords and
     #: UNIX login names
-    exec = 512, 'exec', TransportProtocol.tcp
+    exec = 512
 
     #: [TCP] remote login a la telnet; automatic authentication performed based on
     #: priviledged port numbers and distributed data bases which identify
     #: "authentication domains"
-    login = 513, 'login', TransportProtocol.tcp
+    login = 513
 
     #: [TCP] cmd like exec, but automatic authentication is performed as for login
     #: server
-    shell = 514, 'shell', TransportProtocol.tcp
+    shell = 514
 
     #: - [TCP] spooler
     #: - [UDP] spooler
-    printer = 515, 'printer', TransportProtocol.tcp
+    printer = 515
 
     #: - [TCP] videotex
     #: - [UDP] videotex
-    videotex = 516, 'videotex', TransportProtocol.tcp
+    videotex = 516
 
     #: - [TCP] like tenex link, but across machine - unfortunately, doesn't use link
     #:   protocol (this is actually just a rendezvous port from which a tcp
@@ -2734,421 +2734,421 @@ class TCP(AppType):
     #: - [UDP] like tenex link, but across machine - unfortunately, doesn't use link
     #:   protocol (this is actually just a rendezvous port from which a tcp
     #:   connection is established)
-    talk = 517, 'talk', TransportProtocol.tcp
+    talk = 517
 
     #: - [TCP]
     #: - [UDP]
-    ntalk = 518, 'ntalk', TransportProtocol.tcp
+    ntalk = 518
 
     #: - [TCP] unixtime
     #: - [UDP] unixtime
-    utime = 519, 'utime', TransportProtocol.tcp
+    utime = 519
 
     #: [TCP] extended file name server
-    efs = 520, 'efs', TransportProtocol.tcp
+    efs = 520
 
     #: - [TCP] ripng
     #: - [UDP] ripng
-    ripng = 521, 'ripng', TransportProtocol.tcp
+    ripng = 521
 
     #: - [TCP] ULP
     #: - [UDP] ULP
-    ulp = 522, 'ulp', TransportProtocol.tcp
+    ulp = 522
 
     #: - [TCP] IBM-DB2
     #: - [UDP] IBM-DB2
-    ibm_db2 = 523, 'ibm-db2', TransportProtocol.tcp
+    ibm_db2 = 523, 'ibm-db2'
 
     #: - [TCP] NCP
     #: - [UDP] NCP
-    ncp = 524, 'ncp', TransportProtocol.tcp
+    ncp = 524
 
     #: - [TCP] timeserver
     #: - [UDP] timeserver
-    timed = 525, 'timed', TransportProtocol.tcp
+    timed = 525
 
     #: - [TCP] newdate
     #: - [UDP] newdate
-    tempo = 526, 'tempo', TransportProtocol.tcp
+    tempo = 526
 
     #: - [TCP] Stock IXChange
     #: - [UDP] Stock IXChange
-    stx = 527, 'stx', TransportProtocol.tcp
+    stx = 527
 
     #: - [TCP] Customer IXChange
     #: - [UDP] Customer IXChange
-    custix = 528, 'custix', TransportProtocol.tcp
+    custix = 528
 
     #: - [TCP] IRC-SERV
     #: - [UDP] IRC-SERV
-    irc_serv = 529, 'irc-serv', TransportProtocol.tcp
+    irc_serv = 529, 'irc-serv'
 
     #: - [TCP] rpc
     #: - [UDP] rpc
-    courier = 530, 'courier', TransportProtocol.tcp
+    courier = 530
 
     #: - [TCP] chat
     #: - [UDP] chat
-    conference = 531, 'conference', TransportProtocol.tcp
+    conference = 531
 
     #: - [TCP] readnews
     #: - [UDP] readnews
-    netnews = 532, 'netnews', TransportProtocol.tcp
+    netnews = 532
 
     #: - [TCP] for emergency broadcasts
     #: - [UDP] for emergency broadcasts
-    netwall = 533, 'netwall', TransportProtocol.tcp
+    netwall = 533
 
     #: - [TCP] windream Admin
     #: - [UDP] windream Admin
-    windream = 534, 'windream', TransportProtocol.tcp
+    windream = 534
 
     #: - [TCP] iiop
     #: - [UDP] iiop
-    iiop = 535, 'iiop', TransportProtocol.tcp
+    iiop = 535
 
     #: - [TCP] opalis-rdv
     #: - [UDP] opalis-rdv
-    opalis_rdv = 536, 'opalis-rdv', TransportProtocol.tcp
+    opalis_rdv = 536, 'opalis-rdv'
 
     #: - [TCP] gdomap
     #: - [UDP] gdomap
-    gdomap = 538, 'gdomap', TransportProtocol.tcp
+    gdomap = 538
 
     #: - [TCP] Apertus Technologies Load Determination
     #: - [UDP] Apertus Technologies Load Determination
-    apertus_ldp = 539, 'apertus-ldp', TransportProtocol.tcp
+    apertus_ldp = 539, 'apertus-ldp'
 
     #: - [TCP] uucpd
     #: - [UDP] uucpd
-    uucp = 540, 'uucp', TransportProtocol.tcp
+    uucp = 540
 
     #: - [TCP] uucp-rlogin
     #: - [UDP] uucp-rlogin
-    uucp_rlogin = 541, 'uucp-rlogin', TransportProtocol.tcp
+    uucp_rlogin = 541, 'uucp-rlogin'
 
     #: - [TCP] commerce
     #: - [UDP] commerce
-    commerce = 542, 'commerce', TransportProtocol.tcp
+    commerce = 542
 
     #: - [TCP]
     #: - [UDP]
-    klogin = 543, 'klogin', TransportProtocol.tcp
+    klogin = 543
 
     #: - [TCP] krcmd
     #: - [UDP] krcmd
-    kshell = 544, 'kshell', TransportProtocol.tcp
+    kshell = 544
 
     #: - [TCP] appleqtcsrvr
     #: - [UDP] appleqtcsrvr
-    appleqtcsrvr = 545, 'appleqtcsrvr', TransportProtocol.tcp
+    appleqtcsrvr = 545
 
     #: - [TCP] DHCPv6 Client
     #: - [UDP] DHCPv6 Client [:rfc:`9915`]
-    dhcpv6_client = 546, 'dhcpv6-client', TransportProtocol.tcp
+    dhcpv6_client = 546, 'dhcpv6-client'
 
     #: - [TCP] DHCPv6 Server [:rfc:`5460`]
     #: - [UDP] DHCPv6 Server [:rfc:`9915`]
-    dhcpv6_server = 547, 'dhcpv6-server', TransportProtocol.tcp
+    dhcpv6_server = 547, 'dhcpv6-server'
 
     #: - [TCP] AFP over TCP
     #: - [UDP] AFP over TCP
-    afpovertcp = 548, 'afpovertcp', TransportProtocol.tcp
+    afpovertcp = 548
 
     #: - [TCP] IDFP
     #: - [UDP] IDFP
-    idfp = 549, 'idfp', TransportProtocol.tcp
+    idfp = 549
 
     #: - [TCP] new-who [n/a]
     #: - [UDP] new-who [n/a]
-    new_rwho = 550, 'new-rwho', TransportProtocol.tcp
+    new_rwho = 550, 'new-rwho'
 
     #: - [TCP] cybercash [:rfc:`1898`]
     #: - [UDP] cybercash [:rfc:`1898`]
-    cybercash = 551, 'cybercash', TransportProtocol.tcp
+    cybercash = 551
 
     #: - [TCP] DeviceShare
     #: - [UDP] DeviceShare
-    devshr_nts = 552, 'devshr-nts', TransportProtocol.tcp
+    devshr_nts = 552, 'devshr-nts'
 
     #: - [TCP] pirp
     #: - [UDP] pirp
-    pirp = 553, 'pirp', TransportProtocol.tcp
+    pirp = 553
 
     #: - [TCP] Real Time Streaming Protocol (RTSP)
     #: - [UDP] Real Time Streaming Protocol (RTSP)
-    rtsp = 554, 'rtsp', TransportProtocol.tcp
+    rtsp = 554
 
     #: - [TCP]
     #: - [UDP]
-    dsf = 555, 'dsf', TransportProtocol.tcp
+    dsf = 555
 
     #: - [TCP] rfs server
     #: - [UDP] rfs server
-    remotefs = 556, 'remotefs', TransportProtocol.tcp
+    remotefs = 556
 
     #: - [TCP] openvms-sysipc
     #: - [UDP] openvms-sysipc
-    openvms_sysipc = 557, 'openvms-sysipc', TransportProtocol.tcp
+    openvms_sysipc = 557, 'openvms-sysipc'
 
     #: - [TCP] SDNSKMP
     #: - [UDP] SDNSKMP
-    sdnskmp = 558, 'sdnskmp', TransportProtocol.tcp
+    sdnskmp = 558
 
     #: - [TCP] TEEDTAP
     #: - [UDP] TEEDTAP
-    teedtap = 559, 'teedtap', TransportProtocol.tcp
+    teedtap = 559
 
     #: - [TCP] rmonitord
     #: - [UDP] rmonitord
-    rmonitor = 560, 'rmonitor', TransportProtocol.tcp
+    rmonitor = 560
 
     #: - [TCP]
     #: - [UDP]
-    monitor = 561, 'monitor', TransportProtocol.tcp
+    monitor = 561
 
     #: - [TCP] chcmd
     #: - [UDP] chcmd
-    chshell = 562, 'chshell', TransportProtocol.tcp
+    chshell = 562
 
     #: - [TCP] nntp protocol over TLS/SSL (was snntp) [:rfc:`4642`]
     #: - [UDP] nntp protocol over TLS/SSL (was snntp) [:rfc:`4642`]
-    nntps = 563, 'nntps', TransportProtocol.tcp
+    nntps = 563
 
     #: - [TCP] plan 9 file service
     #: - [UDP] plan 9 file service
-    TCP_9pfs = 564, '9pfs', TransportProtocol.tcp
+    TCP_9pfs = 564, '9pfs'
 
     #: - [TCP] whoami
     #: - [UDP] whoami
-    whoami = 565, 'whoami', TransportProtocol.tcp
+    whoami = 565
 
     #: - [TCP] streettalk
     #: - [UDP] streettalk
-    streettalk = 566, 'streettalk', TransportProtocol.tcp
+    streettalk = 566
 
     #: - [TCP] banyan-rpc
     #: - [UDP] banyan-rpc
-    banyan_rpc = 567, 'banyan-rpc', TransportProtocol.tcp
+    banyan_rpc = 567, 'banyan-rpc'
 
     #: - [TCP] microsoft shuttle
     #: - [UDP] microsoft shuttle
-    ms_shuttle = 568, 'ms-shuttle', TransportProtocol.tcp
+    ms_shuttle = 568, 'ms-shuttle'
 
     #: - [TCP] microsoft rome
     #: - [UDP] microsoft rome
-    ms_rome = 569, 'ms-rome', TransportProtocol.tcp
+    ms_rome = 569, 'ms-rome'
 
     #: - [TCP] demon
     #: - [UDP] demon
-    meter_570 = 570, 'meter', TransportProtocol.tcp
+    meter_570 = 570, 'meter'
 
     #: - [TCP] udemon
     #: - [UDP] udemon
-    meter_571 = 571, 'meter', TransportProtocol.tcp
+    meter_571 = 571, 'meter'
 
     #: - [TCP] sonar
     #: - [UDP] sonar
-    sonar = 572, 'sonar', TransportProtocol.tcp
+    sonar = 572
 
     #: - [TCP] banyan-vip
     #: - [UDP] banyan-vip
-    banyan_vip = 573, 'banyan-vip', TransportProtocol.tcp
+    banyan_vip = 573, 'banyan-vip'
 
     #: - [TCP] FTP Software Agent System
     #: - [UDP] FTP Software Agent System
-    ftp_agent = 574, 'ftp-agent', TransportProtocol.tcp
+    ftp_agent = 574, 'ftp-agent'
 
     #: - [TCP] VEMMI
     #: - [UDP] VEMMI
-    vemmi = 575, 'vemmi', TransportProtocol.tcp
+    vemmi = 575
 
     #: - [TCP] ipcd
     #: - [UDP] ipcd
-    ipcd = 576, 'ipcd', TransportProtocol.tcp
+    ipcd = 576
 
     #: - [TCP] vnas
     #: - [UDP] vnas
-    vnas = 577, 'vnas', TransportProtocol.tcp
+    vnas = 577
 
     #: - [TCP] ipdd
     #: - [UDP] ipdd
-    ipdd = 578, 'ipdd', TransportProtocol.tcp
+    ipdd = 578
 
     #: - [TCP] decbsrv
     #: - [UDP] decbsrv
-    decbsrv = 579, 'decbsrv', TransportProtocol.tcp
+    decbsrv = 579
 
     #: - [TCP] SNTP HEARTBEAT
     #: - [UDP] SNTP HEARTBEAT
-    sntp_heartbeat = 580, 'sntp-heartbeat', TransportProtocol.tcp
+    sntp_heartbeat = 580, 'sntp-heartbeat'
 
     #: - [TCP] Bundle Discovery Protocol
     #: - [UDP] Bundle Discovery Protocol
-    bdp = 581, 'bdp', TransportProtocol.tcp
+    bdp = 581
 
     #: - [TCP] SCC Security
     #: - [UDP] SCC Security
-    scc_security = 582, 'scc-security', TransportProtocol.tcp
+    scc_security = 582, 'scc-security'
 
     #: - [TCP] Philips Video-Conferencing
     #: - [UDP] Philips Video-Conferencing
-    philips_vc = 583, 'philips-vc', TransportProtocol.tcp
+    philips_vc = 583, 'philips-vc'
 
     #: - [TCP] Key Server
     #: - [UDP] Key Server
-    keyserver = 584, 'keyserver', TransportProtocol.tcp
+    keyserver = 584
 
     #: - [TCP] Password Change
     #: - [UDP] Password Change
-    password_chg = 586, 'password-chg', TransportProtocol.tcp
+    password_chg = 586, 'password-chg'
 
     #: - [TCP] Message Submission [:rfc:`6409`]
     #: - [UDP] Message Submission [:rfc:`6409`]
-    submission = 587, 'submission', TransportProtocol.tcp
+    submission = 587
 
     #: - [TCP] CAL
     #: - [UDP] CAL
-    cal = 588, 'cal', TransportProtocol.tcp
+    cal = 588
 
     #: - [TCP] EyeLink
     #: - [UDP] EyeLink
-    eyelink = 589, 'eyelink', TransportProtocol.tcp
+    eyelink = 589
 
     #: - [TCP] TNS CML
     #: - [UDP] TNS CML
-    tns_cml = 590, 'tns-cml', TransportProtocol.tcp
+    tns_cml = 590, 'tns-cml'
 
     #: - [TCP] Eudora Set
     #: - [UDP] Eudora Set
-    eudora_set = 592, 'eudora-set', TransportProtocol.tcp
+    eudora_set = 592, 'eudora-set'
 
     #: - [TCP] HTTP RPC Ep Map
     #: - [UDP] HTTP RPC Ep Map
-    http_rpc_epmap = 593, 'http-rpc-epmap', TransportProtocol.tcp
+    http_rpc_epmap = 593, 'http-rpc-epmap'
 
     #: - [TCP] TPIP
     #: - [UDP] TPIP
-    tpip = 594, 'tpip', TransportProtocol.tcp
+    tpip = 594
 
     #: - [TCP] CAB Protocol
     #: - [UDP] CAB Protocol
-    cab_protocol = 595, 'cab-protocol', TransportProtocol.tcp
+    cab_protocol = 595, 'cab-protocol'
 
     #: - [TCP] SMSD
     #: - [UDP] SMSD
-    smsd = 596, 'smsd', TransportProtocol.tcp
+    smsd = 596
 
     #: - [TCP] PTC Name Service
     #: - [UDP] PTC Name Service
-    ptcnameservice = 597, 'ptcnameservice', TransportProtocol.tcp
+    ptcnameservice = 597
 
     #: - [TCP] SCO Web Server Manager 3
     #: - [UDP] SCO Web Server Manager 3
-    sco_websrvrmg3 = 598, 'sco-websrvrmg3', TransportProtocol.tcp
+    sco_websrvrmg3 = 598, 'sco-websrvrmg3'
 
     #: - [TCP] Aeolon Core Protocol
     #: - [UDP] Aeolon Core Protocol
-    acp = 599, 'acp', TransportProtocol.tcp
+    acp = 599
 
     #: - [TCP] Sun IPC server
     #: - [UDP] Sun IPC server
-    ipcserver = 600, 'ipcserver', TransportProtocol.tcp
+    ipcserver = 600
 
     #: - [TCP] Reliable Syslog Service [:rfc:`3195`]
     #: - [UDP] Reliable Syslog Service [:rfc:`3195`]
-    syslog_conn = 601, 'syslog-conn', TransportProtocol.tcp
+    syslog_conn = 601, 'syslog-conn'
 
     #: - [TCP] XML-RPC over BEEP [:rfc:`3529`]
     #: - [UDP] XML-RPC over BEEP [:rfc:`3529`]
-    xmlrpc_beep = 602, 'xmlrpc-beep', TransportProtocol.tcp
+    xmlrpc_beep = 602, 'xmlrpc-beep'
 
     #: - [TCP] IDXP [:rfc:`4767`]
     #: - [UDP] IDXP [:rfc:`4767`]
-    idxp = 603, 'idxp', TransportProtocol.tcp
+    idxp = 603
 
     #: - [TCP] TUNNEL [:rfc:`3620`]
     #: - [UDP] TUNNEL [:rfc:`3620`]
-    tunnel = 604, 'tunnel', TransportProtocol.tcp
+    tunnel = 604
 
     #: - [TCP] SOAP over BEEP [:rfc:`4227`]
     #: - [UDP] SOAP over BEEP [:rfc:`4227`]
-    soap_beep = 605, 'soap-beep', TransportProtocol.tcp
+    soap_beep = 605, 'soap-beep'
 
     #: - [TCP] Cray Unified Resource Manager
     #: - [UDP] Cray Unified Resource Manager
-    urm = 606, 'urm', TransportProtocol.tcp
+    urm = 606
 
     #: - [TCP] nqs
     #: - [UDP] nqs
-    nqs = 607, 'nqs', TransportProtocol.tcp
+    nqs = 607
 
     #: - [TCP] Sender-Initiated/Unsolicited File Transfer
     #: - [UDP] Sender-Initiated/Unsolicited File Transfer
-    sift_uft = 608, 'sift-uft', TransportProtocol.tcp
+    sift_uft = 608, 'sift-uft'
 
     #: - [TCP] npmp-trap
     #: - [UDP] npmp-trap
-    npmp_trap = 609, 'npmp-trap', TransportProtocol.tcp
+    npmp_trap = 609, 'npmp-trap'
 
     #: - [TCP] npmp-local
     #: - [UDP] npmp-local
-    npmp_local = 610, 'npmp-local', TransportProtocol.tcp
+    npmp_local = 610, 'npmp-local'
 
     #: - [TCP] npmp-gui
     #: - [UDP] npmp-gui
-    npmp_gui = 611, 'npmp-gui', TransportProtocol.tcp
+    npmp_gui = 611, 'npmp-gui'
 
     #: - [TCP] HMMP Indication
     #: - [UDP] HMMP Indication
-    hmmp_ind = 612, 'hmmp-ind', TransportProtocol.tcp
+    hmmp_ind = 612, 'hmmp-ind'
 
     #: - [TCP] HMMP Operation
     #: - [UDP] HMMP Operation
-    hmmp_op = 613, 'hmmp-op', TransportProtocol.tcp
+    hmmp_op = 613, 'hmmp-op'
 
     #: - [TCP] SSLshell
     #: - [UDP] SSLshell
-    sshell = 614, 'sshell', TransportProtocol.tcp
+    sshell = 614
 
     #: - [TCP] Internet Configuration Manager
     #: - [UDP] Internet Configuration Manager
-    sco_inetmgr = 615, 'sco-inetmgr', TransportProtocol.tcp
+    sco_inetmgr = 615, 'sco-inetmgr'
 
     #: - [TCP] SCO System Administration Server
     #: - [UDP] SCO System Administration Server
-    sco_sysmgr = 616, 'sco-sysmgr', TransportProtocol.tcp
+    sco_sysmgr = 616, 'sco-sysmgr'
 
     #: - [TCP] SCO Desktop Administration Server
     #: - [UDP] SCO Desktop Administration Server
-    sco_dtmgr = 617, 'sco-dtmgr', TransportProtocol.tcp
+    sco_dtmgr = 617, 'sco-dtmgr'
 
     #: - [TCP] DEI-ICDA
     #: - [UDP] DEI-ICDA
-    dei_icda = 618, 'dei-icda', TransportProtocol.tcp
+    dei_icda = 618, 'dei-icda'
 
     #: - [TCP] Compaq EVM
     #: - [UDP] Compaq EVM
-    compaq_evm = 619, 'compaq-evm', TransportProtocol.tcp
+    compaq_evm = 619, 'compaq-evm'
 
     #: - [TCP] SCO WebServer Manager
     #: - [UDP] SCO WebServer Manager
-    sco_websrvrmgr = 620, 'sco-websrvrmgr', TransportProtocol.tcp
+    sco_websrvrmgr = 620, 'sco-websrvrmgr'
 
     #: - [TCP] ESCP
     #: - [UDP] ESCP
-    escp_ip = 621, 'escp-ip', TransportProtocol.tcp
+    escp_ip = 621, 'escp-ip'
 
     #: - [TCP] Collaborator
     #: - [UDP] Collaborator
-    collaborator = 622, 'collaborator', TransportProtocol.tcp
+    collaborator = 622
 
     #: [TCP] DMTF out-of-band web services management protocol
-    oob_ws_http = 623, 'oob-ws-http', TransportProtocol.tcp
+    oob_ws_http = 623, 'oob-ws-http'
 
     #: - [TCP] Crypto Admin
     #: - [UDP] Crypto Admin
-    cryptoadmin = 624, 'cryptoadmin', TransportProtocol.tcp
+    cryptoadmin = 624
 
     #: - [TCP] DEC DLM IANA assigned this well-formed service name as a replacement
     #:   for "dec_dlm".
@@ -3156,481 +3156,481 @@ class TCP(AppType):
     #: - [UDP] DEC DLM IANA assigned this well-formed service name as a replacement
     #:   for "dec_dlm".
     #: - [UDP] DEC DLM
-    dec_dlm = 625, 'dec-dlm', TransportProtocol.tcp
+    dec_dlm = 625, 'dec-dlm'
 
     #: - [TCP] ASIA
     #: - [UDP] ASIA
-    asia = 626, 'asia', TransportProtocol.tcp
+    asia = 626
 
     #: - [TCP] PassGo Tivoli
     #: - [UDP] PassGo Tivoli
-    passgo_tivoli = 627, 'passgo-tivoli', TransportProtocol.tcp
+    passgo_tivoli = 627, 'passgo-tivoli'
 
     #: - [TCP] QMQP
     #: - [UDP] QMQP
-    qmqp = 628, 'qmqp', TransportProtocol.tcp
+    qmqp = 628
 
     #: - [TCP] 3Com AMP3
     #: - [UDP] 3Com AMP3
-    TCP_3com_amp3 = 629, '3com-amp3', TransportProtocol.tcp
+    TCP_3com_amp3 = 629, '3com-amp3'
 
     #: - [TCP] IPP (Internet Printing Protocol) [:rfc:`8011`]
     #: - [UDP] IPP (Internet Printing Protocol) [:rfc:`8011`]
-    ipp = 631, 'ipp', TransportProtocol.tcp
+    ipp = 631
 
     #: [TCP] Internet Printing Protocol over HTTPS [:rfc:`8011`]
-    ipps = 631, 'ipps', TransportProtocol.tcp
+    ipps = 631
 
     #: - [TCP] bmpp
     #: - [UDP] bmpp
-    bmpp = 632, 'bmpp', TransportProtocol.tcp
+    bmpp = 632
 
     #: - [TCP] Service Status update (Sterling Software)
     #: - [UDP] Service Status update (Sterling Software)
-    servstat = 633, 'servstat', TransportProtocol.tcp
+    servstat = 633
 
     #: - [TCP] ginad
     #: - [UDP] ginad
-    ginad = 634, 'ginad', TransportProtocol.tcp
+    ginad = 634
 
     #: - [TCP] RLZ DBase
     #: - [UDP] RLZ DBase
-    rlzdbase = 635, 'rlzdbase', TransportProtocol.tcp
+    rlzdbase = 635
 
     #: - [TCP] ldap protocol over TLS/SSL (was sldap)
     #: - [UDP] ldap protocol over TLS/SSL (was sldap)
-    ldaps = 636, 'ldaps', TransportProtocol.tcp
+    ldaps = 636
 
     #: - [TCP] lanserver
     #: - [UDP] lanserver
-    lanserver = 637, 'lanserver', TransportProtocol.tcp
+    lanserver = 637
 
     #: - [TCP] mcns-sec
     #: - [UDP] mcns-sec
-    mcns_sec = 638, 'mcns-sec', TransportProtocol.tcp
+    mcns_sec = 638, 'mcns-sec'
 
     #: - [TCP] MSDP
     #: - [UDP] MSDP
-    msdp = 639, 'msdp', TransportProtocol.tcp
+    msdp = 639
 
     #: - [TCP] entrust-sps
     #: - [UDP] entrust-sps
-    entrust_sps = 640, 'entrust-sps', TransportProtocol.tcp
+    entrust_sps = 640, 'entrust-sps'
 
     #: - [TCP] repcmd
     #: - [UDP] repcmd
-    repcmd = 641, 'repcmd', TransportProtocol.tcp
+    repcmd = 641
 
     #: - [TCP] ESRO-EMSDP V1.3
     #: - [UDP] ESRO-EMSDP V1.3
-    esro_emsdp = 642, 'esro-emsdp', TransportProtocol.tcp
+    esro_emsdp = 642, 'esro-emsdp'
 
     #: - [TCP] SANity
     #: - [UDP] SANity
-    sanity = 643, 'sanity', TransportProtocol.tcp
+    sanity = 643
 
     #: - [TCP] dwr
     #: - [UDP] dwr
-    dwr = 644, 'dwr', TransportProtocol.tcp
+    dwr = 644
 
     #: - [TCP] PSSC
     #: - [UDP] PSSC
-    pssc = 645, 'pssc', TransportProtocol.tcp
+    pssc = 645
 
     #: - [TCP] LDP
     #: - [UDP] LDP
-    ldp = 646, 'ldp', TransportProtocol.tcp
+    ldp = 646
 
     #: - [TCP] DHCP Failover [:rfc:`8156`]
     #: - [UDP] DHCP Failover
-    dhcp_failover = 647, 'dhcp-failover', TransportProtocol.tcp
+    dhcp_failover = 647, 'dhcp-failover'
 
     #: - [TCP] Registry Registrar Protocol (RRP)
     #: - [UDP] Registry Registrar Protocol (RRP)
-    rrp = 648, 'rrp', TransportProtocol.tcp
+    rrp = 648
 
     #: - [TCP] Cadview-3d - streaming 3d models over the internet
     #: - [UDP] Cadview-3d - streaming 3d models over the internet
-    cadview_3d = 649, 'cadview-3d', TransportProtocol.tcp
+    cadview_3d = 649, 'cadview-3d'
 
     #: - [TCP] OBEX
     #: - [UDP] OBEX
-    obex = 650, 'obex', TransportProtocol.tcp
+    obex = 650
 
     #: - [TCP] IEEE MMS
     #: - [UDP] IEEE MMS
-    ieee_mms = 651, 'ieee-mms', TransportProtocol.tcp
+    ieee_mms = 651, 'ieee-mms'
 
     #: - [TCP] HELLO_PORT
     #: - [UDP] HELLO_PORT
-    hello_port = 652, 'hello-port', TransportProtocol.tcp
+    hello_port = 652, 'hello-port'
 
     #: - [TCP] RepCmd
     #: - [UDP] RepCmd
-    repscmd = 653, 'repscmd', TransportProtocol.tcp
+    repscmd = 653
 
     #: - [TCP] AODV
     #: - [UDP] AODV
-    aodv = 654, 'aodv', TransportProtocol.tcp
+    aodv = 654
 
     #: - [TCP] TINC
     #: - [UDP] TINC
-    tinc = 655, 'tinc', TransportProtocol.tcp
+    tinc = 655
 
     #: - [TCP] SPMP
     #: - [UDP] SPMP
-    spmp = 656, 'spmp', TransportProtocol.tcp
+    spmp = 656
 
     #: - [TCP] RMC
     #: - [UDP] RMC
-    rmc = 657, 'rmc', TransportProtocol.tcp
+    rmc = 657
 
     #: - [TCP] TenFold
     #: - [UDP] TenFold
-    tenfold = 658, 'tenfold', TransportProtocol.tcp
+    tenfold = 658
 
     #: - [TCP] MacOS Server Admin
     #: - [UDP] MacOS Server Admin
-    mac_srvr_admin = 660, 'mac-srvr-admin', TransportProtocol.tcp
+    mac_srvr_admin = 660, 'mac-srvr-admin'
 
     #: - [TCP] HAP
     #: - [UDP] HAP
-    hap = 661, 'hap', TransportProtocol.tcp
+    hap = 661
 
     #: - [TCP] PFTP
     #: - [UDP] PFTP
-    pftp = 662, 'pftp', TransportProtocol.tcp
+    pftp = 662
 
     #: - [TCP] PureNoise
     #: - [UDP] PureNoise
-    purenoise = 663, 'purenoise', TransportProtocol.tcp
+    purenoise = 663
 
     #: [TCP] DMTF out-of-band secure web services management protocol
-    oob_ws_https = 664, 'oob-ws-https', TransportProtocol.tcp
+    oob_ws_https = 664, 'oob-ws-https'
 
     #: - [TCP] Sun DR
     #: - [UDP] Sun DR
-    sun_dr = 665, 'sun-dr', TransportProtocol.tcp
+    sun_dr = 665, 'sun-dr'
 
     #: - [TCP]
     #: - [UDP]
-    mdqs = 666, 'mdqs', TransportProtocol.tcp
+    mdqs = 666
 
     #: - [TCP] doom Id Software
     #: - [UDP] doom Id Software
-    doom = 666, 'doom', TransportProtocol.tcp
+    doom = 666
 
     #: - [TCP] campaign contribution disclosures - SDR Technologies
     #: - [UDP] campaign contribution disclosures - SDR Technologies
-    disclose = 667, 'disclose', TransportProtocol.tcp
+    disclose = 667
 
     #: - [TCP] MeComm
     #: - [UDP] MeComm
-    mecomm = 668, 'mecomm', TransportProtocol.tcp
+    mecomm = 668
 
     #: - [TCP] MeRegister
     #: - [UDP] MeRegister
-    meregister = 669, 'meregister', TransportProtocol.tcp
+    meregister = 669
 
     #: - [TCP] VACDSM-SWS
     #: - [UDP] VACDSM-SWS
-    vacdsm_sws = 670, 'vacdsm-sws', TransportProtocol.tcp
+    vacdsm_sws = 670, 'vacdsm-sws'
 
     #: - [TCP] VACDSM-APP
     #: - [UDP] VACDSM-APP
-    vacdsm_app = 671, 'vacdsm-app', TransportProtocol.tcp
+    vacdsm_app = 671, 'vacdsm-app'
 
     #: - [TCP] VPPS-QUA
     #: - [UDP] VPPS-QUA
-    vpps_qua = 672, 'vpps-qua', TransportProtocol.tcp
+    vpps_qua = 672, 'vpps-qua'
 
     #: - [TCP] CIMPLEX
     #: - [UDP] CIMPLEX
-    cimplex = 673, 'cimplex', TransportProtocol.tcp
+    cimplex = 673
 
     #: - [TCP] ACAP
     #: - [UDP] ACAP
-    acap = 674, 'acap', TransportProtocol.tcp
+    acap = 674
 
     #: - [TCP] DCTP
     #: - [UDP] DCTP
-    dctp = 675, 'dctp', TransportProtocol.tcp
+    dctp = 675
 
     #: - [TCP] VPPS Via
     #: - [UDP] VPPS Via
-    vpps_via = 676, 'vpps-via', TransportProtocol.tcp
+    vpps_via = 676, 'vpps-via'
 
     #: - [TCP] Virtual Presence Protocol
     #: - [UDP] Virtual Presence Protocol
-    vpp = 677, 'vpp', TransportProtocol.tcp
+    vpp = 677
 
     #: - [TCP] GNU Generation Foundation NCP
     #: - [UDP] GNU Generation Foundation NCP
-    ggf_ncp = 678, 'ggf-ncp', TransportProtocol.tcp
+    ggf_ncp = 678, 'ggf-ncp'
 
     #: - [TCP] MRM
     #: - [UDP] MRM
-    mrm = 679, 'mrm', TransportProtocol.tcp
+    mrm = 679
 
     #: - [TCP] entrust-aaas
     #: - [UDP] entrust-aaas
-    entrust_aaas = 680, 'entrust-aaas', TransportProtocol.tcp
+    entrust_aaas = 680, 'entrust-aaas'
 
     #: - [TCP] entrust-aams
     #: - [UDP] entrust-aams
-    entrust_aams = 681, 'entrust-aams', TransportProtocol.tcp
+    entrust_aams = 681, 'entrust-aams'
 
     #: - [TCP] XFR
     #: - [UDP] XFR
-    xfr = 682, 'xfr', TransportProtocol.tcp
+    xfr = 682
 
     #: - [TCP] CORBA IIOP
     #: - [UDP] CORBA IIOP
-    corba_iiop = 683, 'corba-iiop', TransportProtocol.tcp
+    corba_iiop = 683, 'corba-iiop'
 
     #: - [TCP] CORBA IIOP SSL
     #: - [UDP] CORBA IIOP SSL
-    corba_iiop_ssl = 684, 'corba-iiop-ssl', TransportProtocol.tcp
+    corba_iiop_ssl = 684, 'corba-iiop-ssl'
 
     #: - [TCP] MDC Port Mapper
     #: - [UDP] MDC Port Mapper
-    mdc_portmapper = 685, 'mdc-portmapper', TransportProtocol.tcp
+    mdc_portmapper = 685, 'mdc-portmapper'
 
     #: - [TCP] Hardware Control Protocol Wismar
     #: - [UDP] Hardware Control Protocol Wismar
-    hcp_wismar = 686, 'hcp-wismar', TransportProtocol.tcp
+    hcp_wismar = 686, 'hcp-wismar'
 
     #: - [TCP] asipregistry
     #: - [UDP] asipregistry
-    asipregistry = 687, 'asipregistry', TransportProtocol.tcp
+    asipregistry = 687
 
     #: - [TCP] ApplianceWare managment protocol
     #: - [UDP] ApplianceWare managment protocol
-    realm_rusd = 688, 'realm-rusd', TransportProtocol.tcp
+    realm_rusd = 688, 'realm-rusd'
 
     #: - [TCP] NMAP
     #: - [UDP] NMAP
-    nmap = 689, 'nmap', TransportProtocol.tcp
+    nmap = 689
 
     #: - [TCP] Velneo Application Transfer Protocol
     #: - [UDP] Velneo Application Transfer Protocol
-    vatp = 690, 'vatp', TransportProtocol.tcp
+    vatp = 690
 
     #: - [TCP] MS Exchange Routing
     #: - [UDP] MS Exchange Routing
-    msexch_routing = 691, 'msexch-routing', TransportProtocol.tcp
+    msexch_routing = 691, 'msexch-routing'
 
     #: - [TCP] Hyperwave-ISP
     #: - [UDP] Hyperwave-ISP
-    hyperwave_isp = 692, 'hyperwave-isp', TransportProtocol.tcp
+    hyperwave_isp = 692, 'hyperwave-isp'
 
     #: - [TCP] almanid Connection Endpoint
     #: - [UDP] almanid Connection Endpoint
-    connendp = 693, 'connendp', TransportProtocol.tcp
+    connendp = 693
 
     #: - [TCP] ha-cluster
     #: - [UDP] ha-cluster
-    ha_cluster = 694, 'ha-cluster', TransportProtocol.tcp
+    ha_cluster = 694, 'ha-cluster'
 
     #: - [TCP] IEEE-MMS-SSL
     #: - [UDP] IEEE-MMS-SSL
-    ieee_mms_ssl = 695, 'ieee-mms-ssl', TransportProtocol.tcp
+    ieee_mms_ssl = 695, 'ieee-mms-ssl'
 
     #: - [TCP] RUSHD
     #: - [UDP] RUSHD
-    rushd = 696, 'rushd', TransportProtocol.tcp
+    rushd = 696
 
     #: - [TCP] UUIDGEN
     #: - [UDP] UUIDGEN
-    uuidgen = 697, 'uuidgen', TransportProtocol.tcp
+    uuidgen = 697
 
     #: - [TCP] OLSR
     #: - [UDP] OLSR
-    olsr = 698, 'olsr', TransportProtocol.tcp
+    olsr = 698
 
     #: - [TCP] Access Network
     #: - [UDP] Access Network
-    accessnetwork = 699, 'accessnetwork', TransportProtocol.tcp
+    accessnetwork = 699
 
     #: - [TCP] Link Management Protocol (LMP) [:rfc:`4204`]
     #: - [UDP] Link Management Protocol (LMP) [:rfc:`4204`]
-    lmp = 701, 'lmp', TransportProtocol.tcp
+    lmp = 701
 
     #: - [TCP] IRIS over BEEP [:rfc:`3983`]
     #: - [UDP] IRIS over BEEP [:rfc:`3983`]
-    iris_beep = 702, 'iris-beep', TransportProtocol.tcp
+    iris_beep = 702, 'iris-beep'
 
     #: - [TCP] errlog copy/server daemon
     #: - [UDP] errlog copy/server daemon
-    elcsd = 704, 'elcsd', TransportProtocol.tcp
+    elcsd = 704
 
     #: - [TCP] AgentX
     #: - [UDP] AgentX
-    agentx = 705, 'agentx', TransportProtocol.tcp
+    agentx = 705
 
     #: - [TCP] SILC
     #: - [UDP] SILC
-    silc = 706, 'silc', TransportProtocol.tcp
+    silc = 706
 
     #: - [TCP] Borland DSJ
     #: - [UDP] Borland DSJ
-    borland_dsj = 707, 'borland-dsj', TransportProtocol.tcp
+    borland_dsj = 707, 'borland-dsj'
 
     #: - [TCP] Entrust Key Management Service Handler
     #: - [UDP] Entrust Key Management Service Handler
-    entrust_kmsh = 709, 'entrust-kmsh', TransportProtocol.tcp
+    entrust_kmsh = 709, 'entrust-kmsh'
 
     #: - [TCP] Entrust Administration Service Handler
     #: - [UDP] Entrust Administration Service Handler
-    entrust_ash = 710, 'entrust-ash', TransportProtocol.tcp
+    entrust_ash = 710, 'entrust-ash'
 
     #: - [TCP] Cisco TDP
     #: - [UDP] Cisco TDP
-    cisco_tdp = 711, 'cisco-tdp', TransportProtocol.tcp
+    cisco_tdp = 711, 'cisco-tdp'
 
     #: - [TCP] TBRPF [:rfc:`3684`]
     #: - [UDP] TBRPF [:rfc:`3684`]
-    tbrpf = 712, 'tbrpf', TransportProtocol.tcp
+    tbrpf = 712
 
     #: - [TCP] IRIS over XPC
     #: - [UDP] IRIS over XPC
-    iris_xpc = 713, 'iris-xpc', TransportProtocol.tcp
+    iris_xpc = 713, 'iris-xpc'
 
     #: - [TCP] IRIS over XPCS [:rfc:`4992`]
     #: - [UDP] IRIS over XPCS [:rfc:`4992`]
-    iris_xpcs = 714, 'iris-xpcs', TransportProtocol.tcp
+    iris_xpcs = 714, 'iris-xpcs'
 
     #: - [TCP] IRIS-LWZ [:rfc:`4993`]
     #: - [UDP] IRIS-LWZ [:rfc:`4993`]
-    iris_lwz = 715, 'iris-lwz', TransportProtocol.tcp
+    iris_lwz = 715, 'iris-lwz'
 
     #: - [TCP] IBM NetView DM/6000 Server/Client
     #: - [UDP] IBM NetView DM/6000 Server/Client
-    netviewdm1 = 729, 'netviewdm1', TransportProtocol.tcp
+    netviewdm1 = 729
 
     #: - [TCP] IBM NetView DM/6000 send/tcp
     #: - [UDP] IBM NetView DM/6000 send/tcp
-    netviewdm2 = 730, 'netviewdm2', TransportProtocol.tcp
+    netviewdm2 = 730
 
     #: - [TCP] IBM NetView DM/6000 receive/tcp
     #: - [UDP] IBM NetView DM/6000 receive/tcp
-    netviewdm3 = 731, 'netviewdm3', TransportProtocol.tcp
+    netviewdm3 = 731
 
     #: - [TCP] netGW
     #: - [UDP] netGW
-    netgw = 741, 'netgw', TransportProtocol.tcp
+    netgw = 741
 
     #: - [TCP] Network based Rev. Cont. Sys.
     #: - [UDP] Network based Rev. Cont. Sys.
-    netrcs = 742, 'netrcs', TransportProtocol.tcp
+    netrcs = 742
 
     #: - [TCP] Flexible License Manager
     #: - [UDP] Flexible License Manager
-    flexlm = 744, 'flexlm', TransportProtocol.tcp
+    flexlm = 744
 
     #: - [TCP] Fujitsu Device Control
     #: - [UDP] Fujitsu Device Control
-    fujitsu_dev = 747, 'fujitsu-dev', TransportProtocol.tcp
+    fujitsu_dev = 747, 'fujitsu-dev'
 
     #: - [TCP] Russell Info Sci Calendar Manager
     #: - [UDP] Russell Info Sci Calendar Manager
-    ris_cm = 748, 'ris-cm', TransportProtocol.tcp
+    ris_cm = 748, 'ris-cm'
 
     #: - [TCP] kerberos administration
     #: - [UDP] kerberos administration
-    kerberos_adm = 749, 'kerberos-adm', TransportProtocol.tcp
+    kerberos_adm = 749, 'kerberos-adm'
 
     #: [TCP]
-    rfile = 750, 'rfile', TransportProtocol.tcp
+    rfile = 750
 
     #: - [TCP]
     #: - [UDP]
-    pump = 751, 'pump', TransportProtocol.tcp
+    pump = 751
 
     #: - [TCP]
     #: - [UDP]
-    qrh = 752, 'qrh', TransportProtocol.tcp
+    qrh = 752
 
     #: - [TCP]
     #: - [UDP]
-    rrh = 753, 'rrh', TransportProtocol.tcp
+    rrh = 753
 
     #: - [TCP] send
     #: - [UDP] send
-    tell = 754, 'tell', TransportProtocol.tcp
+    tell = 754
 
     #: - [TCP]
     #: - [UDP]
-    nlogin = 758, 'nlogin', TransportProtocol.tcp
+    nlogin = 758
 
     #: - [TCP]
     #: - [UDP]
-    con = 759, 'con', TransportProtocol.tcp
+    con = 759
 
     #: - [TCP]
     #: - [UDP]
-    ns = 760, 'ns', TransportProtocol.tcp
+    ns = 760
 
     #: - [TCP]
     #: - [UDP]
-    rxe = 761, 'rxe', TransportProtocol.tcp
+    rxe = 761
 
     #: - [TCP]
     #: - [UDP]
-    quotad = 762, 'quotad', TransportProtocol.tcp
+    quotad = 762
 
     #: - [TCP]
     #: - [UDP]
-    cycleserv = 763, 'cycleserv', TransportProtocol.tcp
+    cycleserv = 763
 
     #: - [TCP]
     #: - [UDP]
-    omserv = 764, 'omserv', TransportProtocol.tcp
+    omserv = 764
 
     #: - [TCP]
     #: - [UDP]
-    webster = 765, 'webster', TransportProtocol.tcp
+    webster = 765
 
     #: - [TCP] phone
     #: - [UDP] phone
-    phonebook = 767, 'phonebook', TransportProtocol.tcp
+    phonebook = 767
 
     #: - [TCP]
     #: - [UDP]
-    vid = 769, 'vid', TransportProtocol.tcp
+    vid = 769
 
     #: - [TCP]
     #: - [UDP]
-    cadlock = 770, 'cadlock', TransportProtocol.tcp
+    cadlock = 770
 
     #: - [TCP]
     #: - [UDP]
-    rtip = 771, 'rtip', TransportProtocol.tcp
+    rtip = 771
 
     #: - [TCP]
     #: - [UDP]
-    cycleserv2 = 772, 'cycleserv2', TransportProtocol.tcp
+    cycleserv2 = 772
 
     #: [TCP]
-    submit = 773, 'submit', TransportProtocol.tcp
+    submit = 773
 
     #: [TCP]
-    rpasswd = 774, 'rpasswd', TransportProtocol.tcp
+    rpasswd = 774
 
     #: [TCP]
-    entomb = 775, 'entomb', TransportProtocol.tcp
+    entomb = 775
 
     #: - [TCP]
     #: - [UDP]
-    wpages = 776, 'wpages', TransportProtocol.tcp
+    wpages = 776
 
     #: - [TCP] Multiling HTTP
     #: - [UDP] Multiling HTTP
-    multiling_http = 777, 'multiling-http', TransportProtocol.tcp
+    multiling_http = 777, 'multiling-http'
 
     #: - [TCP]
     #: - [UDP]
-    wpgs = 780, 'wpgs', TransportProtocol.tcp
+    wpgs = 780
 
     #: - [TCP] IANA assigned this well-formed service name as a replacement for
     #:   "mdbs_daemon".
@@ -3638,78 +3638,78 @@ class TCP(AppType):
     #: - [UDP] IANA assigned this well-formed service name as a replacement for
     #:   "mdbs_daemon".
     #: - [UDP]
-    mdbs_daemon = 800, 'mdbs-daemon', TransportProtocol.tcp
+    mdbs_daemon = 800, 'mdbs-daemon'
 
     #: - [TCP]
     #: - [UDP]
-    device = 801, 'device', TransportProtocol.tcp
+    device = 801
 
     #: - [TCP] Modbus Application Protocol Secure
     #: - [UDP] Modbus Application Protocol Secure
-    mbap_s = 802, 'mbap-s', TransportProtocol.tcp
+    mbap_s = 802, 'mbap-s'
 
     #: - [TCP] FCP
     #: - [UDP] FCP Datagram
-    fcp_udp = 810, 'fcp-udp', TransportProtocol.tcp
+    fcp_udp = 810, 'fcp-udp'
 
     #: - [TCP] itm-mcell-s
     #: - [UDP] itm-mcell-s
-    itm_mcell_s = 828, 'itm-mcell-s', TransportProtocol.tcp
+    itm_mcell_s = 828, 'itm-mcell-s'
 
     #: - [TCP] PKIX-3 CA/RA
     #: - [UDP] PKIX-3 CA/RA
-    pkix_3_ca_ra = 829, 'pkix-3-ca-ra', TransportProtocol.tcp
+    pkix_3_ca_ra = 829, 'pkix-3-ca-ra'
 
     #: - [TCP] NETCONF over SSH [:rfc:`6242`]
     #: - [UDP] NETCONF over SSH [:rfc:`6242`]
-    netconf_ssh = 830, 'netconf-ssh', TransportProtocol.tcp
+    netconf_ssh = 830, 'netconf-ssh'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_831 = 831, 'reserved', TransportProtocol.tcp
+    reserved_831 = 831, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_832 = 832, 'reserved', TransportProtocol.tcp
+    reserved_832 = 832, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_833 = 833, 'reserved', TransportProtocol.tcp
+    reserved_833 = 833, 'reserved'
 
     #: - [TCP] dhcp-failover 2
     #: - [UDP] dhcp-failover 2
-    dhcp_failover2 = 847, 'dhcp-failover2', TransportProtocol.tcp
+    dhcp_failover2 = 847, 'dhcp-failover2'
 
     #: - [TCP] GDOI [:rfc:`3547`]
     #: - [UDP] GDOI [:rfc:`3547`]
-    gdoi = 848, 'gdoi', TransportProtocol.tcp
+    gdoi = 848
 
     #: - [TCP] DNS query-response protocol run over TLS [:rfc:`7858`]
     #: - [UDP] DNS query-response protocol run over DTLS or QUIC
     #:   [:rfc:`7858`][:rfc:`8094`][:rfc:`9250`]
-    domain_s = 853, 'domain-s', TransportProtocol.tcp
+    domain_s = 853, 'domain-s'
 
     #: - [TCP] Dynamic Link Exchange Protocol (DLEP) [:rfc:`8175`]
     #: - [UDP] Dynamic Link Exchange Protocol (DLEP) [:rfc:`8175`]
-    dlep = 854, 'dlep', TransportProtocol.tcp
+    dlep = 854
 
     #: - [TCP] iSCSI [:rfc:`7143`]
     #: - [UDP] iSCSI [:rfc:`7143`]
-    iscsi = 860, 'iscsi', TransportProtocol.tcp
+    iscsi = 860
 
     #: [TCP] OWAMP-Control [:rfc:`4656`]
-    owamp_control = 861, 'owamp-control', TransportProtocol.tcp
+    owamp_control = 861, 'owamp-control'
 
     #: [TCP] TWAMP-Control [:rfc:`5357`]
-    twamp_control = 862, 'twamp-control', TransportProtocol.tcp
+    twamp_control = 862, 'twamp-control'
 
     #: - [TCP] rsync
     #: - [UDP] rsync
-    rsync = 873, 'rsync', TransportProtocol.tcp
+    rsync = 873
 
     #: - [TCP] ICL coNETion locate server
     #: - [UDP] ICL coNETion locate server
-    iclcnet_locate = 886, 'iclcnet-locate', TransportProtocol.tcp
+    iclcnet_locate = 886, 'iclcnet-locate'
 
     #: - [TCP] ICL coNETion server info IANA assigned this well-formed service name
     #:   as a replacement for "iclcnet_svinfo".
@@ -3717,282 +3717,282 @@ class TCP(AppType):
     #: - [UDP] ICL coNETion server info IANA assigned this well-formed service name
     #:   as a replacement for "iclcnet_svinfo".
     #: - [UDP] ICL coNETion server info
-    iclcnet_svinfo = 887, 'iclcnet-svinfo', TransportProtocol.tcp
+    iclcnet_svinfo = 887, 'iclcnet-svinfo'
 
     #: - [TCP] AccessBuilder
     #: - [UDP] AccessBuilder
-    accessbuilder = 888, 'accessbuilder', TransportProtocol.tcp
+    accessbuilder = 888
 
     #: [TCP] CD Database Protocol
-    cddbp = 888, 'cddbp', TransportProtocol.tcp
+    cddbp = 888
 
     #: - [TCP] OMG Initial Refs
     #: - [UDP] OMG Initial Refs
-    omginitialrefs = 900, 'omginitialrefs', TransportProtocol.tcp
+    omginitialrefs = 900
 
     #: - [TCP] SMPNAMERES
     #: - [UDP] SMPNAMERES
-    smpnameres = 901, 'smpnameres', TransportProtocol.tcp
+    smpnameres = 901
 
     #: - [TCP] self documenting Telnet Door
     #: - [UDP] self documenting Door: send 0x00 for info
-    ideafarm_door = 902, 'ideafarm-door', TransportProtocol.tcp
+    ideafarm_door = 902, 'ideafarm-door'
 
     #: - [TCP] self documenting Telnet Panic Door
     #: - [UDP] self documenting Panic Door: send 0x00 for info
-    ideafarm_panic = 903, 'ideafarm-panic', TransportProtocol.tcp
+    ideafarm_panic = 903, 'ideafarm-panic'
 
     #: - [TCP] Kerberized Internet Negotiation of Keys (KINK) [:rfc:`4430`]
     #: - [UDP] Kerberized Internet Negotiation of Keys (KINK) [:rfc:`4430`]
-    kink = 910, 'kink', TransportProtocol.tcp
+    kink = 910
 
     #: - [TCP] xact-backup
     #: - [UDP] xact-backup
-    xact_backup = 911, 'xact-backup', TransportProtocol.tcp
+    xact_backup = 911, 'xact-backup'
 
     #: - [TCP] APEX relay-relay service
     #: - [UDP] APEX relay-relay service
-    apex_mesh = 912, 'apex-mesh', TransportProtocol.tcp
+    apex_mesh = 912, 'apex-mesh'
 
     #: - [TCP] APEX endpoint-relay service [:rfc:`3340`]
     #: - [UDP] APEX endpoint-relay service [:rfc:`3340`]
-    apex_edge = 913, 'apex-edge', TransportProtocol.tcp
+    apex_edge = 913, 'apex-edge'
 
     #: [TCP] Reserved
-    reserved_914 = 914, 'reserved', TransportProtocol.tcp
+    reserved_914 = 914, 'reserved'
 
     #: [TCP] Reserved
-    reserved_915 = 915, 'reserved', TransportProtocol.tcp
+    reserved_915 = 915, 'reserved'
 
     #: [TCP] BIND9 remote name daemon controller
-    rndc = 953, 'rndc', TransportProtocol.tcp
+    rndc = 953
 
     #: - [TCP] ftp protocol, data, over TLS/SSL
     #: - [UDP] ftp protocol, data, over TLS/SSL
-    ftps_data = 989, 'ftps-data', TransportProtocol.tcp
+    ftps_data = 989, 'ftps-data'
 
     #: - [TCP] ftp protocol, control, over TLS/SSL
     #: - [UDP] ftp protocol, control, over TLS/SSL
-    ftps = 990, 'ftps', TransportProtocol.tcp
+    ftps = 990
 
     #: - [TCP] Netnews Administration System [:rfc:`4707`]
     #: - [UDP] Netnews Administration System [:rfc:`4707`]
-    nas = 991, 'nas', TransportProtocol.tcp
+    nas = 991
 
     #: - [TCP] telnet protocol over TLS/SSL
     #: - [UDP] telnet protocol over TLS/SSL
-    telnets = 992, 'telnets', TransportProtocol.tcp
+    telnets = 992
 
     #: [TCP] IMAP over TLS protocol [:rfc:`3501`][:rfc:`8314`][:rfc:`9051`]
-    imaps = 993, 'imaps', TransportProtocol.tcp
+    imaps = 993
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_994 = 994, 'reserved', TransportProtocol.tcp
+    reserved_994 = 994, 'reserved'
 
     #: - [TCP] POP3 over TLS protocol [:rfc:`8314`]
     #: - [UDP] pop3 protocol over TLS/SSL (was spop3)
-    pop3s = 995, 'pop3s', TransportProtocol.tcp
+    pop3s = 995
 
     #: - [TCP] vsinet
     #: - [UDP] vsinet
-    vsinet = 996, 'vsinet', TransportProtocol.tcp
+    vsinet = 996
 
     #: - [TCP]
     #: - [UDP]
-    maitrd = 997, 'maitrd', TransportProtocol.tcp
+    maitrd = 997
 
     #: [TCP]
-    busboy = 998, 'busboy', TransportProtocol.tcp
+    busboy = 998
 
     #: [TCP]
-    garcon = 999, 'garcon', TransportProtocol.tcp
+    garcon = 999
 
     #: - [TCP]
     #: - [UDP]
-    puprouter = 999, 'puprouter', TransportProtocol.tcp
+    puprouter = 999
 
     #: - [TCP]
     #: - [UDP]
-    cadlock2 = 1000, 'cadlock2', TransportProtocol.tcp
+    cadlock2 = 1000
 
     #: [TCP] HTTP Web Push [:rfc:`8030`]
-    webpush = 1001, 'webpush', TransportProtocol.tcp
+    webpush = 1001
 
     #: - [TCP] surf
     #: - [UDP] surf
-    surf = 1010, 'surf', TransportProtocol.tcp
+    surf = 1010
 
     #: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    exp1 = 1021, 'exp1', TransportProtocol.tcp
+    exp1 = 1021
 
     #: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    exp2 = 1022, 'exp2', TransportProtocol.tcp
+    exp2 = 1022
 
     #: - [TCP] Reserved [:rfc:`6335`]
     #: - [UDP] Reserved [:rfc:`6335`]
-    reserved_1023 = 1023, 'reserved', TransportProtocol.tcp
+    reserved_1023 = 1023, 'reserved'
 
     #: - [TCP] Reserved [:rfc:`6335`]
     #: - [UDP] Reserved [:rfc:`6335`]
-    reserved_1024 = 1024, 'reserved', TransportProtocol.tcp
+    reserved_1024 = 1024, 'reserved'
 
     #: - [TCP] network blackjack
     #: - [UDP] network blackjack
-    blackjack = 1025, 'blackjack', TransportProtocol.tcp
+    blackjack = 1025
 
     #: - [TCP] Calendar Access Protocol
     #: - [UDP] Calendar Access Protocol
-    cap = 1026, 'cap', TransportProtocol.tcp
+    cap = 1026
 
     #: [TCP] Reserved
-    reserved_1027 = 1027, 'reserved', TransportProtocol.tcp
+    reserved_1027 = 1027, 'reserved'
 
     #: - [TCP] Solid Mux Server
     #: - [UDP] Solid Mux Server
-    solid_mux = 1029, 'solid-mux', TransportProtocol.tcp
+    solid_mux = 1029, 'solid-mux'
 
     #: - [TCP] local netinfo port
     #: - [UDP] local netinfo port
-    netinfo_local = 1033, 'netinfo-local', TransportProtocol.tcp
+    netinfo_local = 1033, 'netinfo-local'
 
     #: - [TCP] ActiveSync Notifications
     #: - [UDP] ActiveSync Notifications
-    activesync = 1034, 'activesync', TransportProtocol.tcp
+    activesync = 1034
 
     #: - [TCP] MX-XR RPC
     #: - [UDP] MX-XR RPC
-    mxxrlogin = 1035, 'mxxrlogin', TransportProtocol.tcp
+    mxxrlogin = 1035
 
     #: - [TCP] Nebula Secure Segment Transfer Protocol
     #: - [UDP] Nebula Secure Segment Transfer Protocol
-    nsstp = 1036, 'nsstp', TransportProtocol.tcp
+    nsstp = 1036
 
     #: - [TCP] AMS
     #: - [UDP] AMS
-    ams = 1037, 'ams', TransportProtocol.tcp
+    ams = 1037
 
     #: - [TCP] Message Tracking Query Protocol [:rfc:`3887`]
     #: - [UDP] Message Tracking Query Protocol [:rfc:`3887`]
-    mtqp = 1038, 'mtqp', TransportProtocol.tcp
+    mtqp = 1038
 
     #: - [TCP] Streamlined Blackhole
     #: - [UDP] Streamlined Blackhole
-    sbl = 1039, 'sbl', TransportProtocol.tcp
+    sbl = 1039
 
     #: - [TCP] Netarx Netcare
     #: - [UDP] Netarx Netcare
-    netarx = 1040, 'netarx', TransportProtocol.tcp
+    netarx = 1040
 
     #: - [TCP] AK2 Product
     #: - [UDP] AK2 Product
-    danf_ak2 = 1041, 'danf-ak2', TransportProtocol.tcp
+    danf_ak2 = 1041, 'danf-ak2'
 
     #: - [TCP] Subnet Roaming
     #: - [UDP] Subnet Roaming
-    afrog = 1042, 'afrog', TransportProtocol.tcp
+    afrog = 1042
 
     #: - [TCP] BOINC Client Control
     #: - [UDP] BOINC Client Control
-    boinc_client = 1043, 'boinc-client', TransportProtocol.tcp
+    boinc_client = 1043, 'boinc-client'
 
     #: - [TCP] Dev Consortium Utility
     #: - [UDP] Dev Consortium Utility
-    dcutility = 1044, 'dcutility', TransportProtocol.tcp
+    dcutility = 1044
 
     #: - [TCP] Fingerprint Image Transfer Protocol
     #: - [UDP] Fingerprint Image Transfer Protocol
-    fpitp = 1045, 'fpitp', TransportProtocol.tcp
+    fpitp = 1045
 
     #: - [TCP] WebFilter Remote Monitor
     #: - [UDP] WebFilter Remote Monitor
-    wfremotertm = 1046, 'wfremotertm', TransportProtocol.tcp
+    wfremotertm = 1046
 
     #: - [TCP] Sun's NEO Object Request Broker
     #: - [UDP] Sun's NEO Object Request Broker
-    neod1 = 1047, 'neod1', TransportProtocol.tcp
+    neod1 = 1047
 
     #: - [TCP] Sun's NEO Object Request Broker
     #: - [UDP] Sun's NEO Object Request Broker
-    neod2 = 1048, 'neod2', TransportProtocol.tcp
+    neod2 = 1048
 
     #: - [TCP] Tobit David Postman VPMN
     #: - [UDP] Tobit David Postman VPMN
-    td_postman = 1049, 'td-postman', TransportProtocol.tcp
+    td_postman = 1049, 'td-postman'
 
     #: - [TCP] CORBA Management Agent
     #: - [UDP] CORBA Management Agent
-    cma = 1050, 'cma', TransportProtocol.tcp
+    cma = 1050
 
     #: - [TCP] Optima VNET
     #: - [UDP] Optima VNET
-    optima_vnet = 1051, 'optima-vnet', TransportProtocol.tcp
+    optima_vnet = 1051, 'optima-vnet'
 
     #: - [TCP] Dynamic DNS Tools
     #: - [UDP] Dynamic DNS Tools
-    ddt = 1052, 'ddt', TransportProtocol.tcp
+    ddt = 1052
 
     #: - [TCP] Remote Assistant (RA)
     #: - [UDP] Remote Assistant (RA)
-    remote_as = 1053, 'remote-as', TransportProtocol.tcp
+    remote_as = 1053, 'remote-as'
 
     #: - [TCP] BRVREAD
     #: - [UDP] BRVREAD
-    brvread = 1054, 'brvread', TransportProtocol.tcp
+    brvread = 1054
 
     #: - [TCP] ANSYS - License Manager
     #: - [UDP] ANSYS - License Manager
-    ansyslmd = 1055, 'ansyslmd', TransportProtocol.tcp
+    ansyslmd = 1055
 
     #: - [TCP] VFO
     #: - [UDP] VFO
-    vfo = 1056, 'vfo', TransportProtocol.tcp
+    vfo = 1056
 
     #: - [TCP] STARTRON
     #: - [UDP] STARTRON
-    startron = 1057, 'startron', TransportProtocol.tcp
+    startron = 1057
 
     #: - [TCP] nim
     #: - [UDP] nim
-    nim = 1058, 'nim', TransportProtocol.tcp
+    nim = 1058
 
     #: - [TCP] nimreg
     #: - [UDP] nimreg
-    nimreg = 1059, 'nimreg', TransportProtocol.tcp
+    nimreg = 1059
 
     #: - [TCP] POLESTAR
     #: - [UDP] POLESTAR
-    polestar = 1060, 'polestar', TransportProtocol.tcp
+    polestar = 1060
 
     #: - [TCP] KIOSK
     #: - [UDP] KIOSK
-    kiosk = 1061, 'kiosk', TransportProtocol.tcp
+    kiosk = 1061
 
     #: - [TCP] Veracity
     #: - [UDP] Veracity
-    veracity = 1062, 'veracity', TransportProtocol.tcp
+    veracity = 1062
 
     #: - [TCP] KyoceraNetDev
     #: - [UDP] KyoceraNetDev
-    kyoceranetdev = 1063, 'kyoceranetdev', TransportProtocol.tcp
+    kyoceranetdev = 1063
 
     #: - [TCP] JSTEL
     #: - [UDP] JSTEL
-    jstel = 1064, 'jstel', TransportProtocol.tcp
+    jstel = 1064
 
     #: - [TCP] SYSCOMLAN
     #: - [UDP] SYSCOMLAN
-    syscomlan = 1065, 'syscomlan', TransportProtocol.tcp
+    syscomlan = 1065
 
     #: - [TCP] FPO-FNS
     #: - [UDP] FPO-FNS
-    fpo_fns = 1066, 'fpo-fns', TransportProtocol.tcp
+    fpo_fns = 1066, 'fpo-fns'
 
     #: - [TCP] Installation Bootstrap Proto. Serv. IANA assigned this well-formed
     #:   service name as a replacement for "instl_boots".
@@ -4000,7 +4000,7 @@ class TCP(AppType):
     #: - [UDP] Installation Bootstrap Proto. Serv. IANA assigned this well-formed
     #:   service name as a replacement for "instl_boots".
     #: - [UDP] Installation Bootstrap Proto. Serv.
-    instl_boots = 1067, 'instl-boots', TransportProtocol.tcp
+    instl_boots = 1067, 'instl-boots'
 
     #: - [TCP] Installation Bootstrap Proto. Cli. IANA assigned this well-formed
     #:   service name as a replacement for "instl_bootc".
@@ -4008,279 +4008,279 @@ class TCP(AppType):
     #: - [UDP] Installation Bootstrap Proto. Cli. IANA assigned this well-formed
     #:   service name as a replacement for "instl_bootc".
     #: - [UDP] Installation Bootstrap Proto. Cli.
-    instl_bootc = 1068, 'instl-bootc', TransportProtocol.tcp
+    instl_bootc = 1068, 'instl-bootc'
 
     #: - [TCP] COGNEX-INSIGHT
     #: - [UDP] COGNEX-INSIGHT
-    cognex_insight = 1069, 'cognex-insight', TransportProtocol.tcp
+    cognex_insight = 1069, 'cognex-insight'
 
     #: - [TCP] GMRUpdateSERV
     #: - [UDP] GMRUpdateSERV
-    gmrupdateserv = 1070, 'gmrupdateserv', TransportProtocol.tcp
+    gmrupdateserv = 1070
 
     #: - [TCP] BSQUARE-VOIP
     #: - [UDP] BSQUARE-VOIP
-    bsquare_voip = 1071, 'bsquare-voip', TransportProtocol.tcp
+    bsquare_voip = 1071, 'bsquare-voip'
 
     #: - [TCP] CARDAX
     #: - [UDP] CARDAX
-    cardax = 1072, 'cardax', TransportProtocol.tcp
+    cardax = 1072
 
     #: - [TCP] Bridge Control
     #: - [UDP] Bridge Control
-    bridgecontrol = 1073, 'bridgecontrol', TransportProtocol.tcp
+    bridgecontrol = 1073
 
     #: - [TCP] Warmspot Management Protocol
     #: - [UDP] Warmspot Management Protocol
-    warmspotmgmt = 1074, 'warmspotmgmt', TransportProtocol.tcp
+    warmspotmgmt = 1074
 
     #: - [TCP] RDRMSHC
     #: - [UDP] RDRMSHC
-    rdrmshc = 1075, 'rdrmshc', TransportProtocol.tcp
+    rdrmshc = 1075
 
     #: - [TCP] DAB STI-C
     #: - [UDP] DAB STI-C
-    dab_sti_c = 1076, 'dab-sti-c', TransportProtocol.tcp
+    dab_sti_c = 1076, 'dab-sti-c'
 
     #: - [TCP] IMGames
     #: - [UDP] IMGames
-    imgames = 1077, 'imgames', TransportProtocol.tcp
+    imgames = 1077
 
     #: - [TCP] Avocent Proxy Protocol
     #: - [UDP] Avocent Proxy Protocol
-    avocent_proxy = 1078, 'avocent-proxy', TransportProtocol.tcp
+    avocent_proxy = 1078, 'avocent-proxy'
 
     #: - [TCP] ASPROVATalk
     #: - [UDP] ASPROVATalk
-    asprovatalk = 1079, 'asprovatalk', TransportProtocol.tcp
+    asprovatalk = 1079
 
     #: - [TCP] Socks
     #: - [UDP] Socks
-    socks = 1080, 'socks', TransportProtocol.tcp
+    socks = 1080
 
     #: - [TCP] PVUNIWIEN
     #: - [UDP] PVUNIWIEN
-    pvuniwien = 1081, 'pvuniwien', TransportProtocol.tcp
+    pvuniwien = 1081
 
     #: - [TCP] AMT-ESD-PROT
     #: - [UDP] AMT-ESD-PROT
-    amt_esd_prot = 1082, 'amt-esd-prot', TransportProtocol.tcp
+    amt_esd_prot = 1082, 'amt-esd-prot'
 
     #: - [TCP] Anasoft License Manager
     #: - [UDP] Anasoft License Manager
-    ansoft_lm_1 = 1083, 'ansoft-lm-1', TransportProtocol.tcp
+    ansoft_lm_1 = 1083, 'ansoft-lm-1'
 
     #: - [TCP] Anasoft License Manager
     #: - [UDP] Anasoft License Manager
-    ansoft_lm_2 = 1084, 'ansoft-lm-2', TransportProtocol.tcp
+    ansoft_lm_2 = 1084, 'ansoft-lm-2'
 
     #: - [TCP] Web Objects
     #: - [UDP] Web Objects
-    webobjects = 1085, 'webobjects', TransportProtocol.tcp
+    webobjects = 1085
 
     #: - [TCP] CPL Scrambler Logging
     #: - [UDP] CPL Scrambler Logging
-    cplscrambler_lg = 1086, 'cplscrambler-lg', TransportProtocol.tcp
+    cplscrambler_lg = 1086, 'cplscrambler-lg'
 
     #: - [TCP] CPL Scrambler Internal
     #: - [UDP] CPL Scrambler Internal
-    cplscrambler_in = 1087, 'cplscrambler-in', TransportProtocol.tcp
+    cplscrambler_in = 1087, 'cplscrambler-in'
 
     #: - [TCP] CPL Scrambler Alarm Log
     #: - [UDP] CPL Scrambler Alarm Log
-    cplscrambler_al = 1088, 'cplscrambler-al', TransportProtocol.tcp
+    cplscrambler_al = 1088, 'cplscrambler-al'
 
     #: - [TCP] FF Annunciation
     #: - [UDP] FF Annunciation
-    ff_annunc = 1089, 'ff-annunc', TransportProtocol.tcp
+    ff_annunc = 1089, 'ff-annunc'
 
     #: - [TCP] FF Fieldbus Message Specification
     #: - [UDP] FF Fieldbus Message Specification
-    ff_fms = 1090, 'ff-fms', TransportProtocol.tcp
+    ff_fms = 1090, 'ff-fms'
 
     #: - [TCP] FF System Management
     #: - [UDP] FF System Management
-    ff_sm = 1091, 'ff-sm', TransportProtocol.tcp
+    ff_sm = 1091, 'ff-sm'
 
     #: - [TCP] Open Business Reporting Protocol
     #: - [UDP] Open Business Reporting Protocol
-    obrpd = 1092, 'obrpd', TransportProtocol.tcp
+    obrpd = 1092
 
     #: - [TCP] PROOFD
     #: - [UDP] PROOFD
-    proofd = 1093, 'proofd', TransportProtocol.tcp
+    proofd = 1093
 
     #: - [TCP] ROOTD
     #: - [UDP] ROOTD
-    rootd = 1094, 'rootd', TransportProtocol.tcp
+    rootd = 1094
 
     #: - [TCP] NICELink
     #: - [UDP] NICELink
-    nicelink = 1095, 'nicelink', TransportProtocol.tcp
+    nicelink = 1095
 
     #: - [TCP] Common Name Resolution Protocol
     #: - [UDP] Common Name Resolution Protocol
-    cnrprotocol = 1096, 'cnrprotocol', TransportProtocol.tcp
+    cnrprotocol = 1096
 
     #: - [TCP] Sun Cluster Manager
     #: - [UDP] Sun Cluster Manager
-    sunclustermgr = 1097, 'sunclustermgr', TransportProtocol.tcp
+    sunclustermgr = 1097
 
     #: - [TCP] RMI Activation
     #: - [UDP] RMI Activation
-    rmiactivation = 1098, 'rmiactivation', TransportProtocol.tcp
+    rmiactivation = 1098
 
     #: - [TCP] RMI Registry
     #: - [UDP] RMI Registry
-    rmiregistry = 1099, 'rmiregistry', TransportProtocol.tcp
+    rmiregistry = 1099
 
     #: - [TCP] MCTP
     #: - [UDP] MCTP
-    mctp = 1100, 'mctp', TransportProtocol.tcp
+    mctp = 1100
 
     #: - [TCP] PT2-DISCOVER
     #: - [UDP] PT2-DISCOVER
-    pt2_discover = 1101, 'pt2-discover', TransportProtocol.tcp
+    pt2_discover = 1101, 'pt2-discover'
 
     #: - [TCP] ADOBE SERVER 1
     #: - [UDP] ADOBE SERVER 1
-    adobeserver_1 = 1102, 'adobeserver-1', TransportProtocol.tcp
+    adobeserver_1 = 1102, 'adobeserver-1'
 
     #: - [TCP] ADOBE SERVER 2
     #: - [UDP] ADOBE SERVER 2
-    adobeserver_2 = 1103, 'adobeserver-2', TransportProtocol.tcp
+    adobeserver_2 = 1103, 'adobeserver-2'
 
     #: - [TCP] XRL
     #: - [UDP] XRL
-    xrl = 1104, 'xrl', TransportProtocol.tcp
+    xrl = 1104
 
     #: - [TCP] FTRANHC
     #: - [UDP] FTRANHC
-    ftranhc = 1105, 'ftranhc', TransportProtocol.tcp
+    ftranhc = 1105
 
     #: - [TCP] ISOIPSIGPORT-1
     #: - [UDP] ISOIPSIGPORT-1
-    isoipsigport_1 = 1106, 'isoipsigport-1', TransportProtocol.tcp
+    isoipsigport_1 = 1106, 'isoipsigport-1'
 
     #: - [TCP] ISOIPSIGPORT-2
     #: - [UDP] ISOIPSIGPORT-2
-    isoipsigport_2 = 1107, 'isoipsigport-2', TransportProtocol.tcp
+    isoipsigport_2 = 1107, 'isoipsigport-2'
 
     #: - [TCP] ratio-adp
     #: - [UDP] ratio-adp
-    ratio_adp = 1108, 'ratio-adp', TransportProtocol.tcp
+    ratio_adp = 1108, 'ratio-adp'
 
     #: [TCP] Start web admin server
-    webadmstart = 1110, 'webadmstart', TransportProtocol.tcp
+    webadmstart = 1110
 
     #: - [TCP] LM Social Server
     #: - [UDP] LM Social Server
-    lmsocialserver = 1111, 'lmsocialserver', TransportProtocol.tcp
+    lmsocialserver = 1111
 
     #: - [TCP] Intelligent Communication Protocol
     #: - [UDP] Intelligent Communication Protocol
-    icp = 1112, 'icp', TransportProtocol.tcp
+    icp = 1112
 
     #: - [TCP] Licklider Transmission Protocol [:rfc:`5326`]
     #: - [UDP] Licklider Transmission Protocol [:rfc:`5326`][:rfc:`7122`]
     #: - [DCCP] Licklider Transmission Protocol [:rfc:`7122`]
-    ltp_deepspace = 1113, 'ltp-deepspace', TransportProtocol.tcp
+    ltp_deepspace = 1113, 'ltp-deepspace'
 
     #: - [TCP] Mini SQL
     #: - [UDP] Mini SQL
-    mini_sql = 1114, 'mini-sql', TransportProtocol.tcp
+    mini_sql = 1114, 'mini-sql'
 
     #: - [TCP] ARDUS Transfer
     #: - [UDP] ARDUS Transfer
-    ardus_trns = 1115, 'ardus-trns', TransportProtocol.tcp
+    ardus_trns = 1115, 'ardus-trns'
 
     #: - [TCP] ARDUS Control
     #: - [UDP] ARDUS Control
-    ardus_cntl = 1116, 'ardus-cntl', TransportProtocol.tcp
+    ardus_cntl = 1116, 'ardus-cntl'
 
     #: - [TCP] ARDUS Multicast Transfer
     #: - [UDP] ARDUS Multicast Transfer
-    ardus_mtrns = 1117, 'ardus-mtrns', TransportProtocol.tcp
+    ardus_mtrns = 1117, 'ardus-mtrns'
 
     #: - [TCP] SACRED [:rfc:`3767`]
     #: - [UDP] SACRED [:rfc:`3767`]
-    sacred = 1118, 'sacred', TransportProtocol.tcp
+    sacred = 1118
 
     #: - [TCP] Battle.net Chat/Game Protocol
     #: - [UDP] Battle.net Chat/Game Protocol
-    bnetgame = 1119, 'bnetgame', TransportProtocol.tcp
+    bnetgame = 1119
 
     #: - [TCP] Battle.net File Transfer Protocol
     #: - [UDP] Battle.net File Transfer Protocol
-    bnetfile = 1120, 'bnetfile', TransportProtocol.tcp
+    bnetfile = 1120
 
     #: - [TCP] Datalode RMPP
     #: - [UDP] Datalode RMPP
-    rmpp = 1121, 'rmpp', TransportProtocol.tcp
+    rmpp = 1121
 
     #: - [TCP] availant-mgr
     #: - [UDP] availant-mgr
-    availant_mgr = 1122, 'availant-mgr', TransportProtocol.tcp
+    availant_mgr = 1122, 'availant-mgr'
 
     #: - [TCP] Murray
     #: - [UDP] Murray
-    murray = 1123, 'murray', TransportProtocol.tcp
+    murray = 1123
 
     #: - [TCP] HP VMM Control
     #: - [UDP] HP VMM Control
-    hpvmmcontrol = 1124, 'hpvmmcontrol', TransportProtocol.tcp
+    hpvmmcontrol = 1124
 
     #: - [TCP] HP VMM Agent
     #: - [UDP] HP VMM Agent
-    hpvmmagent = 1125, 'hpvmmagent', TransportProtocol.tcp
+    hpvmmagent = 1125
 
     #: - [TCP] HP VMM Agent
     #: - [UDP] HP VMM Agent
-    hpvmmdata = 1126, 'hpvmmdata', TransportProtocol.tcp
+    hpvmmdata = 1126
 
     #: - [TCP] KWDB Remote Communication
     #: - [UDP] KWDB Remote Communication
-    kwdb_commn = 1127, 'kwdb-commn', TransportProtocol.tcp
+    kwdb_commn = 1127, 'kwdb-commn'
 
     #: - [TCP] SAPHostControl over SOAP/HTTP
     #: - [UDP] SAPHostControl over SOAP/HTTP
-    saphostctrl = 1128, 'saphostctrl', TransportProtocol.tcp
+    saphostctrl = 1128
 
     #: - [TCP] SAPHostControl over SOAP/HTTPS
     #: - [UDP] SAPHostControl over SOAP/HTTPS
-    saphostctrls = 1129, 'saphostctrls', TransportProtocol.tcp
+    saphostctrls = 1129
 
     #: - [TCP] CAC App Service Protocol
     #: - [UDP] CAC App Service Protocol
-    casp = 1130, 'casp', TransportProtocol.tcp
+    casp = 1130
 
     #: - [TCP] CAC App Service Protocol Encripted
     #: - [UDP] CAC App Service Protocol Encripted
-    caspssl = 1131, 'caspssl', TransportProtocol.tcp
+    caspssl = 1131
 
     #: - [TCP] KVM-via-IP Management Service
     #: - [UDP] KVM-via-IP Management Service
-    kvm_via_ip = 1132, 'kvm-via-ip', TransportProtocol.tcp
+    kvm_via_ip = 1132, 'kvm-via-ip'
 
     #: - [TCP] Data Flow Network
     #: - [UDP] Data Flow Network
-    dfn = 1133, 'dfn', TransportProtocol.tcp
+    dfn = 1133
 
     #: - [TCP] MicroAPL APLX
     #: - [UDP] MicroAPL APLX
-    aplx = 1134, 'aplx', TransportProtocol.tcp
+    aplx = 1134
 
     #: - [TCP] OmniVision Communication Service
     #: - [UDP] OmniVision Communication Service
-    omnivision = 1135, 'omnivision', TransportProtocol.tcp
+    omnivision = 1135
 
     #: - [TCP] HHB Gateway Control
     #: - [UDP] HHB Gateway Control
-    hhb_gateway = 1136, 'hhb-gateway', TransportProtocol.tcp
+    hhb_gateway = 1136, 'hhb-gateway'
 
     #: - [TCP] TRIM Workgroup Service
     #: - [UDP] TRIM Workgroup Service
-    trim = 1137, 'trim', TransportProtocol.tcp
+    trim = 1137
 
     #: - [TCP] encrypted admin requests IANA assigned this well-formed service name
     #:   as a replacement for "encrypted_admin".
@@ -4288,703 +4288,703 @@ class TCP(AppType):
     #: - [UDP] encrypted admin requests IANA assigned this well-formed service name
     #:   as a replacement for "encrypted_admin".
     #: - [UDP] encrypted admin requests
-    encrypted_admin = 1138, 'encrypted-admin', TransportProtocol.tcp
+    encrypted_admin = 1138, 'encrypted-admin'
 
     #: - [TCP] Enterprise Virtual Manager
     #: - [UDP] Enterprise Virtual Manager
-    evm = 1139, 'evm', TransportProtocol.tcp
+    evm = 1139
 
     #: - [TCP] AutoNOC Network Operations Protocol
     #: - [UDP] AutoNOC Network Operations Protocol
-    autonoc = 1140, 'autonoc', TransportProtocol.tcp
+    autonoc = 1140
 
     #: - [TCP] User Message Service
     #: - [UDP] User Message Service
-    mxomss = 1141, 'mxomss', TransportProtocol.tcp
+    mxomss = 1141
 
     #: - [TCP] User Discovery Service
     #: - [UDP] User Discovery Service
-    edtools = 1142, 'edtools', TransportProtocol.tcp
+    edtools = 1142
 
     #: - [TCP] Infomatryx Exchange
     #: - [UDP] Infomatryx Exchange
-    imyx = 1143, 'imyx', TransportProtocol.tcp
+    imyx = 1143
 
     #: - [TCP] Fusion Script
     #: - [UDP] Fusion Script
-    fuscript = 1144, 'fuscript', TransportProtocol.tcp
+    fuscript = 1144
 
     #: - [TCP] X9 iCue Show Control
     #: - [UDP] X9 iCue Show Control
-    x9_icue = 1145, 'x9-icue', TransportProtocol.tcp
+    x9_icue = 1145, 'x9-icue'
 
     #: - [TCP] audit transfer
     #: - [UDP] audit transfer
-    audit_transfer = 1146, 'audit-transfer', TransportProtocol.tcp
+    audit_transfer = 1146, 'audit-transfer'
 
     #: - [TCP] CAPIoverLAN
     #: - [UDP] CAPIoverLAN
-    capioverlan = 1147, 'capioverlan', TransportProtocol.tcp
+    capioverlan = 1147
 
     #: - [TCP] Elfiq Replication Service
     #: - [UDP] Elfiq Replication Service
-    elfiq_repl = 1148, 'elfiq-repl', TransportProtocol.tcp
+    elfiq_repl = 1148, 'elfiq-repl'
 
     #: - [TCP] BlueView Sonar Service
     #: - [UDP] BlueView Sonar Service
-    bvtsonar = 1149, 'bvtsonar', TransportProtocol.tcp
+    bvtsonar = 1149
 
     #: - [TCP] Blaze File Server
     #: - [UDP] Blaze File Server
-    blaze = 1150, 'blaze', TransportProtocol.tcp
+    blaze = 1150
 
     #: - [TCP] Unizensus Login Server
     #: - [UDP] Unizensus Login Server
-    unizensus = 1151, 'unizensus', TransportProtocol.tcp
+    unizensus = 1151
 
     #: - [TCP] Winpopup LAN Messenger
     #: - [UDP] Winpopup LAN Messenger
-    winpoplanmess = 1152, 'winpoplanmess', TransportProtocol.tcp
+    winpoplanmess = 1152
 
     #: - [TCP] ANSI C12.22 Port [:rfc:`6142`]
     #: - [UDP] ANSI C12.22 Port [:rfc:`6142`]
-    c1222_acse = 1153, 'c1222-acse', TransportProtocol.tcp
+    c1222_acse = 1153, 'c1222-acse'
 
     #: - [TCP] Community Service
     #: - [UDP] Community Service
-    resacommunity = 1154, 'resacommunity', TransportProtocol.tcp
+    resacommunity = 1154
 
     #: - [TCP] Network File Access
     #: - [UDP] Network File Access
-    nfa = 1155, 'nfa', TransportProtocol.tcp
+    nfa = 1155
 
     #: - [TCP] iasControl OMS
     #: - [UDP] iasControl OMS
-    iascontrol_oms = 1156, 'iascontrol-oms', TransportProtocol.tcp
+    iascontrol_oms = 1156, 'iascontrol-oms'
 
     #: - [TCP] Oracle iASControl
     #: - [UDP] Oracle iASControl
-    iascontrol = 1157, 'iascontrol', TransportProtocol.tcp
+    iascontrol = 1157
 
     #: - [TCP] dbControl OMS
     #: - [UDP] dbControl OMS
-    dbcontrol_oms = 1158, 'dbcontrol-oms', TransportProtocol.tcp
+    dbcontrol_oms = 1158, 'dbcontrol-oms'
 
     #: - [TCP] Oracle OMS
     #: - [UDP] Oracle OMS
-    oracle_oms = 1159, 'oracle-oms', TransportProtocol.tcp
+    oracle_oms = 1159, 'oracle-oms'
 
     #: - [TCP] DB Lite Mult-User Server
     #: - [UDP] DB Lite Mult-User Server
-    olsv = 1160, 'olsv', TransportProtocol.tcp
+    olsv = 1160
 
     #: - [TCP] Health Polling
     #: - [UDP] Health Polling
-    health_polling = 1161, 'health-polling', TransportProtocol.tcp
+    health_polling = 1161, 'health-polling'
 
     #: - [TCP] Health Trap
     #: - [UDP] Health Trap
-    health_trap = 1162, 'health-trap', TransportProtocol.tcp
+    health_trap = 1162, 'health-trap'
 
     #: - [TCP] SmartDialer Data Protocol
     #: - [UDP] SmartDialer Data Protocol
-    sddp = 1163, 'sddp', TransportProtocol.tcp
+    sddp = 1163
 
     #: - [TCP] QSM Proxy Service
     #: - [UDP] QSM Proxy Service
-    qsm_proxy = 1164, 'qsm-proxy', TransportProtocol.tcp
+    qsm_proxy = 1164, 'qsm-proxy'
 
     #: - [TCP] QSM GUI Service
     #: - [UDP] QSM GUI Service
-    qsm_gui = 1165, 'qsm-gui', TransportProtocol.tcp
+    qsm_gui = 1165, 'qsm-gui'
 
     #: - [TCP] QSM RemoteExec
     #: - [UDP] QSM RemoteExec
-    qsm_remote = 1166, 'qsm-remote', TransportProtocol.tcp
+    qsm_remote = 1166, 'qsm-remote'
 
     #: - [TCP] Cisco IP SLAs Control Protocol
     #: - [UDP] Cisco IP SLAs Control Protocol
     #: - [SCTP] Cisco IP SLAs Control Protocol
-    cisco_ipsla = 1167, 'cisco-ipsla', TransportProtocol.tcp
+    cisco_ipsla = 1167, 'cisco-ipsla'
 
     #: - [TCP] VChat Conference Service
     #: - [UDP] VChat Conference Service
-    vchat = 1168, 'vchat', TransportProtocol.tcp
+    vchat = 1168
 
     #: - [TCP] TRIPWIRE
     #: - [UDP] TRIPWIRE
-    tripwire = 1169, 'tripwire', TransportProtocol.tcp
+    tripwire = 1169
 
     #: - [TCP] AT+C License Manager
     #: - [UDP] AT+C License Manager
-    atc_lm = 1170, 'atc-lm', TransportProtocol.tcp
+    atc_lm = 1170, 'atc-lm'
 
     #: - [TCP] AT+C FmiApplicationServer
     #: - [UDP] AT+C FmiApplicationServer
-    atc_appserver = 1171, 'atc-appserver', TransportProtocol.tcp
+    atc_appserver = 1171, 'atc-appserver'
 
     #: - [TCP] DNA Protocol
     #: - [UDP] DNA Protocol
-    dnap = 1172, 'dnap', TransportProtocol.tcp
+    dnap = 1172
 
     #: - [TCP] D-Cinema Request-Response
     #: - [UDP] D-Cinema Request-Response
-    d_cinema_rrp = 1173, 'd-cinema-rrp', TransportProtocol.tcp
+    d_cinema_rrp = 1173, 'd-cinema-rrp'
 
     #: - [TCP] FlashNet Remote Admin
     #: - [UDP] FlashNet Remote Admin
-    fnet_remote_ui = 1174, 'fnet-remote-ui', TransportProtocol.tcp
+    fnet_remote_ui = 1174, 'fnet-remote-ui'
 
     #: - [TCP] Dossier Server
     #: - [UDP] Dossier Server
-    dossier = 1175, 'dossier', TransportProtocol.tcp
+    dossier = 1175
 
     #: - [TCP] Indigo Home Server
     #: - [UDP] Indigo Home Server
-    indigo_server = 1176, 'indigo-server', TransportProtocol.tcp
+    indigo_server = 1176, 'indigo-server'
 
     #: - [TCP] DKMessenger Protocol
     #: - [UDP] DKMessenger Protocol
-    dkmessenger = 1177, 'dkmessenger', TransportProtocol.tcp
+    dkmessenger = 1177
 
     #: - [TCP] SGI Storage Manager
     #: - [UDP] SGI Storage Manager
-    sgi_storman = 1178, 'sgi-storman', TransportProtocol.tcp
+    sgi_storman = 1178, 'sgi-storman'
 
     #: - [TCP] Backup To Neighbor
     #: - [UDP] Backup To Neighbor
-    b2n = 1179, 'b2n', TransportProtocol.tcp
+    b2n = 1179
 
     #: - [TCP] Millicent Client Proxy
     #: - [UDP] Millicent Client Proxy
-    mc_client = 1180, 'mc-client', TransportProtocol.tcp
+    mc_client = 1180, 'mc-client'
 
     #: - [TCP] 3Com Net Management
     #: - [UDP] 3Com Net Management
-    TCP_3comnetman = 1181, '3comnetman', TransportProtocol.tcp
+    TCP_3comnetman = 1181, '3comnetman'
 
     #: [TCP] AcceleNet Control
-    accelenet = 1182, 'accelenet', TransportProtocol.tcp
+    accelenet = 1182
 
     #: - [TCP] LL Surfup HTTP
     #: - [UDP] LL Surfup HTTP
-    llsurfup_http = 1183, 'llsurfup-http', TransportProtocol.tcp
+    llsurfup_http = 1183, 'llsurfup-http'
 
     #: - [TCP] LL Surfup HTTPS
     #: - [UDP] LL Surfup HTTPS
-    llsurfup_https = 1184, 'llsurfup-https', TransportProtocol.tcp
+    llsurfup_https = 1184, 'llsurfup-https'
 
     #: - [TCP] Catchpole port
     #: - [UDP] Catchpole port
-    catchpole = 1185, 'catchpole', TransportProtocol.tcp
+    catchpole = 1185
 
     #: - [TCP] MySQL Cluster Manager
     #: - [UDP] MySQL Cluster Manager
-    mysql_cluster = 1186, 'mysql-cluster', TransportProtocol.tcp
+    mysql_cluster = 1186, 'mysql-cluster'
 
     #: - [TCP] Alias Service
     #: - [UDP] Alias Service
-    alias = 1187, 'alias', TransportProtocol.tcp
+    alias = 1187
 
     #: - [TCP] HP Web Admin
     #: - [UDP] HP Web Admin
-    hp_webadmin = 1188, 'hp-webadmin', TransportProtocol.tcp
+    hp_webadmin = 1188, 'hp-webadmin'
 
     #: - [TCP] Unet Connection
     #: - [UDP] Unet Connection
-    unet = 1189, 'unet', TransportProtocol.tcp
+    unet = 1189
 
     #: - [TCP] CommLinx GPS / AVL System
     #: - [UDP] CommLinx GPS / AVL System
-    commlinx_avl = 1190, 'commlinx-avl', TransportProtocol.tcp
+    commlinx_avl = 1190, 'commlinx-avl'
 
     #: - [TCP] General Parallel File System
     #: - [UDP] General Parallel File System
-    gpfs = 1191, 'gpfs', TransportProtocol.tcp
+    gpfs = 1191
 
     #: - [TCP] caids sensors channel
     #: - [UDP] caids sensors channel
-    caids_sensor = 1192, 'caids-sensor', TransportProtocol.tcp
+    caids_sensor = 1192, 'caids-sensor'
 
     #: - [TCP] Five Across Server
     #: - [UDP] Five Across Server
-    fiveacross = 1193, 'fiveacross', TransportProtocol.tcp
+    fiveacross = 1193
 
     #: - [TCP] OpenVPN
     #: - [UDP] OpenVPN
-    openvpn = 1194, 'openvpn', TransportProtocol.tcp
+    openvpn = 1194
 
     #: - [TCP] RSF-1 clustering
     #: - [UDP] RSF-1 clustering
-    rsf_1 = 1195, 'rsf-1', TransportProtocol.tcp
+    rsf_1 = 1195, 'rsf-1'
 
     #: - [TCP] Network Magic
     #: - [UDP] Network Magic
-    netmagic = 1196, 'netmagic', TransportProtocol.tcp
+    netmagic = 1196
 
     #: - [TCP] Carrius Remote Access
     #: - [UDP] Carrius Remote Access
-    carrius_rshell = 1197, 'carrius-rshell', TransportProtocol.tcp
+    carrius_rshell = 1197, 'carrius-rshell'
 
     #: - [TCP] cajo reference discovery
     #: - [UDP] cajo reference discovery
-    cajo_discovery = 1198, 'cajo-discovery', TransportProtocol.tcp
+    cajo_discovery = 1198, 'cajo-discovery'
 
     #: - [TCP] DMIDI
     #: - [UDP] DMIDI
-    dmidi = 1199, 'dmidi', TransportProtocol.tcp
+    dmidi = 1199
 
     #: - [TCP] SCOL
     #: - [UDP] SCOL
-    scol = 1200, 'scol', TransportProtocol.tcp
+    scol = 1200
 
     #: - [TCP] Nucleus Sand Database Server
     #: - [UDP] Nucleus Sand Database Server
-    nucleus_sand = 1201, 'nucleus-sand', TransportProtocol.tcp
+    nucleus_sand = 1201, 'nucleus-sand'
 
     #: - [TCP] caiccipc
     #: - [UDP] caiccipc
-    caiccipc = 1202, 'caiccipc', TransportProtocol.tcp
+    caiccipc = 1202
 
     #: - [TCP] License Validation
     #: - [UDP] License Validation
-    ssslic_mgr = 1203, 'ssslic-mgr', TransportProtocol.tcp
+    ssslic_mgr = 1203, 'ssslic-mgr'
 
     #: - [TCP] Log Request Listener
     #: - [UDP] Log Request Listener
-    ssslog_mgr = 1204, 'ssslog-mgr', TransportProtocol.tcp
+    ssslog_mgr = 1204, 'ssslog-mgr'
 
     #: - [TCP] Accord-MGC
     #: - [UDP] Accord-MGC
-    accord_mgc = 1205, 'accord-mgc', TransportProtocol.tcp
+    accord_mgc = 1205, 'accord-mgc'
 
     #: - [TCP] Anthony Data
     #: - [UDP] Anthony Data
-    anthony_data = 1206, 'anthony-data', TransportProtocol.tcp
+    anthony_data = 1206, 'anthony-data'
 
     #: - [TCP] MetaSage
     #: - [UDP] MetaSage
-    metasage = 1207, 'metasage', TransportProtocol.tcp
+    metasage = 1207
 
     #: - [TCP] SEAGULL AIS
     #: - [UDP] SEAGULL AIS
-    seagull_ais = 1208, 'seagull-ais', TransportProtocol.tcp
+    seagull_ais = 1208, 'seagull-ais'
 
     #: - [TCP] IPCD3
     #: - [UDP] IPCD3
-    ipcd3 = 1209, 'ipcd3', TransportProtocol.tcp
+    ipcd3 = 1209
 
     #: - [TCP] EOSS
     #: - [UDP] EOSS
-    eoss = 1210, 'eoss', TransportProtocol.tcp
+    eoss = 1210
 
     #: - [TCP] Groove DPP
     #: - [UDP] Groove DPP
-    groove_dpp = 1211, 'groove-dpp', TransportProtocol.tcp
+    groove_dpp = 1211, 'groove-dpp'
 
     #: - [TCP] lupa
     #: - [UDP] lupa
-    lupa = 1212, 'lupa', TransportProtocol.tcp
+    lupa = 1212
 
     #: - [TCP] Medtronic/Physio-Control LIFENET
     #: - [UDP] Medtronic/Physio-Control LIFENET
-    mpc_lifenet = 1213, 'mpc-lifenet', TransportProtocol.tcp
+    mpc_lifenet = 1213, 'mpc-lifenet'
 
     #: - [TCP] KAZAA
     #: - [UDP] KAZAA
-    kazaa = 1214, 'kazaa', TransportProtocol.tcp
+    kazaa = 1214
 
     #: - [TCP] scanSTAT 1.0
     #: - [UDP] scanSTAT 1.0
-    scanstat_1 = 1215, 'scanstat-1', TransportProtocol.tcp
+    scanstat_1 = 1215, 'scanstat-1'
 
     #: - [TCP] ETEBAC 5
     #: - [UDP] ETEBAC 5
-    etebac5 = 1216, 'etebac5', TransportProtocol.tcp
+    etebac5 = 1216
 
     #: - [TCP] HPSS NonDCE Gateway
     #: - [UDP] HPSS NonDCE Gateway
-    hpss_ndapi = 1217, 'hpss-ndapi', TransportProtocol.tcp
+    hpss_ndapi = 1217, 'hpss-ndapi'
 
     #: - [TCP] AeroFlight-ADs
     #: - [UDP] AeroFlight-ADs
-    aeroflight_ads = 1218, 'aeroflight-ads', TransportProtocol.tcp
+    aeroflight_ads = 1218, 'aeroflight-ads'
 
     #: - [TCP] AeroFlight-Ret
     #: - [UDP] AeroFlight-Ret
-    aeroflight_ret = 1219, 'aeroflight-ret', TransportProtocol.tcp
+    aeroflight_ret = 1219, 'aeroflight-ret'
 
     #: - [TCP] QT SERVER ADMIN
     #: - [UDP] QT SERVER ADMIN
-    qt_serveradmin = 1220, 'qt-serveradmin', TransportProtocol.tcp
+    qt_serveradmin = 1220, 'qt-serveradmin'
 
     #: - [TCP] SweetWARE Apps
     #: - [UDP] SweetWARE Apps
-    sweetware_apps = 1221, 'sweetware-apps', TransportProtocol.tcp
+    sweetware_apps = 1221, 'sweetware-apps'
 
     #: - [TCP] SNI R&D network
     #: - [UDP] SNI R&D network
-    nerv = 1222, 'nerv', TransportProtocol.tcp
+    nerv = 1222
 
     #: - [TCP] TrulyGlobal Protocol
     #: - [UDP] TrulyGlobal Protocol
-    tgp = 1223, 'tgp', TransportProtocol.tcp
+    tgp = 1223
 
     #: - [TCP] VPNz
     #: - [UDP] VPNz
-    vpnz = 1224, 'vpnz', TransportProtocol.tcp
+    vpnz = 1224
 
     #: - [TCP] SLINKYSEARCH
     #: - [UDP] SLINKYSEARCH
-    slinkysearch = 1225, 'slinkysearch', TransportProtocol.tcp
+    slinkysearch = 1225
 
     #: - [TCP] STGXFWS
     #: - [UDP] STGXFWS
-    stgxfws = 1226, 'stgxfws', TransportProtocol.tcp
+    stgxfws = 1226
 
     #: - [TCP] DNS2Go
     #: - [UDP] DNS2Go
-    dns2go = 1227, 'dns2go', TransportProtocol.tcp
+    dns2go = 1227
 
     #: - [TCP] FLORENCE
     #: - [UDP] FLORENCE
-    florence = 1228, 'florence', TransportProtocol.tcp
+    florence = 1228
 
     #: - [TCP] ZENworks Tiered Electronic Distribution
     #: - [UDP] ZENworks Tiered Electronic Distribution
-    zented = 1229, 'zented', TransportProtocol.tcp
+    zented = 1229
 
     #: - [TCP] Periscope
     #: - [UDP] Periscope
-    periscope = 1230, 'periscope', TransportProtocol.tcp
+    periscope = 1230
 
     #: - [TCP] menandmice-lpm
     #: - [UDP] menandmice-lpm
-    menandmice_lpm = 1231, 'menandmice-lpm', TransportProtocol.tcp
+    menandmice_lpm = 1231, 'menandmice-lpm'
 
     #: - [TCP] Remote systems monitoring
     #: - [UDP] Remote systems monitoring
-    first_defense = 1232, 'first-defense', TransportProtocol.tcp
+    first_defense = 1232, 'first-defense'
 
     #: - [TCP] Universal App Server
     #: - [UDP] Universal App Server
-    univ_appserver = 1233, 'univ-appserver', TransportProtocol.tcp
+    univ_appserver = 1233, 'univ-appserver'
 
     #: - [TCP] Infoseek Search Agent
     #: - [UDP] Infoseek Search Agent
-    search_agent = 1234, 'search-agent', TransportProtocol.tcp
+    search_agent = 1234, 'search-agent'
 
     #: - [TCP] mosaicsyssvc1
     #: - [UDP] mosaicsyssvc1
-    mosaicsyssvc1 = 1235, 'mosaicsyssvc1', TransportProtocol.tcp
+    mosaicsyssvc1 = 1235
 
     #: - [TCP] bvcontrol
     #: - [UDP] bvcontrol
-    bvcontrol = 1236, 'bvcontrol', TransportProtocol.tcp
+    bvcontrol = 1236
 
     #: - [TCP] tsdos390
     #: - [UDP] tsdos390
-    tsdos390 = 1237, 'tsdos390', TransportProtocol.tcp
+    tsdos390 = 1237
 
     #: - [TCP] hacl-qs
     #: - [UDP] hacl-qs
-    hacl_qs = 1238, 'hacl-qs', TransportProtocol.tcp
+    hacl_qs = 1238, 'hacl-qs'
 
     #: - [TCP] NMSD
     #: - [UDP] NMSD
-    nmsd = 1239, 'nmsd', TransportProtocol.tcp
+    nmsd = 1239
 
     #: - [TCP] Instantia
     #: - [UDP] Instantia
-    instantia = 1240, 'instantia', TransportProtocol.tcp
+    instantia = 1240
 
     #: - [TCP] nessus
     #: - [UDP] nessus
-    nessus = 1241, 'nessus', TransportProtocol.tcp
+    nessus = 1241
 
     #: - [TCP] NMAS over IP
     #: - [UDP] NMAS over IP
-    nmasoverip = 1242, 'nmasoverip', TransportProtocol.tcp
+    nmasoverip = 1242
 
     #: - [TCP] SerialGateway
     #: - [UDP] SerialGateway
-    serialgateway = 1243, 'serialgateway', TransportProtocol.tcp
+    serialgateway = 1243
 
     #: - [TCP] isbconference1
     #: - [UDP] isbconference1
-    isbconference1 = 1244, 'isbconference1', TransportProtocol.tcp
+    isbconference1 = 1244
 
     #: - [TCP] isbconference2
     #: - [UDP] isbconference2
-    isbconference2 = 1245, 'isbconference2', TransportProtocol.tcp
+    isbconference2 = 1245
 
     #: - [TCP] payrouter
     #: - [UDP] payrouter
-    payrouter = 1246, 'payrouter', TransportProtocol.tcp
+    payrouter = 1246
 
     #: - [TCP] VisionPyramid
     #: - [UDP] VisionPyramid
-    visionpyramid = 1247, 'visionpyramid', TransportProtocol.tcp
+    visionpyramid = 1247
 
     #: - [TCP] hermes
     #: - [UDP] hermes
-    hermes = 1248, 'hermes', TransportProtocol.tcp
+    hermes = 1248
 
     #: - [TCP] Mesa Vista Co
     #: - [UDP] Mesa Vista Co
-    mesavistaco = 1249, 'mesavistaco', TransportProtocol.tcp
+    mesavistaco = 1249
 
     #: - [TCP] swldy-sias
     #: - [UDP] swldy-sias
-    swldy_sias = 1250, 'swldy-sias', TransportProtocol.tcp
+    swldy_sias = 1250, 'swldy-sias'
 
     #: - [TCP] servergraph
     #: - [UDP] servergraph
-    servergraph = 1251, 'servergraph', TransportProtocol.tcp
+    servergraph = 1251
 
     #: - [TCP] bspne-pcc
     #: - [UDP] bspne-pcc
-    bspne_pcc = 1252, 'bspne-pcc', TransportProtocol.tcp
+    bspne_pcc = 1252, 'bspne-pcc'
 
     #: - [TCP] q55-pcc
     #: - [UDP] q55-pcc
-    q55_pcc = 1253, 'q55-pcc', TransportProtocol.tcp
+    q55_pcc = 1253, 'q55-pcc'
 
     #: - [TCP] de-noc
     #: - [UDP] de-noc
-    de_noc = 1254, 'de-noc', TransportProtocol.tcp
+    de_noc = 1254, 'de-noc'
 
     #: - [TCP] de-cache-query
     #: - [UDP] de-cache-query
-    de_cache_query = 1255, 'de-cache-query', TransportProtocol.tcp
+    de_cache_query = 1255, 'de-cache-query'
 
     #: - [TCP] de-server
     #: - [UDP] de-server
-    de_server = 1256, 'de-server', TransportProtocol.tcp
+    de_server = 1256, 'de-server'
 
     #: - [TCP] Shockwave 2
     #: - [UDP] Shockwave 2
-    shockwave2 = 1257, 'shockwave2', TransportProtocol.tcp
+    shockwave2 = 1257
 
     #: - [TCP] Open Network Library
     #: - [UDP] Open Network Library
-    opennl = 1258, 'opennl', TransportProtocol.tcp
+    opennl = 1258
 
     #: - [TCP] Open Network Library Voice
     #: - [UDP] Open Network Library Voice
-    opennl_voice = 1259, 'opennl-voice', TransportProtocol.tcp
+    opennl_voice = 1259, 'opennl-voice'
 
     #: - [TCP] ibm-ssd
     #: - [UDP] ibm-ssd
-    ibm_ssd = 1260, 'ibm-ssd', TransportProtocol.tcp
+    ibm_ssd = 1260, 'ibm-ssd'
 
     #: - [TCP] mpshrsv
     #: - [UDP] mpshrsv
-    mpshrsv = 1261, 'mpshrsv', TransportProtocol.tcp
+    mpshrsv = 1261
 
     #: - [TCP] QNTS-ORB
     #: - [UDP] QNTS-ORB
-    qnts_orb = 1262, 'qnts-orb', TransportProtocol.tcp
+    qnts_orb = 1262, 'qnts-orb'
 
     #: - [TCP] dka
     #: - [UDP] dka
-    dka = 1263, 'dka', TransportProtocol.tcp
+    dka = 1263
 
     #: - [TCP] PRAT
     #: - [UDP] PRAT
-    prat = 1264, 'prat', TransportProtocol.tcp
+    prat = 1264
 
     #: - [TCP] DSSIAPI
     #: - [UDP] DSSIAPI
-    dssiapi = 1265, 'dssiapi', TransportProtocol.tcp
+    dssiapi = 1265
 
     #: - [TCP] DELLPWRAPPKS
     #: - [UDP] DELLPWRAPPKS
-    dellpwrappks = 1266, 'dellpwrappks', TransportProtocol.tcp
+    dellpwrappks = 1266
 
     #: - [TCP] eTrust Policy Compliance
     #: - [UDP] eTrust Policy Compliance
-    epc = 1267, 'epc', TransportProtocol.tcp
+    epc = 1267
 
     #: - [TCP] PROPEL-MSGSYS
     #: - [UDP] PROPEL-MSGSYS
-    propel_msgsys = 1268, 'propel-msgsys', TransportProtocol.tcp
+    propel_msgsys = 1268, 'propel-msgsys'
 
     #: - [TCP] WATiLaPP
     #: - [UDP] WATiLaPP
-    watilapp = 1269, 'watilapp', TransportProtocol.tcp
+    watilapp = 1269
 
     #: - [TCP] Microsoft Operations Manager
     #: - [UDP] Microsoft Operations Manager
-    opsmgr = 1270, 'opsmgr', TransportProtocol.tcp
+    opsmgr = 1270
 
     #: - [TCP] eXcW
     #: - [UDP] eXcW
-    excw = 1271, 'excw', TransportProtocol.tcp
+    excw = 1271
 
     #: - [TCP] CSPMLockMgr
     #: - [UDP] CSPMLockMgr
-    cspmlockmgr = 1272, 'cspmlockmgr', TransportProtocol.tcp
+    cspmlockmgr = 1272
 
     #: - [TCP] EMC-Gateway
     #: - [UDP] EMC-Gateway
-    emc_gateway = 1273, 'emc-gateway', TransportProtocol.tcp
+    emc_gateway = 1273, 'emc-gateway'
 
     #: - [TCP] t1distproc
     #: - [UDP] t1distproc
-    t1distproc = 1274, 't1distproc', TransportProtocol.tcp
+    t1distproc = 1274
 
     #: - [TCP] ivcollector
     #: - [UDP] ivcollector
-    ivcollector = 1275, 'ivcollector', TransportProtocol.tcp
+    ivcollector = 1275
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_1276 = 1276, 'reserved', TransportProtocol.tcp
+    reserved_1276 = 1276, 'reserved'
 
     #: - [TCP] mqs
     #: - [UDP] mqs
-    miva_mqs = 1277, 'miva-mqs', TransportProtocol.tcp
+    miva_mqs = 1277, 'miva-mqs'
 
     #: - [TCP] Dell Web Admin 1
     #: - [UDP] Dell Web Admin 1
-    dellwebadmin_1 = 1278, 'dellwebadmin-1', TransportProtocol.tcp
+    dellwebadmin_1 = 1278, 'dellwebadmin-1'
 
     #: - [TCP] Dell Web Admin 2
     #: - [UDP] Dell Web Admin 2
-    dellwebadmin_2 = 1279, 'dellwebadmin-2', TransportProtocol.tcp
+    dellwebadmin_2 = 1279, 'dellwebadmin-2'
 
     #: - [TCP] Pictrography
     #: - [UDP] Pictrography
-    pictrography = 1280, 'pictrography', TransportProtocol.tcp
+    pictrography = 1280
 
     #: - [TCP] healthd
     #: - [UDP] healthd
-    healthd = 1281, 'healthd', TransportProtocol.tcp
+    healthd = 1281
 
     #: - [TCP] Emperion
     #: - [UDP] Emperion
-    emperion = 1282, 'emperion', TransportProtocol.tcp
+    emperion = 1282
 
     #: - [TCP] Product Information
     #: - [UDP] Product Information
-    productinfo = 1283, 'productinfo', TransportProtocol.tcp
+    productinfo = 1283
 
     #: - [TCP] IEE-QFX
     #: - [UDP] IEE-QFX
-    iee_qfx = 1284, 'iee-qfx', TransportProtocol.tcp
+    iee_qfx = 1284, 'iee-qfx'
 
     #: - [TCP] neoiface
     #: - [UDP] neoiface
-    neoiface = 1285, 'neoiface', TransportProtocol.tcp
+    neoiface = 1285
 
     #: - [TCP] netuitive
     #: - [UDP] netuitive
-    netuitive = 1286, 'netuitive', TransportProtocol.tcp
+    netuitive = 1286
 
     #: - [TCP] RouteMatch Com
     #: - [UDP] RouteMatch Com
-    routematch = 1287, 'routematch', TransportProtocol.tcp
+    routematch = 1287
 
     #: - [TCP] NavBuddy
     #: - [UDP] NavBuddy
-    navbuddy = 1288, 'navbuddy', TransportProtocol.tcp
+    navbuddy = 1288
 
     #: - [TCP] JWalkServer
     #: - [UDP] JWalkServer
-    jwalkserver = 1289, 'jwalkserver', TransportProtocol.tcp
+    jwalkserver = 1289
 
     #: - [TCP] WinJaServer
     #: - [UDP] WinJaServer
-    winjaserver = 1290, 'winjaserver', TransportProtocol.tcp
+    winjaserver = 1290
 
     #: - [TCP] SEAGULLLMS
     #: - [UDP] SEAGULLLMS
-    seagulllms = 1291, 'seagulllms', TransportProtocol.tcp
+    seagulllms = 1291
 
     #: - [TCP] dsdn
     #: - [UDP] dsdn
-    dsdn = 1292, 'dsdn', TransportProtocol.tcp
+    dsdn = 1292
 
     #: - [TCP] PKT-KRB-IPSec
     #: - [UDP] PKT-KRB-IPSec
-    pkt_krb_ipsec = 1293, 'pkt-krb-ipsec', TransportProtocol.tcp
+    pkt_krb_ipsec = 1293, 'pkt-krb-ipsec'
 
     #: - [TCP] CMMdriver
     #: - [UDP] CMMdriver
-    cmmdriver = 1294, 'cmmdriver', TransportProtocol.tcp
+    cmmdriver = 1294
 
     #: - [TCP] End-by-Hop Transmission Protocol
     #: - [UDP] End-by-Hop Transmission Protocol
-    ehtp = 1295, 'ehtp', TransportProtocol.tcp
+    ehtp = 1295
 
     #: - [TCP] dproxy
     #: - [UDP] dproxy
-    dproxy = 1296, 'dproxy', TransportProtocol.tcp
+    dproxy = 1296
 
     #: - [TCP] sdproxy
     #: - [UDP] sdproxy
-    sdproxy = 1297, 'sdproxy', TransportProtocol.tcp
+    sdproxy = 1297
 
     #: - [TCP] lpcp
     #: - [UDP] lpcp
-    lpcp = 1298, 'lpcp', TransportProtocol.tcp
+    lpcp = 1298
 
     #: - [TCP] hp-sci
     #: - [UDP] hp-sci
-    hp_sci = 1299, 'hp-sci', TransportProtocol.tcp
+    hp_sci = 1299, 'hp-sci'
 
     #: - [TCP] H.323 Secure Call Control Signalling
     #: - [UDP] H.323 Secure Call Control Signalling
-    h323hostcallsc = 1300, 'h323hostcallsc', TransportProtocol.tcp
+    h323hostcallsc = 1300
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_1301 = 1301, 'reserved', TransportProtocol.tcp
+    reserved_1301 = 1301, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_1302 = 1302, 'reserved', TransportProtocol.tcp
+    reserved_1302 = 1302, 'reserved'
 
     #: - [TCP] sftsrv
     #: - [UDP] sftsrv
-    sftsrv = 1303, 'sftsrv', TransportProtocol.tcp
+    sftsrv = 1303
 
     #: - [TCP] Boomerang
     #: - [UDP] Boomerang
-    boomerang = 1304, 'boomerang', TransportProtocol.tcp
+    boomerang = 1304
 
     #: - [TCP] pe-mike
     #: - [UDP] pe-mike
-    pe_mike = 1305, 'pe-mike', TransportProtocol.tcp
+    pe_mike = 1305, 'pe-mike'
 
     #: - [TCP] RE-Conn-Proto
     #: - [UDP] RE-Conn-Proto
-    re_conn_proto = 1306, 're-conn-proto', TransportProtocol.tcp
+    re_conn_proto = 1306, 're-conn-proto'
 
     #: - [TCP] Pacmand
     #: - [UDP] Pacmand
-    pacmand = 1307, 'pacmand', TransportProtocol.tcp
+    pacmand = 1307
 
     #: - [TCP] Optical Domain Service Interconnect (ODSI)
     #: - [UDP] Optical Domain Service Interconnect (ODSI)
-    odsi = 1308, 'odsi', TransportProtocol.tcp
+    odsi = 1308
 
     #: - [TCP] JTAG server
     #: - [UDP] JTAG server
-    jtag_server = 1309, 'jtag-server', TransportProtocol.tcp
+    jtag_server = 1309, 'jtag-server'
 
     #: - [TCP] Husky
     #: - [UDP] Husky
-    husky = 1310, 'husky', TransportProtocol.tcp
+    husky = 1310
 
     #: - [TCP] RxMon
     #: - [UDP] RxMon
-    rxmon = 1311, 'rxmon', TransportProtocol.tcp
+    rxmon = 1311
 
     #: - [TCP] STI Envision
     #: - [UDP] STI Envision
-    sti_envision = 1312, 'sti-envision', TransportProtocol.tcp
+    sti_envision = 1312, 'sti-envision'
 
     #: - [TCP] BMC_PATROLDB IANA assigned this well-formed service name as a
     #:   replacement for "bmc_patroldb".
@@ -4992,291 +4992,291 @@ class TCP(AppType):
     #: - [UDP] BMC_PATROLDB IANA assigned this well-formed service name as a
     #:   replacement for "bmc_patroldb".
     #: - [UDP] BMC_PATROLDB
-    bmc_patroldb = 1313, 'bmc-patroldb', TransportProtocol.tcp
+    bmc_patroldb = 1313, 'bmc-patroldb'
 
     #: - [TCP] Photoscript Distributed Printing System
     #: - [UDP] Photoscript Distributed Printing System
-    pdps = 1314, 'pdps', TransportProtocol.tcp
+    pdps = 1314
 
     #: - [TCP] E.L.S., Event Listener Service
     #: - [UDP] E.L.S., Event Listener Service
-    els = 1315, 'els', TransportProtocol.tcp
+    els = 1315
 
     #: - [TCP] Exbit-ESCP
     #: - [UDP] Exbit-ESCP
-    exbit_escp = 1316, 'exbit-escp', TransportProtocol.tcp
+    exbit_escp = 1316, 'exbit-escp'
 
     #: - [TCP] vrts-ipcserver
     #: - [UDP] vrts-ipcserver
-    vrts_ipcserver = 1317, 'vrts-ipcserver', TransportProtocol.tcp
+    vrts_ipcserver = 1317, 'vrts-ipcserver'
 
     #: - [TCP] krb5gatekeeper
     #: - [UDP] krb5gatekeeper
-    krb5gatekeeper = 1318, 'krb5gatekeeper', TransportProtocol.tcp
+    krb5gatekeeper = 1318
 
     #: - [TCP] AMX-ICSP
     #: - [UDP] AMX-ICSP
-    amx_icsp = 1319, 'amx-icsp', TransportProtocol.tcp
+    amx_icsp = 1319, 'amx-icsp'
 
     #: - [TCP] AMX-AXBNET
     #: - [UDP] AMX-AXBNET
-    amx_axbnet = 1320, 'amx-axbnet', TransportProtocol.tcp
+    amx_axbnet = 1320, 'amx-axbnet'
 
     #: - [TCP] PIP
     #: - [UDP] PIP
-    pip_321 = 321, 'pip', TransportProtocol.tcp
+    pip_321 = 321, 'pip'
 
     #: - [TCP] PIP
     #: - [UDP] PIP
-    pip_1321 = 1321, 'pip', TransportProtocol.tcp
+    pip_1321 = 1321, 'pip'
 
     #: - [TCP] Novation
     #: - [UDP] Novation
-    novation = 1322, 'novation', TransportProtocol.tcp
+    novation = 1322
 
     #: - [TCP] brcd
     #: - [UDP] brcd
-    brcd = 1323, 'brcd', TransportProtocol.tcp
+    brcd = 1323
 
     #: - [TCP] delta-mcp
     #: - [UDP] delta-mcp
-    delta_mcp = 1324, 'delta-mcp', TransportProtocol.tcp
+    delta_mcp = 1324, 'delta-mcp'
 
     #: - [TCP] Thermo Fisher Scientific Instrumentation (Formally Dionex)
     #: - [UDP] Thermo Fisher Scientific Instrumentation (Formally Dionex)
-    dx_instrument = 1325, 'dx-instrument', TransportProtocol.tcp
+    dx_instrument = 1325, 'dx-instrument'
 
     #: - [TCP] WIMSIC
     #: - [UDP] WIMSIC
-    wimsic = 1326, 'wimsic', TransportProtocol.tcp
+    wimsic = 1326
 
     #: - [TCP] Ultrex
     #: - [UDP] Ultrex
-    ultrex = 1327, 'ultrex', TransportProtocol.tcp
+    ultrex = 1327
 
     #: - [TCP] EWALL
     #: - [UDP] EWALL
-    ewall = 1328, 'ewall', TransportProtocol.tcp
+    ewall = 1328
 
     #: - [TCP] netdb-export
     #: - [UDP] netdb-export
-    netdb_export = 1329, 'netdb-export', TransportProtocol.tcp
+    netdb_export = 1329, 'netdb-export'
 
     #: - [TCP] StreetPerfect
     #: - [UDP] StreetPerfect
-    streetperfect = 1330, 'streetperfect', TransportProtocol.tcp
+    streetperfect = 1330
 
     #: - [TCP] intersan
     #: - [UDP] intersan
-    intersan = 1331, 'intersan', TransportProtocol.tcp
+    intersan = 1331
 
     #: - [TCP] PCIA RXP-B
     #: - [UDP] PCIA RXP-B
-    pcia_rxp_b = 1332, 'pcia-rxp-b', TransportProtocol.tcp
+    pcia_rxp_b = 1332, 'pcia-rxp-b'
 
     #: - [TCP] Password Policy
     #: - [UDP] Password Policy
-    passwrd_policy = 1333, 'passwrd-policy', TransportProtocol.tcp
+    passwrd_policy = 1333, 'passwrd-policy'
 
     #: - [TCP] writesrv
     #: - [UDP] writesrv
-    writesrv = 1334, 'writesrv', TransportProtocol.tcp
+    writesrv = 1334
 
     #: - [TCP] Digital Notary Protocol
     #: - [UDP] Digital Notary Protocol
-    digital_notary = 1335, 'digital-notary', TransportProtocol.tcp
+    digital_notary = 1335, 'digital-notary'
 
     #: - [TCP] Instant Service Chat
     #: - [UDP] Instant Service Chat
-    ischat = 1336, 'ischat', TransportProtocol.tcp
+    ischat = 1336
 
     #: - [TCP] menandmice DNS
     #: - [UDP] menandmice DNS
-    menandmice_dns = 1337, 'menandmice-dns', TransportProtocol.tcp
+    menandmice_dns = 1337, 'menandmice-dns'
 
     #: - [TCP] WMC-log-svr
     #: - [UDP] WMC-log-svr
-    wmc_log_svc = 1338, 'wmc-log-svc', TransportProtocol.tcp
+    wmc_log_svc = 1338, 'wmc-log-svc'
 
     #: - [TCP] kjtsiteserver
     #: - [UDP] kjtsiteserver
-    kjtsiteserver = 1339, 'kjtsiteserver', TransportProtocol.tcp
+    kjtsiteserver = 1339
 
     #: - [TCP] NAAP
     #: - [UDP] NAAP
-    naap = 1340, 'naap', TransportProtocol.tcp
+    naap = 1340
 
     #: - [TCP] QuBES
     #: - [UDP] QuBES
-    qubes = 1341, 'qubes', TransportProtocol.tcp
+    qubes = 1341
 
     #: - [TCP] ESBroker
     #: - [UDP] ESBroker
-    esbroker = 1342, 'esbroker', TransportProtocol.tcp
+    esbroker = 1342
 
     #: - [TCP] re101
     #: - [UDP] re101
-    re101 = 1343, 're101', TransportProtocol.tcp
+    re101 = 1343
 
     #: - [TCP] ICAP
     #: - [UDP] ICAP
-    icap = 1344, 'icap', TransportProtocol.tcp
+    icap = 1344
 
     #: - [TCP] VPJP
     #: - [UDP] VPJP
-    vpjp = 1345, 'vpjp', TransportProtocol.tcp
+    vpjp = 1345
 
     #: - [TCP] Alta Analytics License Manager
     #: - [UDP] Alta Analytics License Manager
-    alta_ana_lm = 1346, 'alta-ana-lm', TransportProtocol.tcp
+    alta_ana_lm = 1346, 'alta-ana-lm'
 
     #: - [TCP] multi media conferencing
     #: - [UDP] multi media conferencing
-    bbn_mmc = 1347, 'bbn-mmc', TransportProtocol.tcp
+    bbn_mmc = 1347, 'bbn-mmc'
 
     #: - [TCP] multi media conferencing
     #: - [UDP] multi media conferencing
-    bbn_mmx = 1348, 'bbn-mmx', TransportProtocol.tcp
+    bbn_mmx = 1348, 'bbn-mmx'
 
     #: - [TCP] Registration Network Protocol
     #: - [UDP] Registration Network Protocol
-    sbook = 1349, 'sbook', TransportProtocol.tcp
+    sbook = 1349
 
     #: - [TCP] Registration Network Protocol
     #: - [UDP] Registration Network Protocol
-    editbench = 1350, 'editbench', TransportProtocol.tcp
+    editbench = 1350
 
     #: - [TCP] Digital Tool Works (MIT)
     #: - [UDP] Digital Tool Works (MIT)
-    equationbuilder = 1351, 'equationbuilder', TransportProtocol.tcp
+    equationbuilder = 1351
 
     #: - [TCP] Lotus Note
     #: - [UDP] Lotus Note
-    lotusnote = 1352, 'lotusnote', TransportProtocol.tcp
+    lotusnote = 1352
 
     #: - [TCP] Relief Consulting
     #: - [UDP] Relief Consulting
-    relief = 1353, 'relief', TransportProtocol.tcp
+    relief = 1353
 
     #: - [TCP] Five Across XSIP Network
     #: - [UDP] Five Across XSIP Network
-    xsip_network = 1354, 'xsip-network', TransportProtocol.tcp
+    xsip_network = 1354, 'xsip-network'
 
     #: - [TCP] Intuitive Edge
     #: - [UDP] Intuitive Edge
-    intuitive_edge = 1355, 'intuitive-edge', TransportProtocol.tcp
+    intuitive_edge = 1355, 'intuitive-edge'
 
     #: - [TCP] CuillaMartin Company
     #: - [UDP] CuillaMartin Company
-    cuillamartin = 1356, 'cuillamartin', TransportProtocol.tcp
+    cuillamartin = 1356
 
     #: - [TCP] Electronic PegBoard
     #: - [UDP] Electronic PegBoard
-    pegboard = 1357, 'pegboard', TransportProtocol.tcp
+    pegboard = 1357
 
     #: - [TCP] CONNLCLI
     #: - [UDP] CONNLCLI
-    connlcli = 1358, 'connlcli', TransportProtocol.tcp
+    connlcli = 1358
 
     #: - [TCP] FTSRV
     #: - [UDP] FTSRV
-    ftsrv = 1359, 'ftsrv', TransportProtocol.tcp
+    ftsrv = 1359
 
     #: - [TCP] MIMER
     #: - [UDP] MIMER
-    mimer = 1360, 'mimer', TransportProtocol.tcp
+    mimer = 1360
 
     #: - [TCP] LinX
     #: - [UDP] LinX
-    linx = 1361, 'linx', TransportProtocol.tcp
+    linx = 1361
 
     #: - [TCP] TimeFlies
     #: - [UDP] TimeFlies
-    timeflies = 1362, 'timeflies', TransportProtocol.tcp
+    timeflies = 1362
 
     #: - [TCP] Network DataMover Requester
     #: - [UDP] Network DataMover Requester
-    ndm_requester = 1363, 'ndm-requester', TransportProtocol.tcp
+    ndm_requester = 1363, 'ndm-requester'
 
     #: - [TCP] Network DataMover Server
     #: - [UDP] Network DataMover Server
-    ndm_server = 1364, 'ndm-server', TransportProtocol.tcp
+    ndm_server = 1364, 'ndm-server'
 
     #: - [TCP] Network Software Associates
     #: - [UDP] Network Software Associates
-    adapt_sna = 1365, 'adapt-sna', TransportProtocol.tcp
+    adapt_sna = 1365, 'adapt-sna'
 
     #: - [TCP] Novell NetWare Comm Service Platform
     #: - [UDP] Novell NetWare Comm Service Platform
-    netware_csp = 1366, 'netware-csp', TransportProtocol.tcp
+    netware_csp = 1366, 'netware-csp'
 
     #: - [TCP] DCS
     #: - [UDP] DCS
-    dcs = 1367, 'dcs', TransportProtocol.tcp
+    dcs = 1367
 
     #: - [TCP] ScreenCast
     #: - [UDP] ScreenCast
-    screencast = 1368, 'screencast', TransportProtocol.tcp
+    screencast = 1368
 
     #: - [TCP] GlobalView to Unix Shell
     #: - [UDP] GlobalView to Unix Shell
-    gv_us = 1369, 'gv-us', TransportProtocol.tcp
+    gv_us = 1369, 'gv-us'
 
     #: - [TCP] Unix Shell to GlobalView
     #: - [UDP] Unix Shell to GlobalView
-    us_gv = 1370, 'us-gv', TransportProtocol.tcp
+    us_gv = 1370, 'us-gv'
 
     #: - [TCP] Fujitsu Config Protocol
     #: - [UDP] Fujitsu Config Protocol
-    fc_cli = 1371, 'fc-cli', TransportProtocol.tcp
+    fc_cli = 1371, 'fc-cli'
 
     #: - [TCP] Fujitsu Config Protocol
     #: - [UDP] Fujitsu Config Protocol
-    fc_ser = 1372, 'fc-ser', TransportProtocol.tcp
+    fc_ser = 1372, 'fc-ser'
 
     #: - [TCP] Chromagrafx
     #: - [UDP] Chromagrafx
-    chromagrafx = 1373, 'chromagrafx', TransportProtocol.tcp
+    chromagrafx = 1373
 
     #: - [TCP] EPI Software Systems
     #: - [UDP] EPI Software Systems
-    molly = 1374, 'molly', TransportProtocol.tcp
+    molly = 1374
 
     #: - [TCP] Bytex
     #: - [UDP] Bytex
-    bytex = 1375, 'bytex', TransportProtocol.tcp
+    bytex = 1375
 
     #: - [TCP] IBM Person to Person Software
     #: - [UDP] IBM Person to Person Software
-    ibm_pps = 1376, 'ibm-pps', TransportProtocol.tcp
+    ibm_pps = 1376, 'ibm-pps'
 
     #: - [TCP] Cichlid License Manager
     #: - [UDP] Cichlid License Manager
-    cichlid = 1377, 'cichlid', TransportProtocol.tcp
+    cichlid = 1377
 
     #: - [TCP] Elan License Manager
     #: - [UDP] Elan License Manager
-    elan = 1378, 'elan', TransportProtocol.tcp
+    elan = 1378
 
     #: - [TCP] Integrity Solutions
     #: - [UDP] Integrity Solutions
-    dbreporter = 1379, 'dbreporter', TransportProtocol.tcp
+    dbreporter = 1379
 
     #: - [TCP] Telesis Network License Manager
     #: - [UDP] Telesis Network License Manager
-    telesis_licman = 1380, 'telesis-licman', TransportProtocol.tcp
+    telesis_licman = 1380, 'telesis-licman'
 
     #: - [TCP] Apple Network License Manager
     #: - [UDP] Apple Network License Manager
-    apple_licman = 1381, 'apple-licman', TransportProtocol.tcp
+    apple_licman = 1381, 'apple-licman'
 
     #: - [TCP] GW Hannaway Network License Manager
     #: - [UDP] GW Hannaway Network License Manager
-    gwha = 1383, 'gwha', TransportProtocol.tcp
+    gwha = 1383
 
     #: - [TCP] Objective Solutions License Manager
     #: - [UDP] Objective Solutions License Manager
-    os_licman = 1384, 'os-licman', TransportProtocol.tcp
+    os_licman = 1384, 'os-licman'
 
     #: - [TCP] Atex Publishing License Manager IANA assigned this well-formed service
     #:   name as a replacement for "atex_elmd".
@@ -5284,126 +5284,126 @@ class TCP(AppType):
     #: - [UDP] Atex Publishing License Manager IANA assigned this well-formed service
     #:   name as a replacement for "atex_elmd".
     #: - [UDP] Atex Publishing License Manager
-    atex_elmd = 1385, 'atex-elmd', TransportProtocol.tcp
+    atex_elmd = 1385, 'atex-elmd'
 
     #: - [TCP] CheckSum License Manager
     #: - [UDP] CheckSum License Manager
-    checksum = 1386, 'checksum', TransportProtocol.tcp
+    checksum = 1386
 
     #: - [TCP] Computer Aided Design Software Inc LM
     #: - [UDP] Computer Aided Design Software Inc LM
-    cadsi_lm = 1387, 'cadsi-lm', TransportProtocol.tcp
+    cadsi_lm = 1387, 'cadsi-lm'
 
     #: - [TCP] Objective Solutions DataBase Cache
     #: - [UDP] Objective Solutions DataBase Cache
-    objective_dbc = 1388, 'objective-dbc', TransportProtocol.tcp
+    objective_dbc = 1388, 'objective-dbc'
 
     #: - [TCP] Document Manager
     #: - [UDP] Document Manager
-    iclpv_dm = 1389, 'iclpv-dm', TransportProtocol.tcp
+    iclpv_dm = 1389, 'iclpv-dm'
 
     #: - [TCP] Storage Controller
     #: - [UDP] Storage Controller
-    iclpv_sc = 1390, 'iclpv-sc', TransportProtocol.tcp
+    iclpv_sc = 1390, 'iclpv-sc'
 
     #: - [TCP] Storage Access Server
     #: - [UDP] Storage Access Server
-    iclpv_sas = 1391, 'iclpv-sas', TransportProtocol.tcp
+    iclpv_sas = 1391, 'iclpv-sas'
 
     #: - [TCP] Print Manager
     #: - [UDP] Print Manager
-    iclpv_pm = 1392, 'iclpv-pm', TransportProtocol.tcp
+    iclpv_pm = 1392, 'iclpv-pm'
 
     #: - [TCP] Network Log Server
     #: - [UDP] Network Log Server
-    iclpv_nls = 1393, 'iclpv-nls', TransportProtocol.tcp
+    iclpv_nls = 1393, 'iclpv-nls'
 
     #: - [TCP] Network Log Client
     #: - [UDP] Network Log Client
-    iclpv_nlc = 1394, 'iclpv-nlc', TransportProtocol.tcp
+    iclpv_nlc = 1394, 'iclpv-nlc'
 
     #: - [TCP] PC Workstation Manager software
     #: - [UDP] PC Workstation Manager software
-    iclpv_wsm = 1395, 'iclpv-wsm', TransportProtocol.tcp
+    iclpv_wsm = 1395, 'iclpv-wsm'
 
     #: - [TCP] DVL Active Mail
     #: - [UDP] DVL Active Mail
-    dvl_activemail = 1396, 'dvl-activemail', TransportProtocol.tcp
+    dvl_activemail = 1396, 'dvl-activemail'
 
     #: - [TCP] Audio Active Mail
     #: - [UDP] Audio Active Mail
-    audio_activmail = 1397, 'audio-activmail', TransportProtocol.tcp
+    audio_activmail = 1397, 'audio-activmail'
 
     #: - [TCP] Video Active Mail
     #: - [UDP] Video Active Mail
-    video_activmail = 1398, 'video-activmail', TransportProtocol.tcp
+    video_activmail = 1398, 'video-activmail'
 
     #: - [TCP] Cadkey License Manager
     #: - [UDP] Cadkey License Manager
-    cadkey_licman = 1399, 'cadkey-licman', TransportProtocol.tcp
+    cadkey_licman = 1399, 'cadkey-licman'
 
     #: - [TCP] Cadkey Tablet Daemon
     #: - [UDP] Cadkey Tablet Daemon
-    cadkey_tablet = 1400, 'cadkey-tablet', TransportProtocol.tcp
+    cadkey_tablet = 1400, 'cadkey-tablet'
 
     #: - [TCP] Goldleaf License Manager
     #: - [UDP] Goldleaf License Manager
-    goldleaf_licman = 1401, 'goldleaf-licman', TransportProtocol.tcp
+    goldleaf_licman = 1401, 'goldleaf-licman'
 
     #: - [TCP] Prospero Resource Manager
     #: - [UDP] Prospero Resource Manager
-    prm_sm_np = 1402, 'prm-sm-np', TransportProtocol.tcp
+    prm_sm_np = 1402, 'prm-sm-np'
 
     #: - [TCP] Prospero Resource Manager
     #: - [UDP] Prospero Resource Manager
-    prm_nm_np = 1403, 'prm-nm-np', TransportProtocol.tcp
+    prm_nm_np = 1403, 'prm-nm-np'
 
     #: - [TCP] Infinite Graphics License Manager
     #: - [UDP] Infinite Graphics License Manager
-    igi_lm = 1404, 'igi-lm', TransportProtocol.tcp
+    igi_lm = 1404, 'igi-lm'
 
     #: - [TCP] IBM Remote Execution Starter
     #: - [UDP] IBM Remote Execution Starter
-    ibm_res = 1405, 'ibm-res', TransportProtocol.tcp
+    ibm_res = 1405, 'ibm-res'
 
     #: - [TCP] NetLabs License Manager
     #: - [UDP] NetLabs License Manager
-    netlabs_lm = 1406, 'netlabs-lm', TransportProtocol.tcp
+    netlabs_lm = 1406, 'netlabs-lm'
 
     #: [TCP] TIBET Data Server
-    tibet_server = 1407, 'tibet-server', TransportProtocol.tcp
+    tibet_server = 1407, 'tibet-server'
 
     #: - [TCP] Sophia License Manager
     #: - [UDP] Sophia License Manager
-    sophia_lm = 1408, 'sophia-lm', TransportProtocol.tcp
+    sophia_lm = 1408, 'sophia-lm'
 
     #: - [TCP] Here License Manager
     #: - [UDP] Here License Manager
-    here_lm = 1409, 'here-lm', TransportProtocol.tcp
+    here_lm = 1409, 'here-lm'
 
     #: - [TCP] HiQ License Manager
     #: - [UDP] HiQ License Manager
-    hiq = 1410, 'hiq', TransportProtocol.tcp
+    hiq = 1410
 
     #: - [TCP] AudioFile
     #: - [UDP] AudioFile
-    af = 1411, 'af', TransportProtocol.tcp
+    af = 1411
 
     #: - [TCP] InnoSys
     #: - [UDP] InnoSys
-    innosys = 1412, 'innosys', TransportProtocol.tcp
+    innosys = 1412
 
     #: - [TCP] Innosys-ACL
     #: - [UDP] Innosys-ACL
-    innosys_acl = 1413, 'innosys-acl', TransportProtocol.tcp
+    innosys_acl = 1413, 'innosys-acl'
 
     #: - [TCP] IBM MQSeries
     #: - [UDP] IBM MQSeries
-    ibm_mqseries = 1414, 'ibm-mqseries', TransportProtocol.tcp
+    ibm_mqseries = 1414, 'ibm-mqseries'
 
     #: - [TCP] DBStar
     #: - [UDP] DBStar
-    dbstar = 1415, 'dbstar', TransportProtocol.tcp
+    dbstar = 1415
 
     #: - [TCP] Novell LU6.2 IANA assigned this well-formed service name as a
     #:   replacement for "novell-lu6.2".
@@ -5411,155 +5411,155 @@ class TCP(AppType):
     #: - [UDP] Novell LU6.2 IANA assigned this well-formed service name as a
     #:   replacement for "novell-lu6.2".
     #: - [UDP] Novell LU6.2
-    novell_lu6_2 = 1416, 'novell-lu6-2', TransportProtocol.tcp
+    novell_lu6_2 = 1416, 'novell-lu6-2'
 
     #: - [TCP] Timbuktu Service 1 Port
     #: - [UDP] Timbuktu Service 1 Port
-    timbuktu_srv1 = 1417, 'timbuktu-srv1', TransportProtocol.tcp
+    timbuktu_srv1 = 1417, 'timbuktu-srv1'
 
     #: - [TCP] Timbuktu Service 2 Port
     #: - [UDP] Timbuktu Service 2 Port
-    timbuktu_srv2 = 1418, 'timbuktu-srv2', TransportProtocol.tcp
+    timbuktu_srv2 = 1418, 'timbuktu-srv2'
 
     #: - [TCP] Timbuktu Service 3 Port
     #: - [UDP] Timbuktu Service 3 Port
-    timbuktu_srv3 = 1419, 'timbuktu-srv3', TransportProtocol.tcp
+    timbuktu_srv3 = 1419, 'timbuktu-srv3'
 
     #: - [TCP] Timbuktu Service 4 Port
     #: - [UDP] Timbuktu Service 4 Port
-    timbuktu_srv4 = 1420, 'timbuktu-srv4', TransportProtocol.tcp
+    timbuktu_srv4 = 1420, 'timbuktu-srv4'
 
     #: - [TCP] Gandalf License Manager
     #: - [UDP] Gandalf License Manager
-    gandalf_lm = 1421, 'gandalf-lm', TransportProtocol.tcp
+    gandalf_lm = 1421, 'gandalf-lm'
 
     #: - [TCP] Autodesk License Manager
     #: - [UDP] Autodesk License Manager
-    autodesk_lm = 1422, 'autodesk-lm', TransportProtocol.tcp
+    autodesk_lm = 1422, 'autodesk-lm'
 
     #: - [TCP] Essbase Arbor Software
     #: - [UDP] Essbase Arbor Software
-    essbase = 1423, 'essbase', TransportProtocol.tcp
+    essbase = 1423
 
     #: - [TCP] Hybrid Encryption Protocol
     #: - [UDP] Hybrid Encryption Protocol
-    hybrid = 1424, 'hybrid', TransportProtocol.tcp
+    hybrid = 1424
 
     #: - [TCP] Zion Software License Manager
     #: - [UDP] Zion Software License Manager
-    zion_lm = 1425, 'zion-lm', TransportProtocol.tcp
+    zion_lm = 1425, 'zion-lm'
 
     #: - [TCP] Satellite-data Acquisition System 1
     #: - [UDP] Satellite-data Acquisition System 1
-    sais = 1426, 'sais', TransportProtocol.tcp
+    sais = 1426
 
     #: - [TCP] mloadd monitoring tool
     #: - [UDP] mloadd monitoring tool
-    mloadd = 1427, 'mloadd', TransportProtocol.tcp
+    mloadd = 1427
 
     #: - [TCP] Informatik License Manager
     #: - [UDP] Informatik License Manager
-    informatik_lm = 1428, 'informatik-lm', TransportProtocol.tcp
+    informatik_lm = 1428, 'informatik-lm'
 
     #: - [TCP] Hypercom NMS
     #: - [UDP] Hypercom NMS
-    nms = 1429, 'nms', TransportProtocol.tcp
+    nms = 1429
 
     #: - [TCP] Hypercom TPDU
     #: - [UDP] Hypercom TPDU
-    tpdu = 1430, 'tpdu', TransportProtocol.tcp
+    tpdu = 1430
 
     #: - [TCP] Reverse Gossip Transport
     #: - [UDP] Reverse Gossip Transport
-    rgtp = 1431, 'rgtp', TransportProtocol.tcp
+    rgtp = 1431
 
     #: - [TCP] Blueberry Software License Manager
     #: - [UDP] Blueberry Software License Manager
-    blueberry_lm = 1432, 'blueberry-lm', TransportProtocol.tcp
+    blueberry_lm = 1432, 'blueberry-lm'
 
     #: - [TCP] Microsoft-SQL-Server
     #: - [UDP] Microsoft-SQL-Server
-    ms_sql_s = 1433, 'ms-sql-s', TransportProtocol.tcp
+    ms_sql_s = 1433, 'ms-sql-s'
 
     #: - [TCP] Microsoft-SQL-Monitor
     #: - [UDP] Microsoft-SQL-Monitor
-    ms_sql_m = 1434, 'ms-sql-m', TransportProtocol.tcp
+    ms_sql_m = 1434, 'ms-sql-m'
 
     #: - [TCP] IBM CICS
     #: - [UDP] IBM CICS
-    ibm_cics = 1435, 'ibm-cics', TransportProtocol.tcp
+    ibm_cics = 1435, 'ibm-cics'
 
     #: - [TCP] Satellite-data Acquisition System 2
     #: - [UDP] Satellite-data Acquisition System 2
-    saism = 1436, 'saism', TransportProtocol.tcp
+    saism = 1436
 
     #: - [TCP] Tabula
     #: - [UDP] Tabula
-    tabula = 1437, 'tabula', TransportProtocol.tcp
+    tabula = 1437
 
     #: - [TCP] Eicon Security Agent/Server
     #: - [UDP] Eicon Security Agent/Server
-    eicon_server = 1438, 'eicon-server', TransportProtocol.tcp
+    eicon_server = 1438, 'eicon-server'
 
     #: - [TCP] Eicon X25/SNA Gateway
     #: - [UDP] Eicon X25/SNA Gateway
-    eicon_x25 = 1439, 'eicon-x25', TransportProtocol.tcp
+    eicon_x25 = 1439, 'eicon-x25'
 
     #: - [TCP] Eicon Service Location Protocol
     #: - [UDP] Eicon Service Location Protocol
-    eicon_slp = 1440, 'eicon-slp', TransportProtocol.tcp
+    eicon_slp = 1440, 'eicon-slp'
 
     #: - [TCP] Cadis License Management
     #: - [UDP] Cadis License Management
-    cadis_1 = 1441, 'cadis-1', TransportProtocol.tcp
+    cadis_1 = 1441, 'cadis-1'
 
     #: - [TCP] Cadis License Management
     #: - [UDP] Cadis License Management
-    cadis_2 = 1442, 'cadis-2', TransportProtocol.tcp
+    cadis_2 = 1442, 'cadis-2'
 
     #: - [TCP] Integrated Engineering Software
     #: - [UDP] Integrated Engineering Software
-    ies_lm = 1443, 'ies-lm', TransportProtocol.tcp
+    ies_lm = 1443, 'ies-lm'
 
     #: - [TCP] Marcam License Management
     #: - [UDP] Marcam License Management
-    marcam_lm = 1444, 'marcam-lm', TransportProtocol.tcp
+    marcam_lm = 1444, 'marcam-lm'
 
     #: - [TCP] Proxima License Manager
     #: - [UDP] Proxima License Manager
-    proxima_lm = 1445, 'proxima-lm', TransportProtocol.tcp
+    proxima_lm = 1445, 'proxima-lm'
 
     #: - [TCP] Optical Research Associates License Manager
     #: - [UDP] Optical Research Associates License Manager
-    ora_lm = 1446, 'ora-lm', TransportProtocol.tcp
+    ora_lm = 1446, 'ora-lm'
 
     #: - [TCP] Applied Parallel Research LM
     #: - [UDP] Applied Parallel Research LM
-    apri_lm = 1447, 'apri-lm', TransportProtocol.tcp
+    apri_lm = 1447, 'apri-lm'
 
     #: - [TCP] OpenConnect License Manager
     #: - [UDP] OpenConnect License Manager
-    oc_lm = 1448, 'oc-lm', TransportProtocol.tcp
+    oc_lm = 1448, 'oc-lm'
 
     #: - [TCP] PEport
     #: - [UDP] PEport
-    peport = 1449, 'peport', TransportProtocol.tcp
+    peport = 1449
 
     #: - [TCP] Tandem Distributed Workbench Facility
     #: - [UDP] Tandem Distributed Workbench Facility
-    dwf = 1450, 'dwf', TransportProtocol.tcp
+    dwf = 1450
 
     #: - [TCP] IBM Information Management
     #: - [UDP] IBM Information Management
-    infoman = 1451, 'infoman', TransportProtocol.tcp
+    infoman = 1451
 
     #: - [TCP] GTE Government Systems License Man
     #: - [UDP] GTE Government Systems License Man
-    gtegsc_lm = 1452, 'gtegsc-lm', TransportProtocol.tcp
+    gtegsc_lm = 1452, 'gtegsc-lm'
 
     #: - [TCP] Genie License Manager
     #: - [UDP] Genie License Manager
-    genie_lm = 1453, 'genie-lm', TransportProtocol.tcp
+    genie_lm = 1453, 'genie-lm'
 
     #: - [TCP] interHDL License Manager IANA assigned this well-formed service name
     #:   as a replacement for "interhdl_elmd".
@@ -5567,31 +5567,31 @@ class TCP(AppType):
     #: - [UDP] interHDL License Manager IANA assigned this well-formed service name
     #:   as a replacement for "interhdl_elmd".
     #: - [UDP] interHDL License Manager
-    interhdl_elmd = 1454, 'interhdl-elmd', TransportProtocol.tcp
+    interhdl_elmd = 1454, 'interhdl-elmd'
 
     #: - [TCP] ESL License Manager
     #: - [UDP] ESL License Manager
-    esl_lm = 1455, 'esl-lm', TransportProtocol.tcp
+    esl_lm = 1455, 'esl-lm'
 
     #: - [TCP] DCA
     #: - [UDP] DCA
-    dca = 1456, 'dca', TransportProtocol.tcp
+    dca = 1456
 
     #: - [TCP] Valisys License Manager
     #: - [UDP] Valisys License Manager
-    valisys_lm = 1457, 'valisys-lm', TransportProtocol.tcp
+    valisys_lm = 1457, 'valisys-lm'
 
     #: - [TCP] Nichols Research Corp.
     #: - [UDP] Nichols Research Corp.
-    nrcabq_lm = 1458, 'nrcabq-lm', TransportProtocol.tcp
+    nrcabq_lm = 1458, 'nrcabq-lm'
 
     #: - [TCP] Proshare Notebook Application
     #: - [UDP] Proshare Notebook Application
-    proshare1 = 1459, 'proshare1', TransportProtocol.tcp
+    proshare1 = 1459
 
     #: - [TCP] Proshare Notebook Application
     #: - [UDP] Proshare Notebook Application
-    proshare2 = 1460, 'proshare2', TransportProtocol.tcp
+    proshare2 = 1460
 
     #: - [TCP] IBM Wireless LAN IANA assigned this well-formed service name as a
     #:   replacement for "ibm_wrless_lan".
@@ -5599,15 +5599,15 @@ class TCP(AppType):
     #: - [UDP] IBM Wireless LAN IANA assigned this well-formed service name as a
     #:   replacement for "ibm_wrless_lan".
     #: - [UDP] IBM Wireless LAN
-    ibm_wrless_lan = 1461, 'ibm-wrless-lan', TransportProtocol.tcp
+    ibm_wrless_lan = 1461, 'ibm-wrless-lan'
 
     #: - [TCP] World License Manager
     #: - [UDP] World License Manager
-    world_lm = 1462, 'world-lm', TransportProtocol.tcp
+    world_lm = 1462, 'world-lm'
 
     #: - [TCP] Nucleus
     #: - [UDP] Nucleus
-    nucleus = 1463, 'nucleus', TransportProtocol.tcp
+    nucleus = 1463
 
     #: - [TCP] MSL License Manager IANA assigned this well-formed service name as a
     #:   replacement for "msl_lmd".
@@ -5615,91 +5615,91 @@ class TCP(AppType):
     #: - [UDP] MSL License Manager IANA assigned this well-formed service name as a
     #:   replacement for "msl_lmd".
     #: - [UDP] MSL License Manager
-    msl_lmd = 1464, 'msl-lmd', TransportProtocol.tcp
+    msl_lmd = 1464, 'msl-lmd'
 
     #: - [TCP] Pipes Platform
     #: - [UDP] Pipes Platform
-    pipes = 1465, 'pipes', TransportProtocol.tcp
+    pipes = 1465
 
     #: - [TCP] Ocean Software License Manager
     #: - [UDP] Ocean Software License Manager
-    oceansoft_lm = 1466, 'oceansoft-lm', TransportProtocol.tcp
+    oceansoft_lm = 1466, 'oceansoft-lm'
 
     #: - [TCP] Active Analysis Limited License Manager
     #: - [UDP] Active Analysis Limited License Manager
-    aal_lm = 1469, 'aal-lm', TransportProtocol.tcp
+    aal_lm = 1469, 'aal-lm'
 
     #: - [TCP] Universal Analytics
     #: - [UDP] Universal Analytics
-    uaiact = 1470, 'uaiact', TransportProtocol.tcp
+    uaiact = 1470
 
     #: - [TCP] CSDMBASE
     #: - [UDP] CSDMBASE
-    csdmbase_1467 = 1467, 'csdmbase', TransportProtocol.tcp
+    csdmbase_1467 = 1467, 'csdmbase'
 
     #: - [TCP] csdmbase
     #: - [UDP] csdmbase
-    csdmbase_1471 = 1471, 'csdmbase', TransportProtocol.tcp
+    csdmbase_1471 = 1471, 'csdmbase'
 
     #: - [TCP] CSDM
     #: - [UDP] CSDM
-    csdm_1468 = 1468, 'csdm', TransportProtocol.tcp
+    csdm_1468 = 1468, 'csdm'
 
     #: - [TCP] csdm
     #: - [UDP] csdm
-    csdm_1472 = 1472, 'csdm', TransportProtocol.tcp
+    csdm_1472 = 1472, 'csdm'
 
     #: - [TCP] OpenMath
     #: - [UDP] OpenMath
-    openmath = 1473, 'openmath', TransportProtocol.tcp
+    openmath = 1473
 
     #: - [TCP] Telefinder
     #: - [UDP] Telefinder
-    telefinder = 1474, 'telefinder', TransportProtocol.tcp
+    telefinder = 1474
 
     #: - [TCP] Taligent License Manager
     #: - [UDP] Taligent License Manager
-    taligent_lm = 1475, 'taligent-lm', TransportProtocol.tcp
+    taligent_lm = 1475, 'taligent-lm'
 
     #: - [TCP] clvm-cfg
     #: - [UDP] clvm-cfg
-    clvm_cfg = 1476, 'clvm-cfg', TransportProtocol.tcp
+    clvm_cfg = 1476, 'clvm-cfg'
 
     #: - [TCP] ms-sna-server
     #: - [UDP] ms-sna-server
-    ms_sna_server = 1477, 'ms-sna-server', TransportProtocol.tcp
+    ms_sna_server = 1477, 'ms-sna-server'
 
     #: - [TCP] ms-sna-base
     #: - [UDP] ms-sna-base
-    ms_sna_base = 1478, 'ms-sna-base', TransportProtocol.tcp
+    ms_sna_base = 1478, 'ms-sna-base'
 
     #: - [TCP] dberegister
     #: - [UDP] dberegister
-    dberegister = 1479, 'dberegister', TransportProtocol.tcp
+    dberegister = 1479
 
     #: - [TCP] PacerForum
     #: - [UDP] PacerForum
-    pacerforum = 1480, 'pacerforum', TransportProtocol.tcp
+    pacerforum = 1480
 
     #: - [TCP] AIRS
     #: - [UDP] AIRS
-    airs = 1481, 'airs', TransportProtocol.tcp
+    airs = 1481
 
     #: - [TCP] Miteksys License Manager
     #: - [UDP] Miteksys License Manager
-    miteksys_lm = 1482, 'miteksys-lm', TransportProtocol.tcp
+    miteksys_lm = 1482, 'miteksys-lm'
 
     #: - [TCP] AFS License Manager
     #: - [UDP] AFS License Manager
-    afs = 1483, 'afs', TransportProtocol.tcp
+    afs = 1483
 
     #: - [TCP] Confluent License Manager
     #: - [UDP] Confluent License Manager
-    confluent = 1484, 'confluent', TransportProtocol.tcp
+    confluent = 1484
 
     #: - [TCP] LANSource
     #: - [UDP] LANSource
-    lansource = 1485, 'lansource', TransportProtocol.tcp
+    lansource = 1485
 
     #: - [TCP] nms_topo_serv IANA assigned this well-formed service name as a
     #:   replacement for "nms_topo_serv".
@@ -5707,27 +5707,27 @@ class TCP(AppType):
     #: - [UDP] nms_topo_serv IANA assigned this well-formed service name as a
     #:   replacement for "nms_topo_serv".
     #: - [UDP] nms_topo_serv
-    nms_topo_serv = 1486, 'nms-topo-serv', TransportProtocol.tcp
+    nms_topo_serv = 1486, 'nms-topo-serv'
 
     #: - [TCP] LocalInfoSrvr
     #: - [UDP] LocalInfoSrvr
-    localinfosrvr = 1487, 'localinfosrvr', TransportProtocol.tcp
+    localinfosrvr = 1487
 
     #: - [TCP] DocStor
     #: - [UDP] DocStor
-    docstor = 1488, 'docstor', TransportProtocol.tcp
+    docstor = 1488
 
     #: - [TCP] dmdocbroker
     #: - [UDP] dmdocbroker
-    dmdocbroker = 1489, 'dmdocbroker', TransportProtocol.tcp
+    dmdocbroker = 1489
 
     #: - [TCP] insitu-conf
     #: - [UDP] insitu-conf
-    insitu_conf = 1490, 'insitu-conf', TransportProtocol.tcp
+    insitu_conf = 1490, 'insitu-conf'
 
     #: - [TCP] stone-design-1
     #: - [UDP] stone-design-1
-    stone_design_1 = 1492, 'stone-design-1', TransportProtocol.tcp
+    stone_design_1 = 1492, 'stone-design-1'
 
     #: - [TCP] netmap_lm IANA assigned this well-formed service name as a replacement
     #:   for "netmap_lm".
@@ -5735,255 +5735,255 @@ class TCP(AppType):
     #: - [UDP] netmap_lm IANA assigned this well-formed service name as a replacement
     #:   for "netmap_lm".
     #: - [UDP] netmap_lm
-    netmap_lm = 1493, 'netmap-lm', TransportProtocol.tcp
+    netmap_lm = 1493, 'netmap-lm'
 
     #: - [TCP] ica
     #: - [UDP] ica
-    ica = 1494, 'ica', TransportProtocol.tcp
+    ica = 1494
 
     #: - [TCP] cvc
     #: - [UDP] cvc
-    cvc = 1495, 'cvc', TransportProtocol.tcp
+    cvc = 1495
 
     #: - [TCP] liberty-lm
     #: - [UDP] liberty-lm
-    liberty_lm = 1496, 'liberty-lm', TransportProtocol.tcp
+    liberty_lm = 1496, 'liberty-lm'
 
     #: - [TCP] rfx-lm
     #: - [UDP] rfx-lm
-    rfx_lm = 1497, 'rfx-lm', TransportProtocol.tcp
+    rfx_lm = 1497, 'rfx-lm'
 
     #: - [TCP] Sybase SQL Any
     #: - [UDP] Sybase SQL Any
-    sybase_sqlany = 1498, 'sybase-sqlany', TransportProtocol.tcp
+    sybase_sqlany = 1498, 'sybase-sqlany'
 
     #: - [TCP] Federico Heinz Consultora
     #: - [UDP] Federico Heinz Consultora
-    fhc = 1499, 'fhc', TransportProtocol.tcp
+    fhc = 1499
 
     #: - [TCP] VLSI License Manager
     #: - [UDP] VLSI License Manager
-    vlsi_lm = 1500, 'vlsi-lm', TransportProtocol.tcp
+    vlsi_lm = 1500, 'vlsi-lm'
 
     #: - [TCP] Satellite-data Acquisition System 3
     #: - [UDP] Satellite-data Acquisition System 3
-    saiscm = 1501, 'saiscm', TransportProtocol.tcp
+    saiscm = 1501
 
     #: - [TCP] Shiva
     #: - [UDP] Shiva
-    shivadiscovery = 1502, 'shivadiscovery', TransportProtocol.tcp
+    shivadiscovery = 1502
 
     #: - [TCP] Databeam
     #: - [UDP] Databeam
-    imtc_mcs = 1503, 'imtc-mcs', TransportProtocol.tcp
+    imtc_mcs = 1503, 'imtc-mcs'
 
     #: - [TCP] EVB Software Engineering License Manager
     #: - [UDP] EVB Software Engineering License Manager
-    evb_elm = 1504, 'evb-elm', TransportProtocol.tcp
+    evb_elm = 1504, 'evb-elm'
 
     #: - [TCP] Funk Software, Inc.
     #: - [UDP] Funk Software, Inc.
-    funkproxy = 1505, 'funkproxy', TransportProtocol.tcp
+    funkproxy = 1505
 
     #: - [TCP] Universal Time daemon (utcd)
     #: - [UDP] Universal Time daemon (utcd)
-    utcd = 1506, 'utcd', TransportProtocol.tcp
+    utcd = 1506
 
     #: - [TCP] symplex
     #: - [UDP] symplex
-    symplex = 1507, 'symplex', TransportProtocol.tcp
+    symplex = 1507
 
     #: - [TCP] diagmond
     #: - [UDP] diagmond
-    diagmond = 1508, 'diagmond', TransportProtocol.tcp
+    diagmond = 1508
 
     #: - [TCP] Robcad, Ltd. License Manager
     #: - [UDP] Robcad, Ltd. License Manager
-    robcad_lm = 1509, 'robcad-lm', TransportProtocol.tcp
+    robcad_lm = 1509, 'robcad-lm'
 
     #: - [TCP] Midland Valley Exploration Ltd. Lic. Man.
     #: - [UDP] Midland Valley Exploration Ltd. Lic. Man.
-    mvx_lm = 1510, 'mvx-lm', TransportProtocol.tcp
+    mvx_lm = 1510, 'mvx-lm'
 
     #: - [TCP] 3l-l1
     #: - [UDP] 3l-l1
-    TCP_3l_l1 = 1511, '3l-l1', TransportProtocol.tcp
+    TCP_3l_l1 = 1511, '3l-l1'
 
     #: - [TCP] Microsoft's Windows Internet Name Service
     #: - [UDP] Microsoft's Windows Internet Name Service
-    wins = 1512, 'wins', TransportProtocol.tcp
+    wins = 1512
 
     #: - [TCP] Fujitsu Systems Business of America, Inc
     #: - [UDP] Fujitsu Systems Business of America, Inc
-    fujitsu_dtc = 1513, 'fujitsu-dtc', TransportProtocol.tcp
+    fujitsu_dtc = 1513, 'fujitsu-dtc'
 
     #: - [TCP] Fujitsu Systems Business of America, Inc
     #: - [UDP] Fujitsu Systems Business of America, Inc
-    fujitsu_dtcns = 1514, 'fujitsu-dtcns', TransportProtocol.tcp
+    fujitsu_dtcns = 1514, 'fujitsu-dtcns'
 
     #: - [TCP] ifor-protocol
     #: - [UDP] ifor-protocol
-    ifor_protocol = 1515, 'ifor-protocol', TransportProtocol.tcp
+    ifor_protocol = 1515, 'ifor-protocol'
 
     #: - [TCP] Virtual Places Audio data
     #: - [UDP] Virtual Places Audio data
-    vpad = 1516, 'vpad', TransportProtocol.tcp
+    vpad = 1516
 
     #: - [TCP] Virtual Places Audio control
     #: - [UDP] Virtual Places Audio control
-    vpac = 1517, 'vpac', TransportProtocol.tcp
+    vpac = 1517
 
     #: - [TCP] Virtual Places Video data
     #: - [UDP] Virtual Places Video data
-    vpvd = 1518, 'vpvd', TransportProtocol.tcp
+    vpvd = 1518
 
     #: - [TCP] Virtual Places Video control
     #: - [UDP] Virtual Places Video control
-    vpvc = 1519, 'vpvc', TransportProtocol.tcp
+    vpvc = 1519
 
     #: - [TCP] atm zip office
     #: - [UDP] atm zip office
-    atm_zip_office = 1520, 'atm-zip-office', TransportProtocol.tcp
+    atm_zip_office = 1520, 'atm-zip-office'
 
     #: - [TCP] nCube License Manager
     #: - [UDP] nCube License Manager
-    ncube_lm = 1521, 'ncube-lm', TransportProtocol.tcp
+    ncube_lm = 1521, 'ncube-lm'
 
     #: - [TCP] cichild
     #: - [UDP] cichild
-    cichild_lm = 1523, 'cichild-lm', TransportProtocol.tcp
+    cichild_lm = 1523, 'cichild-lm'
 
     #: - [TCP] ingres
     #: - [UDP] ingres
-    ingreslock = 1524, 'ingreslock', TransportProtocol.tcp
+    ingreslock = 1524
 
     #: - [TCP] oracle
     #: - [UDP] oracle
-    orasrv = 1525, 'orasrv', TransportProtocol.tcp
+    orasrv = 1525
 
     #: - [TCP] Prospero Directory Service non-priv
     #: - [UDP] Prospero Directory Service non-priv
-    prospero_np = 1525, 'prospero-np', TransportProtocol.tcp
+    prospero_np = 1525, 'prospero-np'
 
     #: - [TCP] Prospero Data Access Prot non-priv
     #: - [UDP] Prospero Data Access Prot non-priv
-    pdap_np = 1526, 'pdap-np', TransportProtocol.tcp
+    pdap_np = 1526, 'pdap-np'
 
     #: - [TCP] oracle
     #: - [UDP] oracle
-    tlisrv = 1527, 'tlisrv', TransportProtocol.tcp
+    tlisrv = 1527
 
     #: - [TCP] Not Only a Routeing Protocol
     #: - [UDP] Not Only a Routeing Protocol
     #: - [SCTP] Not Only a Routeing Protocol
-    norp = 1528, 'norp', TransportProtocol.tcp
+    norp = 1528
 
     #: - [TCP] oracle
     #: - [UDP] oracle
-    coauthor = 1529, 'coauthor', TransportProtocol.tcp
+    coauthor = 1529
 
     #: - [TCP] rap-service
     #: - [UDP] rap-service
-    rap_service = 1530, 'rap-service', TransportProtocol.tcp
+    rap_service = 1530, 'rap-service'
 
     #: - [TCP] rap-listen
     #: - [UDP] rap-listen
-    rap_listen = 1531, 'rap-listen', TransportProtocol.tcp
+    rap_listen = 1531, 'rap-listen'
 
     #: - [TCP] miroconnect
     #: - [UDP] miroconnect
-    miroconnect = 1532, 'miroconnect', TransportProtocol.tcp
+    miroconnect = 1532
 
     #: - [TCP] Virtual Places Software
     #: - [UDP] Virtual Places Software
-    virtual_places = 1533, 'virtual-places', TransportProtocol.tcp
+    virtual_places = 1533, 'virtual-places'
 
     #: - [TCP] micromuse-lm
     #: - [UDP] micromuse-lm
-    micromuse_lm = 1534, 'micromuse-lm', TransportProtocol.tcp
+    micromuse_lm = 1534, 'micromuse-lm'
 
     #: - [TCP] ampr-info
     #: - [UDP] ampr-info
-    ampr_info = 1535, 'ampr-info', TransportProtocol.tcp
+    ampr_info = 1535, 'ampr-info'
 
     #: - [TCP] ampr-inter
     #: - [UDP] ampr-inter
-    ampr_inter = 1536, 'ampr-inter', TransportProtocol.tcp
+    ampr_inter = 1536, 'ampr-inter'
 
     #: - [TCP] isi-lm
     #: - [UDP] isi-lm
-    sdsc_lm = 1537, 'sdsc-lm', TransportProtocol.tcp
+    sdsc_lm = 1537, 'sdsc-lm'
 
     #: - [TCP] 3ds-lm
     #: - [UDP] 3ds-lm
-    TCP_3ds_lm = 1538, '3ds-lm', TransportProtocol.tcp
+    TCP_3ds_lm = 1538, '3ds-lm'
 
     #: - [TCP] Intellistor License Manager
     #: - [UDP] Intellistor License Manager
-    intellistor_lm = 1539, 'intellistor-lm', TransportProtocol.tcp
+    intellistor_lm = 1539, 'intellistor-lm'
 
     #: - [TCP] rds
     #: - [UDP] rds
-    rds = 1540, 'rds', TransportProtocol.tcp
+    rds = 1540
 
     #: - [TCP] rds2
     #: - [UDP] rds2
-    rds2 = 1541, 'rds2', TransportProtocol.tcp
+    rds2 = 1541
 
     #: - [TCP] gridgen-elmd
     #: - [UDP] gridgen-elmd
-    gridgen_elmd = 1542, 'gridgen-elmd', TransportProtocol.tcp
+    gridgen_elmd = 1542, 'gridgen-elmd'
 
     #: - [TCP] simba-cs
     #: - [UDP] simba-cs
-    simba_cs = 1543, 'simba-cs', TransportProtocol.tcp
+    simba_cs = 1543, 'simba-cs'
 
     #: - [TCP] aspeclmd
     #: - [UDP] aspeclmd
-    aspeclmd = 1544, 'aspeclmd', TransportProtocol.tcp
+    aspeclmd = 1544
 
     #: - [TCP] vistium-share
     #: - [UDP] vistium-share
-    vistium_share = 1545, 'vistium-share', TransportProtocol.tcp
+    vistium_share = 1545, 'vistium-share'
 
     #: - [TCP] abbaccuray
     #: - [UDP] abbaccuray
-    abbaccuray = 1546, 'abbaccuray', TransportProtocol.tcp
+    abbaccuray = 1546
 
     #: - [TCP] laplink
     #: - [UDP] laplink
-    laplink = 1547, 'laplink', TransportProtocol.tcp
+    laplink = 1547
 
     #: - [TCP] Axon License Manager
     #: - [UDP] Axon License Manager
-    axon_lm = 1548, 'axon-lm', TransportProtocol.tcp
+    axon_lm = 1548, 'axon-lm'
 
     #: [TCP] Shiva Hose
-    shivahose = 1549, 'shivahose', TransportProtocol.tcp
+    shivahose = 1549
 
     #: - [TCP] Image Storage license manager 3M Company
     #: - [UDP] Image Storage license manager 3M Company
-    TCP_3m_image_lm = 1550, '3m-image-lm', TransportProtocol.tcp
+    TCP_3m_image_lm = 1550, '3m-image-lm'
 
     #: - [TCP] HECMTL-DB
     #: - [UDP] HECMTL-DB
-    hecmtl_db = 1551, 'hecmtl-db', TransportProtocol.tcp
+    hecmtl_db = 1551, 'hecmtl-db'
 
     #: - [TCP] pciarray
     #: - [UDP] pciarray
-    pciarray = 1552, 'pciarray', TransportProtocol.tcp
+    pciarray = 1552
 
     #: - [TCP] sna-cs
     #: - [UDP] sna-cs
-    sna_cs = 1553, 'sna-cs', TransportProtocol.tcp
+    sna_cs = 1553, 'sna-cs'
 
     #: - [TCP] CACI Products Company License Manager
     #: - [UDP] CACI Products Company License Manager
-    caci_lm = 1554, 'caci-lm', TransportProtocol.tcp
+    caci_lm = 1554, 'caci-lm'
 
     #: - [TCP] livelan
     #: - [UDP] livelan
-    livelan = 1555, 'livelan', TransportProtocol.tcp
+    livelan = 1555
 
     #: - [TCP] VERITAS Private Branch Exchange IANA assigned this well-formed service
     #:   name as a replacement for "veritas_pbx".
@@ -5991,126 +5991,126 @@ class TCP(AppType):
     #: - [UDP] VERITAS Private Branch Exchange IANA assigned this well-formed service
     #:   name as a replacement for "veritas_pbx".
     #: - [UDP] VERITAS Private Branch Exchange
-    veritas_pbx = 1556, 'veritas-pbx', TransportProtocol.tcp
+    veritas_pbx = 1556, 'veritas-pbx'
 
     #: - [TCP] ArborText License Manager
     #: - [UDP] ArborText License Manager
-    arbortext_lm = 1557, 'arbortext-lm', TransportProtocol.tcp
+    arbortext_lm = 1557, 'arbortext-lm'
 
     #: - [TCP] xingmpeg
     #: - [UDP] xingmpeg
-    xingmpeg = 1558, 'xingmpeg', TransportProtocol.tcp
+    xingmpeg = 1558
 
     #: - [TCP] web2host
     #: - [UDP] web2host
-    web2host = 1559, 'web2host', TransportProtocol.tcp
+    web2host = 1559
 
     #: - [TCP] ASCI-RemoteSHADOW
     #: - [UDP] ASCI-RemoteSHADOW
-    asci_val = 1560, 'asci-val', TransportProtocol.tcp
+    asci_val = 1560, 'asci-val'
 
     #: - [TCP] facilityview
     #: - [UDP] facilityview
-    facilityview = 1561, 'facilityview', TransportProtocol.tcp
+    facilityview = 1561
 
     #: - [TCP] pconnectmgr
     #: - [UDP] pconnectmgr
-    pconnectmgr = 1562, 'pconnectmgr', TransportProtocol.tcp
+    pconnectmgr = 1562
 
     #: - [TCP] Cadabra License Manager
     #: - [UDP] Cadabra License Manager
-    cadabra_lm = 1563, 'cadabra-lm', TransportProtocol.tcp
+    cadabra_lm = 1563, 'cadabra-lm'
 
     #: - [TCP] Pay-Per-View
     #: - [UDP] Pay-Per-View
-    pay_per_view = 1564, 'pay-per-view', TransportProtocol.tcp
+    pay_per_view = 1564, 'pay-per-view'
 
     #: - [TCP] WinDD
     #: - [UDP] WinDD
-    winddlb = 1565, 'winddlb', TransportProtocol.tcp
+    winddlb = 1565
 
     #: - [TCP] CORELVIDEO
     #: - [UDP] CORELVIDEO
-    corelvideo = 1566, 'corelvideo', TransportProtocol.tcp
+    corelvideo = 1566
 
     #: - [TCP] jlicelmd
     #: - [UDP] jlicelmd
-    jlicelmd = 1567, 'jlicelmd', TransportProtocol.tcp
+    jlicelmd = 1567
 
     #: - [TCP] tsspmap
     #: - [UDP] tsspmap
-    tsspmap = 1568, 'tsspmap', TransportProtocol.tcp
+    tsspmap = 1568
 
     #: - [TCP] ets
     #: - [UDP] ets
-    ets = 1569, 'ets', TransportProtocol.tcp
+    ets = 1569
 
     #: - [TCP] orbixd
     #: - [UDP] orbixd
-    orbixd = 1570, 'orbixd', TransportProtocol.tcp
+    orbixd = 1570
 
     #: - [TCP] Oracle Remote Data Base
     #: - [UDP] Oracle Remote Data Base
-    rdb_dbs_disp = 1571, 'rdb-dbs-disp', TransportProtocol.tcp
+    rdb_dbs_disp = 1571, 'rdb-dbs-disp'
 
     #: - [TCP] Chipcom License Manager
     #: - [UDP] Chipcom License Manager
-    chip_lm = 1572, 'chip-lm', TransportProtocol.tcp
+    chip_lm = 1572, 'chip-lm'
 
     #: - [TCP] itscomm-ns
     #: - [UDP] itscomm-ns
-    itscomm_ns = 1573, 'itscomm-ns', TransportProtocol.tcp
+    itscomm_ns = 1573, 'itscomm-ns'
 
     #: - [TCP] mvel-lm
     #: - [UDP] mvel-lm
-    mvel_lm = 1574, 'mvel-lm', TransportProtocol.tcp
+    mvel_lm = 1574, 'mvel-lm'
 
     #: - [TCP] oraclenames
     #: - [UDP] oraclenames
-    oraclenames = 1575, 'oraclenames', TransportProtocol.tcp
+    oraclenames = 1575
 
     #: - [TCP] Moldflow License Manager
     #: - [UDP] Moldflow License Manager
-    moldflow_lm = 1576, 'moldflow-lm', TransportProtocol.tcp
+    moldflow_lm = 1576, 'moldflow-lm'
 
     #: - [TCP] hypercube-lm
     #: - [UDP] hypercube-lm
-    hypercube_lm = 1577, 'hypercube-lm', TransportProtocol.tcp
+    hypercube_lm = 1577, 'hypercube-lm'
 
     #: - [TCP] Jacobus License Manager
     #: - [UDP] Jacobus License Manager
-    jacobus_lm = 1578, 'jacobus-lm', TransportProtocol.tcp
+    jacobus_lm = 1578, 'jacobus-lm'
 
     #: - [TCP] ioc-sea-lm
     #: - [UDP] ioc-sea-lm
-    ioc_sea_lm = 1579, 'ioc-sea-lm', TransportProtocol.tcp
+    ioc_sea_lm = 1579, 'ioc-sea-lm'
 
     #: [TCP] tn-tl-r1
-    tn_tl_r1 = 1580, 'tn-tl-r1', TransportProtocol.tcp
+    tn_tl_r1 = 1580, 'tn-tl-r1'
 
     #: - [TCP] MIL-2045-47001
     #: - [UDP] MIL-2045-47001
-    mil_2045_47001 = 1581, 'mil-2045-47001', TransportProtocol.tcp
+    mil_2045_47001 = 1581, 'mil-2045-47001'
 
     #: - [TCP] MSIMS
     #: - [UDP] MSIMS
-    msims = 1582, 'msims', TransportProtocol.tcp
+    msims = 1582
 
     #: - [TCP] simbaexpress
     #: - [UDP] simbaexpress
-    simbaexpress = 1583, 'simbaexpress', TransportProtocol.tcp
+    simbaexpress = 1583
 
     #: - [TCP] tn-tl-fd2
     #: - [UDP] tn-tl-fd2
-    tn_tl_fd2 = 1584, 'tn-tl-fd2', TransportProtocol.tcp
+    tn_tl_fd2 = 1584, 'tn-tl-fd2'
 
     #: - [TCP] intv
     #: - [UDP] intv
-    intv = 1585, 'intv', TransportProtocol.tcp
+    intv = 1585
 
     #: - [TCP] ibm-abtact
     #: - [UDP] ibm-abtact
-    ibm_abtact = 1586, 'ibm-abtact', TransportProtocol.tcp
+    ibm_abtact = 1586, 'ibm-abtact'
 
     #: - [TCP] pra_elmd IANA assigned this well-formed service name as a replacement
     #:   for "pra_elmd".
@@ -6118,258 +6118,258 @@ class TCP(AppType):
     #: - [UDP] pra_elmd IANA assigned this well-formed service name as a replacement
     #:   for "pra_elmd".
     #: - [UDP] pra_elmd
-    pra_elmd = 1587, 'pra-elmd', TransportProtocol.tcp
+    pra_elmd = 1587, 'pra-elmd'
 
     #: - [TCP] triquest-lm
     #: - [UDP] triquest-lm
-    triquest_lm = 1588, 'triquest-lm', TransportProtocol.tcp
+    triquest_lm = 1588, 'triquest-lm'
 
     #: - [TCP] VQP
     #: - [UDP] VQP
-    vqp = 1589, 'vqp', TransportProtocol.tcp
+    vqp = 1589
 
     #: - [TCP] gemini-lm
     #: - [UDP] gemini-lm
-    gemini_lm = 1590, 'gemini-lm', TransportProtocol.tcp
+    gemini_lm = 1590, 'gemini-lm'
 
     #: - [TCP] ncpm-pm
     #: - [UDP] ncpm-pm
-    ncpm_pm = 1591, 'ncpm-pm', TransportProtocol.tcp
+    ncpm_pm = 1591, 'ncpm-pm'
 
     #: - [TCP] commonspace
     #: - [UDP] commonspace
-    commonspace = 1592, 'commonspace', TransportProtocol.tcp
+    commonspace = 1592
 
     #: - [TCP] mainsoft-lm
     #: - [UDP] mainsoft-lm
-    mainsoft_lm = 1593, 'mainsoft-lm', TransportProtocol.tcp
+    mainsoft_lm = 1593, 'mainsoft-lm'
 
     #: - [TCP] sixtrak
     #: - [UDP] sixtrak
-    sixtrak = 1594, 'sixtrak', TransportProtocol.tcp
+    sixtrak = 1594
 
     #: - [TCP] radio
     #: - [UDP] radio
-    radio = 1595, 'radio', TransportProtocol.tcp
+    radio = 1595
 
     #: [TCP] radio-sm
-    radio_sm = 1596, 'radio-sm', TransportProtocol.tcp
+    radio_sm = 1596, 'radio-sm'
 
     #: - [TCP] orbplus-iiop
     #: - [UDP] orbplus-iiop
-    orbplus_iiop = 1597, 'orbplus-iiop', TransportProtocol.tcp
+    orbplus_iiop = 1597, 'orbplus-iiop'
 
     #: - [TCP] picknfs
     #: - [UDP] picknfs
-    picknfs = 1598, 'picknfs', TransportProtocol.tcp
+    picknfs = 1598
 
     #: - [TCP] simbaservices
     #: - [UDP] simbaservices
-    simbaservices = 1599, 'simbaservices', TransportProtocol.tcp
+    simbaservices = 1599
 
     #: - [TCP] issd
     #: - [UDP] issd
-    issd = 1600, 'issd', TransportProtocol.tcp
+    issd = 1600
 
     #: - [TCP] aas
     #: - [UDP] aas
-    aas = 1601, 'aas', TransportProtocol.tcp
+    aas = 1601
 
     #: - [TCP] inspect
     #: - [UDP] inspect
-    inspect = 1602, 'inspect', TransportProtocol.tcp
+    inspect = 1602
 
     #: - [TCP] pickodbc
     #: - [UDP] pickodbc
-    picodbc = 1603, 'picodbc', TransportProtocol.tcp
+    picodbc = 1603
 
     #: - [TCP] icabrowser
     #: - [UDP] icabrowser
-    icabrowser = 1604, 'icabrowser', TransportProtocol.tcp
+    icabrowser = 1604
 
     #: - [TCP] Salutation Manager (Salutation Protocol)
     #: - [UDP] Salutation Manager (Salutation Protocol)
-    slp = 1605, 'slp', TransportProtocol.tcp
+    slp = 1605
 
     #: - [TCP] Salutation Manager (SLM-API)
     #: - [UDP] Salutation Manager (SLM-API)
-    slm_api = 1606, 'slm-api', TransportProtocol.tcp
+    slm_api = 1606, 'slm-api'
 
     #: - [TCP] stt
     #: - [UDP] stt
-    stt = 1607, 'stt', TransportProtocol.tcp
+    stt = 1607
 
     #: - [TCP] Smart Corp. License Manager
     #: - [UDP] Smart Corp. License Manager
-    smart_lm = 1608, 'smart-lm', TransportProtocol.tcp
+    smart_lm = 1608, 'smart-lm'
 
     #: - [TCP] isysg-lm
     #: - [UDP] isysg-lm
-    isysg_lm = 1609, 'isysg-lm', TransportProtocol.tcp
+    isysg_lm = 1609, 'isysg-lm'
 
     #: - [TCP] taurus-wh
     #: - [UDP] taurus-wh
-    taurus_wh = 1610, 'taurus-wh', TransportProtocol.tcp
+    taurus_wh = 1610, 'taurus-wh'
 
     #: - [TCP] Inter Library Loan
     #: - [UDP] Inter Library Loan
-    ill = 1611, 'ill', TransportProtocol.tcp
+    ill = 1611
 
     #: - [TCP] NetBill Transaction Server
     #: - [UDP] NetBill Transaction Server
-    netbill_trans = 1612, 'netbill-trans', TransportProtocol.tcp
+    netbill_trans = 1612, 'netbill-trans'
 
     #: - [TCP] NetBill Key Repository
     #: - [UDP] NetBill Key Repository
-    netbill_keyrep = 1613, 'netbill-keyrep', TransportProtocol.tcp
+    netbill_keyrep = 1613, 'netbill-keyrep'
 
     #: - [TCP] NetBill Credential Server
     #: - [UDP] NetBill Credential Server
-    netbill_cred = 1614, 'netbill-cred', TransportProtocol.tcp
+    netbill_cred = 1614, 'netbill-cred'
 
     #: - [TCP] NetBill Authorization Server
     #: - [UDP] NetBill Authorization Server
-    netbill_auth = 1615, 'netbill-auth', TransportProtocol.tcp
+    netbill_auth = 1615, 'netbill-auth'
 
     #: - [TCP] NetBill Product Server
     #: - [UDP] NetBill Product Server
-    netbill_prod = 1616, 'netbill-prod', TransportProtocol.tcp
+    netbill_prod = 1616, 'netbill-prod'
 
     #: - [TCP] Nimrod Inter-Agent Communication
     #: - [UDP] Nimrod Inter-Agent Communication
-    nimrod_agent = 1617, 'nimrod-agent', TransportProtocol.tcp
+    nimrod_agent = 1617, 'nimrod-agent'
 
     #: - [TCP] skytelnet
     #: - [UDP] skytelnet
-    skytelnet = 1618, 'skytelnet', TransportProtocol.tcp
+    skytelnet = 1618
 
     #: - [TCP] xs-openstorage
     #: - [UDP] xs-openstorage
-    xs_openstorage = 1619, 'xs-openstorage', TransportProtocol.tcp
+    xs_openstorage = 1619, 'xs-openstorage'
 
     #: - [TCP] faxportwinport
     #: - [UDP] faxportwinport
-    faxportwinport = 1620, 'faxportwinport', TransportProtocol.tcp
+    faxportwinport = 1620
 
     #: - [TCP] softdataphone
     #: - [UDP] softdataphone
-    softdataphone = 1621, 'softdataphone', TransportProtocol.tcp
+    softdataphone = 1621
 
     #: - [TCP] ontime
     #: - [UDP] ontime
-    ontime = 1622, 'ontime', TransportProtocol.tcp
+    ontime = 1622
 
     #: - [TCP] jaleosnd
     #: - [UDP] jaleosnd
-    jaleosnd = 1623, 'jaleosnd', TransportProtocol.tcp
+    jaleosnd = 1623
 
     #: - [TCP] udp-sr-port
     #: - [UDP] udp-sr-port
-    udp_sr_port = 1624, 'udp-sr-port', TransportProtocol.tcp
+    udp_sr_port = 1624, 'udp-sr-port'
 
     #: - [TCP] svs-omagent
     #: - [UDP] svs-omagent
-    svs_omagent = 1625, 'svs-omagent', TransportProtocol.tcp
+    svs_omagent = 1625, 'svs-omagent'
 
     #: - [TCP] Shockwave
     #: - [UDP] Shockwave
-    shockwave = 1626, 'shockwave', TransportProtocol.tcp
+    shockwave = 1626
 
     #: - [TCP] T.128 Gateway
     #: - [UDP] T.128 Gateway
-    t128_gateway = 1627, 't128-gateway', TransportProtocol.tcp
+    t128_gateway = 1627, 't128-gateway'
 
     #: - [TCP] LonTalk normal
     #: - [UDP] LonTalk normal
-    lontalk_norm = 1628, 'lontalk-norm', TransportProtocol.tcp
+    lontalk_norm = 1628, 'lontalk-norm'
 
     #: - [TCP] LonTalk urgent
     #: - [UDP] LonTalk urgent
-    lontalk_urgnt = 1629, 'lontalk-urgnt', TransportProtocol.tcp
+    lontalk_urgnt = 1629, 'lontalk-urgnt'
 
     #: - [TCP] Oracle Net8 Cman
     #: - [UDP] Oracle Net8 Cman
-    oraclenet8cman = 1630, 'oraclenet8cman', TransportProtocol.tcp
+    oraclenet8cman = 1630
 
     #: - [TCP] Visit view
     #: - [UDP] Visit view
-    visitview = 1631, 'visitview', TransportProtocol.tcp
+    visitview = 1631
 
     #: - [TCP] PAMMRATC
     #: - [UDP] PAMMRATC
-    pammratc = 1632, 'pammratc', TransportProtocol.tcp
+    pammratc = 1632
 
     #: - [TCP] PAMMRPC
     #: - [UDP] PAMMRPC
-    pammrpc = 1633, 'pammrpc', TransportProtocol.tcp
+    pammrpc = 1633
 
     #: - [TCP] Log On America Probe
     #: - [UDP] Log On America Probe
-    loaprobe = 1634, 'loaprobe', TransportProtocol.tcp
+    loaprobe = 1634
 
     #: - [TCP] EDB Server 1
     #: - [UDP] EDB Server 1
-    edb_server1 = 1635, 'edb-server1', TransportProtocol.tcp
+    edb_server1 = 1635, 'edb-server1'
 
     #: - [TCP] ISP shared public data control
     #: - [UDP] ISP shared public data control
-    isdc = 1636, 'isdc', TransportProtocol.tcp
+    isdc = 1636
 
     #: - [TCP] ISP shared local data control
     #: - [UDP] ISP shared local data control
-    islc = 1637, 'islc', TransportProtocol.tcp
+    islc = 1637
 
     #: - [TCP] ISP shared management control
     #: - [UDP] ISP shared management control
-    ismc = 1638, 'ismc', TransportProtocol.tcp
+    ismc = 1638
 
     #: - [TCP] cert-initiator
     #: - [UDP] cert-initiator
-    cert_initiator = 1639, 'cert-initiator', TransportProtocol.tcp
+    cert_initiator = 1639, 'cert-initiator'
 
     #: - [TCP] cert-responder
     #: - [UDP] cert-responder
-    cert_responder = 1640, 'cert-responder', TransportProtocol.tcp
+    cert_responder = 1640, 'cert-responder'
 
     #: - [TCP] InVision
     #: - [UDP] InVision
-    invision = 1641, 'invision', TransportProtocol.tcp
+    invision = 1641
 
     #: - [TCP] isis-am
     #: - [UDP] isis-am
-    isis_am = 1642, 'isis-am', TransportProtocol.tcp
+    isis_am = 1642, 'isis-am'
 
     #: - [TCP] isis-ambc
     #: - [UDP] isis-ambc
-    isis_ambc = 1643, 'isis-ambc', TransportProtocol.tcp
+    isis_ambc = 1643, 'isis-ambc'
 
     #: - [TCP] Satellite-data Acquisition System 4
     #: - [UDP] Satellite-data Acquisition System 4
-    saiseh = 1644, 'saiseh', TransportProtocol.tcp
+    saiseh = 1644
 
     #: - [TCP] SightLine
     #: - [UDP] SightLine
-    sightline = 1645, 'sightline', TransportProtocol.tcp
+    sightline = 1645
 
     #: - [TCP] sa-msg-port
     #: - [UDP] sa-msg-port
-    sa_msg_port = 1646, 'sa-msg-port', TransportProtocol.tcp
+    sa_msg_port = 1646, 'sa-msg-port'
 
     #: - [TCP] rsap
     #: - [UDP] rsap
-    rsap = 1647, 'rsap', TransportProtocol.tcp
+    rsap = 1647
 
     #: - [TCP] concurrent-lm
     #: - [UDP] concurrent-lm
-    concurrent_lm = 1648, 'concurrent-lm', TransportProtocol.tcp
+    concurrent_lm = 1648, 'concurrent-lm'
 
     #: - [TCP] kermit
     #: - [UDP] kermit
-    kermit = 1649, 'kermit', TransportProtocol.tcp
+    kermit = 1649
 
     #: - [TCP] nkdn
     #: - [UDP] nkd
-    nkd = 1650, 'nkd', TransportProtocol.tcp
+    nkd = 1650
 
     #: - [TCP] shiva_confsrvr IANA assigned this well-formed service name as a
     #:   replacement for "shiva_confsrvr".
@@ -6377,2268 +6377,2268 @@ class TCP(AppType):
     #: - [UDP] shiva_confsrvr IANA assigned this well-formed service name as a
     #:   replacement for "shiva_confsrvr".
     #: - [UDP] shiva_confsrvr
-    shiva_confsrvr = 1651, 'shiva-confsrvr', TransportProtocol.tcp
+    shiva_confsrvr = 1651, 'shiva-confsrvr'
 
     #: - [TCP] xnmp
     #: - [UDP] xnmp
-    xnmp = 1652, 'xnmp', TransportProtocol.tcp
+    xnmp = 1652
 
     #: - [TCP] alphatech-lm
     #: - [UDP] alphatech-lm
-    alphatech_lm = 1653, 'alphatech-lm', TransportProtocol.tcp
+    alphatech_lm = 1653, 'alphatech-lm'
 
     #: - [TCP] stargatealerts
     #: - [UDP] stargatealerts
-    stargatealerts = 1654, 'stargatealerts', TransportProtocol.tcp
+    stargatealerts = 1654
 
     #: - [TCP] dec-mbadmin
     #: - [UDP] dec-mbadmin
-    dec_mbadmin = 1655, 'dec-mbadmin', TransportProtocol.tcp
+    dec_mbadmin = 1655, 'dec-mbadmin'
 
     #: - [TCP] dec-mbadmin-h
     #: - [UDP] dec-mbadmin-h
-    dec_mbadmin_h = 1656, 'dec-mbadmin-h', TransportProtocol.tcp
+    dec_mbadmin_h = 1656, 'dec-mbadmin-h'
 
     #: - [TCP] fujitsu-mmpdc
     #: - [UDP] fujitsu-mmpdc
-    fujitsu_mmpdc = 1657, 'fujitsu-mmpdc', TransportProtocol.tcp
+    fujitsu_mmpdc = 1657, 'fujitsu-mmpdc'
 
     #: - [TCP] sixnetudr
     #: - [UDP] sixnetudr
-    sixnetudr = 1658, 'sixnetudr', TransportProtocol.tcp
+    sixnetudr = 1658
 
     #: - [TCP] Silicon Grail License Manager
     #: - [UDP] Silicon Grail License Manager
-    sg_lm = 1659, 'sg-lm', TransportProtocol.tcp
+    sg_lm = 1659, 'sg-lm'
 
     #: - [TCP] skip-mc-gikreq
     #: - [UDP] skip-mc-gikreq
-    skip_mc_gikreq = 1660, 'skip-mc-gikreq', TransportProtocol.tcp
+    skip_mc_gikreq = 1660, 'skip-mc-gikreq'
 
     #: - [TCP] netview-aix-1
     #: - [UDP] netview-aix-1
-    netview_aix_1 = 1661, 'netview-aix-1', TransportProtocol.tcp
+    netview_aix_1 = 1661, 'netview-aix-1'
 
     #: - [TCP] netview-aix-2
     #: - [UDP] netview-aix-2
-    netview_aix_2 = 1662, 'netview-aix-2', TransportProtocol.tcp
+    netview_aix_2 = 1662, 'netview-aix-2'
 
     #: - [TCP] netview-aix-3
     #: - [UDP] netview-aix-3
-    netview_aix_3 = 1663, 'netview-aix-3', TransportProtocol.tcp
+    netview_aix_3 = 1663, 'netview-aix-3'
 
     #: - [TCP] netview-aix-4
     #: - [UDP] netview-aix-4
-    netview_aix_4 = 1664, 'netview-aix-4', TransportProtocol.tcp
+    netview_aix_4 = 1664, 'netview-aix-4'
 
     #: - [TCP] netview-aix-5
     #: - [UDP] netview-aix-5
-    netview_aix_5 = 1665, 'netview-aix-5', TransportProtocol.tcp
+    netview_aix_5 = 1665, 'netview-aix-5'
 
     #: - [TCP] netview-aix-6
     #: - [UDP] netview-aix-6
-    netview_aix_6 = 1666, 'netview-aix-6', TransportProtocol.tcp
+    netview_aix_6 = 1666, 'netview-aix-6'
 
     #: - [TCP] netview-aix-7
     #: - [UDP] netview-aix-7
-    netview_aix_7 = 1667, 'netview-aix-7', TransportProtocol.tcp
+    netview_aix_7 = 1667, 'netview-aix-7'
 
     #: - [TCP] netview-aix-8
     #: - [UDP] netview-aix-8
-    netview_aix_8 = 1668, 'netview-aix-8', TransportProtocol.tcp
+    netview_aix_8 = 1668, 'netview-aix-8'
 
     #: - [TCP] netview-aix-9
     #: - [UDP] netview-aix-9
-    netview_aix_9 = 1669, 'netview-aix-9', TransportProtocol.tcp
+    netview_aix_9 = 1669, 'netview-aix-9'
 
     #: - [TCP] netview-aix-10
     #: - [UDP] netview-aix-10
-    netview_aix_10 = 1670, 'netview-aix-10', TransportProtocol.tcp
+    netview_aix_10 = 1670, 'netview-aix-10'
 
     #: - [TCP] netview-aix-11
     #: - [UDP] netview-aix-11
-    netview_aix_11 = 1671, 'netview-aix-11', TransportProtocol.tcp
+    netview_aix_11 = 1671, 'netview-aix-11'
 
     #: - [TCP] netview-aix-12
     #: - [UDP] netview-aix-12
-    netview_aix_12 = 1672, 'netview-aix-12', TransportProtocol.tcp
+    netview_aix_12 = 1672, 'netview-aix-12'
 
     #: - [TCP] Intel Proshare Multicast
     #: - [UDP] Intel Proshare Multicast
-    proshare_mc_1 = 1673, 'proshare-mc-1', TransportProtocol.tcp
+    proshare_mc_1 = 1673, 'proshare-mc-1'
 
     #: - [TCP] Intel Proshare Multicast
     #: - [UDP] Intel Proshare Multicast
-    proshare_mc_2 = 1674, 'proshare-mc-2', TransportProtocol.tcp
+    proshare_mc_2 = 1674, 'proshare-mc-2'
 
     #: - [TCP] Pacific Data Products
     #: - [UDP] Pacific Data Products
-    pdp = 1675, 'pdp', TransportProtocol.tcp
+    pdp = 1675
 
     #: [TCP] netcomm1
-    netcomm1 = 1676, 'netcomm1', TransportProtocol.tcp
+    netcomm1 = 1676
 
     #: - [TCP] groupwise
     #: - [UDP] groupwise
-    groupwise = 1677, 'groupwise', TransportProtocol.tcp
+    groupwise = 1677
 
     #: - [TCP] prolink
     #: - [UDP] prolink
-    prolink = 1678, 'prolink', TransportProtocol.tcp
+    prolink = 1678
 
     #: - [TCP] darcorp-lm
     #: - [UDP] darcorp-lm
-    darcorp_lm = 1679, 'darcorp-lm', TransportProtocol.tcp
+    darcorp_lm = 1679, 'darcorp-lm'
 
     #: - [TCP] microcom-sbp
     #: - [UDP] microcom-sbp
-    microcom_sbp = 1680, 'microcom-sbp', TransportProtocol.tcp
+    microcom_sbp = 1680, 'microcom-sbp'
 
     #: - [TCP] sd-elmd
     #: - [UDP] sd-elmd
-    sd_elmd = 1681, 'sd-elmd', TransportProtocol.tcp
+    sd_elmd = 1681, 'sd-elmd'
 
     #: - [TCP] lanyon-lantern
     #: - [UDP] lanyon-lantern
-    lanyon_lantern = 1682, 'lanyon-lantern', TransportProtocol.tcp
+    lanyon_lantern = 1682, 'lanyon-lantern'
 
     #: - [TCP] ncpm-hip
     #: - [UDP] ncpm-hip
-    ncpm_hip = 1683, 'ncpm-hip', TransportProtocol.tcp
+    ncpm_hip = 1683, 'ncpm-hip'
 
     #: - [TCP] SnareSecure
     #: - [UDP] SnareSecure
-    snaresecure = 1684, 'snaresecure', TransportProtocol.tcp
+    snaresecure = 1684
 
     #: - [TCP] n2nremote
     #: - [UDP] n2nremote
-    n2nremote = 1685, 'n2nremote', TransportProtocol.tcp
+    n2nremote = 1685
 
     #: - [TCP] cvmon
     #: - [UDP] cvmon
-    cvmon = 1686, 'cvmon', TransportProtocol.tcp
+    cvmon = 1686
 
     #: - [TCP] nsjtp-ctrl
     #: - [UDP] nsjtp-ctrl
-    nsjtp_ctrl = 1687, 'nsjtp-ctrl', TransportProtocol.tcp
+    nsjtp_ctrl = 1687, 'nsjtp-ctrl'
 
     #: - [TCP] nsjtp-data
     #: - [UDP] nsjtp-data
-    nsjtp_data = 1688, 'nsjtp-data', TransportProtocol.tcp
+    nsjtp_data = 1688, 'nsjtp-data'
 
     #: - [TCP] firefox
     #: - [UDP] firefox
-    firefox = 1689, 'firefox', TransportProtocol.tcp
+    firefox = 1689
 
     #: - [TCP] ng-umds
     #: - [UDP] ng-umds
-    ng_umds = 1690, 'ng-umds', TransportProtocol.tcp
+    ng_umds = 1690, 'ng-umds'
 
     #: - [TCP] empire-empuma
     #: - [UDP] empire-empuma
-    empire_empuma = 1691, 'empire-empuma', TransportProtocol.tcp
+    empire_empuma = 1691, 'empire-empuma'
 
     #: - [TCP] sstsys-lm
     #: - [UDP] sstsys-lm
-    sstsys_lm = 1692, 'sstsys-lm', TransportProtocol.tcp
+    sstsys_lm = 1692, 'sstsys-lm'
 
     #: - [TCP] rrirtr
     #: - [UDP] rrirtr
-    rrirtr = 1693, 'rrirtr', TransportProtocol.tcp
+    rrirtr = 1693
 
     #: - [TCP] rrimwm
     #: - [UDP] rrimwm
-    rrimwm = 1694, 'rrimwm', TransportProtocol.tcp
+    rrimwm = 1694
 
     #: - [TCP] rrilwm
     #: - [UDP] rrilwm
-    rrilwm = 1695, 'rrilwm', TransportProtocol.tcp
+    rrilwm = 1695
 
     #: - [TCP] rrifmm
     #: - [UDP] rrifmm
-    rrifmm = 1696, 'rrifmm', TransportProtocol.tcp
+    rrifmm = 1696
 
     #: - [TCP] rrisat
     #: - [UDP] rrisat
-    rrisat = 1697, 'rrisat', TransportProtocol.tcp
+    rrisat = 1697
 
     #: - [TCP] RSVP-ENCAPSULATION-1
     #: - [UDP] RSVP-ENCAPSULATION-1
-    rsvp_encap_1 = 1698, 'rsvp-encap-1', TransportProtocol.tcp
+    rsvp_encap_1 = 1698, 'rsvp-encap-1'
 
     #: - [TCP] RSVP-ENCAPSULATION-2
     #: - [UDP] RSVP-ENCAPSULATION-2
-    rsvp_encap_2 = 1699, 'rsvp-encap-2', TransportProtocol.tcp
+    rsvp_encap_2 = 1699, 'rsvp-encap-2'
 
     #: - [TCP] mps-raft
     #: - [UDP] mps-raft
-    mps_raft = 1700, 'mps-raft', TransportProtocol.tcp
+    mps_raft = 1700, 'mps-raft'
 
     #: - [TCP] l2f
     #: - [UDP] l2f
-    l2f = 1701, 'l2f', TransportProtocol.tcp
+    l2f = 1701
 
     #: - [TCP] l2tp
     #: - [UDP] l2tp
-    l2tp = 1701, 'l2tp', TransportProtocol.tcp
+    l2tp = 1701
 
     #: - [TCP] deskshare
     #: - [UDP] deskshare
-    deskshare = 1702, 'deskshare', TransportProtocol.tcp
+    deskshare = 1702
 
     #: - [TCP] hb-engine
     #: - [UDP] hb-engine
-    hb_engine = 1703, 'hb-engine', TransportProtocol.tcp
+    hb_engine = 1703, 'hb-engine'
 
     #: - [TCP] bcs-broker
     #: - [UDP] bcs-broker
-    bcs_broker = 1704, 'bcs-broker', TransportProtocol.tcp
+    bcs_broker = 1704, 'bcs-broker'
 
     #: - [TCP] slingshot
     #: - [UDP] slingshot
-    slingshot = 1705, 'slingshot', TransportProtocol.tcp
+    slingshot = 1705
 
     #: - [TCP] jetform
     #: - [UDP] jetform
-    jetform = 1706, 'jetform', TransportProtocol.tcp
+    jetform = 1706
 
     #: - [TCP] vdmplay
     #: - [UDP] vdmplay
-    vdmplay = 1707, 'vdmplay', TransportProtocol.tcp
+    vdmplay = 1707
 
     #: - [TCP] gat-lmd
     #: - [UDP] gat-lmd
-    gat_lmd = 1708, 'gat-lmd', TransportProtocol.tcp
+    gat_lmd = 1708, 'gat-lmd'
 
     #: - [TCP] centra
     #: - [UDP] centra
-    centra = 1709, 'centra', TransportProtocol.tcp
+    centra = 1709
 
     #: - [TCP] impera
     #: - [UDP] impera
-    impera = 1710, 'impera', TransportProtocol.tcp
+    impera = 1710
 
     #: - [TCP] pptconference
     #: - [UDP] pptconference
-    pptconference = 1711, 'pptconference', TransportProtocol.tcp
+    pptconference = 1711
 
     #: - [TCP] resource monitoring service
     #: - [UDP] resource monitoring service
-    registrar = 1712, 'registrar', TransportProtocol.tcp
+    registrar = 1712
 
     #: - [TCP] ConferenceTalk
     #: - [UDP] ConferenceTalk
-    conferencetalk = 1713, 'conferencetalk', TransportProtocol.tcp
+    conferencetalk = 1713
 
     #: - [TCP] sesi-lm
     #: - [UDP] sesi-lm
-    sesi_lm = 1714, 'sesi-lm', TransportProtocol.tcp
+    sesi_lm = 1714, 'sesi-lm'
 
     #: - [TCP] houdini-lm
     #: - [UDP] houdini-lm
-    houdini_lm = 1715, 'houdini-lm', TransportProtocol.tcp
+    houdini_lm = 1715, 'houdini-lm'
 
     #: - [TCP] xmsg
     #: - [UDP] xmsg
-    xmsg = 1716, 'xmsg', TransportProtocol.tcp
+    xmsg = 1716
 
     #: - [TCP] fj-hdnet
     #: - [UDP] fj-hdnet
-    fj_hdnet = 1717, 'fj-hdnet', TransportProtocol.tcp
+    fj_hdnet = 1717, 'fj-hdnet'
 
     #: - [TCP] H.323 Multicast Gatekeeper Discover
     #: - [UDP] H.323 Multicast Gatekeeper Discover
-    h323gatedisc = 1718, 'h323gatedisc', TransportProtocol.tcp
+    h323gatedisc = 1718
 
     #: - [TCP] H.323 Unicast Gatekeeper Signaling
     #: - [UDP] H.323 Unicast Gatekeeper Signaling
-    h323gatestat = 1719, 'h323gatestat', TransportProtocol.tcp
+    h323gatestat = 1719
 
     #: - [TCP] H.323 Call Control Signalling
     #: - [UDP] H.323 Call Control Signalling
     #: - [SCTP] H.323 Call Control
-    h323hostcall = 1720, 'h323hostcall', TransportProtocol.tcp
+    h323hostcall = 1720
 
     #: - [TCP] caicci
     #: - [UDP] caicci
-    caicci = 1721, 'caicci', TransportProtocol.tcp
+    caicci = 1721
 
     #: - [TCP] HKS License Manager
     #: - [UDP] HKS License Manager
-    hks_lm = 1722, 'hks-lm', TransportProtocol.tcp
+    hks_lm = 1722, 'hks-lm'
 
     #: - [TCP] pptp [:rfc:`2637`]
     #: - [UDP] pptp [:rfc:`2637`]
-    pptp = 1723, 'pptp', TransportProtocol.tcp
+    pptp = 1723
 
     #: - [TCP] csbphonemaster
     #: - [UDP] csbphonemaster
-    csbphonemaster = 1724, 'csbphonemaster', TransportProtocol.tcp
+    csbphonemaster = 1724
 
     #: - [TCP] iden-ralp
     #: - [UDP] iden-ralp
-    iden_ralp = 1725, 'iden-ralp', TransportProtocol.tcp
+    iden_ralp = 1725, 'iden-ralp'
 
     #: - [TCP] IBERIAGAMES
     #: - [UDP] IBERIAGAMES
-    iberiagames = 1726, 'iberiagames', TransportProtocol.tcp
+    iberiagames = 1726
 
     #: - [TCP] winddx
     #: - [UDP] winddx
-    winddx = 1727, 'winddx', TransportProtocol.tcp
+    winddx = 1727
 
     #: - [TCP] TELINDUS
     #: - [UDP] TELINDUS
-    telindus = 1728, 'telindus', TransportProtocol.tcp
+    telindus = 1728
 
     #: - [TCP] CityNL License Management
     #: - [UDP] CityNL License Management
-    citynl = 1729, 'citynl', TransportProtocol.tcp
+    citynl = 1729
 
     #: - [TCP] roketz
     #: - [UDP] roketz
-    roketz = 1730, 'roketz', TransportProtocol.tcp
+    roketz = 1730
 
     #: - [TCP] MSICCP
     #: - [UDP] MSICCP
-    msiccp = 1731, 'msiccp', TransportProtocol.tcp
+    msiccp = 1731
 
     #: - [TCP] proxim
     #: - [UDP] proxim
-    proxim = 1732, 'proxim', TransportProtocol.tcp
+    proxim = 1732
 
     #: - [TCP] SIMS - SIIPAT Protocol for Alarm Transmission
     #: - [UDP] SIMS - SIIPAT Protocol for Alarm Transmission
-    siipat = 1733, 'siipat', TransportProtocol.tcp
+    siipat = 1733
 
     #: - [TCP] Camber Corporation License Management
     #: - [UDP] Camber Corporation License Management
-    cambertx_lm = 1734, 'cambertx-lm', TransportProtocol.tcp
+    cambertx_lm = 1734, 'cambertx-lm'
 
     #: - [TCP] PrivateChat
     #: - [UDP] PrivateChat
-    privatechat = 1735, 'privatechat', TransportProtocol.tcp
+    privatechat = 1735
 
     #: - [TCP] street-stream
     #: - [UDP] street-stream
-    street_stream = 1736, 'street-stream', TransportProtocol.tcp
+    street_stream = 1736, 'street-stream'
 
     #: - [TCP] ultimad
     #: - [UDP] ultimad
-    ultimad = 1737, 'ultimad', TransportProtocol.tcp
+    ultimad = 1737
 
     #: - [TCP] GameGen1
     #: - [UDP] GameGen1
-    gamegen1 = 1738, 'gamegen1', TransportProtocol.tcp
+    gamegen1 = 1738
 
     #: - [TCP] webaccess
     #: - [UDP] webaccess
-    webaccess = 1739, 'webaccess', TransportProtocol.tcp
+    webaccess = 1739
 
     #: - [TCP] encore
     #: - [UDP] encore
-    encore = 1740, 'encore', TransportProtocol.tcp
+    encore = 1740
 
     #: - [TCP] cisco-net-mgmt
     #: - [UDP] cisco-net-mgmt
-    cisco_net_mgmt = 1741, 'cisco-net-mgmt', TransportProtocol.tcp
+    cisco_net_mgmt = 1741, 'cisco-net-mgmt'
 
     #: - [TCP] 3Com-nsd
     #: - [UDP] 3Com-nsd
-    TCP_3com_nsd = 1742, '3com-nsd', TransportProtocol.tcp
+    TCP_3com_nsd = 1742, '3com-nsd'
 
     #: - [TCP] Cinema Graphics License Manager
     #: - [UDP] Cinema Graphics License Manager
-    cinegrfx_lm = 1743, 'cinegrfx-lm', TransportProtocol.tcp
+    cinegrfx_lm = 1743, 'cinegrfx-lm'
 
     #: - [TCP] ncpm-ft
     #: - [UDP] ncpm-ft
-    ncpm_ft = 1744, 'ncpm-ft', TransportProtocol.tcp
+    ncpm_ft = 1744, 'ncpm-ft'
 
     #: - [TCP] remote-winsock
     #: - [UDP] remote-winsock
-    remote_winsock = 1745, 'remote-winsock', TransportProtocol.tcp
+    remote_winsock = 1745, 'remote-winsock'
 
     #: - [TCP] ftrapid-1
     #: - [UDP] ftrapid-1
-    ftrapid_1 = 1746, 'ftrapid-1', TransportProtocol.tcp
+    ftrapid_1 = 1746, 'ftrapid-1'
 
     #: - [TCP] ftrapid-2
     #: - [UDP] ftrapid-2
-    ftrapid_2 = 1747, 'ftrapid-2', TransportProtocol.tcp
+    ftrapid_2 = 1747, 'ftrapid-2'
 
     #: - [TCP] oracle-em1
     #: - [UDP] oracle-em1
-    oracle_em1 = 1748, 'oracle-em1', TransportProtocol.tcp
+    oracle_em1 = 1748, 'oracle-em1'
 
     #: - [TCP] aspen-services
     #: - [UDP] aspen-services
-    aspen_services = 1749, 'aspen-services', TransportProtocol.tcp
+    aspen_services = 1749, 'aspen-services'
 
     #: - [TCP] Simple Socket Library's PortMaster
     #: - [UDP] Simple Socket Library's PortMaster
-    sslp = 1750, 'sslp', TransportProtocol.tcp
+    sslp = 1750
 
     #: - [TCP] SwiftNet
     #: - [UDP] SwiftNet
-    swiftnet = 1751, 'swiftnet', TransportProtocol.tcp
+    swiftnet = 1751
 
     #: - [TCP] Leap of Faith Research License Manager
     #: - [UDP] Leap of Faith Research License Manager
-    lofr_lm = 1752, 'lofr-lm', TransportProtocol.tcp
+    lofr_lm = 1752, 'lofr-lm'
 
     #: [TCP] Predatar Comms Service
-    predatar_comms = 1753, 'predatar-comms', TransportProtocol.tcp
+    predatar_comms = 1753, 'predatar-comms'
 
     #: - [TCP] oracle-em2
     #: - [UDP] oracle-em2
-    oracle_em2 = 1754, 'oracle-em2', TransportProtocol.tcp
+    oracle_em2 = 1754, 'oracle-em2'
 
     #: - [TCP] ms-streaming
     #: - [UDP] ms-streaming
-    ms_streaming = 1755, 'ms-streaming', TransportProtocol.tcp
+    ms_streaming = 1755, 'ms-streaming'
 
     #: - [TCP] capfast-lmd
     #: - [UDP] capfast-lmd
-    capfast_lmd = 1756, 'capfast-lmd', TransportProtocol.tcp
+    capfast_lmd = 1756, 'capfast-lmd'
 
     #: - [TCP] cnhrp
     #: - [UDP] cnhrp
-    cnhrp = 1757, 'cnhrp', TransportProtocol.tcp
+    cnhrp = 1757
 
     #: - [TCP] tftp-mcast
     #: - [UDP] tftp-mcast
-    tftp_mcast = 1758, 'tftp-mcast', TransportProtocol.tcp
+    tftp_mcast = 1758, 'tftp-mcast'
 
     #: - [TCP] SPSS License Manager
     #: - [UDP] SPSS License Manager
-    spss_lm = 1759, 'spss-lm', TransportProtocol.tcp
+    spss_lm = 1759, 'spss-lm'
 
     #: - [TCP] www-ldap-gw
     #: - [UDP] www-ldap-gw
-    www_ldap_gw = 1760, 'www-ldap-gw', TransportProtocol.tcp
+    www_ldap_gw = 1760, 'www-ldap-gw'
 
     #: - [TCP] cft-0
     #: - [UDP] cft-0
-    cft_0 = 1761, 'cft-0', TransportProtocol.tcp
+    cft_0 = 1761, 'cft-0'
 
     #: - [TCP] cft-1
     #: - [UDP] cft-1
-    cft_1 = 1762, 'cft-1', TransportProtocol.tcp
+    cft_1 = 1762, 'cft-1'
 
     #: - [TCP] cft-2
     #: - [UDP] cft-2
-    cft_2 = 1763, 'cft-2', TransportProtocol.tcp
+    cft_2 = 1763, 'cft-2'
 
     #: - [TCP] cft-3
     #: - [UDP] cft-3
-    cft_3 = 1764, 'cft-3', TransportProtocol.tcp
+    cft_3 = 1764, 'cft-3'
 
     #: - [TCP] cft-4
     #: - [UDP] cft-4
-    cft_4 = 1765, 'cft-4', TransportProtocol.tcp
+    cft_4 = 1765, 'cft-4'
 
     #: - [TCP] cft-5
     #: - [UDP] cft-5
-    cft_5 = 1766, 'cft-5', TransportProtocol.tcp
+    cft_5 = 1766, 'cft-5'
 
     #: - [TCP] cft-6
     #: - [UDP] cft-6
-    cft_6 = 1767, 'cft-6', TransportProtocol.tcp
+    cft_6 = 1767, 'cft-6'
 
     #: - [TCP] cft-7
     #: - [UDP] cft-7
-    cft_7 = 1768, 'cft-7', TransportProtocol.tcp
+    cft_7 = 1768, 'cft-7'
 
     #: - [TCP] bmc-net-adm
     #: - [UDP] bmc-net-adm
-    bmc_net_adm = 1769, 'bmc-net-adm', TransportProtocol.tcp
+    bmc_net_adm = 1769, 'bmc-net-adm'
 
     #: - [TCP] bmc-net-svc
     #: - [UDP] bmc-net-svc
-    bmc_net_svc = 1770, 'bmc-net-svc', TransportProtocol.tcp
+    bmc_net_svc = 1770, 'bmc-net-svc'
 
     #: - [TCP] vaultbase
     #: - [UDP] vaultbase
-    vaultbase = 1771, 'vaultbase', TransportProtocol.tcp
+    vaultbase = 1771
 
     #: - [TCP] EssWeb Gateway
     #: - [UDP] EssWeb Gateway
-    essweb_gw = 1772, 'essweb-gw', TransportProtocol.tcp
+    essweb_gw = 1772, 'essweb-gw'
 
     #: - [TCP] KMSControl
     #: - [UDP] KMSControl
-    kmscontrol = 1773, 'kmscontrol', TransportProtocol.tcp
+    kmscontrol = 1773
 
     #: - [TCP] global-dtserv
     #: - [UDP] global-dtserv
-    global_dtserv = 1774, 'global-dtserv', TransportProtocol.tcp
+    global_dtserv = 1774, 'global-dtserv'
 
     #: [TCP] data interchange between visual processing containers
-    vdab = 1775, 'vdab', TransportProtocol.tcp
+    vdab = 1775
 
     #: - [TCP] Federal Emergency Management Information System
     #: - [UDP] Federal Emergency Management Information System
-    femis = 1776, 'femis', TransportProtocol.tcp
+    femis = 1776
 
     #: - [TCP] powerguardian
     #: - [UDP] powerguardian
-    powerguardian = 1777, 'powerguardian', TransportProtocol.tcp
+    powerguardian = 1777
 
     #: - [TCP] prodigy-internet
     #: - [UDP] prodigy-internet
-    prodigy_intrnet = 1778, 'prodigy-intrnet', TransportProtocol.tcp
+    prodigy_intrnet = 1778, 'prodigy-intrnet'
 
     #: - [TCP] pharmasoft
     #: - [UDP] pharmasoft
-    pharmasoft = 1779, 'pharmasoft', TransportProtocol.tcp
+    pharmasoft = 1779
 
     #: - [TCP] dpkeyserv
     #: - [UDP] dpkeyserv
-    dpkeyserv = 1780, 'dpkeyserv', TransportProtocol.tcp
+    dpkeyserv = 1780
 
     #: - [TCP] answersoft-lm
     #: - [UDP] answersoft-lm
-    answersoft_lm = 1781, 'answersoft-lm', TransportProtocol.tcp
+    answersoft_lm = 1781, 'answersoft-lm'
 
     #: - [TCP] hp-hcip
     #: - [UDP] hp-hcip
-    hp_hcip = 1782, 'hp-hcip', TransportProtocol.tcp
+    hp_hcip = 1782, 'hp-hcip'
 
     #: - [TCP] Finle License Manager
     #: - [UDP] Finle License Manager
-    finle_lm = 1784, 'finle-lm', TransportProtocol.tcp
+    finle_lm = 1784, 'finle-lm'
 
     #: - [TCP] Wind River Systems License Manager
     #: - [UDP] Wind River Systems License Manager
-    windlm = 1785, 'windlm', TransportProtocol.tcp
+    windlm = 1785
 
     #: - [TCP] funk-logger
     #: - [UDP] funk-logger
-    funk_logger = 1786, 'funk-logger', TransportProtocol.tcp
+    funk_logger = 1786, 'funk-logger'
 
     #: - [TCP] funk-license
     #: - [UDP] funk-license
-    funk_license = 1787, 'funk-license', TransportProtocol.tcp
+    funk_license = 1787, 'funk-license'
 
     #: - [TCP] psmond
     #: - [UDP] psmond
-    psmond = 1788, 'psmond', TransportProtocol.tcp
+    psmond = 1788
 
     #: - [TCP] hello
     #: - [UDP] hello
-    hello = 1789, 'hello', TransportProtocol.tcp
+    hello = 1789
 
     #: - [TCP] Networked Media Streaming Protocol
     #: - [UDP] Networked Media Streaming Protocol
-    nmsp_537 = 537, 'nmsp', TransportProtocol.tcp
+    nmsp_537 = 537, 'nmsp'
 
     #: - [TCP] Narrative Media Streaming Protocol
     #: - [UDP] Narrative Media Streaming Protocol
-    nmsp_1790 = 1790, 'nmsp', TransportProtocol.tcp
+    nmsp_1790 = 1790, 'nmsp'
 
     #: - [TCP] EA1
     #: - [UDP] EA1
-    ea1 = 1791, 'ea1', TransportProtocol.tcp
+    ea1 = 1791
 
     #: - [TCP] ibm-dt-2
     #: - [UDP] ibm-dt-2
-    ibm_dt_2 = 1792, 'ibm-dt-2', TransportProtocol.tcp
+    ibm_dt_2 = 1792, 'ibm-dt-2'
 
     #: - [TCP] rsc-robot
     #: - [UDP] rsc-robot
-    rsc_robot = 1793, 'rsc-robot', TransportProtocol.tcp
+    rsc_robot = 1793, 'rsc-robot'
 
     #: - [TCP] cera-bcm
     #: - [UDP] cera-bcm
-    cera_bcm = 1794, 'cera-bcm', TransportProtocol.tcp
+    cera_bcm = 1794, 'cera-bcm'
 
     #: - [TCP] dpi-proxy
     #: - [UDP] dpi-proxy
-    dpi_proxy = 1795, 'dpi-proxy', TransportProtocol.tcp
+    dpi_proxy = 1795, 'dpi-proxy'
 
     #: - [TCP] Vocaltec Server Administration
     #: - [UDP] Vocaltec Server Administration
-    vocaltec_admin = 1796, 'vocaltec-admin', TransportProtocol.tcp
+    vocaltec_admin = 1796, 'vocaltec-admin'
 
     #: - [TCP] Universal Management Architecture
     #: - [UDP] Universal Management Architecture
-    uma_144 = 144, 'uma', TransportProtocol.tcp
+    uma_144 = 144, 'uma'
 
     #: - [TCP] UMA
     #: - [UDP] UMA
-    uma_1797 = 1797, 'uma', TransportProtocol.tcp
+    uma_1797 = 1797, 'uma'
 
     #: - [TCP] Event Transfer Protocol
     #: - [UDP] Event Transfer Protocol
-    etp = 1798, 'etp', TransportProtocol.tcp
+    etp = 1798
 
     #: - [TCP] NETRISK
     #: - [UDP] NETRISK
-    netrisk = 1799, 'netrisk', TransportProtocol.tcp
+    netrisk = 1799
 
     #: - [TCP] ANSYS-License manager
     #: - [UDP] ANSYS-License manager
-    ansys_lm = 1800, 'ansys-lm', TransportProtocol.tcp
+    ansys_lm = 1800, 'ansys-lm'
 
     #: - [TCP] Microsoft Message Que
     #: - [UDP] Microsoft Message Que
-    msmq = 1801, 'msmq', TransportProtocol.tcp
+    msmq = 1801
 
     #: - [TCP] ConComp1
     #: - [UDP] ConComp1
-    concomp1 = 1802, 'concomp1', TransportProtocol.tcp
+    concomp1 = 1802
 
     #: - [TCP] HP-HCIP-GWY
     #: - [UDP] HP-HCIP-GWY
-    hp_hcip_gwy = 1803, 'hp-hcip-gwy', TransportProtocol.tcp
+    hp_hcip_gwy = 1803, 'hp-hcip-gwy'
 
     #: - [TCP] ENL
     #: - [UDP] ENL
-    enl = 1804, 'enl', TransportProtocol.tcp
+    enl = 1804
 
     #: - [TCP] ENL-Name
     #: - [UDP] ENL-Name
-    enl_name = 1805, 'enl-name', TransportProtocol.tcp
+    enl_name = 1805, 'enl-name'
 
     #: - [TCP] Musiconline
     #: - [UDP] Musiconline
-    musiconline = 1806, 'musiconline', TransportProtocol.tcp
+    musiconline = 1806
 
     #: - [TCP] Fujitsu Hot Standby Protocol
     #: - [UDP] Fujitsu Hot Standby Protocol
-    fhsp = 1807, 'fhsp', TransportProtocol.tcp
+    fhsp = 1807
 
     #: - [TCP] Oracle-VP2
     #: - [UDP] Oracle-VP2
-    oracle_vp2 = 1808, 'oracle-vp2', TransportProtocol.tcp
+    oracle_vp2 = 1808, 'oracle-vp2'
 
     #: - [TCP] Oracle-VP1
     #: - [UDP] Oracle-VP1
-    oracle_vp1 = 1809, 'oracle-vp1', TransportProtocol.tcp
+    oracle_vp1 = 1809, 'oracle-vp1'
 
     #: - [TCP] Jerand License Manager
     #: - [UDP] Jerand License Manager
-    jerand_lm = 1810, 'jerand-lm', TransportProtocol.tcp
+    jerand_lm = 1810, 'jerand-lm'
 
     #: - [TCP] Scientia-SDB
     #: - [UDP] Scientia-SDB
-    scientia_sdb = 1811, 'scientia-sdb', TransportProtocol.tcp
+    scientia_sdb = 1811, 'scientia-sdb'
 
     #: - [TCP] RADIUS [:rfc:`2865`]
     #: - [UDP] RADIUS [:rfc:`2865`]
-    radius = 1812, 'radius', TransportProtocol.tcp
+    radius = 1812
 
     #: - [TCP] RADIUS Accounting [:rfc:`2866`]
     #: - [UDP] RADIUS Accounting [:rfc:`2866`]
-    radius_acct = 1813, 'radius-acct', TransportProtocol.tcp
+    radius_acct = 1813, 'radius-acct'
 
     #: - [TCP] TDP Suite
     #: - [UDP] TDP Suite
-    tdp_suite = 1814, 'tdp-suite', TransportProtocol.tcp
+    tdp_suite = 1814, 'tdp-suite'
 
     #: - [TCP] Manufacturing messaging protocol for factory transmission
     #: - [UDP] Manufacturing messaging protocol for factory transmission
-    mmpft = 1815, 'mmpft', TransportProtocol.tcp
+    mmpft = 1815
 
     #: - [TCP] HARP
     #: - [UDP] HARP
-    harp = 1816, 'harp', TransportProtocol.tcp
+    harp = 1816
 
     #: - [TCP] RKB-OSCS
     #: - [UDP] RKB-OSCS
-    rkb_oscs = 1817, 'rkb-oscs', TransportProtocol.tcp
+    rkb_oscs = 1817, 'rkb-oscs'
 
     #: - [TCP] Enhanced Trivial File Transfer Protocol
     #: - [UDP] Enhanced Trivial File Transfer Protocol
-    etftp = 1818, 'etftp', TransportProtocol.tcp
+    etftp = 1818
 
     #: - [TCP] Plato License Manager
     #: - [UDP] Plato License Manager
-    plato_lm = 1819, 'plato-lm', TransportProtocol.tcp
+    plato_lm = 1819, 'plato-lm'
 
     #: - [TCP] mcagent
     #: - [UDP] mcagent
-    mcagent = 1820, 'mcagent', TransportProtocol.tcp
+    mcagent = 1820
 
     #: - [TCP] donnyworld
     #: - [UDP] donnyworld
-    donnyworld = 1821, 'donnyworld', TransportProtocol.tcp
+    donnyworld = 1821
 
     #: - [TCP] es-elmd
     #: - [UDP] es-elmd
-    es_elmd = 1822, 'es-elmd', TransportProtocol.tcp
+    es_elmd = 1822, 'es-elmd'
 
     #: - [TCP] Unisys Natural Language License Manager
     #: - [UDP] Unisys Natural Language License Manager
-    unisys_lm = 1823, 'unisys-lm', TransportProtocol.tcp
+    unisys_lm = 1823, 'unisys-lm'
 
     #: - [TCP] metrics-pas
     #: - [UDP] metrics-pas
-    metrics_pas = 1824, 'metrics-pas', TransportProtocol.tcp
+    metrics_pas = 1824, 'metrics-pas'
 
     #: - [TCP] DirecPC Video
     #: - [UDP] DirecPC Video
-    direcpc_video = 1825, 'direcpc-video', TransportProtocol.tcp
+    direcpc_video = 1825, 'direcpc-video'
 
     #: - [TCP] ARDT
     #: - [UDP] ARDT
-    ardt = 1826, 'ardt', TransportProtocol.tcp
+    ardt = 1826
 
     #: - [TCP] ASI
     #: - [UDP] ASI
-    asi = 1827, 'asi', TransportProtocol.tcp
+    asi = 1827
 
     #: - [TCP] itm-mcell-u
     #: - [UDP] itm-mcell-u
-    itm_mcell_u = 1828, 'itm-mcell-u', TransportProtocol.tcp
+    itm_mcell_u = 1828, 'itm-mcell-u'
 
     #: - [TCP] Optika eMedia
     #: - [UDP] Optika eMedia
-    optika_emedia = 1829, 'optika-emedia', TransportProtocol.tcp
+    optika_emedia = 1829, 'optika-emedia'
 
     #: - [TCP] Oracle Net8 CMan Admin
     #: - [UDP] Oracle Net8 CMan Admin
-    net8_cman = 1830, 'net8-cman', TransportProtocol.tcp
+    net8_cman = 1830, 'net8-cman'
 
     #: - [TCP] Myrtle
     #: - [UDP] Myrtle
-    myrtle = 1831, 'myrtle', TransportProtocol.tcp
+    myrtle = 1831
 
     #: - [TCP] ThoughtTreasure
     #: - [UDP] ThoughtTreasure
-    tht_treasure = 1832, 'tht-treasure', TransportProtocol.tcp
+    tht_treasure = 1832, 'tht-treasure'
 
     #: - [TCP] udpradio
     #: - [UDP] udpradio
-    udpradio = 1833, 'udpradio', TransportProtocol.tcp
+    udpradio = 1833
 
     #: - [TCP] ARDUS Unicast
     #: - [UDP] ARDUS Unicast
-    ardusuni = 1834, 'ardusuni', TransportProtocol.tcp
+    ardusuni = 1834
 
     #: - [TCP] ARDUS Multicast
     #: - [UDP] ARDUS Multicast
-    ardusmul = 1835, 'ardusmul', TransportProtocol.tcp
+    ardusmul = 1835
 
     #: - [TCP] ste-smsc
     #: - [UDP] ste-smsc
-    ste_smsc = 1836, 'ste-smsc', TransportProtocol.tcp
+    ste_smsc = 1836, 'ste-smsc'
 
     #: - [TCP] csoft1
     #: - [UDP] csoft1
-    csoft1 = 1837, 'csoft1', TransportProtocol.tcp
+    csoft1 = 1837
 
     #: - [TCP] TALNET
     #: - [UDP] TALNET
-    talnet = 1838, 'talnet', TransportProtocol.tcp
+    talnet = 1838
 
     #: - [TCP] netopia-vo1
     #: - [UDP] netopia-vo1
-    netopia_vo1 = 1839, 'netopia-vo1', TransportProtocol.tcp
+    netopia_vo1 = 1839, 'netopia-vo1'
 
     #: - [TCP] netopia-vo2
     #: - [UDP] netopia-vo2
-    netopia_vo2 = 1840, 'netopia-vo2', TransportProtocol.tcp
+    netopia_vo2 = 1840, 'netopia-vo2'
 
     #: - [TCP] netopia-vo3
     #: - [UDP] netopia-vo3
-    netopia_vo3 = 1841, 'netopia-vo3', TransportProtocol.tcp
+    netopia_vo3 = 1841, 'netopia-vo3'
 
     #: - [TCP] netopia-vo4
     #: - [UDP] netopia-vo4
-    netopia_vo4 = 1842, 'netopia-vo4', TransportProtocol.tcp
+    netopia_vo4 = 1842, 'netopia-vo4'
 
     #: - [TCP] netopia-vo5
     #: - [UDP] netopia-vo5
-    netopia_vo5 = 1843, 'netopia-vo5', TransportProtocol.tcp
+    netopia_vo5 = 1843, 'netopia-vo5'
 
     #: - [TCP] DirecPC-DLL
     #: - [UDP] DirecPC-DLL
-    direcpc_dll = 1844, 'direcpc-dll', TransportProtocol.tcp
+    direcpc_dll = 1844, 'direcpc-dll'
 
     #: - [TCP] altalink
     #: - [UDP] altalink
-    altalink = 1845, 'altalink', TransportProtocol.tcp
+    altalink = 1845
 
     #: - [TCP] Tunstall PNC
     #: - [UDP] Tunstall PNC
-    tunstall_pnc = 1846, 'tunstall-pnc', TransportProtocol.tcp
+    tunstall_pnc = 1846, 'tunstall-pnc'
 
     #: - [TCP] SLP Notification [:rfc:`3082`]
     #: - [UDP] SLP Notification [:rfc:`3082`]
-    slp_notify = 1847, 'slp-notify', TransportProtocol.tcp
+    slp_notify = 1847, 'slp-notify'
 
     #: - [TCP] fjdocdist
     #: - [UDP] fjdocdist
-    fjdocdist = 1848, 'fjdocdist', TransportProtocol.tcp
+    fjdocdist = 1848
 
     #: - [TCP] ALPHA-SMS
     #: - [UDP] ALPHA-SMS
-    alpha_sms = 1849, 'alpha-sms', TransportProtocol.tcp
+    alpha_sms = 1849, 'alpha-sms'
 
     #: - [TCP] GSI
     #: - [UDP] GSI
-    gsi = 1850, 'gsi', TransportProtocol.tcp
+    gsi = 1850
 
     #: - [TCP] ctcd
     #: - [UDP] ctcd
-    ctcd = 1851, 'ctcd', TransportProtocol.tcp
+    ctcd = 1851
 
     #: - [TCP] Virtual Time
     #: - [UDP] Virtual Time
-    virtual_time = 1852, 'virtual-time', TransportProtocol.tcp
+    virtual_time = 1852, 'virtual-time'
 
     #: - [TCP] VIDS-AVTP
     #: - [UDP] VIDS-AVTP
-    vids_avtp = 1853, 'vids-avtp', TransportProtocol.tcp
+    vids_avtp = 1853, 'vids-avtp'
 
     #: - [TCP] Buddy Draw
     #: - [UDP] Buddy Draw
-    buddy_draw = 1854, 'buddy-draw', TransportProtocol.tcp
+    buddy_draw = 1854, 'buddy-draw'
 
     #: - [TCP] Fiorano RtrSvc
     #: - [UDP] Fiorano RtrSvc
-    fiorano_rtrsvc = 1855, 'fiorano-rtrsvc', TransportProtocol.tcp
+    fiorano_rtrsvc = 1855, 'fiorano-rtrsvc'
 
     #: - [TCP] Fiorano MsgSvc
     #: - [UDP] Fiorano MsgSvc
-    fiorano_msgsvc = 1856, 'fiorano-msgsvc', TransportProtocol.tcp
+    fiorano_msgsvc = 1856, 'fiorano-msgsvc'
 
     #: - [TCP] DataCaptor
     #: - [UDP] DataCaptor
-    datacaptor = 1857, 'datacaptor', TransportProtocol.tcp
+    datacaptor = 1857
 
     #: - [TCP] PrivateArk
     #: - [UDP] PrivateArk
-    privateark = 1858, 'privateark', TransportProtocol.tcp
+    privateark = 1858
 
     #: - [TCP] Gamma Fetcher Server
     #: - [UDP] Gamma Fetcher Server
-    gammafetchsvr = 1859, 'gammafetchsvr', TransportProtocol.tcp
+    gammafetchsvr = 1859
 
     #: - [TCP] SunSCALAR Services
     #: - [UDP] SunSCALAR Services
-    sunscalar_svc = 1860, 'sunscalar-svc', TransportProtocol.tcp
+    sunscalar_svc = 1860, 'sunscalar-svc'
 
     #: - [TCP] LeCroy VICP
     #: - [UDP] LeCroy VICP
-    lecroy_vicp = 1861, 'lecroy-vicp', TransportProtocol.tcp
+    lecroy_vicp = 1861, 'lecroy-vicp'
 
     #: - [TCP] MySQL Cluster Manager Agent
     #: - [UDP] MySQL Cluster Manager Agent
-    mysql_cm_agent = 1862, 'mysql-cm-agent', TransportProtocol.tcp
+    mysql_cm_agent = 1862, 'mysql-cm-agent'
 
     #: - [TCP] MSNP
     #: - [UDP] MSNP
-    msnp = 1863, 'msnp', TransportProtocol.tcp
+    msnp = 1863
 
     #: - [TCP] Paradym 31 Port
     #: - [UDP] Paradym 31 Port
-    paradym_31port = 1864, 'paradym-31port', TransportProtocol.tcp
+    paradym_31port = 1864, 'paradym-31port'
 
     #: - [TCP] ENTP
     #: - [UDP] ENTP
-    entp = 1865, 'entp', TransportProtocol.tcp
+    entp = 1865
 
     #: - [TCP] swrmi
     #: - [UDP] swrmi
-    swrmi = 1866, 'swrmi', TransportProtocol.tcp
+    swrmi = 1866
 
     #: - [TCP] UDRIVE
     #: - [UDP] UDRIVE
-    udrive = 1867, 'udrive', TransportProtocol.tcp
+    udrive = 1867
 
     #: - [TCP] VizibleBrowser
     #: - [UDP] VizibleBrowser
-    viziblebrowser = 1868, 'viziblebrowser', TransportProtocol.tcp
+    viziblebrowser = 1868
 
     #: - [TCP] TransAct
     #: - [UDP] TransAct
-    transact = 1869, 'transact', TransportProtocol.tcp
+    transact = 1869
 
     #: - [TCP] SunSCALAR DNS Service
     #: - [UDP] SunSCALAR DNS Service
-    sunscalar_dns = 1870, 'sunscalar-dns', TransportProtocol.tcp
+    sunscalar_dns = 1870, 'sunscalar-dns'
 
     #: - [TCP] Cano Central 0
     #: - [UDP] Cano Central 0
-    canocentral0 = 1871, 'canocentral0', TransportProtocol.tcp
+    canocentral0 = 1871
 
     #: - [TCP] Cano Central 1
     #: - [UDP] Cano Central 1
-    canocentral1 = 1872, 'canocentral1', TransportProtocol.tcp
+    canocentral1 = 1872
 
     #: - [TCP] Fjmpjps
     #: - [UDP] Fjmpjps
-    fjmpjps = 1873, 'fjmpjps', TransportProtocol.tcp
+    fjmpjps = 1873
 
     #: - [TCP] Fjswapsnp
     #: - [UDP] Fjswapsnp
-    fjswapsnp = 1874, 'fjswapsnp', TransportProtocol.tcp
+    fjswapsnp = 1874
 
     #: - [TCP] westell stats
     #: - [UDP] westell stats
-    westell_stats = 1875, 'westell-stats', TransportProtocol.tcp
+    westell_stats = 1875, 'westell-stats'
 
     #: - [TCP] ewcappsrv
     #: - [UDP] ewcappsrv
-    ewcappsrv = 1876, 'ewcappsrv', TransportProtocol.tcp
+    ewcappsrv = 1876
 
     #: - [TCP] hp-webqosdb
     #: - [UDP] hp-webqosdb
-    hp_webqosdb = 1877, 'hp-webqosdb', TransportProtocol.tcp
+    hp_webqosdb = 1877, 'hp-webqosdb'
 
     #: - [TCP] drmsmc
     #: - [UDP] drmsmc
-    drmsmc = 1878, 'drmsmc', TransportProtocol.tcp
+    drmsmc = 1878
 
     #: - [TCP] NettGain NMS
     #: - [UDP] NettGain NMS
-    nettgain_nms = 1879, 'nettgain-nms', TransportProtocol.tcp
+    nettgain_nms = 1879, 'nettgain-nms'
 
     #: - [TCP] Gilat VSAT Control
     #: - [UDP] Gilat VSAT Control
-    vsat_control = 1880, 'vsat-control', TransportProtocol.tcp
+    vsat_control = 1880, 'vsat-control'
 
     #: - [TCP] IBM WebSphere MQ Everyplace
     #: - [UDP] IBM WebSphere MQ Everyplace
-    ibm_mqseries2 = 1881, 'ibm-mqseries2', TransportProtocol.tcp
+    ibm_mqseries2 = 1881, 'ibm-mqseries2'
 
     #: - [TCP] CA eTrust Common Services
     #: - [UDP] CA eTrust Common Services
-    ecsqdmn = 1882, 'ecsqdmn', TransportProtocol.tcp
+    ecsqdmn = 1882
 
     #: - [TCP] Internet Distance Map Svc
     #: - [UDP] Internet Distance Map Svc
-    idmaps = 1884, 'idmaps', TransportProtocol.tcp
+    idmaps = 1884
 
     #: - [TCP] Veritas Trap Server
     #: - [UDP] Veritas Trap Server
-    vrtstrapserver = 1885, 'vrtstrapserver', TransportProtocol.tcp
+    vrtstrapserver = 1885
 
     #: - [TCP] Leonardo over IP
     #: - [UDP] Leonardo over IP
-    leoip = 1886, 'leoip', TransportProtocol.tcp
+    leoip = 1886
 
     #: - [TCP] FileX Listening Port
     #: - [UDP] FileX Listening Port
-    filex_lport = 1887, 'filex-lport', TransportProtocol.tcp
+    filex_lport = 1887, 'filex-lport'
 
     #: - [TCP] NC Config Port
     #: - [UDP] NC Config Port
-    ncconfig = 1888, 'ncconfig', TransportProtocol.tcp
+    ncconfig = 1888
 
     #: - [TCP] Unify Web Adapter Service
     #: - [UDP] Unify Web Adapter Service
-    unify_adapter = 1889, 'unify-adapter', TransportProtocol.tcp
+    unify_adapter = 1889, 'unify-adapter'
 
     #: - [TCP] wilkenListener
     #: - [UDP] wilkenListener
-    wilkenlistener = 1890, 'wilkenlistener', TransportProtocol.tcp
+    wilkenlistener = 1890
 
     #: - [TCP] ChildKey Notification
     #: - [UDP] ChildKey Notification
-    childkey_notif = 1891, 'childkey-notif', TransportProtocol.tcp
+    childkey_notif = 1891, 'childkey-notif'
 
     #: - [TCP] ChildKey Control
     #: - [UDP] ChildKey Control
-    childkey_ctrl = 1892, 'childkey-ctrl', TransportProtocol.tcp
+    childkey_ctrl = 1892, 'childkey-ctrl'
 
     #: - [TCP] ELAD Protocol
     #: - [UDP] ELAD Protocol
-    elad = 1893, 'elad', TransportProtocol.tcp
+    elad = 1893
 
     #: - [TCP] O2Server Port
     #: - [UDP] O2Server Port
-    o2server_port = 1894, 'o2server-port', TransportProtocol.tcp
+    o2server_port = 1894, 'o2server-port'
 
     #: - [TCP] unassigned
     #: - [UDP] unassigned
-    unassigned_1895 = 1895, 'unassigned', TransportProtocol.tcp
+    unassigned_1895 = 1895, 'unassigned'
 
     #: - [TCP] b-novative license server
     #: - [UDP] b-novative license server
-    b_novative_ls = 1896, 'b-novative-ls', TransportProtocol.tcp
+    b_novative_ls = 1896, 'b-novative-ls'
 
     #: - [TCP] MetaAgent
     #: - [UDP] MetaAgent
-    metaagent = 1897, 'metaagent', TransportProtocol.tcp
+    metaagent = 1897
 
     #: - [TCP] Cymtec secure management
     #: - [UDP] Cymtec secure management
-    cymtec_port = 1898, 'cymtec-port', TransportProtocol.tcp
+    cymtec_port = 1898, 'cymtec-port'
 
     #: - [TCP] MC2Studios
     #: - [UDP] MC2Studios
-    mc2studios = 1899, 'mc2studios', TransportProtocol.tcp
+    mc2studios = 1899
 
     #: - [TCP] SSDP
     #: - [UDP] SSDP
-    ssdp = 1900, 'ssdp', TransportProtocol.tcp
+    ssdp = 1900
 
     #: - [TCP] Fujitsu ICL Terminal Emulator Program A
     #: - [UDP] Fujitsu ICL Terminal Emulator Program A
-    fjicl_tep_a = 1901, 'fjicl-tep-a', TransportProtocol.tcp
+    fjicl_tep_a = 1901, 'fjicl-tep-a'
 
     #: - [TCP] Fujitsu ICL Terminal Emulator Program B
     #: - [UDP] Fujitsu ICL Terminal Emulator Program B
-    fjicl_tep_b = 1902, 'fjicl-tep-b', TransportProtocol.tcp
+    fjicl_tep_b = 1902, 'fjicl-tep-b'
 
     #: - [TCP] Local Link Name Resolution
     #: - [UDP] Local Link Name Resolution
-    linkname = 1903, 'linkname', TransportProtocol.tcp
+    linkname = 1903
 
     #: - [TCP] Fujitsu ICL Terminal Emulator Program C
     #: - [UDP] Fujitsu ICL Terminal Emulator Program C
-    fjicl_tep_c = 1904, 'fjicl-tep-c', TransportProtocol.tcp
+    fjicl_tep_c = 1904, 'fjicl-tep-c'
 
     #: - [TCP] Secure UP.Link Gateway Protocol
     #: - [UDP] Secure UP.Link Gateway Protocol
-    sugp = 1905, 'sugp', TransportProtocol.tcp
+    sugp = 1905
 
     #: - [TCP] TPortMapperReq
     #: - [UDP] TPortMapperReq
-    tpmd = 1906, 'tpmd', TransportProtocol.tcp
+    tpmd = 1906
 
     #: - [TCP] IntraSTAR
     #: - [UDP] IntraSTAR
-    intrastar = 1907, 'intrastar', TransportProtocol.tcp
+    intrastar = 1907
 
     #: - [TCP] Dawn
     #: - [UDP] Dawn
-    dawn = 1908, 'dawn', TransportProtocol.tcp
+    dawn = 1908
 
     #: - [TCP] Global World Link
     #: - [UDP] Global World Link
-    global_wlink = 1909, 'global-wlink', TransportProtocol.tcp
+    global_wlink = 1909, 'global-wlink'
 
     #: - [TCP] UltraBac Software communications port
     #: - [UDP] UltraBac Software communications port
-    ultrabac = 1910, 'ultrabac', TransportProtocol.tcp
+    ultrabac = 1910
 
     #: - [TCP] Starlight Networks Multimedia Transport Protocol
     #: - [UDP] Starlight Networks Multimedia Transport Protocol
-    mtp = 1911, 'mtp', TransportProtocol.tcp
+    mtp = 1911
 
     #: - [TCP] rhp-iibp
     #: - [UDP] rhp-iibp
-    rhp_iibp = 1912, 'rhp-iibp', TransportProtocol.tcp
+    rhp_iibp = 1912, 'rhp-iibp'
 
     #: - [TCP] armadp
     #: - [UDP] armadp
-    armadp = 1913, 'armadp', TransportProtocol.tcp
+    armadp = 1913
 
     #: - [TCP] Elm-Momentum
     #: - [UDP] Elm-Momentum
-    elm_momentum = 1914, 'elm-momentum', TransportProtocol.tcp
+    elm_momentum = 1914, 'elm-momentum'
 
     #: - [TCP] FACELINK
     #: - [UDP] FACELINK
-    facelink = 1915, 'facelink', TransportProtocol.tcp
+    facelink = 1915
 
     #: - [TCP] Persoft Persona
     #: - [UDP] Persoft Persona
-    persona = 1916, 'persona', TransportProtocol.tcp
+    persona = 1916
 
     #: - [TCP] nOAgent
     #: - [UDP] nOAgent
-    noagent = 1917, 'noagent', TransportProtocol.tcp
+    noagent = 1917
 
     #: - [TCP] IBM Tivole Directory Service - NDS
     #: - [UDP] IBM Tivole Directory Service - NDS
-    can_nds = 1918, 'can-nds', TransportProtocol.tcp
+    can_nds = 1918, 'can-nds'
 
     #: - [TCP] IBM Tivoli Directory Service - DCH
     #: - [UDP] IBM Tivoli Directory Service - DCH
-    can_dch = 1919, 'can-dch', TransportProtocol.tcp
+    can_dch = 1919, 'can-dch'
 
     #: - [TCP] IBM Tivoli Directory Service - FERRET
     #: - [UDP] IBM Tivoli Directory Service - FERRET
-    can_ferret = 1920, 'can-ferret', TransportProtocol.tcp
+    can_ferret = 1920, 'can-ferret'
 
     #: - [TCP] NoAdmin
     #: - [UDP] NoAdmin
-    noadmin = 1921, 'noadmin', TransportProtocol.tcp
+    noadmin = 1921
 
     #: - [TCP] Tapestry
     #: - [UDP] Tapestry
-    tapestry = 1922, 'tapestry', TransportProtocol.tcp
+    tapestry = 1922
 
     #: - [TCP] SPICE
     #: - [UDP] SPICE
-    spice = 1923, 'spice', TransportProtocol.tcp
+    spice = 1923
 
     #: - [TCP] XIIP
     #: - [UDP] XIIP
-    xiip = 1924, 'xiip', TransportProtocol.tcp
+    xiip = 1924
 
     #: - [TCP] Surrogate Discovery Port
     #: - [UDP] Surrogate Discovery Port
-    discovery_port = 1925, 'discovery-port', TransportProtocol.tcp
+    discovery_port = 1925, 'discovery-port'
 
     #: - [TCP] Evolution Game Server
     #: - [UDP] Evolution Game Server
-    egs = 1926, 'egs', TransportProtocol.tcp
+    egs = 1926
 
     #: - [TCP] Videte CIPC Port
     #: - [UDP] Videte CIPC Port
-    videte_cipc = 1927, 'videte-cipc', TransportProtocol.tcp
+    videte_cipc = 1927, 'videte-cipc'
 
     #: - [TCP] Expnd Maui Srvr Dscovr
     #: - [UDP] Expnd Maui Srvr Dscovr
-    emsd_port = 1928, 'emsd-port', TransportProtocol.tcp
+    emsd_port = 1928, 'emsd-port'
 
     #: - [TCP] Bandwiz System - Server
     #: - [UDP] Bandwiz System - Server
-    bandwiz_system = 1929, 'bandwiz-system', TransportProtocol.tcp
+    bandwiz_system = 1929, 'bandwiz-system'
 
     #: - [TCP] Drive AppServer
     #: - [UDP] Drive AppServer
-    driveappserver = 1930, 'driveappserver', TransportProtocol.tcp
+    driveappserver = 1930
 
     #: - [TCP] AMD SCHED
     #: - [UDP] AMD SCHED
-    amdsched = 1931, 'amdsched', TransportProtocol.tcp
+    amdsched = 1931
 
     #: - [TCP] CTT Broker
     #: - [UDP] CTT Broker
-    ctt_broker = 1932, 'ctt-broker', TransportProtocol.tcp
+    ctt_broker = 1932, 'ctt-broker'
 
     #: - [TCP] IBM LM MT Agent
     #: - [UDP] IBM LM MT Agent
-    xmapi = 1933, 'xmapi', TransportProtocol.tcp
+    xmapi = 1933
 
     #: - [TCP] IBM LM Appl Agent
     #: - [UDP] IBM LM Appl Agent
-    xaapi = 1934, 'xaapi', TransportProtocol.tcp
+    xaapi = 1934
 
     #: - [TCP] Macromedia Flash Communications Server MX
     #: - [UDP] Macromedia Flash Communications server MX
-    macromedia_fcs = 1935, 'macromedia-fcs', TransportProtocol.tcp
+    macromedia_fcs = 1935, 'macromedia-fcs'
 
     #: - [TCP] JetCmeServer Server Port
     #: - [UDP] JetCmeServer Server Port
-    jetcmeserver = 1936, 'jetcmeserver', TransportProtocol.tcp
+    jetcmeserver = 1936
 
     #: - [TCP] JetVWay Server Port
     #: - [UDP] JetVWay Server Port
-    jwserver = 1937, 'jwserver', TransportProtocol.tcp
+    jwserver = 1937
 
     #: - [TCP] JetVWay Client Port
     #: - [UDP] JetVWay Client Port
-    jwclient = 1938, 'jwclient', TransportProtocol.tcp
+    jwclient = 1938
 
     #: - [TCP] JetVision Server Port
     #: - [UDP] JetVision Server Port
-    jvserver = 1939, 'jvserver', TransportProtocol.tcp
+    jvserver = 1939
 
     #: - [TCP] JetVision Client Port
     #: - [UDP] JetVision Client Port
-    jvclient = 1940, 'jvclient', TransportProtocol.tcp
+    jvclient = 1940
 
     #: - [TCP] DIC-Aida
     #: - [UDP] DIC-Aida
-    dic_aida = 1941, 'dic-aida', TransportProtocol.tcp
+    dic_aida = 1941, 'dic-aida'
 
     #: - [TCP] Real Enterprise Service
     #: - [UDP] Real Enterprise Service
-    res = 1942, 'res', TransportProtocol.tcp
+    res = 1942
 
     #: - [TCP] Beeyond Media
     #: - [UDP] Beeyond Media
-    beeyond_media = 1943, 'beeyond-media', TransportProtocol.tcp
+    beeyond_media = 1943, 'beeyond-media'
 
     #: - [TCP] close-combat
     #: - [UDP] close-combat
-    close_combat = 1944, 'close-combat', TransportProtocol.tcp
+    close_combat = 1944, 'close-combat'
 
     #: - [TCP] dialogic-elmd
     #: - [UDP] dialogic-elmd
-    dialogic_elmd = 1945, 'dialogic-elmd', TransportProtocol.tcp
+    dialogic_elmd = 1945, 'dialogic-elmd'
 
     #: - [TCP] tekpls
     #: - [UDP] tekpls
-    tekpls = 1946, 'tekpls', TransportProtocol.tcp
+    tekpls = 1946
 
     #: - [TCP] SentinelSRM
     #: - [UDP] SentinelSRM
-    sentinelsrm = 1947, 'sentinelsrm', TransportProtocol.tcp
+    sentinelsrm = 1947
 
     #: - [TCP] eye2eye
     #: - [UDP] eye2eye
-    eye2eye = 1948, 'eye2eye', TransportProtocol.tcp
+    eye2eye = 1948
 
     #: - [TCP] ISMA Easdaq Live
     #: - [UDP] ISMA Easdaq Live
-    ismaeasdaqlive = 1949, 'ismaeasdaqlive', TransportProtocol.tcp
+    ismaeasdaqlive = 1949
 
     #: - [TCP] ISMA Easdaq Test
     #: - [UDP] ISMA Easdaq Test
-    ismaeasdaqtest = 1950, 'ismaeasdaqtest', TransportProtocol.tcp
+    ismaeasdaqtest = 1950
 
     #: - [TCP] bcs-lmserver
     #: - [UDP] bcs-lmserver
-    bcs_lmserver = 1951, 'bcs-lmserver', TransportProtocol.tcp
+    bcs_lmserver = 1951, 'bcs-lmserver'
 
     #: - [TCP] mpnjsc
     #: - [UDP] mpnjsc
-    mpnjsc = 1952, 'mpnjsc', TransportProtocol.tcp
+    mpnjsc = 1952
 
     #: - [TCP] Rapid Base
     #: - [UDP] Rapid Base
-    rapidbase = 1953, 'rapidbase', TransportProtocol.tcp
+    rapidbase = 1953
 
     #: - [TCP] ABR-API (diskbridge)
     #: - [UDP] ABR-API (diskbridge)
-    abr_api = 1954, 'abr-api', TransportProtocol.tcp
+    abr_api = 1954, 'abr-api'
 
     #: - [TCP] ABR-Secure Data (diskbridge)
     #: - [UDP] ABR-Secure Data (diskbridge)
-    abr_secure = 1955, 'abr-secure', TransportProtocol.tcp
+    abr_secure = 1955, 'abr-secure'
 
     #: - [TCP] Vertel VMF DS
     #: - [UDP] Vertel VMF DS
-    vrtl_vmf_ds = 1956, 'vrtl-vmf-ds', TransportProtocol.tcp
+    vrtl_vmf_ds = 1956, 'vrtl-vmf-ds'
 
     #: - [TCP] unix-status
     #: - [UDP] unix-status
-    unix_status = 1957, 'unix-status', TransportProtocol.tcp
+    unix_status = 1957, 'unix-status'
 
     #: - [TCP] CA Administration Daemon
     #: - [UDP] CA Administration Daemon
-    dxadmind = 1958, 'dxadmind', TransportProtocol.tcp
+    dxadmind = 1958
 
     #: - [TCP] SIMP Channel
     #: - [UDP] SIMP Channel
-    simp_all = 1959, 'simp-all', TransportProtocol.tcp
+    simp_all = 1959, 'simp-all'
 
     #: - [TCP] Merit DAC NASmanager
     #: - [UDP] Merit DAC NASmanager
-    nasmanager = 1960, 'nasmanager', TransportProtocol.tcp
+    nasmanager = 1960
 
     #: - [TCP] BTS APPSERVER
     #: - [UDP] BTS APPSERVER
-    bts_appserver = 1961, 'bts-appserver', TransportProtocol.tcp
+    bts_appserver = 1961, 'bts-appserver'
 
     #: - [TCP] BIAP-MP
     #: - [UDP] BIAP-MP
-    biap_mp = 1962, 'biap-mp', TransportProtocol.tcp
+    biap_mp = 1962, 'biap-mp'
 
     #: - [TCP] WebMachine
     #: - [UDP] WebMachine
-    webmachine = 1963, 'webmachine', TransportProtocol.tcp
+    webmachine = 1963
 
     #: - [TCP] SOLID E ENGINE
     #: - [UDP] SOLID E ENGINE
-    solid_e_engine = 1964, 'solid-e-engine', TransportProtocol.tcp
+    solid_e_engine = 1964, 'solid-e-engine'
 
     #: - [TCP] Tivoli NPM
     #: - [UDP] Tivoli NPM
-    tivoli_npm = 1965, 'tivoli-npm', TransportProtocol.tcp
+    tivoli_npm = 1965, 'tivoli-npm'
 
     #: - [TCP] Slush
     #: - [UDP] Slush
-    slush = 1966, 'slush', TransportProtocol.tcp
+    slush = 1966
 
     #: - [TCP] SNS Quote
     #: - [UDP] SNS Quote
-    sns_quote = 1967, 'sns-quote', TransportProtocol.tcp
+    sns_quote = 1967, 'sns-quote'
 
     #: - [TCP] LIPSinc
     #: - [UDP] LIPSinc
-    lipsinc = 1968, 'lipsinc', TransportProtocol.tcp
+    lipsinc = 1968
 
     #: - [TCP] LIPSinc 1
     #: - [UDP] LIPSinc 1
-    lipsinc1 = 1969, 'lipsinc1', TransportProtocol.tcp
+    lipsinc1 = 1969
 
     #: - [TCP] NetOp Remote Control
     #: - [UDP] NetOp Remote Control
-    netop_rc = 1970, 'netop-rc', TransportProtocol.tcp
+    netop_rc = 1970, 'netop-rc'
 
     #: - [TCP] NetOp School
     #: - [UDP] NetOp School
-    netop_school = 1971, 'netop-school', TransportProtocol.tcp
+    netop_school = 1971, 'netop-school'
 
     #: - [TCP] Cache
     #: - [UDP] Cache
-    intersys_cache = 1972, 'intersys-cache', TransportProtocol.tcp
+    intersys_cache = 1972, 'intersys-cache'
 
     #: - [TCP] Data Link Switching Remote Access Protocol
     #: - [UDP] Data Link Switching Remote Access Protocol
-    dlsrap = 1973, 'dlsrap', TransportProtocol.tcp
+    dlsrap = 1973
 
     #: - [TCP] DRP
     #: - [UDP] DRP
-    drp = 1974, 'drp', TransportProtocol.tcp
+    drp = 1974
 
     #: - [TCP] TCO Flash Agent
     #: - [UDP] TCO Flash Agent
-    tcoflashagent = 1975, 'tcoflashagent', TransportProtocol.tcp
+    tcoflashagent = 1975
 
     #: - [TCP] TCO Reg Agent
     #: - [UDP] TCO Reg Agent
-    tcoregagent = 1976, 'tcoregagent', TransportProtocol.tcp
+    tcoregagent = 1976
 
     #: - [TCP] TCO Address Book
     #: - [UDP] TCO Address Book
-    tcoaddressbook = 1977, 'tcoaddressbook', TransportProtocol.tcp
+    tcoaddressbook = 1977
 
     #: - [TCP] UniSQL
     #: - [UDP] UniSQL
-    unisql = 1978, 'unisql', TransportProtocol.tcp
+    unisql = 1978
 
     #: - [TCP] UniSQL Java
     #: - [UDP] UniSQL Java
-    unisql_java = 1979, 'unisql-java', TransportProtocol.tcp
+    unisql_java = 1979, 'unisql-java'
 
     #: - [TCP] PanQuest XACT
     #: - [UDP] PanQuest XACT
-    panquest_xact = 1980, 'panquest-xact', TransportProtocol.tcp
+    panquest_xact = 1980, 'panquest-xact'
 
     #: - [TCP] p2pQ
     #: - [UDP] p2pQ
-    p2pq = 1981, 'p2pq', TransportProtocol.tcp
+    p2pq = 1981
 
     #: - [TCP] Evidentiary Timestamp
     #: - [UDP] Evidentiary Timestamp
-    estamp = 1982, 'estamp', TransportProtocol.tcp
+    estamp = 1982
 
     #: - [TCP] Loophole Test Protocol
     #: - [UDP] Loophole Test Protocol
-    lhtp = 1983, 'lhtp', TransportProtocol.tcp
+    lhtp = 1983
 
     #: - [TCP] BB
     #: - [UDP] BB
-    bb = 1984, 'bb', TransportProtocol.tcp
+    bb = 1984
 
     #: - [TCP] Hot Standby Router Protocol [:rfc:`2281`]
     #: - [UDP] Hot Standby Router Protocol [:rfc:`2281`]
-    hsrp = 1985, 'hsrp', TransportProtocol.tcp
+    hsrp = 1985
 
     #: - [TCP] cisco license management
     #: - [UDP] cisco license management
-    licensedaemon = 1986, 'licensedaemon', TransportProtocol.tcp
+    licensedaemon = 1986
 
     #: - [TCP] cisco RSRB Priority 1 port
     #: - [UDP] cisco RSRB Priority 1 port
-    tr_rsrb_p1 = 1987, 'tr-rsrb-p1', TransportProtocol.tcp
+    tr_rsrb_p1 = 1987, 'tr-rsrb-p1'
 
     #: - [TCP] cisco RSRB Priority 2 port
     #: - [UDP] cisco RSRB Priority 2 port
-    tr_rsrb_p2 = 1988, 'tr-rsrb-p2', TransportProtocol.tcp
+    tr_rsrb_p2 = 1988, 'tr-rsrb-p2'
 
     #: - [TCP] cisco RSRB Priority 3 port
     #: - [UDP] cisco RSRB Priority 3 port
-    tr_rsrb_p3 = 1989, 'tr-rsrb-p3', TransportProtocol.tcp
+    tr_rsrb_p3 = 1989, 'tr-rsrb-p3'
 
     #: - [TCP] MHSnet system
     #: - [UDP] MHSnet system
-    mshnet = 1989, 'mshnet', TransportProtocol.tcp
+    mshnet = 1989
 
     #: - [TCP] cisco STUN Priority 1 port
     #: - [UDP] cisco STUN Priority 1 port
-    stun_p1 = 1990, 'stun-p1', TransportProtocol.tcp
+    stun_p1 = 1990, 'stun-p1'
 
     #: - [TCP] cisco STUN Priority 2 port
     #: - [UDP] cisco STUN Priority 2 port
-    stun_p2 = 1991, 'stun-p2', TransportProtocol.tcp
+    stun_p2 = 1991, 'stun-p2'
 
     #: - [TCP] cisco STUN Priority 3 port
     #: - [UDP] cisco STUN Priority 3 port
-    stun_p3 = 1992, 'stun-p3', TransportProtocol.tcp
+    stun_p3 = 1992, 'stun-p3'
 
     #: - [TCP] IPsendmsg
     #: - [UDP] IPsendmsg
-    ipsendmsg = 1992, 'ipsendmsg', TransportProtocol.tcp
+    ipsendmsg = 1992
 
     #: - [TCP] cisco SNMP TCP port
     #: - [UDP] cisco SNMP TCP port
-    snmp_tcp_port = 1993, 'snmp-tcp-port', TransportProtocol.tcp
+    snmp_tcp_port = 1993, 'snmp-tcp-port'
 
     #: - [TCP] cisco serial tunnel port
     #: - [UDP] cisco serial tunnel port
-    stun_port = 1994, 'stun-port', TransportProtocol.tcp
+    stun_port = 1994, 'stun-port'
 
     #: - [TCP] cisco perf port
     #: - [UDP] cisco perf port
-    perf_port = 1995, 'perf-port', TransportProtocol.tcp
+    perf_port = 1995, 'perf-port'
 
     #: - [TCP] cisco Remote SRB port
     #: - [UDP] cisco Remote SRB port
-    tr_rsrb_port = 1996, 'tr-rsrb-port', TransportProtocol.tcp
+    tr_rsrb_port = 1996, 'tr-rsrb-port'
 
     #: - [TCP] cisco Gateway Discovery Protocol
     #: - [UDP] cisco Gateway Discovery Protocol
-    gdp_port = 1997, 'gdp-port', TransportProtocol.tcp
+    gdp_port = 1997, 'gdp-port'
 
     #: - [TCP] cisco X.25 service (XOT)
     #: - [UDP] cisco X.25 service (XOT)
-    x25_svc_port = 1998, 'x25-svc-port', TransportProtocol.tcp
+    x25_svc_port = 1998, 'x25-svc-port'
 
     #: - [TCP] cisco identification port
     #: - [UDP] cisco identification port
-    tcp_id_port = 1999, 'tcp-id-port', TransportProtocol.tcp
+    tcp_id_port = 1999, 'tcp-id-port'
 
     #: - [TCP] Cisco SCCP
     #: - [UDP] Cisco SCCp
-    cisco_sccp = 2000, 'cisco-sccp', TransportProtocol.tcp
+    cisco_sccp = 2000, 'cisco-sccp'
 
     #: [TCP]
-    dc = 2001, 'dc', TransportProtocol.tcp
+    dc = 2001
 
     #: - [TCP]
     #: - [UDP]
-    globe = 2002, 'globe', TransportProtocol.tcp
+    globe = 2002
 
     #: - [TCP] Brutus Server
     #: - [UDP] Brutus Server
-    brutus = 2003, 'brutus', TransportProtocol.tcp
+    brutus = 2003
 
     #: [TCP]
-    mailbox = 2004, 'mailbox', TransportProtocol.tcp
+    mailbox = 2004
 
     #: [TCP]
-    berknet = 2005, 'berknet', TransportProtocol.tcp
+    berknet = 2005
 
     #: [TCP]
-    invokator = 2006, 'invokator', TransportProtocol.tcp
+    invokator = 2006
 
     #: [TCP]
-    dectalk = 2007, 'dectalk', TransportProtocol.tcp
+    dectalk = 2007
 
     #: [TCP]
-    conf = 2008, 'conf', TransportProtocol.tcp
+    conf = 2008
 
     #: [TCP]
-    news = 2009, 'news', TransportProtocol.tcp
+    news = 2009
 
     #: [TCP]
-    search = 2010, 'search', TransportProtocol.tcp
+    search = 2010
 
     #: [TCP] raid
-    raid_cc = 2011, 'raid-cc', TransportProtocol.tcp
+    raid_cc = 2011, 'raid-cc'
 
     #: [TCP]
-    ttyinfo = 2012, 'ttyinfo', TransportProtocol.tcp
+    ttyinfo = 2012
 
     #: [TCP]
-    raid_am_2013 = 2013, 'raid-am', TransportProtocol.tcp
+    raid_am_2013 = 2013, 'raid-am'
 
     #: [TCP]
-    troff = 2014, 'troff', TransportProtocol.tcp
+    troff = 2014
 
     #: [TCP]
-    cypress = 2015, 'cypress', TransportProtocol.tcp
+    cypress = 2015
 
     #: - [TCP]
     #: - [UDP]
-    bootserver = 2016, 'bootserver', TransportProtocol.tcp
+    bootserver = 2016
 
     #: [TCP]
-    cypress_stat = 2017, 'cypress-stat', TransportProtocol.tcp
+    cypress_stat = 2017, 'cypress-stat'
 
     #: [TCP]
-    terminaldb_2018 = 2018, 'terminaldb', TransportProtocol.tcp
+    terminaldb_2018 = 2018, 'terminaldb'
 
     #: [TCP]
-    whosockami_2019 = 2019, 'whosockami', TransportProtocol.tcp
+    whosockami_2019 = 2019, 'whosockami'
 
     #: - [TCP]
     #: - [UDP]
-    xinupageserver = 2020, 'xinupageserver', TransportProtocol.tcp
+    xinupageserver = 2020
 
     #: [TCP]
-    servexec = 2021, 'servexec', TransportProtocol.tcp
+    servexec = 2021
 
     #: [TCP]
-    down = 2022, 'down', TransportProtocol.tcp
+    down = 2022
 
     #: - [TCP]
     #: - [UDP]
-    xinuexpansion3 = 2023, 'xinuexpansion3', TransportProtocol.tcp
+    xinuexpansion3 = 2023
 
     #: - [TCP]
     #: - [UDP]
-    xinuexpansion4 = 2024, 'xinuexpansion4', TransportProtocol.tcp
+    xinuexpansion4 = 2024
 
     #: [TCP]
-    ellpack = 2025, 'ellpack', TransportProtocol.tcp
+    ellpack = 2025
 
     #: - [TCP]
     #: - [UDP]
-    scrabble = 2026, 'scrabble', TransportProtocol.tcp
+    scrabble = 2026
 
     #: - [TCP]
     #: - [UDP]
-    shadowserver = 2027, 'shadowserver', TransportProtocol.tcp
+    shadowserver = 2027
 
     #: - [TCP]
     #: - [UDP]
-    submitserver = 2028, 'submitserver', TransportProtocol.tcp
+    submitserver = 2028
 
     #: - [TCP] Hot Standby Router Protocol IPv6
     #: - [UDP] Hot Standby Router Protocol IPv6
-    hsrpv6 = 2029, 'hsrpv6', TransportProtocol.tcp
+    hsrpv6 = 2029
 
     #: - [TCP]
     #: - [UDP]
-    device2 = 2030, 'device2', TransportProtocol.tcp
+    device2 = 2030
 
     #: - [TCP] mobrien-chat
     #: - [UDP] mobrien-chat
-    mobrien_chat = 2031, 'mobrien-chat', TransportProtocol.tcp
+    mobrien_chat = 2031, 'mobrien-chat'
 
     #: - [TCP]
     #: - [UDP]
-    blackboard = 2032, 'blackboard', TransportProtocol.tcp
+    blackboard = 2032
 
     #: - [TCP]
     #: - [UDP]
-    glogger = 2033, 'glogger', TransportProtocol.tcp
+    glogger = 2033
 
     #: - [TCP]
     #: - [UDP]
-    scoremgr = 2034, 'scoremgr', TransportProtocol.tcp
+    scoremgr = 2034
 
     #: - [TCP]
     #: - [UDP]
-    imsldoc = 2035, 'imsldoc', TransportProtocol.tcp
+    imsldoc = 2035
 
     #: - [TCP] Ethernet WS DP network
     #: - [UDP] Ethernet WS DP network
-    e_dpnet = 2036, 'e-dpnet', TransportProtocol.tcp
+    e_dpnet = 2036, 'e-dpnet'
 
     #: - [TCP] APplus Application Server
     #: - [UDP] APplus Application Server
-    applus = 2037, 'applus', TransportProtocol.tcp
+    applus = 2037
 
     #: - [TCP]
     #: - [UDP]
-    objectmanager = 2038, 'objectmanager', TransportProtocol.tcp
+    objectmanager = 2038
 
     #: - [TCP] Prizma Monitoring Service
     #: - [UDP] Prizma Monitoring Service
-    prizma = 2039, 'prizma', TransportProtocol.tcp
+    prizma = 2039
 
     #: - [TCP]
     #: - [UDP]
-    lam = 2040, 'lam', TransportProtocol.tcp
+    lam = 2040
 
     #: - [TCP]
     #: - [UDP]
-    interbase = 2041, 'interbase', TransportProtocol.tcp
+    interbase = 2041
 
     #: - [TCP] isis
     #: - [UDP] isis
-    isis = 2042, 'isis', TransportProtocol.tcp
+    isis = 2042
 
     #: - [TCP] isis-bcast
     #: - [UDP] isis-bcast
-    isis_bcast = 2043, 'isis-bcast', TransportProtocol.tcp
+    isis_bcast = 2043, 'isis-bcast'
 
     #: - [TCP]
     #: - [UDP]
-    rimsl = 2044, 'rimsl', TransportProtocol.tcp
+    rimsl = 2044
 
     #: - [TCP]
     #: - [UDP]
-    cdfunc = 2045, 'cdfunc', TransportProtocol.tcp
+    cdfunc = 2045
 
     #: - [TCP]
     #: - [UDP]
-    sdfunc = 2046, 'sdfunc', TransportProtocol.tcp
+    sdfunc = 2046
 
     #: - [TCP] Directory Location Service
     #: - [UDP] Directory Location Service
-    dls_197 = 197, 'dls', TransportProtocol.tcp
+    dls_197 = 197, 'dls'
 
     #: - [TCP]
     #: - [UDP]
-    dls_2047 = 2047, 'dls', TransportProtocol.tcp
+    dls_2047 = 2047, 'dls'
 
     #: - [TCP]
     #: - [UDP]
-    dls_monitor = 2048, 'dls-monitor', TransportProtocol.tcp
+    dls_monitor = 2048, 'dls-monitor'
 
     #: - [TCP]
     #: - [UDP]
-    shilp = 2049, 'shilp', TransportProtocol.tcp
+    shilp = 2049
 
     #: - [TCP] Network File System - Sun Microsystems
     #: - [UDP] Network File System - Sun Microsystems
     #: - [SCTP] Network File System [:rfc:`5665`]
-    nfs = 2049, 'nfs', TransportProtocol.tcp
+    nfs = 2049
 
     #: - [TCP] Avaya EMB Config Port
     #: - [UDP] Avaya EMB Config Port
-    av_emb_config = 2050, 'av-emb-config', TransportProtocol.tcp
+    av_emb_config = 2050, 'av-emb-config'
 
     #: - [TCP] EPNSDP
     #: - [UDP] EPNSDP
-    epnsdp = 2051, 'epnsdp', TransportProtocol.tcp
+    epnsdp = 2051
 
     #: - [TCP] clearVisn Services Port
     #: - [UDP] clearVisn Services Port
-    clearvisn = 2052, 'clearvisn', TransportProtocol.tcp
+    clearvisn = 2052
 
     #: - [TCP] Lot105 DSuper Updates
     #: - [UDP] Lot105 DSuper Updates
-    lot105_ds_upd = 2053, 'lot105-ds-upd', TransportProtocol.tcp
+    lot105_ds_upd = 2053, 'lot105-ds-upd'
 
     #: - [TCP] Weblogin Port
     #: - [UDP] Weblogin Port
-    weblogin = 2054, 'weblogin', TransportProtocol.tcp
+    weblogin = 2054
 
     #: - [TCP] Iliad-Odyssey Protocol
     #: - [UDP] Iliad-Odyssey Protocol
-    iop = 2055, 'iop', TransportProtocol.tcp
+    iop = 2055
 
     #: - [TCP] OmniSky Port
     #: - [UDP] OmniSky Port
-    omnisky = 2056, 'omnisky', TransportProtocol.tcp
+    omnisky = 2056
 
     #: - [TCP] Rich Content Protocol
     #: - [UDP] Rich Content Protocol
-    rich_cp = 2057, 'rich-cp', TransportProtocol.tcp
+    rich_cp = 2057, 'rich-cp'
 
     #: - [TCP] NewWaveSearchables RMI
     #: - [UDP] NewWaveSearchables RMI
-    newwavesearch = 2058, 'newwavesearch', TransportProtocol.tcp
+    newwavesearch = 2058
 
     #: - [TCP] BMC Messaging Service
     #: - [UDP] BMC Messaging Service
-    bmc_messaging = 2059, 'bmc-messaging', TransportProtocol.tcp
+    bmc_messaging = 2059, 'bmc-messaging'
 
     #: - [TCP] Telenium Daemon IF
     #: - [UDP] Telenium Daemon IF
-    teleniumdaemon = 2060, 'teleniumdaemon', TransportProtocol.tcp
+    teleniumdaemon = 2060
 
     #: - [TCP] NetMount
     #: - [UDP] NetMount
-    netmount = 2061, 'netmount', TransportProtocol.tcp
+    netmount = 2061
 
     #: - [TCP] ICG SWP Port
     #: - [UDP] ICG SWP Port
-    icg_swp = 2062, 'icg-swp', TransportProtocol.tcp
+    icg_swp = 2062, 'icg-swp'
 
     #: - [TCP] ICG Bridge Port
     #: - [UDP] ICG Bridge Port
-    icg_bridge = 2063, 'icg-bridge', TransportProtocol.tcp
+    icg_bridge = 2063, 'icg-bridge'
 
     #: - [TCP] ICG IP Relay Port
     #: - [UDP] ICG IP Relay Port
-    icg_iprelay = 2064, 'icg-iprelay', TransportProtocol.tcp
+    icg_iprelay = 2064, 'icg-iprelay'
 
     #: - [TCP] Data Link Switch Read Port Number
     #: - [UDP] Data Link Switch Read Port Number
-    dlsrpn = 2065, 'dlsrpn', TransportProtocol.tcp
+    dlsrpn = 2065
 
     #: - [TCP] AVM USB Remote Architecture
     #: - [UDP] AVM USB Remote Architecture
-    aura = 2066, 'aura', TransportProtocol.tcp
+    aura = 2066
 
     #: - [TCP] Data Link Switch Write Port Number
     #: - [UDP] Data Link Switch Write Port Number
-    dlswpn = 2067, 'dlswpn', TransportProtocol.tcp
+    dlswpn = 2067
 
     #: - [TCP] Avocent AuthSrv Protocol
     #: - [UDP] Avocent AuthSrv Protocol
-    avauthsrvprtcl = 2068, 'avauthsrvprtcl', TransportProtocol.tcp
+    avauthsrvprtcl = 2068
 
     #: - [TCP] HTTP Event Port
     #: - [UDP] HTTP Event Port
-    event_port = 2069, 'event-port', TransportProtocol.tcp
+    event_port = 2069, 'event-port'
 
     #: - [TCP] AH and ESP Encapsulated in UDP packet
     #: - [UDP] AH and ESP Encapsulated in UDP packet
-    ah_esp_encap = 2070, 'ah-esp-encap', TransportProtocol.tcp
+    ah_esp_encap = 2070, 'ah-esp-encap'
 
     #: - [TCP] Axon Control Protocol
     #: - [UDP] Axon Control Protocol
-    acp_port = 2071, 'acp-port', TransportProtocol.tcp
+    acp_port = 2071, 'acp-port'
 
     #: - [TCP] GlobeCast mSync
     #: - [UDP] GlobeCast mSync
-    msync = 2072, 'msync', TransportProtocol.tcp
+    msync = 2072
 
     #: - [TCP] DataReel Database Socket
     #: - [UDP] DataReel Database Socket
-    gxs_data_port = 2073, 'gxs-data-port', TransportProtocol.tcp
+    gxs_data_port = 2073, 'gxs-data-port'
 
     #: - [TCP] Vertel VMF SA
     #: - [UDP] Vertel VMF SA
-    vrtl_vmf_sa = 2074, 'vrtl-vmf-sa', TransportProtocol.tcp
+    vrtl_vmf_sa = 2074, 'vrtl-vmf-sa'
 
     #: - [TCP] Newlix ServerWare Engine
     #: - [UDP] Newlix ServerWare Engine
-    newlixengine = 2075, 'newlixengine', TransportProtocol.tcp
+    newlixengine = 2075
 
     #: - [TCP] Newlix JSPConfig
     #: - [UDP] Newlix JSPConfig
-    newlixconfig = 2076, 'newlixconfig', TransportProtocol.tcp
+    newlixconfig = 2076
 
     #: - [TCP] Old Tivoli Storage Manager
     #: - [UDP] Old Tivoli Storage Manager
-    tsrmagt = 2077, 'tsrmagt', TransportProtocol.tcp
+    tsrmagt = 2077
 
     #: - [TCP] IBM Total Productivity Center Server
     #: - [UDP] IBM Total Productivity Center Server
-    tpcsrvr = 2078, 'tpcsrvr', TransportProtocol.tcp
+    tpcsrvr = 2078
 
     #: - [TCP] IDWARE Router Port
     #: - [UDP] IDWARE Router Port
-    idware_router = 2079, 'idware-router', TransportProtocol.tcp
+    idware_router = 2079, 'idware-router'
 
     #: - [TCP] Autodesk NLM (FLEXlm)
     #: - [UDP] Autodesk NLM (FLEXlm)
-    autodesk_nlm = 2080, 'autodesk-nlm', TransportProtocol.tcp
+    autodesk_nlm = 2080, 'autodesk-nlm'
 
     #: - [TCP] KME PRINTER TRAP PORT
     #: - [UDP] KME PRINTER TRAP PORT
-    kme_trap_port = 2081, 'kme-trap-port', TransportProtocol.tcp
+    kme_trap_port = 2081, 'kme-trap-port'
 
     #: - [TCP] Infowave Mobility Server
     #: - [UDP] Infowave Mobility Server
-    infowave = 2082, 'infowave', TransportProtocol.tcp
+    infowave = 2082
 
     #: - [TCP] Secure RADIUS Service [RFC-ietf-radext-radiusdtls-bis-18]
     #: - [UDP] Secure RADIUS Service [RFC-ietf-radext-radiusdtls-bis-18]
-    radsec = 2083, 'radsec', TransportProtocol.tcp
+    radsec = 2083
 
     #: - [TCP] SunCluster Geographic
     #: - [UDP] SunCluster Geographic
-    sunclustergeo = 2084, 'sunclustergeo', TransportProtocol.tcp
+    sunclustergeo = 2084
 
     #: - [TCP] ADA Control
     #: - [UDP] ADA Control
-    ada_cip = 2085, 'ada-cip', TransportProtocol.tcp
+    ada_cip = 2085, 'ada-cip'
 
     #: - [TCP] GNUnet
     #: - [UDP] GNUnet
-    gnunet = 2086, 'gnunet', TransportProtocol.tcp
+    gnunet = 2086
 
     #: - [TCP] ELI - Event Logging Integration
     #: - [UDP] ELI - Event Logging Integration
-    eli = 2087, 'eli', TransportProtocol.tcp
+    eli = 2087
 
     #: - [TCP] IP Busy Lamp Field
     #: - [UDP] IP Busy Lamp Field
-    ip_blf = 2088, 'ip-blf', TransportProtocol.tcp
+    ip_blf = 2088, 'ip-blf'
 
     #: - [TCP] Security Encapsulation Protocol - SEP
     #: - [UDP] Security Encapsulation Protocol - SEP
-    sep = 2089, 'sep', TransportProtocol.tcp
+    sep = 2089
 
     #: - [TCP] Load Report Protocol
     #: - [UDP] Load Report Protocol
-    lrp = 2090, 'lrp', TransportProtocol.tcp
+    lrp = 2090
 
     #: - [TCP] PRP
     #: - [UDP] PRP
-    prp = 2091, 'prp', TransportProtocol.tcp
+    prp = 2091
 
     #: - [TCP] Descent 3
     #: - [UDP] Descent 3
-    descent3 = 2092, 'descent3', TransportProtocol.tcp
+    descent3 = 2092
 
     #: - [TCP] NBX CC
     #: - [UDP] NBX CC
-    nbx_cc = 2093, 'nbx-cc', TransportProtocol.tcp
+    nbx_cc = 2093, 'nbx-cc'
 
     #: - [TCP] NBX AU
     #: - [UDP] NBX AU
-    nbx_au = 2094, 'nbx-au', TransportProtocol.tcp
+    nbx_au = 2094, 'nbx-au'
 
     #: - [TCP] NBX SER
     #: - [UDP] NBX SER
-    nbx_ser = 2095, 'nbx-ser', TransportProtocol.tcp
+    nbx_ser = 2095, 'nbx-ser'
 
     #: - [TCP] NBX DIR
     #: - [UDP] NBX DIR
-    nbx_dir = 2096, 'nbx-dir', TransportProtocol.tcp
+    nbx_dir = 2096, 'nbx-dir'
 
     #: - [TCP] Jet Form Preview
     #: - [UDP] Jet Form Preview
-    jetformpreview = 2097, 'jetformpreview', TransportProtocol.tcp
+    jetformpreview = 2097
 
     #: - [TCP] Dialog Port
     #: - [UDP] Dialog Port
-    dialog_port = 2098, 'dialog-port', TransportProtocol.tcp
+    dialog_port = 2098, 'dialog-port'
 
     #: - [TCP] H.225.0 Annex G Signalling
     #: - [UDP] H.225.0 Annex G Signalling
-    h2250_annex_g = 2099, 'h2250-annex-g', TransportProtocol.tcp
+    h2250_annex_g = 2099, 'h2250-annex-g'
 
     #: - [TCP] Amiga Network Filesystem
     #: - [UDP] Amiga Network Filesystem
-    amiganetfs = 2100, 'amiganetfs', TransportProtocol.tcp
+    amiganetfs = 2100
 
     #: - [TCP] rtcm-sc104
     #: - [UDP] rtcm-sc104
-    rtcm_sc104 = 2101, 'rtcm-sc104', TransportProtocol.tcp
+    rtcm_sc104 = 2101, 'rtcm-sc104'
 
     #: - [TCP] Zephyr server
     #: - [UDP] Zephyr server
-    zephyr_srv = 2102, 'zephyr-srv', TransportProtocol.tcp
+    zephyr_srv = 2102, 'zephyr-srv'
 
     #: - [TCP] Zephyr serv-hm connection
     #: - [UDP] Zephyr serv-hm connection
-    zephyr_clt = 2103, 'zephyr-clt', TransportProtocol.tcp
+    zephyr_clt = 2103, 'zephyr-clt'
 
     #: - [TCP] Zephyr hostmanager
     #: - [UDP] Zephyr hostmanager
-    zephyr_hm = 2104, 'zephyr-hm', TransportProtocol.tcp
+    zephyr_hm = 2104, 'zephyr-hm'
 
     #: - [TCP] MiniPay
     #: - [UDP] MiniPay
-    minipay = 2105, 'minipay', TransportProtocol.tcp
+    minipay = 2105
 
     #: - [TCP] MZAP
     #: - [UDP] MZAP
-    mzap = 2106, 'mzap', TransportProtocol.tcp
+    mzap = 2106
 
     #: - [TCP] BinTec Admin
     #: - [UDP] BinTec Admin
-    bintec_admin = 2107, 'bintec-admin', TransportProtocol.tcp
+    bintec_admin = 2107, 'bintec-admin'
 
     #: - [TCP] Comcam
     #: - [UDP] Comcam
-    comcam = 2108, 'comcam', TransportProtocol.tcp
+    comcam = 2108
 
     #: - [TCP] Ergolight
     #: - [UDP] Ergolight
-    ergolight = 2109, 'ergolight', TransportProtocol.tcp
+    ergolight = 2109
 
     #: - [TCP] UMSP
     #: - [UDP] UMSP
-    umsp = 2110, 'umsp', TransportProtocol.tcp
+    umsp = 2110
 
     #: - [TCP] OPNET Dynamic Sampling Agent Transaction Protocol
     #: - [UDP] OPNET Dynamic Sampling Agent Transaction Protocol
-    dsatp = 2111, 'dsatp', TransportProtocol.tcp
+    dsatp = 2111
 
     #: - [TCP] Idonix MetaNet
     #: - [UDP] Idonix MetaNet
-    idonix_metanet = 2112, 'idonix-metanet', TransportProtocol.tcp
+    idonix_metanet = 2112, 'idonix-metanet'
 
     #: - [TCP] HSL StoRM
     #: - [UDP] HSL StoRM
-    hsl_storm = 2113, 'hsl-storm', TransportProtocol.tcp
+    hsl_storm = 2113, 'hsl-storm'
 
     #: - [TCP] Classical Music Meta-Data Access and Enhancement
     #: - [UDP] Classical Music Meta-Data Access and Enhancement
-    ariascribe = 2114, 'ariascribe', TransportProtocol.tcp
+    ariascribe = 2114
 
     #: - [TCP] Key Distribution Manager
     #: - [UDP] Key Distribution Manager
-    kdm = 2115, 'kdm', TransportProtocol.tcp
+    kdm = 2115
 
     #: - [TCP] CCOWCMR
     #: - [UDP] CCOWCMR
-    ccowcmr = 2116, 'ccowcmr', TransportProtocol.tcp
+    ccowcmr = 2116
 
     #: - [TCP] MENTACLIENT
     #: - [UDP] MENTACLIENT
-    mentaclient = 2117, 'mentaclient', TransportProtocol.tcp
+    mentaclient = 2117
 
     #: - [TCP] MENTASERVER
     #: - [UDP] MENTASERVER
-    mentaserver = 2118, 'mentaserver', TransportProtocol.tcp
+    mentaserver = 2118
 
     #: - [TCP] GSIGATEKEEPER
     #: - [UDP] GSIGATEKEEPER
-    gsigatekeeper = 2119, 'gsigatekeeper', TransportProtocol.tcp
+    gsigatekeeper = 2119
 
     #: - [TCP] Quick Eagle Networks CP
     #: - [UDP] Quick Eagle Networks CP
-    qencp = 2120, 'qencp', TransportProtocol.tcp
+    qencp = 2120
 
     #: - [TCP] SCIENTIA-SSDB
     #: - [UDP] SCIENTIA-SSDB
-    scientia_ssdb = 2121, 'scientia-ssdb', TransportProtocol.tcp
+    scientia_ssdb = 2121, 'scientia-ssdb'
 
     #: - [TCP] CauPC Remote Control
     #: - [UDP] CauPC Remote Control
-    caupc_remote = 2122, 'caupc-remote', TransportProtocol.tcp
+    caupc_remote = 2122, 'caupc-remote'
 
     #: - [TCP] GTP-Control Plane (3GPP)
     #: - [UDP] GTP-Control Plane (3GPP)
-    gtp_control = 2123, 'gtp-control', TransportProtocol.tcp
+    gtp_control = 2123, 'gtp-control'
 
     #: - [TCP] ELATELINK
     #: - [UDP] ELATELINK
-    elatelink = 2124, 'elatelink', TransportProtocol.tcp
+    elatelink = 2124
 
     #: - [TCP] LOCKSTEP
     #: - [UDP] LOCKSTEP
-    lockstep = 2125, 'lockstep', TransportProtocol.tcp
+    lockstep = 2125
 
     #: - [TCP] PktCable-COPS
     #: - [UDP] PktCable-COPS
-    pktcable_cops = 2126, 'pktcable-cops', TransportProtocol.tcp
+    pktcable_cops = 2126, 'pktcable-cops'
 
     #: - [TCP] INDEX-PC-WB
     #: - [UDP] INDEX-PC-WB
-    index_pc_wb = 2127, 'index-pc-wb', TransportProtocol.tcp
+    index_pc_wb = 2127, 'index-pc-wb'
 
     #: - [TCP] Net Steward Control
     #: - [UDP] Net Steward Control
-    net_steward = 2128, 'net-steward', TransportProtocol.tcp
+    net_steward = 2128, 'net-steward'
 
     #: - [TCP] cs-live.com
     #: - [UDP] cs-live.com
-    cs_live = 2129, 'cs-live', TransportProtocol.tcp
+    cs_live = 2129, 'cs-live'
 
     #: - [TCP] XDS
     #: - [UDP] XDS
-    xds = 2130, 'xds', TransportProtocol.tcp
+    xds = 2130
 
     #: - [TCP] Avantageb2b
     #: - [UDP] Avantageb2b
-    avantageb2b = 2131, 'avantageb2b', TransportProtocol.tcp
+    avantageb2b = 2131
 
     #: - [TCP] SoleraTec End Point Map
     #: - [UDP] SoleraTec End Point Map
-    solera_epmap = 2132, 'solera-epmap', TransportProtocol.tcp
+    solera_epmap = 2132, 'solera-epmap'
 
     #: - [TCP] ZYMED-ZPP
     #: - [UDP] ZYMED-ZPP
-    zymed_zpp = 2133, 'zymed-zpp', TransportProtocol.tcp
+    zymed_zpp = 2133, 'zymed-zpp'
 
     #: - [TCP] AVENUE
     #: - [UDP] AVENUE
-    avenue = 2134, 'avenue', TransportProtocol.tcp
+    avenue = 2134
 
     #: - [TCP] Grid Resource Information Server
     #: - [UDP] Grid Resource Information Server
-    gris = 2135, 'gris', TransportProtocol.tcp
+    gris = 2135
 
     #: - [TCP] APPWORXSRV
     #: - [UDP] APPWORXSRV
-    appworxsrv = 2136, 'appworxsrv', TransportProtocol.tcp
+    appworxsrv = 2136
 
     #: - [TCP] CONNECT
     #: - [UDP] CONNECT
-    connect = 2137, 'connect', TransportProtocol.tcp
+    connect = 2137
 
     #: - [TCP] UNBIND-CLUSTER
     #: - [UDP] UNBIND-CLUSTER
-    unbind_cluster = 2138, 'unbind-cluster', TransportProtocol.tcp
+    unbind_cluster = 2138, 'unbind-cluster'
 
     #: - [TCP] IAS-AUTH
     #: - [UDP] IAS-AUTH
-    ias_auth = 2139, 'ias-auth', TransportProtocol.tcp
+    ias_auth = 2139, 'ias-auth'
 
     #: - [TCP] IAS-REG
     #: - [UDP] IAS-REG
-    ias_reg = 2140, 'ias-reg', TransportProtocol.tcp
+    ias_reg = 2140, 'ias-reg'
 
     #: - [TCP] IAS-ADMIND
     #: - [UDP] IAS-ADMIND
-    ias_admind = 2141, 'ias-admind', TransportProtocol.tcp
+    ias_admind = 2141, 'ias-admind'
 
     #: - [TCP] TDM OVER IP [:rfc:`5087`]
     #: - [UDP] TDM OVER IP [:rfc:`5087`]
-    tdmoip = 2142, 'tdmoip', TransportProtocol.tcp
+    tdmoip = 2142
 
     #: - [TCP] Live Vault Job Control
     #: - [UDP] Live Vault Job Control
-    lv_jc = 2143, 'lv-jc', TransportProtocol.tcp
+    lv_jc = 2143, 'lv-jc'
 
     #: - [TCP] Live Vault Fast Object Transfer
     #: - [UDP] Live Vault Fast Object Transfer
-    lv_ffx = 2144, 'lv-ffx', TransportProtocol.tcp
+    lv_ffx = 2144, 'lv-ffx'
 
     #: - [TCP] Live Vault Remote Diagnostic Console Support
     #: - [UDP] Live Vault Remote Diagnostic Console Support
-    lv_pici = 2145, 'lv-pici', TransportProtocol.tcp
+    lv_pici = 2145, 'lv-pici'
 
     #: - [TCP] Live Vault Admin Event Notification
     #: - [UDP] Live Vault Admin Event Notification
-    lv_not = 2146, 'lv-not', TransportProtocol.tcp
+    lv_not = 2146, 'lv-not'
 
     #: - [TCP] Live Vault Authentication
     #: - [UDP] Live Vault Authentication
-    lv_auth = 2147, 'lv-auth', TransportProtocol.tcp
+    lv_auth = 2147, 'lv-auth'
 
     #: - [TCP] VERITAS UNIVERSAL COMMUNICATION LAYER
     #: - [UDP] VERITAS UNIVERSAL COMMUNICATION LAYER
-    veritas_ucl = 2148, 'veritas-ucl', TransportProtocol.tcp
+    veritas_ucl = 2148, 'veritas-ucl'
 
     #: - [TCP] ACPTSYS
     #: - [UDP] ACPTSYS
-    acptsys = 2149, 'acptsys', TransportProtocol.tcp
+    acptsys = 2149
 
     #: - [TCP] DYNAMIC3D
     #: - [UDP] DYNAMIC3D
-    dynamic3d = 2150, 'dynamic3d', TransportProtocol.tcp
+    dynamic3d = 2150
 
     #: - [TCP] DOCENT
     #: - [UDP] DOCENT
-    docent = 2151, 'docent', TransportProtocol.tcp
+    docent = 2151
 
     #: - [TCP] GTP-User Plane (3GPP)
     #: - [UDP] GTP-User Plane (3GPP)
-    gtp_user = 2152, 'gtp-user', TransportProtocol.tcp
+    gtp_user = 2152, 'gtp-user'
 
     #: - [TCP] Control Protocol
     #: - [UDP] Control Protocol
-    ctlptc = 2153, 'ctlptc', TransportProtocol.tcp
+    ctlptc = 2153
 
     #: - [TCP] Standard Protocol
     #: - [UDP] Standard Protocol
-    stdptc = 2154, 'stdptc', TransportProtocol.tcp
+    stdptc = 2154
 
     #: - [TCP] Bridge Protocol
     #: - [UDP] Bridge Protocol
-    brdptc = 2155, 'brdptc', TransportProtocol.tcp
+    brdptc = 2155
 
     #: - [TCP] Talari Reliable Protocol
     #: - [UDP] Talari Reliable Protocol
-    trp = 2156, 'trp', TransportProtocol.tcp
+    trp = 2156
 
     #: - [TCP] Xerox Network Document Scan Protocol
     #: - [UDP] Xerox Network Document Scan Protocol
-    xnds = 2157, 'xnds', TransportProtocol.tcp
+    xnds = 2157
 
     #: - [TCP] TouchNetPlus Service
     #: - [UDP] TouchNetPlus Service
-    touchnetplus = 2158, 'touchnetplus', TransportProtocol.tcp
+    touchnetplus = 2158
 
     #: - [TCP] GDB Remote Debug Port
     #: - [UDP] GDB Remote Debug Port
-    gdbremote = 2159, 'gdbremote', TransportProtocol.tcp
+    gdbremote = 2159
 
     #: - [TCP] APC 2160
     #: - [UDP] APC 2160
-    apc_2160 = 2160, 'apc-2160', TransportProtocol.tcp
+    apc_2160 = 2160, 'apc-2160'
 
     #: - [TCP] APC 2161
     #: - [UDP] APC 2161
-    apc_2161 = 2161, 'apc-2161', TransportProtocol.tcp
+    apc_2161 = 2161, 'apc-2161'
 
     #: - [TCP] Navisphere
     #: - [UDP] Navisphere
-    navisphere = 2162, 'navisphere', TransportProtocol.tcp
+    navisphere = 2162
 
     #: - [TCP] Navisphere Secure
     #: - [UDP] Navisphere Secure
-    navisphere_sec = 2163, 'navisphere-sec', TransportProtocol.tcp
+    navisphere_sec = 2163, 'navisphere-sec'
 
     #: - [TCP] Dynamic DNS Version 3
     #: - [UDP] Dynamic DNS Version 3
-    ddns_v3 = 2164, 'ddns-v3', TransportProtocol.tcp
+    ddns_v3 = 2164, 'ddns-v3'
 
     #: - [TCP] X-Bone API
     #: - [UDP] X-Bone API
-    x_bone_api = 2165, 'x-bone-api', TransportProtocol.tcp
+    x_bone_api = 2165, 'x-bone-api'
 
     #: - [TCP] iwserver
     #: - [UDP] iwserver
-    iwserver = 2166, 'iwserver', TransportProtocol.tcp
+    iwserver = 2166
 
     #: - [TCP] Raw Async Serial Link
     #: - [UDP] Raw Async Serial Link
-    raw_serial = 2167, 'raw-serial', TransportProtocol.tcp
+    raw_serial = 2167, 'raw-serial'
 
     #: - [TCP] easy-soft Multiplexer
     #: - [UDP] easy-soft Multiplexer
-    easy_soft_mux = 2168, 'easy-soft-mux', TransportProtocol.tcp
+    easy_soft_mux = 2168, 'easy-soft-mux'
 
     #: - [TCP] Backbone for Academic Information Notification (BRAIN)
     #: - [UDP] Backbone for Academic Information Notification (BRAIN)
-    brain = 2169, 'brain', TransportProtocol.tcp
+    brain = 2169
 
     #: - [TCP] EyeTV Server Port
     #: - [UDP] EyeTV Server Port
-    eyetv = 2170, 'eyetv', TransportProtocol.tcp
+    eyetv = 2170
 
     #: - [TCP] MS Firewall Storage
     #: - [UDP] MS Firewall Storage
-    msfw_storage = 2171, 'msfw-storage', TransportProtocol.tcp
+    msfw_storage = 2171, 'msfw-storage'
 
     #: - [TCP] MS Firewall SecureStorage
     #: - [UDP] MS Firewall SecureStorage
-    msfw_s_storage = 2172, 'msfw-s-storage', TransportProtocol.tcp
+    msfw_s_storage = 2172, 'msfw-s-storage'
 
     #: - [TCP] MS Firewall Replication
     #: - [UDP] MS Firewall Replication
-    msfw_replica = 2173, 'msfw-replica', TransportProtocol.tcp
+    msfw_replica = 2173, 'msfw-replica'
 
     #: - [TCP] MS Firewall Intra Array
     #: - [UDP] MS Firewall Intra Array
-    msfw_array = 2174, 'msfw-array', TransportProtocol.tcp
+    msfw_array = 2174, 'msfw-array'
 
     #: - [TCP] Microsoft Desktop AirSync Protocol
     #: - [UDP] Microsoft Desktop AirSync Protocol
-    airsync = 2175, 'airsync', TransportProtocol.tcp
+    airsync = 2175
 
     #: - [TCP] Microsoft ActiveSync Remote API
     #: - [UDP] Microsoft ActiveSync Remote API
-    rapi = 2176, 'rapi', TransportProtocol.tcp
+    rapi = 2176
 
     #: - [TCP] qWAVE Bandwidth Estimate
     #: - [UDP] qWAVE Bandwidth Estimate
-    qwave = 2177, 'qwave', TransportProtocol.tcp
+    qwave = 2177
 
     #: - [TCP] Peer Services for BITS
     #: - [UDP] Peer Services for BITS
-    bitspeer = 2178, 'bitspeer', TransportProtocol.tcp
+    bitspeer = 2178
 
     #: - [TCP] Microsoft RDP for virtual machines
     #: - [UDP] Microsoft RDP for virtual machines
-    vmrdp = 2179, 'vmrdp', TransportProtocol.tcp
+    vmrdp = 2179
 
     #: - [TCP] Millicent Vendor Gateway Server
     #: - [UDP] Millicent Vendor Gateway Server
-    mc_gt_srv = 2180, 'mc-gt-srv', TransportProtocol.tcp
+    mc_gt_srv = 2180, 'mc-gt-srv'
 
     #: - [TCP] eforward
     #: - [UDP] eforward
-    eforward = 2181, 'eforward', TransportProtocol.tcp
+    eforward = 2181
 
     #: - [TCP] CGN status
     #: - [UDP] CGN status
-    cgn_stat = 2182, 'cgn-stat', TransportProtocol.tcp
+    cgn_stat = 2182, 'cgn-stat'
 
     #: - [TCP] Code Green configuration
     #: - [UDP] Code Green configuration
-    cgn_config = 2183, 'cgn-config', TransportProtocol.tcp
+    cgn_config = 2183, 'cgn-config'
 
     #: - [TCP] OnBase Distributed Disk Services
     #: - [UDP] OnBase Distributed Disk Services
-    onbase_dds = 2185, 'onbase-dds', TransportProtocol.tcp
+    onbase_dds = 2185, 'onbase-dds'
 
     #: - [TCP] Guy-Tek Automated Update Applications
     #: - [UDP] Guy-Tek Automated Update Applications
-    gtaua = 2186, 'gtaua', TransportProtocol.tcp
+    gtaua = 2186
 
     #: [TCP] Sepehr System Management Control
-    ssmc = 2187, 'ssmc', TransportProtocol.tcp
+    ssmc = 2187
 
     #: [TCP] Radware Resource Pool Manager
-    radware_rpm = 2188, 'radware-rpm', TransportProtocol.tcp
+    radware_rpm = 2188, 'radware-rpm'
 
     #: [TCP] Secure Radware Resource Pool Manager
-    radware_rpm_s = 2189, 'radware-rpm-s', TransportProtocol.tcp
+    radware_rpm_s = 2189, 'radware-rpm-s'
 
     #: - [TCP] TiVoConnect Beacon
     #: - [UDP] TiVoConnect Beacon
-    tivoconnect = 2190, 'tivoconnect', TransportProtocol.tcp
+    tivoconnect = 2190
 
     #: - [TCP] TvBus Messaging
     #: - [UDP] TvBus Messaging
-    tvbus = 2191, 'tvbus', TransportProtocol.tcp
+    tvbus = 2191
 
     #: - [TCP] ASDIS software management
     #: - [UDP] ASDIS software management
-    asdis = 2192, 'asdis', TransportProtocol.tcp
+    asdis = 2192
 
     #: - [TCP] Dr.Web Enterprise Management Service
     #: - [UDP] Dr.Web Enterprise Management Service
-    drwcs = 2193, 'drwcs', TransportProtocol.tcp
+    drwcs = 2193
 
     #: - [TCP] MNP data exchange
     #: - [UDP] MNP data exchange
-    mnp_exchange = 2197, 'mnp-exchange', TransportProtocol.tcp
+    mnp_exchange = 2197, 'mnp-exchange'
 
     #: - [TCP] OneHome Remote Access
     #: - [UDP] OneHome Remote Access
-    onehome_remote = 2198, 'onehome-remote', TransportProtocol.tcp
+    onehome_remote = 2198, 'onehome-remote'
 
     #: - [TCP] OneHome Service Port
     #: - [UDP] OneHome Service Port
-    onehome_help = 2199, 'onehome-help', TransportProtocol.tcp
+    onehome_help = 2199, 'onehome-help'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_2200 = 2200, 'reserved', TransportProtocol.tcp
+    reserved_2200 = 2200, 'reserved'
 
     #: - [TCP] Advanced Training System Program
     #: - [UDP] Advanced Training System Program
-    ats = 2201, 'ats', TransportProtocol.tcp
+    ats = 2201
 
     #: - [TCP] Int. Multimedia Teleconferencing Cosortium
     #: - [UDP] Int. Multimedia Teleconferencing Cosortium
-    imtc_map = 2202, 'imtc-map', TransportProtocol.tcp
+    imtc_map = 2202, 'imtc-map'
 
     #: - [TCP] b2 Runtime Protocol
     #: - [UDP] b2 Runtime Protocol
-    b2_runtime = 2203, 'b2-runtime', TransportProtocol.tcp
+    b2_runtime = 2203, 'b2-runtime'
 
     #: - [TCP] b2 License Server
     #: - [UDP] b2 License Server
-    b2_license = 2204, 'b2-license', TransportProtocol.tcp
+    b2_license = 2204, 'b2-license'
 
     #: - [TCP] Java Presentation Server
     #: - [UDP] Java Presentation Server
-    jps = 2205, 'jps', TransportProtocol.tcp
+    jps = 2205
 
     #: - [TCP] HP OpenCall bus
     #: - [UDP] HP OpenCall bus
-    hpocbus = 2206, 'hpocbus', TransportProtocol.tcp
+    hpocbus = 2206
 
     #: - [TCP] HP Status and Services
     #: - [UDP] HP Status and Services
-    hpssd = 2207, 'hpssd', TransportProtocol.tcp
+    hpssd = 2207
 
     #: - [TCP] HP I/O Backend
     #: - [UDP] HP I/O Backend
-    hpiod = 2208, 'hpiod', TransportProtocol.tcp
+    hpiod = 2208
 
     #: - [TCP] HP RIM for Files Portal Service
     #: - [UDP] HP RIM for Files Portal Service
-    rimf_ps = 2209, 'rimf-ps', TransportProtocol.tcp
+    rimf_ps = 2209, 'rimf-ps'
 
     #: - [TCP] NOAAPORT Broadcast Network
     #: - [UDP] NOAAPORT Broadcast Network
-    noaaport = 2210, 'noaaport', TransportProtocol.tcp
+    noaaport = 2210
 
     #: - [TCP] EMWIN
     #: - [UDP] EMWIN
-    emwin = 2211, 'emwin', TransportProtocol.tcp
+    emwin = 2211
 
     #: - [TCP] LeeCO POS Server Service
     #: - [UDP] LeeCO POS Server Service
-    leecoposserver = 2212, 'leecoposserver', TransportProtocol.tcp
+    leecoposserver = 2212
 
     #: - [TCP] Kali
     #: - [UDP] Kali
-    kali = 2213, 'kali', TransportProtocol.tcp
+    kali = 2213
 
     #: - [TCP] RDQ Protocol Interface
     #: - [UDP] RDQ Protocol Interface
-    rpi = 2214, 'rpi', TransportProtocol.tcp
+    rpi = 2214
 
     #: - [TCP] IPCore.co.za GPRS
     #: - [UDP] IPCore.co.za GPRS
-    ipcore = 2215, 'ipcore', TransportProtocol.tcp
+    ipcore = 2215
 
     #: - [TCP] VTU data service
     #: - [UDP] VTU data service
-    vtu_comms = 2216, 'vtu-comms', TransportProtocol.tcp
+    vtu_comms = 2216, 'vtu-comms'
 
     #: - [TCP] GoToDevice Device Management
     #: - [UDP] GoToDevice Device Management
-    gotodevice = 2217, 'gotodevice', TransportProtocol.tcp
+    gotodevice = 2217
 
     #: - [TCP] Bounzza IRC Proxy
     #: - [UDP] Bounzza IRC Proxy
-    bounzza = 2218, 'bounzza', TransportProtocol.tcp
+    bounzza = 2218
 
     #: - [TCP] NetIQ NCAP Protocol
     #: - [UDP] NetIQ NCAP Protocol
-    netiq_ncap = 2219, 'netiq-ncap', TransportProtocol.tcp
+    netiq_ncap = 2219, 'netiq-ncap'
 
     #: - [TCP] NetIQ End2End
     #: - [UDP] NetIQ End2End
-    netiq = 2220, 'netiq', TransportProtocol.tcp
+    netiq = 2220
 
     #: - [TCP] EtherNet/IP over TLS
     #: - [UDP] EtherNet/IP over DTLS
-    ethernet_ip_s = 2221, 'ethernet-ip-s', TransportProtocol.tcp
+    ethernet_ip_s = 2221, 'ethernet-ip-s'
 
     #: - [TCP] EtherNet/IP I/O IANA assigned this well-formed service name as a
     #:   replacement for "EtherNet/IP-1".
@@ -8646,479 +8646,479 @@ class TCP(AppType):
     #: - [UDP] EtherNet/IP I/O IANA assigned this well-formed service name as a
     #:   replacement for "EtherNet/IP-1".
     #: - [UDP] EtherNet/IP I/O
-    ethernet_ip_1 = 2222, 'ethernet-ip-1', TransportProtocol.tcp
+    ethernet_ip_1 = 2222, 'ethernet-ip-1'
 
     #: - [TCP] Rockwell CSP2
     #: - [UDP] Rockwell CSP2
-    rockwell_csp2 = 2223, 'rockwell-csp2', TransportProtocol.tcp
+    rockwell_csp2 = 2223, 'rockwell-csp2'
 
     #: - [TCP] Easy Flexible Internet/Multiplayer Games
     #: - [UDP] Easy Flexible Internet/Multiplayer Games
-    efi_mg = 2224, 'efi-mg', TransportProtocol.tcp
+    efi_mg = 2224, 'efi-mg'
 
     #: - [TCP] Resource Connection Initiation Protocol
     #: - [SCTP] Resource Connection Initiation Protocol
-    rcip_itu = 2225, 'rcip-itu', TransportProtocol.tcp
+    rcip_itu = 2225, 'rcip-itu'
 
     #: - [TCP] Digital Instinct DRM
     #: - [UDP] Digital Instinct DRM
-    di_drm = 2226, 'di-drm', TransportProtocol.tcp
+    di_drm = 2226, 'di-drm'
 
     #: - [TCP] DI Messaging Service
     #: - [UDP] DI Messaging Service
-    di_msg = 2227, 'di-msg', TransportProtocol.tcp
+    di_msg = 2227, 'di-msg'
 
     #: - [TCP] eHome Message Server
     #: - [UDP] eHome Message Server
-    ehome_ms = 2228, 'ehome-ms', TransportProtocol.tcp
+    ehome_ms = 2228, 'ehome-ms'
 
     #: - [TCP] DataLens Service
     #: - [UDP] DataLens Service
-    datalens = 2229, 'datalens', TransportProtocol.tcp
+    datalens = 2229
 
     #: - [TCP] MetaSoft Job Queue Administration Service
     #: - [UDP] MetaSoft Job Queue Administration Service
-    queueadm = 2230, 'queueadm', TransportProtocol.tcp
+    queueadm = 2230
 
     #: - [TCP] WiMAX ASN Control Plane Protocol
     #: - [UDP] WiMAX ASN Control Plane Protocol
-    wimaxasncp = 2231, 'wimaxasncp', TransportProtocol.tcp
+    wimaxasncp = 2231
 
     #: - [TCP] IVS Video default
     #: - [UDP] IVS Video default
-    ivs_video = 2232, 'ivs-video', TransportProtocol.tcp
+    ivs_video = 2232, 'ivs-video'
 
     #: - [TCP] INFOCRYPT
     #: - [UDP] INFOCRYPT
-    infocrypt = 2233, 'infocrypt', TransportProtocol.tcp
+    infocrypt = 2233
 
     #: - [TCP] DirectPlay
     #: - [UDP] DirectPlay
-    directplay = 2234, 'directplay', TransportProtocol.tcp
+    directplay = 2234
 
     #: - [TCP] Sercomm-WLink
     #: - [UDP] Sercomm-WLink
-    sercomm_wlink = 2235, 'sercomm-wlink', TransportProtocol.tcp
+    sercomm_wlink = 2235, 'sercomm-wlink'
 
     #: - [TCP] Nani
     #: - [UDP] Nani
-    nani = 2236, 'nani', TransportProtocol.tcp
+    nani = 2236
 
     #: - [TCP] Optech Port1 License Manager
     #: - [UDP] Optech Port1 License Manager
-    optech_port1_lm = 2237, 'optech-port1-lm', TransportProtocol.tcp
+    optech_port1_lm = 2237, 'optech-port1-lm'
 
     #: - [TCP] AVIVA SNA SERVER
     #: - [UDP] AVIVA SNA SERVER
-    aviva_sna = 2238, 'aviva-sna', TransportProtocol.tcp
+    aviva_sna = 2238, 'aviva-sna'
 
     #: - [TCP] Image Query
     #: - [UDP] Image Query
-    imagequery = 2239, 'imagequery', TransportProtocol.tcp
+    imagequery = 2239
 
     #: - [TCP] RECIPe
     #: - [UDP] RECIPe
-    recipe = 2240, 'recipe', TransportProtocol.tcp
+    recipe = 2240
 
     #: - [TCP] IVS Daemon
     #: - [UDP] IVS Daemon
-    ivsd = 2241, 'ivsd', TransportProtocol.tcp
+    ivsd = 2241
 
     #: - [TCP] Folio Remote Server
     #: - [UDP] Folio Remote Server
-    foliocorp = 2242, 'foliocorp', TransportProtocol.tcp
+    foliocorp = 2242
 
     #: - [TCP] Magicom Protocol
     #: - [UDP] Magicom Protocol
-    magicom = 2243, 'magicom', TransportProtocol.tcp
+    magicom = 2243
 
     #: - [TCP] NMS Server
     #: - [UDP] NMS Server
-    nmsserver = 2244, 'nmsserver', TransportProtocol.tcp
+    nmsserver = 2244
 
     #: - [TCP] HaO
     #: - [UDP] HaO
-    hao = 2245, 'hao', TransportProtocol.tcp
+    hao = 2245
 
     #: - [TCP] PacketCable MTA Addr Map
     #: - [UDP] PacketCable MTA Addr Map
-    pc_mta_addrmap = 2246, 'pc-mta-addrmap', TransportProtocol.tcp
+    pc_mta_addrmap = 2246, 'pc-mta-addrmap'
 
     #: - [TCP] Antidote Deployment Manager Service
     #: - [UDP] Antidote Deployment Manager Service
-    antidotemgrsvr = 2247, 'antidotemgrsvr', TransportProtocol.tcp
+    antidotemgrsvr = 2247
 
     #: - [TCP] User Management Service
     #: - [UDP] User Management Service
-    ums = 2248, 'ums', TransportProtocol.tcp
+    ums = 2248
 
     #: - [TCP] RISO File Manager Protocol
     #: - [UDP] RISO File Manager Protocol
-    rfmp = 2249, 'rfmp', TransportProtocol.tcp
+    rfmp = 2249
 
     #: - [TCP] remote-collab
     #: - [UDP] remote-collab
-    remote_collab = 2250, 'remote-collab', TransportProtocol.tcp
+    remote_collab = 2250, 'remote-collab'
 
     #: - [TCP] Distributed Framework Port
     #: - [UDP] Distributed Framework Port
-    dif_port = 2251, 'dif-port', TransportProtocol.tcp
+    dif_port = 2251, 'dif-port'
 
     #: - [TCP] NJENET using SSL
     #: - [UDP] NJENET using SSL
-    njenet_ssl = 2252, 'njenet-ssl', TransportProtocol.tcp
+    njenet_ssl = 2252, 'njenet-ssl'
 
     #: - [TCP] DTV Channel Request
     #: - [UDP] DTV Channel Request
-    dtv_chan_req = 2253, 'dtv-chan-req', TransportProtocol.tcp
+    dtv_chan_req = 2253, 'dtv-chan-req'
 
     #: - [TCP] Seismic P.O.C. Port
     #: - [UDP] Seismic P.O.C. Port
-    seispoc = 2254, 'seispoc', TransportProtocol.tcp
+    seispoc = 2254
 
     #: - [TCP] VRTP - ViRtue Transfer Protocol
     #: - [UDP] VRTP - ViRtue Transfer Protocol
-    vrtp = 2255, 'vrtp', TransportProtocol.tcp
+    vrtp = 2255
 
     #: - [TCP] PCC MFP
     #: - [UDP] PCC MFP
-    pcc_mfp = 2256, 'pcc-mfp', TransportProtocol.tcp
+    pcc_mfp = 2256, 'pcc-mfp'
 
     #: - [TCP] simple text/file transfer
     #: - [UDP] simple text/file transfer
-    simple_tx_rx = 2257, 'simple-tx-rx', TransportProtocol.tcp
+    simple_tx_rx = 2257, 'simple-tx-rx'
 
     #: - [TCP] Rotorcraft Communications Test System
     #: - [UDP] Rotorcraft Communications Test System
-    rcts = 2258, 'rcts', TransportProtocol.tcp
+    rcts = 2258
 
     #: - [TCP] BIF identifiers resolution service
     #: - [UDP] BIF identifiers resolution service
-    bid_serv = 2259, 'bid-serv', TransportProtocol.tcp
+    bid_serv = 2259, 'bid-serv'
 
     #: - [TCP] APC 2260
     #: - [UDP] APC 2260
-    apc_2260 = 2260, 'apc-2260', TransportProtocol.tcp
+    apc_2260 = 2260, 'apc-2260'
 
     #: - [TCP] CoMotion Master Server
     #: - [UDP] CoMotion Master Server
-    comotionmaster = 2261, 'comotionmaster', TransportProtocol.tcp
+    comotionmaster = 2261
 
     #: - [TCP] CoMotion Backup Server
     #: - [UDP] CoMotion Backup Server
-    comotionback = 2262, 'comotionback', TransportProtocol.tcp
+    comotionback = 2262
 
     #: - [TCP] ECweb Configuration Service
     #: - [UDP] ECweb Configuration Service
-    ecwcfg = 2263, 'ecwcfg', TransportProtocol.tcp
+    ecwcfg = 2263
 
     #: - [TCP] Audio Precision Apx500 API Port 1
     #: - [UDP] Audio Precision Apx500 API Port 1
-    apx500api_1 = 2264, 'apx500api-1', TransportProtocol.tcp
+    apx500api_1 = 2264, 'apx500api-1'
 
     #: - [TCP] Audio Precision Apx500 API Port 2
     #: - [UDP] Audio Precision Apx500 API Port 2
-    apx500api_2 = 2265, 'apx500api-2', TransportProtocol.tcp
+    apx500api_2 = 2265, 'apx500api-2'
 
     #: - [TCP] M-Files Server
     #: - [UDP] M-files Server
-    mfserver = 2266, 'mfserver', TransportProtocol.tcp
+    mfserver = 2266
 
     #: - [TCP] OntoBroker
     #: - [UDP] OntoBroker
-    ontobroker = 2267, 'ontobroker', TransportProtocol.tcp
+    ontobroker = 2267
 
     #: - [TCP] AMT [:rfc:`7450`]
     #: - [UDP] AMT [:rfc:`7450`]
-    amt = 2268, 'amt', TransportProtocol.tcp
+    amt = 2268
 
     #: - [TCP] MIKEY
     #: - [UDP] MIKEY
-    mikey = 2269, 'mikey', TransportProtocol.tcp
+    mikey = 2269
 
     #: - [TCP] starSchool
     #: - [UDP] starSchool
-    starschool = 2270, 'starschool', TransportProtocol.tcp
+    starschool = 2270
 
     #: - [TCP] Secure Meeting Maker Scheduling
     #: - [UDP] Secure Meeting Maker Scheduling
-    mmcals = 2271, 'mmcals', TransportProtocol.tcp
+    mmcals = 2271
 
     #: - [TCP] Meeting Maker Scheduling
     #: - [UDP] Meeting Maker Scheduling
-    mmcal = 2272, 'mmcal', TransportProtocol.tcp
+    mmcal = 2272
 
     #: - [TCP] MySQL Instance Manager
     #: - [UDP] MySQL Instance Manager
-    mysql_im = 2273, 'mysql-im', TransportProtocol.tcp
+    mysql_im = 2273, 'mysql-im'
 
     #: - [TCP] PCTTunneller
     #: - [UDP] PCTTunneller
-    pcttunnell = 2274, 'pcttunnell', TransportProtocol.tcp
+    pcttunnell = 2274
 
     #: - [TCP] iBridge Conferencing
     #: - [UDP] iBridge Conferencing
-    ibridge_data = 2275, 'ibridge-data', TransportProtocol.tcp
+    ibridge_data = 2275, 'ibridge-data'
 
     #: - [TCP] iBridge Management
     #: - [UDP] iBridge Management
-    ibridge_mgmt = 2276, 'ibridge-mgmt', TransportProtocol.tcp
+    ibridge_mgmt = 2276, 'ibridge-mgmt'
 
     #: - [TCP] Bt device control proxy
     #: - [UDP] Bt device control proxy
-    bluectrlproxy = 2277, 'bluectrlproxy', TransportProtocol.tcp
+    bluectrlproxy = 2277
 
     #: - [TCP] Simple Stacked Sequences Database
     #: - [UDP] Simple Stacked Sequences Database
-    s3db = 2278, 's3db', TransportProtocol.tcp
+    s3db = 2278
 
     #: - [TCP] xmquery
     #: - [UDP] xmquery
-    xmquery = 2279, 'xmquery', TransportProtocol.tcp
+    xmquery = 2279
 
     #: - [TCP] LNVPOLLER
     #: - [UDP] LNVPOLLER
-    lnvpoller = 2280, 'lnvpoller', TransportProtocol.tcp
+    lnvpoller = 2280
 
     #: - [TCP] LNVCONSOLE
     #: - [UDP] LNVCONSOLE
-    lnvconsole = 2281, 'lnvconsole', TransportProtocol.tcp
+    lnvconsole = 2281
 
     #: - [TCP] LNVALARM
     #: - [UDP] LNVALARM
-    lnvalarm = 2282, 'lnvalarm', TransportProtocol.tcp
+    lnvalarm = 2282
 
     #: - [TCP] LNVSTATUS
     #: - [UDP] LNVSTATUS
-    lnvstatus = 2283, 'lnvstatus', TransportProtocol.tcp
+    lnvstatus = 2283
 
     #: - [TCP] LNVMAPS
     #: - [UDP] LNVMAPS
-    lnvmaps = 2284, 'lnvmaps', TransportProtocol.tcp
+    lnvmaps = 2284
 
     #: - [TCP] LNVMAILMON
     #: - [UDP] LNVMAILMON
-    lnvmailmon = 2285, 'lnvmailmon', TransportProtocol.tcp
+    lnvmailmon = 2285
 
     #: - [TCP] NAS-Metering
     #: - [UDP] NAS-Metering
-    nas_metering = 2286, 'nas-metering', TransportProtocol.tcp
+    nas_metering = 2286, 'nas-metering'
 
     #: - [TCP] DNA
     #: - [UDP] DNA
-    dna = 2287, 'dna', TransportProtocol.tcp
+    dna = 2287
 
     #: - [TCP] NETML
     #: - [UDP] NETML
-    netml = 2288, 'netml', TransportProtocol.tcp
+    netml = 2288
 
     #: - [TCP] Lookup dict server
     #: - [UDP] Lookup dict server
-    dict_lookup = 2289, 'dict-lookup', TransportProtocol.tcp
+    dict_lookup = 2289, 'dict-lookup'
 
     #: - [TCP] Sonus Logging Services
     #: - [UDP] Sonus Logging Services
-    sonus_logging = 2290, 'sonus-logging', TransportProtocol.tcp
+    sonus_logging = 2290, 'sonus-logging'
 
     #: - [TCP] EPSON Advanced Printer Share Protocol
     #: - [UDP] EPSON Advanced Printer Share Protocol
-    eapsp = 2291, 'eapsp', TransportProtocol.tcp
+    eapsp = 2291
 
     #: - [TCP] Sonus Element Management Services
     #: - [UDP] Sonus Element Management Services
-    mib_streaming = 2292, 'mib-streaming', TransportProtocol.tcp
+    mib_streaming = 2292, 'mib-streaming'
 
     #: - [TCP] Network Platform Debug Manager
     #: - [UDP] Network Platform Debug Manager
-    npdbgmngr = 2293, 'npdbgmngr', TransportProtocol.tcp
+    npdbgmngr = 2293
 
     #: - [TCP] Konshus License Manager (FLEX)
     #: - [UDP] Konshus License Manager (FLEX)
-    konshus_lm = 2294, 'konshus-lm', TransportProtocol.tcp
+    konshus_lm = 2294, 'konshus-lm'
 
     #: - [TCP] Advant License Manager
     #: - [UDP] Advant License Manager
-    advant_lm = 2295, 'advant-lm', TransportProtocol.tcp
+    advant_lm = 2295, 'advant-lm'
 
     #: - [TCP] Theta License Manager (Rainbow)
     #: - [UDP] Theta License Manager (Rainbow)
-    theta_lm = 2296, 'theta-lm', TransportProtocol.tcp
+    theta_lm = 2296, 'theta-lm'
 
     #: - [TCP] D2K DataMover 1
     #: - [UDP] D2K DataMover 1
-    d2k_datamover1 = 2297, 'd2k-datamover1', TransportProtocol.tcp
+    d2k_datamover1 = 2297, 'd2k-datamover1'
 
     #: - [TCP] D2K DataMover 2
     #: - [UDP] D2K DataMover 2
-    d2k_datamover2 = 2298, 'd2k-datamover2', TransportProtocol.tcp
+    d2k_datamover2 = 2298, 'd2k-datamover2'
 
     #: - [TCP] PC Telecommute
     #: - [UDP] PC Telecommute
-    pc_telecommute = 2299, 'pc-telecommute', TransportProtocol.tcp
+    pc_telecommute = 2299, 'pc-telecommute'
 
     #: - [TCP] CVMMON
     #: - [UDP] CVMMON
-    cvmmon = 2300, 'cvmmon', TransportProtocol.tcp
+    cvmmon = 2300
 
     #: - [TCP] Compaq HTTP
     #: - [UDP] Compaq HTTP
-    cpq_wbem = 2301, 'cpq-wbem', TransportProtocol.tcp
+    cpq_wbem = 2301, 'cpq-wbem'
 
     #: - [TCP] Bindery Support
     #: - [UDP] Bindery Support
-    binderysupport = 2302, 'binderysupport', TransportProtocol.tcp
+    binderysupport = 2302
 
     #: - [TCP] Proxy Gateway
     #: - [UDP] Proxy Gateway
-    proxy_gateway = 2303, 'proxy-gateway', TransportProtocol.tcp
+    proxy_gateway = 2303, 'proxy-gateway'
 
     #: - [TCP] Attachmate UTS
     #: - [UDP] Attachmate UTS
-    attachmate_uts = 2304, 'attachmate-uts', TransportProtocol.tcp
+    attachmate_uts = 2304, 'attachmate-uts'
 
     #: - [TCP] MT ScaleServer
     #: - [UDP] MT ScaleServer
-    mt_scaleserver = 2305, 'mt-scaleserver', TransportProtocol.tcp
+    mt_scaleserver = 2305, 'mt-scaleserver'
 
     #: - [TCP] TAPPI BoxNet
     #: - [UDP] TAPPI BoxNet
-    tappi_boxnet = 2306, 'tappi-boxnet', TransportProtocol.tcp
+    tappi_boxnet = 2306, 'tappi-boxnet'
 
     #: - [TCP] pehelp
     #: - [UDP] pehelp
-    pehelp = 2307, 'pehelp', TransportProtocol.tcp
+    pehelp = 2307
 
     #: - [TCP] sdhelp
     #: - [UDP] sdhelp
-    sdhelp = 2308, 'sdhelp', TransportProtocol.tcp
+    sdhelp = 2308
 
     #: - [TCP] SD Server
     #: - [UDP] SD Server
-    sdserver = 2309, 'sdserver', TransportProtocol.tcp
+    sdserver = 2309
 
     #: - [TCP] SD Client
     #: - [UDP] SD Client
-    sdclient = 2310, 'sdclient', TransportProtocol.tcp
+    sdclient = 2310
 
     #: - [TCP] Message Service
     #: - [UDP] Message Service
-    messageservice = 2311, 'messageservice', TransportProtocol.tcp
+    messageservice = 2311
 
     #: - [TCP] WANScaler Communication Service
     #: - [UDP] WANScaler Communication Service
-    wanscaler = 2312, 'wanscaler', TransportProtocol.tcp
+    wanscaler = 2312
 
     #: - [TCP] IAPP (Inter Access Point Protocol)
     #: - [UDP] IAPP (Inter Access Point Protocol)
-    iapp = 2313, 'iapp', TransportProtocol.tcp
+    iapp = 2313
 
     #: - [TCP] CR WebSystems
     #: - [UDP] CR WebSystems
-    cr_websystems = 2314, 'cr-websystems', TransportProtocol.tcp
+    cr_websystems = 2314, 'cr-websystems'
 
     #: - [TCP] Precise Sft.
     #: - [UDP] Precise Sft.
-    precise_sft = 2315, 'precise-sft', TransportProtocol.tcp
+    precise_sft = 2315, 'precise-sft'
 
     #: - [TCP] SENT License Manager
     #: - [UDP] SENT License Manager
-    sent_lm = 2316, 'sent-lm', TransportProtocol.tcp
+    sent_lm = 2316, 'sent-lm'
 
     #: - [TCP] Attachmate G32
     #: - [UDP] Attachmate G32
-    attachmate_g32 = 2317, 'attachmate-g32', TransportProtocol.tcp
+    attachmate_g32 = 2317, 'attachmate-g32'
 
     #: - [TCP] Cadence Control
     #: - [UDP] Cadence Control
-    cadencecontrol = 2318, 'cadencecontrol', TransportProtocol.tcp
+    cadencecontrol = 2318
 
     #: - [TCP] InfoLibria
     #: - [UDP] InfoLibria
-    infolibria = 2319, 'infolibria', TransportProtocol.tcp
+    infolibria = 2319
 
     #: - [TCP] Siebel NS
     #: - [UDP] Siebel NS
-    siebel_ns = 2320, 'siebel-ns', TransportProtocol.tcp
+    siebel_ns = 2320, 'siebel-ns'
 
     #: - [TCP] RDLAP
     #: - [UDP] RDLAP
-    rdlap = 2321, 'rdlap', TransportProtocol.tcp
+    rdlap = 2321
 
     #: - [TCP] ofsd
     #: - [UDP] ofsd
-    ofsd = 2322, 'ofsd', TransportProtocol.tcp
+    ofsd = 2322
 
     #: - [TCP] 3d-nfsd
     #: - [UDP] 3d-nfsd
-    TCP_3d_nfsd = 2323, '3d-nfsd', TransportProtocol.tcp
+    TCP_3d_nfsd = 2323, '3d-nfsd'
 
     #: - [TCP] Cosmocall
     #: - [UDP] Cosmocall
-    cosmocall = 2324, 'cosmocall', TransportProtocol.tcp
+    cosmocall = 2324
 
     #: - [TCP] ANSYS Licensing Interconnect
     #: - [UDP] ANSYS Licensing Interconnect
-    ansysli = 2325, 'ansysli', TransportProtocol.tcp
+    ansysli = 2325
 
     #: - [TCP] IDCP
     #: - [UDP] IDCP
-    idcp = 2326, 'idcp', TransportProtocol.tcp
+    idcp = 2326
 
     #: - [TCP] xingcsm
     #: - [UDP] xingcsm
-    xingcsm = 2327, 'xingcsm', TransportProtocol.tcp
+    xingcsm = 2327
 
     #: - [TCP] Netrix SFTM
     #: - [UDP] Netrix SFTM
-    netrix_sftm = 2328, 'netrix-sftm', TransportProtocol.tcp
+    netrix_sftm = 2328, 'netrix-sftm'
 
     #: - [TCP] NVD User
     #: - [UDP] NVD User
-    nvd_2184 = 2184, 'nvd', TransportProtocol.tcp
+    nvd_2184 = 2184, 'nvd'
 
     #: - [TCP] NVD
     #: - [UDP] NVD
-    nvd_2329 = 2329, 'nvd', TransportProtocol.tcp
+    nvd_2329 = 2329, 'nvd'
 
     #: - [TCP] TSCCHAT
     #: - [UDP] TSCCHAT
-    tscchat = 2330, 'tscchat', TransportProtocol.tcp
+    tscchat = 2330
 
     #: - [TCP] AGENTVIEW
     #: - [UDP] AGENTVIEW
-    agentview = 2331, 'agentview', TransportProtocol.tcp
+    agentview = 2331
 
     #: - [TCP] RCC Host
     #: - [UDP] RCC Host
-    rcc_host = 2332, 'rcc-host', TransportProtocol.tcp
+    rcc_host = 2332, 'rcc-host'
 
     #: - [TCP] SNAPP
     #: - [UDP] SNAPP
-    snapp = 2333, 'snapp', TransportProtocol.tcp
+    snapp = 2333
 
     #: - [TCP] ACE Client Auth
     #: - [UDP] ACE Client Auth
-    ace_client = 2334, 'ace-client', TransportProtocol.tcp
+    ace_client = 2334, 'ace-client'
 
     #: - [TCP] ACE Proxy
     #: - [UDP] ACE Proxy
-    ace_proxy = 2335, 'ace-proxy', TransportProtocol.tcp
+    ace_proxy = 2335, 'ace-proxy'
 
     #: - [TCP] Apple UG Control
     #: - [UDP] Apple UG Control
-    appleugcontrol = 2336, 'appleugcontrol', TransportProtocol.tcp
+    appleugcontrol = 2336
 
     #: - [TCP] ideesrv
     #: - [UDP] ideesrv
-    ideesrv = 2337, 'ideesrv', TransportProtocol.tcp
+    ideesrv = 2337
 
     #: - [TCP] Norton Lambert
     #: - [UDP] Norton Lambert
-    norton_lambert = 2338, 'norton-lambert', TransportProtocol.tcp
+    norton_lambert = 2338, 'norton-lambert'
 
     #: - [TCP] 3Com WebView
     #: - [UDP] 3Com WebView
-    TCP_3com_webview = 2339, '3com-webview', TransportProtocol.tcp
+    TCP_3com_webview = 2339, '3com-webview'
 
     #: - [TCP] WRS Registry IANA assigned this well-formed service name as a
     #:   replacement for "wrs_registry".
@@ -9126,27 +9126,27 @@ class TCP(AppType):
     #: - [UDP] WRS Registry IANA assigned this well-formed service name as a
     #:   replacement for "wrs_registry".
     #: - [UDP] WRS Registry
-    wrs_registry = 2340, 'wrs-registry', TransportProtocol.tcp
+    wrs_registry = 2340, 'wrs-registry'
 
     #: - [TCP] XIO Status
     #: - [UDP] XIO Status
-    xiostatus = 2341, 'xiostatus', TransportProtocol.tcp
+    xiostatus = 2341
 
     #: - [TCP] Seagate Manage Exec
     #: - [UDP] Seagate Manage Exec
-    manage_exec = 2342, 'manage-exec', TransportProtocol.tcp
+    manage_exec = 2342, 'manage-exec'
 
     #: - [TCP] nati logos
     #: - [UDP] nati logos
-    nati_logos = 2343, 'nati-logos', TransportProtocol.tcp
+    nati_logos = 2343, 'nati-logos'
 
     #: - [TCP] fcmsys
     #: - [UDP] fcmsys
-    fcmsys = 2344, 'fcmsys', TransportProtocol.tcp
+    fcmsys = 2344
 
     #: - [TCP] dbm
     #: - [UDP] dbm
-    dbm = 2345, 'dbm', TransportProtocol.tcp
+    dbm = 2345
 
     #: - [TCP] Game Connection Port IANA assigned this well-formed service name as a
     #:   replacement for "redstorm_join".
@@ -9154,7 +9154,7 @@ class TCP(AppType):
     #: - [UDP] Game Connection Port IANA assigned this well-formed service name as a
     #:   replacement for "redstorm_join".
     #: - [UDP] Game Connection Port
-    redstorm_join = 2346, 'redstorm-join', TransportProtocol.tcp
+    redstorm_join = 2346, 'redstorm-join'
 
     #: - [TCP] Game Announcement and Location IANA assigned this well-formed service
     #:   name as a replacement for "redstorm_find".
@@ -9162,7 +9162,7 @@ class TCP(AppType):
     #: - [UDP] Game Announcement and Location IANA assigned this well-formed service
     #:   name as a replacement for "redstorm_find".
     #: - [UDP] Game Announcement and Location
-    redstorm_find = 2347, 'redstorm-find', TransportProtocol.tcp
+    redstorm_find = 2347, 'redstorm-find'
 
     #: - [TCP] Information to query for game status IANA assigned this well-formed
     #:   service name as a replacement for "redstorm_info".
@@ -9170,7 +9170,7 @@ class TCP(AppType):
     #: - [UDP] Information to query for game status IANA assigned this well-formed
     #:   service name as a replacement for "redstorm_info".
     #: - [UDP] Information to query for game status
-    redstorm_info = 2348, 'redstorm-info', TransportProtocol.tcp
+    redstorm_info = 2348, 'redstorm-info'
 
     #: - [TCP] Diagnostics Port IANA assigned this well-formed service name as a
     #:   replacement for "redstorm_diag".
@@ -9178,181 +9178,181 @@ class TCP(AppType):
     #: - [UDP] Diagnostics Port IANA assigned this well-formed service name as a
     #:   replacement for "redstorm_diag".
     #: - [UDP] Diagnostics Port
-    redstorm_diag = 2349, 'redstorm-diag', TransportProtocol.tcp
+    redstorm_diag = 2349, 'redstorm-diag'
 
     #: - [TCP] Pharos Booking Server
     #: - [UDP] Pharos Booking Server
-    psbserver = 2350, 'psbserver', TransportProtocol.tcp
+    psbserver = 2350
 
     #: - [TCP] psrserver
     #: - [UDP] psrserver
-    psrserver = 2351, 'psrserver', TransportProtocol.tcp
+    psrserver = 2351
 
     #: - [TCP] pslserver
     #: - [UDP] pslserver
-    pslserver = 2352, 'pslserver', TransportProtocol.tcp
+    pslserver = 2352
 
     #: - [TCP] pspserver
     #: - [UDP] pspserver
-    pspserver = 2353, 'pspserver', TransportProtocol.tcp
+    pspserver = 2353
 
     #: - [TCP] psprserver
     #: - [UDP] psprserver
-    psprserver = 2354, 'psprserver', TransportProtocol.tcp
+    psprserver = 2354
 
     #: - [TCP] psdbserver
     #: - [UDP] psdbserver
-    psdbserver = 2355, 'psdbserver', TransportProtocol.tcp
+    psdbserver = 2355
 
     #: - [TCP] GXT License Managemant
     #: - [UDP] GXT License Managemant
-    gxtelmd = 2356, 'gxtelmd', TransportProtocol.tcp
+    gxtelmd = 2356
 
     #: - [TCP] UniHub Server
     #: - [UDP] UniHub Server
-    unihub_server = 2357, 'unihub-server', TransportProtocol.tcp
+    unihub_server = 2357, 'unihub-server'
 
     #: - [TCP] Futrix
     #: - [UDP] Futrix
-    futrix = 2358, 'futrix', TransportProtocol.tcp
+    futrix = 2358
 
     #: - [TCP] FlukeServer
     #: - [UDP] FlukeServer
-    flukeserver = 2359, 'flukeserver', TransportProtocol.tcp
+    flukeserver = 2359
 
     #: - [TCP] NexstorIndLtd
     #: - [UDP] NexstorIndLtd
-    nexstorindltd = 2360, 'nexstorindltd', TransportProtocol.tcp
+    nexstorindltd = 2360
 
     #: - [TCP] TL1
     #: - [UDP] TL1
-    tl1 = 2361, 'tl1', TransportProtocol.tcp
+    tl1 = 2361
 
     #: - [TCP] digiman
     #: - [UDP] digiman
-    digiman = 2362, 'digiman', TransportProtocol.tcp
+    digiman = 2362
 
     #: - [TCP] Media Central NFSD
     #: - [UDP] Media Central NFSD
-    mediacntrlnfsd = 2363, 'mediacntrlnfsd', TransportProtocol.tcp
+    mediacntrlnfsd = 2363
 
     #: - [TCP] OI-2000
     #: - [UDP] OI-2000
-    oi_2000 = 2364, 'oi-2000', TransportProtocol.tcp
+    oi_2000 = 2364, 'oi-2000'
 
     #: - [TCP] dbref
     #: - [UDP] dbref
-    dbref = 2365, 'dbref', TransportProtocol.tcp
+    dbref = 2365
 
     #: - [TCP] qip-login
     #: - [UDP] qip-login
-    qip_login = 2366, 'qip-login', TransportProtocol.tcp
+    qip_login = 2366, 'qip-login'
 
     #: - [TCP] Service Control
     #: - [UDP] Service Control
-    service_ctrl = 2367, 'service-ctrl', TransportProtocol.tcp
+    service_ctrl = 2367, 'service-ctrl'
 
     #: - [TCP] OpenTable
     #: - [UDP] OpenTable
-    opentable = 2368, 'opentable', TransportProtocol.tcp
+    opentable = 2368
 
     #: - [TCP] Blockchain Identifier InFrastructure P2P
     #: - [UDP] Blockchain Identifier InFrastructure P2P
-    bif_p2p = 2369, 'bif-p2p', TransportProtocol.tcp
+    bif_p2p = 2369, 'bif-p2p'
 
     #: - [TCP] L3-HBMon
     #: - [UDP] L3-HBMon
-    l3_hbmon = 2370, 'l3-hbmon', TransportProtocol.tcp
+    l3_hbmon = 2370, 'l3-hbmon'
 
     #: - [TCP] RDA
     #: - [UDP] RDA
-    rda_630 = 630, 'rda', TransportProtocol.tcp
+    rda_630 = 630, 'rda'
 
     #: [TCP] Remote Device Access
-    rda_2371 = 2371, 'rda', TransportProtocol.tcp
+    rda_2371 = 2371, 'rda'
 
     #: - [TCP] LanMessenger
     #: - [UDP] LanMessenger
-    lanmessenger = 2372, 'lanmessenger', TransportProtocol.tcp
+    lanmessenger = 2372
 
     #: [TCP] Remograph License Manager
-    remographlm = 2373, 'remographlm', TransportProtocol.tcp
+    remographlm = 2373
 
     #: [TCP] Hydra RPC
-    hydra = 2374, 'hydra', TransportProtocol.tcp
+    hydra = 2374
 
     #: [TCP] Docker REST API (plain text)
-    docker = 2375, 'docker', TransportProtocol.tcp
+    docker = 2375
 
     #: [TCP] Docker REST API (ssl)
-    docker_s = 2376, 'docker-s', TransportProtocol.tcp
+    docker_s = 2376, 'docker-s'
 
     #: [TCP] RPC interface for Docker Swarm
-    swarm = 2377, 'swarm', TransportProtocol.tcp
+    swarm = 2377
 
     #: [TCP] Reserved
-    reserved_2378 = 2378, 'reserved', TransportProtocol.tcp
+    reserved_2378 = 2378, 'reserved'
 
     #: [TCP] etcd client communication
-    etcd_client = 2379, 'etcd-client', TransportProtocol.tcp
+    etcd_client = 2379, 'etcd-client'
 
     #: [TCP] etcd server to server communication
-    etcd_server = 2380, 'etcd-server', TransportProtocol.tcp
+    etcd_server = 2380, 'etcd-server'
 
     #: - [TCP] Compaq HTTPS
     #: - [UDP] Compaq HTTPS
-    compaq_https = 2381, 'compaq-https', TransportProtocol.tcp
+    compaq_https = 2381, 'compaq-https'
 
     #: - [TCP] Microsoft OLAP
     #: - [UDP] Microsoft OLAP
-    ms_olap3 = 2382, 'ms-olap3', TransportProtocol.tcp
+    ms_olap3 = 2382, 'ms-olap3'
 
     #: - [TCP] Microsoft OLAP
     #: - [UDP] Microsoft OLAP
-    ms_olap4 = 2383, 'ms-olap4', TransportProtocol.tcp
+    ms_olap4 = 2383, 'ms-olap4'
 
     #: [TCP] SD-REQUEST
-    sd_request = 2384, 'sd-request', TransportProtocol.tcp
+    sd_request = 2384, 'sd-request'
 
     #: - [TCP] SD-DATA
     #: - [UDP] SD-DATA
-    sd_data = 2385, 'sd-data', TransportProtocol.tcp
+    sd_data = 2385, 'sd-data'
 
     #: - [TCP] Virtual Tape
     #: - [UDP] Virtual Tape
-    virtualtape = 2386, 'virtualtape', TransportProtocol.tcp
+    virtualtape = 2386
 
     #: - [TCP] VSAM Redirector
     #: - [UDP] VSAM Redirector
-    vsamredirector = 2387, 'vsamredirector', TransportProtocol.tcp
+    vsamredirector = 2387
 
     #: - [TCP] MYNAH AutoStart
     #: - [UDP] MYNAH AutoStart
-    mynahautostart = 2388, 'mynahautostart', TransportProtocol.tcp
+    mynahautostart = 2388
 
     #: - [TCP] OpenView Session Mgr
     #: - [UDP] OpenView Session Mgr
-    ovsessionmgr = 2389, 'ovsessionmgr', TransportProtocol.tcp
+    ovsessionmgr = 2389
 
     #: - [TCP] RSMTP
     #: - [UDP] RSMTP
-    rsmtp = 2390, 'rsmtp', TransportProtocol.tcp
+    rsmtp = 2390
 
     #: - [TCP] 3COM Net Management
     #: - [UDP] 3COM Net Management
-    TCP_3com_net_mgmt = 2391, '3com-net-mgmt', TransportProtocol.tcp
+    TCP_3com_net_mgmt = 2391, '3com-net-mgmt'
 
     #: - [TCP] Tactical Auth
     #: - [UDP] Tactical Auth
-    tacticalauth = 2392, 'tacticalauth', TransportProtocol.tcp
+    tacticalauth = 2392
 
     #: - [TCP] MS OLAP 1
     #: - [UDP] MS OLAP 1
-    ms_olap1 = 2393, 'ms-olap1', TransportProtocol.tcp
+    ms_olap1 = 2393, 'ms-olap1'
 
     #: - [TCP] MS OLAP 2
     #: - [UDP] MS OLAP 2
-    ms_olap2 = 2394, 'ms-olap2', TransportProtocol.tcp
+    ms_olap2 = 2394, 'ms-olap2'
 
     #: - [TCP] LAN900 Remote IANA assigned this well-formed service name as a
     #:   replacement for "lan900_remote".
@@ -9360,206 +9360,206 @@ class TCP(AppType):
     #: - [UDP] LAN900 Remote IANA assigned this well-formed service name as a
     #:   replacement for "lan900_remote".
     #: - [UDP] LAN900 Remote
-    lan900_remote = 2395, 'lan900-remote', TransportProtocol.tcp
+    lan900_remote = 2395, 'lan900-remote'
 
     #: - [TCP] Wusage
     #: - [UDP] Wusage
-    wusage = 2396, 'wusage', TransportProtocol.tcp
+    wusage = 2396
 
     #: - [TCP] NCL
     #: - [UDP] NCL
-    ncl = 2397, 'ncl', TransportProtocol.tcp
+    ncl = 2397
 
     #: - [TCP] Orbiter
     #: - [UDP] Orbiter
-    orbiter = 2398, 'orbiter', TransportProtocol.tcp
+    orbiter = 2398
 
     #: - [TCP] FileMaker, Inc. - Data Access Layer
     #: - [UDP] FileMaker, Inc. - Data Access Layer
-    fmpro_fdal = 2399, 'fmpro-fdal', TransportProtocol.tcp
+    fmpro_fdal = 2399, 'fmpro-fdal'
 
     #: - [TCP] OpEquus Server
     #: - [UDP] OpEquus Server
-    opequus_server = 2400, 'opequus-server', TransportProtocol.tcp
+    opequus_server = 2400, 'opequus-server'
 
     #: - [TCP] cvspserver
     #: - [UDP] cvspserver
-    cvspserver = 2401, 'cvspserver', TransportProtocol.tcp
+    cvspserver = 2401
 
     #: - [TCP] TaskMaster 2000 Server
     #: - [UDP] TaskMaster 2000 Server
-    taskmaster2000_2402 = 2402, 'taskmaster2000', TransportProtocol.tcp
+    taskmaster2000_2402 = 2402, 'taskmaster2000'
 
     #: - [TCP] TaskMaster 2000 Web
     #: - [UDP] TaskMaster 2000 Web
-    taskmaster2000_2403 = 2403, 'taskmaster2000', TransportProtocol.tcp
+    taskmaster2000_2403 = 2403, 'taskmaster2000'
 
     #: - [TCP] IEC 60870-5-104 process control over IP
     #: - [UDP] IEC 60870-5-104 process control over IP
-    iec_104 = 2404, 'iec-104', TransportProtocol.tcp
+    iec_104 = 2404, 'iec-104'
 
     #: - [TCP] TRC Netpoll
     #: - [UDP] TRC Netpoll
-    trc_netpoll = 2405, 'trc-netpoll', TransportProtocol.tcp
+    trc_netpoll = 2405, 'trc-netpoll'
 
     #: - [TCP] JediServer
     #: - [UDP] JediServer
-    jediserver = 2406, 'jediserver', TransportProtocol.tcp
+    jediserver = 2406
 
     #: - [TCP] Orion
     #: - [UDP] Orion
-    orion = 2407, 'orion', TransportProtocol.tcp
+    orion = 2407
 
     #: [TCP] CloudFlare Railgun Web Acceleration Protocol
-    railgun_webaccl = 2408, 'railgun-webaccl', TransportProtocol.tcp
+    railgun_webaccl = 2408, 'railgun-webaccl'
 
     #: - [TCP] SNS Protocol
     #: - [UDP] SNS Protocol
-    sns_protocol = 2409, 'sns-protocol', TransportProtocol.tcp
+    sns_protocol = 2409, 'sns-protocol'
 
     #: - [TCP] VRTS Registry
     #: - [UDP] VRTS Registry
-    vrts_registry = 2410, 'vrts-registry', TransportProtocol.tcp
+    vrts_registry = 2410, 'vrts-registry'
 
     #: - [TCP] Netwave AP Management
     #: - [UDP] Netwave AP Management
-    netwave_ap_mgmt = 2411, 'netwave-ap-mgmt', TransportProtocol.tcp
+    netwave_ap_mgmt = 2411, 'netwave-ap-mgmt'
 
     #: - [TCP] CDN
     #: - [UDP] CDN
-    cdn = 2412, 'cdn', TransportProtocol.tcp
+    cdn = 2412
 
     #: - [TCP] orion-rmi-reg
     #: - [UDP] orion-rmi-reg
-    orion_rmi_reg = 2413, 'orion-rmi-reg', TransportProtocol.tcp
+    orion_rmi_reg = 2413, 'orion-rmi-reg'
 
     #: - [TCP] Beeyond
     #: - [UDP] Beeyond
-    beeyond = 2414, 'beeyond', TransportProtocol.tcp
+    beeyond = 2414
 
     #: - [TCP] Codima Remote Transaction Protocol
     #: - [UDP] Codima Remote Transaction Protocol
-    codima_rtp = 2415, 'codima-rtp', TransportProtocol.tcp
+    codima_rtp = 2415, 'codima-rtp'
 
     #: - [TCP] RMT Server
     #: - [UDP] RMT Server
-    rmtserver = 2416, 'rmtserver', TransportProtocol.tcp
+    rmtserver = 2416
 
     #: - [TCP] Composit Server
     #: - [UDP] Composit Server
-    composit_server = 2417, 'composit-server', TransportProtocol.tcp
+    composit_server = 2417, 'composit-server'
 
     #: - [TCP] cas
     #: - [UDP] cas
-    cas = 2418, 'cas', TransportProtocol.tcp
+    cas = 2418
 
     #: - [TCP] Attachmate S2S
     #: - [UDP] Attachmate S2S
-    attachmate_s2s = 2419, 'attachmate-s2s', TransportProtocol.tcp
+    attachmate_s2s = 2419, 'attachmate-s2s'
 
     #: - [TCP] DSL Remote Management
     #: - [UDP] DSL Remote Management
-    dslremote_mgmt = 2420, 'dslremote-mgmt', TransportProtocol.tcp
+    dslremote_mgmt = 2420, 'dslremote-mgmt'
 
     #: - [TCP] G-Talk
     #: - [UDP] G-Talk
-    g_talk = 2421, 'g-talk', TransportProtocol.tcp
+    g_talk = 2421, 'g-talk'
 
     #: - [TCP] CRMSBITS
     #: - [UDP] CRMSBITS
-    crmsbits = 2422, 'crmsbits', TransportProtocol.tcp
+    crmsbits = 2422
 
     #: - [TCP] RNRP
     #: - [UDP] RNRP
-    rnrp = 2423, 'rnrp', TransportProtocol.tcp
+    rnrp = 2423
 
     #: - [TCP] KOFAX-SVR
     #: - [UDP] KOFAX-SVR
-    kofax_svr = 2424, 'kofax-svr', TransportProtocol.tcp
+    kofax_svr = 2424, 'kofax-svr'
 
     #: - [TCP] Fujitsu App Manager
     #: - [UDP] Fujitsu App Manager
-    fjitsuappmgr = 2425, 'fjitsuappmgr', TransportProtocol.tcp
+    fjitsuappmgr = 2425
 
     #: - [TCP] VeloCloud MultiPath Protocol
     #: - [UDP] VeloCloud MultiPath Protocol
-    vcmp = 2426, 'vcmp', TransportProtocol.tcp
+    vcmp = 2426
 
     #: - [TCP] Media Gateway Control Protocol Gateway
     #: - [UDP] Media Gateway Control Protocol Gateway
-    mgcp_gateway = 2427, 'mgcp-gateway', TransportProtocol.tcp
+    mgcp_gateway = 2427, 'mgcp-gateway'
 
     #: - [TCP] One Way Trip Time
     #: - [UDP] One Way Trip Time
-    ott = 2428, 'ott', TransportProtocol.tcp
+    ott = 2428
 
     #: - [TCP] FT-ROLE
     #: - [UDP] FT-ROLE
-    ft_role = 2429, 'ft-role', TransportProtocol.tcp
+    ft_role = 2429, 'ft-role'
 
     #: - [TCP] venus
     #: - [UDP] venus
-    venus = 2430, 'venus', TransportProtocol.tcp
+    venus = 2430
 
     #: - [TCP] venus-se
     #: - [UDP] venus-se
-    venus_se = 2431, 'venus-se', TransportProtocol.tcp
+    venus_se = 2431, 'venus-se'
 
     #: - [TCP] codasrv
     #: - [UDP] codasrv
-    codasrv = 2432, 'codasrv', TransportProtocol.tcp
+    codasrv = 2432
 
     #: - [TCP] codasrv-se
     #: - [UDP] codasrv-se
-    codasrv_se = 2433, 'codasrv-se', TransportProtocol.tcp
+    codasrv_se = 2433, 'codasrv-se'
 
     #: - [TCP] pxc-epmap
     #: - [UDP] pxc-epmap
-    pxc_epmap = 2434, 'pxc-epmap', TransportProtocol.tcp
+    pxc_epmap = 2434, 'pxc-epmap'
 
     #: - [TCP] OptiLogic
     #: - [UDP] OptiLogic
-    optilogic = 2435, 'optilogic', TransportProtocol.tcp
+    optilogic = 2435
 
     #: - [TCP] TOP/X
     #: - [UDP] TOP/X
-    topx = 2436, 'topx', TransportProtocol.tcp
+    topx = 2436
 
     #: - [TCP] Message Send Protocol (historic)
     #: - [UDP] Message Send Protocol (historic)
-    msp_18 = 18, 'msp', TransportProtocol.tcp
+    msp_18 = 18, 'msp'
 
     #: - [TCP] MSP
     #: - [UDP] MSP
-    msp_2438 = 2438, 'msp', TransportProtocol.tcp
+    msp_2438 = 2438, 'msp'
 
     #: - [TCP] SybaseDBSynch
     #: - [UDP] SybaseDBSynch
-    sybasedbsynch = 2439, 'sybasedbsynch', TransportProtocol.tcp
+    sybasedbsynch = 2439
 
     #: - [TCP] Spearway Lockers
     #: - [UDP] Spearway Lockers
-    spearway = 2440, 'spearway', TransportProtocol.tcp
+    spearway = 2440
 
     #: - [TCP] Pervasive I*net Data Server
     #: - [UDP] Pervasive I*net Data Server
-    pvsw_inet = 2441, 'pvsw-inet', TransportProtocol.tcp
+    pvsw_inet = 2441, 'pvsw-inet'
 
     #: - [TCP] Netangel
     #: - [UDP] Netangel
-    netangel = 2442, 'netangel', TransportProtocol.tcp
+    netangel = 2442
 
     #: - [TCP] PowerClient Central Storage Facility
     #: - [UDP] PowerClient Central Storage Facility
-    powerclientcsf = 2443, 'powerclientcsf', TransportProtocol.tcp
+    powerclientcsf = 2443
 
     #: - [TCP] BT PP2 Sectrans
     #: - [UDP] BT PP2 Sectrans
-    btpp2sectrans = 2444, 'btpp2sectrans', TransportProtocol.tcp
+    btpp2sectrans = 2444
 
     #: - [TCP] DTN1
     #: - [UDP] DTN1
-    dtn1 = 2445, 'dtn1', TransportProtocol.tcp
+    dtn1 = 2445
 
     #: - [TCP] bues_service IANA assigned this well-formed service name as a
     #:   replacement for "bues_service".
@@ -9567,335 +9567,335 @@ class TCP(AppType):
     #: - [UDP] bues_service IANA assigned this well-formed service name as a
     #:   replacement for "bues_service".
     #: - [UDP] bues_service
-    bues_service = 2446, 'bues-service', TransportProtocol.tcp
+    bues_service = 2446, 'bues-service'
 
     #: - [TCP] OpenView NNM daemon
     #: - [UDP] OpenView NNM daemon
-    ovwdb = 2447, 'ovwdb', TransportProtocol.tcp
+    ovwdb = 2447
 
     #: - [TCP] hpppsvr
     #: - [UDP] hpppsvr
-    hpppssvr = 2448, 'hpppssvr', TransportProtocol.tcp
+    hpppssvr = 2448
 
     #: - [TCP] RATL
     #: - [UDP] RATL
-    ratl = 2449, 'ratl', TransportProtocol.tcp
+    ratl = 2449
 
     #: - [TCP] netadmin
     #: - [UDP] netadmin
-    netadmin = 2450, 'netadmin', TransportProtocol.tcp
+    netadmin = 2450
 
     #: - [TCP] netchat
     #: - [UDP] netchat
-    netchat = 2451, 'netchat', TransportProtocol.tcp
+    netchat = 2451
 
     #: - [TCP] SnifferClient
     #: - [UDP] SnifferClient
-    snifferclient = 2452, 'snifferclient', TransportProtocol.tcp
+    snifferclient = 2452
 
     #: - [TCP] madge ltd
     #: - [UDP] madge ltd
-    madge_ltd = 2453, 'madge-ltd', TransportProtocol.tcp
+    madge_ltd = 2453, 'madge-ltd'
 
     #: - [TCP] IndX-DDS
     #: - [UDP] IndX-DDS
-    indx_dds = 2454, 'indx-dds', TransportProtocol.tcp
+    indx_dds = 2454, 'indx-dds'
 
     #: - [TCP] WAGO-IO-SYSTEM
     #: - [UDP] WAGO-IO-SYSTEM
-    wago_io_system = 2455, 'wago-io-system', TransportProtocol.tcp
+    wago_io_system = 2455, 'wago-io-system'
 
     #: - [TCP] altav-remmgt
     #: - [UDP] altav-remmgt
-    altav_remmgt = 2456, 'altav-remmgt', TransportProtocol.tcp
+    altav_remmgt = 2456, 'altav-remmgt'
 
     #: - [TCP] Rapido_IP
     #: - [UDP] Rapido_IP
-    rapido_ip = 2457, 'rapido-ip', TransportProtocol.tcp
+    rapido_ip = 2457, 'rapido-ip'
 
     #: - [TCP] griffin
     #: - [UDP] griffin
-    griffin = 2458, 'griffin', TransportProtocol.tcp
+    griffin = 2458
 
     #: - [TCP] Community
     #: - [UDP] Community
-    xrpl = 2459, 'xrpl', TransportProtocol.tcp
+    xrpl = 2459
 
     #: - [TCP] ms-theater
     #: - [UDP] ms-theater
-    ms_theater = 2460, 'ms-theater', TransportProtocol.tcp
+    ms_theater = 2460, 'ms-theater'
 
     #: - [TCP] qadmifoper
     #: - [UDP] qadmifoper
-    qadmifoper = 2461, 'qadmifoper', TransportProtocol.tcp
+    qadmifoper = 2461
 
     #: - [TCP] qadmifevent
     #: - [UDP] qadmifevent
-    qadmifevent = 2462, 'qadmifevent', TransportProtocol.tcp
+    qadmifevent = 2462
 
     #: - [TCP] LSI RAID Management
     #: - [UDP] LSI RAID Management
-    lsi_raid_mgmt = 2463, 'lsi-raid-mgmt', TransportProtocol.tcp
+    lsi_raid_mgmt = 2463, 'lsi-raid-mgmt'
 
     #: - [TCP] DirecPC SI
     #: - [UDP] DirecPC SI
-    direcpc_si = 2464, 'direcpc-si', TransportProtocol.tcp
+    direcpc_si = 2464, 'direcpc-si'
 
     #: - [TCP] Load Balance Management
     #: - [UDP] Load Balance Management
-    lbm = 2465, 'lbm', TransportProtocol.tcp
+    lbm = 2465
 
     #: - [TCP] Load Balance Forwarding
     #: - [UDP] Load Balance Forwarding
-    lbf = 2466, 'lbf', TransportProtocol.tcp
+    lbf = 2466
 
     #: - [TCP] High Criteria
     #: - [UDP] High Criteria
-    high_criteria = 2467, 'high-criteria', TransportProtocol.tcp
+    high_criteria = 2467, 'high-criteria'
 
     #: - [TCP] qip_msgd
     #: - [UDP] qip_msgd
-    qip_msgd = 2468, 'qip-msgd', TransportProtocol.tcp
+    qip_msgd = 2468, 'qip-msgd'
 
     #: - [TCP] MTI-TCS-COMM
     #: - [UDP] MTI-TCS-COMM
-    mti_tcs_comm = 2469, 'mti-tcs-comm', TransportProtocol.tcp
+    mti_tcs_comm = 2469, 'mti-tcs-comm'
 
     #: - [TCP] taskman port
     #: - [UDP] taskman port
-    taskman_port = 2470, 'taskman-port', TransportProtocol.tcp
+    taskman_port = 2470, 'taskman-port'
 
     #: - [TCP] SeaODBC
     #: - [UDP] SeaODBC
-    seaodbc = 2471, 'seaodbc', TransportProtocol.tcp
+    seaodbc = 2471
 
     #: - [TCP] C3
     #: - [UDP] C3
-    c3 = 2472, 'c3', TransportProtocol.tcp
+    c3 = 2472
 
     #: - [TCP] Aker-cdp
     #: - [UDP] Aker-cdp
-    aker_cdp = 2473, 'aker-cdp', TransportProtocol.tcp
+    aker_cdp = 2473, 'aker-cdp'
 
     #: - [TCP] Vital Analysis
     #: - [UDP] Vital Analysis
-    vitalanalysis = 2474, 'vitalanalysis', TransportProtocol.tcp
+    vitalanalysis = 2474
 
     #: - [TCP] ACE Server
     #: - [UDP] ACE Server
-    ace_server = 2475, 'ace-server', TransportProtocol.tcp
+    ace_server = 2475, 'ace-server'
 
     #: - [TCP] ACE Server Propagation
     #: - [UDP] ACE Server Propagation
-    ace_svr_prop = 2476, 'ace-svr-prop', TransportProtocol.tcp
+    ace_svr_prop = 2476, 'ace-svr-prop'
 
     #: - [TCP] SecurSight Certificate Valifation Service
     #: - [UDP] SecurSight Certificate Valifation Service
-    ssm_cvs = 2477, 'ssm-cvs', TransportProtocol.tcp
+    ssm_cvs = 2477, 'ssm-cvs'
 
     #: - [TCP] SecurSight Authentication Server (SSL)
     #: - [UDP] SecurSight Authentication Server (SSL)
-    ssm_cssps = 2478, 'ssm-cssps', TransportProtocol.tcp
+    ssm_cssps = 2478, 'ssm-cssps'
 
     #: - [TCP] SecurSight Event Logging Server (SSL)
     #: - [UDP] SecurSight Event Logging Server (SSL)
-    ssm_els = 2479, 'ssm-els', TransportProtocol.tcp
+    ssm_els = 2479, 'ssm-els'
 
     #: - [TCP] Informatica PowerExchange Listener
     #: - [UDP] Informatica PowerExchange Listener
-    powerexchange = 2480, 'powerexchange', TransportProtocol.tcp
+    powerexchange = 2480
 
     #: - [TCP] Oracle GIOP
     #: - [UDP] Oracle GIOP
-    giop = 2481, 'giop', TransportProtocol.tcp
+    giop = 2481
 
     #: - [TCP] Oracle GIOP SSL
     #: - [UDP] Oracle GIOP SSL
-    giop_ssl = 2482, 'giop-ssl', TransportProtocol.tcp
+    giop_ssl = 2482, 'giop-ssl'
 
     #: - [TCP] Oracle TTC
     #: - [UDP] Oracle TTC
-    ttc = 2483, 'ttc', TransportProtocol.tcp
+    ttc = 2483
 
     #: - [TCP] Oracle TTC SSL
     #: - [UDP] Oracle TTC SSL
-    ttc_ssl = 2484, 'ttc-ssl', TransportProtocol.tcp
+    ttc_ssl = 2484, 'ttc-ssl'
 
     #: - [TCP] Net Objects1
     #: - [UDP] Net Objects1
-    netobjects1 = 2485, 'netobjects1', TransportProtocol.tcp
+    netobjects1 = 2485
 
     #: - [TCP] Net Objects2
     #: - [UDP] Net Objects2
-    netobjects2 = 2486, 'netobjects2', TransportProtocol.tcp
+    netobjects2 = 2486
 
     #: - [TCP] Policy Notice Service
     #: - [UDP] Policy Notice Service
-    pns = 2487, 'pns', TransportProtocol.tcp
+    pns = 2487
 
     #: - [TCP] Moy Corporation
     #: - [UDP] Moy Corporation
-    moy_corp = 2488, 'moy-corp', TransportProtocol.tcp
+    moy_corp = 2488, 'moy-corp'
 
     #: - [TCP] TSILB
     #: - [UDP] TSILB
-    tsilb = 2489, 'tsilb', TransportProtocol.tcp
+    tsilb = 2489
 
     #: - [TCP] qip_qdhcp
     #: - [UDP] qip_qdhcp
-    qip_qdhcp = 2490, 'qip-qdhcp', TransportProtocol.tcp
+    qip_qdhcp = 2490, 'qip-qdhcp'
 
     #: - [TCP] Conclave CPP
     #: - [UDP] Conclave CPP
-    conclave_cpp = 2491, 'conclave-cpp', TransportProtocol.tcp
+    conclave_cpp = 2491, 'conclave-cpp'
 
     #: - [TCP] GROOVE
     #: - [UDP] GROOVE
-    groove = 2492, 'groove', TransportProtocol.tcp
+    groove = 2492
 
     #: - [TCP] Talarian MQS
     #: - [UDP] Talarian MQS
-    talarian_mqs = 2493, 'talarian-mqs', TransportProtocol.tcp
+    talarian_mqs = 2493, 'talarian-mqs'
 
     #: - [TCP] BMC AR
     #: - [UDP] BMC AR
-    bmc_ar = 2494, 'bmc-ar', TransportProtocol.tcp
+    bmc_ar = 2494, 'bmc-ar'
 
     #: - [TCP] Fast Remote Services
     #: - [UDP] Fast Remote Services
-    fast_rem_serv = 2495, 'fast-rem-serv', TransportProtocol.tcp
+    fast_rem_serv = 2495, 'fast-rem-serv'
 
     #: - [TCP] DIRGIS
     #: - [UDP] DIRGIS
-    dirgis = 2496, 'dirgis', TransportProtocol.tcp
+    dirgis = 2496
 
     #: - [TCP] Quad DB
     #: - [UDP] Quad DB
-    quaddb = 2497, 'quaddb', TransportProtocol.tcp
+    quaddb = 2497
 
     #: - [TCP] ODN-CasTraq
     #: - [UDP] ODN-CasTraq
-    odn_castraq = 2498, 'odn-castraq', TransportProtocol.tcp
+    odn_castraq = 2498, 'odn-castraq'
 
     #: - [TCP] UniControl
     #: - [UDP] UniControl
-    unicontrol_2437 = 2437, 'unicontrol', TransportProtocol.tcp
+    unicontrol_2437 = 2437, 'unicontrol'
 
     #: - [TCP] UniControl
     #: - [UDP] UniControl
-    unicontrol_2499 = 2499, 'unicontrol', TransportProtocol.tcp
+    unicontrol_2499 = 2499, 'unicontrol'
 
     #: - [TCP] Resource Tracking system server
     #: - [UDP] Resource Tracking system server
-    rtsserv = 2500, 'rtsserv', TransportProtocol.tcp
+    rtsserv = 2500
 
     #: - [TCP] Resource Tracking system client
     #: - [UDP] Resource Tracking system client
-    rtsclient = 2501, 'rtsclient', TransportProtocol.tcp
+    rtsclient = 2501
 
     #: - [TCP] Kentrox Protocol
     #: - [UDP] Kentrox Protocol
-    kentrox_prot = 2502, 'kentrox-prot', TransportProtocol.tcp
+    kentrox_prot = 2502, 'kentrox-prot'
 
     #: - [TCP] NMS-DPNSS
     #: - [UDP] NMS-DPNSS
-    nms_dpnss = 2503, 'nms-dpnss', TransportProtocol.tcp
+    nms_dpnss = 2503, 'nms-dpnss'
 
     #: - [TCP] WLBS
     #: - [UDP] WLBS
-    wlbs = 2504, 'wlbs', TransportProtocol.tcp
+    wlbs = 2504
 
     #: - [TCP] PowerPlay Control
     #: - [UDP] PowerPlay Control
-    ppcontrol = 2505, 'ppcontrol', TransportProtocol.tcp
+    ppcontrol = 2505
 
     #: - [TCP] jbroker
     #: - [UDP] jbroker
-    jbroker = 2506, 'jbroker', TransportProtocol.tcp
+    jbroker = 2506
 
     #: - [TCP] spock
     #: - [UDP] spock
-    spock = 2507, 'spock', TransportProtocol.tcp
+    spock = 2507
 
     #: - [TCP] JDataStore
     #: - [UDP] JDataStore
-    jdatastore = 2508, 'jdatastore', TransportProtocol.tcp
+    jdatastore = 2508
 
     #: - [TCP] fjmpss
     #: - [UDP] fjmpss
-    fjmpss = 2509, 'fjmpss', TransportProtocol.tcp
+    fjmpss = 2509
 
     #: - [TCP] fjappmgrbulk
     #: - [UDP] fjappmgrbulk
-    fjappmgrbulk = 2510, 'fjappmgrbulk', TransportProtocol.tcp
+    fjappmgrbulk = 2510
 
     #: - [TCP] Metastorm
     #: - [UDP] Metastorm
-    metastorm = 2511, 'metastorm', TransportProtocol.tcp
+    metastorm = 2511
 
     #: - [TCP] Citrix IMA
     #: - [UDP] Citrix IMA
-    citrixima = 2512, 'citrixima', TransportProtocol.tcp
+    citrixima = 2512
 
     #: - [TCP] Citrix ADMIN
     #: - [UDP] Citrix ADMIN
-    citrixadmin = 2513, 'citrixadmin', TransportProtocol.tcp
+    citrixadmin = 2513
 
     #: - [TCP] Facsys NTP
     #: - [UDP] Facsys NTP
-    facsys_ntp = 2514, 'facsys-ntp', TransportProtocol.tcp
+    facsys_ntp = 2514, 'facsys-ntp'
 
     #: - [TCP] Facsys Router
     #: - [UDP] Facsys Router
-    facsys_router = 2515, 'facsys-router', TransportProtocol.tcp
+    facsys_router = 2515, 'facsys-router'
 
     #: - [TCP] Main Control
     #: - [UDP] Main Control
-    maincontrol = 2516, 'maincontrol', TransportProtocol.tcp
+    maincontrol = 2516
 
     #: - [TCP] H.323 Annex E Call Control Signalling Transport
     #: - [UDP] H.323 Annex E Call Control Signalling Transport
-    call_sig_trans = 2517, 'call-sig-trans', TransportProtocol.tcp
+    call_sig_trans = 2517, 'call-sig-trans'
 
     #: - [TCP] Willy
     #: - [UDP] Willy
-    willy = 2518, 'willy', TransportProtocol.tcp
+    willy = 2518
 
     #: - [TCP] globmsgsvc
     #: - [UDP] globmsgsvc
-    globmsgsvc = 2519, 'globmsgsvc', TransportProtocol.tcp
+    globmsgsvc = 2519
 
     #: - [TCP] Pervasive Listener
     #: - [UDP] Pervasive Listener
-    pvsw = 2520, 'pvsw', TransportProtocol.tcp
+    pvsw = 2520
 
     #: - [TCP] Adaptec Manager
     #: - [UDP] Adaptec Manager
-    adaptecmgr = 2521, 'adaptecmgr', TransportProtocol.tcp
+    adaptecmgr = 2521
 
     #: - [TCP] WinDb
     #: - [UDP] WinDb
-    windb = 2522, 'windb', TransportProtocol.tcp
+    windb = 2522
 
     #: - [TCP] Qke LLC V.3
     #: - [UDP] Qke LLC V.3
-    qke_llc_v3 = 2523, 'qke-llc-v3', TransportProtocol.tcp
+    qke_llc_v3 = 2523, 'qke-llc-v3'
 
     #: - [TCP] Optiwave License Management
     #: - [UDP] Optiwave License Management
-    optiwave_lm = 2524, 'optiwave-lm', TransportProtocol.tcp
+    optiwave_lm = 2524, 'optiwave-lm'
 
     #: - [TCP] MS V-Worlds
     #: - [UDP] MS V-Worlds
-    ms_v_worlds = 2525, 'ms-v-worlds', TransportProtocol.tcp
+    ms_v_worlds = 2525, 'ms-v-worlds'
 
     #: - [TCP] EMA License Manager
     #: - [UDP] EMA License Manager
-    ema_sent_lm = 2526, 'ema-sent-lm', TransportProtocol.tcp
+    ema_sent_lm = 2526, 'ema-sent-lm'
 
     #: - [TCP] IQ Server
     #: - [UDP] IQ Server
-    iqserver = 2527, 'iqserver', TransportProtocol.tcp
+    iqserver = 2527
 
     #: - [TCP] NCR CCL IANA assigned this well-formed service name as a replacement
     #:   for "ncr_ccl".
@@ -9903,499 +9903,499 @@ class TCP(AppType):
     #: - [UDP] NCR CCL IANA assigned this well-formed service name as a replacement
     #:   for "ncr_ccl".
     #: - [UDP] NCR CCL
-    ncr_ccl = 2528, 'ncr-ccl', TransportProtocol.tcp
+    ncr_ccl = 2528, 'ncr-ccl'
 
     #: - [TCP] UTS FTP
     #: - [UDP] UTS FTP
-    utsftp = 2529, 'utsftp', TransportProtocol.tcp
+    utsftp = 2529
 
     #: - [TCP] VR Commerce
     #: - [UDP] VR Commerce
-    vrcommerce = 2530, 'vrcommerce', TransportProtocol.tcp
+    vrcommerce = 2530
 
     #: - [TCP] ITO-E GUI
     #: - [UDP] ITO-E GUI
-    ito_e_gui = 2531, 'ito-e-gui', TransportProtocol.tcp
+    ito_e_gui = 2531, 'ito-e-gui'
 
     #: - [TCP] OVTOPMD
     #: - [UDP] OVTOPMD
-    ovtopmd = 2532, 'ovtopmd', TransportProtocol.tcp
+    ovtopmd = 2532
 
     #: - [TCP] SnifferServer
     #: - [UDP] SnifferServer
-    snifferserver = 2533, 'snifferserver', TransportProtocol.tcp
+    snifferserver = 2533
 
     #: - [TCP] Combox Web Access
     #: - [UDP] Combox Web Access
-    combox_web_acc = 2534, 'combox-web-acc', TransportProtocol.tcp
+    combox_web_acc = 2534, 'combox-web-acc'
 
     #: - [TCP] MADCAP
     #: - [UDP] MADCAP
-    madcap = 2535, 'madcap', TransportProtocol.tcp
+    madcap = 2535
 
     #: - [TCP] btpp2audctr1
     #: - [UDP] btpp2audctr1
-    btpp2audctr1 = 2536, 'btpp2audctr1', TransportProtocol.tcp
+    btpp2audctr1 = 2536
 
     #: - [TCP] Upgrade Protocol
     #: - [UDP] Upgrade Protocol
-    upgrade = 2537, 'upgrade', TransportProtocol.tcp
+    upgrade = 2537
 
     #: - [TCP] vnwk-prapi
     #: - [UDP] vnwk-prapi
-    vnwk_prapi = 2538, 'vnwk-prapi', TransportProtocol.tcp
+    vnwk_prapi = 2538, 'vnwk-prapi'
 
     #: - [TCP] VSI Admin
     #: - [UDP] VSI Admin
-    vsiadmin = 2539, 'vsiadmin', TransportProtocol.tcp
+    vsiadmin = 2539
 
     #: - [TCP] LonWorks2
     #: - [UDP] LonWorks2
-    lonworks2 = 2541, 'lonworks2', TransportProtocol.tcp
+    lonworks2 = 2541
 
     #: - [TCP] uDraw(Graph)
     #: - [UDP] uDraw(Graph)
-    udrawgraph = 2542, 'udrawgraph', TransportProtocol.tcp
+    udrawgraph = 2542
 
     #: - [TCP] REFTEK
     #: - [UDP] REFTEK
-    reftek = 2543, 'reftek', TransportProtocol.tcp
+    reftek = 2543
 
     #: - [TCP] Management Daemon Refresh
     #: - [UDP] Management Daemon Refresh
-    novell_zen = 2544, 'novell-zen', TransportProtocol.tcp
+    novell_zen = 2544, 'novell-zen'
 
     #: - [TCP] sis-emt
     #: - [UDP] sis-emt
-    sis_emt = 2545, 'sis-emt', TransportProtocol.tcp
+    sis_emt = 2545, 'sis-emt'
 
     #: - [TCP] vytalvaultbrtp
     #: - [UDP] vytalvaultbrtp
-    vytalvaultbrtp = 2546, 'vytalvaultbrtp', TransportProtocol.tcp
+    vytalvaultbrtp = 2546
 
     #: - [TCP] vytalvaultvsmp
     #: - [UDP] vytalvaultvsmp
-    vytalvaultvsmp = 2547, 'vytalvaultvsmp', TransportProtocol.tcp
+    vytalvaultvsmp = 2547
 
     #: - [TCP] vytalvaultpipe
     #: - [UDP] vytalvaultpipe
-    vytalvaultpipe = 2548, 'vytalvaultpipe', TransportProtocol.tcp
+    vytalvaultpipe = 2548
 
     #: - [TCP] IPASS
     #: - [UDP] IPASS
-    ipass = 2549, 'ipass', TransportProtocol.tcp
+    ipass = 2549
 
     #: - [TCP] ADS
     #: - [UDP] ADS
-    ads = 2550, 'ads', TransportProtocol.tcp
+    ads = 2550
 
     #: - [TCP] ISG UDA Server
     #: - [UDP] ISG UDA Server
-    isg_uda_server = 2551, 'isg-uda-server', TransportProtocol.tcp
+    isg_uda_server = 2551, 'isg-uda-server'
 
     #: - [TCP] Call Logging
     #: - [UDP] Call Logging
-    call_logging = 2552, 'call-logging', TransportProtocol.tcp
+    call_logging = 2552, 'call-logging'
 
     #: - [TCP] efidiningport
     #: - [UDP] efidiningport
-    efidiningport = 2553, 'efidiningport', TransportProtocol.tcp
+    efidiningport = 2553
 
     #: - [TCP] VCnet-Link v10
     #: - [UDP] VCnet-Link v10
-    vcnet_link_v10 = 2554, 'vcnet-link-v10', TransportProtocol.tcp
+    vcnet_link_v10 = 2554, 'vcnet-link-v10'
 
     #: - [TCP] Compaq WCP
     #: - [UDP] Compaq WCP
-    compaq_wcp = 2555, 'compaq-wcp', TransportProtocol.tcp
+    compaq_wcp = 2555, 'compaq-wcp'
 
     #: - [TCP] nicetec-nmsvc
     #: - [UDP] nicetec-nmsvc
-    nicetec_nmsvc = 2556, 'nicetec-nmsvc', TransportProtocol.tcp
+    nicetec_nmsvc = 2556, 'nicetec-nmsvc'
 
     #: - [TCP] nicetec-mgmt
     #: - [UDP] nicetec-mgmt
-    nicetec_mgmt = 2557, 'nicetec-mgmt', TransportProtocol.tcp
+    nicetec_mgmt = 2557, 'nicetec-mgmt'
 
     #: - [TCP] PCLE Multi Media
     #: - [UDP] PCLE Multi Media
-    pclemultimedia = 2558, 'pclemultimedia', TransportProtocol.tcp
+    pclemultimedia = 2558
 
     #: - [TCP] LSTP
     #: - [UDP] LSTP
-    lstp = 2559, 'lstp', TransportProtocol.tcp
+    lstp = 2559
 
     #: - [TCP] labrat
     #: - [UDP] labrat
-    labrat = 2560, 'labrat', TransportProtocol.tcp
+    labrat = 2560
 
     #: - [TCP] MosaixCC
     #: - [UDP] MosaixCC
-    mosaixcc = 2561, 'mosaixcc', TransportProtocol.tcp
+    mosaixcc = 2561
 
     #: - [TCP] Delibo
     #: - [UDP] Delibo
-    delibo = 2562, 'delibo', TransportProtocol.tcp
+    delibo = 2562
 
     #: - [TCP] CTI Redwood
     #: - [UDP] CTI Redwood
-    cti_redwood = 2563, 'cti-redwood', TransportProtocol.tcp
+    cti_redwood = 2563, 'cti-redwood'
 
     #: - [TCP] HP 3000 NS/VT block mode telnet
     #: - [UDP] HP 3000 NS/VT block mode telnet
-    hp_3000_telnet = 2564, 'hp-3000-telnet', TransportProtocol.tcp
+    hp_3000_telnet = 2564, 'hp-3000-telnet'
 
     #: - [TCP] Coordinator Server
     #: - [UDP] Coordinator Server
-    coord_svr = 2565, 'coord-svr', TransportProtocol.tcp
+    coord_svr = 2565, 'coord-svr'
 
     #: - [TCP] pcs-pcw
     #: - [UDP] pcs-pcw
-    pcs_pcw = 2566, 'pcs-pcw', TransportProtocol.tcp
+    pcs_pcw = 2566, 'pcs-pcw'
 
     #: - [TCP] Cisco Line Protocol
     #: - [UDP] Cisco Line Protocol
-    clp = 2567, 'clp', TransportProtocol.tcp
+    clp = 2567
 
     #: - [TCP] SPAM TRAP
     #: - [UDP] SPAM TRAP
-    spamtrap = 2568, 'spamtrap', TransportProtocol.tcp
+    spamtrap = 2568
 
     #: - [TCP] Sonus Call Signal
     #: - [UDP] Sonus Call Signal
-    sonuscallsig = 2569, 'sonuscallsig', TransportProtocol.tcp
+    sonuscallsig = 2569
 
     #: - [TCP] HS Port
     #: - [UDP] HS Port
-    hs_port = 2570, 'hs-port', TransportProtocol.tcp
+    hs_port = 2570, 'hs-port'
 
     #: - [TCP] CECSVC
     #: - [UDP] CECSVC
-    cecsvc = 2571, 'cecsvc', TransportProtocol.tcp
+    cecsvc = 2571
 
     #: - [TCP] IBP
     #: - [UDP] IBP
-    ibp = 2572, 'ibp', TransportProtocol.tcp
+    ibp = 2572
 
     #: - [TCP] Trust Establish
     #: - [UDP] Trust Establish
-    trustestablish = 2573, 'trustestablish', TransportProtocol.tcp
+    trustestablish = 2573
 
     #: - [TCP] Blockade BPSP
     #: - [UDP] Blockade BPSP
-    blockade_bpsp = 2574, 'blockade-bpsp', TransportProtocol.tcp
+    blockade_bpsp = 2574, 'blockade-bpsp'
 
     #: - [TCP] HL7
     #: - [UDP] HL7
-    hl7 = 2575, 'hl7', TransportProtocol.tcp
+    hl7 = 2575
 
     #: - [TCP] TCL Pro Debugger
     #: - [UDP] TCL Pro Debugger
-    tclprodebugger = 2576, 'tclprodebugger', TransportProtocol.tcp
+    tclprodebugger = 2576
 
     #: - [TCP] Scriptics Lsrvr
     #: - [UDP] Scriptics Lsrvr
-    scipticslsrvr = 2577, 'scipticslsrvr', TransportProtocol.tcp
+    scipticslsrvr = 2577
 
     #: - [TCP] RVS ISDN DCP
     #: - [UDP] RVS ISDN DCP
-    rvs_isdn_dcp = 2578, 'rvs-isdn-dcp', TransportProtocol.tcp
+    rvs_isdn_dcp = 2578, 'rvs-isdn-dcp'
 
     #: - [TCP] mpfoncl
     #: - [UDP] mpfoncl
-    mpfoncl = 2579, 'mpfoncl', TransportProtocol.tcp
+    mpfoncl = 2579
 
     #: - [TCP] Tributary
     #: - [UDP] Tributary
-    tributary = 2580, 'tributary', TransportProtocol.tcp
+    tributary = 2580
 
     #: - [TCP] ARGIS TE
     #: - [UDP] ARGIS TE
-    argis_te = 2581, 'argis-te', TransportProtocol.tcp
+    argis_te = 2581, 'argis-te'
 
     #: - [TCP] ARGIS DS
     #: - [UDP] ARGIS DS
-    argis_ds = 2582, 'argis-ds', TransportProtocol.tcp
+    argis_ds = 2582, 'argis-ds'
 
     #: - [TCP] cyaserv
     #: - [UDP] cyaserv
-    cyaserv = 2584, 'cyaserv', TransportProtocol.tcp
+    cyaserv = 2584
 
     #: - [TCP] NETX Server
     #: - [UDP] NETX Server
-    netx_server = 2585, 'netx-server', TransportProtocol.tcp
+    netx_server = 2585, 'netx-server'
 
     #: - [TCP] NETX Agent
     #: - [UDP] NETX Agent
-    netx_agent = 2586, 'netx-agent', TransportProtocol.tcp
+    netx_agent = 2586, 'netx-agent'
 
     #: - [TCP] MASC
     #: - [UDP] MASC
-    masc = 2587, 'masc', TransportProtocol.tcp
+    masc = 2587
 
     #: - [TCP] Privilege
     #: - [UDP] Privilege
-    privilege = 2588, 'privilege', TransportProtocol.tcp
+    privilege = 2588
 
     #: - [TCP] quartus tcl
     #: - [UDP] quartus tcl
-    quartus_tcl = 2589, 'quartus-tcl', TransportProtocol.tcp
+    quartus_tcl = 2589, 'quartus-tcl'
 
     #: - [TCP] idotdist
     #: - [UDP] idotdist
-    idotdist = 2590, 'idotdist', TransportProtocol.tcp
+    idotdist = 2590
 
     #: - [TCP] Maytag Shuffle
     #: - [UDP] Maytag Shuffle
-    maytagshuffle = 2591, 'maytagshuffle', TransportProtocol.tcp
+    maytagshuffle = 2591
 
     #: - [TCP] netrek
     #: - [UDP] netrek
-    netrek = 2592, 'netrek', TransportProtocol.tcp
+    netrek = 2592
 
     #: - [TCP] MNS Mail Notice Service
     #: - [UDP] MNS Mail Notice Service
-    mns_mail = 2593, 'mns-mail', TransportProtocol.tcp
+    mns_mail = 2593, 'mns-mail'
 
     #: - [TCP] Data Base Server
     #: - [UDP] Data Base Server
-    dts = 2594, 'dts', TransportProtocol.tcp
+    dts = 2594
 
     #: - [TCP] World Fusion 1
     #: - [UDP] World Fusion 1
-    worldfusion1 = 2595, 'worldfusion1', TransportProtocol.tcp
+    worldfusion1 = 2595
 
     #: - [TCP] World Fusion 2
     #: - [UDP] World Fusion 2
-    worldfusion2 = 2596, 'worldfusion2', TransportProtocol.tcp
+    worldfusion2 = 2596
 
     #: - [TCP] Homestead Glory
     #: - [UDP] Homestead Glory
-    homesteadglory = 2597, 'homesteadglory', TransportProtocol.tcp
+    homesteadglory = 2597
 
     #: - [TCP] Citrix MA Client
     #: - [UDP] Citrix MA Client
-    citriximaclient = 2598, 'citriximaclient', TransportProtocol.tcp
+    citriximaclient = 2598
 
     #: - [TCP] Snap Discovery
     #: - [UDP] Snap Discovery
-    snapd = 2599, 'snapd', TransportProtocol.tcp
+    snapd = 2599
 
     #: - [TCP] HPSTGMGR
     #: - [UDP] HPSTGMGR
-    hpstgmgr = 2600, 'hpstgmgr', TransportProtocol.tcp
+    hpstgmgr = 2600
 
     #: - [TCP] discp client
     #: - [UDP] discp client
-    discp_client = 2601, 'discp-client', TransportProtocol.tcp
+    discp_client = 2601, 'discp-client'
 
     #: - [TCP] discp server
     #: - [UDP] discp server
-    discp_server = 2602, 'discp-server', TransportProtocol.tcp
+    discp_server = 2602, 'discp-server'
 
     #: - [TCP] Service Meter
     #: - [UDP] Service Meter
-    servicemeter = 2603, 'servicemeter', TransportProtocol.tcp
+    servicemeter = 2603
 
     #: - [TCP] NSC CCS
     #: - [UDP] NSC CCS
-    nsc_ccs = 2604, 'nsc-ccs', TransportProtocol.tcp
+    nsc_ccs = 2604, 'nsc-ccs'
 
     #: - [TCP] NSC POSA
     #: - [UDP] NSC POSA
-    nsc_posa = 2605, 'nsc-posa', TransportProtocol.tcp
+    nsc_posa = 2605, 'nsc-posa'
 
     #: - [TCP] Dell Netmon
     #: - [UDP] Dell Netmon
-    netmon = 2606, 'netmon', TransportProtocol.tcp
+    netmon = 2606
 
     #: - [TCP] Dell Connection
     #: - [UDP] Dell Connection
-    connection = 2607, 'connection', TransportProtocol.tcp
+    connection = 2607
 
     #: - [TCP] Wag Service
     #: - [UDP] Wag Service
-    wag_service = 2608, 'wag-service', TransportProtocol.tcp
+    wag_service = 2608, 'wag-service'
 
     #: - [TCP] System Monitor
     #: - [UDP] System Monitor
-    system_monitor = 2609, 'system-monitor', TransportProtocol.tcp
+    system_monitor = 2609, 'system-monitor'
 
     #: - [TCP] VersaTek
     #: - [UDP] VersaTek
-    versa_tek = 2610, 'versa-tek', TransportProtocol.tcp
+    versa_tek = 2610, 'versa-tek'
 
     #: - [TCP] LIONHEAD
     #: - [UDP] LIONHEAD
-    lionhead = 2611, 'lionhead', TransportProtocol.tcp
+    lionhead = 2611
 
     #: - [TCP] Qpasa Agent
     #: - [UDP] Qpasa Agent
-    qpasa_agent = 2612, 'qpasa-agent', TransportProtocol.tcp
+    qpasa_agent = 2612, 'qpasa-agent'
 
     #: - [TCP] SMNTUBootstrap
     #: - [UDP] SMNTUBootstrap
-    smntubootstrap = 2613, 'smntubootstrap', TransportProtocol.tcp
+    smntubootstrap = 2613
 
     #: - [TCP] Never Offline
     #: - [UDP] Never Offline
-    neveroffline = 2614, 'neveroffline', TransportProtocol.tcp
+    neveroffline = 2614
 
     #: - [TCP] firepower
     #: - [UDP] firepower
-    firepower = 2615, 'firepower', TransportProtocol.tcp
+    firepower = 2615
 
     #: - [TCP] appswitch-emp
     #: - [UDP] appswitch-emp
-    appswitch_emp = 2616, 'appswitch-emp', TransportProtocol.tcp
+    appswitch_emp = 2616, 'appswitch-emp'
 
     #: - [TCP] Clinical Context Managers
     #: - [UDP] Clinical Context Managers
-    cmadmin = 2617, 'cmadmin', TransportProtocol.tcp
+    cmadmin = 2617
 
     #: - [TCP] Priority E-Com
     #: - [UDP] Priority E-Com
-    priority_e_com = 2618, 'priority-e-com', TransportProtocol.tcp
+    priority_e_com = 2618, 'priority-e-com'
 
     #: - [TCP] bruce
     #: - [UDP] bruce
-    bruce = 2619, 'bruce', TransportProtocol.tcp
+    bruce = 2619
 
     #: - [TCP] LPSRecommender
     #: - [UDP] LPSRecommender
-    lpsrecommender = 2620, 'lpsrecommender', TransportProtocol.tcp
+    lpsrecommender = 2620
 
     #: - [TCP] Miles Apart Jukebox Server
     #: - [UDP] Miles Apart Jukebox Server
-    miles_apart = 2621, 'miles-apart', TransportProtocol.tcp
+    miles_apart = 2621, 'miles-apart'
 
     #: - [TCP] MetricaDBC
     #: - [UDP] MetricaDBC
-    metricadbc = 2622, 'metricadbc', TransportProtocol.tcp
+    metricadbc = 2622
 
     #: - [TCP] LMDP
     #: - [UDP] LMDP
-    lmdp = 2623, 'lmdp', TransportProtocol.tcp
+    lmdp = 2623
 
     #: - [TCP] Aria
     #: - [UDP] Aria
-    aria = 2624, 'aria', TransportProtocol.tcp
+    aria = 2624
 
     #: - [TCP] Blwnkl Port
     #: - [UDP] Blwnkl Port
-    blwnkl_port = 2625, 'blwnkl-port', TransportProtocol.tcp
+    blwnkl_port = 2625, 'blwnkl-port'
 
     #: - [TCP] gbjd816
     #: - [UDP] gbjd816
-    gbjd816 = 2626, 'gbjd816', TransportProtocol.tcp
+    gbjd816 = 2626
 
     #: - [TCP] Moshe Beeri
     #: - [UDP] Moshe Beeri
-    moshebeeri = 2627, 'moshebeeri', TransportProtocol.tcp
+    moshebeeri = 2627
 
     #: - [TCP] DICT
     #: - [UDP] DICT
-    dict = 2628, 'dict', TransportProtocol.tcp
+    dict = 2628
 
     #: - [TCP] Sitara Server
     #: - [UDP] Sitara Server
-    sitaraserver = 2629, 'sitaraserver', TransportProtocol.tcp
+    sitaraserver = 2629
 
     #: - [TCP] Sitara Management
     #: - [UDP] Sitara Management
-    sitaramgmt = 2630, 'sitaramgmt', TransportProtocol.tcp
+    sitaramgmt = 2630
 
     #: - [TCP] Sitara Dir
     #: - [UDP] Sitara Dir
-    sitaradir = 2631, 'sitaradir', TransportProtocol.tcp
+    sitaradir = 2631
 
     #: - [TCP] IRdg Post
     #: - [UDP] IRdg Post
-    irdg_post = 2632, 'irdg-post', TransportProtocol.tcp
+    irdg_post = 2632, 'irdg-post'
 
     #: - [TCP] InterIntelli
     #: - [UDP] InterIntelli
-    interintelli = 2633, 'interintelli', TransportProtocol.tcp
+    interintelli = 2633
 
     #: - [TCP] PK Electronics
     #: - [UDP] PK Electronics
-    pk_electronics = 2634, 'pk-electronics', TransportProtocol.tcp
+    pk_electronics = 2634, 'pk-electronics'
 
     #: - [TCP] Back Burner
     #: - [UDP] Back Burner
-    backburner = 2635, 'backburner', TransportProtocol.tcp
+    backburner = 2635
 
     #: - [TCP] Solve
     #: - [UDP] Solve
-    solve = 2636, 'solve', TransportProtocol.tcp
+    solve = 2636
 
     #: - [TCP] Import Document Service
     #: - [UDP] Import Document Service
-    imdocsvc = 2637, 'imdocsvc', TransportProtocol.tcp
+    imdocsvc = 2637
 
     #: - [TCP] Sybase Anywhere
     #: - [UDP] Sybase Anywhere
-    sybaseanywhere = 2638, 'sybaseanywhere', TransportProtocol.tcp
+    sybaseanywhere = 2638
 
     #: - [TCP] AMInet
     #: - [UDP] AMInet
-    aminet = 2639, 'aminet', TransportProtocol.tcp
+    aminet = 2639
 
     #: - [TCP] Alcorn McBride Inc protocol used for device control
     #: - [UDP] Alcorn McBride Inc protocol used for device control
-    ami_control = 2640, 'ami-control', TransportProtocol.tcp
+    ami_control = 2640, 'ami-control'
 
     #: - [TCP] HDL Server
     #: - [UDP] HDL Server
-    hdl_srv = 2641, 'hdl-srv', TransportProtocol.tcp
+    hdl_srv = 2641, 'hdl-srv'
 
     #: - [TCP] Tragic
     #: - [UDP] Tragic
-    tragic = 2642, 'tragic', TransportProtocol.tcp
+    tragic = 2642
 
     #: - [TCP] GTE-SAMP
     #: - [UDP] GTE-SAMP
-    gte_samp = 2643, 'gte-samp', TransportProtocol.tcp
+    gte_samp = 2643, 'gte-samp'
 
     #: - [TCP] Travsoft IPX Tunnel
     #: - [UDP] Travsoft IPX Tunnel
-    travsoft_ipx_t = 2644, 'travsoft-ipx-t', TransportProtocol.tcp
+    travsoft_ipx_t = 2644, 'travsoft-ipx-t'
 
     #: - [TCP] Novell IPX CMD
     #: - [UDP] Novell IPX CMD
-    novell_ipx_cmd = 2645, 'novell-ipx-cmd', TransportProtocol.tcp
+    novell_ipx_cmd = 2645, 'novell-ipx-cmd'
 
     #: - [TCP] AND License Manager
     #: - [UDP] AND License Manager
-    and_lm = 2646, 'and-lm', TransportProtocol.tcp
+    and_lm = 2646, 'and-lm'
 
     #: - [TCP] SyncServer
     #: - [UDP] SyncServer
-    syncserver = 2647, 'syncserver', TransportProtocol.tcp
+    syncserver = 2647
 
     #: - [TCP] Upsnotifyprot
     #: - [UDP] Upsnotifyprot
-    upsnotifyprot = 2648, 'upsnotifyprot', TransportProtocol.tcp
+    upsnotifyprot = 2648
 
     #: - [TCP] VPSIPPORT
     #: - [UDP] VPSIPPORT
-    vpsipport = 2649, 'vpsipport', TransportProtocol.tcp
+    vpsipport = 2649
 
     #: - [TCP] eristwoguns
     #: - [UDP] eristwoguns
-    eristwoguns = 2650, 'eristwoguns', TransportProtocol.tcp
+    eristwoguns = 2650
 
     #: - [TCP] EBInSite
     #: - [UDP] EBInSite
-    ebinsite = 2651, 'ebinsite', TransportProtocol.tcp
+    ebinsite = 2651
 
     #: - [TCP] InterPathPanel
     #: - [UDP] InterPathPanel
-    interpathpanel = 2652, 'interpathpanel', TransportProtocol.tcp
+    interpathpanel = 2652
 
     #: - [TCP] Sonus
     #: - [UDP] Sonus
-    sonus = 2653, 'sonus', TransportProtocol.tcp
+    sonus = 2653
 
     #: - [TCP] Corel VNC Admin IANA assigned this well-formed service name as a
     #:   replacement for "corel_vncadmin".
@@ -10403,1048 +10403,1048 @@ class TCP(AppType):
     #: - [UDP] Corel VNC Admin IANA assigned this well-formed service name as a
     #:   replacement for "corel_vncadmin".
     #: - [UDP] Corel VNC Admin
-    corel_vncadmin = 2654, 'corel-vncadmin', TransportProtocol.tcp
+    corel_vncadmin = 2654, 'corel-vncadmin'
 
     #: - [TCP] UNIX Nt Glue
     #: - [UDP] UNIX Nt Glue
-    unglue = 2655, 'unglue', TransportProtocol.tcp
+    unglue = 2655
 
     #: - [TCP] Kana
     #: - [UDP] Kana
-    kana = 2656, 'kana', TransportProtocol.tcp
+    kana = 2656
 
     #: - [TCP] SNS Dispatcher
     #: - [UDP] SNS Dispatcher
-    sns_dispatcher = 2657, 'sns-dispatcher', TransportProtocol.tcp
+    sns_dispatcher = 2657, 'sns-dispatcher'
 
     #: - [TCP] SNS Admin
     #: - [UDP] SNS Admin
-    sns_admin = 2658, 'sns-admin', TransportProtocol.tcp
+    sns_admin = 2658, 'sns-admin'
 
     #: - [TCP] SNS Query
     #: - [UDP] SNS Query
-    sns_query = 2659, 'sns-query', TransportProtocol.tcp
+    sns_query = 2659, 'sns-query'
 
     #: - [TCP] GC Monitor
     #: - [UDP] GC Monitor
-    gcmonitor = 2660, 'gcmonitor', TransportProtocol.tcp
+    gcmonitor = 2660
 
     #: - [TCP] OLHOST
     #: - [UDP] OLHOST
-    olhost = 2661, 'olhost', TransportProtocol.tcp
+    olhost = 2661
 
     #: - [TCP] BinTec-CAPI
     #: - [UDP] BinTec-CAPI
-    bintec_capi = 2662, 'bintec-capi', TransportProtocol.tcp
+    bintec_capi = 2662, 'bintec-capi'
 
     #: - [TCP] BinTec-TAPI
     #: - [UDP] BinTec-TAPI
-    bintec_tapi = 2663, 'bintec-tapi', TransportProtocol.tcp
+    bintec_tapi = 2663, 'bintec-tapi'
 
     #: - [TCP] Patrol for MQ GM
     #: - [UDP] Patrol for MQ GM
-    patrol_mq_gm = 2664, 'patrol-mq-gm', TransportProtocol.tcp
+    patrol_mq_gm = 2664, 'patrol-mq-gm'
 
     #: - [TCP] Patrol for MQ NM
     #: - [UDP] Patrol for MQ NM
-    patrol_mq_nm = 2665, 'patrol-mq-nm', TransportProtocol.tcp
+    patrol_mq_nm = 2665, 'patrol-mq-nm'
 
     #: - [TCP] extensis
     #: - [UDP] extensis
-    extensis = 2666, 'extensis', TransportProtocol.tcp
+    extensis = 2666
 
     #: - [TCP] Alarm Clock Server
     #: - [UDP] Alarm Clock Server
-    alarm_clock_s = 2667, 'alarm-clock-s', TransportProtocol.tcp
+    alarm_clock_s = 2667, 'alarm-clock-s'
 
     #: - [TCP] Alarm Clock Client
     #: - [UDP] Alarm Clock Client
-    alarm_clock_c = 2668, 'alarm-clock-c', TransportProtocol.tcp
+    alarm_clock_c = 2668, 'alarm-clock-c'
 
     #: - [TCP] TOAD
     #: - [UDP] TOAD
-    toad = 2669, 'toad', TransportProtocol.tcp
+    toad = 2669
 
     #: - [TCP] TVE Announce
     #: - [UDP] TVE Announce
-    tve_announce = 2670, 'tve-announce', TransportProtocol.tcp
+    tve_announce = 2670, 'tve-announce'
 
     #: - [TCP] newlixreg
     #: - [UDP] newlixreg
-    newlixreg = 2671, 'newlixreg', TransportProtocol.tcp
+    newlixreg = 2671
 
     #: - [TCP] nhserver
     #: - [UDP] nhserver
-    nhserver = 2672, 'nhserver', TransportProtocol.tcp
+    nhserver = 2672
 
     #: - [TCP] First Call 42
     #: - [UDP] First Call 42
-    firstcall42 = 2673, 'firstcall42', TransportProtocol.tcp
+    firstcall42 = 2673
 
     #: - [TCP] ewnn
     #: - [UDP] ewnn
-    ewnn = 2674, 'ewnn', TransportProtocol.tcp
+    ewnn = 2674
 
     #: - [TCP] TTC ETAP
     #: - [UDP] TTC ETAP
-    ttc_etap = 2675, 'ttc-etap', TransportProtocol.tcp
+    ttc_etap = 2675, 'ttc-etap'
 
     #: - [TCP] SIMSLink
     #: - [UDP] SIMSLink
-    simslink = 2676, 'simslink', TransportProtocol.tcp
+    simslink = 2676
 
     #: - [TCP] Gadget Gate 1 Way
     #: - [UDP] Gadget Gate 1 Way
-    gadgetgate1way = 2677, 'gadgetgate1way', TransportProtocol.tcp
+    gadgetgate1way = 2677
 
     #: - [TCP] Gadget Gate 2 Way
     #: - [UDP] Gadget Gate 2 Way
-    gadgetgate2way = 2678, 'gadgetgate2way', TransportProtocol.tcp
+    gadgetgate2way = 2678
 
     #: - [TCP] Sync Server SSL
     #: - [UDP] Sync Server SSL
-    syncserverssl = 2679, 'syncserverssl', TransportProtocol.tcp
+    syncserverssl = 2679
 
     #: - [TCP] pxc-sapxom
     #: - [UDP] pxc-sapxom
-    pxc_sapxom = 2680, 'pxc-sapxom', TransportProtocol.tcp
+    pxc_sapxom = 2680, 'pxc-sapxom'
 
     #: - [TCP] mpnjsomb
     #: - [UDP] mpnjsomb
-    mpnjsomb = 2681, 'mpnjsomb', TransportProtocol.tcp
+    mpnjsomb = 2681
 
     #: - [TCP] NCDLoadBalance
     #: - [UDP] NCDLoadBalance
-    ncdloadbalance = 2683, 'ncdloadbalance', TransportProtocol.tcp
+    ncdloadbalance = 2683
 
     #: - [TCP] mpnjsosv
     #: - [UDP] mpnjsosv
-    mpnjsosv = 2684, 'mpnjsosv', TransportProtocol.tcp
+    mpnjsosv = 2684
 
     #: - [TCP] mpnjsocl
     #: - [UDP] mpnjsocl
-    mpnjsocl = 2685, 'mpnjsocl', TransportProtocol.tcp
+    mpnjsocl = 2685
 
     #: - [TCP] mpnjsomg
     #: - [UDP] mpnjsomg
-    mpnjsomg = 2686, 'mpnjsomg', TransportProtocol.tcp
+    mpnjsomg = 2686
 
     #: - [TCP] pq-lic-mgmt
     #: - [UDP] pq-lic-mgmt
-    pq_lic_mgmt = 2687, 'pq-lic-mgmt', TransportProtocol.tcp
+    pq_lic_mgmt = 2687, 'pq-lic-mgmt'
 
     #: - [TCP] md-cf-http
     #: - [UDP] md-cf-http
-    md_cg_http = 2688, 'md-cg-http', TransportProtocol.tcp
+    md_cg_http = 2688, 'md-cg-http'
 
     #: - [TCP] FastLynx
     #: - [UDP] FastLynx
-    fastlynx = 2689, 'fastlynx', TransportProtocol.tcp
+    fastlynx = 2689
 
     #: - [TCP] HP NNM Embedded Database
     #: - [UDP] HP NNM Embedded Database
-    hp_nnm_data = 2690, 'hp-nnm-data', TransportProtocol.tcp
+    hp_nnm_data = 2690, 'hp-nnm-data'
 
     #: - [TCP] ITInternet ISM Server
     #: - [UDP] ITInternet ISM Server
-    itinternet = 2691, 'itinternet', TransportProtocol.tcp
+    itinternet = 2691
 
     #: - [TCP] Admins LMS
     #: - [UDP] Admins LMS
-    admins_lms = 2692, 'admins-lms', TransportProtocol.tcp
+    admins_lms = 2692, 'admins-lms'
 
     #: - [TCP] Unassigned
     #: - [UDP] Unassigned
-    unassigned_2693 = 2693, 'unassigned', TransportProtocol.tcp
+    unassigned_2693 = 2693, 'unassigned'
 
     #: - [TCP] pwrsevent
     #: - [UDP] pwrsevent
-    pwrsevent = 2694, 'pwrsevent', TransportProtocol.tcp
+    pwrsevent = 2694
 
     #: - [TCP] VSPREAD
     #: - [UDP] VSPREAD
-    vspread = 2695, 'vspread', TransportProtocol.tcp
+    vspread = 2695
 
     #: - [TCP] Unify Admin
     #: - [UDP] Unify Admin
-    unifyadmin = 2696, 'unifyadmin', TransportProtocol.tcp
+    unifyadmin = 2696
 
     #: - [TCP] Oce SNMP Trap Port
     #: - [UDP] Oce SNMP Trap Port
-    oce_snmp_trap = 2697, 'oce-snmp-trap', TransportProtocol.tcp
+    oce_snmp_trap = 2697, 'oce-snmp-trap'
 
     #: - [TCP] MCK-IVPIP
     #: - [UDP] MCK-IVPIP
-    mck_ivpip = 2698, 'mck-ivpip', TransportProtocol.tcp
+    mck_ivpip = 2698, 'mck-ivpip'
 
     #: - [TCP] Csoft Plus Client
     #: - [UDP] Csoft Plus Client
-    csoft_plusclnt = 2699, 'csoft-plusclnt', TransportProtocol.tcp
+    csoft_plusclnt = 2699, 'csoft-plusclnt'
 
     #: - [TCP] tqdata
     #: - [UDP] tqdata
-    tqdata = 2700, 'tqdata', TransportProtocol.tcp
+    tqdata = 2700
 
     #: - [TCP] SMS RCINFO
     #: - [UDP] SMS RCINFO
-    sms_rcinfo = 2701, 'sms-rcinfo', TransportProtocol.tcp
+    sms_rcinfo = 2701, 'sms-rcinfo'
 
     #: - [TCP] SMS XFER
     #: - [UDP] SMS XFER
-    sms_xfer = 2702, 'sms-xfer', TransportProtocol.tcp
+    sms_xfer = 2702, 'sms-xfer'
 
     #: - [TCP] SMS CHAT
     #: - [UDP] SMS CHAT
-    sms_chat = 2703, 'sms-chat', TransportProtocol.tcp
+    sms_chat = 2703, 'sms-chat'
 
     #: - [TCP] SMS REMCTRL
     #: - [UDP] SMS REMCTRL
-    sms_remctrl = 2704, 'sms-remctrl', TransportProtocol.tcp
+    sms_remctrl = 2704, 'sms-remctrl'
 
     #: - [TCP] SDS Admin
     #: - [UDP] SDS Admin
-    sds_admin = 2705, 'sds-admin', TransportProtocol.tcp
+    sds_admin = 2705, 'sds-admin'
 
     #: - [TCP] NCD Mirroring
     #: - [UDP] NCD Mirroring
-    ncdmirroring = 2706, 'ncdmirroring', TransportProtocol.tcp
+    ncdmirroring = 2706
 
     #: - [TCP] EMCSYMAPIPORT
     #: - [UDP] EMCSYMAPIPORT
-    emcsymapiport = 2707, 'emcsymapiport', TransportProtocol.tcp
+    emcsymapiport = 2707
 
     #: - [TCP] Banyan-Net
     #: - [UDP] Banyan-Net
-    banyan_net = 2708, 'banyan-net', TransportProtocol.tcp
+    banyan_net = 2708, 'banyan-net'
 
     #: - [TCP] Supermon
     #: - [UDP] Supermon
-    supermon = 2709, 'supermon', TransportProtocol.tcp
+    supermon = 2709
 
     #: - [TCP] SSO Service
     #: - [UDP] SSO Service
-    sso_service = 2710, 'sso-service', TransportProtocol.tcp
+    sso_service = 2710, 'sso-service'
 
     #: - [TCP] SSO Control
     #: - [UDP] SSO Control
-    sso_control = 2711, 'sso-control', TransportProtocol.tcp
+    sso_control = 2711, 'sso-control'
 
     #: - [TCP] Axapta Object Communication Protocol
     #: - [UDP] Axapta Object Communication Protocol
-    aocp = 2712, 'aocp', TransportProtocol.tcp
+    aocp = 2712
 
     #: - [TCP] Raven Trinity Broker Service
     #: - [UDP] Raven Trinity Broker Service
-    raventbs = 2713, 'raventbs', TransportProtocol.tcp
+    raventbs = 2713
 
     #: - [TCP] Raven Trinity Data Mover
     #: - [UDP] Raven Trinity Data Mover
-    raventdm = 2714, 'raventdm', TransportProtocol.tcp
+    raventdm = 2714
 
     #: - [TCP] HPSTGMGR2
     #: - [UDP] HPSTGMGR2
-    hpstgmgr2 = 2715, 'hpstgmgr2', TransportProtocol.tcp
+    hpstgmgr2 = 2715
 
     #: - [TCP] Inova IP Disco
     #: - [UDP] Inova IP Disco
-    inova_ip_disco = 2716, 'inova-ip-disco', TransportProtocol.tcp
+    inova_ip_disco = 2716, 'inova-ip-disco'
 
     #: - [TCP] PN REQUESTER
     #: - [UDP] PN REQUESTER
-    pn_requester = 2717, 'pn-requester', TransportProtocol.tcp
+    pn_requester = 2717, 'pn-requester'
 
     #: - [TCP] PN REQUESTER 2
     #: - [UDP] PN REQUESTER 2
-    pn_requester2 = 2718, 'pn-requester2', TransportProtocol.tcp
+    pn_requester2 = 2718, 'pn-requester2'
 
     #: - [TCP] Scan & Change
     #: - [UDP] Scan & Change
-    scan_change = 2719, 'scan-change', TransportProtocol.tcp
+    scan_change = 2719, 'scan-change'
 
     #: - [TCP] wkars
     #: - [UDP] wkars
-    wkars = 2720, 'wkars', TransportProtocol.tcp
+    wkars = 2720
 
     #: - [TCP] Smart Diagnose
     #: - [UDP] Smart Diagnose
-    smart_diagnose = 2721, 'smart-diagnose', TransportProtocol.tcp
+    smart_diagnose = 2721, 'smart-diagnose'
 
     #: - [TCP] Proactive Server
     #: - [UDP] Proactive Server
-    proactivesrvr = 2722, 'proactivesrvr', TransportProtocol.tcp
+    proactivesrvr = 2722
 
     #: - [TCP] WatchDog NT Protocol
     #: - [UDP] WatchDog NT Protocol
-    watchdog_nt = 2723, 'watchdog-nt', TransportProtocol.tcp
+    watchdog_nt = 2723, 'watchdog-nt'
 
     #: - [TCP] qotps
     #: - [UDP] qotps
-    qotps = 2724, 'qotps', TransportProtocol.tcp
+    qotps = 2724
 
     #: - [TCP] MSOLAP PTP2
     #: - [UDP] MSOLAP PTP2
-    msolap_ptp2 = 2725, 'msolap-ptp2', TransportProtocol.tcp
+    msolap_ptp2 = 2725, 'msolap-ptp2'
 
     #: - [TCP] TAMS
     #: - [UDP] TAMS
-    tams = 2726, 'tams', TransportProtocol.tcp
+    tams = 2726
 
     #: - [TCP] Media Gateway Control Protocol Call Agent
     #: - [UDP] Media Gateway Control Protocol Call Agent
-    mgcp_callagent = 2727, 'mgcp-callagent', TransportProtocol.tcp
+    mgcp_callagent = 2727, 'mgcp-callagent'
 
     #: - [TCP] SQDR
     #: - [UDP] SQDR
-    sqdr = 2728, 'sqdr', TransportProtocol.tcp
+    sqdr = 2728
 
     #: - [TCP] TCIM Control
     #: - [UDP] TCIM Control
-    tcim_control = 2729, 'tcim-control', TransportProtocol.tcp
+    tcim_control = 2729, 'tcim-control'
 
     #: - [TCP] NEC RaidPlus
     #: - [UDP] NEC RaidPlus
-    nec_raidplus = 2730, 'nec-raidplus', TransportProtocol.tcp
+    nec_raidplus = 2730, 'nec-raidplus'
 
     #: - [TCP] Fyre Messanger
     #: - [UDP] Fyre Messanger
-    fyre_messanger = 2731, 'fyre-messanger', TransportProtocol.tcp
+    fyre_messanger = 2731, 'fyre-messanger'
 
     #: - [TCP] G5M
     #: - [UDP] G5M
-    g5m = 2732, 'g5m', TransportProtocol.tcp
+    g5m = 2732
 
     #: - [TCP] Signet CTF
     #: - [UDP] Signet CTF
-    signet_ctf = 2733, 'signet-ctf', TransportProtocol.tcp
+    signet_ctf = 2733, 'signet-ctf'
 
     #: - [TCP] CCS Software
     #: - [UDP] CCS Software
-    ccs_software = 2734, 'ccs-software', TransportProtocol.tcp
+    ccs_software = 2734, 'ccs-software'
 
     #: - [TCP] NetIQ Monitor Console
     #: - [UDP] NetIQ Monitor Console
-    netiq_mc = 2735, 'netiq-mc', TransportProtocol.tcp
+    netiq_mc = 2735, 'netiq-mc'
 
     #: - [TCP] RADWIZ NMS SRV
     #: - [UDP] RADWIZ NMS SRV
-    radwiz_nms_srv = 2736, 'radwiz-nms-srv', TransportProtocol.tcp
+    radwiz_nms_srv = 2736, 'radwiz-nms-srv'
 
     #: - [TCP] SRP Feedback
     #: - [UDP] SRP Feedback
-    srp_feedback = 2737, 'srp-feedback', TransportProtocol.tcp
+    srp_feedback = 2737, 'srp-feedback'
 
     #: - [TCP] NDL TCP-OSI Gateway
     #: - [UDP] NDL TCP-OSI Gateway
-    ndl_tcp_ois_gw = 2738, 'ndl-tcp-ois-gw', TransportProtocol.tcp
+    ndl_tcp_ois_gw = 2738, 'ndl-tcp-ois-gw'
 
     #: - [TCP] TN Timing
     #: - [UDP] TN Timing
-    tn_timing = 2739, 'tn-timing', TransportProtocol.tcp
+    tn_timing = 2739, 'tn-timing'
 
     #: - [TCP] Alarm
     #: - [UDP] Alarm
-    alarm = 2740, 'alarm', TransportProtocol.tcp
+    alarm = 2740
 
     #: - [TCP] TSB
     #: - [UDP] TSB
-    tsb = 2741, 'tsb', TransportProtocol.tcp
+    tsb = 2741
 
     #: - [TCP] TSB2
     #: - [UDP] TSB2
-    tsb2 = 2742, 'tsb2', TransportProtocol.tcp
+    tsb2 = 2742
 
     #: - [TCP] murx
     #: - [UDP] murx
-    murx = 2743, 'murx', TransportProtocol.tcp
+    murx = 2743
 
     #: - [TCP] honyaku
     #: - [UDP] honyaku
-    honyaku = 2744, 'honyaku', TransportProtocol.tcp
+    honyaku = 2744
 
     #: - [TCP] URBISNET
     #: - [UDP] URBISNET
-    urbisnet = 2745, 'urbisnet', TransportProtocol.tcp
+    urbisnet = 2745
 
     #: - [TCP] CPUDPENCAP
     #: - [UDP] CPUDPENCAP
-    cpudpencap = 2746, 'cpudpencap', TransportProtocol.tcp
+    cpudpencap = 2746
 
     #: - [TCP]
     #: - [UDP]
-    fjippol_swrly = 2747, 'fjippol-swrly', TransportProtocol.tcp
+    fjippol_swrly = 2747, 'fjippol-swrly'
 
     #: - [TCP]
     #: - [UDP]
-    fjippol_polsvr = 2748, 'fjippol-polsvr', TransportProtocol.tcp
+    fjippol_polsvr = 2748, 'fjippol-polsvr'
 
     #: - [TCP]
     #: - [UDP]
-    fjippol_cnsl = 2749, 'fjippol-cnsl', TransportProtocol.tcp
+    fjippol_cnsl = 2749, 'fjippol-cnsl'
 
     #: - [TCP]
     #: - [UDP]
-    fjippol_port1 = 2750, 'fjippol-port1', TransportProtocol.tcp
+    fjippol_port1 = 2750, 'fjippol-port1'
 
     #: - [TCP]
     #: - [UDP]
-    fjippol_port2 = 2751, 'fjippol-port2', TransportProtocol.tcp
+    fjippol_port2 = 2751, 'fjippol-port2'
 
     #: - [TCP] RSISYS ACCESS
     #: - [UDP] RSISYS ACCESS
-    rsisysaccess = 2752, 'rsisysaccess', TransportProtocol.tcp
+    rsisysaccess = 2752
 
     #: - [TCP] de-spot
     #: - [UDP] de-spot
-    de_spot = 2753, 'de-spot', TransportProtocol.tcp
+    de_spot = 2753, 'de-spot'
 
     #: - [TCP] APOLLO CC
     #: - [UDP] APOLLO CC
-    apollo_cc = 2754, 'apollo-cc', TransportProtocol.tcp
+    apollo_cc = 2754, 'apollo-cc'
 
     #: - [TCP] Express Pay
     #: - [UDP] Express Pay
-    expresspay = 2755, 'expresspay', TransportProtocol.tcp
+    expresspay = 2755
 
     #: - [TCP] simplement-tie
     #: - [UDP] simplement-tie
-    simplement_tie = 2756, 'simplement-tie', TransportProtocol.tcp
+    simplement_tie = 2756, 'simplement-tie'
 
     #: - [TCP] CNRP
     #: - [UDP] CNRP
-    cnrp = 2757, 'cnrp', TransportProtocol.tcp
+    cnrp = 2757
 
     #: - [TCP] APOLLO Status
     #: - [UDP] APOLLO Status
-    apollo_status = 2758, 'apollo-status', TransportProtocol.tcp
+    apollo_status = 2758, 'apollo-status'
 
     #: - [TCP] APOLLO GMS
     #: - [UDP] APOLLO GMS
-    apollo_gms = 2759, 'apollo-gms', TransportProtocol.tcp
+    apollo_gms = 2759, 'apollo-gms'
 
     #: - [TCP] Saba MS
     #: - [UDP] Saba MS
-    sabams = 2760, 'sabams', TransportProtocol.tcp
+    sabams = 2760
 
     #: - [TCP] DICOM ISCL
     #: - [UDP] DICOM ISCL
-    dicom_iscl = 2761, 'dicom-iscl', TransportProtocol.tcp
+    dicom_iscl = 2761, 'dicom-iscl'
 
     #: - [TCP] DICOM TLS
     #: - [UDP] DICOM TLS
-    dicom_tls = 2762, 'dicom-tls', TransportProtocol.tcp
+    dicom_tls = 2762, 'dicom-tls'
 
     #: - [TCP] Desktop DNA
     #: - [UDP] Desktop DNA
-    desktop_dna = 2763, 'desktop-dna', TransportProtocol.tcp
+    desktop_dna = 2763, 'desktop-dna'
 
     #: - [TCP] Data Insurance
     #: - [UDP] Data Insurance
-    data_insurance = 2764, 'data-insurance', TransportProtocol.tcp
+    data_insurance = 2764, 'data-insurance'
 
     #: - [TCP] qip-audup
     #: - [UDP] qip-audup
-    qip_audup = 2765, 'qip-audup', TransportProtocol.tcp
+    qip_audup = 2765, 'qip-audup'
 
     #: - [TCP] Compaq SCP
     #: - [UDP] Compaq SCP
-    compaq_scp = 2766, 'compaq-scp', TransportProtocol.tcp
+    compaq_scp = 2766, 'compaq-scp'
 
     #: - [TCP] UADTC
     #: - [UDP] UADTC
-    uadtc = 2767, 'uadtc', TransportProtocol.tcp
+    uadtc = 2767
 
     #: - [TCP] UACS
     #: - [UDP] UACS
-    uacs = 2768, 'uacs', TransportProtocol.tcp
+    uacs = 2768
 
     #: - [TCP] eXcE
     #: - [UDP] eXcE
-    exce = 2769, 'exce', TransportProtocol.tcp
+    exce = 2769
 
     #: - [TCP] Veronica
     #: - [UDP] Veronica
-    veronica = 2770, 'veronica', TransportProtocol.tcp
+    veronica = 2770
 
     #: - [TCP] Vergence CM
     #: - [UDP] Vergence CM
-    vergencecm = 2771, 'vergencecm', TransportProtocol.tcp
+    vergencecm = 2771
 
     #: - [TCP] auris
     #: - [UDP] auris
-    auris = 2772, 'auris', TransportProtocol.tcp
+    auris = 2772
 
     #: - [TCP] RBackup Remote Backup
     #: - [UDP] RBackup Remote Backup
-    rbakcup1 = 2773, 'rbakcup1', TransportProtocol.tcp
+    rbakcup1 = 2773
 
     #: - [TCP] RBackup Remote Backup
     #: - [UDP] RBackup Remote Backup
-    rbakcup2 = 2774, 'rbakcup2', TransportProtocol.tcp
+    rbakcup2 = 2774
 
     #: - [TCP] SMPP
     #: - [UDP] SMPP
-    smpp = 2775, 'smpp', TransportProtocol.tcp
+    smpp = 2775
 
     #: - [TCP] Ridgeway Systems & Software
     #: - [UDP] Ridgeway Systems & Software
-    ridgeway1 = 2776, 'ridgeway1', TransportProtocol.tcp
+    ridgeway1 = 2776
 
     #: - [TCP] Ridgeway Systems & Software
     #: - [UDP] Ridgeway Systems & Software
-    ridgeway2 = 2777, 'ridgeway2', TransportProtocol.tcp
+    ridgeway2 = 2777
 
     #: - [TCP] Gwen-Sonya
     #: - [UDP] Gwen-Sonya
-    gwen_sonya = 2778, 'gwen-sonya', TransportProtocol.tcp
+    gwen_sonya = 2778, 'gwen-sonya'
 
     #: - [TCP] LBC Sync
     #: - [UDP] LBC Sync
-    lbc_sync = 2779, 'lbc-sync', TransportProtocol.tcp
+    lbc_sync = 2779, 'lbc-sync'
 
     #: - [TCP] LBC Control
     #: - [UDP] LBC Control
-    lbc_control = 2780, 'lbc-control', TransportProtocol.tcp
+    lbc_control = 2780, 'lbc-control'
 
     #: - [TCP] whosells
     #: - [UDP] whosells
-    whosells = 2781, 'whosells', TransportProtocol.tcp
+    whosells = 2781
 
     #: - [TCP] everydayrc
     #: - [UDP] everydayrc
-    everydayrc = 2782, 'everydayrc', TransportProtocol.tcp
+    everydayrc = 2782
 
     #: - [TCP] AISES
     #: - [UDP] AISES
-    aises = 2783, 'aises', TransportProtocol.tcp
+    aises = 2783
 
     #: - [TCP] world wide web - development
     #: - [UDP] world wide web - development
-    www_dev = 2784, 'www-dev', TransportProtocol.tcp
+    www_dev = 2784, 'www-dev'
 
     #: - [TCP] aic-np
     #: - [UDP] aic-np
-    aic_np = 2785, 'aic-np', TransportProtocol.tcp
+    aic_np = 2785, 'aic-np'
 
     #: - [TCP] aic-oncrpc - Destiny MCD database
     #: - [UDP] aic-oncrpc - Destiny MCD database
-    aic_oncrpc = 2786, 'aic-oncrpc', TransportProtocol.tcp
+    aic_oncrpc = 2786, 'aic-oncrpc'
 
     #: - [TCP] piccolo - Cornerstone Software
     #: - [UDP] piccolo - Cornerstone Software
-    piccolo = 2787, 'piccolo', TransportProtocol.tcp
+    piccolo = 2787
 
     #: - [TCP] NetWare Loadable Module - Seagate Software
     #: - [UDP] NetWare Loadable Module - Seagate Software
-    fryeserv = 2788, 'fryeserv', TransportProtocol.tcp
+    fryeserv = 2788
 
     #: - [TCP] Media Agent
     #: - [UDP] Media Agent
-    media_agent = 2789, 'media-agent', TransportProtocol.tcp
+    media_agent = 2789, 'media-agent'
 
     #: - [TCP] PLG Proxy
     #: - [UDP] PLG Proxy
-    plgproxy = 2790, 'plgproxy', TransportProtocol.tcp
+    plgproxy = 2790
 
     #: - [TCP] MT Port Registrator
     #: - [UDP] MT Port Registrator
-    mtport_regist = 2791, 'mtport-regist', TransportProtocol.tcp
+    mtport_regist = 2791, 'mtport-regist'
 
     #: - [TCP] f5-globalsite
     #: - [UDP] f5-globalsite
-    f5_globalsite = 2792, 'f5-globalsite', TransportProtocol.tcp
+    f5_globalsite = 2792, 'f5-globalsite'
 
     #: - [TCP] initlsmsad
     #: - [UDP] initlsmsad
-    initlsmsad = 2793, 'initlsmsad', TransportProtocol.tcp
+    initlsmsad = 2793
 
     #: - [TCP] Uniform Resource Platform
     #: - [UDP] Uniform Resource Platform
-    urp = 2794, 'urp', TransportProtocol.tcp
+    urp = 2794
 
     #: - [TCP] LiveStats
     #: - [UDP] LiveStats
-    livestats = 2795, 'livestats', TransportProtocol.tcp
+    livestats = 2795
 
     #: - [TCP] ac-tech
     #: - [UDP] ac-tech
-    ac_tech = 2796, 'ac-tech', TransportProtocol.tcp
+    ac_tech = 2796, 'ac-tech'
 
     #: - [TCP] esp-encap
     #: - [UDP] esp-encap
-    esp_encap = 2797, 'esp-encap', TransportProtocol.tcp
+    esp_encap = 2797, 'esp-encap'
 
     #: - [TCP] TMESIS-UPShot
     #: - [UDP] TMESIS-UPShot
-    tmesis_upshot = 2798, 'tmesis-upshot', TransportProtocol.tcp
+    tmesis_upshot = 2798, 'tmesis-upshot'
 
     #: - [TCP] ICON Discover
     #: - [UDP] ICON Discover
-    icon_discover = 2799, 'icon-discover', TransportProtocol.tcp
+    icon_discover = 2799, 'icon-discover'
 
     #: - [TCP] ACC RAID
     #: - [UDP] ACC RAID
-    acc_raid = 2800, 'acc-raid', TransportProtocol.tcp
+    acc_raid = 2800, 'acc-raid'
 
     #: - [TCP] IGCP
     #: - [UDP] IGCP
-    igcp = 2801, 'igcp', TransportProtocol.tcp
+    igcp = 2801
 
     #: [TCP] Veritas TCP1
-    veritas_tcp1 = 2802, 'veritas-tcp1', TransportProtocol.tcp
+    veritas_tcp1 = 2802, 'veritas-tcp1'
 
     #: - [TCP] btprjctrl
     #: - [UDP] btprjctrl
-    btprjctrl = 2803, 'btprjctrl', TransportProtocol.tcp
+    btprjctrl = 2803
 
     #: - [TCP] March Networks Digital Video Recorders and Enterprise Service Manager
     #:   products
     #: - [UDP] March Networks Digital Video Recorders and Enterprise Service Manager
     #:   products
-    dvr_esm = 2804, 'dvr-esm', TransportProtocol.tcp
+    dvr_esm = 2804, 'dvr-esm'
 
     #: - [TCP] WTA WSP-S
     #: - [UDP] WTA WSP-S
-    wta_wsp_s = 2805, 'wta-wsp-s', TransportProtocol.tcp
+    wta_wsp_s = 2805, 'wta-wsp-s'
 
     #: - [TCP] cspuni
     #: - [UDP] cspuni
-    cspuni = 2806, 'cspuni', TransportProtocol.tcp
+    cspuni = 2806
 
     #: - [TCP] cspmulti
     #: - [UDP] cspmulti
-    cspmulti = 2807, 'cspmulti', TransportProtocol.tcp
+    cspmulti = 2807
 
     #: - [TCP] J-LAN-P
     #: - [UDP] J-LAN-P
-    j_lan_p = 2808, 'j-lan-p', TransportProtocol.tcp
+    j_lan_p = 2808, 'j-lan-p'
 
     #: - [TCP] CORBA LOC
     #: - [UDP] CORBA LOC
-    corbaloc = 2809, 'corbaloc', TransportProtocol.tcp
+    corbaloc = 2809
 
     #: - [TCP] Active Net Steward
     #: - [UDP] Active Net Steward
-    netsteward = 2810, 'netsteward', TransportProtocol.tcp
+    netsteward = 2810
 
     #: - [TCP] GSI FTP
     #: - [UDP] GSI FTP
-    gsiftp = 2811, 'gsiftp', TransportProtocol.tcp
+    gsiftp = 2811
 
     #: - [TCP] atmtcp
     #: - [UDP] atmtcp
-    atmtcp = 2812, 'atmtcp', TransportProtocol.tcp
+    atmtcp = 2812
 
     #: - [TCP] llm-pass
     #: - [UDP] llm-pass
-    llm_pass = 2813, 'llm-pass', TransportProtocol.tcp
+    llm_pass = 2813, 'llm-pass'
 
     #: - [TCP] llm-csv
     #: - [UDP] llm-csv
-    llm_csv = 2814, 'llm-csv', TransportProtocol.tcp
+    llm_csv = 2814, 'llm-csv'
 
     #: - [TCP] LBC Measurement
     #: - [UDP] LBC Measurement
-    lbc_measure = 2815, 'lbc-measure', TransportProtocol.tcp
+    lbc_measure = 2815, 'lbc-measure'
 
     #: - [TCP] LBC Watchdog
     #: - [UDP] LBC Watchdog
-    lbc_watchdog = 2816, 'lbc-watchdog', TransportProtocol.tcp
+    lbc_watchdog = 2816, 'lbc-watchdog'
 
     #: - [TCP] rmlnk
     #: - [UDP] rmlnk
-    rmlnk = 2818, 'rmlnk', TransportProtocol.tcp
+    rmlnk = 2818
 
     #: - [TCP] FC Fault Notification
     #: - [UDP] FC Fault Notification
-    fc_faultnotify = 2819, 'fc-faultnotify', TransportProtocol.tcp
+    fc_faultnotify = 2819, 'fc-faultnotify'
 
     #: - [TCP] UniVision
     #: - [UDP] UniVision
-    univision = 2820, 'univision', TransportProtocol.tcp
+    univision = 2820
 
     #: - [TCP] VERITAS Authentication Service
     #: - [UDP] VERITAS Authentication Service
-    vrts_at_port = 2821, 'vrts-at-port', TransportProtocol.tcp
+    vrts_at_port = 2821, 'vrts-at-port'
 
     #: - [TCP] ka0wuc
     #: - [UDP] ka0wuc
-    ka0wuc = 2822, 'ka0wuc', TransportProtocol.tcp
+    ka0wuc = 2822
 
     #: - [TCP] CQG Net/LAN
     #: - [UDP] CQG Net/LAN
-    cqg_netlan = 2823, 'cqg-netlan', TransportProtocol.tcp
+    cqg_netlan = 2823, 'cqg-netlan'
 
     #: - [TCP] CQG Net/LAN 1
     #: - [UDP] CQG Net/Lan 1
-    cqg_netlan_1 = 2824, 'cqg-netlan-1', TransportProtocol.tcp
+    cqg_netlan_1 = 2824, 'cqg-netlan-1'
 
     #: - [TCP] slc systemlog
     #: - [UDP] slc systemlog
-    slc_systemlog = 2826, 'slc-systemlog', TransportProtocol.tcp
+    slc_systemlog = 2826, 'slc-systemlog'
 
     #: - [TCP] slc ctrlrloops
     #: - [UDP] slc ctrlrloops
-    slc_ctrlrloops = 2827, 'slc-ctrlrloops', TransportProtocol.tcp
+    slc_ctrlrloops = 2827, 'slc-ctrlrloops'
 
     #: - [TCP] ITM License Manager
     #: - [UDP] ITM License Manager
-    itm_lm = 2828, 'itm-lm', TransportProtocol.tcp
+    itm_lm = 2828, 'itm-lm'
 
     #: - [TCP] silkp1
     #: - [UDP] silkp1
-    silkp1 = 2829, 'silkp1', TransportProtocol.tcp
+    silkp1 = 2829
 
     #: - [TCP] silkp2
     #: - [UDP] silkp2
-    silkp2 = 2830, 'silkp2', TransportProtocol.tcp
+    silkp2 = 2830
 
     #: - [TCP] silkp3
     #: - [UDP] silkp3
-    silkp3 = 2831, 'silkp3', TransportProtocol.tcp
+    silkp3 = 2831
 
     #: - [TCP] silkp4
     #: - [UDP] silkp4
-    silkp4 = 2832, 'silkp4', TransportProtocol.tcp
+    silkp4 = 2832
 
     #: - [TCP] glishd
     #: - [UDP] glishd
-    glishd = 2833, 'glishd', TransportProtocol.tcp
+    glishd = 2833
 
     #: - [TCP] EVTP
     #: - [UDP] EVTP
-    evtp = 2834, 'evtp', TransportProtocol.tcp
+    evtp = 2834
 
     #: - [TCP] EVTP-DATA
     #: - [UDP] EVTP-DATA
-    evtp_data = 2835, 'evtp-data', TransportProtocol.tcp
+    evtp_data = 2835, 'evtp-data'
 
     #: - [TCP] catalyst
     #: - [UDP] catalyst
-    catalyst = 2836, 'catalyst', TransportProtocol.tcp
+    catalyst = 2836
 
     #: - [TCP] Repliweb
     #: - [UDP] Repliweb
-    repliweb = 2837, 'repliweb', TransportProtocol.tcp
+    repliweb = 2837
 
     #: - [TCP] Starbot
     #: - [UDP] Starbot
-    starbot = 2838, 'starbot', TransportProtocol.tcp
+    starbot = 2838
 
     #: - [TCP] NMSig Port
     #: - [UDP] NMSig Port
-    nmsigport_2817 = 2817, 'nmsigport', TransportProtocol.tcp
+    nmsigport_2817 = 2817, 'nmsigport'
 
     #: - [TCP] NMSigPort
     #: - [UDP] NMSigPort
-    nmsigport_2839 = 2839, 'nmsigport', TransportProtocol.tcp
+    nmsigport_2839 = 2839, 'nmsigport'
 
     #: - [TCP] l3-exprt
     #: - [UDP] l3-exprt
-    l3_exprt = 2840, 'l3-exprt', TransportProtocol.tcp
+    l3_exprt = 2840, 'l3-exprt'
 
     #: - [TCP] l3-ranger
     #: - [UDP] l3-ranger
-    l3_ranger = 2841, 'l3-ranger', TransportProtocol.tcp
+    l3_ranger = 2841, 'l3-ranger'
 
     #: - [TCP] l3-hawk
     #: - [UDP] l3-hawk
-    l3_hawk = 2842, 'l3-hawk', TransportProtocol.tcp
+    l3_hawk = 2842, 'l3-hawk'
 
     #: - [TCP] PDnet
     #: - [UDP] PDnet
-    pdnet = 2843, 'pdnet', TransportProtocol.tcp
+    pdnet = 2843
 
     #: - [TCP] BPCP POLL
     #: - [UDP] BPCP POLL
-    bpcp_poll = 2844, 'bpcp-poll', TransportProtocol.tcp
+    bpcp_poll = 2844, 'bpcp-poll'
 
     #: - [TCP] BPCP TRAP
     #: - [UDP] BPCP TRAP
-    bpcp_trap = 2845, 'bpcp-trap', TransportProtocol.tcp
+    bpcp_trap = 2845, 'bpcp-trap'
 
     #: - [TCP] AIMPP Hello
     #: - [UDP] AIMPP Hello
-    aimpp_hello = 2846, 'aimpp-hello', TransportProtocol.tcp
+    aimpp_hello = 2846, 'aimpp-hello'
 
     #: - [TCP] AIMPP Port Req
     #: - [UDP] AIMPP Port Req
-    aimpp_port_req = 2847, 'aimpp-port-req', TransportProtocol.tcp
+    aimpp_port_req = 2847, 'aimpp-port-req'
 
     #: - [TCP] AMT-BLC-PORT
     #: - [UDP] AMT-BLC-PORT
-    amt_blc_port = 2848, 'amt-blc-port', TransportProtocol.tcp
+    amt_blc_port = 2848, 'amt-blc-port'
 
     #: - [TCP] FXP Communication
     #: - [UDP] FXP Communication
-    fxp_286 = 286, 'fxp', TransportProtocol.tcp
+    fxp_286 = 286, 'fxp'
 
     #: - [TCP] FXP
     #: - [UDP] FXP
-    fxp_2849 = 2849, 'fxp', TransportProtocol.tcp
+    fxp_2849 = 2849, 'fxp'
 
     #: - [TCP] MetaConsole
     #: - [UDP] MetaConsole
-    metaconsole = 2850, 'metaconsole', TransportProtocol.tcp
+    metaconsole = 2850
 
     #: - [TCP] webemshttp
     #: - [UDP] webemshttp
-    webemshttp = 2851, 'webemshttp', TransportProtocol.tcp
+    webemshttp = 2851
 
     #: - [TCP] bears-01
     #: - [UDP] bears-01
-    bears_01 = 2852, 'bears-01', TransportProtocol.tcp
+    bears_01 = 2852, 'bears-01'
 
     #: - [TCP] ISPipes
     #: - [UDP] ISPipes
-    ispipes = 2853, 'ispipes', TransportProtocol.tcp
+    ispipes = 2853
 
     #: - [TCP] InfoMover
     #: - [UDP] InfoMover
-    infomover = 2854, 'infomover', TransportProtocol.tcp
+    infomover = 2854
 
     #: [TCP] MSRP over TCP [:rfc:`4976`]
-    msrp = 2855, 'msrp', TransportProtocol.tcp
+    msrp = 2855
 
     #: - [TCP] cesdinv
     #: - [UDP] cesdinv
-    cesdinv = 2856, 'cesdinv', TransportProtocol.tcp
+    cesdinv = 2856
 
     #: - [TCP] SimCtIP
     #: - [UDP] SimCtIP
-    simctlp = 2857, 'simctlp', TransportProtocol.tcp
+    simctlp = 2857
 
     #: - [TCP] ECNP
     #: - [UDP] ECNP
-    ecnp = 2858, 'ecnp', TransportProtocol.tcp
+    ecnp = 2858
 
     #: - [TCP] Active Memory
     #: - [UDP] Active Memory
-    activememory = 2859, 'activememory', TransportProtocol.tcp
+    activememory = 2859
 
     #: - [TCP] Dialpad Voice 1
     #: - [UDP] Dialpad Voice 1
-    dialpad_voice1 = 2860, 'dialpad-voice1', TransportProtocol.tcp
+    dialpad_voice1 = 2860, 'dialpad-voice1'
 
     #: - [TCP] Dialpad Voice 2
     #: - [UDP] Dialpad Voice 2
-    dialpad_voice2 = 2861, 'dialpad-voice2', TransportProtocol.tcp
+    dialpad_voice2 = 2861, 'dialpad-voice2'
 
     #: - [TCP] TTG Protocol
     #: - [UDP] TTG Protocol
-    ttg_protocol = 2862, 'ttg-protocol', TransportProtocol.tcp
+    ttg_protocol = 2862, 'ttg-protocol'
 
     #: - [TCP] Sonar Data
     #: - [UDP] Sonar Data
-    sonardata = 2863, 'sonardata', TransportProtocol.tcp
+    sonardata = 2863
 
     #: - [TCP] main 5001 cmd
     #: - [UDP] main 5001 cmd
-    astronova_main = 2864, 'astronova-main', TransportProtocol.tcp
+    astronova_main = 2864, 'astronova-main'
 
     #: - [TCP] pit-vpn
     #: - [UDP] pit-vpn
-    pit_vpn = 2865, 'pit-vpn', TransportProtocol.tcp
+    pit_vpn = 2865, 'pit-vpn'
 
     #: - [TCP] iwlistener
     #: - [UDP] iwlistener
-    iwlistener = 2866, 'iwlistener', TransportProtocol.tcp
+    iwlistener = 2866
 
     #: - [TCP] esps-portal
     #: - [UDP] esps-portal
-    esps_portal = 2867, 'esps-portal', TransportProtocol.tcp
+    esps_portal = 2867, 'esps-portal'
 
     #: - [TCP] Norman Proprietaqry Events Protocol
     #: - [UDP] Norman Proprietaqry Events Protocol
-    npep_messaging = 2868, 'npep-messaging', TransportProtocol.tcp
+    npep_messaging = 2868, 'npep-messaging'
 
     #: - [TCP] ICSLAP
     #: - [UDP] ICSLAP
-    icslap = 2869, 'icslap', TransportProtocol.tcp
+    icslap = 2869
 
     #: - [TCP] daishi
     #: - [UDP] daishi
-    daishi = 2870, 'daishi', TransportProtocol.tcp
+    daishi = 2870
 
     #: - [TCP] MSI Select Play
     #: - [UDP] MSI Select Play
-    msi_selectplay = 2871, 'msi-selectplay', TransportProtocol.tcp
+    msi_selectplay = 2871, 'msi-selectplay'
 
     #: - [TCP] RADIX
     #: - [UDP] RADIX
-    radix = 2872, 'radix', TransportProtocol.tcp
+    radix = 2872
 
     #: - [TCP] PubSub Realtime Telemetry Protocol
     #: - [UDP] PubSub Realtime Telemetry Protocol
-    psrt = 2873, 'psrt', TransportProtocol.tcp
+    psrt = 2873
 
     #: - [TCP] DX Message Base Transport Protocol
     #: - [UDP] DX Message Base Transport Protocol
-    dxmessagebase1 = 2874, 'dxmessagebase1', TransportProtocol.tcp
+    dxmessagebase1 = 2874
 
     #: - [TCP] DX Message Base Transport Protocol
     #: - [UDP] DX Message Base Transport Protocol
-    dxmessagebase2 = 2875, 'dxmessagebase2', TransportProtocol.tcp
+    dxmessagebase2 = 2875
 
     #: - [TCP] SPS Tunnel
     #: - [UDP] SPS Tunnel
-    sps_tunnel = 2876, 'sps-tunnel', TransportProtocol.tcp
+    sps_tunnel = 2876, 'sps-tunnel'
 
     #: - [TCP] BLUELANCE
     #: - [UDP] BLUELANCE
-    bluelance = 2877, 'bluelance', TransportProtocol.tcp
+    bluelance = 2877
 
     #: - [TCP] AAP
     #: - [UDP] AAP
-    aap = 2878, 'aap', TransportProtocol.tcp
+    aap = 2878
 
     #: - [TCP] ucentric-ds
     #: - [UDP] ucentric-ds
-    ucentric_ds = 2879, 'ucentric-ds', TransportProtocol.tcp
+    ucentric_ds = 2879, 'ucentric-ds'
 
     #: - [TCP] Synapse Transport
     #: - [UDP] Synapse Transport
-    synapse = 2880, 'synapse', TransportProtocol.tcp
+    synapse = 2880
 
     #: - [TCP] NDSP
     #: - [UDP] NDSP
-    ndsp = 2881, 'ndsp', TransportProtocol.tcp
+    ndsp = 2881
 
     #: - [TCP] NDTP
     #: - [UDP] NDTP
-    ndtp = 2882, 'ndtp', TransportProtocol.tcp
+    ndtp = 2882
 
     #: - [TCP] NDNP
     #: - [UDP] NDNP
-    ndnp = 2883, 'ndnp', TransportProtocol.tcp
+    ndnp = 2883
 
     #: - [TCP] Flash Msg
     #: - [UDP] Flash Msg
-    flashmsg = 2884, 'flashmsg', TransportProtocol.tcp
+    flashmsg = 2884
 
     #: - [TCP] TopFlow
     #: - [UDP] TopFlow
-    topflow = 2885, 'topflow', TransportProtocol.tcp
+    topflow = 2885
 
     #: - [TCP] RESPONSELOGIC
     #: - [UDP] RESPONSELOGIC
-    responselogic = 2886, 'responselogic', TransportProtocol.tcp
+    responselogic = 2886
 
     #: - [TCP] aironet
     #: - [UDP] aironet
-    aironetddp = 2887, 'aironetddp', TransportProtocol.tcp
+    aironetddp = 2887
 
     #: - [TCP] SPCSDLOBBY
     #: - [UDP] SPCSDLOBBY
-    spcsdlobby = 2888, 'spcsdlobby', TransportProtocol.tcp
+    spcsdlobby = 2888
 
     #: - [TCP] RSOM
     #: - [UDP] RSOM
-    rsom = 2889, 'rsom', TransportProtocol.tcp
+    rsom = 2889
 
     #: - [TCP] CSPCLMULTI
     #: - [UDP] CSPCLMULTI
-    cspclmulti = 2890, 'cspclmulti', TransportProtocol.tcp
+    cspclmulti = 2890
 
     #: - [TCP] CINEGRFX-ELMD License Manager
     #: - [UDP] CINEGRFX-ELMD License Manager
-    cinegrfx_elmd = 2891, 'cinegrfx-elmd', TransportProtocol.tcp
+    cinegrfx_elmd = 2891, 'cinegrfx-elmd'
 
     #: - [TCP] SNIFFERDATA
     #: - [UDP] SNIFFERDATA
-    snifferdata = 2892, 'snifferdata', TransportProtocol.tcp
+    snifferdata = 2892
 
     #: - [TCP] VSECONNECTOR
     #: - [UDP] VSECONNECTOR
-    vseconnector = 2893, 'vseconnector', TransportProtocol.tcp
+    vseconnector = 2893
 
     #: - [TCP] ABACUS-REMOTE
     #: - [UDP] ABACUS-REMOTE
-    abacus_remote = 2894, 'abacus-remote', TransportProtocol.tcp
+    abacus_remote = 2894, 'abacus-remote'
 
     #: - [TCP] NATUS LINK
     #: - [UDP] NATUS LINK
-    natuslink = 2895, 'natuslink', TransportProtocol.tcp
+    natuslink = 2895
 
     #: - [TCP] ECOVISIONG6-1
     #: - [UDP] ECOVISIONG6-1
-    ecovisiong6_1 = 2896, 'ecovisiong6-1', TransportProtocol.tcp
+    ecovisiong6_1 = 2896, 'ecovisiong6-1'
 
     #: - [TCP] Citrix RTMP
     #: - [UDP] Citrix RTMP
-    citrix_rtmp = 2897, 'citrix-rtmp', TransportProtocol.tcp
+    citrix_rtmp = 2897, 'citrix-rtmp'
 
     #: - [TCP] APPLIANCE-CFG
     #: - [UDP] APPLIANCE-CFG
-    appliance_cfg = 2898, 'appliance-cfg', TransportProtocol.tcp
+    appliance_cfg = 2898, 'appliance-cfg'
 
     #: - [TCP] POWERGEMPLUS
     #: - [UDP] POWERGEMPLUS
-    powergemplus = 2899, 'powergemplus', TransportProtocol.tcp
+    powergemplus = 2899
 
     #: - [TCP] QUICKSUITE
     #: - [UDP] QUICKSUITE
-    quicksuite = 2900, 'quicksuite', TransportProtocol.tcp
+    quicksuite = 2900
 
     #: - [TCP] ALLSTORCNS
     #: - [UDP] ALLSTORCNS
-    allstorcns = 2901, 'allstorcns', TransportProtocol.tcp
+    allstorcns = 2901
 
     #: - [TCP] NET ASPI
     #: - [UDP] NET ASPI
-    netaspi = 2902, 'netaspi', TransportProtocol.tcp
+    netaspi = 2902
 
     #: - [TCP] SUITCASE
     #: - [UDP] SUITCASE
-    suitcase = 2903, 'suitcase', TransportProtocol.tcp
+    suitcase = 2903
 
     #: - [TCP] M2UA
     #: - [UDP] M2UA
     #: - [SCTP] M2UA
-    m2ua = 2904, 'm2ua', TransportProtocol.tcp
+    m2ua = 2904
 
     #: - [TCP] M3UA [:rfc:`4666`]
     #: - [SCTP] M3UA [:rfc:`4666`]
-    m3ua = 2905, 'm3ua', TransportProtocol.tcp
+    m3ua = 2905
 
     #: - [TCP] CALLER9
     #: - [UDP] CALLER9
-    caller9 = 2906, 'caller9', TransportProtocol.tcp
+    caller9 = 2906
 
     #: - [TCP] WEBMETHODS B2B
     #: - [UDP] WEBMETHODS B2B
-    webmethods_b2b = 2907, 'webmethods-b2b', TransportProtocol.tcp
+    webmethods_b2b = 2907, 'webmethods-b2b'
 
     #: - [TCP] mao
     #: - [UDP] mao
-    mao = 2908, 'mao', TransportProtocol.tcp
+    mao = 2908
 
     #: - [TCP] Funk Dialout
     #: - [UDP] Funk Dialout
-    funk_dialout = 2909, 'funk-dialout', TransportProtocol.tcp
+    funk_dialout = 2909, 'funk-dialout'
 
     #: - [TCP] TDAccess
     #: - [UDP] TDAccess
-    tdaccess = 2910, 'tdaccess', TransportProtocol.tcp
+    tdaccess = 2910
 
     #: - [TCP] Blockade
     #: - [UDP] Blockade
-    blockade = 2911, 'blockade', TransportProtocol.tcp
+    blockade = 2911
 
     #: - [TCP] Epicon
     #: - [UDP] Epicon
-    epicon = 2912, 'epicon', TransportProtocol.tcp
+    epicon = 2912
 
     #: - [TCP] Booster Ware
     #: - [UDP] Booster Ware
-    boosterware = 2913, 'boosterware', TransportProtocol.tcp
+    boosterware = 2913
 
     #: - [TCP] Game Lobby
     #: - [UDP] Game Lobby
-    gamelobby = 2914, 'gamelobby', TransportProtocol.tcp
+    gamelobby = 2914
 
     #: - [TCP] TK Socket
     #: - [UDP] TK Socket
-    tksocket = 2915, 'tksocket', TransportProtocol.tcp
+    tksocket = 2915
 
     #: - [TCP] Elvin Server IANA assigned this well-formed service name as a
     #:   replacement for "elvin_server".
@@ -11452,7 +11452,7 @@ class TCP(AppType):
     #: - [UDP] Elvin Server IANA assigned this well-formed service name as a
     #:   replacement for "elvin_server".
     #: - [UDP] Elvin Server
-    elvin_server = 2916, 'elvin-server', TransportProtocol.tcp
+    elvin_server = 2916, 'elvin-server'
 
     #: - [TCP] Elvin Client IANA assigned this well-formed service name as a
     #:   replacement for "elvin_client".
@@ -11460,395 +11460,395 @@ class TCP(AppType):
     #: - [UDP] Elvin Client IANA assigned this well-formed service name as a
     #:   replacement for "elvin_client".
     #: - [UDP] Elvin Client
-    elvin_client = 2917, 'elvin-client', TransportProtocol.tcp
+    elvin_client = 2917, 'elvin-client'
 
     #: - [TCP] Kasten Chase Pad
     #: - [UDP] Kasten Chase Pad
-    kastenchasepad = 2918, 'kastenchasepad', TransportProtocol.tcp
+    kastenchasepad = 2918
 
     #: - [TCP] roboER
     #: - [UDP] roboER
-    roboer = 2919, 'roboer', TransportProtocol.tcp
+    roboer = 2919
 
     #: - [TCP] roboEDA
     #: - [UDP] roboEDA
-    roboeda = 2920, 'roboeda', TransportProtocol.tcp
+    roboeda = 2920
 
     #: - [TCP] CESD Contents Delivery Management
     #: - [UDP] CESD Contents Delivery Management
-    cesdcdman = 2921, 'cesdcdman', TransportProtocol.tcp
+    cesdcdman = 2921
 
     #: - [TCP] CESD Contents Delivery Data Transfer
     #: - [UDP] CESD Contents Delivery Data Transfer
-    cesdcdtrn = 2922, 'cesdcdtrn', TransportProtocol.tcp
+    cesdcdtrn = 2922
 
     #: - [TCP] WTA-WSP-WTP-S
     #: - [UDP] WTA-WSP-WTP-S
-    wta_wsp_wtp_s = 2923, 'wta-wsp-wtp-s', TransportProtocol.tcp
+    wta_wsp_wtp_s = 2923, 'wta-wsp-wtp-s'
 
     #: - [TCP] PRECISE-VIP
     #: - [UDP] PRECISE-VIP
-    precise_vip = 2924, 'precise-vip', TransportProtocol.tcp
+    precise_vip = 2924, 'precise-vip'
 
     #: - [TCP] MOBILE-FILE-DL
     #: - [UDP] MOBILE-FILE-DL
-    mobile_file_dl = 2926, 'mobile-file-dl', TransportProtocol.tcp
+    mobile_file_dl = 2926, 'mobile-file-dl'
 
     #: - [TCP] UNIMOBILECTRL
     #: - [UDP] UNIMOBILECTRL
-    unimobilectrl = 2927, 'unimobilectrl', TransportProtocol.tcp
+    unimobilectrl = 2927
 
     #: - [TCP] REDSTONE-CPSS
     #: - [UDP] REDSTONE-CPSS
-    redstone_cpss = 2928, 'redstone-cpss', TransportProtocol.tcp
+    redstone_cpss = 2928, 'redstone-cpss'
 
     #: - [TCP] AMX-WEBADMIN
     #: - [UDP] AMX-WEBADMIN
-    amx_webadmin = 2929, 'amx-webadmin', TransportProtocol.tcp
+    amx_webadmin = 2929, 'amx-webadmin'
 
     #: - [TCP] AMX-WEBLINX
     #: - [UDP] AMX-WEBLINX
-    amx_weblinx = 2930, 'amx-weblinx', TransportProtocol.tcp
+    amx_weblinx = 2930, 'amx-weblinx'
 
     #: - [TCP] Circle-X
     #: - [UDP] Circle-X
-    circle_x = 2931, 'circle-x', TransportProtocol.tcp
+    circle_x = 2931, 'circle-x'
 
     #: - [TCP] INCP
     #: - [UDP] INCP
-    incp = 2932, 'incp', TransportProtocol.tcp
+    incp = 2932
 
     #: - [TCP] 4-TIER OPM GW
     #: - [UDP] 4-TIER OPM GW
-    TCP_4_tieropmgw = 2933, '4-tieropmgw', TransportProtocol.tcp
+    TCP_4_tieropmgw = 2933, '4-tieropmgw'
 
     #: - [TCP] 4-TIER OPM CLI
     #: - [UDP] 4-TIER OPM CLI
-    TCP_4_tieropmcli = 2934, '4-tieropmcli', TransportProtocol.tcp
+    TCP_4_tieropmcli = 2934, '4-tieropmcli'
 
     #: - [TCP] QTP
     #: - [UDP] QTP
-    qtp = 2935, 'qtp', TransportProtocol.tcp
+    qtp = 2935
 
     #: - [TCP] OTPatch
     #: - [UDP] OTPatch
-    otpatch = 2936, 'otpatch', TransportProtocol.tcp
+    otpatch = 2936
 
     #: - [TCP] PNACONSULT-LM
     #: - [UDP] PNACONSULT-LM
-    pnaconsult_lm = 2937, 'pnaconsult-lm', TransportProtocol.tcp
+    pnaconsult_lm = 2937, 'pnaconsult-lm'
 
     #: - [TCP] SM-PAS-1
     #: - [UDP] SM-PAS-1
-    sm_pas_1 = 2938, 'sm-pas-1', TransportProtocol.tcp
+    sm_pas_1 = 2938, 'sm-pas-1'
 
     #: - [TCP] SM-PAS-2
     #: - [UDP] SM-PAS-2
-    sm_pas_2 = 2939, 'sm-pas-2', TransportProtocol.tcp
+    sm_pas_2 = 2939, 'sm-pas-2'
 
     #: - [TCP] SM-PAS-3
     #: - [UDP] SM-PAS-3
-    sm_pas_3 = 2940, 'sm-pas-3', TransportProtocol.tcp
+    sm_pas_3 = 2940, 'sm-pas-3'
 
     #: - [TCP] SM-PAS-4
     #: - [UDP] SM-PAS-4
-    sm_pas_4 = 2941, 'sm-pas-4', TransportProtocol.tcp
+    sm_pas_4 = 2941, 'sm-pas-4'
 
     #: - [TCP] SM-PAS-5
     #: - [UDP] SM-PAS-5
-    sm_pas_5 = 2942, 'sm-pas-5', TransportProtocol.tcp
+    sm_pas_5 = 2942, 'sm-pas-5'
 
     #: - [TCP] TTNRepository
     #: - [UDP] TTNRepository
-    ttnrepository = 2943, 'ttnrepository', TransportProtocol.tcp
+    ttnrepository = 2943
 
     #: - [TCP] Megaco H-248
     #: - [UDP] Megaco H-248
     #: - [SCTP] Megaco-H.248 text
-    megaco_h248 = 2944, 'megaco-h248', TransportProtocol.tcp
+    megaco_h248 = 2944, 'megaco-h248'
 
     #: - [TCP] H248 Binary
     #: - [UDP] H248 Binary
     #: - [SCTP] Megaco/H.248 binary
-    h248_binary = 2945, 'h248-binary', TransportProtocol.tcp
+    h248_binary = 2945, 'h248-binary'
 
     #: - [TCP] FJSVmpor
     #: - [UDP] FJSVmpor
-    fjsvmpor = 2946, 'fjsvmpor', TransportProtocol.tcp
+    fjsvmpor = 2946
 
     #: - [TCP] GPS Daemon request/response protocol
     #: - [UDP] GPS Daemon request/response protocol
-    gpsd = 2947, 'gpsd', TransportProtocol.tcp
+    gpsd = 2947
 
     #: - [TCP] WAP PUSH
     #: - [UDP] WAP PUSH
-    wap_push = 2948, 'wap-push', TransportProtocol.tcp
+    wap_push = 2948, 'wap-push'
 
     #: - [TCP] WAP PUSH SECURE
     #: - [UDP] WAP PUSH SECURE
-    wap_pushsecure = 2949, 'wap-pushsecure', TransportProtocol.tcp
+    wap_pushsecure = 2949, 'wap-pushsecure'
 
     #: - [TCP] ESIP
     #: - [UDP] ESIP
-    esip = 2950, 'esip', TransportProtocol.tcp
+    esip = 2950
 
     #: - [TCP] OTTP
     #: - [UDP] OTTP
-    ottp = 2951, 'ottp', TransportProtocol.tcp
+    ottp = 2951
 
     #: - [TCP] MPFWSAS
     #: - [UDP] MPFWSAS
-    mpfwsas = 2952, 'mpfwsas', TransportProtocol.tcp
+    mpfwsas = 2952
 
     #: - [TCP] OVALARMSRV
     #: - [UDP] OVALARMSRV
-    ovalarmsrv = 2953, 'ovalarmsrv', TransportProtocol.tcp
+    ovalarmsrv = 2953
 
     #: - [TCP] OVALARMSRV-CMD
     #: - [UDP] OVALARMSRV-CMD
-    ovalarmsrv_cmd = 2954, 'ovalarmsrv-cmd', TransportProtocol.tcp
+    ovalarmsrv_cmd = 2954, 'ovalarmsrv-cmd'
 
     #: - [TCP] CSNOTIFY
     #: - [UDP] CSNOTIFY
-    csnotify = 2955, 'csnotify', TransportProtocol.tcp
+    csnotify = 2955
 
     #: - [TCP] OVRIMOSDBMAN
     #: - [UDP] OVRIMOSDBMAN
-    ovrimosdbman = 2956, 'ovrimosdbman', TransportProtocol.tcp
+    ovrimosdbman = 2956
 
     #: - [TCP] JAMCT5
     #: - [UDP] JAMCT5
-    jmact5 = 2957, 'jmact5', TransportProtocol.tcp
+    jmact5 = 2957
 
     #: - [TCP] JAMCT6
     #: - [UDP] JAMCT6
-    jmact6 = 2958, 'jmact6', TransportProtocol.tcp
+    jmact6 = 2958
 
     #: - [TCP] RMOPAGT
     #: - [UDP] RMOPAGT
-    rmopagt = 2959, 'rmopagt', TransportProtocol.tcp
+    rmopagt = 2959
 
     #: - [TCP] DFOXSERVER
     #: - [UDP] DFOXSERVER
-    dfoxserver = 2960, 'dfoxserver', TransportProtocol.tcp
+    dfoxserver = 2960
 
     #: - [TCP] BOLDSOFT-LM
     #: - [UDP] BOLDSOFT-LM
-    boldsoft_lm = 2961, 'boldsoft-lm', TransportProtocol.tcp
+    boldsoft_lm = 2961, 'boldsoft-lm'
 
     #: - [TCP] IPH-POLICY-CLI
     #: - [UDP] IPH-POLICY-CLI
-    iph_policy_cli = 2962, 'iph-policy-cli', TransportProtocol.tcp
+    iph_policy_cli = 2962, 'iph-policy-cli'
 
     #: - [TCP] IPH-POLICY-ADM
     #: - [UDP] IPH-POLICY-ADM
-    iph_policy_adm = 2963, 'iph-policy-adm', TransportProtocol.tcp
+    iph_policy_adm = 2963, 'iph-policy-adm'
 
     #: - [TCP] BULLANT SRAP
     #: - [UDP] BULLANT SRAP
-    bullant_srap = 2964, 'bullant-srap', TransportProtocol.tcp
+    bullant_srap = 2964, 'bullant-srap'
 
     #: - [TCP] BULLANT RAP
     #: - [UDP] BULLANT RAP
-    bullant_rap = 2965, 'bullant-rap', TransportProtocol.tcp
+    bullant_rap = 2965, 'bullant-rap'
 
     #: - [TCP] IDP-INFOTRIEVE
     #: - [UDP] IDP-INFOTRIEVE
-    idp_infotrieve = 2966, 'idp-infotrieve', TransportProtocol.tcp
+    idp_infotrieve = 2966, 'idp-infotrieve'
 
     #: - [TCP] SSC-AGENT
     #: - [UDP] SSC-AGENT
-    ssc_agent = 2967, 'ssc-agent', TransportProtocol.tcp
+    ssc_agent = 2967, 'ssc-agent'
 
     #: - [TCP] ENPP
     #: - [UDP] ENPP
-    enpp = 2968, 'enpp', TransportProtocol.tcp
+    enpp = 2968
 
     #: - [TCP] ESSP
     #: - [UDP] ESSP
-    essp = 2969, 'essp', TransportProtocol.tcp
+    essp = 2969
 
     #: - [TCP] INDEX-NET
     #: - [UDP] INDEX-NET
-    index_net = 2970, 'index-net', TransportProtocol.tcp
+    index_net = 2970, 'index-net'
 
     #: - [TCP] NetClip clipboard daemon
     #: - [UDP] NetClip clipboard daemon
-    netclip = 2971, 'netclip', TransportProtocol.tcp
+    netclip = 2971
 
     #: - [TCP] PMSM Webrctl
     #: - [UDP] PMSM Webrctl
-    pmsm_webrctl = 2972, 'pmsm-webrctl', TransportProtocol.tcp
+    pmsm_webrctl = 2972, 'pmsm-webrctl'
 
     #: - [TCP] SV Networks
     #: - [UDP] SV Networks
-    svnetworks = 2973, 'svnetworks', TransportProtocol.tcp
+    svnetworks = 2973
 
     #: - [TCP] Signal
     #: - [UDP] Signal
-    signal = 2974, 'signal', TransportProtocol.tcp
+    signal = 2974
 
     #: - [TCP] Fujitsu Configuration Management Service
     #: - [UDP] Fujitsu Configuration Management Service
-    fjmpcm = 2975, 'fjmpcm', TransportProtocol.tcp
+    fjmpcm = 2975
 
     #: - [TCP] CNS Server Port
     #: - [UDP] CNS Server Port
-    cns_srv_port = 2976, 'cns-srv-port', TransportProtocol.tcp
+    cns_srv_port = 2976, 'cns-srv-port'
 
     #: - [TCP] TTCs Enterprise Test Access Protocol - NS
     #: - [UDP] TTCs Enterprise Test Access Protocol - NS
-    ttc_etap_ns = 2977, 'ttc-etap-ns', TransportProtocol.tcp
+    ttc_etap_ns = 2977, 'ttc-etap-ns'
 
     #: - [TCP] TTCs Enterprise Test Access Protocol - DS
     #: - [UDP] TTCs Enterprise Test Access Protocol - DS
-    ttc_etap_ds = 2978, 'ttc-etap-ds', TransportProtocol.tcp
+    ttc_etap_ds = 2978, 'ttc-etap-ds'
 
     #: - [TCP] H.263 Video Streaming
     #: - [UDP] H.263 Video Streaming
-    h263_video = 2979, 'h263-video', TransportProtocol.tcp
+    h263_video = 2979, 'h263-video'
 
     #: - [TCP] Instant Messaging Service
     #: - [UDP] Instant Messaging Service
-    wimd = 2980, 'wimd', TransportProtocol.tcp
+    wimd = 2980
 
     #: - [TCP] MYLXAMPORT
     #: - [UDP] MYLXAMPORT
-    mylxamport = 2981, 'mylxamport', TransportProtocol.tcp
+    mylxamport = 2981
 
     #: - [TCP] IWB-WHITEBOARD
     #: - [UDP] IWB-WHITEBOARD
-    iwb_whiteboard = 2982, 'iwb-whiteboard', TransportProtocol.tcp
+    iwb_whiteboard = 2982, 'iwb-whiteboard'
 
     #: - [TCP] NETPLAN
     #: - [UDP] NETPLAN
-    netplan = 2983, 'netplan', TransportProtocol.tcp
+    netplan = 2983
 
     #: - [TCP] HPIDSADMIN
     #: - [UDP] HPIDSADMIN
-    hpidsadmin = 2984, 'hpidsadmin', TransportProtocol.tcp
+    hpidsadmin = 2984
 
     #: - [TCP] HPIDSAGENT
     #: - [UDP] HPIDSAGENT
-    hpidsagent = 2985, 'hpidsagent', TransportProtocol.tcp
+    hpidsagent = 2985
 
     #: - [TCP] STONEFALLS
     #: - [UDP] STONEFALLS
-    stonefalls = 2986, 'stonefalls', TransportProtocol.tcp
+    stonefalls = 2986
 
     #: - [TCP] identify
     #: - [UDP] identify
-    identify = 2987, 'identify', TransportProtocol.tcp
+    identify = 2987
 
     #: - [TCP] HIPPA Reporting Protocol
     #: - [UDP] HIPPA Reporting Protocol
-    hippad = 2988, 'hippad', TransportProtocol.tcp
+    hippad = 2988
 
     #: - [TCP] ZARKOV Intelligent Agent Communication
     #: - [UDP] ZARKOV Intelligent Agent Communication
-    zarkov = 2989, 'zarkov', TransportProtocol.tcp
+    zarkov = 2989
 
     #: - [TCP] BOSCAP
     #: - [UDP] BOSCAP
-    boscap = 2990, 'boscap', TransportProtocol.tcp
+    boscap = 2990
 
     #: - [TCP] WKSTN-MON
     #: - [UDP] WKSTN-MON
-    wkstn_mon = 2991, 'wkstn-mon', TransportProtocol.tcp
+    wkstn_mon = 2991, 'wkstn-mon'
 
     #: - [TCP] Avenyo Server
     #: - [UDP] Avenyo Server
-    avenyo = 2992, 'avenyo', TransportProtocol.tcp
+    avenyo = 2992
 
     #: - [TCP] VERITAS VIS1
     #: - [UDP] VERITAS VIS1
-    veritas_vis1 = 2993, 'veritas-vis1', TransportProtocol.tcp
+    veritas_vis1 = 2993, 'veritas-vis1'
 
     #: - [TCP] VERITAS VIS2
     #: - [UDP] VERITAS VIS2
-    veritas_vis2 = 2994, 'veritas-vis2', TransportProtocol.tcp
+    veritas_vis2 = 2994, 'veritas-vis2'
 
     #: - [TCP] IDRS
     #: - [UDP] IDRS
-    idrs = 2995, 'idrs', TransportProtocol.tcp
+    idrs = 2995
 
     #: - [TCP] vsixml
     #: - [UDP] vsixml
-    vsixml = 2996, 'vsixml', TransportProtocol.tcp
+    vsixml = 2996
 
     #: - [TCP] REBOL
     #: - [UDP] REBOL
-    rebol = 2997, 'rebol', TransportProtocol.tcp
+    rebol = 2997
 
     #: - [TCP] Real Secure
     #: - [UDP] Real Secure
-    realsecure = 2998, 'realsecure', TransportProtocol.tcp
+    realsecure = 2998
 
     #: - [TCP] RemoteWare Unassigned
     #: - [UDP] RemoteWare Unassigned
-    remoteware_un = 2999, 'remoteware-un', TransportProtocol.tcp
+    remoteware_un = 2999, 'remoteware-un'
 
     #: - [TCP] HBCI
     #: - [UDP] HBCI
-    hbci = 3000, 'hbci', TransportProtocol.tcp
+    hbci = 3000
 
     #: - [TCP] RemoteWare Client
     #: - [UDP] RemoteWare Client
-    remoteware_cl = 3000, 'remoteware-cl', TransportProtocol.tcp
+    remoteware_cl = 3000, 'remoteware-cl'
 
     #: [TCP] OrigoDB Server Native Interface
-    origo_native = 3001, 'origo-native', TransportProtocol.tcp
+    origo_native = 3001, 'origo-native'
 
     #: - [TCP] EXLM Agent
     #: - [UDP] EXLM Agent
-    exlm_agent = 3002, 'exlm-agent', TransportProtocol.tcp
+    exlm_agent = 3002, 'exlm-agent'
 
     #: - [TCP] RemoteWare Server
     #: - [UDP] RemoteWare Server
-    remoteware_srv = 3002, 'remoteware-srv', TransportProtocol.tcp
+    remoteware_srv = 3002, 'remoteware-srv'
 
     #: - [TCP] CGMS
     #: - [UDP] CGMS
-    cgms = 3003, 'cgms', TransportProtocol.tcp
+    cgms = 3003
 
     #: - [TCP] Csoft Agent
     #: - [UDP] Csoft Agent
-    csoftragent = 3004, 'csoftragent', TransportProtocol.tcp
+    csoftragent = 3004
 
     #: - [TCP] Genius License Manager
     #: - [UDP] Genius License Manager
-    geniuslm = 3005, 'geniuslm', TransportProtocol.tcp
+    geniuslm = 3005
 
     #: - [TCP] Instant Internet Admin
     #: - [UDP] Instant Internet Admin
-    ii_admin = 3006, 'ii-admin', TransportProtocol.tcp
+    ii_admin = 3006, 'ii-admin'
 
     #: - [TCP] Lotus Mail Tracking Agent Protocol
     #: - [UDP] Lotus Mail Tracking Agent Protocol
-    lotusmtap = 3007, 'lotusmtap', TransportProtocol.tcp
+    lotusmtap = 3007
 
     #: - [TCP] Midnight Technologies
     #: - [UDP] Midnight Technologies
-    midnight_tech = 3008, 'midnight-tech', TransportProtocol.tcp
+    midnight_tech = 3008, 'midnight-tech'
 
     #: - [TCP] PXC-NTFY
     #: - [UDP] PXC-NTFY
-    pxc_ntfy = 3009, 'pxc-ntfy', TransportProtocol.tcp
+    pxc_ntfy = 3009, 'pxc-ntfy'
 
     #: [TCP] Telerate Workstation
-    gw = 3010, 'gw', TransportProtocol.tcp
+    gw = 3010
 
     #: - [TCP] Trusted Web
     #: - [UDP] Trusted Web
-    trusted_web = 3011, 'trusted-web', TransportProtocol.tcp
+    trusted_web = 3011, 'trusted-web'
 
     #: - [TCP] Trusted Web Client
     #: - [UDP] Trusted Web Client
-    twsdss = 3012, 'twsdss', TransportProtocol.tcp
+    twsdss = 3012
 
     #: - [TCP] Gilat Sky Surfer
     #: - [UDP] Gilat Sky Surfer
-    gilatskysurfer = 3013, 'gilatskysurfer', TransportProtocol.tcp
+    gilatskysurfer = 3013
 
     #: - [TCP] Broker Service IANA assigned this well-formed service name as a
     #:   replacement for "broker_service".
@@ -11856,11 +11856,11 @@ class TCP(AppType):
     #: - [UDP] Broker Service IANA assigned this well-formed service name as a
     #:   replacement for "broker_service".
     #: - [UDP] Broker Service
-    broker_service = 3014, 'broker-service', TransportProtocol.tcp
+    broker_service = 3014, 'broker-service'
 
     #: - [TCP] NATI DSTP
     #: - [UDP] NATI DSTP
-    nati_dstp = 3015, 'nati-dstp', TransportProtocol.tcp
+    nati_dstp = 3015, 'nati-dstp'
 
     #: - [TCP] Notify Server IANA assigned this well-formed service name as a
     #:   replacement for "notify_srvr".
@@ -11868,7 +11868,7 @@ class TCP(AppType):
     #: - [UDP] Notify Server IANA assigned this well-formed service name as a
     #:   replacement for "notify_srvr".
     #: - [UDP] Notify Server
-    notify_srvr = 3016, 'notify-srvr', TransportProtocol.tcp
+    notify_srvr = 3016, 'notify-srvr'
 
     #: - [TCP] Event Listener IANA assigned this well-formed service name as a
     #:   replacement for "event_listener".
@@ -11876,7 +11876,7 @@ class TCP(AppType):
     #: - [UDP] Event Listener IANA assigned this well-formed service name as a
     #:   replacement for "event_listener".
     #: - [UDP] Event Listener
-    event_listener = 3017, 'event-listener', TransportProtocol.tcp
+    event_listener = 3017, 'event-listener'
 
     #: - [TCP] Service Registry IANA assigned this well-formed service name as a
     #:   replacement for "srvc_registry".
@@ -11884,7 +11884,7 @@ class TCP(AppType):
     #: - [UDP] Service Registry IANA assigned this well-formed service name as a
     #:   replacement for "srvc_registry".
     #: - [UDP] Service Registry
-    srvc_registry = 3018, 'srvc-registry', TransportProtocol.tcp
+    srvc_registry = 3018, 'srvc-registry'
 
     #: - [TCP] Resource Manager IANA assigned this well-formed service name as a
     #:   replacement for "resource_mgr".
@@ -11892,23 +11892,23 @@ class TCP(AppType):
     #: - [UDP] Resource Manager IANA assigned this well-formed service name as a
     #:   replacement for "resource_mgr".
     #: - [UDP] Resource Manager
-    resource_mgr = 3019, 'resource-mgr', TransportProtocol.tcp
+    resource_mgr = 3019, 'resource-mgr'
 
     #: - [TCP] CIFS
     #: - [UDP] CIFS
-    cifs = 3020, 'cifs', TransportProtocol.tcp
+    cifs = 3020
 
     #: - [TCP] AGRI Server
     #: - [UDP] AGRI Server
-    agriserver = 3021, 'agriserver', TransportProtocol.tcp
+    agriserver = 3021
 
     #: - [TCP] CSREGAGENT
     #: - [UDP] CSREGAGENT
-    csregagent = 3022, 'csregagent', TransportProtocol.tcp
+    csregagent = 3022
 
     #: - [TCP] magicnotes
     #: - [UDP] magicnotes
-    magicnotes = 3023, 'magicnotes', TransportProtocol.tcp
+    magicnotes = 3023
 
     #: - [TCP] NDS_SSO IANA assigned this well-formed service name as a replacement
     #:   for "nds_sso".
@@ -11916,15 +11916,15 @@ class TCP(AppType):
     #: - [UDP] NDS_SSO IANA assigned this well-formed service name as a replacement
     #:   for "nds_sso".
     #: - [UDP] NDS_SSO
-    nds_sso = 3024, 'nds-sso', TransportProtocol.tcp
+    nds_sso = 3024, 'nds-sso'
 
     #: - [TCP] Arepa Raft
     #: - [UDP] Arepa Raft
-    arepa_raft = 3025, 'arepa-raft', TransportProtocol.tcp
+    arepa_raft = 3025, 'arepa-raft'
 
     #: - [TCP] AGRI Gateway
     #: - [UDP] AGRI Gateway
-    agri_gateway = 3026, 'agri-gateway', TransportProtocol.tcp
+    agri_gateway = 3026, 'agri-gateway'
 
     #: - [TCP] LiebDevMgmt_C IANA assigned this well-formed service name as a
     #:   replacement for "LiebDevMgmt_C".
@@ -11932,7 +11932,7 @@ class TCP(AppType):
     #: - [UDP] LiebDevMgmt_C IANA assigned this well-formed service name as a
     #:   replacement for "LiebDevMgmt_C".
     #: - [UDP] LiebDevMgmt_C
-    liebdevmgmt_c = 3027, 'liebdevmgmt-c', TransportProtocol.tcp
+    liebdevmgmt_c = 3027, 'liebdevmgmt-c'
 
     #: - [TCP] LiebDevMgmt_DM IANA assigned this well-formed service name as a
     #:   replacement for "LiebDevMgmt_DM".
@@ -11940,7 +11940,7 @@ class TCP(AppType):
     #: - [UDP] LiebDevMgmt_DM IANA assigned this well-formed service name as a
     #:   replacement for "LiebDevMgmt_DM".
     #: - [UDP] LiebDevMgmt_DM
-    liebdevmgmt_dm = 3028, 'liebdevmgmt-dm', TransportProtocol.tcp
+    liebdevmgmt_dm = 3028, 'liebdevmgmt-dm'
 
     #: - [TCP] LiebDevMgmt_A IANA assigned this well-formed service name as a
     #:   replacement for "LiebDevMgmt_A".
@@ -11948,91 +11948,91 @@ class TCP(AppType):
     #: - [UDP] LiebDevMgmt_A IANA assigned this well-formed service name as a
     #:   replacement for "LiebDevMgmt_A".
     #: - [UDP] LiebDevMgmt_A
-    liebdevmgmt_a = 3029, 'liebdevmgmt-a', TransportProtocol.tcp
+    liebdevmgmt_a = 3029, 'liebdevmgmt-a'
 
     #: - [TCP] Arepa Cas
     #: - [UDP] Arepa Cas
-    arepa_cas = 3030, 'arepa-cas', TransportProtocol.tcp
+    arepa_cas = 3030, 'arepa-cas'
 
     #: - [TCP] Remote AppleEvents/PPC Toolbox
     #: - [UDP] Remote AppleEvents/PPC Toolbox
-    eppc = 3031, 'eppc', TransportProtocol.tcp
+    eppc = 3031
 
     #: - [TCP] Redwood Chat
     #: - [UDP] Redwood Chat
-    redwood_chat = 3032, 'redwood-chat', TransportProtocol.tcp
+    redwood_chat = 3032, 'redwood-chat'
 
     #: - [TCP] PDB
     #: - [UDP] PDB
-    pdb = 3033, 'pdb', TransportProtocol.tcp
+    pdb = 3033
 
     #: - [TCP] Osmosis / Helix (R) AEEA Port
     #: - [UDP] Osmosis / Helix (R) AEEA Port
-    osmosis_aeea = 3034, 'osmosis-aeea', TransportProtocol.tcp
+    osmosis_aeea = 3034, 'osmosis-aeea'
 
     #: - [TCP] FJSV gssagt
     #: - [UDP] FJSV gssagt
-    fjsv_gssagt = 3035, 'fjsv-gssagt', TransportProtocol.tcp
+    fjsv_gssagt = 3035, 'fjsv-gssagt'
 
     #: - [TCP] Hagel DUMP
     #: - [UDP] Hagel DUMP
-    hagel_dump = 3036, 'hagel-dump', TransportProtocol.tcp
+    hagel_dump = 3036, 'hagel-dump'
 
     #: - [TCP] HP SAN Mgmt
     #: - [UDP] HP SAN Mgmt
-    hp_san_mgmt = 3037, 'hp-san-mgmt', TransportProtocol.tcp
+    hp_san_mgmt = 3037, 'hp-san-mgmt'
 
     #: - [TCP] Santak UPS
     #: - [UDP] Santak UPS
-    santak_ups = 3038, 'santak-ups', TransportProtocol.tcp
+    santak_ups = 3038, 'santak-ups'
 
     #: - [TCP] Cogitate, Inc.
     #: - [UDP] Cogitate, Inc.
-    cogitate = 3039, 'cogitate', TransportProtocol.tcp
+    cogitate = 3039
 
     #: - [TCP] Tomato Springs
     #: - [UDP] Tomato Springs
-    tomato_springs = 3040, 'tomato-springs', TransportProtocol.tcp
+    tomato_springs = 3040, 'tomato-springs'
 
     #: - [TCP] di-traceware
     #: - [UDP] di-traceware
-    di_traceware = 3041, 'di-traceware', TransportProtocol.tcp
+    di_traceware = 3041, 'di-traceware'
 
     #: - [TCP] journee
     #: - [UDP] journee
-    journee = 3042, 'journee', TransportProtocol.tcp
+    journee = 3042
 
     #: - [TCP] Broadcast Routing Protocol
     #: - [UDP] Broadcast Routing Protocol
-    brp = 3043, 'brp', TransportProtocol.tcp
+    brp = 3043
 
     #: - [TCP] Extensible Provisioning Protocol [:rfc:`5734`]
     #: - [UDP] EPP running over QUIC [:rfc:`5734`][:rfc:`10087`]
-    epp_700 = 700, 'epp', TransportProtocol.tcp
+    epp_700 = 700, 'epp'
 
     #: - [TCP] EndPoint Protocol
     #: - [UDP] EndPoint Protocol
-    epp_3044 = 3044, 'epp', TransportProtocol.tcp
+    epp_3044 = 3044, 'epp'
 
     #: - [TCP] ResponseNet
     #: - [UDP] ResponseNet
-    responsenet = 3045, 'responsenet', TransportProtocol.tcp
+    responsenet = 3045
 
     #: - [TCP] di-ase
     #: - [UDP] di-ase
-    di_ase = 3046, 'di-ase', TransportProtocol.tcp
+    di_ase = 3046, 'di-ase'
 
     #: - [TCP] Fast Security HL Server
     #: - [UDP] Fast Security HL Server
-    hlserver = 3047, 'hlserver', TransportProtocol.tcp
+    hlserver = 3047
 
     #: - [TCP] Sierra Net PC Trader
     #: - [UDP] Sierra Net PC Trader
-    pctrader = 3048, 'pctrader', TransportProtocol.tcp
+    pctrader = 3048
 
     #: - [TCP] NSWS
     #: - [UDP] NSWS
-    nsws = 3049, 'nsws', TransportProtocol.tcp
+    nsws = 3049
 
     #: - [TCP] gds_db IANA assigned this well-formed service name as a replacement
     #:   for "gds_db".
@@ -12040,122 +12040,122 @@ class TCP(AppType):
     #: - [UDP] gds_db IANA assigned this well-formed service name as a replacement
     #:   for "gds_db".
     #: - [UDP] gds_db
-    gds_db = 3050, 'gds-db', TransportProtocol.tcp
+    gds_db = 3050, 'gds-db'
 
     #: - [TCP] Galaxy Server
     #: - [UDP] Galaxy Server
-    galaxy_server = 3051, 'galaxy-server', TransportProtocol.tcp
+    galaxy_server = 3051, 'galaxy-server'
 
     #: - [TCP] APC 3052
     #: - [UDP] APC 3052
-    apc_3052 = 3052, 'apc-3052', TransportProtocol.tcp
+    apc_3052 = 3052, 'apc-3052'
 
     #: - [TCP] dsom-server
     #: - [UDP] dsom-server
-    dsom_server = 3053, 'dsom-server', TransportProtocol.tcp
+    dsom_server = 3053, 'dsom-server'
 
     #: - [TCP] AMT CNF PROT
     #: - [UDP] AMT CNF PROT
-    amt_cnf_prot = 3054, 'amt-cnf-prot', TransportProtocol.tcp
+    amt_cnf_prot = 3054, 'amt-cnf-prot'
 
     #: - [TCP] Policy Server
     #: - [UDP] Policy Server
-    policyserver = 3055, 'policyserver', TransportProtocol.tcp
+    policyserver = 3055
 
     #: - [TCP] CDL Server
     #: - [UDP] CDL Server
-    cdl_server = 3056, 'cdl-server', TransportProtocol.tcp
+    cdl_server = 3056, 'cdl-server'
 
     #: - [TCP] GoAhead FldUp
     #: - [UDP] GoAhead FldUp
-    goahead_fldup = 3057, 'goahead-fldup', TransportProtocol.tcp
+    goahead_fldup = 3057, 'goahead-fldup'
 
     #: - [TCP] videobeans
     #: - [UDP] videobeans
-    videobeans = 3058, 'videobeans', TransportProtocol.tcp
+    videobeans = 3058
 
     #: - [TCP] qsoft
     #: - [UDP] qsoft
-    qsoft = 3059, 'qsoft', TransportProtocol.tcp
+    qsoft = 3059
 
     #: - [TCP] interserver
     #: - [UDP] interserver
-    interserver = 3060, 'interserver', TransportProtocol.tcp
+    interserver = 3060
 
     #: - [TCP] cautcpd
     #: - [UDP] cautcpd
-    cautcpd = 3061, 'cautcpd', TransportProtocol.tcp
+    cautcpd = 3061
 
     #: - [TCP] ncacn-ip-tcp
     #: - [UDP] ncacn-ip-tcp
-    ncacn_ip_tcp = 3062, 'ncacn-ip-tcp', TransportProtocol.tcp
+    ncacn_ip_tcp = 3062, 'ncacn-ip-tcp'
 
     #: - [TCP] ncadg-ip-udp
     #: - [UDP] ncadg-ip-udp
-    ncadg_ip_udp = 3063, 'ncadg-ip-udp', TransportProtocol.tcp
+    ncadg_ip_udp = 3063, 'ncadg-ip-udp'
 
     #: - [TCP] Remote Port Redirector
     #: - [UDP] Remote Port Redirector
-    rprt = 3064, 'rprt', TransportProtocol.tcp
+    rprt = 3064
 
     #: - [TCP] slinterbase
     #: - [UDP] slinterbase
-    slinterbase = 3065, 'slinterbase', TransportProtocol.tcp
+    slinterbase = 3065
 
     #: - [TCP] NETATTACHSDMP
     #: - [UDP] NETATTACHSDMP
-    netattachsdmp = 3066, 'netattachsdmp', TransportProtocol.tcp
+    netattachsdmp = 3066
 
     #: - [TCP] FJHPJP
     #: - [UDP] FJHPJP
-    fjhpjp = 3067, 'fjhpjp', TransportProtocol.tcp
+    fjhpjp = 3067
 
     #: - [TCP] ls3 Broadcast
     #: - [UDP] ls3 Broadcast
-    ls3bcast = 3068, 'ls3bcast', TransportProtocol.tcp
+    ls3bcast = 3068
 
     #: - [TCP] ls3
     #: - [UDP] ls3
-    ls3 = 3069, 'ls3', TransportProtocol.tcp
+    ls3 = 3069
 
     #: - [TCP] MGXSWITCH
     #: - [UDP] MGXSWITCH
-    mgxswitch = 3070, 'mgxswitch', TransportProtocol.tcp
+    mgxswitch = 3070
 
     #: [TCP] Crossplatform replication protocol
-    xplat_replicate = 3071, 'xplat-replicate', TransportProtocol.tcp
+    xplat_replicate = 3071, 'xplat-replicate'
 
     #: - [TCP] ContinuStor Monitor Port
     #: - [UDP] ContinuStor Monitor Port
-    csd_monitor = 3072, 'csd-monitor', TransportProtocol.tcp
+    csd_monitor = 3072, 'csd-monitor'
 
     #: - [TCP] Very simple chatroom prot
     #: - [UDP] Very simple chatroom prot
-    vcrp = 3073, 'vcrp', TransportProtocol.tcp
+    vcrp = 3073
 
     #: - [TCP] Xbox game port
     #: - [UDP] Xbox game port
-    xbox = 3074, 'xbox', TransportProtocol.tcp
+    xbox = 3074
 
     #: - [TCP] Orbix 2000 Locator
     #: - [UDP] Orbix 2000 Locator
-    orbix_locator = 3075, 'orbix-locator', TransportProtocol.tcp
+    orbix_locator = 3075, 'orbix-locator'
 
     #: - [TCP] Orbix 2000 Config
     #: - [UDP] Orbix 2000 Config
-    orbix_config = 3076, 'orbix-config', TransportProtocol.tcp
+    orbix_config = 3076, 'orbix-config'
 
     #: - [TCP] Orbix 2000 Locator SSL
     #: - [UDP] Orbix 2000 Locator SSL
-    orbix_loc_ssl = 3077, 'orbix-loc-ssl', TransportProtocol.tcp
+    orbix_loc_ssl = 3077, 'orbix-loc-ssl'
 
     #: - [TCP] Orbix 2000 Locator SSL
     #: - [UDP] Orbix 2000 Locator SSL
-    orbix_cfg_ssl = 3078, 'orbix-cfg-ssl', TransportProtocol.tcp
+    orbix_cfg_ssl = 3078, 'orbix-cfg-ssl'
 
     #: - [TCP] LV Front Panel
     #: - [UDP] LV Front Panel
-    lv_frontpanel = 3079, 'lv-frontpanel', TransportProtocol.tcp
+    lv_frontpanel = 3079, 'lv-frontpanel'
 
     #: - [TCP] stm_pproc IANA assigned this well-formed service name as a replacement
     #:   for "stm_pproc".
@@ -12163,1228 +12163,1228 @@ class TCP(AppType):
     #: - [UDP] stm_pproc IANA assigned this well-formed service name as a replacement
     #:   for "stm_pproc".
     #: - [UDP] stm_pproc
-    stm_pproc = 3080, 'stm-pproc', TransportProtocol.tcp
+    stm_pproc = 3080, 'stm-pproc'
 
     #: - [TCP] TL1-LV
     #: - [UDP] TL1-LV
-    tl1_lv = 3081, 'tl1-lv', TransportProtocol.tcp
+    tl1_lv = 3081, 'tl1-lv'
 
     #: - [TCP] TL1-RAW
     #: - [UDP] TL1-RAW
-    tl1_raw = 3082, 'tl1-raw', TransportProtocol.tcp
+    tl1_raw = 3082, 'tl1-raw'
 
     #: - [TCP] TL1-TELNET
     #: - [UDP] TL1-TELNET
-    tl1_telnet = 3083, 'tl1-telnet', TransportProtocol.tcp
+    tl1_telnet = 3083, 'tl1-telnet'
 
     #: - [TCP] ITM-MCCS
     #: - [UDP] ITM-MCCS
-    itm_mccs = 3084, 'itm-mccs', TransportProtocol.tcp
+    itm_mccs = 3084, 'itm-mccs'
 
     #: - [TCP] PCIHReq
     #: - [UDP] PCIHReq
-    pcihreq = 3085, 'pcihreq', TransportProtocol.tcp
+    pcihreq = 3085
 
     #: - [TCP] JDL-DBKitchen
     #: - [UDP] JDL-DBKitchen
-    jdl_dbkitchen = 3086, 'jdl-dbkitchen', TransportProtocol.tcp
+    jdl_dbkitchen = 3086, 'jdl-dbkitchen'
 
     #: - [TCP] Asoki SMA
     #: - [UDP] Asoki SMA
-    asoki_sma = 3087, 'asoki-sma', TransportProtocol.tcp
+    asoki_sma = 3087, 'asoki-sma'
 
     #: - [TCP] eXtensible Data Transfer Protocol
     #: - [UDP] eXtensible Data Transfer Protocol
-    xdtp = 3088, 'xdtp', TransportProtocol.tcp
+    xdtp = 3088
 
     #: - [TCP] ParaTek Agent Linking
     #: - [UDP] ParaTek Agent Linking
-    ptk_alink = 3089, 'ptk-alink', TransportProtocol.tcp
+    ptk_alink = 3089, 'ptk-alink'
 
     #: - [TCP] Senforce Session Services
     #: - [UDP] Senforce Session Services
-    stss = 3090, 'stss', TransportProtocol.tcp
+    stss = 3090
 
     #: - [TCP] 1Ci Server Management
     #: - [UDP] 1Ci Server Management
-    TCP_1ci_smcs = 3091, '1ci-smcs', TransportProtocol.tcp
+    TCP_1ci_smcs = 3091, '1ci-smcs'
 
     #: - [TCP] Jiiva RapidMQ Center
     #: - [UDP] Jiiva RapidMQ Center
-    rapidmq_center = 3093, 'rapidmq-center', TransportProtocol.tcp
+    rapidmq_center = 3093, 'rapidmq-center'
 
     #: - [TCP] Jiiva RapidMQ Registry
     #: - [UDP] Jiiva RapidMQ Registry
-    rapidmq_reg = 3094, 'rapidmq-reg', TransportProtocol.tcp
+    rapidmq_reg = 3094, 'rapidmq-reg'
 
     #: - [TCP] Panasas rendezvous port
     #: - [UDP] Panasas rendezvous port
-    panasas = 3095, 'panasas', TransportProtocol.tcp
+    panasas = 3095
 
     #: - [TCP] Active Print Server Port
     #: - [UDP] Active Print Server Port
-    ndl_aps = 3096, 'ndl-aps', TransportProtocol.tcp
+    ndl_aps = 3096, 'ndl-aps'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_3097 = 3097, 'reserved', TransportProtocol.tcp
+    reserved_3097 = 3097, 'reserved'
 
     #: - [TCP] Universal Message Manager
     #: - [UDP] Universal Message Manager
-    umm_port = 3098, 'umm-port', TransportProtocol.tcp
+    umm_port = 3098, 'umm-port'
 
     #: - [TCP] CHIPSY Machine Daemon
     #: - [UDP] CHIPSY Machine Daemon
-    chmd = 3099, 'chmd', TransportProtocol.tcp
+    chmd = 3099
 
     #: - [TCP] OpCon/xps
     #: - [UDP] OpCon/xps
-    opcon_xps = 3100, 'opcon-xps', TransportProtocol.tcp
+    opcon_xps = 3100, 'opcon-xps'
 
     #: - [TCP] HP PolicyXpert PIB Server
     #: - [UDP] HP PolicyXpert PIB Server
-    hp_pxpib = 3101, 'hp-pxpib', TransportProtocol.tcp
+    hp_pxpib = 3101, 'hp-pxpib'
 
     #: - [TCP] SoftlinK Slave Mon Port
     #: - [UDP] SoftlinK Slave Mon Port
-    slslavemon = 3102, 'slslavemon', TransportProtocol.tcp
+    slslavemon = 3102
 
     #: - [TCP] Autocue SMI Protocol
     #: - [UDP] Autocue SMI Protocol
-    autocuesmi = 3103, 'autocuesmi', TransportProtocol.tcp
+    autocuesmi = 3103
 
     #: [TCP] Autocue Logger Protocol
-    autocuelog = 3104, 'autocuelog', TransportProtocol.tcp
+    autocuelog = 3104
 
     #: - [TCP] Cardbox
     #: - [UDP] Cardbox
-    cardbox = 3105, 'cardbox', TransportProtocol.tcp
+    cardbox = 3105
 
     #: - [TCP] Cardbox HTTP
     #: - [UDP] Cardbox HTTP
-    cardbox_http = 3106, 'cardbox-http', TransportProtocol.tcp
+    cardbox_http = 3106, 'cardbox-http'
 
     #: - [TCP] Business protocol
     #: - [UDP] Business protocol
-    business = 3107, 'business', TransportProtocol.tcp
+    business = 3107
 
     #: - [TCP] Geolocate protocol
     #: - [UDP] Geolocate protocol
-    geolocate = 3108, 'geolocate', TransportProtocol.tcp
+    geolocate = 3108
 
     #: - [TCP] Personnel protocol
     #: - [UDP] Personnel protocol
-    personnel = 3109, 'personnel', TransportProtocol.tcp
+    personnel = 3109
 
     #: - [TCP] simulator control port
     #: - [UDP] simulator control port
-    sim_control = 3110, 'sim-control', TransportProtocol.tcp
+    sim_control = 3110, 'sim-control'
 
     #: - [TCP] Web Synchronous Services
     #: - [UDP] Web Synchronous Services
-    wsynch = 3111, 'wsynch', TransportProtocol.tcp
+    wsynch = 3111
 
     #: - [TCP] KDE System Guard
     #: - [UDP] KDE System Guard
-    ksysguard = 3112, 'ksysguard', TransportProtocol.tcp
+    ksysguard = 3112
 
     #: - [TCP] CS-Authenticate Svr Port
     #: - [UDP] CS-Authenticate Svr Port
-    cs_auth_svr = 3113, 'cs-auth-svr', TransportProtocol.tcp
+    cs_auth_svr = 3113, 'cs-auth-svr'
 
     #: - [TCP] CCM AutoDiscover
     #: - [UDP] CCM AutoDiscover
-    ccmad = 3114, 'ccmad', TransportProtocol.tcp
+    ccmad = 3114
 
     #: - [TCP] MCTET Master
     #: - [UDP] MCTET Master
-    mctet_master = 3115, 'mctet-master', TransportProtocol.tcp
+    mctet_master = 3115, 'mctet-master'
 
     #: - [TCP] MCTET Gateway
     #: - [UDP] MCTET Gateway
-    mctet_gateway = 3116, 'mctet-gateway', TransportProtocol.tcp
+    mctet_gateway = 3116, 'mctet-gateway'
 
     #: - [TCP] MCTET Jserv
     #: - [UDP] MCTET Jserv
-    mctet_jserv = 3117, 'mctet-jserv', TransportProtocol.tcp
+    mctet_jserv = 3117, 'mctet-jserv'
 
     #: - [TCP] PKAgent
     #: - [UDP] PKAgent
-    pkagent = 3118, 'pkagent', TransportProtocol.tcp
+    pkagent = 3118
 
     #: - [TCP] D2000 Kernel Port
     #: - [UDP] D2000 Kernel Port
-    d2000kernel = 3119, 'd2000kernel', TransportProtocol.tcp
+    d2000kernel = 3119
 
     #: - [TCP] D2000 Webserver Port
     #: - [UDP] D2000 Webserver Port
-    d2000webserver = 3120, 'd2000webserver', TransportProtocol.tcp
+    d2000webserver = 3120
 
     #: [TCP] The pacemaker remote (pcmk-remote) service extends high availability
     #: functionality outside of the Linux cluster into remote nodes.
-    pcmk_remote = 3121, 'pcmk-remote', TransportProtocol.tcp
+    pcmk_remote = 3121, 'pcmk-remote'
 
     #: - [TCP] MTI VTR Emulator port
     #: - [UDP] MTI VTR Emulator port
-    vtr_emulator = 3122, 'vtr-emulator', TransportProtocol.tcp
+    vtr_emulator = 3122, 'vtr-emulator'
 
     #: - [TCP] EDI Translation Protocol
     #: - [UDP] EDI Translation Protocol
-    edix = 3123, 'edix', TransportProtocol.tcp
+    edix = 3123
 
     #: - [TCP] Beacon Port
     #: - [UDP] Beacon Port
-    beacon_port = 3124, 'beacon-port', TransportProtocol.tcp
+    beacon_port = 3124, 'beacon-port'
 
     #: - [TCP] A13-AN Interface
     #: - [UDP] A13-AN Interface
-    a13_an = 3125, 'a13-an', TransportProtocol.tcp
+    a13_an = 3125, 'a13-an'
 
     #: - [TCP] CTX Bridge Port
     #: - [UDP] CTX Bridge Port
-    ctx_bridge = 3127, 'ctx-bridge', TransportProtocol.tcp
+    ctx_bridge = 3127, 'ctx-bridge'
 
     #: - [TCP] Active API Server Port
     #: - [UDP] Active API Server Port
-    ndl_aas = 3128, 'ndl-aas', TransportProtocol.tcp
+    ndl_aas = 3128, 'ndl-aas'
 
     #: - [TCP] NetPort Discovery Port
     #: - [UDP] NetPort Discovery Port
-    netport_id = 3129, 'netport-id', TransportProtocol.tcp
+    netport_id = 3129, 'netport-id'
 
     #: - [TCP] ICPv2
     #: - [UDP] ICPv2
-    icpv2 = 3130, 'icpv2', TransportProtocol.tcp
+    icpv2 = 3130
 
     #: - [TCP] Net Book Mark
     #: - [UDP] Net Book Mark
-    netbookmark = 3131, 'netbookmark', TransportProtocol.tcp
+    netbookmark = 3131
 
     #: - [TCP] Microsoft Business Rule Engine Update Service
     #: - [UDP] Microsoft Business Rule Engine Update Service
-    ms_rule_engine = 3132, 'ms-rule-engine', TransportProtocol.tcp
+    ms_rule_engine = 3132, 'ms-rule-engine'
 
     #: - [TCP] Prism Deploy User Port
     #: - [UDP] Prism Deploy User Port
-    prism_deploy = 3133, 'prism-deploy', TransportProtocol.tcp
+    prism_deploy = 3133, 'prism-deploy'
 
     #: - [TCP] Extensible Code Protocol
     #: - [UDP] Extensible Code Protocol
-    ecp = 3134, 'ecp', TransportProtocol.tcp
+    ecp = 3134
 
     #: - [TCP] PeerBook Port
     #: - [UDP] PeerBook Port
-    peerbook_port = 3135, 'peerbook-port', TransportProtocol.tcp
+    peerbook_port = 3135, 'peerbook-port'
 
     #: - [TCP] Grub Server Port
     #: - [UDP] Grub Server Port
-    grubd = 3136, 'grubd', TransportProtocol.tcp
+    grubd = 3136
 
     #: - [TCP] rtnt-1 data packets
     #: - [UDP] rtnt-1 data packets
-    rtnt_1 = 3137, 'rtnt-1', TransportProtocol.tcp
+    rtnt_1 = 3137, 'rtnt-1'
 
     #: - [TCP] rtnt-2 data packets
     #: - [UDP] rtnt-2 data packets
-    rtnt_2 = 3138, 'rtnt-2', TransportProtocol.tcp
+    rtnt_2 = 3138, 'rtnt-2'
 
     #: - [TCP] Incognito Rendez-Vous
     #: - [UDP] Incognito Rendez-Vous
-    incognitorv = 3139, 'incognitorv', TransportProtocol.tcp
+    incognitorv = 3139
 
     #: - [TCP] Arilia Multiplexor
     #: - [UDP] Arilia Multiplexor
-    ariliamulti = 3140, 'ariliamulti', TransportProtocol.tcp
+    ariliamulti = 3140
 
     #: - [TCP] VMODEM
     #: - [UDP] VMODEM
-    vmodem = 3141, 'vmodem', TransportProtocol.tcp
+    vmodem = 3141
 
     #: - [TCP] RDC WH EOS
     #: - [UDP] RDC WH EOS
-    rdc_wh_eos = 3142, 'rdc-wh-eos', TransportProtocol.tcp
+    rdc_wh_eos = 3142, 'rdc-wh-eos'
 
     #: - [TCP] Sea View
     #: - [UDP] Sea View
-    seaview = 3143, 'seaview', TransportProtocol.tcp
+    seaview = 3143
 
     #: - [TCP] Tarantella
     #: - [UDP] Tarantella
-    tarantella = 3144, 'tarantella', TransportProtocol.tcp
+    tarantella = 3144
 
     #: - [TCP] CSI-LFAP
     #: - [UDP] CSI-LFAP
-    csi_lfap = 3145, 'csi-lfap', TransportProtocol.tcp
+    csi_lfap = 3145, 'csi-lfap'
 
     #: - [TCP] bears-02
     #: - [UDP] bears-02
-    bears_02 = 3146, 'bears-02', TransportProtocol.tcp
+    bears_02 = 3146, 'bears-02'
 
     #: - [TCP] RFIO
     #: - [UDP] RFIO
-    rfio = 3147, 'rfio', TransportProtocol.tcp
+    rfio = 3147
 
     #: - [TCP] NetMike Game Administrator
     #: - [UDP] NetMike Game Administrator
-    nm_game_admin = 3148, 'nm-game-admin', TransportProtocol.tcp
+    nm_game_admin = 3148, 'nm-game-admin'
 
     #: - [TCP] NetMike Game Server
     #: - [UDP] NetMike Game Server
-    nm_game_server = 3149, 'nm-game-server', TransportProtocol.tcp
+    nm_game_server = 3149, 'nm-game-server'
 
     #: - [TCP] NetMike Assessor Administrator
     #: - [UDP] NetMike Assessor Administrator
-    nm_asses_admin = 3150, 'nm-asses-admin', TransportProtocol.tcp
+    nm_asses_admin = 3150, 'nm-asses-admin'
 
     #: - [TCP] NetMike Assessor
     #: - [UDP] NetMike Assessor
-    nm_assessor = 3151, 'nm-assessor', TransportProtocol.tcp
+    nm_assessor = 3151, 'nm-assessor'
 
     #: - [TCP] FeiTian Port
     #: - [UDP] FeiTian Port
-    feitianrockey = 3152, 'feitianrockey', TransportProtocol.tcp
+    feitianrockey = 3152
 
     #: - [TCP] S8Cargo Client Port
     #: - [UDP] S8Cargo Client Port
-    s8_client_port = 3153, 's8-client-port', TransportProtocol.tcp
+    s8_client_port = 3153, 's8-client-port'
 
     #: - [TCP] ON RMI Registry
     #: - [UDP] ON RMI Registry
-    ccmrmi = 3154, 'ccmrmi', TransportProtocol.tcp
+    ccmrmi = 3154
 
     #: - [TCP] JpegMpeg Port
     #: - [UDP] JpegMpeg Port
-    jpegmpeg = 3155, 'jpegmpeg', TransportProtocol.tcp
+    jpegmpeg = 3155
 
     #: - [TCP] Indura Collector
     #: - [UDP] Indura Collector
-    indura = 3156, 'indura', TransportProtocol.tcp
+    indura = 3156
 
     #: - [TCP] LSA Communicator
     #: - [UDP] LSA Communicator
-    lsa_comm = 3157, 'lsa-comm', TransportProtocol.tcp
+    lsa_comm = 3157, 'lsa-comm'
 
     #: - [TCP] SmashTV Protocol
     #: - [UDP] SmashTV Protocol
-    stvp = 3158, 'stvp', TransportProtocol.tcp
+    stvp = 3158
 
     #: - [TCP] NavegaWeb Tarification
     #: - [UDP] NavegaWeb Tarification
-    navegaweb_port = 3159, 'navegaweb-port', TransportProtocol.tcp
+    navegaweb_port = 3159, 'navegaweb-port'
 
     #: - [TCP] TIP Application Server
     #: - [UDP] TIP Application Server
-    tip_app_server = 3160, 'tip-app-server', TransportProtocol.tcp
+    tip_app_server = 3160, 'tip-app-server'
 
     #: - [TCP] DOC1 License Manager
     #: - [UDP] DOC1 License Manager
-    doc1lm = 3161, 'doc1lm', TransportProtocol.tcp
+    doc1lm = 3161
 
     #: - [TCP] SFLM
     #: - [UDP] SFLM
-    sflm = 3162, 'sflm', TransportProtocol.tcp
+    sflm = 3162
 
     #: - [TCP] RES-SAP
     #: - [UDP] RES-SAP
-    res_sap = 3163, 'res-sap', TransportProtocol.tcp
+    res_sap = 3163, 'res-sap'
 
     #: - [TCP] IMPRS
     #: - [UDP] IMPRS
-    imprs = 3164, 'imprs', TransportProtocol.tcp
+    imprs = 3164
 
     #: - [TCP] Newgenpay Engine Service
     #: - [UDP] Newgenpay Engine Service
-    newgenpay = 3165, 'newgenpay', TransportProtocol.tcp
+    newgenpay = 3165
 
     #: - [TCP] Quest Spotlight Out-Of-Process Collector
     #: - [UDP] Quest Spotlight Out-Of-Process Collector
-    sossecollector = 3166, 'sossecollector', TransportProtocol.tcp
+    sossecollector = 3166
 
     #: - [TCP] Now Contact Public Server
     #: - [UDP] Now Contact Public Server
-    nowcontact = 3167, 'nowcontact', TransportProtocol.tcp
+    nowcontact = 3167
 
     #: - [TCP] Now Up-to-Date Public Server
     #: - [UDP] Now Up-to-Date Public Server
-    poweronnud = 3168, 'poweronnud', TransportProtocol.tcp
+    poweronnud = 3168
 
     #: - [TCP] SERVERVIEW-AS
     #: - [UDP] SERVERVIEW-AS
-    serverview_as = 3169, 'serverview-as', TransportProtocol.tcp
+    serverview_as = 3169, 'serverview-as'
 
     #: - [TCP] SERVERVIEW-ASN
     #: - [UDP] SERVERVIEW-ASN
-    serverview_asn = 3170, 'serverview-asn', TransportProtocol.tcp
+    serverview_asn = 3170, 'serverview-asn'
 
     #: - [TCP] SERVERVIEW-GF
     #: - [UDP] SERVERVIEW-GF
-    serverview_gf = 3171, 'serverview-gf', TransportProtocol.tcp
+    serverview_gf = 3171, 'serverview-gf'
 
     #: - [TCP] SERVERVIEW-RM
     #: - [UDP] SERVERVIEW-RM
-    serverview_rm = 3172, 'serverview-rm', TransportProtocol.tcp
+    serverview_rm = 3172, 'serverview-rm'
 
     #: - [TCP] SERVERVIEW-ICC
     #: - [UDP] SERVERVIEW-ICC
-    serverview_icc = 3173, 'serverview-icc', TransportProtocol.tcp
+    serverview_icc = 3173, 'serverview-icc'
 
     #: - [TCP] ARMI Server
     #: - [UDP] ARMI Server
-    armi_server = 3174, 'armi-server', TransportProtocol.tcp
+    armi_server = 3174, 'armi-server'
 
     #: - [TCP] T1_E1_Over_IP
     #: - [UDP] T1_E1_Over_IP
-    t1_e1_over_ip = 3175, 't1-e1-over-ip', TransportProtocol.tcp
+    t1_e1_over_ip = 3175, 't1-e1-over-ip'
 
     #: - [TCP] ARS Master
     #: - [UDP] ARS Master
-    ars_master = 3176, 'ars-master', TransportProtocol.tcp
+    ars_master = 3176, 'ars-master'
 
     #: - [TCP] Phonex Protocol
     #: - [UDP] Phonex Protocol
-    phonex_port = 3177, 'phonex-port', TransportProtocol.tcp
+    phonex_port = 3177, 'phonex-port'
 
     #: - [TCP] Radiance UltraEdge Port
     #: - [UDP] Radiance UltraEdge Port
-    radclientport = 3178, 'radclientport', TransportProtocol.tcp
+    radclientport = 3178
 
     #: - [TCP] H2GF W.2m Handover prot.
     #: - [UDP] H2GF W.2m Handover prot.
-    h2gf_w_2m = 3179, 'h2gf-w-2m', TransportProtocol.tcp
+    h2gf_w_2m = 3179, 'h2gf-w-2m'
 
     #: - [TCP] Millicent Broker Server
     #: - [UDP] Millicent Broker Server
-    mc_brk_srv = 3180, 'mc-brk-srv', TransportProtocol.tcp
+    mc_brk_srv = 3180, 'mc-brk-srv'
 
     #: - [TCP] BMC Patrol Agent
     #: - [UDP] BMC Patrol Agent
-    bmcpatrolagent = 3181, 'bmcpatrolagent', TransportProtocol.tcp
+    bmcpatrolagent = 3181
 
     #: - [TCP] BMC Patrol Rendezvous
     #: - [UDP] BMC Patrol Rendezvous
-    bmcpatrolrnvu = 3182, 'bmcpatrolrnvu', TransportProtocol.tcp
+    bmcpatrolrnvu = 3182
 
     #: - [TCP] COPS/TLS
     #: - [UDP] COPS/TLS
-    cops_tls = 3183, 'cops-tls', TransportProtocol.tcp
+    cops_tls = 3183, 'cops-tls'
 
     #: - [TCP] ApogeeX Port
     #: - [UDP] ApogeeX Port
-    apogeex_port = 3184, 'apogeex-port', TransportProtocol.tcp
+    apogeex_port = 3184, 'apogeex-port'
 
     #: - [TCP] SuSE Meta PPPD
     #: - [UDP] SuSE Meta PPPD
-    smpppd = 3185, 'smpppd', TransportProtocol.tcp
+    smpppd = 3185
 
     #: - [TCP] IIW Monitor User Port
     #: - [UDP] IIW Monitor User Port
-    iiw_port = 3186, 'iiw-port', TransportProtocol.tcp
+    iiw_port = 3186, 'iiw-port'
 
     #: - [TCP] Open Design Listen Port
     #: - [UDP] Open Design Listen Port
-    odi_port = 3187, 'odi-port', TransportProtocol.tcp
+    odi_port = 3187, 'odi-port'
 
     #: - [TCP] Broadcom Port
     #: - [UDP] Broadcom Port
-    brcm_comm_port = 3188, 'brcm-comm-port', TransportProtocol.tcp
+    brcm_comm_port = 3188, 'brcm-comm-port'
 
     #: - [TCP] Pinnacle Sys InfEx Port
     #: - [UDP] Pinnacle Sys InfEx Port
-    pcle_infex = 3189, 'pcle-infex', TransportProtocol.tcp
+    pcle_infex = 3189, 'pcle-infex'
 
     #: - [TCP] ConServR Proxy
     #: - [UDP] ConServR Proxy
-    csvr_proxy = 3190, 'csvr-proxy', TransportProtocol.tcp
+    csvr_proxy = 3190, 'csvr-proxy'
 
     #: - [TCP] ConServR SSL Proxy
     #: - [UDP] ConServR SSL Proxy
-    csvr_sslproxy = 3191, 'csvr-sslproxy', TransportProtocol.tcp
+    csvr_sslproxy = 3191, 'csvr-sslproxy'
 
     #: - [TCP] FireMon Revision Control
     #: - [UDP] FireMon Revision Control
-    firemonrcc = 3192, 'firemonrcc', TransportProtocol.tcp
+    firemonrcc = 3192
 
     #: - [TCP] SpanDataPort
     #: - [UDP] SpanDataPort
-    spandataport = 3193, 'spandataport', TransportProtocol.tcp
+    spandataport = 3193
 
     #: - [TCP] Rockstorm MAG protocol
     #: - [UDP] Rockstorm MAG protocol
-    magbind = 3194, 'magbind', TransportProtocol.tcp
+    magbind = 3194
 
     #: - [TCP] Network Control Unit
     #: - [UDP] Network Control Unit
-    ncu_1 = 3195, 'ncu-1', TransportProtocol.tcp
+    ncu_1 = 3195, 'ncu-1'
 
     #: - [TCP] Network Control Unit
     #: - [UDP] Network Control Unit
-    ncu_2 = 3196, 'ncu-2', TransportProtocol.tcp
+    ncu_2 = 3196, 'ncu-2'
 
     #: - [TCP] Embrace Device Protocol Server
     #: - [UDP] Embrace Device Protocol Server
-    embrace_dp_s = 3197, 'embrace-dp-s', TransportProtocol.tcp
+    embrace_dp_s = 3197, 'embrace-dp-s'
 
     #: - [TCP] Embrace Device Protocol Client
     #: - [UDP] Embrace Device Protocol Client
-    embrace_dp_c = 3198, 'embrace-dp-c', TransportProtocol.tcp
+    embrace_dp_c = 3198, 'embrace-dp-c'
 
     #: - [TCP] DMOD WorkSpace
     #: - [UDP] DMOD WorkSpace
-    dmod_workspace = 3199, 'dmod-workspace', TransportProtocol.tcp
+    dmod_workspace = 3199, 'dmod-workspace'
 
     #: - [TCP] Press-sense Tick Port
     #: - [UDP] Press-sense Tick Port
-    tick_port = 3200, 'tick-port', TransportProtocol.tcp
+    tick_port = 3200, 'tick-port'
 
     #: - [TCP] CPQ-TaskSmart
     #: - [UDP] CPQ-TaskSmart
-    cpq_tasksmart = 3201, 'cpq-tasksmart', TransportProtocol.tcp
+    cpq_tasksmart = 3201, 'cpq-tasksmart'
 
     #: - [TCP] IntraIntra
     #: - [UDP] IntraIntra
-    intraintra = 3202, 'intraintra', TransportProtocol.tcp
+    intraintra = 3202
 
     #: - [TCP] Network Watcher Monitor
     #: - [UDP] Network Watcher Monitor
-    netwatcher_mon = 3203, 'netwatcher-mon', TransportProtocol.tcp
+    netwatcher_mon = 3203, 'netwatcher-mon'
 
     #: - [TCP] Network Watcher DB Access
     #: - [UDP] Network Watcher DB Access
-    netwatcher_db = 3204, 'netwatcher-db', TransportProtocol.tcp
+    netwatcher_db = 3204, 'netwatcher-db'
 
     #: - [TCP] iSNS Server Port [:rfc:`4171`]
     #: - [UDP] iSNS Server Port [:rfc:`4171`]
-    isns = 3205, 'isns', TransportProtocol.tcp
+    isns = 3205
 
     #: - [TCP] IronMail POP Proxy
     #: - [UDP] IronMail POP Proxy
-    ironmail = 3206, 'ironmail', TransportProtocol.tcp
+    ironmail = 3206
 
     #: - [TCP] Veritas Authentication Port
     #: - [UDP] Veritas Authentication Port
-    vx_auth_port = 3207, 'vx-auth-port', TransportProtocol.tcp
+    vx_auth_port = 3207, 'vx-auth-port'
 
     #: - [TCP] PFU PR Callback
     #: - [UDP] PFU PR Callback
-    pfu_prcallback = 3208, 'pfu-prcallback', TransportProtocol.tcp
+    pfu_prcallback = 3208, 'pfu-prcallback'
 
     #: - [TCP] HP OpenView Network Path Engine Server
     #: - [UDP] HP OpenView Network Path Engine Server
-    netwkpathengine = 3209, 'netwkpathengine', TransportProtocol.tcp
+    netwkpathengine = 3209
 
     #: - [TCP] Flamenco Networks Proxy
     #: - [UDP] Flamenco Networks Proxy
-    flamenco_proxy = 3210, 'flamenco-proxy', TransportProtocol.tcp
+    flamenco_proxy = 3210, 'flamenco-proxy'
 
     #: - [TCP] Avocent Secure Management
     #: - [UDP] Avocent Secure Management
-    avsecuremgmt = 3211, 'avsecuremgmt', TransportProtocol.tcp
+    avsecuremgmt = 3211
 
     #: - [TCP] Survey Instrument
     #: - [UDP] Survey Instrument
-    surveyinst = 3212, 'surveyinst', TransportProtocol.tcp
+    surveyinst = 3212
 
     #: - [TCP] NEON 24X7 Mission Control
     #: - [UDP] NEON 24X7 Mission Control
-    neon24x7 = 3213, 'neon24x7', TransportProtocol.tcp
+    neon24x7 = 3213
 
     #: - [TCP] JMQ Daemon Port 1
     #: - [UDP] JMQ Daemon Port 1
-    jmq_daemon_1 = 3214, 'jmq-daemon-1', TransportProtocol.tcp
+    jmq_daemon_1 = 3214, 'jmq-daemon-1'
 
     #: - [TCP] JMQ Daemon Port 2
     #: - [UDP] JMQ Daemon Port 2
-    jmq_daemon_2 = 3215, 'jmq-daemon-2', TransportProtocol.tcp
+    jmq_daemon_2 = 3215, 'jmq-daemon-2'
 
     #: - [TCP] Ferrari electronic FOAM
     #: - [UDP] Ferrari electronic FOAM
-    ferrari_foam = 3216, 'ferrari-foam', TransportProtocol.tcp
+    ferrari_foam = 3216, 'ferrari-foam'
 
     #: - [TCP] Unified IP & Telecom Environment
     #: - [UDP] Unified IP & Telecom Environment
-    unite = 3217, 'unite', TransportProtocol.tcp
+    unite = 3217
 
     #: - [TCP] EMC SmartPackets
     #: - [UDP] EMC SmartPackets
-    smartpackets = 3218, 'smartpackets', TransportProtocol.tcp
+    smartpackets = 3218
 
     #: - [TCP] WMS Messenger
     #: - [UDP] WMS Messenger
-    wms_messenger = 3219, 'wms-messenger', TransportProtocol.tcp
+    wms_messenger = 3219, 'wms-messenger'
 
     #: - [TCP] XML NM over SSL
     #: - [UDP] XML NM over SSL
-    xnm_ssl = 3220, 'xnm-ssl', TransportProtocol.tcp
+    xnm_ssl = 3220, 'xnm-ssl'
 
     #: - [TCP] XML NM over TCP
     #: - [UDP] XML NM over TCP
-    xnm_clear_text = 3221, 'xnm-clear-text', TransportProtocol.tcp
+    xnm_clear_text = 3221, 'xnm-clear-text'
 
     #: - [TCP] Gateway Load Balancing Pr
     #: - [UDP] Gateway Load Balancing Pr
-    glbp = 3222, 'glbp', TransportProtocol.tcp
+    glbp = 3222
 
     #: - [TCP] DIGIVOTE (R) Vote-Server
     #: - [UDP] DIGIVOTE (R) Vote-Server
-    digivote = 3223, 'digivote', TransportProtocol.tcp
+    digivote = 3223
 
     #: - [TCP] AES Discovery Port
     #: - [UDP] AES Discovery Port
-    aes_discovery = 3224, 'aes-discovery', TransportProtocol.tcp
+    aes_discovery = 3224, 'aes-discovery'
 
     #: - [TCP] FCIP [:rfc:`3821`]
     #: - [UDP] FCIP [:rfc:`3821`]
-    fcip_port = 3225, 'fcip-port', TransportProtocol.tcp
+    fcip_port = 3225, 'fcip-port'
 
     #: - [TCP] ISI Industry Software IRP
     #: - [UDP] ISI Industry Software IRP
-    isi_irp = 3226, 'isi-irp', TransportProtocol.tcp
+    isi_irp = 3226, 'isi-irp'
 
     #: - [TCP] DiamondWave NMS Server
     #: - [UDP] DiamondWave NMS Server
-    dwnmshttp = 3227, 'dwnmshttp', TransportProtocol.tcp
+    dwnmshttp = 3227
 
     #: - [TCP] DiamondWave MSG Server
     #: - [UDP] DiamondWave MSG Server
-    dwmsgserver = 3228, 'dwmsgserver', TransportProtocol.tcp
+    dwmsgserver = 3228
 
     #: - [TCP] Global CD Port
     #: - [UDP] Global CD Port
-    global_cd_port = 3229, 'global-cd-port', TransportProtocol.tcp
+    global_cd_port = 3229, 'global-cd-port'
 
     #: - [TCP] Software Distributor Port
     #: - [UDP] Software Distributor Port
-    sftdst_port = 3230, 'sftdst-port', TransportProtocol.tcp
+    sftdst_port = 3230, 'sftdst-port'
 
     #: - [TCP] VidiGo communication (previous was: Delta Solutions Direct)
     #: - [UDP] VidiGo communication (previous was: Delta Solutions Direct)
-    vidigo = 3231, 'vidigo', TransportProtocol.tcp
+    vidigo = 3231
 
     #: - [TCP] MDT port [:rfc:`6513`]
     #: - [UDP] MDT port [:rfc:`6513`]
-    mdtp = 3232, 'mdtp', TransportProtocol.tcp
+    mdtp = 3232
 
     #: - [TCP] WhiskerControl main port
     #: - [UDP] WhiskerControl main port
-    whisker = 3233, 'whisker', TransportProtocol.tcp
+    whisker = 3233
 
     #: - [TCP] Alchemy Server
     #: - [UDP] Alchemy Server
-    alchemy = 3234, 'alchemy', TransportProtocol.tcp
+    alchemy = 3234
 
     #: - [TCP] MDAP port
     #: - [UDP] MDAP Port
-    mdap_port = 3235, 'mdap-port', TransportProtocol.tcp
+    mdap_port = 3235, 'mdap-port'
 
     #: - [TCP] appareNet Test Server
     #: - [UDP] appareNet Test Server
-    apparenet_ts = 3236, 'apparenet-ts', TransportProtocol.tcp
+    apparenet_ts = 3236, 'apparenet-ts'
 
     #: - [TCP] appareNet Test Packet Sequencer
     #: - [UDP] appareNet Test Packet Sequencer
-    apparenet_tps = 3237, 'apparenet-tps', TransportProtocol.tcp
+    apparenet_tps = 3237, 'apparenet-tps'
 
     #: - [TCP] appareNet Analysis Server
     #: - [UDP] appareNet Analysis Server
-    apparenet_as = 3238, 'apparenet-as', TransportProtocol.tcp
+    apparenet_as = 3238, 'apparenet-as'
 
     #: - [TCP] appareNet User Interface
     #: - [UDP] appareNet User Interface
-    apparenet_ui = 3239, 'apparenet-ui', TransportProtocol.tcp
+    apparenet_ui = 3239, 'apparenet-ui'
 
     #: - [TCP] Trio Motion Control Port
     #: - [UDP] Trio Motion Control Port
-    triomotion = 3240, 'triomotion', TransportProtocol.tcp
+    triomotion = 3240
 
     #: - [TCP] SysOrb Monitoring Server
     #: - [UDP] SysOrb Monitoring Server
-    sysorb = 3241, 'sysorb', TransportProtocol.tcp
+    sysorb = 3241
 
     #: - [TCP] Session Description ID
     #: - [UDP] Session Description ID
-    sdp_id_port = 3242, 'sdp-id-port', TransportProtocol.tcp
+    sdp_id_port = 3242, 'sdp-id-port'
 
     #: - [TCP] Timelot Port
     #: - [UDP] Timelot Port
-    timelot = 3243, 'timelot', TransportProtocol.tcp
+    timelot = 3243
 
     #: - [TCP] OneSAF
     #: - [UDP] OneSAF
-    onesaf = 3244, 'onesaf', TransportProtocol.tcp
+    onesaf = 3244
 
     #: - [TCP] VIEO Fabric Executive
     #: - [UDP] VIEO Fabric Executive
-    vieo_fe = 3245, 'vieo-fe', TransportProtocol.tcp
+    vieo_fe = 3245, 'vieo-fe'
 
     #: - [TCP] DVT SYSTEM PORT
     #: - [UDP] DVT SYSTEM PORT
-    dvt_system = 3246, 'dvt-system', TransportProtocol.tcp
+    dvt_system = 3246, 'dvt-system'
 
     #: - [TCP] DVT DATA LINK
     #: - [UDP] DVT DATA LINK
-    dvt_data = 3247, 'dvt-data', TransportProtocol.tcp
+    dvt_data = 3247, 'dvt-data'
 
     #: - [TCP] PROCOS LM
     #: - [UDP] PROCOS LM
-    procos_lm = 3248, 'procos-lm', TransportProtocol.tcp
+    procos_lm = 3248, 'procos-lm'
 
     #: - [TCP] State Sync Protocol
     #: - [UDP] State Sync Protocol
-    ssp = 3249, 'ssp', TransportProtocol.tcp
+    ssp = 3249
 
     #: - [TCP] HMS hicp port
     #: - [UDP] HMS hicp port
-    hicp = 3250, 'hicp', TransportProtocol.tcp
+    hicp = 3250
 
     #: - [TCP] Sys Scanner
     #: - [UDP] Sys Scanner
-    sysscanner = 3251, 'sysscanner', TransportProtocol.tcp
+    sysscanner = 3251
 
     #: - [TCP] DHE port
     #: - [UDP] DHE port
-    dhe = 3252, 'dhe', TransportProtocol.tcp
+    dhe = 3252
 
     #: - [TCP] PDA Data
     #: - [UDP] PDA Data
-    pda_data = 3253, 'pda-data', TransportProtocol.tcp
+    pda_data = 3253, 'pda-data'
 
     #: - [TCP] PDA System
     #: - [UDP] PDA System
-    pda_sys = 3254, 'pda-sys', TransportProtocol.tcp
+    pda_sys = 3254, 'pda-sys'
 
     #: - [TCP] Semaphore Connection Port
     #: - [UDP] Semaphore Connection Port
-    semaphore = 3255, 'semaphore', TransportProtocol.tcp
+    semaphore = 3255
 
     #: - [TCP] Compaq RPM Agent Port
     #: - [UDP] Compaq RPM Agent Port
-    cpqrpm_agent = 3256, 'cpqrpm-agent', TransportProtocol.tcp
+    cpqrpm_agent = 3256, 'cpqrpm-agent'
 
     #: - [TCP] Compaq RPM Server Port
     #: - [UDP] Compaq RPM Server Port
-    cpqrpm_server = 3257, 'cpqrpm-server', TransportProtocol.tcp
+    cpqrpm_server = 3257, 'cpqrpm-server'
 
     #: - [TCP] Ivecon Server Port
     #: - [UDP] Ivecon Server Port
-    ivecon_port = 3258, 'ivecon-port', TransportProtocol.tcp
+    ivecon_port = 3258, 'ivecon-port'
 
     #: - [TCP] Epson Network Common Devi
     #: - [UDP] Epson Network Common Devi
-    epncdp2 = 3259, 'epncdp2', TransportProtocol.tcp
+    epncdp2 = 3259
 
     #: - [TCP] iSCSI port [:rfc:`7143`]
     #: - [UDP] iSCSI port [:rfc:`7143`]
-    iscsi_target = 3260, 'iscsi-target', TransportProtocol.tcp
+    iscsi_target = 3260, 'iscsi-target'
 
     #: - [TCP] winShadow
     #: - [UDP] winShadow
-    winshadow = 3261, 'winshadow', TransportProtocol.tcp
+    winshadow = 3261
 
     #: - [TCP] NECP
     #: - [UDP] NECP
-    necp = 3262, 'necp', TransportProtocol.tcp
+    necp = 3262
 
     #: - [TCP] E-Color Enterprise Imager
     #: - [UDP] E-Color Enterprise Imager
-    ecolor_imager = 3263, 'ecolor-imager', TransportProtocol.tcp
+    ecolor_imager = 3263, 'ecolor-imager'
 
     #: - [TCP] cc:mail/lotus
     #: - [UDP] cc:mail/lotus
-    ccmail = 3264, 'ccmail', TransportProtocol.tcp
+    ccmail = 3264
 
     #: - [TCP] Altav Tunnel
     #: - [UDP] Altav Tunnel
-    altav_tunnel = 3265, 'altav-tunnel', TransportProtocol.tcp
+    altav_tunnel = 3265, 'altav-tunnel'
 
     #: - [TCP] NS CFG Server
     #: - [UDP] NS CFG Server
-    ns_cfg_server = 3266, 'ns-cfg-server', TransportProtocol.tcp
+    ns_cfg_server = 3266, 'ns-cfg-server'
 
     #: - [TCP] IBM Dial Out
     #: - [UDP] IBM Dial Out
-    ibm_dial_out = 3267, 'ibm-dial-out', TransportProtocol.tcp
+    ibm_dial_out = 3267, 'ibm-dial-out'
 
     #: - [TCP] Microsoft Global Catalog
     #: - [UDP] Microsoft Global Catalog
-    msft_gc = 3268, 'msft-gc', TransportProtocol.tcp
+    msft_gc = 3268, 'msft-gc'
 
     #: - [TCP] Microsoft Global Catalog with LDAP/SSL
     #: - [UDP] Microsoft Global Catalog with LDAP/SSL
-    msft_gc_ssl = 3269, 'msft-gc-ssl', TransportProtocol.tcp
+    msft_gc_ssl = 3269, 'msft-gc-ssl'
 
     #: - [TCP] Verismart
     #: - [UDP] Verismart
-    verismart = 3270, 'verismart', TransportProtocol.tcp
+    verismart = 3270
 
     #: - [TCP] CSoft Prev Port
     #: - [UDP] CSoft Prev Port
-    csoft_prev = 3271, 'csoft-prev', TransportProtocol.tcp
+    csoft_prev = 3271, 'csoft-prev'
 
     #: - [TCP] Fujitsu User Manager
     #: - [UDP] Fujitsu User Manager
-    user_manager = 3272, 'user-manager', TransportProtocol.tcp
+    user_manager = 3272, 'user-manager'
 
     #: - [TCP] Simple Extensible Multiplexed Protocol
     #: - [UDP] Simple Extensible Multiplexed Protocol
-    sxmp = 3273, 'sxmp', TransportProtocol.tcp
+    sxmp = 3273
 
     #: - [TCP] Ordinox Server
     #: - [UDP] Ordinox Server
-    ordinox_server = 3274, 'ordinox-server', TransportProtocol.tcp
+    ordinox_server = 3274, 'ordinox-server'
 
     #: - [TCP] SAMD
     #: - [UDP] SAMD
-    samd = 3275, 'samd', TransportProtocol.tcp
+    samd = 3275
 
     #: - [TCP] Maxim ASICs
     #: - [UDP] Maxim ASICs
-    maxim_asics = 3276, 'maxim-asics', TransportProtocol.tcp
+    maxim_asics = 3276, 'maxim-asics'
 
     #: - [TCP] AWG Proxy
     #: - [UDP] AWG Proxy
-    awg_proxy = 3277, 'awg-proxy', TransportProtocol.tcp
+    awg_proxy = 3277, 'awg-proxy'
 
     #: - [TCP] LKCM Server
     #: - [UDP] LKCM Server
-    lkcmserver = 3278, 'lkcmserver', TransportProtocol.tcp
+    lkcmserver = 3278
 
     #: - [TCP] VS Server
     #: - [UDP] VS Server
-    vs_server = 3280, 'vs-server', TransportProtocol.tcp
+    vs_server = 3280, 'vs-server'
 
     #: - [TCP] SYSOPT
     #: - [UDP] SYSOPT
-    sysopt = 3281, 'sysopt', TransportProtocol.tcp
+    sysopt = 3281
 
     #: - [TCP] Datusorb
     #: - [UDP] Datusorb
-    datusorb = 3282, 'datusorb', TransportProtocol.tcp
+    datusorb = 3282
 
     #: - [TCP] Net Assistant
     #: - [UDP] Net Assistant
-    net_assistant = 3283, 'net-assistant', TransportProtocol.tcp
+    net_assistant = 3283, 'net-assistant'
 
     #: - [TCP] 4Talk
     #: - [UDP] 4Talk
-    TCP_4talk = 3284, '4talk', TransportProtocol.tcp
+    TCP_4talk = 3284, '4talk'
 
     #: - [TCP] Plato
     #: - [UDP] Plato
-    plato = 3285, 'plato', TransportProtocol.tcp
+    plato = 3285
 
     #: - [TCP] E-Net
     #: - [UDP] E-Net
-    e_net = 3286, 'e-net', TransportProtocol.tcp
+    e_net = 3286, 'e-net'
 
     #: - [TCP] DIRECTVDATA
     #: - [UDP] DIRECTVDATA
-    directvdata = 3287, 'directvdata', TransportProtocol.tcp
+    directvdata = 3287
 
     #: - [TCP] COPS
     #: - [UDP] COPS
-    cops = 3288, 'cops', TransportProtocol.tcp
+    cops = 3288
 
     #: - [TCP] ENPC
     #: - [UDP] ENPC
-    enpc = 3289, 'enpc', TransportProtocol.tcp
+    enpc = 3289
 
     #: - [TCP] CAPS LOGISTICS TOOLKIT - LM
     #: - [UDP] CAPS LOGISTICS TOOLKIT - LM
-    caps_lm = 3290, 'caps-lm', TransportProtocol.tcp
+    caps_lm = 3290, 'caps-lm'
 
     #: - [TCP] S A Holditch & Associates - LM
     #: - [UDP] S A Holditch & Associates - LM
-    sah_lm = 3291, 'sah-lm', TransportProtocol.tcp
+    sah_lm = 3291, 'sah-lm'
 
     #: - [TCP] Cart O Rama
     #: - [UDP] Cart O Rama
-    cart_o_rama = 3292, 'cart-o-rama', TransportProtocol.tcp
+    cart_o_rama = 3292, 'cart-o-rama'
 
     #: - [TCP] fg-fps
     #: - [UDP] fg-fps
-    fg_fps = 3293, 'fg-fps', TransportProtocol.tcp
+    fg_fps = 3293, 'fg-fps'
 
     #: - [TCP] fg-gip
     #: - [UDP] fg-gip
-    fg_gip = 3294, 'fg-gip', TransportProtocol.tcp
+    fg_gip = 3294, 'fg-gip'
 
     #: - [TCP] Dynamic IP Lookup
     #: - [UDP] Dynamic IP Lookup
-    dyniplookup = 3295, 'dyniplookup', TransportProtocol.tcp
+    dyniplookup = 3295
 
     #: - [TCP] Rib License Manager
     #: - [UDP] Rib License Manager
-    rib_slm = 3296, 'rib-slm', TransportProtocol.tcp
+    rib_slm = 3296, 'rib-slm'
 
     #: - [TCP] Cytel License Manager
     #: - [UDP] Cytel License Manager
-    cytel_lm = 3297, 'cytel-lm', TransportProtocol.tcp
+    cytel_lm = 3297, 'cytel-lm'
 
     #: - [TCP] DeskView
     #: - [UDP] DeskView
-    deskview = 3298, 'deskview', TransportProtocol.tcp
+    deskview = 3298
 
     #: - [TCP] pdrncs
     #: - [UDP] pdrncs
-    pdrncs = 3299, 'pdrncs', TransportProtocol.tcp
+    pdrncs = 3299
 
     #: [TCP] Ceph monitor
-    ceph = 3300, 'ceph', TransportProtocol.tcp
+    ceph = 3300
 
     #: - [TCP] Tarantool in-memory computing platform
     #: - [UDP] Tarantool in-memory computing platform
-    tarantool = 3301, 'tarantool', TransportProtocol.tcp
+    tarantool = 3301
 
     #: - [TCP] MCS Fastmail
     #: - [UDP] MCS Fastmail
-    mcs_fastmail = 3302, 'mcs-fastmail', TransportProtocol.tcp
+    mcs_fastmail = 3302, 'mcs-fastmail'
 
     #: - [TCP] OP Session Client
     #: - [UDP] OP Session Client
-    opsession_clnt = 3303, 'opsession-clnt', TransportProtocol.tcp
+    opsession_clnt = 3303, 'opsession-clnt'
 
     #: - [TCP] OP Session Server
     #: - [UDP] OP Session Server
-    opsession_srvr = 3304, 'opsession-srvr', TransportProtocol.tcp
+    opsession_srvr = 3304, 'opsession-srvr'
 
     #: - [TCP] ODETTE-FTP [:rfc:`5024`]
     #: - [UDP] ODETTE-FTP [:rfc:`5024`]
-    odette_ftp = 3305, 'odette-ftp', TransportProtocol.tcp
+    odette_ftp = 3305, 'odette-ftp'
 
     #: - [TCP] MySQL
     #: - [UDP] MySQL
-    mysql = 3306, 'mysql', TransportProtocol.tcp
+    mysql = 3306
 
     #: - [TCP] OP Session Proxy
     #: - [UDP] OP Session Proxy
-    opsession_prxy = 3307, 'opsession-prxy', TransportProtocol.tcp
+    opsession_prxy = 3307, 'opsession-prxy'
 
     #: - [TCP] TNS Server
     #: - [UDP] TNS Server
-    tns_server = 3308, 'tns-server', TransportProtocol.tcp
+    tns_server = 3308, 'tns-server'
 
     #: - [TCP] TNS ADV
     #: - [UDP] TNS ADV
-    tns_adv = 3309, 'tns-adv', TransportProtocol.tcp
+    tns_adv = 3309, 'tns-adv'
 
     #: - [TCP] Dyna Access
     #: - [UDP] Dyna Access
-    dyna_access = 3310, 'dyna-access', TransportProtocol.tcp
+    dyna_access = 3310, 'dyna-access'
 
     #: - [TCP] MCNS Tel Ret
     #: - [UDP] MCNS Tel Ret
-    mcns_tel_ret = 3311, 'mcns-tel-ret', TransportProtocol.tcp
+    mcns_tel_ret = 3311, 'mcns-tel-ret'
 
     #: - [TCP] Application Management Server
     #: - [UDP] Application Management Server
-    appman_server = 3312, 'appman-server', TransportProtocol.tcp
+    appman_server = 3312, 'appman-server'
 
     #: - [TCP] Unify Object Broker
     #: - [UDP] Unify Object Broker
-    uorb = 3313, 'uorb', TransportProtocol.tcp
+    uorb = 3313
 
     #: - [TCP] Unify Object Host
     #: - [UDP] Unify Object Host
-    uohost = 3314, 'uohost', TransportProtocol.tcp
+    uohost = 3314
 
     #: - [TCP] CDID
     #: - [UDP] CDID
-    cdid = 3315, 'cdid', TransportProtocol.tcp
+    cdid = 3315
 
     #: - [TCP] AICC/CMI
     #: - [UDP] AICC/CMI
-    aicc_cmi = 3316, 'aicc-cmi', TransportProtocol.tcp
+    aicc_cmi = 3316, 'aicc-cmi'
 
     #: - [TCP] VSAI PORT
     #: - [UDP] VSAI PORT
-    vsaiport = 3317, 'vsaiport', TransportProtocol.tcp
+    vsaiport = 3317
 
     #: - [TCP] Swith to Swith Routing Information Protocol
     #: - [UDP] Swith to Swith Routing Information Protocol
-    ssrip = 3318, 'ssrip', TransportProtocol.tcp
+    ssrip = 3318
 
     #: - [TCP] SDT License Manager
     #: - [UDP] SDT License Manager
-    sdt_lmd = 3319, 'sdt-lmd', TransportProtocol.tcp
+    sdt_lmd = 3319, 'sdt-lmd'
 
     #: - [TCP] Office Link 2000
     #: - [UDP] Office Link 2000
-    officelink2000 = 3320, 'officelink2000', TransportProtocol.tcp
+    officelink2000 = 3320
 
     #: - [TCP] VNSSTR
     #: - [UDP] VNSSTR
-    vnsstr = 3321, 'vnsstr', TransportProtocol.tcp
+    vnsstr = 3321
 
     #: - [TCP] SFTU
     #: - [UDP] SFTU
-    sftu = 3326, 'sftu', TransportProtocol.tcp
+    sftu = 3326
 
     #: - [TCP] BBARS
     #: - [UDP] BBARS
-    bbars = 3327, 'bbars', TransportProtocol.tcp
+    bbars = 3327
 
     #: - [TCP] Eaglepoint License Manager
     #: - [UDP] Eaglepoint License Manager
-    egptlm = 3328, 'egptlm', TransportProtocol.tcp
+    egptlm = 3328
 
     #: - [TCP] HP Device Disc
     #: - [UDP] HP Device Disc
-    hp_device_disc = 3329, 'hp-device-disc', TransportProtocol.tcp
+    hp_device_disc = 3329, 'hp-device-disc'
 
     #: - [TCP] MCS Calypso ICF
     #: - [UDP] MCS Calypso ICF
-    mcs_calypsoicf = 3330, 'mcs-calypsoicf', TransportProtocol.tcp
+    mcs_calypsoicf = 3330, 'mcs-calypsoicf'
 
     #: - [TCP] MCS Messaging
     #: - [UDP] MCS Messaging
-    mcs_messaging = 3331, 'mcs-messaging', TransportProtocol.tcp
+    mcs_messaging = 3331, 'mcs-messaging'
 
     #: - [TCP] MCS Mail Server
     #: - [UDP] MCS Mail Server
-    mcs_mailsvr = 3332, 'mcs-mailsvr', TransportProtocol.tcp
+    mcs_mailsvr = 3332, 'mcs-mailsvr'
 
     #: - [TCP] DEC Notes
     #: - [UDP] DEC Notes
-    dec_notes = 3333, 'dec-notes', TransportProtocol.tcp
+    dec_notes = 3333, 'dec-notes'
 
     #: - [TCP] Direct TV Webcasting
     #: - [UDP] Direct TV Webcasting
-    directv_web = 3334, 'directv-web', TransportProtocol.tcp
+    directv_web = 3334, 'directv-web'
 
     #: - [TCP] Direct TV Software Updates
     #: - [UDP] Direct TV Software Updates
-    directv_soft = 3335, 'directv-soft', TransportProtocol.tcp
+    directv_soft = 3335, 'directv-soft'
 
     #: - [TCP] Direct TV Tickers
     #: - [UDP] Direct TV Tickers
-    directv_tick = 3336, 'directv-tick', TransportProtocol.tcp
+    directv_tick = 3336, 'directv-tick'
 
     #: - [TCP] Direct TV Data Catalog
     #: - [UDP] Direct TV Data Catalog
-    directv_catlg = 3337, 'directv-catlg', TransportProtocol.tcp
+    directv_catlg = 3337, 'directv-catlg'
 
     #: - [TCP] OMF data b
     #: - [UDP] OMF data b
-    anet_b = 3338, 'anet-b', TransportProtocol.tcp
+    anet_b = 3338, 'anet-b'
 
     #: - [TCP] OMF data l
     #: - [UDP] OMF data l
-    anet_l = 3339, 'anet-l', TransportProtocol.tcp
+    anet_l = 3339, 'anet-l'
 
     #: - [TCP] OMF data m
     #: - [UDP] OMF data m
-    anet_m = 3340, 'anet-m', TransportProtocol.tcp
+    anet_m = 3340, 'anet-m'
 
     #: - [TCP] OMF data h
     #: - [UDP] OMF data h
-    anet_h = 3341, 'anet-h', TransportProtocol.tcp
+    anet_h = 3341, 'anet-h'
 
     #: - [TCP] WebTIE
     #: - [UDP] WebTIE
-    webtie = 3342, 'webtie', TransportProtocol.tcp
+    webtie = 3342
 
     #: - [TCP] MS Cluster Net
     #: - [UDP] MS Cluster Net
-    ms_cluster_net = 3343, 'ms-cluster-net', TransportProtocol.tcp
+    ms_cluster_net = 3343, 'ms-cluster-net'
 
     #: - [TCP] BNT Manager
     #: - [UDP] BNT Manager
-    bnt_manager = 3344, 'bnt-manager', TransportProtocol.tcp
+    bnt_manager = 3344, 'bnt-manager'
 
     #: - [TCP] Influence
     #: - [UDP] Influence
-    influence = 3345, 'influence', TransportProtocol.tcp
+    influence = 3345
 
     #: - [TCP] Trnsprnt Proxy
     #: - [UDP] Trnsprnt Proxy
-    trnsprntproxy = 3346, 'trnsprntproxy', TransportProtocol.tcp
+    trnsprntproxy = 3346
 
     #: - [TCP] Phoenix RPC
     #: - [UDP] Phoenix RPC
-    phoenix_rpc = 3347, 'phoenix-rpc', TransportProtocol.tcp
+    phoenix_rpc = 3347, 'phoenix-rpc'
 
     #: - [TCP] Pangolin Laser
     #: - [UDP] Pangolin Laser
-    pangolin_laser = 3348, 'pangolin-laser', TransportProtocol.tcp
+    pangolin_laser = 3348, 'pangolin-laser'
 
     #: - [TCP] Chevin Services
     #: - [UDP] Chevin Services
-    chevinservices = 3349, 'chevinservices', TransportProtocol.tcp
+    chevinservices = 3349
 
     #: - [TCP] FINDVIATV
     #: - [UDP] FINDVIATV
-    findviatv = 3350, 'findviatv', TransportProtocol.tcp
+    findviatv = 3350
 
     #: - [TCP] Btrieve port
     #: - [UDP] Btrieve port
-    btrieve = 3351, 'btrieve', TransportProtocol.tcp
+    btrieve = 3351
 
     #: - [TCP] Scalable SQL
     #: - [UDP] Scalable SQL
-    ssql = 3352, 'ssql', TransportProtocol.tcp
+    ssql = 3352
 
     #: - [TCP] FATPIPE
     #: - [UDP] FATPIPE
-    fatpipe = 3353, 'fatpipe', TransportProtocol.tcp
+    fatpipe = 3353
 
     #: - [TCP] SUITJD
     #: - [UDP] SUITJD
-    suitjd = 3354, 'suitjd', TransportProtocol.tcp
+    suitjd = 3354
 
     #: - [TCP] Ordinox Dbase
     #: - [UDP] Ordinox Dbase
-    ordinox_dbase = 3355, 'ordinox-dbase', TransportProtocol.tcp
+    ordinox_dbase = 3355, 'ordinox-dbase'
 
     #: - [TCP] UPNOTIFYPS
     #: - [UDP] UPNOTIFYPS
-    upnotifyps = 3356, 'upnotifyps', TransportProtocol.tcp
+    upnotifyps = 3356
 
     #: - [TCP] Adtech Test IP
     #: - [UDP] Adtech Test IP
-    adtech_test = 3357, 'adtech-test', TransportProtocol.tcp
+    adtech_test = 3357, 'adtech-test'
 
     #: - [TCP] Mp Sys Rmsvr
     #: - [UDP] Mp Sys Rmsvr
-    mpsysrmsvr = 3358, 'mpsysrmsvr', TransportProtocol.tcp
+    mpsysrmsvr = 3358
 
     #: - [TCP] WG NetForce
     #: - [UDP] WG NetForce
-    wg_netforce = 3359, 'wg-netforce', TransportProtocol.tcp
+    wg_netforce = 3359, 'wg-netforce'
 
     #: - [TCP] KV Server
     #: - [UDP] KV Server
-    kv_server = 3360, 'kv-server', TransportProtocol.tcp
+    kv_server = 3360, 'kv-server'
 
     #: - [TCP] KV Agent
     #: - [UDP] KV Agent
-    kv_agent = 3361, 'kv-agent', TransportProtocol.tcp
+    kv_agent = 3361, 'kv-agent'
 
     #: - [TCP] DJ ILM
     #: - [UDP] DJ ILM
-    dj_ilm = 3362, 'dj-ilm', TransportProtocol.tcp
+    dj_ilm = 3362, 'dj-ilm'
 
     #: - [TCP] NATI Vi Server
     #: - [UDP] NATI Vi Server
-    nati_vi_server = 3363, 'nati-vi-server', TransportProtocol.tcp
+    nati_vi_server = 3363, 'nati-vi-server'
 
     #: - [TCP] CreativeServer
     #: - [UDP] CreativeServer
-    creativeserver_453 = 453, 'creativeserver', TransportProtocol.tcp
+    creativeserver_453 = 453, 'creativeserver'
 
     #: - [TCP] Creative Server
     #: - [UDP] Creative Server
-    creativeserver_3364 = 3364, 'creativeserver', TransportProtocol.tcp
+    creativeserver_3364 = 3364, 'creativeserver'
 
     #: - [TCP] ContentServer
     #: - [UDP] ContentServer
-    contentserver_454 = 454, 'contentserver', TransportProtocol.tcp
+    contentserver_454 = 454, 'contentserver'
 
     #: - [TCP] Content Server
     #: - [UDP] Content Server
-    contentserver_3365 = 3365, 'contentserver', TransportProtocol.tcp
+    contentserver_3365 = 3365, 'contentserver'
 
     #: - [TCP] CreativePartnr
     #: - [UDP] CreativePartnr
-    creativepartnr_455 = 455, 'creativepartnr', TransportProtocol.tcp
+    creativepartnr_455 = 455, 'creativepartnr'
 
     #: - [TCP] Creative Partner
     #: - [UDP] Creative Partner
-    creativepartnr_3366 = 3366, 'creativepartnr', TransportProtocol.tcp
+    creativepartnr_3366 = 3366, 'creativepartnr'
 
     #: - [TCP] TIP 2
     #: - [UDP] TIP 2
-    tip2 = 3372, 'tip2', TransportProtocol.tcp
+    tip2 = 3372
 
     #: - [TCP] Lavenir License Manager
     #: - [UDP] Lavenir License Manager
-    lavenir_lm = 3373, 'lavenir-lm', TransportProtocol.tcp
+    lavenir_lm = 3373, 'lavenir-lm'
 
     #: - [TCP] Cluster Disc
     #: - [UDP] Cluster Disc
-    cluster_disc = 3374, 'cluster-disc', TransportProtocol.tcp
+    cluster_disc = 3374, 'cluster-disc'
 
     #: - [TCP] VSNM Agent
     #: - [UDP] VSNM Agent
-    vsnm_agent = 3375, 'vsnm-agent', TransportProtocol.tcp
+    vsnm_agent = 3375, 'vsnm-agent'
 
     #: - [TCP] CD Broker
     #: - [UDP] CD Broker
-    cdbroker = 3376, 'cdbroker', TransportProtocol.tcp
+    cdbroker = 3376
 
     #: - [TCP] Cogsys Network License Manager
     #: - [UDP] Cogsys Network License Manager
-    cogsys_lm = 3377, 'cogsys-lm', TransportProtocol.tcp
+    cogsys_lm = 3377, 'cogsys-lm'
 
     #: - [TCP] WSICOPY
     #: - [UDP] WSICOPY
-    wsicopy = 3378, 'wsicopy', TransportProtocol.tcp
+    wsicopy = 3378
 
     #: - [TCP] SOCORFS
     #: - [UDP] SOCORFS
-    socorfs = 3379, 'socorfs', TransportProtocol.tcp
+    socorfs = 3379
 
     #: - [TCP] SNS Channels
     #: - [UDP] SNS Channels
-    sns_channels = 3380, 'sns-channels', TransportProtocol.tcp
+    sns_channels = 3380, 'sns-channels'
 
     #: - [TCP] Geneous
     #: - [UDP] Geneous
-    geneous = 3381, 'geneous', TransportProtocol.tcp
+    geneous = 3381
 
     #: - [TCP] Fujitsu Network Enhanced Antitheft function
     #: - [UDP] Fujitsu Network Enhanced Antitheft function
-    fujitsu_neat = 3382, 'fujitsu-neat', TransportProtocol.tcp
+    fujitsu_neat = 3382, 'fujitsu-neat'
 
     #: - [TCP] Enterprise Software Products License Manager
     #: - [UDP] Enterprise Software Products License Manager
-    esp_lm = 3383, 'esp-lm', TransportProtocol.tcp
+    esp_lm = 3383, 'esp-lm'
 
     #: - [TCP] Cluster Management Services
     #: - [UDP] Hardware Management
-    hp_clic = 3384, 'hp-clic', TransportProtocol.tcp
+    hp_clic = 3384, 'hp-clic'
 
     #: - [TCP] qnxnetman
     #: - [UDP] qnxnetman
-    qnxnetman = 3385, 'qnxnetman', TransportProtocol.tcp
+    qnxnetman = 3385
 
     #: [TCP] GPRS Data
-    gprs_data = 3386, 'gprs-data', TransportProtocol.tcp
+    gprs_data = 3386, 'gprs-data'
 
     #: - [TCP] Back Room Net
     #: - [UDP] Back Room Net
-    backroomnet = 3387, 'backroomnet', TransportProtocol.tcp
+    backroomnet = 3387
 
     #: - [TCP] CB Server
     #: - [UDP] CB Server
-    cbserver = 3388, 'cbserver', TransportProtocol.tcp
+    cbserver = 3388
 
     #: - [TCP] MS WBT Server
     #: - [UDP] MS WBT Server
-    ms_wbt_server = 3389, 'ms-wbt-server', TransportProtocol.tcp
+    ms_wbt_server = 3389, 'ms-wbt-server'
 
     #: - [TCP] Distributed Service Coordinator
     #: - [UDP] Distributed Service Coordinator
-    dsc = 3390, 'dsc', TransportProtocol.tcp
+    dsc = 3390
 
     #: - [TCP] SAVANT
     #: - [UDP] SAVANT
-    savant = 3391, 'savant', TransportProtocol.tcp
+    savant = 3391
 
     #: - [TCP] EFI License Management
     #: - [UDP] EFI License Management
-    efi_lm = 3392, 'efi-lm', TransportProtocol.tcp
+    efi_lm = 3392, 'efi-lm'
 
     #: - [TCP] D2K Tapestry Client to Server
     #: - [UDP] D2K Tapestry Client to Server
-    d2k_tapestry1 = 3393, 'd2k-tapestry1', TransportProtocol.tcp
+    d2k_tapestry1 = 3393, 'd2k-tapestry1'
 
     #: - [TCP] D2K Tapestry Server to Server
     #: - [UDP] D2K Tapestry Server to Server
-    d2k_tapestry2 = 3394, 'd2k-tapestry2', TransportProtocol.tcp
+    d2k_tapestry2 = 3394, 'd2k-tapestry2'
 
     #: - [TCP] Dyna License Manager (Elam)
     #: - [UDP] Dyna License Manager (Elam)
-    dyna_lm = 3395, 'dyna-lm', TransportProtocol.tcp
+    dyna_lm = 3395, 'dyna-lm'
 
     #: - [TCP] Printer Agent IANA assigned this well-formed service name as a
     #:   replacement for "printer_agent".
@@ -13392,1901 +13392,1901 @@ class TCP(AppType):
     #: - [UDP] Printer Agent IANA assigned this well-formed service name as a
     #:   replacement for "printer_agent".
     #: - [UDP] Printer Agent
-    printer_agent = 3396, 'printer-agent', TransportProtocol.tcp
+    printer_agent = 3396, 'printer-agent'
 
     #: - [TCP] Cloanto License Manager
     #: - [UDP] Cloanto License Manager
-    cloanto_lm = 3397, 'cloanto-lm', TransportProtocol.tcp
+    cloanto_lm = 3397, 'cloanto-lm'
 
     #: - [TCP] Mercantile
     #: - [UDP] Mercantile
-    mercantile = 3398, 'mercantile', TransportProtocol.tcp
+    mercantile = 3398
 
     #: - [TCP] CSMS
     #: - [UDP] CSMS
-    csms = 3399, 'csms', TransportProtocol.tcp
+    csms = 3399
 
     #: - [TCP] CSMS2
     #: - [UDP] CSMS2
-    csms2 = 3400, 'csms2', TransportProtocol.tcp
+    csms2 = 3400
 
     #: - [TCP] filecast
     #: - [UDP] filecast
-    filecast = 3401, 'filecast', TransportProtocol.tcp
+    filecast = 3401
 
     #: - [TCP] FXa Engine Network Port
     #: - [UDP] FXa Engine Network Port
-    fxaengine_net = 3402, 'fxaengine-net', TransportProtocol.tcp
+    fxaengine_net = 3402, 'fxaengine-net'
 
     #: - [TCP] Nokia Announcement ch 1
     #: - [UDP] Nokia Announcement ch 1
-    nokia_ann_ch1 = 3405, 'nokia-ann-ch1', TransportProtocol.tcp
+    nokia_ann_ch1 = 3405, 'nokia-ann-ch1'
 
     #: - [TCP] Nokia Announcement ch 2
     #: - [UDP] Nokia Announcement ch 2
-    nokia_ann_ch2 = 3406, 'nokia-ann-ch2', TransportProtocol.tcp
+    nokia_ann_ch2 = 3406, 'nokia-ann-ch2'
 
     #: - [TCP] LDAP admin server port
     #: - [UDP] LDAP admin server port
-    ldap_admin = 3407, 'ldap-admin', TransportProtocol.tcp
+    ldap_admin = 3407, 'ldap-admin'
 
     #: - [TCP] BES Api Port
     #: - [UDP] BES Api Port
-    besapi = 3408, 'besapi', TransportProtocol.tcp
+    besapi = 3408
 
     #: - [TCP] NetworkLens Event Port
     #: - [UDP] NetworkLens Event Port
-    networklens = 3409, 'networklens', TransportProtocol.tcp
+    networklens = 3409
 
     #: - [TCP] NetworkLens SSL Event
     #: - [UDP] NetworkLens SSL Event
-    networklenss = 3410, 'networklenss', TransportProtocol.tcp
+    networklenss = 3410
 
     #: - [TCP] BioLink Authenteon server
     #: - [UDP] BioLink Authenteon server
-    biolink_auth = 3411, 'biolink-auth', TransportProtocol.tcp
+    biolink_auth = 3411, 'biolink-auth'
 
     #: - [TCP] xmlBlaster
     #: - [UDP] xmlBlaster
-    xmlblaster = 3412, 'xmlblaster', TransportProtocol.tcp
+    xmlblaster = 3412
 
     #: - [TCP] SpecView Networking
     #: - [UDP] SpecView Networking
-    svnet = 3413, 'svnet', TransportProtocol.tcp
+    svnet = 3413
 
     #: - [TCP] BroadCloud WIP Port
     #: - [UDP] BroadCloud WIP Port
-    wip_port = 3414, 'wip-port', TransportProtocol.tcp
+    wip_port = 3414, 'wip-port'
 
     #: - [TCP] BCI Name Service
     #: - [UDP] BCI Name Service
-    bcinameservice = 3415, 'bcinameservice', TransportProtocol.tcp
+    bcinameservice = 3415
 
     #: - [TCP] AirMobile IS Command Port
     #: - [UDP] AirMobile IS Command Port
-    commandport = 3416, 'commandport', TransportProtocol.tcp
+    commandport = 3416
 
     #: - [TCP] ConServR file translation
     #: - [UDP] ConServR file translation
-    csvr = 3417, 'csvr', TransportProtocol.tcp
+    csvr = 3417
 
     #: - [TCP] Remote nmap
     #: - [UDP] Remote nmap
-    rnmap = 3418, 'rnmap', TransportProtocol.tcp
+    rnmap = 3418
 
     #: - [TCP] Isogon SoftAudit
     #: - [UDP] ISogon SoftAudit
-    softaudit = 3419, 'softaudit', TransportProtocol.tcp
+    softaudit = 3419
 
     #: - [TCP] iFCP User Port [:rfc:`4172`]
     #: - [UDP] iFCP User Port [:rfc:`4172`]
-    ifcp_port = 3420, 'ifcp-port', TransportProtocol.tcp
+    ifcp_port = 3420, 'ifcp-port'
 
     #: - [TCP] Bull Apprise portmapper
     #: - [UDP] Bull Apprise portmapper
-    bmap = 3421, 'bmap', TransportProtocol.tcp
+    bmap = 3421
 
     #: - [TCP] Remote USB System Port
     #: - [UDP] Remote USB System Port
-    rusb_sys_port = 3422, 'rusb-sys-port', TransportProtocol.tcp
+    rusb_sys_port = 3422, 'rusb-sys-port'
 
     #: - [TCP] xTrade Reliable Messaging
     #: - [UDP] xTrade Reliable Messaging
-    xtrm = 3423, 'xtrm', TransportProtocol.tcp
+    xtrm = 3423
 
     #: - [TCP] xTrade over TLS/SSL
     #: - [UDP] xTrade over TLS/SSL
-    xtrms = 3424, 'xtrms', TransportProtocol.tcp
+    xtrms = 3424
 
     #: - [TCP] AGPS Access Port
     #: - [UDP] AGPS Access Port
-    agps_port = 3425, 'agps-port', TransportProtocol.tcp
+    agps_port = 3425, 'agps-port'
 
     #: - [TCP] Arkivio Storage Protocol
     #: - [UDP] Arkivio Storage Protocol
-    arkivio = 3426, 'arkivio', TransportProtocol.tcp
+    arkivio = 3426
 
     #: - [TCP] WebSphere SNMP
     #: - [UDP] WebSphere SNMP
-    websphere_snmp = 3427, 'websphere-snmp', TransportProtocol.tcp
+    websphere_snmp = 3427, 'websphere-snmp'
 
     #: - [TCP] 2Wire CSS
     #: - [UDP] 2Wire CSS
-    twcss = 3428, 'twcss', TransportProtocol.tcp
+    twcss = 3428
 
     #: - [TCP] GCSP user port
     #: - [UDP] GCSP user port
-    gcsp = 3429, 'gcsp', TransportProtocol.tcp
+    gcsp = 3429
 
     #: - [TCP] Scott Studios Dispatch
     #: - [UDP] Scott Studios Dispatch
-    ssdispatch = 3430, 'ssdispatch', TransportProtocol.tcp
+    ssdispatch = 3430
 
     #: - [TCP] Active License Server Port
     #: - [UDP] Active License Server Port
-    ndl_als = 3431, 'ndl-als', TransportProtocol.tcp
+    ndl_als = 3431, 'ndl-als'
 
     #: - [TCP] Secure Device Protocol
     #: - [UDP] Secure Device Protocol
-    osdcp = 3432, 'osdcp', TransportProtocol.tcp
+    osdcp = 3432
 
     #: - [TCP] OPNET Service Management Platform
     #: - [UDP] OPNET Service Management Platform
-    opnet_smp = 3433, 'opnet-smp', TransportProtocol.tcp
+    opnet_smp = 3433, 'opnet-smp'
 
     #: - [TCP] OpenCM Server
     #: - [UDP] OpenCM Server
-    opencm = 3434, 'opencm', TransportProtocol.tcp
+    opencm = 3434
 
     #: - [TCP] Pacom Security User Port
     #: - [UDP] Pacom Security User Port
-    pacom = 3435, 'pacom', TransportProtocol.tcp
+    pacom = 3435
 
     #: - [TCP] GuardControl Exchange Protocol
     #: - [UDP] GuardControl Exchange Protocol
-    gc_config = 3436, 'gc-config', TransportProtocol.tcp
+    gc_config = 3436, 'gc-config'
 
     #: - [TCP] Autocue Directory Service
     #: - [UDP] Autocue Directory Service
-    autocueds = 3437, 'autocueds', TransportProtocol.tcp
+    autocueds = 3437
 
     #: - [TCP] Spiralcraft Admin
     #: - [UDP] Spiralcraft Admin
-    spiral_admin = 3438, 'spiral-admin', TransportProtocol.tcp
+    spiral_admin = 3438, 'spiral-admin'
 
     #: - [TCP] HRI Interface Port
     #: - [UDP] HRI Interface Port
-    hri_port = 3439, 'hri-port', TransportProtocol.tcp
+    hri_port = 3439, 'hri-port'
 
     #: - [TCP] Net Steward Mgmt Console
     #: - [UDP] Net Steward Mgmt Console
-    ans_console = 3440, 'ans-console', TransportProtocol.tcp
+    ans_console = 3440, 'ans-console'
 
     #: - [TCP] OC Connect Client
     #: - [UDP] OC Connect Client
-    connect_client = 3441, 'connect-client', TransportProtocol.tcp
+    connect_client = 3441, 'connect-client'
 
     #: - [TCP] OC Connect Server
     #: - [UDP] OC Connect Server
-    connect_server = 3442, 'connect-server', TransportProtocol.tcp
+    connect_server = 3442, 'connect-server'
 
     #: - [TCP] OpenView Network Node Manager WEB Server
     #: - [UDP] OpenView Network Node Manager WEB Server
-    ov_nnm_websrv = 3443, 'ov-nnm-websrv', TransportProtocol.tcp
+    ov_nnm_websrv = 3443, 'ov-nnm-websrv'
 
     #: - [TCP] Denali Server
     #: - [UDP] Denali Server
-    denali_server = 3444, 'denali-server', TransportProtocol.tcp
+    denali_server = 3444, 'denali-server'
 
     #: - [TCP] Media Object Network Protocol
     #: - [UDP] Media Object Network Protocol
-    monp = 3445, 'monp', TransportProtocol.tcp
+    monp = 3445
 
     #: - [TCP] 3Com FAX RPC port
     #: - [UDP] 3Com FAX RPC port
-    TCP_3comfaxrpc = 3446, '3comfaxrpc', TransportProtocol.tcp
+    TCP_3comfaxrpc = 3446, '3comfaxrpc'
 
     #: - [TCP] DirectNet IM System
     #: - [UDP] DirectNet IM System
-    directnet = 3447, 'directnet', TransportProtocol.tcp
+    directnet = 3447
 
     #: - [TCP] Discovery and Net Config
     #: - [UDP] Discovery and Net Config
-    dnc_port = 3448, 'dnc-port', TransportProtocol.tcp
+    dnc_port = 3448, 'dnc-port'
 
     #: - [TCP] HotU Chat
     #: - [UDP] HotU Chat
-    hotu_chat = 3449, 'hotu-chat', TransportProtocol.tcp
+    hotu_chat = 3449, 'hotu-chat'
 
     #: - [TCP] CAStorProxy
     #: - [UDP] CAStorProxy
-    castorproxy = 3450, 'castorproxy', TransportProtocol.tcp
+    castorproxy = 3450
 
     #: - [TCP] ASAM Services
     #: - [UDP] ASAM Services
-    asam = 3451, 'asam', TransportProtocol.tcp
+    asam = 3451
 
     #: - [TCP] SABP-Signalling Protocol
     #: - [UDP] SABP-Signalling Protocol
-    sabp_signal = 3452, 'sabp-signal', TransportProtocol.tcp
+    sabp_signal = 3452, 'sabp-signal'
 
     #: - [TCP] PSC Update
     #: - [UDP] PSC Update
-    pscupd = 3453, 'pscupd', TransportProtocol.tcp
+    pscupd = 3453
 
     #: - [TCP] Apple Remote Access Protocol
     #: - [UDP] Apple Remote Access Protocol
-    mira = 3454, 'mira', TransportProtocol.tcp
+    mira = 3454
 
     #: - [TCP] RSVP Port
     #: - [UDP] RSVP Port
-    prsvp = 3455, 'prsvp', TransportProtocol.tcp
+    prsvp = 3455
 
     #: - [TCP] VAT default data
     #: - [UDP] VAT default data
-    vat = 3456, 'vat', TransportProtocol.tcp
+    vat = 3456
 
     #: - [TCP] VAT default control
     #: - [UDP] VAT default control
-    vat_control = 3457, 'vat-control', TransportProtocol.tcp
+    vat_control = 3457, 'vat-control'
 
     #: - [TCP] D3WinOSFI
     #: - [UDP] D3WinOSFI
-    d3winosfi = 3458, 'd3winosfi', TransportProtocol.tcp
+    d3winosfi = 3458
 
     #: - [TCP] TIP Integral
     #: - [UDP] TIP Integral
-    integral = 3459, 'integral', TransportProtocol.tcp
+    integral = 3459
 
     #: - [TCP] EDM Manger
     #: - [UDP] EDM Manger
-    edm_manager = 3460, 'edm-manager', TransportProtocol.tcp
+    edm_manager = 3460, 'edm-manager'
 
     #: - [TCP] EDM Stager
     #: - [UDP] EDM Stager
-    edm_stager = 3461, 'edm-stager', TransportProtocol.tcp
+    edm_stager = 3461, 'edm-stager'
 
     #: - [TCP] EDM STD Notify
     #: - [UDP] EDM STD Notify
-    edm_std_notify = 3462, 'edm-std-notify', TransportProtocol.tcp
+    edm_std_notify = 3462, 'edm-std-notify'
 
     #: - [TCP] EDM ADM Notify
     #: - [UDP] EDM ADM Notify
-    edm_adm_notify = 3463, 'edm-adm-notify', TransportProtocol.tcp
+    edm_adm_notify = 3463, 'edm-adm-notify'
 
     #: - [TCP] EDM MGR Sync
     #: - [UDP] EDM MGR Sync
-    edm_mgr_sync = 3464, 'edm-mgr-sync', TransportProtocol.tcp
+    edm_mgr_sync = 3464, 'edm-mgr-sync'
 
     #: - [TCP] EDM MGR Cntrl
     #: - [UDP] EDM MGR Cntrl
-    edm_mgr_cntrl = 3465, 'edm-mgr-cntrl', TransportProtocol.tcp
+    edm_mgr_cntrl = 3465, 'edm-mgr-cntrl'
 
     #: - [TCP] WORKFLOW
     #: - [UDP] WORKFLOW
-    workflow = 3466, 'workflow', TransportProtocol.tcp
+    workflow = 3466
 
     #: - [TCP] RCST
     #: - [UDP] RCST
-    rcst = 3467, 'rcst', TransportProtocol.tcp
+    rcst = 3467
 
     #: - [TCP] TTCM Remote Controll
     #: - [UDP] TTCM Remote Controll
-    ttcmremotectrl = 3468, 'ttcmremotectrl', TransportProtocol.tcp
+    ttcmremotectrl = 3468
 
     #: - [TCP] Pluribus
     #: - [UDP] Pluribus
-    pluribus = 3469, 'pluribus', TransportProtocol.tcp
+    pluribus = 3469
 
     #: - [TCP] jt400
     #: - [UDP] jt400
-    jt400 = 3470, 'jt400', TransportProtocol.tcp
+    jt400 = 3470
 
     #: - [TCP] jt400-ssl
     #: - [UDP] jt400-ssl
-    jt400_ssl = 3471, 'jt400-ssl', TransportProtocol.tcp
+    jt400_ssl = 3471, 'jt400-ssl'
 
     #: - [TCP] JAUGS N-G Remotec 1
     #: - [UDP] JAUGS N-G Remotec 1
-    jaugsremotec_1 = 3472, 'jaugsremotec-1', TransportProtocol.tcp
+    jaugsremotec_1 = 3472, 'jaugsremotec-1'
 
     #: - [TCP] JAUGS N-G Remotec 2
     #: - [UDP] JAUGS N-G Remotec 2
-    jaugsremotec_2 = 3473, 'jaugsremotec-2', TransportProtocol.tcp
+    jaugsremotec_2 = 3473, 'jaugsremotec-2'
 
     #: - [TCP] TSP Automation
     #: - [UDP] TSP Automation
-    ttntspauto = 3474, 'ttntspauto', TransportProtocol.tcp
+    ttntspauto = 3474
 
     #: - [TCP] Genisar Comm Port
     #: - [UDP] Genisar Comm Port
-    genisar_port = 3475, 'genisar-port', TransportProtocol.tcp
+    genisar_port = 3475, 'genisar-port'
 
     #: - [TCP] NVIDIA Mgmt Protocol
     #: - [UDP] NVIDIA Mgmt Protocol
-    nppmp = 3476, 'nppmp', TransportProtocol.tcp
+    nppmp = 3476
 
     #: - [TCP] eComm link port
     #: - [UDP] eComm link port
-    ecomm = 3477, 'ecomm', TransportProtocol.tcp
+    ecomm = 3477
 
     #: - [TCP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]
     #: - [UDP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]
-    stun = 3478, 'stun', TransportProtocol.tcp
+    stun = 3478
 
     #: - [TCP] TURN over TCP [:rfc:`8656`]
     #: - [UDP] TURN over UDP [:rfc:`8656`]
-    turn = 3478, 'turn', TransportProtocol.tcp
+    turn = 3478
 
     #: - [TCP] STUN Behavior Discovery over TCP [:rfc:`5780`]
     #: - [UDP] STUN Behavior Discovery over UDP [:rfc:`5780`]
-    stun_behavior = 3478, 'stun-behavior', TransportProtocol.tcp
+    stun_behavior = 3478, 'stun-behavior'
 
     #: - [TCP] 2Wire RPC
     #: - [UDP] 2Wire RPC
-    twrpc = 3479, 'twrpc', TransportProtocol.tcp
+    twrpc = 3479
 
     #: - [TCP] Secure Virtual Workspace
     #: - [UDP] Secure Virtual Workspace
-    plethora = 3480, 'plethora', TransportProtocol.tcp
+    plethora = 3480
 
     #: - [TCP] CleanerLive remote ctrl
     #: - [UDP] CleanerLive remote ctrl
-    cleanerliverc = 3481, 'cleanerliverc', TransportProtocol.tcp
+    cleanerliverc = 3481
 
     #: - [TCP] Vulture Monitoring System
     #: - [UDP] Vulture Monitoring System
-    vulture = 3482, 'vulture', TransportProtocol.tcp
+    vulture = 3482
 
     #: - [TCP] Slim Devices Protocol
     #: - [UDP] Slim Devices Protocol
-    slim_devices = 3483, 'slim-devices', TransportProtocol.tcp
+    slim_devices = 3483, 'slim-devices'
 
     #: - [TCP] GBS SnapTalk Protocol
     #: - [UDP] GBS SnapTalk Protocol
-    gbs_stp = 3484, 'gbs-stp', TransportProtocol.tcp
+    gbs_stp = 3484, 'gbs-stp'
 
     #: - [TCP] CelaTalk
     #: - [UDP] CelaTalk
-    celatalk = 3485, 'celatalk', TransportProtocol.tcp
+    celatalk = 3485
 
     #: - [TCP] IFSF Heartbeat Port
     #: - [UDP] IFSF Heartbeat Port
-    ifsf_hb_port = 3486, 'ifsf-hb-port', TransportProtocol.tcp
+    ifsf_hb_port = 3486, 'ifsf-hb-port'
 
     #: [TCP] LISA TCP Transfer Channel
-    ltctcp = 3487, 'ltctcp', TransportProtocol.tcp
+    ltctcp = 3487
 
     #: - [TCP] FS Remote Host Server
     #: - [UDP] FS Remote Host Server
-    fs_rh_srv = 3488, 'fs-rh-srv', TransportProtocol.tcp
+    fs_rh_srv = 3488, 'fs-rh-srv'
 
     #: - [TCP] DTP/DIA
     #: - [UDP] DTP/DIA
-    dtp_dia = 3489, 'dtp-dia', TransportProtocol.tcp
+    dtp_dia = 3489, 'dtp-dia'
 
     #: - [TCP] Colubris Management Port
     #: - [UDP] Colubris Management Port
-    colubris = 3490, 'colubris', TransportProtocol.tcp
+    colubris = 3490
 
     #: - [TCP] SWR Port
     #: - [UDP] SWR Port
-    swr_port = 3491, 'swr-port', TransportProtocol.tcp
+    swr_port = 3491, 'swr-port'
 
     #: - [TCP] TVDUM Tray Port
     #: - [UDP] TVDUM Tray Port
-    tvdumtray_port = 3492, 'tvdumtray-port', TransportProtocol.tcp
+    tvdumtray_port = 3492, 'tvdumtray-port'
 
     #: - [TCP] Network UPS Tools [:rfc:`9271`]
     #: - [UDP] Network UPS Tools
-    nut = 3493, 'nut', TransportProtocol.tcp
+    nut = 3493
 
     #: - [TCP] IBM 3494
     #: - [UDP] IBM 3494
-    ibm3494 = 3494, 'ibm3494', TransportProtocol.tcp
+    ibm3494 = 3494
 
     #: - [TCP] securitylayer over tcp
     #: - [UDP] securitylayer over tcp
-    seclayer_tcp = 3495, 'seclayer-tcp', TransportProtocol.tcp
+    seclayer_tcp = 3495, 'seclayer-tcp'
 
     #: - [TCP] securitylayer over tls
     #: - [UDP] securitylayer over tls
-    seclayer_tls = 3496, 'seclayer-tls', TransportProtocol.tcp
+    seclayer_tls = 3496, 'seclayer-tls'
 
     #: - [TCP] ipEther232Port
     #: - [UDP] ipEther232Port
-    ipether232port = 3497, 'ipether232port', TransportProtocol.tcp
+    ipether232port = 3497
 
     #: - [TCP] DASHPAS user port
     #: - [UDP] DASHPAS user port
-    dashpas_port = 3498, 'dashpas-port', TransportProtocol.tcp
+    dashpas_port = 3498, 'dashpas-port'
 
     #: - [TCP] SccIP Media
     #: - [UDP] SccIP Media
-    sccip_media = 3499, 'sccip-media', TransportProtocol.tcp
+    sccip_media = 3499, 'sccip-media'
 
     #: - [TCP] RTMP Port
     #: - [UDP] RTMP Port
-    rtmp_port = 3500, 'rtmp-port', TransportProtocol.tcp
+    rtmp_port = 3500, 'rtmp-port'
 
     #: - [TCP] iSoft-P2P
     #: - [UDP] iSoft-P2P
-    isoft_p2p = 3501, 'isoft-p2p', TransportProtocol.tcp
+    isoft_p2p = 3501, 'isoft-p2p'
 
     #: - [TCP] Avocent Install Discovery
     #: - [UDP] Avocent Install Discovery
-    avinstalldisc = 3502, 'avinstalldisc', TransportProtocol.tcp
+    avinstalldisc = 3502
 
     #: - [TCP] MPLS LSP-echo Port [:rfc:`8029`]
     #: - [UDP] MPLS LSP-echo Port [:rfc:`8029`]
-    lsp_ping = 3503, 'lsp-ping', TransportProtocol.tcp
+    lsp_ping = 3503, 'lsp-ping'
 
     #: - [TCP] IronStorm game server
     #: - [UDP] IronStorm game server
-    ironstorm = 3504, 'ironstorm', TransportProtocol.tcp
+    ironstorm = 3504
 
     #: - [TCP] CCM communications port
     #: - [UDP] CCM communications port
-    ccmcomm = 3505, 'ccmcomm', TransportProtocol.tcp
+    ccmcomm = 3505
 
     #: - [TCP] APC 3506
     #: - [UDP] APC 3506
-    apc_3506 = 3506, 'apc-3506', TransportProtocol.tcp
+    apc_3506 = 3506, 'apc-3506'
 
     #: - [TCP] Nesh Broker Port
     #: - [UDP] Nesh Broker Port
-    nesh_broker = 3507, 'nesh-broker', TransportProtocol.tcp
+    nesh_broker = 3507, 'nesh-broker'
 
     #: - [TCP] Interaction Web
     #: - [UDP] Interaction Web
-    interactionweb = 3508, 'interactionweb', TransportProtocol.tcp
+    interactionweb = 3508
 
     #: - [TCP] Virtual Token SSL Port
     #: - [UDP] Virtual Token SSL Port
-    vt_ssl = 3509, 'vt-ssl', TransportProtocol.tcp
+    vt_ssl = 3509, 'vt-ssl'
 
     #: - [TCP] XSS Port
     #: - [UDP] XSS Port
-    xss_port = 3510, 'xss-port', TransportProtocol.tcp
+    xss_port = 3510, 'xss-port'
 
     #: - [TCP] WebMail/2
     #: - [UDP] WebMail/2
-    webmail_2 = 3511, 'webmail-2', TransportProtocol.tcp
+    webmail_2 = 3511, 'webmail-2'
 
     #: - [TCP] Aztec Distribution Port
     #: - [UDP] Aztec Distribution Port
-    aztec = 3512, 'aztec', TransportProtocol.tcp
+    aztec = 3512
 
     #: - [TCP] Adaptec Remote Protocol
     #: - [UDP] Adaptec Remote Protocol
-    arcpd = 3513, 'arcpd', TransportProtocol.tcp
+    arcpd = 3513
 
     #: - [TCP] MUST Peer to Peer
     #: - [UDP] MUST Peer to Peer
-    must_p2p = 3514, 'must-p2p', TransportProtocol.tcp
+    must_p2p = 3514, 'must-p2p'
 
     #: - [TCP] MUST Backplane
     #: - [UDP] MUST Backplane
-    must_backplane = 3515, 'must-backplane', TransportProtocol.tcp
+    must_backplane = 3515, 'must-backplane'
 
     #: - [TCP] Smartcard Port
     #: - [UDP] Smartcard Port
-    smartcard_port = 3516, 'smartcard-port', TransportProtocol.tcp
+    smartcard_port = 3516, 'smartcard-port'
 
     #: - [TCP] IEEE 802.11 WLANs WG IAPP
     #: - [UDP] IEEE 802.11 WLANs WG IAPP
-    TCP_802_11_iapp = 3517, '802-11-iapp', TransportProtocol.tcp
+    TCP_802_11_iapp = 3517, '802-11-iapp'
 
     #: - [TCP] Artifact Message Server
     #: - [UDP] Artifact Message Server
-    artifact_msg = 3518, 'artifact-msg', TransportProtocol.tcp
+    artifact_msg = 3518, 'artifact-msg'
 
     #: [TCP] Netvion Messenger Port
-    nvmsgd = 3519, 'nvmsgd', TransportProtocol.tcp
+    nvmsgd = 3519
 
     #: - [TCP] Netvion Galileo Log Port
     #: - [UDP] Netvion Galileo Log Port
-    galileolog = 3520, 'galileolog', TransportProtocol.tcp
+    galileolog = 3520
 
     #: - [TCP] Telequip Labs MC3SS
     #: - [UDP] Telequip Labs MC3SS
-    mc3ss = 3521, 'mc3ss', TransportProtocol.tcp
+    mc3ss = 3521
 
     #: - [TCP] DO over NSSocketPort
     #: - [UDP] DO over NSSocketPort
-    nssocketport = 3522, 'nssocketport', TransportProtocol.tcp
+    nssocketport = 3522
 
     #: - [TCP] Odeum Serverlink
     #: - [UDP] Odeum Serverlink
-    odeumservlink = 3523, 'odeumservlink', TransportProtocol.tcp
+    odeumservlink = 3523
 
     #: - [TCP] ECM Server port
     #: - [UDP] ECM Server port
-    ecmport = 3524, 'ecmport', TransportProtocol.tcp
+    ecmport = 3524
 
     #: - [TCP] EIS Server port
     #: - [UDP] EIS Server port
-    eisport = 3525, 'eisport', TransportProtocol.tcp
+    eisport = 3525
 
     #: - [TCP] starQuiz Port
     #: - [UDP] starQuiz Port
-    starquiz_port = 3526, 'starquiz-port', TransportProtocol.tcp
+    starquiz_port = 3526, 'starquiz-port'
 
     #: - [TCP] VERITAS Backup Exec Server
     #: - [UDP] VERITAS Backup Exec Server
-    beserver_msg_q = 3527, 'beserver-msg-q', TransportProtocol.tcp
+    beserver_msg_q = 3527, 'beserver-msg-q'
 
     #: - [TCP] JBoss IIOP
     #: - [UDP] JBoss IIOP
-    jboss_iiop = 3528, 'jboss-iiop', TransportProtocol.tcp
+    jboss_iiop = 3528, 'jboss-iiop'
 
     #: - [TCP] JBoss IIOP/SSL
     #: - [UDP] JBoss IIOP/SSL
-    jboss_iiop_ssl = 3529, 'jboss-iiop-ssl', TransportProtocol.tcp
+    jboss_iiop_ssl = 3529, 'jboss-iiop-ssl'
 
     #: - [TCP] Grid Friendly
     #: - [UDP] Grid Friendly
-    gf = 3530, 'gf', TransportProtocol.tcp
+    gf = 3530
 
     #: - [TCP] Joltid
     #: - [UDP] Joltid
-    joltid = 3531, 'joltid', TransportProtocol.tcp
+    joltid = 3531
 
     #: - [TCP] Raven Remote Management Control
     #: - [UDP] Raven Remote Management Control
-    raven_rmp = 3532, 'raven-rmp', TransportProtocol.tcp
+    raven_rmp = 3532, 'raven-rmp'
 
     #: - [TCP] Raven Remote Management Data
     #: - [UDP] Raven Remote Management Data
-    raven_rdp = 3533, 'raven-rdp', TransportProtocol.tcp
+    raven_rdp = 3533, 'raven-rdp'
 
     #: - [TCP] URL Daemon Port
     #: - [UDP] URL Daemon Port
-    urld_port = 3534, 'urld-port', TransportProtocol.tcp
+    urld_port = 3534, 'urld-port'
 
     #: - [TCP] MS-LA
     #: - [UDP] MS-LA
-    ms_la = 3535, 'ms-la', TransportProtocol.tcp
+    ms_la = 3535, 'ms-la'
 
     #: - [TCP] SNAC
     #: - [UDP] SNAC
-    snac = 3536, 'snac', TransportProtocol.tcp
+    snac = 3536
 
     #: - [TCP] Remote NI-VISA port
     #: - [UDP] Remote NI-VISA port
-    ni_visa_remote = 3537, 'ni-visa-remote', TransportProtocol.tcp
+    ni_visa_remote = 3537, 'ni-visa-remote'
 
     #: - [TCP] IBM Directory Server
     #: - [UDP] IBM Directory Server
-    ibm_diradm = 3538, 'ibm-diradm', TransportProtocol.tcp
+    ibm_diradm = 3538, 'ibm-diradm'
 
     #: - [TCP] IBM Directory Server SSL
     #: - [UDP] IBM Directory Server SSL
-    ibm_diradm_ssl = 3539, 'ibm-diradm-ssl', TransportProtocol.tcp
+    ibm_diradm_ssl = 3539, 'ibm-diradm-ssl'
 
     #: - [TCP] PNRP User Port
     #: - [UDP] PNRP User Port
-    pnrp_port = 3540, 'pnrp-port', TransportProtocol.tcp
+    pnrp_port = 3540, 'pnrp-port'
 
     #: - [TCP] VoiSpeed Port
     #: - [UDP] VoiSpeed Port
-    voispeed_port = 3541, 'voispeed-port', TransportProtocol.tcp
+    voispeed_port = 3541, 'voispeed-port'
 
     #: - [TCP] HA cluster monitor
     #: - [UDP] HA cluster monitor
-    hacl_monitor = 3542, 'hacl-monitor', TransportProtocol.tcp
+    hacl_monitor = 3542, 'hacl-monitor'
 
     #: - [TCP] qftest Lookup Port
     #: - [UDP] qftest Lookup Port
-    qftest_lookup = 3543, 'qftest-lookup', TransportProtocol.tcp
+    qftest_lookup = 3543, 'qftest-lookup'
 
     #: - [TCP] Teredo Port [:rfc:`4380`]
     #: - [UDP] Teredo Port [:rfc:`4380`]
-    teredo = 3544, 'teredo', TransportProtocol.tcp
+    teredo = 3544
 
     #: - [TCP] CAMAC equipment
     #: - [UDP] CAMAC equipment
-    camac = 3545, 'camac', TransportProtocol.tcp
+    camac = 3545
 
     #: - [TCP] Symantec SIM
     #: - [UDP] Symantec SIM
-    symantec_sim = 3547, 'symantec-sim', TransportProtocol.tcp
+    symantec_sim = 3547, 'symantec-sim'
 
     #: - [TCP] Interworld
     #: - [UDP] Interworld
-    interworld = 3548, 'interworld', TransportProtocol.tcp
+    interworld = 3548
 
     #: - [TCP] Tellumat MDR NMS
     #: - [UDP] Tellumat MDR NMS
-    tellumat_nms = 3549, 'tellumat-nms', TransportProtocol.tcp
+    tellumat_nms = 3549, 'tellumat-nms'
 
     #: - [TCP] Secure SMPP
     #: - [UDP] Secure SMPP
-    ssmpp = 3550, 'ssmpp', TransportProtocol.tcp
+    ssmpp = 3550
 
     #: - [TCP] Apcupsd Information Port
     #: - [UDP] Apcupsd Information Port
-    apcupsd = 3551, 'apcupsd', TransportProtocol.tcp
+    apcupsd = 3551
 
     #: - [TCP] TeamAgenda Server Port
     #: - [UDP] TeamAgenda Server Port
-    taserver = 3552, 'taserver', TransportProtocol.tcp
+    taserver = 3552
 
     #: - [TCP] Red Box Recorder ADP
     #: - [UDP] Red Box Recorder ADP
-    rbr_discovery = 3553, 'rbr-discovery', TransportProtocol.tcp
+    rbr_discovery = 3553, 'rbr-discovery'
 
     #: - [TCP] Quest Notification Server
     #: - [UDP] Quest Notification Server
-    questnotify = 3554, 'questnotify', TransportProtocol.tcp
+    questnotify = 3554
 
     #: - [TCP] Vipul's Razor
     #: - [UDP] Vipul's Razor
-    razor = 3555, 'razor', TransportProtocol.tcp
+    razor = 3555
 
     #: - [TCP] Sky Transport Protocol
     #: - [UDP] Sky Transport Protocol
-    sky_transport = 3556, 'sky-transport', TransportProtocol.tcp
+    sky_transport = 3556, 'sky-transport'
 
     #: - [TCP] PersonalOS Comm Port
     #: - [UDP] PersonalOS Comm Port
-    personalos_001 = 3557, 'personalos-001', TransportProtocol.tcp
+    personalos_001 = 3557, 'personalos-001'
 
     #: - [TCP] MCP user port
     #: - [UDP] MCP user port
-    mcp_port = 3558, 'mcp-port', TransportProtocol.tcp
+    mcp_port = 3558, 'mcp-port'
 
     #: - [TCP] CCTV control port
     #: - [UDP] CCTV control port
-    cctv_port = 3559, 'cctv-port', TransportProtocol.tcp
+    cctv_port = 3559, 'cctv-port'
 
     #: - [TCP] INIServe port
     #: - [UDP] INIServe port
-    iniserve_port = 3560, 'iniserve-port', TransportProtocol.tcp
+    iniserve_port = 3560, 'iniserve-port'
 
     #: - [TCP] BMC-OneKey
     #: - [UDP] BMC-OneKey
-    bmc_onekey = 3561, 'bmc-onekey', TransportProtocol.tcp
+    bmc_onekey = 3561, 'bmc-onekey'
 
     #: - [TCP] SDBProxy
     #: - [UDP] SDBProxy
-    sdbproxy = 3562, 'sdbproxy', TransportProtocol.tcp
+    sdbproxy = 3562
 
     #: - [TCP] Watcom Debug
     #: - [UDP] Watcom Debug
-    watcomdebug = 3563, 'watcomdebug', TransportProtocol.tcp
+    watcomdebug = 3563
 
     #: - [TCP] Electromed SIM port
     #: - [UDP] Electromed SIM port
-    esimport = 3564, 'esimport', TransportProtocol.tcp
+    esimport = 3564
 
     #: - [TCP] M2PA [:rfc:`4165`]
     #: - [SCTP] M2PA [:rfc:`4165`]
-    m2pa = 3565, 'm2pa', TransportProtocol.tcp
+    m2pa = 3565
 
     #: [TCP] Quest Data Hub
-    quest_data_hub = 3566, 'quest-data-hub', TransportProtocol.tcp
+    quest_data_hub = 3566, 'quest-data-hub'
 
     #: - [TCP] DOF Protocol Stack
     #: - [UDP] DOF Protocol Stack
-    dof_eps = 3567, 'dof-eps', TransportProtocol.tcp
+    dof_eps = 3567, 'dof-eps'
 
     #: - [TCP] DOF Secure Tunnel
     #: - [UDP] DOF Secure Tunnel
-    dof_tunnel_sec = 3568, 'dof-tunnel-sec', TransportProtocol.tcp
+    dof_tunnel_sec = 3568, 'dof-tunnel-sec'
 
     #: - [TCP] Meinberg Control Service
     #: - [UDP] Meinberg Control Service
-    mbg_ctrl = 3569, 'mbg-ctrl', TransportProtocol.tcp
+    mbg_ctrl = 3569, 'mbg-ctrl'
 
     #: - [TCP] MCC Web Server Port
     #: - [UDP] MCC Web Server Port
-    mccwebsvr_port = 3570, 'mccwebsvr-port', TransportProtocol.tcp
+    mccwebsvr_port = 3570, 'mccwebsvr-port'
 
     #: - [TCP] MegaRAID Server Port
     #: - [UDP] MegaRAID Server Port
-    megardsvr_port = 3571, 'megardsvr-port', TransportProtocol.tcp
+    megardsvr_port = 3571, 'megardsvr-port'
 
     #: - [TCP] Registration Server Port
     #: - [UDP] Registration Server Port
-    megaregsvrport = 3572, 'megaregsvrport', TransportProtocol.tcp
+    megaregsvrport = 3572
 
     #: - [TCP] Advantage Group UPS Suite
     #: - [UDP] Advantage Group UPS Suite
-    tag_ups_1 = 3573, 'tag-ups-1', TransportProtocol.tcp
+    tag_ups_1 = 3573, 'tag-ups-1'
 
     #: [TCP] DMAF Server
-    dmaf_server = 3574, 'dmaf-server', TransportProtocol.tcp
+    dmaf_server = 3574, 'dmaf-server'
 
     #: - [TCP] Coalsere CCM Port
     #: - [UDP] Coalsere CCM Port
-    ccm_port = 3575, 'ccm-port', TransportProtocol.tcp
+    ccm_port = 3575, 'ccm-port'
 
     #: - [TCP] Coalsere CMC Port
     #: - [UDP] Coalsere CMC Port
-    cmc_port = 3576, 'cmc-port', TransportProtocol.tcp
+    cmc_port = 3576, 'cmc-port'
 
     #: - [TCP] Configuration Port
     #: - [UDP] Configuration Port
-    config_port = 3577, 'config-port', TransportProtocol.tcp
+    config_port = 3577, 'config-port'
 
     #: - [TCP] Data Port
     #: - [UDP] Data Port
-    data_port = 3578, 'data-port', TransportProtocol.tcp
+    data_port = 3578, 'data-port'
 
     #: - [TCP] Tarantella Load Balancing
     #: - [UDP] Tarantella Load Balancing
-    ttat3lb = 3579, 'ttat3lb', TransportProtocol.tcp
+    ttat3lb = 3579
 
     #: - [TCP] NATI-ServiceLocator
     #: - [UDP] NATI-ServiceLocator
-    nati_svrloc = 3580, 'nati-svrloc', TransportProtocol.tcp
+    nati_svrloc = 3580, 'nati-svrloc'
 
     #: - [TCP] Ascent Capture Licensing
     #: - [UDP] Ascent Capture Licensing
-    kfxaclicensing = 3581, 'kfxaclicensing', TransportProtocol.tcp
+    kfxaclicensing = 3581
 
     #: - [TCP] PEG PRESS Server
     #: - [UDP] PEG PRESS Server
-    press = 3582, 'press', TransportProtocol.tcp
+    press = 3582
 
     #: - [TCP] CANEX Watch System
     #: - [UDP] CANEX Watch System
-    canex_watch = 3583, 'canex-watch', TransportProtocol.tcp
+    canex_watch = 3583, 'canex-watch'
 
     #: - [TCP] U-DBase Access Protocol
     #: - [UDP] U-DBase Access Protocol
-    u_dbap = 3584, 'u-dbap', TransportProtocol.tcp
+    u_dbap = 3584, 'u-dbap'
 
     #: - [TCP] Emprise License Server
     #: - [UDP] Emprise License Server
-    emprise_lls = 3585, 'emprise-lls', TransportProtocol.tcp
+    emprise_lls = 3585, 'emprise-lls'
 
     #: - [TCP] License Server Console
     #: - [UDP] License Server Console
-    emprise_lsc = 3586, 'emprise-lsc', TransportProtocol.tcp
+    emprise_lsc = 3586, 'emprise-lsc'
 
     #: - [TCP] Peer to Peer Grouping
     #: - [UDP] Peer to Peer Grouping
-    p2pgroup = 3587, 'p2pgroup', TransportProtocol.tcp
+    p2pgroup = 3587
 
     #: - [TCP] Sentinel Server
     #: - [UDP] Sentinel Server
-    sentinel = 3588, 'sentinel', TransportProtocol.tcp
+    sentinel = 3588
 
     #: - [TCP] isomair
     #: - [UDP] isomair
-    isomair = 3589, 'isomair', TransportProtocol.tcp
+    isomair = 3589
 
     #: - [TCP] WV CSP SMS Binding
     #: - [UDP] WV CSP SMS Binding
-    wv_csp_sms = 3590, 'wv-csp-sms', TransportProtocol.tcp
+    wv_csp_sms = 3590, 'wv-csp-sms'
 
     #: - [TCP] LOCANIS G-TRACK Server
     #: - [UDP] LOCANIS G-TRACK Server
-    gtrack_server = 3591, 'gtrack-server', TransportProtocol.tcp
+    gtrack_server = 3591, 'gtrack-server'
 
     #: - [TCP] LOCANIS G-TRACK NE Port
     #: - [UDP] LOCANIS G-TRACK NE Port
-    gtrack_ne = 3592, 'gtrack-ne', TransportProtocol.tcp
+    gtrack_ne = 3592, 'gtrack-ne'
 
     #: - [TCP] BP Model Debugger
     #: - [UDP] BP Model Debugger
-    bpmd = 3593, 'bpmd', TransportProtocol.tcp
+    bpmd = 3593
 
     #: - [TCP] MediaSpace
     #: - [UDP] MediaSpace
-    mediaspace = 3594, 'mediaspace', TransportProtocol.tcp
+    mediaspace = 3594
 
     #: - [TCP] ShareApp
     #: - [UDP] ShareApp
-    shareapp = 3595, 'shareapp', TransportProtocol.tcp
+    shareapp = 3595
 
     #: - [TCP] Illusion Wireless MMOG
     #: - [UDP] Illusion Wireless MMOG
-    iw_mmogame = 3596, 'iw-mmogame', TransportProtocol.tcp
+    iw_mmogame = 3596, 'iw-mmogame'
 
     #: - [TCP] A14 (AN-to-SC/MM)
     #: - [UDP] A14 (AN-to-SC/MM)
-    a14 = 3597, 'a14', TransportProtocol.tcp
+    a14 = 3597
 
     #: - [TCP] A15 (AN-to-AN)
     #: - [UDP] A15 (AN-to-AN)
-    a15 = 3598, 'a15', TransportProtocol.tcp
+    a15 = 3598
 
     #: - [TCP] Quasar Accounting Server
     #: - [UDP] Quasar Accounting Server
-    quasar_server = 3599, 'quasar-server', TransportProtocol.tcp
+    quasar_server = 3599, 'quasar-server'
 
     #: - [TCP] text relay-answer
     #: - [UDP] text relay-answer
-    trap_daemon = 3600, 'trap-daemon', TransportProtocol.tcp
+    trap_daemon = 3600, 'trap-daemon'
 
     #: - [TCP] Visinet Gui
     #: - [UDP] Visinet Gui
-    visinet_gui = 3601, 'visinet-gui', TransportProtocol.tcp
+    visinet_gui = 3601, 'visinet-gui'
 
     #: - [TCP] InfiniSwitch Mgr Client
     #: - [UDP] InfiniSwitch Mgr Client
-    infiniswitchcl = 3602, 'infiniswitchcl', TransportProtocol.tcp
+    infiniswitchcl = 3602
 
     #: - [TCP] Integrated Rcvr Control
     #: - [UDP] Integrated Rcvr Control
-    int_rcv_cntrl = 3603, 'int-rcv-cntrl', TransportProtocol.tcp
+    int_rcv_cntrl = 3603, 'int-rcv-cntrl'
 
     #: - [TCP] BMC JMX Port
     #: - [UDP] BMC JMX Port
-    bmc_jmx_port = 3604, 'bmc-jmx-port', TransportProtocol.tcp
+    bmc_jmx_port = 3604, 'bmc-jmx-port'
 
     #: - [TCP] ComCam IO Port
     #: - [UDP] ComCam IO Port
-    comcam_io = 3605, 'comcam-io', TransportProtocol.tcp
+    comcam_io = 3605, 'comcam-io'
 
     #: - [TCP] Splitlock Server
     #: - [UDP] Splitlock Server
-    splitlock = 3606, 'splitlock', TransportProtocol.tcp
+    splitlock = 3606
 
     #: - [TCP] Precise I3
     #: - [UDP] Precise I3
-    precise_i3 = 3607, 'precise-i3', TransportProtocol.tcp
+    precise_i3 = 3607, 'precise-i3'
 
     #: - [TCP] Trendchip control protocol
     #: - [UDP] Trendchip control protocol
-    trendchip_dcp = 3608, 'trendchip-dcp', TransportProtocol.tcp
+    trendchip_dcp = 3608, 'trendchip-dcp'
 
     #: - [TCP] CPDI PIDAS Connection Mon
     #: - [UDP] CPDI PIDAS Connection Mon
-    cpdi_pidas_cm = 3609, 'cpdi-pidas-cm', TransportProtocol.tcp
+    cpdi_pidas_cm = 3609, 'cpdi-pidas-cm'
 
     #: - [TCP] ECHONET
     #: - [UDP] ECHONET
-    echonet = 3610, 'echonet', TransportProtocol.tcp
+    echonet = 3610
 
     #: - [TCP] Six Degrees Port
     #: - [UDP] Six Degrees Port
-    six_degrees = 3611, 'six-degrees', TransportProtocol.tcp
+    six_degrees = 3611, 'six-degrees'
 
     #: - [TCP] Micro Focus Data Protector
     #: - [UDP] Micro Focus Data Protector
-    dataprotector = 3612, 'dataprotector', TransportProtocol.tcp
+    dataprotector = 3612
 
     #: - [TCP] Alaris Device Discovery
     #: - [UDP] Alaris Device Discovery
-    alaris_disc = 3613, 'alaris-disc', TransportProtocol.tcp
+    alaris_disc = 3613, 'alaris-disc'
 
     #: - [TCP] Satchwell Sigma
     #: - [UDP] Satchwell Sigma
-    sigma_port = 3614, 'sigma-port', TransportProtocol.tcp
+    sigma_port = 3614, 'sigma-port'
 
     #: - [TCP] Start Messaging Network
     #: - [UDP] Start Messaging Network
-    start_network = 3615, 'start-network', TransportProtocol.tcp
+    start_network = 3615, 'start-network'
 
     #: - [TCP] cd3o Control Protocol
     #: - [UDP] cd3o Control Protocol
-    cd3o_protocol = 3616, 'cd3o-protocol', TransportProtocol.tcp
+    cd3o_protocol = 3616, 'cd3o-protocol'
 
     #: - [TCP] ATI SHARP Logic Engine
     #: - [UDP] ATI SHARP Logic Engine
-    sharp_server = 3617, 'sharp-server', TransportProtocol.tcp
+    sharp_server = 3617, 'sharp-server'
 
     #: - [TCP] AAIR-Network 1
     #: - [UDP] AAIR-Network 1
-    aairnet_1 = 3618, 'aairnet-1', TransportProtocol.tcp
+    aairnet_1 = 3618, 'aairnet-1'
 
     #: - [TCP] AAIR-Network 2
     #: - [UDP] AAIR-Network 2
-    aairnet_2 = 3619, 'aairnet-2', TransportProtocol.tcp
+    aairnet_2 = 3619, 'aairnet-2'
 
     #: - [TCP] EPSON Projector Control Port
     #: - [UDP] EPSON Projector Control Port
-    ep_pcp = 3620, 'ep-pcp', TransportProtocol.tcp
+    ep_pcp = 3620, 'ep-pcp'
 
     #: - [TCP] EPSON Network Screen Port
     #: - [UDP] EPSON Network Screen Port
-    ep_nsp = 3621, 'ep-nsp', TransportProtocol.tcp
+    ep_nsp = 3621, 'ep-nsp'
 
     #: - [TCP] FF LAN Redundancy Port
     #: - [UDP] FF LAN Redundancy Port
-    ff_lr_port = 3622, 'ff-lr-port', TransportProtocol.tcp
+    ff_lr_port = 3622, 'ff-lr-port'
 
     #: - [TCP] HAIPIS Dynamic Discovery
     #: - [UDP] HAIPIS Dynamic Discovery
-    haipe_discover = 3623, 'haipe-discover', TransportProtocol.tcp
+    haipe_discover = 3623, 'haipe-discover'
 
     #: - [TCP] Distributed Upgrade Port
     #: - [UDP] Distributed Upgrade Port
-    dist_upgrade = 3624, 'dist-upgrade', TransportProtocol.tcp
+    dist_upgrade = 3624, 'dist-upgrade'
 
     #: - [TCP] Volley
     #: - [UDP] Volley
-    volley = 3625, 'volley', TransportProtocol.tcp
+    volley = 3625
 
     #: - [TCP] bvControl Daemon
     #: - [UDP] bvControl Daemon
-    bvcdaemon_port = 3626, 'bvcdaemon-port', TransportProtocol.tcp
+    bvcdaemon_port = 3626, 'bvcdaemon-port'
 
     #: - [TCP] Jam Server Port
     #: - [UDP] Jam Server Port
-    jamserverport = 3627, 'jamserverport', TransportProtocol.tcp
+    jamserverport = 3627
 
     #: - [TCP] EPT Machine Interface
     #: - [UDP] EPT Machine Interface
-    ept_machine = 3628, 'ept-machine', TransportProtocol.tcp
+    ept_machine = 3628, 'ept-machine'
 
     #: - [TCP] ESC/VP.net
     #: - [UDP] ESC/VP.net
-    escvpnet = 3629, 'escvpnet', TransportProtocol.tcp
+    escvpnet = 3629
 
     #: - [TCP] C&S Remote Database Port
     #: - [UDP] C&S Remote Database Port
-    cs_remote_db = 3630, 'cs-remote-db', TransportProtocol.tcp
+    cs_remote_db = 3630, 'cs-remote-db'
 
     #: - [TCP] C&S Web Services Port
     #: - [UDP] C&S Web Services Port
-    cs_services = 3631, 'cs-services', TransportProtocol.tcp
+    cs_services = 3631, 'cs-services'
 
     #: - [TCP] distributed compiler
     #: - [UDP] distributed compiler
-    distcc = 3632, 'distcc', TransportProtocol.tcp
+    distcc = 3632
 
     #: - [TCP] Wyrnix AIS port
     #: - [UDP] Wyrnix AIS port
-    wacp = 3633, 'wacp', TransportProtocol.tcp
+    wacp = 3633
 
     #: - [TCP] hNTSP Library Manager
     #: - [UDP] hNTSP Library Manager
-    hlibmgr = 3634, 'hlibmgr', TransportProtocol.tcp
+    hlibmgr = 3634
 
     #: - [TCP] Simple Distributed Objects
     #: - [UDP] Simple Distributed Objects
-    sdo = 3635, 'sdo', TransportProtocol.tcp
+    sdo = 3635
 
     #: - [TCP] SerVistaITSM
     #: - [UDP] SerVistaITSM
-    servistaitsm = 3636, 'servistaitsm', TransportProtocol.tcp
+    servistaitsm = 3636
 
     #: - [TCP] Customer Service Port
     #: - [UDP] Customer Service Port
-    scservp = 3637, 'scservp', TransportProtocol.tcp
+    scservp = 3637
 
     #: - [TCP] EHP Backup Protocol
     #: - [UDP] EHP Backup Protocol
-    ehp_backup = 3638, 'ehp-backup', TransportProtocol.tcp
+    ehp_backup = 3638, 'ehp-backup'
 
     #: - [TCP] Extensible Automation
     #: - [UDP] Extensible Automation
-    xap_ha = 3639, 'xap-ha', TransportProtocol.tcp
+    xap_ha = 3639, 'xap-ha'
 
     #: - [TCP] Netplay Port 1
     #: - [UDP] Netplay Port 1
-    netplay_port1 = 3640, 'netplay-port1', TransportProtocol.tcp
+    netplay_port1 = 3640, 'netplay-port1'
 
     #: - [TCP] Netplay Port 2
     #: - [UDP] Netplay Port 2
-    netplay_port2 = 3641, 'netplay-port2', TransportProtocol.tcp
+    netplay_port2 = 3641, 'netplay-port2'
 
     #: - [TCP] Juxml Replication port
     #: - [UDP] Juxml Replication port
-    juxml_port = 3642, 'juxml-port', TransportProtocol.tcp
+    juxml_port = 3642, 'juxml-port'
 
     #: - [TCP] AudioJuggler
     #: - [UDP] AudioJuggler
-    audiojuggler = 3643, 'audiojuggler', TransportProtocol.tcp
+    audiojuggler = 3643
 
     #: - [TCP] ssowatch
     #: - [UDP] ssowatch
-    ssowatch = 3644, 'ssowatch', TransportProtocol.tcp
+    ssowatch = 3644
 
     #: - [TCP] Cyc
     #: - [UDP] Cyc
-    cyc = 3645, 'cyc', TransportProtocol.tcp
+    cyc = 3645
 
     #: - [TCP] XSS Server Port
     #: - [UDP] XSS Server Port
-    xss_srv_port = 3646, 'xss-srv-port', TransportProtocol.tcp
+    xss_srv_port = 3646, 'xss-srv-port'
 
     #: - [TCP] Splitlock Gateway
     #: - [UDP] Splitlock Gateway
-    splitlock_gw = 3647, 'splitlock-gw', TransportProtocol.tcp
+    splitlock_gw = 3647, 'splitlock-gw'
 
     #: - [TCP] Fujitsu Cooperation Port
     #: - [UDP] Fujitsu Cooperation Port
-    fjcp = 3648, 'fjcp', TransportProtocol.tcp
+    fjcp = 3648
 
     #: - [TCP] Nishioka Miyuki Msg Protocol
     #: - [UDP] Nishioka Miyuki Msg Protocol
-    nmmp = 3649, 'nmmp', TransportProtocol.tcp
+    nmmp = 3649
 
     #: - [TCP] PRISMIQ VOD plug-in
     #: - [UDP] PRISMIQ VOD plug-in
-    prismiq_plugin = 3650, 'prismiq-plugin', TransportProtocol.tcp
+    prismiq_plugin = 3650, 'prismiq-plugin'
 
     #: - [TCP] XRPC Registry
     #: - [UDP] XRPC Registry
-    xrpc_registry = 3651, 'xrpc-registry', TransportProtocol.tcp
+    xrpc_registry = 3651, 'xrpc-registry'
 
     #: - [TCP] VxCR NBU Default Port
     #: - [UDP] VxCR NBU Default Port
-    vxcrnbuport = 3652, 'vxcrnbuport', TransportProtocol.tcp
+    vxcrnbuport = 3652
 
     #: - [TCP] Tunnel Setup Protocol [:rfc:`5572`]
     #: - [UDP] Tunnel Setup Protocol [:rfc:`5572`]
-    tsp = 3653, 'tsp', TransportProtocol.tcp
+    tsp = 3653
 
     #: - [TCP] VAP RealTime Messenger
     #: - [UDP] VAP RealTime Messenger
-    vaprtm = 3654, 'vaprtm', TransportProtocol.tcp
+    vaprtm = 3654
 
     #: - [TCP] ActiveBatch Exec Agent
     #: - [UDP] ActiveBatch Exec Agent
-    abatemgr = 3655, 'abatemgr', TransportProtocol.tcp
+    abatemgr = 3655
 
     #: - [TCP] ActiveBatch Job Scheduler
     #: - [UDP] ActiveBatch Job Scheduler
-    abatjss = 3656, 'abatjss', TransportProtocol.tcp
+    abatjss = 3656
 
     #: - [TCP] ImmediaNet Beacon
     #: - [UDP] ImmediaNet Beacon
-    immedianet_bcn = 3657, 'immedianet-bcn', TransportProtocol.tcp
+    immedianet_bcn = 3657, 'immedianet-bcn'
 
     #: - [TCP] PlayStation AMS (Secure)
     #: - [UDP] PlayStation AMS (Secure)
-    ps_ams = 3658, 'ps-ams', TransportProtocol.tcp
+    ps_ams = 3658, 'ps-ams'
 
     #: - [TCP] Apple SASL
     #: - [UDP] Apple SASL
-    apple_sasl = 3659, 'apple-sasl', TransportProtocol.tcp
+    apple_sasl = 3659, 'apple-sasl'
 
     #: - [TCP] IBM Tivoli Directory Service using SSL
     #: - [UDP] IBM Tivoli Directory Service using SSL
-    can_nds_ssl = 3660, 'can-nds-ssl', TransportProtocol.tcp
+    can_nds_ssl = 3660, 'can-nds-ssl'
 
     #: - [TCP] IBM Tivoli Directory Service using SSL
     #: - [UDP] IBM Tivoli Directory Service using SSL
-    can_ferret_ssl = 3661, 'can-ferret-ssl', TransportProtocol.tcp
+    can_ferret_ssl = 3661, 'can-ferret-ssl'
 
     #: - [TCP] pserver
     #: - [UDP] pserver
-    pserver = 3662, 'pserver', TransportProtocol.tcp
+    pserver = 3662
 
     #: - [TCP] DIRECWAY Tunnel Protocol
     #: - [UDP] DIRECWAY Tunnel Protocol
-    dtp = 3663, 'dtp', TransportProtocol.tcp
+    dtp = 3663
 
     #: - [TCP] UPS Engine Port
     #: - [UDP] UPS Engine Port
-    ups_engine = 3664, 'ups-engine', TransportProtocol.tcp
+    ups_engine = 3664, 'ups-engine'
 
     #: - [TCP] Enterprise Engine Port
     #: - [UDP] Enterprise Engine Port
-    ent_engine = 3665, 'ent-engine', TransportProtocol.tcp
+    ent_engine = 3665, 'ent-engine'
 
     #: - [TCP] IBM eServer PAP
     #: - [UDP] IBM EServer PAP
-    eserver_pap = 3666, 'eserver-pap', TransportProtocol.tcp
+    eserver_pap = 3666, 'eserver-pap'
 
     #: - [TCP] IBM Information Exchange
     #: - [UDP] IBM Information Exchange
-    infoexch = 3667, 'infoexch', TransportProtocol.tcp
+    infoexch = 3667
 
     #: - [TCP] Dell Remote Management
     #: - [UDP] Dell Remote Management
-    dell_rm_port = 3668, 'dell-rm-port', TransportProtocol.tcp
+    dell_rm_port = 3668, 'dell-rm-port'
 
     #: - [TCP] CA SAN Switch Management
     #: - [UDP] CA SAN Switch Management
-    casanswmgmt = 3669, 'casanswmgmt', TransportProtocol.tcp
+    casanswmgmt = 3669
 
     #: - [TCP] SMILE TCP/UDP Interface
     #: - [UDP] SMILE TCP/UDP Interface
-    smile = 3670, 'smile', TransportProtocol.tcp
+    smile = 3670
 
     #: - [TCP] e Field Control (EIBnet)
     #: - [UDP] e Field Control (EIBnet)
-    efcp = 3671, 'efcp', TransportProtocol.tcp
+    efcp = 3671
 
     #: - [TCP] LispWorks ORB
     #: - [UDP] LispWorks ORB
-    lispworks_orb = 3672, 'lispworks-orb', TransportProtocol.tcp
+    lispworks_orb = 3672, 'lispworks-orb'
 
     #: - [TCP] Openview Media Vault GUI
     #: - [UDP] Openview Media Vault GUI
-    mediavault_gui = 3673, 'mediavault-gui', TransportProtocol.tcp
+    mediavault_gui = 3673, 'mediavault-gui'
 
     #: - [TCP] WinINSTALL IPC Port
     #: - [UDP] WinINSTALL IPC Port
-    wininstall_ipc = 3674, 'wininstall-ipc', TransportProtocol.tcp
+    wininstall_ipc = 3674, 'wininstall-ipc'
 
     #: - [TCP] CallTrax Data Port
     #: - [UDP] CallTrax Data Port
-    calltrax = 3675, 'calltrax', TransportProtocol.tcp
+    calltrax = 3675
 
     #: - [TCP] VisualAge Pacbase server
     #: - [UDP] VisualAge Pacbase server
-    va_pacbase = 3676, 'va-pacbase', TransportProtocol.tcp
+    va_pacbase = 3676, 'va-pacbase'
 
     #: - [TCP] RoverLog IPC
     #: - [UDP] RoverLog IPC
-    roverlog = 3677, 'roverlog', TransportProtocol.tcp
+    roverlog = 3677
 
     #: - [TCP] DataGuardianLT
     #: - [UDP] DataGuardianLT
-    ipr_dglt = 3678, 'ipr-dglt', TransportProtocol.tcp
+    ipr_dglt = 3678, 'ipr-dglt'
 
     #: - [TCP] Newton Dock
     #: - [UDP] Newton Dock
-    newton_dock = 3679, 'newton-dock', TransportProtocol.tcp
+    newton_dock = 3679, 'newton-dock'
 
     #: - [TCP] NPDS Tracker
     #: - [UDP] NPDS Tracker
-    npds_tracker = 3680, 'npds-tracker', TransportProtocol.tcp
+    npds_tracker = 3680, 'npds-tracker'
 
     #: - [TCP] BTS X73 Port
     #: - [UDP] BTS X73 Port
-    bts_x73 = 3681, 'bts-x73', TransportProtocol.tcp
+    bts_x73 = 3681, 'bts-x73'
 
     #: - [TCP] EMC SmartPackets-MAPI
     #: - [UDP] EMC SmartPackets-MAPI
-    cas_mapi = 3682, 'cas-mapi', TransportProtocol.tcp
+    cas_mapi = 3682, 'cas-mapi'
 
     #: - [TCP] BMC EDV/EA
     #: - [UDP] BMC EDV/EA
-    bmc_ea = 3683, 'bmc-ea', TransportProtocol.tcp
+    bmc_ea = 3683, 'bmc-ea'
 
     #: - [TCP] FAXstfX
     #: - [UDP] FAXstfX
-    faxstfx_port = 3684, 'faxstfx-port', TransportProtocol.tcp
+    faxstfx_port = 3684, 'faxstfx-port'
 
     #: - [TCP] DS Expert Agent
     #: - [UDP] DS Expert Agent
-    dsx_agent = 3685, 'dsx-agent', TransportProtocol.tcp
+    dsx_agent = 3685, 'dsx-agent'
 
     #: - [TCP] Trivial Network Management
     #: - [UDP] Trivial Network Management
-    tnmpv2 = 3686, 'tnmpv2', TransportProtocol.tcp
+    tnmpv2 = 3686
 
     #: - [TCP] simple-push
     #: - [UDP] simple-push
-    simple_push = 3687, 'simple-push', TransportProtocol.tcp
+    simple_push = 3687, 'simple-push'
 
     #: - [TCP] simple-push Secure
     #: - [UDP] simple-push Secure
-    simple_push_s = 3688, 'simple-push-s', TransportProtocol.tcp
+    simple_push_s = 3688, 'simple-push-s'
 
     #: - [TCP] Digital Audio Access Protocol (iTunes)
     #: - [UDP] Digital Audio Access Protocol (iTunes)
-    daap = 3689, 'daap', TransportProtocol.tcp
+    daap = 3689
 
     #: - [TCP] Magaya Network Port
     #: - [UDP] Magaya Network Port
-    magaya_network = 3691, 'magaya-network', TransportProtocol.tcp
+    magaya_network = 3691, 'magaya-network'
 
     #: - [TCP] Brimstone IntelSync
     #: - [UDP] Brimstone IntelSync
-    intelsync = 3692, 'intelsync', TransportProtocol.tcp
+    intelsync = 3692
 
     #: [TCP] Emergency Automatic Structure Lockdown System
-    easl = 3693, 'easl', TransportProtocol.tcp
+    easl = 3693
 
     #: - [TCP] BMC Data Collection
     #: - [UDP] BMC Data Collection
-    bmc_data_coll = 3695, 'bmc-data-coll', TransportProtocol.tcp
+    bmc_data_coll = 3695, 'bmc-data-coll'
 
     #: - [TCP] Telnet Com Port Control
     #: - [UDP] Telnet Com Port Control
-    telnetcpcd = 3696, 'telnetcpcd', TransportProtocol.tcp
+    telnetcpcd = 3696
 
     #: - [TCP] NavisWorks License System
     #: - [UDP] NavisWorks License System
-    nw_license = 3697, 'nw-license', TransportProtocol.tcp
+    nw_license = 3697, 'nw-license'
 
     #: - [TCP] SAGECTLPANEL
     #: - [UDP] SAGECTLPANEL
-    sagectlpanel = 3698, 'sagectlpanel', TransportProtocol.tcp
+    sagectlpanel = 3698
 
     #: - [TCP] Internet Call Waiting
     #: - [UDP] Internet Call Waiting
-    kpn_icw = 3699, 'kpn-icw', TransportProtocol.tcp
+    kpn_icw = 3699, 'kpn-icw'
 
     #: - [TCP] LRS NetPage
     #: - [UDP] LRS NetPage
-    lrs_paging = 3700, 'lrs-paging', TransportProtocol.tcp
+    lrs_paging = 3700, 'lrs-paging'
 
     #: - [TCP] NetCelera
     #: - [UDP] NetCelera
-    netcelera = 3701, 'netcelera', TransportProtocol.tcp
+    netcelera = 3701
 
     #: - [TCP] Web Service Discovery
     #: - [UDP] Web Service Discovery
-    ws_discovery = 3702, 'ws-discovery', TransportProtocol.tcp
+    ws_discovery = 3702, 'ws-discovery'
 
     #: - [TCP] Adobe Server 3
     #: - [UDP] Adobe Server 3
-    adobeserver_3 = 3703, 'adobeserver-3', TransportProtocol.tcp
+    adobeserver_3 = 3703, 'adobeserver-3'
 
     #: - [TCP] Adobe Server 4
     #: - [UDP] Adobe Server 4
-    adobeserver_4 = 3704, 'adobeserver-4', TransportProtocol.tcp
+    adobeserver_4 = 3704, 'adobeserver-4'
 
     #: - [TCP] Adobe Server 5
     #: - [UDP] Adobe Server 5
-    adobeserver_5 = 3705, 'adobeserver-5', TransportProtocol.tcp
+    adobeserver_5 = 3705, 'adobeserver-5'
 
     #: - [TCP] Real-Time Event Port
     #: - [UDP] Real-Time Event Port
-    rt_event = 3706, 'rt-event', TransportProtocol.tcp
+    rt_event = 3706, 'rt-event'
 
     #: - [TCP] Real-Time Event Secure Port
     #: - [UDP] Real-Time Event Secure Port
-    rt_event_s = 3707, 'rt-event-s', TransportProtocol.tcp
+    rt_event_s = 3707, 'rt-event-s'
 
     #: - [TCP] Sun App Svr - Naming
     #: - [UDP] Sun App Svr - Naming
-    sun_as_iiops = 3708, 'sun-as-iiops', TransportProtocol.tcp
+    sun_as_iiops = 3708, 'sun-as-iiops'
 
     #: - [TCP] CA-IDMS Server
     #: - [UDP] CA-IDMS Server
-    ca_idms = 3709, 'ca-idms', TransportProtocol.tcp
+    ca_idms = 3709, 'ca-idms'
 
     #: - [TCP] PortGate Authentication
     #: - [UDP] PortGate Authentication
-    portgate_auth = 3710, 'portgate-auth', TransportProtocol.tcp
+    portgate_auth = 3710, 'portgate-auth'
 
     #: - [TCP] EBD Server 2
     #: - [UDP] EBD Server 2
-    edb_server2 = 3711, 'edb-server2', TransportProtocol.tcp
+    edb_server2 = 3711, 'edb-server2'
 
     #: - [TCP] Sentinel Enterprise
     #: - [UDP] Sentinel Enterprise
-    sentinel_ent = 3712, 'sentinel-ent', TransportProtocol.tcp
+    sentinel_ent = 3712, 'sentinel-ent'
 
     #: - [TCP] TFTP over TLS
     #: - [UDP] TFTP over TLS
-    tftps = 3713, 'tftps', TransportProtocol.tcp
+    tftps = 3713
 
     #: - [TCP] DELOS Direct Messaging
     #: - [UDP] DELOS Direct Messaging
-    delos_dms = 3714, 'delos-dms', TransportProtocol.tcp
+    delos_dms = 3714, 'delos-dms'
 
     #: - [TCP] Anoto Rendezvous Port
     #: - [UDP] Anoto Rendezvous Port
-    anoto_rendezv = 3715, 'anoto-rendezv', TransportProtocol.tcp
+    anoto_rendezv = 3715, 'anoto-rendezv'
 
     #: - [TCP] WV CSP SMS CIR Channel
     #: - [UDP] WV CSP SMS CIR Channel
-    wv_csp_sms_cir = 3716, 'wv-csp-sms-cir', TransportProtocol.tcp
+    wv_csp_sms_cir = 3716, 'wv-csp-sms-cir'
 
     #: - [TCP] WV CSP UDP/IP CIR Channel
     #: - [UDP] WV CSP UDP/IP CIR Channel
-    wv_csp_udp_cir = 3717, 'wv-csp-udp-cir', TransportProtocol.tcp
+    wv_csp_udp_cir = 3717, 'wv-csp-udp-cir'
 
     #: - [TCP] OPUS Server Port
     #: - [UDP] OPUS Server Port
-    opus_services = 3718, 'opus-services', TransportProtocol.tcp
+    opus_services = 3718, 'opus-services'
 
     #: - [TCP] iTel Server Port
     #: - [UDP] iTel Server Port
-    itelserverport = 3719, 'itelserverport', TransportProtocol.tcp
+    itelserverport = 3719
 
     #: - [TCP] UF Astro. Instr. Services
     #: - [UDP] UF Astro. Instr. Services
-    ufastro_instr = 3720, 'ufastro-instr', TransportProtocol.tcp
+    ufastro_instr = 3720, 'ufastro-instr'
 
     #: - [TCP] Xsync
     #: - [UDP] Xsync
-    xsync = 3721, 'xsync', TransportProtocol.tcp
+    xsync = 3721
 
     #: - [TCP] Xserve RAID
     #: - [UDP] Xserve RAID
-    xserveraid = 3722, 'xserveraid', TransportProtocol.tcp
+    xserveraid = 3722
 
     #: - [TCP] Sychron Service Daemon
     #: - [UDP] Sychron Service Daemon
-    sychrond = 3723, 'sychrond', TransportProtocol.tcp
+    sychrond = 3723
 
     #: - [TCP] World of Warcraft
     #: - [UDP] World of Warcraft
-    blizwow = 3724, 'blizwow', TransportProtocol.tcp
+    blizwow = 3724
 
     #: - [TCP] Netia NA-ER Port
     #: - [UDP] Netia NA-ER Port
-    na_er_tip = 3725, 'na-er-tip', TransportProtocol.tcp
+    na_er_tip = 3725, 'na-er-tip'
 
     #: - [TCP] Xyratex Array Manager
     #: - [UDP] Xyratex Array Manager
-    array_manager = 3726, 'array-manager', TransportProtocol.tcp
+    array_manager = 3726, 'array-manager'
 
     #: - [TCP] Ericsson Mobile Data Unit
     #: - [UDP] Ericsson Mobile Data Unit
-    e_mdu = 3727, 'e-mdu', TransportProtocol.tcp
+    e_mdu = 3727, 'e-mdu'
 
     #: - [TCP] Ericsson Web on Air
     #: - [UDP] Ericsson Web on Air
-    e_woa = 3728, 'e-woa', TransportProtocol.tcp
+    e_woa = 3728, 'e-woa'
 
     #: - [TCP] Fireking Audit Port
     #: - [UDP] Fireking Audit Port
-    fksp_audit = 3729, 'fksp-audit', TransportProtocol.tcp
+    fksp_audit = 3729, 'fksp-audit'
 
     #: - [TCP] Client Control
     #: - [UDP] Client Control
-    client_ctrl = 3730, 'client-ctrl', TransportProtocol.tcp
+    client_ctrl = 3730, 'client-ctrl'
 
     #: - [TCP] Service Manager
     #: - [UDP] Service Manager
-    smap = 3731, 'smap', TransportProtocol.tcp
+    smap = 3731
 
     #: - [TCP] Mobile Wnn
     #: - [UDP] Mobile Wnn
-    m_wnn = 3732, 'm-wnn', TransportProtocol.tcp
+    m_wnn = 3732, 'm-wnn'
 
     #: - [TCP] Multipuesto Msg Port
     #: - [UDP] Multipuesto Msg Port
-    multip_msg = 3733, 'multip-msg', TransportProtocol.tcp
+    multip_msg = 3733, 'multip-msg'
 
     #: - [TCP] Synel Data Collection Port
     #: - [UDP] Synel Data Collection Port
-    synel_data = 3734, 'synel-data', TransportProtocol.tcp
+    synel_data = 3734, 'synel-data'
 
     #: - [TCP] Password Distribution
     #: - [UDP] Password Distribution
-    pwdis = 3735, 'pwdis', TransportProtocol.tcp
+    pwdis = 3735
 
     #: - [TCP] RealSpace RMI
     #: - [UDP] RealSpace RMI
-    rs_rmi = 3736, 'rs-rmi', TransportProtocol.tcp
+    rs_rmi = 3736, 'rs-rmi'
 
     #: [TCP] XPanel Daemon
-    xpanel = 3737, 'xpanel', TransportProtocol.tcp
+    xpanel = 3737
 
     #: - [TCP] versaTalk Server Port
     #: - [UDP] versaTalk Server Port
-    versatalk = 3738, 'versatalk', TransportProtocol.tcp
+    versatalk = 3738
 
     #: - [TCP] Launchbird LicenseManager
     #: - [UDP] Launchbird LicenseManager
-    launchbird_lm = 3739, 'launchbird-lm', TransportProtocol.tcp
+    launchbird_lm = 3739, 'launchbird-lm'
 
     #: - [TCP] Heartbeat Protocol
     #: - [UDP] Heartbeat Protocol
-    heartbeat = 3740, 'heartbeat', TransportProtocol.tcp
+    heartbeat = 3740
 
     #: - [TCP] WysDM Agent
     #: - [UDP] WysDM Agent
-    wysdma = 3741, 'wysdma', TransportProtocol.tcp
+    wysdma = 3741
 
     #: - [TCP] CST - Configuration & Service Tracker
     #: - [UDP] CST - Configuration & Service Tracker
-    cst_port = 3742, 'cst-port', TransportProtocol.tcp
+    cst_port = 3742, 'cst-port'
 
     #: - [TCP] IP Control Systems Ltd.
     #: - [UDP] IP Control Systems Ltd.
-    ipcs_command = 3743, 'ipcs-command', TransportProtocol.tcp
+    ipcs_command = 3743, 'ipcs-command'
 
     #: - [TCP] SASG
     #: - [UDP] SASG
-    sasg = 3744, 'sasg', TransportProtocol.tcp
+    sasg = 3744
 
     #: - [TCP] GWRTC Call Port
     #: - [UDP] GWRTC Call Port
-    gw_call_port = 3745, 'gw-call-port', TransportProtocol.tcp
+    gw_call_port = 3745, 'gw-call-port'
 
     #: - [TCP] LXPRO.COM LinkTest
     #: - [UDP] LXPRO.COM LinkTest
-    linktest = 3746, 'linktest', TransportProtocol.tcp
+    linktest = 3746
 
     #: - [TCP] LXPRO.COM LinkTest SSL
     #: - [UDP] LXPRO.COM LinkTest SSL
-    linktest_s = 3747, 'linktest-s', TransportProtocol.tcp
+    linktest_s = 3747, 'linktest-s'
 
     #: - [TCP] webData
     #: - [UDP] webData
-    webdata = 3748, 'webdata', TransportProtocol.tcp
+    webdata = 3748
 
     #: - [TCP] CimTrak
     #: - [UDP] CimTrak
-    cimtrak = 3749, 'cimtrak', TransportProtocol.tcp
+    cimtrak = 3749
 
     #: - [TCP] CBOS/IP ncapsalation port
     #: - [UDP] CBOS/IP ncapsalation port
-    cbos_ip_port = 3750, 'cbos-ip-port', TransportProtocol.tcp
+    cbos_ip_port = 3750, 'cbos-ip-port'
 
     #: - [TCP] CommLinx GPRS Cube
     #: - [UDP] CommLinx GPRS Cube
-    gprs_cube = 3751, 'gprs-cube', TransportProtocol.tcp
+    gprs_cube = 3751, 'gprs-cube'
 
     #: - [TCP] Vigil-IP RemoteAgent
     #: - [UDP] Vigil-IP RemoteAgent
-    vipremoteagent = 3752, 'vipremoteagent', TransportProtocol.tcp
+    vipremoteagent = 3752
 
     #: - [TCP] NattyServer Port
     #: - [UDP] NattyServer Port
-    nattyserver = 3753, 'nattyserver', TransportProtocol.tcp
+    nattyserver = 3753
 
     #: - [TCP] TimesTen Broker Port
     #: - [UDP] TimesTen Broker Port
-    timestenbroker = 3754, 'timestenbroker', TransportProtocol.tcp
+    timestenbroker = 3754
 
     #: - [TCP] SAS Remote Help Server
     #: - [UDP] SAS Remote Help Server
-    sas_remote_hlp = 3755, 'sas-remote-hlp', TransportProtocol.tcp
+    sas_remote_hlp = 3755, 'sas-remote-hlp'
 
     #: - [TCP] Canon CAPT Port
     #: - [UDP] Canon CAPT Port
-    canon_capt = 3756, 'canon-capt', TransportProtocol.tcp
+    canon_capt = 3756, 'canon-capt'
 
     #: - [TCP] GRF Server Port
     #: - [UDP] GRF Server Port
-    grf_port = 3757, 'grf-port', TransportProtocol.tcp
+    grf_port = 3757, 'grf-port'
 
     #: - [TCP] apw RMI registry
     #: - [UDP] apw RMI registry
-    apw_registry = 3758, 'apw-registry', TransportProtocol.tcp
+    apw_registry = 3758, 'apw-registry'
 
     #: - [TCP] Exapt License Manager
     #: - [UDP] Exapt License Manager
-    exapt_lmgr = 3759, 'exapt-lmgr', TransportProtocol.tcp
+    exapt_lmgr = 3759, 'exapt-lmgr'
 
     #: - [TCP] adTempus Client
     #: - [UDP] adTEmpus Client
-    adtempusclient = 3760, 'adtempusclient', TransportProtocol.tcp
+    adtempusclient = 3760
 
     #: - [TCP] gsakmp port [:rfc:`4535`]
     #: - [UDP] gsakmp port [:rfc:`4535`]
-    gsakmp = 3761, 'gsakmp', TransportProtocol.tcp
+    gsakmp = 3761
 
     #: - [TCP] GBS SnapMail Protocol
     #: - [UDP] GBS SnapMail Protocol
-    gbs_smp = 3762, 'gbs-smp', TransportProtocol.tcp
+    gbs_smp = 3762, 'gbs-smp'
 
     #: - [TCP] XO Wave Control Port
     #: - [UDP] XO Wave Control Port
-    xo_wave = 3763, 'xo-wave', TransportProtocol.tcp
+    xo_wave = 3763, 'xo-wave'
 
     #: - [TCP] MNI Protected Routing
     #: - [UDP] MNI Protected Routing
-    mni_prot_rout = 3764, 'mni-prot-rout', TransportProtocol.tcp
+    mni_prot_rout = 3764, 'mni-prot-rout'
 
     #: - [TCP] Remote Traceroute
     #: - [UDP] Remote Traceroute
-    rtraceroute = 3765, 'rtraceroute', TransportProtocol.tcp
+    rtraceroute = 3765
 
     #: [TCP] SSL e-watch sitewatch server
-    sitewatch_s = 3766, 'sitewatch-s', TransportProtocol.tcp
+    sitewatch_s = 3766, 'sitewatch-s'
 
     #: - [TCP] ListMGR Port
     #: - [UDP] ListMGR Port
-    listmgr_port = 3767, 'listmgr-port', TransportProtocol.tcp
+    listmgr_port = 3767, 'listmgr-port'
 
     #: - [TCP] rblcheckd server daemon
     #: - [UDP] rblcheckd server daemon
-    rblcheckd = 3768, 'rblcheckd', TransportProtocol.tcp
+    rblcheckd = 3768
 
     #: - [TCP] HAIPE Network Keying
     #: - [UDP] HAIPE Network Keying
-    haipe_otnk = 3769, 'haipe-otnk', TransportProtocol.tcp
+    haipe_otnk = 3769, 'haipe-otnk'
 
     #: - [TCP] Cinderella Collaboration
     #: - [UDP] Cinderella Collaboration
-    cindycollab = 3770, 'cindycollab', TransportProtocol.tcp
+    cindycollab = 3770
 
     #: - [TCP] RTP Paging Port
     #: - [UDP] RTP Paging Port
-    paging_port = 3771, 'paging-port', TransportProtocol.tcp
+    paging_port = 3771, 'paging-port'
 
     #: - [TCP] Chantry Tunnel Protocol
     #: - [UDP] Chantry Tunnel Protocol
-    ctp = 3772, 'ctp', TransportProtocol.tcp
+    ctp = 3772
 
     #: - [TCP] ctdhercules
     #: - [UDP] ctdhercules
-    ctdhercules = 3773, 'ctdhercules', TransportProtocol.tcp
+    ctdhercules = 3773
 
     #: - [TCP] ZICOM
     #: - [UDP] ZICOM
-    zicom = 3774, 'zicom', TransportProtocol.tcp
+    zicom = 3774
 
     #: - [TCP] ISPM Manager Port
     #: - [UDP] ISPM Manager Port
-    ispmmgr = 3775, 'ispmmgr', TransportProtocol.tcp
+    ispmmgr = 3775
 
     #: - [TCP] Device Provisioning Port
     #: - [UDP] Device Provisioning Port
-    dvcprov_port = 3776, 'dvcprov-port', TransportProtocol.tcp
+    dvcprov_port = 3776, 'dvcprov-port'
 
     #: - [TCP] Jibe EdgeBurst
     #: - [UDP] Jibe EdgeBurst
-    jibe_eb = 3777, 'jibe-eb', TransportProtocol.tcp
+    jibe_eb = 3777, 'jibe-eb'
 
     #: - [TCP] Cutler-Hammer IT Port
     #: - [UDP] Cutler-Hammer IT Port
-    c_h_it_port = 3778, 'c-h-it-port', TransportProtocol.tcp
+    c_h_it_port = 3778, 'c-h-it-port'
 
     #: - [TCP] Cognima Replication
     #: - [UDP] Cognima Replication
-    cognima = 3779, 'cognima', TransportProtocol.tcp
+    cognima = 3779
 
     #: - [TCP] Nuzzler Network Protocol
     #: - [UDP] Nuzzler Network Protocol
-    nnp = 3780, 'nnp', TransportProtocol.tcp
+    nnp = 3780
 
     #: - [TCP] ABCvoice server port
     #: - [UDP] ABCvoice server port
-    abcvoice_port = 3781, 'abcvoice-port', TransportProtocol.tcp
+    abcvoice_port = 3781, 'abcvoice-port'
 
     #: - [TCP] Secure ISO TP0 port
     #: - [UDP] Secure ISO TP0 port
-    iso_tp0s = 3782, 'iso-tp0s', TransportProtocol.tcp
+    iso_tp0s = 3782, 'iso-tp0s'
 
     #: - [TCP] Impact Mgr./PEM Gateway
     #: - [UDP] Impact Mgr./PEM Gateway
-    bim_pem = 3783, 'bim-pem', TransportProtocol.tcp
+    bim_pem = 3783, 'bim-pem'
 
     #: - [TCP] BFD Control Protocol [:rfc:`5881`]
     #: - [UDP] BFD Control Protocol [:rfc:`5881`]
-    bfd_control = 3784, 'bfd-control', TransportProtocol.tcp
+    bfd_control = 3784, 'bfd-control'
 
     #: - [TCP] BFD Echo Protocol [:rfc:`5881`]
     #: - [UDP] BFD Echo Protocol [:rfc:`5881`]
-    bfd_echo = 3785, 'bfd-echo', TransportProtocol.tcp
+    bfd_echo = 3785, 'bfd-echo'
 
     #: - [TCP] VSW Upstrigger port
     #: - [UDP] VSW Upstrigger port
-    upstriggervsw = 3786, 'upstriggervsw', TransportProtocol.tcp
+    upstriggervsw = 3786
 
     #: - [TCP] Fintrx
     #: - [UDP] Fintrx
-    fintrx = 3787, 'fintrx', TransportProtocol.tcp
+    fintrx = 3787
 
     #: - [TCP] SPACEWAY Routing port
     #: - [UDP] SPACEWAY Routing port
-    isrp_port = 3788, 'isrp-port', TransportProtocol.tcp
+    isrp_port = 3788, 'isrp-port'
 
     #: - [TCP] RemoteDeploy Administration Port [July 2003]
     #: - [UDP] RemoteDeploy Administration Port [July 2003]
-    remotedeploy = 3789, 'remotedeploy', TransportProtocol.tcp
+    remotedeploy = 3789
 
     #: - [TCP] QuickBooks RDS
     #: - [UDP] QuickBooks RDS
-    quickbooksrds = 3790, 'quickbooksrds', TransportProtocol.tcp
+    quickbooksrds = 3790
 
     #: - [TCP] TV NetworkVideo Data port
     #: - [UDP] TV NetworkVideo Data port
-    tvnetworkvideo = 3791, 'tvnetworkvideo', TransportProtocol.tcp
+    tvnetworkvideo = 3791
 
     #: - [TCP] e-Watch Corporation SiteWatch
     #: - [UDP] e-Watch Corporation SiteWatch
-    sitewatch = 3792, 'sitewatch', TransportProtocol.tcp
+    sitewatch = 3792
 
     #: - [TCP] DataCore Software
     #: - [UDP] DataCore Software
-    dcsoftware = 3793, 'dcsoftware', TransportProtocol.tcp
+    dcsoftware = 3793
 
     #: - [TCP] JAUS Robots
     #: - [UDP] JAUS Robots
-    jaus = 3794, 'jaus', TransportProtocol.tcp
+    jaus = 3794
 
     #: - [TCP] myBLAST Mekentosj port
     #: - [UDP] myBLAST Mekentosj port
-    myblast = 3795, 'myblast', TransportProtocol.tcp
+    myblast = 3795
 
     #: - [TCP] Spaceway Dialer
     #: - [UDP] Spaceway Dialer
-    spw_dialer = 3796, 'spw-dialer', TransportProtocol.tcp
+    spw_dialer = 3796, 'spw-dialer'
 
     #: - [TCP] idps
     #: - [UDP] idps
-    idps = 3797, 'idps', TransportProtocol.tcp
+    idps = 3797
 
     #: - [TCP] Minilock
     #: - [UDP] Minilock
-    minilock = 3798, 'minilock', TransportProtocol.tcp
+    minilock = 3798
 
     #: - [TCP] RADIUS Dynamic Authorization [:rfc:`3576`]
     #: - [UDP] RADIUS Dynamic Authorization [:rfc:`3576`]
-    radius_dynauth = 3799, 'radius-dynauth', TransportProtocol.tcp
+    radius_dynauth = 3799, 'radius-dynauth'
 
     #: - [TCP] Print Services Interface
     #: - [UDP] Print Services Interface
-    pwgpsi = 3800, 'pwgpsi', TransportProtocol.tcp
+    pwgpsi = 3800
 
     #: - [TCP] ibm manager service
     #: - [UDP] ibm manager service
-    ibm_mgr = 3801, 'ibm-mgr', TransportProtocol.tcp
+    ibm_mgr = 3801, 'ibm-mgr'
 
     #: - [TCP] VHD
     #: - [UDP] VHD
-    vhd = 3802, 'vhd', TransportProtocol.tcp
+    vhd = 3802
 
     #: - [TCP] SoniqSync
     #: - [UDP] SoniqSync
-    soniqsync = 3803, 'soniqsync', TransportProtocol.tcp
+    soniqsync = 3803
 
     #: - [TCP] Harman IQNet Port
     #: - [UDP] Harman IQNet Port
-    iqnet_port = 3804, 'iqnet-port', TransportProtocol.tcp
+    iqnet_port = 3804, 'iqnet-port'
 
     #: - [TCP] ThorGuard Server Port
     #: - [UDP] ThorGuard Server Port
-    tcpdataserver = 3805, 'tcpdataserver', TransportProtocol.tcp
+    tcpdataserver = 3805
 
     #: - [TCP] Remote System Manager
     #: - [UDP] Remote System Manager
-    wsmlb = 3806, 'wsmlb', TransportProtocol.tcp
+    wsmlb = 3806
 
     #: - [TCP] SpuGNA Communication Port
     #: - [UDP] SpuGNA Communication Port
-    spugna = 3807, 'spugna', TransportProtocol.tcp
+    spugna = 3807
 
     #: - [TCP] Sun App Svr-IIOPClntAuth
     #: - [UDP] Sun App Svr-IIOPClntAuth
-    sun_as_iiops_ca = 3808, 'sun-as-iiops-ca', TransportProtocol.tcp
+    sun_as_iiops_ca = 3808, 'sun-as-iiops-ca'
 
     #: - [TCP] Java Desktop System Configuration Agent
     #: - [UDP] Java Desktop System Configuration Agent
-    apocd = 3809, 'apocd', TransportProtocol.tcp
+    apocd = 3809
 
     #: - [TCP] WLAN AS server
     #: - [UDP] WLAN AS server
-    wlanauth = 3810, 'wlanauth', TransportProtocol.tcp
+    wlanauth = 3810
 
     #: - [TCP] AMP
     #: - [UDP] AMP
-    amp = 3811, 'amp', TransportProtocol.tcp
+    amp = 3811
 
     #: - [TCP] netO WOL Server
     #: - [UDP] netO WOL Server
-    neto_wol_server = 3812, 'neto-wol-server', TransportProtocol.tcp
+    neto_wol_server = 3812, 'neto-wol-server'
 
     #: - [TCP] Rhapsody Interface Protocol
     #: - [UDP] Rhapsody Interface Protocol
-    rap_ip = 3813, 'rap-ip', TransportProtocol.tcp
+    rap_ip = 3813, 'rap-ip'
 
     #: - [TCP] netO DCS
     #: - [UDP] netO DCS
-    neto_dcs = 3814, 'neto-dcs', TransportProtocol.tcp
+    neto_dcs = 3814, 'neto-dcs'
 
     #: - [TCP] LANsurveyor XML
     #: - [UDP] LANsurveyor XML
-    lansurveyorxml = 3815, 'lansurveyorxml', TransportProtocol.tcp
+    lansurveyorxml = 3815
 
     #: - [TCP] Sun Local Patch Server
     #: - [UDP] Sun Local Patch Server
-    sunlps_http = 3816, 'sunlps-http', TransportProtocol.tcp
+    sunlps_http = 3816, 'sunlps-http'
 
     #: - [TCP] Yosemite Tech Tapeware
     #: - [UDP] Yosemite Tech Tapeware
-    tapeware = 3817, 'tapeware', TransportProtocol.tcp
+    tapeware = 3817
 
     #: - [TCP] Crinis Heartbeat
     #: - [UDP] Crinis Heartbeat
-    crinis_hb = 3818, 'crinis-hb', TransportProtocol.tcp
+    crinis_hb = 3818, 'crinis-hb'
 
     #: - [TCP] EPL Sequ Layer Protocol
     #: - [UDP] EPL Sequ Layer Protocol
-    epl_slp = 3819, 'epl-slp', TransportProtocol.tcp
+    epl_slp = 3819, 'epl-slp'
 
     #: - [TCP] Siemens AuD SCP
     #: - [UDP] Siemens AuD SCP
-    scp = 3820, 'scp', TransportProtocol.tcp
+    scp = 3820
 
     #: - [TCP] ATSC PMCP Standard
     #: - [UDP] ATSC PMCP Standard
-    pmcp = 3821, 'pmcp', TransportProtocol.tcp
+    pmcp = 3821
 
     #: - [TCP] Compute Pool Discovery
     #: - [UDP] Compute Pool Discovery
-    acp_discovery = 3822, 'acp-discovery', TransportProtocol.tcp
+    acp_discovery = 3822, 'acp-discovery'
 
     #: - [TCP] Compute Pool Conduit
     #: - [UDP] Compute Pool Conduit
-    acp_conduit = 3823, 'acp-conduit', TransportProtocol.tcp
+    acp_conduit = 3823, 'acp-conduit'
 
     #: - [TCP] Compute Pool Policy
     #: - [UDP] Compute Pool Policy
-    acp_policy = 3824, 'acp-policy', TransportProtocol.tcp
+    acp_policy = 3824, 'acp-policy'
 
     #: - [TCP] Antera FlowFusion Process Simulation
     #: - [UDP] Antera FlowFusion Process Simulation
-    ffserver = 3825, 'ffserver', TransportProtocol.tcp
+    ffserver = 3825
 
     #: - [TCP] WarMUX game server
     #: - [UDP] WarMUX game server
-    warmux = 3826, 'warmux', TransportProtocol.tcp
+    warmux = 3826
 
     #: - [TCP] Netadmin Systems MPI service
     #: - [UDP] Netadmin Systems MPI service
-    netmpi = 3827, 'netmpi', TransportProtocol.tcp
+    netmpi = 3827
 
     #: - [TCP] Netadmin Systems Event Handler
     #: - [UDP] Netadmin Systems Event Handler
-    neteh = 3828, 'neteh', TransportProtocol.tcp
+    neteh = 3828
 
     #: - [TCP] Netadmin Systems Event Handler External
     #: - [UDP] Netadmin Systems Event Handler External
-    neteh_ext = 3829, 'neteh-ext', TransportProtocol.tcp
+    neteh_ext = 3829, 'neteh-ext'
 
     #: - [TCP] Cerner System Management Agent
     #: - [UDP] Cerner System Management Agent
-    cernsysmgmtagt = 3830, 'cernsysmgmtagt', TransportProtocol.tcp
+    cernsysmgmtagt = 3830
 
     #: - [TCP] Docsvault Application Service
     #: - [UDP] Docsvault Application Service
-    dvapps = 3831, 'dvapps', TransportProtocol.tcp
+    dvapps = 3831
 
     #: - [TCP] xxNETserver
     #: - [UDP] xxNETserver
-    xxnetserver = 3832, 'xxnetserver', TransportProtocol.tcp
+    xxnetserver = 3832
 
     #: - [TCP] AIPN LS Authentication
     #: - [UDP] AIPN LS Authentication
-    aipn_auth = 3833, 'aipn-auth', TransportProtocol.tcp
+    aipn_auth = 3833, 'aipn-auth'
 
     #: - [TCP] Spectar Data Stream Service
     #: - [UDP] Spectar Data Stream Service
-    spectardata = 3834, 'spectardata', TransportProtocol.tcp
+    spectardata = 3834
 
     #: - [TCP] Spectar Database Rights Service
     #: - [UDP] Spectar Database Rights Service
-    spectardb = 3835, 'spectardb', TransportProtocol.tcp
+    spectardb = 3835
 
     #: - [TCP] MARKEM NEXTGEN DCP
     #: - [UDP] MARKEM NEXTGEN DCP
-    markem_dcp = 3836, 'markem-dcp', TransportProtocol.tcp
+    markem_dcp = 3836, 'markem-dcp'
 
     #: - [TCP] MARKEM Auto-Discovery
     #: - [UDP] MARKEM Auto-Discovery
-    mkm_discovery = 3837, 'mkm-discovery', TransportProtocol.tcp
+    mkm_discovery = 3837, 'mkm-discovery'
 
     #: - [TCP] Scito Object Server
     #: - [UDP] Scito Object Server
-    sos = 3838, 'sos', TransportProtocol.tcp
+    sos = 3838
 
     #: - [TCP] AMX Resource Management Suite
     #: - [UDP] AMX Resource Management Suite
-    amx_rms = 3839, 'amx-rms', TransportProtocol.tcp
+    amx_rms = 3839, 'amx-rms'
 
     #: - [TCP] www.FlirtMitMir.de
     #: - [UDP] www.FlirtMitMir.de
-    flirtmitmir = 3840, 'flirtmitmir', TransportProtocol.tcp
+    flirtmitmir = 3840
 
     #: [TCP] ShipRush Database Server
-    shiprush_db_svr = 3841, 'shiprush-db-svr', TransportProtocol.tcp
+    shiprush_db_svr = 3841, 'shiprush-db-svr'
 
     #: - [TCP] NHCI status port
     #: - [UDP] NHCI status port
-    nhci = 3842, 'nhci', TransportProtocol.tcp
+    nhci = 3842
 
     #: - [TCP] Quest Common Agent
     #: - [UDP] Quest Common Agent
-    quest_agent = 3843, 'quest-agent', TransportProtocol.tcp
+    quest_agent = 3843, 'quest-agent'
 
     #: - [TCP] RNM
     #: - [UDP] RNM
-    rnm = 3844, 'rnm', TransportProtocol.tcp
+    rnm = 3844
 
     #: - [TCP] V-ONE Single Port Proxy
     #: - [UDP] V-ONE Single Port Proxy
-    v_one_spp = 3845, 'v-one-spp', TransportProtocol.tcp
+    v_one_spp = 3845, 'v-one-spp'
 
     #: - [TCP] Astare Network PCP
     #: - [UDP] Astare Network PCP
-    an_pcp = 3846, 'an-pcp', TransportProtocol.tcp
+    an_pcp = 3846, 'an-pcp'
 
     #: - [TCP] MS Firewall Control
     #: - [UDP] MS Firewall Control
-    msfw_control = 3847, 'msfw-control', TransportProtocol.tcp
+    msfw_control = 3847, 'msfw-control'
 
     #: - [TCP] IT Environmental Monitor
     #: - [UDP] IT Environmental Monitor
-    item = 3848, 'item', TransportProtocol.tcp
+    item = 3848
 
     #: - [TCP] SPACEWAY DNS Preload
     #: - [UDP] SPACEWAY DNS Preload
-    spw_dnspreload = 3849, 'spw-dnspreload', TransportProtocol.tcp
+    spw_dnspreload = 3849, 'spw-dnspreload'
 
     #: - [TCP] QTMS Bootstrap Protocol
     #: - [UDP] QTMS Bootstrap Protocol
-    qtms_bootstrap = 3850, 'qtms-bootstrap', TransportProtocol.tcp
+    qtms_bootstrap = 3850, 'qtms-bootstrap'
 
     #: - [TCP] SpectraTalk Port
     #: - [UDP] SpectraTalk Port
-    spectraport = 3851, 'spectraport', TransportProtocol.tcp
+    spectraport = 3851
 
     #: - [TCP] SSE App Configuration
     #: - [UDP] SSE App Configuration
-    sse_app_config = 3852, 'sse-app-config', TransportProtocol.tcp
+    sse_app_config = 3852, 'sse-app-config'
 
     #: - [TCP] SONY scanning protocol
     #: - [UDP] SONY scanning protocol
-    sscan = 3853, 'sscan', TransportProtocol.tcp
+    sscan = 3853
 
     #: - [TCP] Stryker Comm Port
     #: - [UDP] Stryker Comm Port
-    stryker_com = 3854, 'stryker-com', TransportProtocol.tcp
+    stryker_com = 3854, 'stryker-com'
 
     #: - [TCP] OpenTRAC
     #: - [UDP] OpenTRAC
-    opentrac = 3855, 'opentrac', TransportProtocol.tcp
+    opentrac = 3855
 
     #: - [TCP] INFORMER
     #: - [UDP] INFORMER
-    informer = 3856, 'informer', TransportProtocol.tcp
+    informer = 3856
 
     #: - [TCP] Trap Port
     #: - [UDP] Trap Port
-    trap_port = 3857, 'trap-port', TransportProtocol.tcp
+    trap_port = 3857, 'trap-port'
 
     #: - [TCP] Trap Port MOM
     #: - [UDP] Trap Port MOM
-    trap_port_mom = 3858, 'trap-port-mom', TransportProtocol.tcp
+    trap_port_mom = 3858, 'trap-port-mom'
 
     #: - [TCP] Navini Port
     #: - [UDP] Navini Port
-    nav_port = 3859, 'nav-port', TransportProtocol.tcp
+    nav_port = 3859, 'nav-port'
 
     #: - [TCP] Server/Application State Protocol (SASP)
     #: - [UDP] Server/Application State Protocol (SASP)
-    sasp = 3860, 'sasp', TransportProtocol.tcp
+    sasp = 3860
 
     #: - [TCP] winShadow Host Discovery
     #: - [UDP] winShadow Host Discovery
-    winshadow_hd = 3861, 'winshadow-hd', TransportProtocol.tcp
+    winshadow_hd = 3861, 'winshadow-hd'
 
     #: - [TCP] GIGA-POCKET
     #: - [UDP] GIGA-POCKET
-    giga_pocket = 3862, 'giga-pocket', TransportProtocol.tcp
+    giga_pocket = 3862, 'giga-pocket'
 
     #: [TCP] asap tcp port
-    asap_tcp = 3863, 'asap-tcp', TransportProtocol.tcp
+    asap_tcp = 3863, 'asap-tcp'
 
     #: [TCP] asap/tls tcp port [:rfc:`5352`]
-    asap_tcp_tls = 3864, 'asap-tcp-tls', TransportProtocol.tcp
+    asap_tcp_tls = 3864, 'asap-tcp-tls'
 
     #: - [TCP] xpl automation protocol
     #: - [UDP] xpl automation protocol
-    xpl = 3865, 'xpl', TransportProtocol.tcp
+    xpl = 3865
 
     #: - [TCP] Sun SDViz DZDAEMON Port
     #: - [UDP] Sun SDViz DZDAEMON Port
-    dzdaemon = 3866, 'dzdaemon', TransportProtocol.tcp
+    dzdaemon = 3866
 
     #: - [TCP] Sun SDViz DZOGLSERVER Port
     #: - [UDP] Sun SDViz DZOGLSERVER Port
-    dzoglserver = 3867, 'dzoglserver', TransportProtocol.tcp
+    dzoglserver = 3867
 
     #: - [TCP] DIAMETER
     #: - [SCTP] DIAMETER [:rfc:`3588`]
-    diameter = 3868, 'diameter', TransportProtocol.tcp
+    diameter = 3868
 
     #: - [TCP] hp OVSAM MgmtServer Disco
     #: - [UDP] hp OVSAM MgmtServer Disco
-    ovsam_mgmt = 3869, 'ovsam-mgmt', TransportProtocol.tcp
+    ovsam_mgmt = 3869, 'ovsam-mgmt'
 
     #: - [TCP] hp OVSAM HostAgent Disco
     #: - [UDP] hp OVSAM HostAgent Disco
-    ovsam_d_agent = 3870, 'ovsam-d-agent', TransportProtocol.tcp
+    ovsam_d_agent = 3870, 'ovsam-d-agent'
 
     #: - [TCP] Avocent DS Authorization
     #: - [UDP] Avocent DS Authorization
-    avocent_adsap = 3871, 'avocent-adsap', TransportProtocol.tcp
+    avocent_adsap = 3871, 'avocent-adsap'
 
     #: - [TCP] OEM Agent
     #: - [UDP] OEM Agent
-    oem_agent = 3872, 'oem-agent', TransportProtocol.tcp
+    oem_agent = 3872, 'oem-agent'
 
     #: - [TCP] fagordnc
     #: - [UDP] fagordnc
-    fagordnc = 3873, 'fagordnc', TransportProtocol.tcp
+    fagordnc = 3873
 
     #: - [TCP] SixXS Configuration
     #: - [UDP] SixXS Configuration
-    sixxsconfig = 3874, 'sixxsconfig', TransportProtocol.tcp
+    sixxsconfig = 3874
 
     #: - [TCP] PNBSCADA
     #: - [UDP] PNBSCADA
-    pnbscada = 3875, 'pnbscada', TransportProtocol.tcp
+    pnbscada = 3875
 
     #: - [TCP] DirectoryLockdown Agent IANA assigned this well-formed service name as
     #:   a replacement for "dl_agent".
@@ -15294,99 +15294,99 @@ class TCP(AppType):
     #: - [UDP] DirectoryLockdown Agent IANA assigned this well-formed service name as
     #:   a replacement for "dl_agent".
     #: - [UDP] DirectoryLockdown Agent
-    dl_agent = 3876, 'dl-agent', TransportProtocol.tcp
+    dl_agent = 3876, 'dl-agent'
 
     #: - [TCP] XMPCR Interface Port
     #: - [UDP] XMPCR Interface Port
-    xmpcr_interface = 3877, 'xmpcr-interface', TransportProtocol.tcp
+    xmpcr_interface = 3877, 'xmpcr-interface'
 
     #: - [TCP] FotoG CAD interface
     #: - [UDP] FotoG CAD interface
-    fotogcad = 3878, 'fotogcad', TransportProtocol.tcp
+    fotogcad = 3878
 
     #: - [TCP] appss license manager
     #: - [UDP] appss license manager
-    appss_lm = 3879, 'appss-lm', TransportProtocol.tcp
+    appss_lm = 3879, 'appss-lm'
 
     #: - [TCP] IGRS
     #: - [UDP] IGRS
-    igrs = 3880, 'igrs', TransportProtocol.tcp
+    igrs = 3880
 
     #: - [TCP] Data Acquisition and Control
     #: - [UDP] Data Acquisition and Control
-    idac = 3881, 'idac', TransportProtocol.tcp
+    idac = 3881
 
     #: - [TCP] DTS Service Port
     #: - [UDP] DTS Service Port
-    msdts1 = 3882, 'msdts1', TransportProtocol.tcp
+    msdts1 = 3882
 
     #: - [TCP] VR Peripheral Network
     #: - [UDP] VR Peripheral Network
-    vrpn = 3883, 'vrpn', TransportProtocol.tcp
+    vrpn = 3883
 
     #: - [TCP] SofTrack Metering
     #: - [UDP] SofTrack Metering
-    softrack_meter = 3884, 'softrack-meter', TransportProtocol.tcp
+    softrack_meter = 3884, 'softrack-meter'
 
     #: - [TCP] TopFlow SSL
     #: - [UDP] TopFlow SSL
-    topflow_ssl = 3885, 'topflow-ssl', TransportProtocol.tcp
+    topflow_ssl = 3885, 'topflow-ssl'
 
     #: - [TCP] NEI management port
     #: - [UDP] NEI management port
-    nei_management = 3886, 'nei-management', TransportProtocol.tcp
+    nei_management = 3886, 'nei-management'
 
     #: - [TCP] Ciphire Data Transport
     #: - [UDP] Ciphire Data Transport
-    ciphire_data = 3887, 'ciphire-data', TransportProtocol.tcp
+    ciphire_data = 3887, 'ciphire-data'
 
     #: - [TCP] Ciphire Services
     #: - [UDP] Ciphire Services
-    ciphire_serv = 3888, 'ciphire-serv', TransportProtocol.tcp
+    ciphire_serv = 3888, 'ciphire-serv'
 
     #: - [TCP] D and V Tester Control Port
     #: - [UDP] D and V Tester Control Port
-    dandv_tester = 3889, 'dandv-tester', TransportProtocol.tcp
+    dandv_tester = 3889, 'dandv-tester'
 
     #: - [TCP] Niche Data Server Connect
     #: - [UDP] Niche Data Server Connect
-    ndsconnect = 3890, 'ndsconnect', TransportProtocol.tcp
+    ndsconnect = 3890
 
     #: - [TCP] Oracle RTC-PM port
     #: - [UDP] Oracle RTC-PM port
-    rtc_pm_port = 3891, 'rtc-pm-port', TransportProtocol.tcp
+    rtc_pm_port = 3891, 'rtc-pm-port'
 
     #: - [TCP] PCC-image-port
     #: - [UDP] PCC-image-port
-    pcc_image_port = 3892, 'pcc-image-port', TransportProtocol.tcp
+    pcc_image_port = 3892, 'pcc-image-port'
 
     #: - [TCP] CGI StarAPI Server
     #: - [UDP] CGI StarAPI Server
-    cgi_starapi = 3893, 'cgi-starapi', TransportProtocol.tcp
+    cgi_starapi = 3893, 'cgi-starapi'
 
     #: - [TCP] SyAM Agent Port
     #: - [UDP] SyAM Agent Port
-    syam_agent = 3894, 'syam-agent', TransportProtocol.tcp
+    syam_agent = 3894, 'syam-agent'
 
     #: - [TCP] SyAm SMC Service Port
     #: - [UDP] SyAm SMC Service Port
-    syam_smc = 3895, 'syam-smc', TransportProtocol.tcp
+    syam_smc = 3895, 'syam-smc'
 
     #: - [TCP] Simple Distributed Objects over TLS
     #: - [UDP] Simple Distributed Objects over TLS
-    sdo_tls = 3896, 'sdo-tls', TransportProtocol.tcp
+    sdo_tls = 3896, 'sdo-tls'
 
     #: - [TCP] Simple Distributed Objects over SSH
     #: - [UDP] Simple Distributed Objects over SSH
-    sdo_ssh = 3897, 'sdo-ssh', TransportProtocol.tcp
+    sdo_ssh = 3897, 'sdo-ssh'
 
     #: - [TCP] IAS, Inc. SmartEye NET Internet Protocol
     #: - [UDP] IAS, Inc. SmartEye NET Internet Protocol
-    senip = 3898, 'senip', TransportProtocol.tcp
+    senip = 3898
 
     #: - [TCP] ITV Port
     #: - [UDP] ITV Port
-    itv_control = 3899, 'itv-control', TransportProtocol.tcp
+    itv_control = 3899, 'itv-control'
 
     #: - [TCP] udt_os IANA assigned this well-formed service name as a replacement
     #:   for "udt_os".
@@ -15394,7 +15394,7 @@ class TCP(AppType):
     #: - [UDP] udt_os IANA assigned this well-formed service name as a replacement
     #:   for "udt_os".
     #: - [UDP] udt_os
-    udt_os_1382 = 1382, 'udt-os', TransportProtocol.tcp
+    udt_os_1382 = 1382, 'udt-os'
 
     #: - [TCP] Unidata UDT OS IANA assigned this well-formed service name as a
     #:   replacement for "udt_os".
@@ -15402,155 +15402,155 @@ class TCP(AppType):
     #: - [UDP] Unidata UDT OS IANA assigned this well-formed service name as a
     #:   replacement for "udt_os".
     #: - [UDP] Unidata UDT OS
-    udt_os_3900 = 3900, 'udt-os', TransportProtocol.tcp
+    udt_os_3900 = 3900, 'udt-os'
 
     #: - [TCP] NIM Service Handler
     #: - [UDP] NIM Service Handler
-    nimsh = 3901, 'nimsh', TransportProtocol.tcp
+    nimsh = 3901
 
     #: - [TCP] NIMsh Auxiliary Port
     #: - [UDP] NIMsh Auxiliary Port
-    nimaux = 3902, 'nimaux', TransportProtocol.tcp
+    nimaux = 3902
 
     #: - [TCP] CharsetMGR
     #: - [UDP] CharsetMGR
-    charsetmgr = 3903, 'charsetmgr', TransportProtocol.tcp
+    charsetmgr = 3903
 
     #: - [TCP] Arnet Omnilink Port
     #: - [UDP] Arnet Omnilink Port
-    omnilink_port = 3904, 'omnilink-port', TransportProtocol.tcp
+    omnilink_port = 3904, 'omnilink-port'
 
     #: - [TCP] Mailbox Update (MUPDATE) protocol [:rfc:`3656`]
     #: - [UDP] Mailbox Update (MUPDATE) protocol [:rfc:`3656`]
-    mupdate = 3905, 'mupdate', TransportProtocol.tcp
+    mupdate = 3905
 
     #: - [TCP] TopoVista elevation data
     #: - [UDP] TopoVista elevation data
-    topovista_data = 3906, 'topovista-data', TransportProtocol.tcp
+    topovista_data = 3906, 'topovista-data'
 
     #: - [TCP] Imoguia Port
     #: - [UDP] Imoguia Port
-    imoguia_port = 3907, 'imoguia-port', TransportProtocol.tcp
+    imoguia_port = 3907, 'imoguia-port'
 
     #: - [TCP] HP Procurve NetManagement
     #: - [UDP] HP Procurve NetManagement
-    hppronetman = 3908, 'hppronetman', TransportProtocol.tcp
+    hppronetman = 3908
 
     #: - [TCP] SurfControl CPA
     #: - [UDP] SurfControl CPA
-    surfcontrolcpa = 3909, 'surfcontrolcpa', TransportProtocol.tcp
+    surfcontrolcpa = 3909
 
     #: - [TCP] Printer Request Port
     #: - [UDP] Printer Request Port
-    prnrequest = 3910, 'prnrequest', TransportProtocol.tcp
+    prnrequest = 3910
 
     #: - [TCP] Printer Status Port
     #: - [UDP] Printer Status Port
-    prnstatus = 3911, 'prnstatus', TransportProtocol.tcp
+    prnstatus = 3911
 
     #: - [TCP] Global Maintech Stars
     #: - [UDP] Global Maintech Stars
-    gbmt_stars = 3912, 'gbmt-stars', TransportProtocol.tcp
+    gbmt_stars = 3912, 'gbmt-stars'
 
     #: - [TCP] ListCREATOR Port
     #: - [UDP] ListCREATOR Port
-    listcrt_port = 3913, 'listcrt-port', TransportProtocol.tcp
+    listcrt_port = 3913, 'listcrt-port'
 
     #: - [TCP] ListCREATOR Port 2
     #: - [UDP] ListCREATOR Port 2
-    listcrt_port_2 = 3914, 'listcrt-port-2', TransportProtocol.tcp
+    listcrt_port_2 = 3914, 'listcrt-port-2'
 
     #: - [TCP] Auto-Graphics Cataloging
     #: - [UDP] Auto-Graphics Cataloging
-    agcat = 3915, 'agcat', TransportProtocol.tcp
+    agcat = 3915
 
     #: - [TCP] WysDM Controller
     #: - [UDP] WysDM Controller
-    wysdmc = 3916, 'wysdmc', TransportProtocol.tcp
+    wysdmc = 3916
 
     #: - [TCP] AFT multiplex port
     #: - [UDP] AFT multiplex port
-    aftmux = 3917, 'aftmux', TransportProtocol.tcp
+    aftmux = 3917
 
     #: - [TCP] PacketCableMultimediaCOPS
     #: - [UDP] PacketCableMultimediaCOPS
-    pktcablemmcops = 3918, 'pktcablemmcops', TransportProtocol.tcp
+    pktcablemmcops = 3918
 
     #: - [TCP] HyperIP
     #: - [UDP] HyperIP
-    hyperip = 3919, 'hyperip', TransportProtocol.tcp
+    hyperip = 3919
 
     #: - [TCP] Exasoft IP Port
     #: - [UDP] Exasoft IP Port
-    exasoftport1 = 3920, 'exasoftport1', TransportProtocol.tcp
+    exasoftport1 = 3920
 
     #: - [TCP] Herodotus Net
     #: - [UDP] Herodotus Net
-    herodotus_net = 3921, 'herodotus-net', TransportProtocol.tcp
+    herodotus_net = 3921, 'herodotus-net'
 
     #: - [TCP] Soronti Update Port
     #: - [UDP] Soronti Update Port
-    sor_update = 3922, 'sor-update', TransportProtocol.tcp
+    sor_update = 3922, 'sor-update'
 
     #: - [TCP] Symbian Service Broker
     #: - [UDP] Symbian Service Broker
-    symb_sb_port = 3923, 'symb-sb-port', TransportProtocol.tcp
+    symb_sb_port = 3923, 'symb-sb-port'
 
     #: - [TCP] MPL_GPRS_PORT
     #: - [UDP] MPL_GPRS_Port
-    mpl_gprs_port = 3924, 'mpl-gprs-port', TransportProtocol.tcp
+    mpl_gprs_port = 3924, 'mpl-gprs-port'
 
     #: - [TCP] Zoran Media Port
     #: - [UDP] Zoran Media Port
-    zmp = 3925, 'zmp', TransportProtocol.tcp
+    zmp = 3925
 
     #: - [TCP] WINPort
     #: - [UDP] WINPort
-    winport = 3926, 'winport', TransportProtocol.tcp
+    winport = 3926
 
     #: - [TCP] ScsTsr
     #: - [UDP] ScsTsr
-    natdataservice = 3927, 'natdataservice', TransportProtocol.tcp
+    natdataservice = 3927
 
     #: - [TCP] PXE NetBoot Manager
     #: - [UDP] PXE NetBoot Manager
-    netboot_pxe = 3928, 'netboot-pxe', TransportProtocol.tcp
+    netboot_pxe = 3928, 'netboot-pxe'
 
     #: - [TCP] AMS Port
     #: - [UDP] AMS Port
-    smauth_port = 3929, 'smauth-port', TransportProtocol.tcp
+    smauth_port = 3929, 'smauth-port'
 
     #: - [TCP] Syam Web Server Port
     #: - [UDP] Syam Web Server Port
-    syam_webserver = 3930, 'syam-webserver', TransportProtocol.tcp
+    syam_webserver = 3930, 'syam-webserver'
 
     #: - [TCP] MSR Plugin Port
     #: - [UDP] MSR Plugin Port
-    msr_plugin_port = 3931, 'msr-plugin-port', TransportProtocol.tcp
+    msr_plugin_port = 3931, 'msr-plugin-port'
 
     #: - [TCP] Dynamic Site System
     #: - [UDP] Dynamic Site System
-    dyn_site = 3932, 'dyn-site', TransportProtocol.tcp
+    dyn_site = 3932, 'dyn-site'
 
     #: - [TCP] PL/B App Server User Port
     #: - [UDP] PL/B App Server User Port
-    plbserve_port = 3933, 'plbserve-port', TransportProtocol.tcp
+    plbserve_port = 3933, 'plbserve-port'
 
     #: - [TCP] PL/B File Manager Port
     #: - [UDP] PL/B File Manager Port
-    sunfm_port = 3934, 'sunfm-port', TransportProtocol.tcp
+    sunfm_port = 3934, 'sunfm-port'
 
     #: - [TCP] SDP Port Mapper Protocol
     #: - [UDP] SDP Port Mapper Protocol
-    sdp_portmapper = 3935, 'sdp-portmapper', TransportProtocol.tcp
+    sdp_portmapper = 3935, 'sdp-portmapper'
 
     #: - [TCP] Mailprox
     #: - [UDP] Mailprox
-    mailprox = 3936, 'mailprox', TransportProtocol.tcp
+    mailprox = 3936
 
     #: - [TCP] DVB Service Discovery
     #: - [UDP] DVB Service Discovery
-    dvbservdsc = 3937, 'dvbservdsc', TransportProtocol.tcp
+    dvbservdsc = 3937
 
     #: - [TCP] Oracle dbControl Agent po IANA assigned this well-formed service name
     #:   as a replacement for "dbcontrol_agent".
@@ -15558,197 +15558,197 @@ class TCP(AppType):
     #: - [UDP] Oracle dbControl Agent po IANA assigned this well-formed service name
     #:   as a replacement for "dbcontrol_agent".
     #: - [UDP] Oracle dbControl Agent po
-    dbcontrol_agent = 3938, 'dbcontrol-agent', TransportProtocol.tcp
+    dbcontrol_agent = 3938, 'dbcontrol-agent'
 
     #: - [TCP] Anti-virus Application Management Port
     #: - [UDP] Anti-virus Application Management Port
-    aamp = 3939, 'aamp', TransportProtocol.tcp
+    aamp = 3939
 
     #: - [TCP] XeCP Node Service
     #: - [UDP] XeCP Node Service
-    xecp_node = 3940, 'xecp-node', TransportProtocol.tcp
+    xecp_node = 3940, 'xecp-node'
 
     #: - [TCP] Home Portal Web Server
     #: - [UDP] Home Portal Web Server
-    homeportal_web = 3941, 'homeportal-web', TransportProtocol.tcp
+    homeportal_web = 3941, 'homeportal-web'
 
     #: - [TCP] satellite distribution
     #: - [UDP] satellite distribution
-    srdp = 3942, 'srdp', TransportProtocol.tcp
+    srdp = 3942
 
     #: - [TCP] TetraNode Ip Gateway
     #: - [UDP] TetraNode Ip Gateway
-    tig = 3943, 'tig', TransportProtocol.tcp
+    tig = 3943
 
     #: - [TCP] S-Ops Management
     #: - [UDP] S-Ops Management
-    sops = 3944, 'sops', TransportProtocol.tcp
+    sops = 3944
 
     #: - [TCP] EMCADS Server Port
     #: - [UDP] EMCADS Server Port
-    emcads = 3945, 'emcads', TransportProtocol.tcp
+    emcads = 3945
 
     #: - [TCP] BackupEDGE Server
     #: - [UDP] BackupEDGE Server
-    backupedge = 3946, 'backupedge', TransportProtocol.tcp
+    backupedge = 3946
 
     #: - [TCP] Connect and Control Protocol for Consumer, Commercial, and Industrial
     #:   Electronic Devices
     #: - [UDP] Connect and Control Protocol for Consumer, Commercial, and Industrial
     #:   Electronic Devices
-    ccp = 3947, 'ccp', TransportProtocol.tcp
+    ccp = 3947
 
     #: - [TCP] Anton Paar Device Administration Protocol
     #: - [UDP] Anton Paar Device Administration Protocol
-    apdap = 3948, 'apdap', TransportProtocol.tcp
+    apdap = 3948
 
     #: - [TCP] Dynamic Routing Information Protocol
     #: - [UDP] Dynamic Routing Information Protocol
-    drip = 3949, 'drip', TransportProtocol.tcp
+    drip = 3949
 
     #: - [TCP] Name Munging
     #: - [UDP] Name Munging
-    namemunge = 3950, 'namemunge', TransportProtocol.tcp
+    namemunge = 3950
 
     #: - [TCP] PWG IPP Facsimile
     #: - [UDP] PWG IPP Facsimile
-    pwgippfax = 3951, 'pwgippfax', TransportProtocol.tcp
+    pwgippfax = 3951
 
     #: - [TCP] I3 Session Manager
     #: - [UDP] I3 Session Manager
-    i3_sessionmgr = 3952, 'i3-sessionmgr', TransportProtocol.tcp
+    i3_sessionmgr = 3952, 'i3-sessionmgr'
 
     #: - [TCP] Eydeas XMLink Connect
     #: - [UDP] Eydeas XMLink Connect
-    xmlink_connect = 3953, 'xmlink-connect', TransportProtocol.tcp
+    xmlink_connect = 3953, 'xmlink-connect'
 
     #: - [TCP] AD Replication RPC
     #: - [UDP] AD Replication RPC
-    adrep = 3954, 'adrep', TransportProtocol.tcp
+    adrep = 3954
 
     #: - [TCP] p2pCommunity
     #: - [UDP] p2pCommunity
-    p2pcommunity = 3955, 'p2pcommunity', TransportProtocol.tcp
+    p2pcommunity = 3955
 
     #: - [TCP] GigE Vision Control
     #: - [UDP] GigE Vision Control
-    gvcp = 3956, 'gvcp', TransportProtocol.tcp
+    gvcp = 3956
 
     #: - [TCP] MQEnterprise Broker
     #: - [UDP] MQEnterprise Broker
-    mqe_broker = 3957, 'mqe-broker', TransportProtocol.tcp
+    mqe_broker = 3957, 'mqe-broker'
 
     #: - [TCP] MQEnterprise Agent
     #: - [UDP] MQEnterprise Agent
-    mqe_agent = 3958, 'mqe-agent', TransportProtocol.tcp
+    mqe_agent = 3958, 'mqe-agent'
 
     #: - [TCP] Tree Hopper Networking
     #: - [UDP] Tree Hopper Networking
-    treehopper = 3959, 'treehopper', TransportProtocol.tcp
+    treehopper = 3959
 
     #: - [TCP] Bess Peer Assessment
     #: - [UDP] Bess Peer Assessment
-    bess = 3960, 'bess', TransportProtocol.tcp
+    bess = 3960
 
     #: - [TCP] ProAxess Server
     #: - [UDP] ProAxess Server
-    proaxess = 3961, 'proaxess', TransportProtocol.tcp
+    proaxess = 3961
 
     #: - [TCP] SBI Agent Protocol
     #: - [UDP] SBI Agent Protocol
-    sbi_agent = 3962, 'sbi-agent', TransportProtocol.tcp
+    sbi_agent = 3962, 'sbi-agent'
 
     #: - [TCP] Teran Hybrid Routing Protocol
     #: - [UDP] Teran Hybrid Routing Protocol
-    thrp = 3963, 'thrp', TransportProtocol.tcp
+    thrp = 3963
 
     #: - [TCP] SASG GPRS
     #: - [UDP] SASG GPRS
-    sasggprs = 3964, 'sasggprs', TransportProtocol.tcp
+    sasggprs = 3964
 
     #: - [TCP] Avanti IP to NCPE API
     #: - [UDP] Avanti IP to NCPE API
-    ati_ip_to_ncpe = 3965, 'ati-ip-to-ncpe', TransportProtocol.tcp
+    ati_ip_to_ncpe = 3965, 'ati-ip-to-ncpe'
 
     #: - [TCP] BuildForge Lock Manager
     #: - [UDP] BuildForge Lock Manager
-    bflckmgr = 3966, 'bflckmgr', TransportProtocol.tcp
+    bflckmgr = 3966
 
     #: - [TCP] PPS Message Service
     #: - [UDP] PPS Message Service
-    ppsms = 3967, 'ppsms', TransportProtocol.tcp
+    ppsms = 3967
 
     #: - [TCP] iAnywhere DBNS
     #: - [UDP] iAnywhere DBNS
-    ianywhere_dbns = 3968, 'ianywhere-dbns', TransportProtocol.tcp
+    ianywhere_dbns = 3968, 'ianywhere-dbns'
 
     #: - [TCP] Landmark Messages
     #: - [UDP] Landmark Messages
-    landmarks = 3969, 'landmarks', TransportProtocol.tcp
+    landmarks = 3969
 
     #: - [TCP] LANrev Agent
     #: - [UDP] LANrev Agent
-    lanrevagent = 3970, 'lanrevagent', TransportProtocol.tcp
+    lanrevagent = 3970
 
     #: - [TCP] LANrev Server
     #: - [UDP] LANrev Server
-    lanrevserver = 3971, 'lanrevserver', TransportProtocol.tcp
+    lanrevserver = 3971
 
     #: - [TCP] ict-control Protocol
     #: - [UDP] ict-control Protocol
-    iconp = 3972, 'iconp', TransportProtocol.tcp
+    iconp = 3972
 
     #: - [TCP] ConnectShip Progistics
     #: - [UDP] ConnectShip Progistics
-    progistics = 3973, 'progistics', TransportProtocol.tcp
+    progistics = 3973
 
     #: - [TCP] Remote Applicant Tracking Service
     #: - [UDP] Remote Applicant Tracking Service
-    xk22 = 3974, 'xk22', TransportProtocol.tcp
+    xk22 = 3974
 
     #: - [TCP] Air Shot
     #: - [UDP] Air Shot
-    airshot = 3975, 'airshot', TransportProtocol.tcp
+    airshot = 3975
 
     #: - [TCP] Server Automation Agent
     #: - [UDP] Server Automation Agent
-    opswagent = 3976, 'opswagent', TransportProtocol.tcp
+    opswagent = 3976
 
     #: - [TCP] Opsware Manager
     #: - [UDP] Opsware Manager
-    opswmanager = 3977, 'opswmanager', TransportProtocol.tcp
+    opswmanager = 3977
 
     #: - [TCP] Secured Configuration Server
     #: - [UDP] Secured Configuration Server
-    secure_cfg_svr = 3978, 'secure-cfg-svr', TransportProtocol.tcp
+    secure_cfg_svr = 3978, 'secure-cfg-svr'
 
     #: - [TCP] Smith Micro Wide Area Network Service
     #: - [UDP] Smith Micro Wide Area Network Service
-    smwan = 3979, 'smwan', TransportProtocol.tcp
+    smwan = 3979
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_3980 = 3980, 'reserved', TransportProtocol.tcp
+    reserved_3980 = 3980, 'reserved'
 
     #: - [TCP] Starfish System Admin
     #: - [UDP] Starfish System Admin
-    starfish = 3981, 'starfish', TransportProtocol.tcp
+    starfish = 3981
 
     #: - [TCP] ESRI Image Server
     #: - [UDP] ESRI Image Server
-    eis = 3982, 'eis', TransportProtocol.tcp
+    eis = 3982
 
     #: - [TCP] ESRI Image Service
     #: - [UDP] ESRI Image Service
-    eisp = 3983, 'eisp', TransportProtocol.tcp
+    eisp = 3983
 
     #: - [TCP] MAPPER network node manager
     #: - [UDP] MAPPER network node manager
-    mapper_nodemgr = 3984, 'mapper-nodemgr', TransportProtocol.tcp
+    mapper_nodemgr = 3984, 'mapper-nodemgr'
 
     #: - [TCP] MAPPER TCP/IP server
     #: - [UDP] MAPPER TCP/IP server
-    mapper_mapethd = 3985, 'mapper-mapethd', TransportProtocol.tcp
+    mapper_mapethd = 3985, 'mapper-mapethd'
 
     #: - [TCP] MAPPER workstation server IANA assigned this well-formed service name
     #:   as a replacement for "mapper-ws_ethd".
@@ -15756,295 +15756,295 @@ class TCP(AppType):
     #: - [UDP] MAPPER workstation server IANA assigned this well-formed service name
     #:   as a replacement for "mapper-ws_ethd".
     #: - [UDP] MAPPER workstation server
-    mapper_ws_ethd = 3986, 'mapper-ws-ethd', TransportProtocol.tcp
+    mapper_ws_ethd = 3986, 'mapper-ws-ethd'
 
     #: - [TCP] Centerline
     #: - [UDP] Centerline
-    centerline = 3987, 'centerline', TransportProtocol.tcp
+    centerline = 3987
 
     #: - [TCP] DCS Configuration Port
     #: - [UDP] DCS Configuration Port
-    dcs_config = 3988, 'dcs-config', TransportProtocol.tcp
+    dcs_config = 3988, 'dcs-config'
 
     #: - [TCP] BindView-Query Engine
     #: - [UDP] BindView-Query Engine
-    bv_queryengine = 3989, 'bv-queryengine', TransportProtocol.tcp
+    bv_queryengine = 3989, 'bv-queryengine'
 
     #: - [TCP] BindView-IS
     #: - [UDP] BindView-IS
-    bv_is = 3990, 'bv-is', TransportProtocol.tcp
+    bv_is = 3990, 'bv-is'
 
     #: - [TCP] BindView-SMCServer
     #: - [UDP] BindView-SMCServer
-    bv_smcsrv = 3991, 'bv-smcsrv', TransportProtocol.tcp
+    bv_smcsrv = 3991, 'bv-smcsrv'
 
     #: - [TCP] BindView-DirectoryServer
     #: - [UDP] BindView-DirectoryServer
-    bv_ds = 3992, 'bv-ds', TransportProtocol.tcp
+    bv_ds = 3992, 'bv-ds'
 
     #: - [TCP] BindView-Agent
     #: - [UDP] BindView-Agent
-    bv_agent = 3993, 'bv-agent', TransportProtocol.tcp
+    bv_agent = 3993, 'bv-agent'
 
     #: - [TCP] ISS Management Svcs SSL
     #: - [UDP] ISS Management Svcs SSL
-    iss_mgmt_ssl = 3995, 'iss-mgmt-ssl', TransportProtocol.tcp
+    iss_mgmt_ssl = 3995, 'iss-mgmt-ssl'
 
     #: - [TCP] abcsoftware-01
     #: - [UDP] abcsoftware-01
-    abcsoftware = 3996, 'abcsoftware', TransportProtocol.tcp
+    abcsoftware = 3996
 
     #: - [TCP] aes_db
     #: - [UDP] aes_db
-    agentsease_db = 3997, 'agentsease-db', TransportProtocol.tcp
+    agentsease_db = 3997, 'agentsease-db'
 
     #: - [TCP] Distributed Nagios Executor Service
     #: - [UDP] Distributed Nagios Executor Service
-    dnx = 3998, 'dnx', TransportProtocol.tcp
+    dnx = 3998
 
     #: - [TCP] Norman distributes scanning service
     #: - [UDP] Norman distributes scanning service
-    nvcnet = 3999, 'nvcnet', TransportProtocol.tcp
+    nvcnet = 3999
 
     #: - [TCP] Terabase
     #: - [UDP] Terabase
-    terabase = 4000, 'terabase', TransportProtocol.tcp
+    terabase = 4000
 
     #: - [TCP] NewOak
     #: - [UDP] NewOak
-    newoak = 4001, 'newoak', TransportProtocol.tcp
+    newoak = 4001
 
     #: - [TCP] pxc-spvr-ft
     #: - [UDP] pxc-spvr-ft
-    pxc_spvr_ft = 4002, 'pxc-spvr-ft', TransportProtocol.tcp
+    pxc_spvr_ft = 4002, 'pxc-spvr-ft'
 
     #: - [TCP] pxc-splr-ft
     #: - [UDP] pxc-splr-ft
-    pxc_splr_ft = 4003, 'pxc-splr-ft', TransportProtocol.tcp
+    pxc_splr_ft = 4003, 'pxc-splr-ft'
 
     #: - [TCP] pxc-roid
     #: - [UDP] pxc-roid
-    pxc_roid = 4004, 'pxc-roid', TransportProtocol.tcp
+    pxc_roid = 4004, 'pxc-roid'
 
     #: - [TCP] pxc-pin
     #: - [UDP] pxc-pin
-    pxc_pin = 4005, 'pxc-pin', TransportProtocol.tcp
+    pxc_pin = 4005, 'pxc-pin'
 
     #: - [TCP] pxc-spvr
     #: - [UDP] pxc-spvr
-    pxc_spvr = 4006, 'pxc-spvr', TransportProtocol.tcp
+    pxc_spvr = 4006, 'pxc-spvr'
 
     #: - [TCP] pxc-splr
     #: - [UDP] pxc-splr
-    pxc_splr = 4007, 'pxc-splr', TransportProtocol.tcp
+    pxc_splr = 4007, 'pxc-splr'
 
     #: - [TCP] NetCheque accounting
     #: - [UDP] NetCheque accounting
-    netcheque = 4008, 'netcheque', TransportProtocol.tcp
+    netcheque = 4008
 
     #: - [TCP] Chimera HWM
     #: - [UDP] Chimera HWM
-    chimera_hwm = 4009, 'chimera-hwm', TransportProtocol.tcp
+    chimera_hwm = 4009, 'chimera-hwm'
 
     #: - [TCP] Samsung Unidex
     #: - [UDP] Samsung Unidex
-    samsung_unidex = 4010, 'samsung-unidex', TransportProtocol.tcp
+    samsung_unidex = 4010, 'samsung-unidex'
 
     #: - [TCP] Alternate Service Boot
     #: - [UDP] Alternate Service Boot
-    altserviceboot = 4011, 'altserviceboot', TransportProtocol.tcp
+    altserviceboot = 4011
 
     #: - [TCP] PDA Gate
     #: - [UDP] PDA Gate
-    pda_gate = 4012, 'pda-gate', TransportProtocol.tcp
+    pda_gate = 4012, 'pda-gate'
 
     #: - [TCP] ACL Manager
     #: - [UDP] ACL Manager
-    acl_manager = 4013, 'acl-manager', TransportProtocol.tcp
+    acl_manager = 4013, 'acl-manager'
 
     #: - [TCP] TAICLOCK
     #: - [UDP] TAICLOCK
-    taiclock = 4014, 'taiclock', TransportProtocol.tcp
+    taiclock = 4014
 
     #: - [TCP] Talarian Mcast
     #: - [UDP] Talarian Mcast
-    talarian_mcast1 = 4015, 'talarian-mcast1', TransportProtocol.tcp
+    talarian_mcast1 = 4015, 'talarian-mcast1'
 
     #: - [TCP] Talarian Mcast
     #: - [UDP] Talarian Mcast
-    talarian_mcast2 = 4016, 'talarian-mcast2', TransportProtocol.tcp
+    talarian_mcast2 = 4016, 'talarian-mcast2'
 
     #: - [TCP] Talarian Mcast
     #: - [UDP] Talarian Mcast
-    talarian_mcast3 = 4017, 'talarian-mcast3', TransportProtocol.tcp
+    talarian_mcast3 = 4017, 'talarian-mcast3'
 
     #: - [TCP] Talarian Mcast
     #: - [UDP] Talarian Mcast
-    talarian_mcast4 = 4018, 'talarian-mcast4', TransportProtocol.tcp
+    talarian_mcast4 = 4018, 'talarian-mcast4'
 
     #: - [TCP] Talarian Mcast
     #: - [UDP] Talarian Mcast
-    talarian_mcast5 = 4019, 'talarian-mcast5', TransportProtocol.tcp
+    talarian_mcast5 = 4019, 'talarian-mcast5'
 
     #: - [TCP] TRAP Port
     #: - [UDP] TRAP Port
-    trap = 4020, 'trap', TransportProtocol.tcp
+    trap = 4020
 
     #: - [TCP] Nexus Portal
     #: - [UDP] Nexus Portal
-    nexus_portal = 4021, 'nexus-portal', TransportProtocol.tcp
+    nexus_portal = 4021, 'nexus-portal'
 
     #: - [TCP] DNOX
     #: - [UDP] DNOX
-    dnox = 4022, 'dnox', TransportProtocol.tcp
+    dnox = 4022
 
     #: - [TCP] ESNM Zoning Port
     #: - [UDP] ESNM Zoning Port
-    esnm_zoning = 4023, 'esnm-zoning', TransportProtocol.tcp
+    esnm_zoning = 4023, 'esnm-zoning'
 
     #: - [TCP] TNP1 User Port
     #: - [UDP] TNP1 User Port
-    tnp1_port = 4024, 'tnp1-port', TransportProtocol.tcp
+    tnp1_port = 4024, 'tnp1-port'
 
     #: - [TCP] Partition Image Port
     #: - [UDP] Partition Image Port
-    partimage = 4025, 'partimage', TransportProtocol.tcp
+    partimage = 4025
 
     #: - [TCP] Graphical Debug Server
     #: - [UDP] Graphical Debug Server
-    as_debug = 4026, 'as-debug', TransportProtocol.tcp
+    as_debug = 4026, 'as-debug'
 
     #: - [TCP] bitxpress
     #: - [UDP] bitxpress
-    bxp = 4027, 'bxp', TransportProtocol.tcp
+    bxp = 4027
 
     #: - [TCP] DTServer Port
     #: - [UDP] DTServer Port
-    dtserver_port = 4028, 'dtserver-port', TransportProtocol.tcp
+    dtserver_port = 4028, 'dtserver-port'
 
     #: - [TCP] IP Q signaling protocol
     #: - [UDP] IP Q signaling protocol
-    ip_qsig = 4029, 'ip-qsig', TransportProtocol.tcp
+    ip_qsig = 4029, 'ip-qsig'
 
     #: - [TCP] Accell/JSP Daemon Port
     #: - [UDP] Accell/JSP Daemon Port
-    jdmn_port = 4030, 'jdmn-port', TransportProtocol.tcp
+    jdmn_port = 4030, 'jdmn-port'
 
     #: - [TCP] UUCP over SSL
     #: - [UDP] UUCP over SSL
-    suucp = 4031, 'suucp', TransportProtocol.tcp
+    suucp = 4031
 
     #: - [TCP] VERITAS Authorization Service
     #: - [UDP] VERITAS Authorization Service
-    vrts_auth_port = 4032, 'vrts-auth-port', TransportProtocol.tcp
+    vrts_auth_port = 4032, 'vrts-auth-port'
 
     #: - [TCP] SANavigator Peer Port
     #: - [UDP] SANavigator Peer Port
-    sanavigator = 4033, 'sanavigator', TransportProtocol.tcp
+    sanavigator = 4033
 
     #: - [TCP] Ubiquinox Daemon
     #: - [UDP] Ubiquinox Daemon
-    ubxd = 4034, 'ubxd', TransportProtocol.tcp
+    ubxd = 4034
 
     #: - [TCP] WAP Push OTA-HTTP port
     #: - [UDP] WAP Push OTA-HTTP port
-    wap_push_http = 4035, 'wap-push-http', TransportProtocol.tcp
+    wap_push_http = 4035, 'wap-push-http'
 
     #: - [TCP] WAP Push OTA-HTTP secure
     #: - [UDP] WAP Push OTA-HTTP secure
-    wap_push_https = 4036, 'wap-push-https', TransportProtocol.tcp
+    wap_push_https = 4036, 'wap-push-https'
 
     #: - [TCP] RaveHD network control
     #: - [UDP] RaveHD network control
-    ravehd = 4037, 'ravehd', TransportProtocol.tcp
+    ravehd = 4037
 
     #: - [TCP] Fazzt Point-To-Point
     #: - [UDP] Fazzt Point-To-Point
-    fazzt_ptp = 4038, 'fazzt-ptp', TransportProtocol.tcp
+    fazzt_ptp = 4038, 'fazzt-ptp'
 
     #: - [TCP] Fazzt Administration
     #: - [UDP] Fazzt Administration
-    fazzt_admin = 4039, 'fazzt-admin', TransportProtocol.tcp
+    fazzt_admin = 4039, 'fazzt-admin'
 
     #: - [TCP] Yo.net main service
     #: - [UDP] Yo.net main service
-    yo_main = 4040, 'yo-main', TransportProtocol.tcp
+    yo_main = 4040, 'yo-main'
 
     #: - [TCP] Rocketeer-Houston
     #: - [UDP] Rocketeer-Houston
-    houston = 4041, 'houston', TransportProtocol.tcp
+    houston = 4041
 
     #: - [TCP] LDXP
     #: - [UDP] LDXP
-    ldxp = 4042, 'ldxp', TransportProtocol.tcp
+    ldxp = 4042
 
     #: - [TCP] Neighbour Identity Resolution
     #: - [UDP] Neighbour Identity Resolution
-    nirp = 4043, 'nirp', TransportProtocol.tcp
+    nirp = 4043
 
     #: - [TCP] Location Tracking Protocol
     #: - [UDP] Location Tracking Protocol
-    ltp = 4044, 'ltp', TransportProtocol.tcp
+    ltp = 4044
 
     #: - [TCP] Network Printing Protocol
     #: - [UDP] Network Printing Protocol
-    npp_92 = 92, 'npp', TransportProtocol.tcp
+    npp_92 = 92, 'npp'
 
     #: - [TCP] Network Paging Protocol
     #: - [UDP] Network Paging Protocol
-    npp_4045 = 4045, 'npp', TransportProtocol.tcp
+    npp_4045 = 4045, 'npp'
 
     #: - [TCP] Accounting Protocol
     #: - [UDP] Accounting Protocol
-    acp_proto = 4046, 'acp-proto', TransportProtocol.tcp
+    acp_proto = 4046, 'acp-proto'
 
     #: - [TCP] Context Transfer Protocol
     #: - [UDP] Context Transfer Protocol
-    ctp_state = 4047, 'ctp-state', TransportProtocol.tcp
+    ctp_state = 4047, 'ctp-state'
 
     #: - [TCP] Wide Area File Services
     #: - [UDP] Wide Area File Services
-    wafs = 4049, 'wafs', TransportProtocol.tcp
+    wafs = 4049
 
     #: - [TCP] Wide Area File Services
     #: - [UDP] Wide Area File Services
-    cisco_wafs = 4050, 'cisco-wafs', TransportProtocol.tcp
+    cisco_wafs = 4050, 'cisco-wafs'
 
     #: - [TCP] Cisco Peer to Peer Distribution Protocol
     #: - [UDP] Cisco Peer to Peer Distribution Protocol
-    cppdp = 4051, 'cppdp', TransportProtocol.tcp
+    cppdp = 4051
 
     #: - [TCP] VoiceConnect Interact
     #: - [UDP] VoiceConnect Interact
-    interact = 4052, 'interact', TransportProtocol.tcp
+    interact = 4052
 
     #: - [TCP] CosmoCall Universe Communications Port 1
     #: - [UDP] CosmoCall Universe Communications Port 1
-    ccu_comm_1 = 4053, 'ccu-comm-1', TransportProtocol.tcp
+    ccu_comm_1 = 4053, 'ccu-comm-1'
 
     #: - [TCP] CosmoCall Universe Communications Port 2
     #: - [UDP] CosmoCall Universe Communications Port 2
-    ccu_comm_2 = 4054, 'ccu-comm-2', TransportProtocol.tcp
+    ccu_comm_2 = 4054, 'ccu-comm-2'
 
     #: - [TCP] CosmoCall Universe Communications Port 3
     #: - [UDP] CosmoCall Universe Communications Port 3
-    ccu_comm_3 = 4055, 'ccu-comm-3', TransportProtocol.tcp
+    ccu_comm_3 = 4055, 'ccu-comm-3'
 
     #: - [TCP] Location Message Service
     #: - [UDP] Location Message Service
-    lms = 4056, 'lms', TransportProtocol.tcp
+    lms = 4056
 
     #: - [TCP] Servigistics WFM server
     #: - [UDP] Servigistics WFM server
-    wfm = 4057, 'wfm', TransportProtocol.tcp
+    wfm = 4057
 
     #: - [TCP] Kingfisher protocol
     #: - [UDP] Kingfisher protocol
-    kingfisher = 4058, 'kingfisher', TransportProtocol.tcp
+    kingfisher = 4058
 
     #: - [TCP] DLMS/COSEM
     #: - [UDP] DLMS/COSEM
-    dlms_cosem = 4059, 'dlms-cosem', TransportProtocol.tcp
+    dlms_cosem = 4059, 'dlms-cosem'
 
     #: - [TCP] DSMETER Inter-Agent Transfer Channel IANA assigned this well-formed
     #:   service name as a replacement for "dsmeter_iatc".
@@ -16052,23 +16052,23 @@ class TCP(AppType):
     #: - [UDP] DSMETER Inter-Agent Transfer Channel IANA assigned this well-formed
     #:   service name as a replacement for "dsmeter_iatc".
     #: - [UDP] DSMETER Inter-Agent Transfer Channel
-    dsmeter_iatc = 4060, 'dsmeter-iatc', TransportProtocol.tcp
+    dsmeter_iatc = 4060, 'dsmeter-iatc'
 
     #: - [TCP] Ice Location Service (TCP)
     #: - [UDP] Ice Location Service (TCP)
-    ice_location = 4061, 'ice-location', TransportProtocol.tcp
+    ice_location = 4061, 'ice-location'
 
     #: - [TCP] Ice Location Service (SSL)
     #: - [UDP] Ice Location Service (SSL)
-    ice_slocation = 4062, 'ice-slocation', TransportProtocol.tcp
+    ice_slocation = 4062, 'ice-slocation'
 
     #: - [TCP] Ice Firewall Traversal Service (TCP)
     #: - [UDP] Ice Firewall Traversal Service (TCP)
-    ice_router = 4063, 'ice-router', TransportProtocol.tcp
+    ice_router = 4063, 'ice-router'
 
     #: - [TCP] Ice Firewall Traversal Service (SSL)
     #: - [UDP] Ice Firewall Traversal Service (SSL)
-    ice_srouter = 4064, 'ice-srouter', TransportProtocol.tcp
+    ice_srouter = 4064, 'ice-srouter'
 
     #: - [TCP] Avanti Common Data IANA assigned this well-formed service name as a
     #:   replacement for "avanti_cdp".
@@ -16076,259 +16076,259 @@ class TCP(AppType):
     #: - [UDP] Avanti Common Data IANA assigned this well-formed service name as a
     #:   replacement for "avanti_cdp".
     #: - [UDP] Avanti Common Data
-    avanti_cdp = 4065, 'avanti-cdp', TransportProtocol.tcp
+    avanti_cdp = 4065, 'avanti-cdp'
 
     #: - [TCP] Performance Measurement and Analysis
     #: - [UDP] Performance Measurement and Analysis
-    pmas = 4066, 'pmas', TransportProtocol.tcp
+    pmas = 4066
 
     #: - [TCP] Information Distribution Protocol
     #: - [UDP] Information Distribution Protocol
-    idp = 4067, 'idp', TransportProtocol.tcp
+    idp = 4067
 
     #: - [TCP] IP Fleet Broadcast
     #: - [UDP] IP Fleet Broadcast
-    ipfltbcst = 4068, 'ipfltbcst', TransportProtocol.tcp
+    ipfltbcst = 4068
 
     #: - [TCP] Minger Email Address Validation Service
     #: - [UDP] Minger Email Address Validation Service
-    minger = 4069, 'minger', TransportProtocol.tcp
+    minger = 4069
 
     #: - [TCP] Trivial IP Encryption (TrIPE)
     #: - [UDP] Trivial IP Encryption (TrIPE)
-    tripe = 4070, 'tripe', TransportProtocol.tcp
+    tripe = 4070
 
     #: - [TCP] Automatically Incremental Backup
     #: - [UDP] Automatically Incremental Backup
-    aibkup = 4071, 'aibkup', TransportProtocol.tcp
+    aibkup = 4071
 
     #: - [TCP] Zieto Socket Communications
     #: - [UDP] Zieto Socket Communications
-    zieto_sock = 4072, 'zieto-sock', TransportProtocol.tcp
+    zieto_sock = 4072, 'zieto-sock'
 
     #: - [TCP] Interactive Remote Application Pairing Protocol
     #: - [UDP] Interactive Remote Application Pairing Protocol
-    irapp = 4073, 'irapp', TransportProtocol.tcp
+    irapp = 4073
 
     #: - [TCP] Cequint City ID UI trigger
     #: - [UDP] Cequint City ID UI trigger
-    cequint_cityid = 4074, 'cequint-cityid', TransportProtocol.tcp
+    cequint_cityid = 4074, 'cequint-cityid'
 
     #: - [TCP] ISC Alarm Message Service
     #: - [UDP] ISC Alarm Message Service
-    perimlan = 4075, 'perimlan', TransportProtocol.tcp
+    perimlan = 4075
 
     #: - [TCP] Seraph DCS
     #: - [UDP] Seraph DCS
-    seraph = 4076, 'seraph', TransportProtocol.tcp
+    seraph = 4076
 
     #: [TCP] Reserved
-    reserved_4077 = 4077, 'reserved', TransportProtocol.tcp
+    reserved_4077 = 4077, 'reserved'
 
     #: [TCP] Coordinated Security Service Protocol
-    cssp = 4078, 'cssp', TransportProtocol.tcp
+    cssp = 4078
 
     #: - [TCP] SANtools Diagnostic Server
     #: - [UDP] SANtools Diagnostic Server
-    santools = 4079, 'santools', TransportProtocol.tcp
+    santools = 4079
 
     #: - [TCP] Lorica inside facing
     #: - [UDP] Lorica inside facing
-    lorica_in = 4080, 'lorica-in', TransportProtocol.tcp
+    lorica_in = 4080, 'lorica-in'
 
     #: - [TCP] Lorica inside facing (SSL)
     #: - [UDP] Lorica inside facing (SSL)
-    lorica_in_sec = 4081, 'lorica-in-sec', TransportProtocol.tcp
+    lorica_in_sec = 4081, 'lorica-in-sec'
 
     #: - [TCP] Lorica outside facing
     #: - [UDP] Lorica outside facing
-    lorica_out = 4082, 'lorica-out', TransportProtocol.tcp
+    lorica_out = 4082, 'lorica-out'
 
     #: - [TCP] Lorica outside facing (SSL)
     #: - [UDP] Lorica outside facing (SSL)
-    lorica_out_sec = 4083, 'lorica-out-sec', TransportProtocol.tcp
+    lorica_out_sec = 4083, 'lorica-out-sec'
 
     #: [TCP] Reserved
-    reserved_4084 = 4084, 'reserved', TransportProtocol.tcp
+    reserved_4084 = 4084, 'reserved'
 
     #: [TCP] EZNews Newsroom Message Service
-    ezmessagesrv = 4085, 'ezmessagesrv', TransportProtocol.tcp
+    ezmessagesrv = 4085
 
     #: [TCP] Reserved
-    reserved_4086 = 4086, 'reserved', TransportProtocol.tcp
+    reserved_4086 = 4086, 'reserved'
 
     #: [TCP] APplus Service
-    applusservice = 4087, 'applusservice', TransportProtocol.tcp
+    applusservice = 4087
 
     #: [TCP] Noah Printing Service Protocol
-    npsp = 4088, 'npsp', TransportProtocol.tcp
+    npsp = 4088
 
     #: - [TCP] OpenCORE Remote Control Service
     #: - [UDP] OpenCORE Remote Control Service
-    opencore = 4089, 'opencore', TransportProtocol.tcp
+    opencore = 4089
 
     #: - [TCP] OMA BCAST Service Guide
     #: - [UDP] OMA BCAST Service Guide
-    omasgport = 4090, 'omasgport', TransportProtocol.tcp
+    omasgport = 4090
 
     #: - [TCP] EminentWare Installer
     #: - [UDP] EminentWare Installer
-    ewinstaller = 4091, 'ewinstaller', TransportProtocol.tcp
+    ewinstaller = 4091
 
     #: - [TCP] EminentWare DGS
     #: - [UDP] EminentWare DGS
-    ewdgs = 4092, 'ewdgs', TransportProtocol.tcp
+    ewdgs = 4092
 
     #: - [TCP] Pvx Plus CS Host
     #: - [UDP] Pvx Plus CS Host
-    pvxpluscs = 4093, 'pvxpluscs', TransportProtocol.tcp
+    pvxpluscs = 4093
 
     #: - [TCP] sysrq daemon
     #: - [UDP] sysrq daemon
-    sysrqd = 4094, 'sysrqd', TransportProtocol.tcp
+    sysrqd = 4094
 
     #: - [TCP] xtgui information service
     #: - [UDP] xtgui information service
-    xtgui = 4095, 'xtgui', TransportProtocol.tcp
+    xtgui = 4095
 
     #: - [TCP] BRE (Bridge Relay Element)
     #: - [UDP] BRE (Bridge Relay Element)
-    bre = 4096, 'bre', TransportProtocol.tcp
+    bre = 4096
 
     #: - [TCP] Patrol View
     #: - [UDP] Patrol View
-    patrolview = 4097, 'patrolview', TransportProtocol.tcp
+    patrolview = 4097
 
     #: - [TCP] drmsfsd
     #: - [UDP] drmsfsd
-    drmsfsd = 4098, 'drmsfsd', TransportProtocol.tcp
+    drmsfsd = 4098
 
     #: - [TCP] DPCP
     #: - [UDP] DPCP
-    dpcp = 4099, 'dpcp', TransportProtocol.tcp
+    dpcp = 4099
 
     #: - [TCP] IGo Incognito Data Port
     #: - [UDP] IGo Incognito Data Port
-    igo_incognito = 4100, 'igo-incognito', TransportProtocol.tcp
+    igo_incognito = 4100, 'igo-incognito'
 
     #: - [TCP] Braille protocol
     #: - [UDP] Braille protocol
-    brlp_0 = 4101, 'brlp-0', TransportProtocol.tcp
+    brlp_0 = 4101, 'brlp-0'
 
     #: - [TCP] Braille protocol
     #: - [UDP] Braille protocol
-    brlp_1 = 4102, 'brlp-1', TransportProtocol.tcp
+    brlp_1 = 4102, 'brlp-1'
 
     #: - [TCP] Braille protocol
     #: - [UDP] Braille protocol
-    brlp_2 = 4103, 'brlp-2', TransportProtocol.tcp
+    brlp_2 = 4103, 'brlp-2'
 
     #: - [TCP] Braille protocol
     #: - [UDP] Braille protocol
-    brlp_3 = 4104, 'brlp-3', TransportProtocol.tcp
+    brlp_3 = 4104, 'brlp-3'
 
     #: - [TCP] Shofar
     #: - [UDP] Shofar
-    shofar = 4105, 'shofar', TransportProtocol.tcp
+    shofar = 4105
 
     #: - [TCP] Synchronite
     #: - [UDP] Synchronite
-    synchronite = 4106, 'synchronite', TransportProtocol.tcp
+    synchronite = 4106
 
     #: - [TCP] JDL Accounting LAN Service
     #: - [UDP] JDL Accounting LAN Service
-    j_ac = 4107, 'j-ac', TransportProtocol.tcp
+    j_ac = 4107, 'j-ac'
 
     #: - [TCP] ACCEL
     #: - [UDP] ACCEL
-    accel = 4108, 'accel', TransportProtocol.tcp
+    accel = 4108
 
     #: - [TCP] Instantiated Zero-control Messaging
     #: - [UDP] Instantiated Zero-control Messaging
-    izm = 4109, 'izm', TransportProtocol.tcp
+    izm = 4109
 
     #: - [TCP] G2 RFID Tag Telemetry Data
     #: - [UDP] G2 RFID Tag Telemetry Data
-    g2tag = 4110, 'g2tag', TransportProtocol.tcp
+    g2tag = 4110
 
     #: - [TCP] Xgrid
     #: - [UDP] Xgrid
-    xgrid = 4111, 'xgrid', TransportProtocol.tcp
+    xgrid = 4111
 
     #: - [TCP] Apple VPN Server Reporting Protocol
     #: - [UDP] Apple VPN Server Reporting Protocol
-    apple_vpns_rp = 4112, 'apple-vpns-rp', TransportProtocol.tcp
+    apple_vpns_rp = 4112, 'apple-vpns-rp'
 
     #: - [TCP] AIPN LS Registration
     #: - [UDP] AIPN LS Registration
-    aipn_reg = 4113, 'aipn-reg', TransportProtocol.tcp
+    aipn_reg = 4113, 'aipn-reg'
 
     #: - [TCP] JomaMQMonitor
     #: - [UDP] JomaMQMonitor
-    jomamqmonitor = 4114, 'jomamqmonitor', TransportProtocol.tcp
+    jomamqmonitor = 4114
 
     #: - [TCP] CDS Transfer Agent
     #: - [UDP] CDS Transfer Agent
-    cds = 4115, 'cds', TransportProtocol.tcp
+    cds = 4115
 
     #: - [TCP] smartcard-TLS
     #: - [UDP] smartcard-TLS
-    smartcard_tls = 4116, 'smartcard-tls', TransportProtocol.tcp
+    smartcard_tls = 4116, 'smartcard-tls'
 
     #: - [TCP] Hillr Connection Manager
     #: - [UDP] Hillr Connection Manager
-    hillrserv = 4117, 'hillrserv', TransportProtocol.tcp
+    hillrserv = 4117
 
     #: - [TCP] Netadmin Systems NETscript service
     #: - [UDP] Netadmin Systems NETscript service
-    netscript = 4118, 'netscript', TransportProtocol.tcp
+    netscript = 4118
 
     #: - [TCP] Assuria Log Manager
     #: - [UDP] Assuria Log Manager
-    assuria_slm = 4119, 'assuria-slm', TransportProtocol.tcp
+    assuria_slm = 4119, 'assuria-slm'
 
     #: [TCP] MiniRem Remote Telemetry and Control
-    minirem = 4120, 'minirem', TransportProtocol.tcp
+    minirem = 4120
 
     #: - [TCP] e-Builder Application Communication
     #: - [UDP] e-Builder Application Communication
-    e_builder = 4121, 'e-builder', TransportProtocol.tcp
+    e_builder = 4121, 'e-builder'
 
     #: - [TCP] Fiber Patrol Alarm Service
     #: - [UDP] Fiber Patrol Alarm Service
-    fprams = 4122, 'fprams', TransportProtocol.tcp
+    fprams = 4122
 
     #: - [TCP] Rohill TetraNode Ip Gateway v2
     #: - [UDP] Rohill TetraNode Ip Gateway v2
-    tigv2 = 4124, 'tigv2', TransportProtocol.tcp
+    tigv2 = 4124
 
     #: - [TCP] Opsview Envoy
     #: - [UDP] Opsview Envoy
-    opsview_envoy = 4125, 'opsview-envoy', TransportProtocol.tcp
+    opsview_envoy = 4125, 'opsview-envoy'
 
     #: - [TCP] Data Domain Replication Service
     #: - [UDP] Data Domain Replication Service
-    ddrepl = 4126, 'ddrepl', TransportProtocol.tcp
+    ddrepl = 4126
 
     #: - [TCP] NetUniKeyServer
     #: - [UDP] NetUniKeyServer
-    unikeypro = 4127, 'unikeypro', TransportProtocol.tcp
+    unikeypro = 4127
 
     #: - [TCP] NuFW decision delegation protocol
     #: - [UDP] NuFW decision delegation protocol
-    nufw = 4128, 'nufw', TransportProtocol.tcp
+    nufw = 4128
 
     #: - [TCP] NuFW authentication protocol
     #: - [UDP] NuFW authentication protocol
-    nuauth = 4129, 'nuauth', TransportProtocol.tcp
+    nuauth = 4129
 
     #: - [TCP] FRONET message protocol
     #: - [UDP] FRONET message protocol
-    fronet = 4130, 'fronet', TransportProtocol.tcp
+    fronet = 4130
 
     #: - [TCP] Global Maintech Stars
     #: - [UDP] Global Maintech Stars
-    stars = 4131, 'stars', TransportProtocol.tcp
+    stars = 4131
 
     #: - [TCP] NUTS Daemon IANA assigned this well-formed service name as a
     #:   replacement for "nuts_dem".
@@ -16336,7 +16336,7 @@ class TCP(AppType):
     #: - [UDP] NUTS Daemon IANA assigned this well-formed service name as a
     #:   replacement for "nuts_dem".
     #: - [UDP] NUTS Daemon
-    nuts_dem = 4132, 'nuts-dem', TransportProtocol.tcp
+    nuts_dem = 4132, 'nuts-dem'
 
     #: - [TCP] NUTS Bootp Server IANA assigned this well-formed service name as a
     #:   replacement for "nuts_bootp".
@@ -16344,31 +16344,31 @@ class TCP(AppType):
     #: - [UDP] NUTS Bootp Server IANA assigned this well-formed service name as a
     #:   replacement for "nuts_bootp".
     #: - [UDP] NUTS Bootp Server
-    nuts_bootp = 4133, 'nuts-bootp', TransportProtocol.tcp
+    nuts_bootp = 4133, 'nuts-bootp'
 
     #: - [TCP] NIFTY-Serve HMI protocol
     #: - [UDP] NIFTY-Serve HMI protocol
-    nifty_hmi = 4134, 'nifty-hmi', TransportProtocol.tcp
+    nifty_hmi = 4134, 'nifty-hmi'
 
     #: - [TCP] Classic Line Database Server Attach
     #: - [UDP] Classic Line Database Server Attach
-    cl_db_attach = 4135, 'cl-db-attach', TransportProtocol.tcp
+    cl_db_attach = 4135, 'cl-db-attach'
 
     #: - [TCP] Classic Line Database Server Request
     #: - [UDP] Classic Line Database Server Request
-    cl_db_request = 4136, 'cl-db-request', TransportProtocol.tcp
+    cl_db_request = 4136, 'cl-db-request'
 
     #: - [TCP] Classic Line Database Server Remote
     #: - [UDP] Classic Line Database Server Remote
-    cl_db_remote = 4137, 'cl-db-remote', TransportProtocol.tcp
+    cl_db_remote = 4137, 'cl-db-remote'
 
     #: - [TCP] nettest
     #: - [UDP] nettest
-    nettest = 4138, 'nettest', TransportProtocol.tcp
+    nettest = 4138
 
     #: - [TCP] Imperfect Networks Server
     #: - [UDP] Imperfect Networks Server
-    thrtx = 4139, 'thrtx', TransportProtocol.tcp
+    thrtx = 4139
 
     #: - [TCP] Cedros Fraud Detection System IANA assigned this well-formed service
     #:   name as a replacement for "cedros_fds".
@@ -16376,43 +16376,43 @@ class TCP(AppType):
     #: - [UDP] Cedros Fraud Detection System IANA assigned this well-formed service
     #:   name as a replacement for "cedros_fds".
     #: - [UDP] Cedros Fraud Detection System
-    cedros_fds = 4140, 'cedros-fds', TransportProtocol.tcp
+    cedros_fds = 4140, 'cedros-fds'
 
     #: - [TCP] Workflow Server
     #: - [UDP] Workflow Server
-    oirtgsvc = 4141, 'oirtgsvc', TransportProtocol.tcp
+    oirtgsvc = 4141
 
     #: - [TCP] Document Server
     #: - [UDP] Document Server
-    oidocsvc = 4142, 'oidocsvc', TransportProtocol.tcp
+    oidocsvc = 4142
 
     #: - [TCP] Document Replication
     #: - [UDP] Document Replication
-    oidsr = 4143, 'oidsr', TransportProtocol.tcp
+    oidsr = 4143
 
     #: - [TCP] VVR Control
     #: - [UDP] VVR Control
-    vvr_control = 4145, 'vvr-control', TransportProtocol.tcp
+    vvr_control = 4145, 'vvr-control'
 
     #: - [TCP] TGCConnect Beacon
     #: - [UDP] TGCConnect Beacon
-    tgcconnect = 4146, 'tgcconnect', TransportProtocol.tcp
+    tgcconnect = 4146
 
     #: - [TCP] Multum Service Manager
     #: - [UDP] Multum Service Manager
-    vrxpservman = 4147, 'vrxpservman', TransportProtocol.tcp
+    vrxpservman = 4147
 
     #: - [TCP] HHB Handheld Client
     #: - [UDP] HHB Handheld Client
-    hhb_handheld = 4148, 'hhb-handheld', TransportProtocol.tcp
+    hhb_handheld = 4148, 'hhb-handheld'
 
     #: - [TCP] A10 GSLB Service
     #: - [UDP] A10 GSLB Service
-    agslb = 4149, 'agslb', TransportProtocol.tcp
+    agslb = 4149
 
     #: - [TCP] PowerAlert Network Shutdown Agent
     #: - [UDP] PowerAlert Network Shutdown Agent
-    poweralert_nsa = 4150, 'poweralert-nsa', TransportProtocol.tcp
+    poweralert_nsa = 4150, 'poweralert-nsa'
 
     #: - [TCP] Men & Mice Remote Control IANA assigned this well-formed service name
     #:   as a replacement for "menandmice_noh".
@@ -16420,7 +16420,7 @@ class TCP(AppType):
     #: - [UDP] Men & Mice Remote Control IANA assigned this well-formed service name
     #:   as a replacement for "menandmice_noh".
     #: - [UDP] Men & Mice Remote Control
-    menandmice_noh = 4151, 'menandmice-noh', TransportProtocol.tcp
+    menandmice_noh = 4151, 'menandmice-noh'
 
     #: - [TCP] iDigTech Multiplex IANA assigned this well-formed service name as a
     #:   replacement for "idig_mux".
@@ -16428,124 +16428,124 @@ class TCP(AppType):
     #: - [UDP] iDigTech Multiplex IANA assigned this well-formed service name as a
     #:   replacement for "idig_mux".
     #: - [UDP] iDigTech Multiplex
-    idig_mux = 4152, 'idig-mux', TransportProtocol.tcp
+    idig_mux = 4152, 'idig-mux'
 
     #: - [TCP] MBL Remote Battery Monitoring
     #: - [UDP] MBL Remote Battery Monitoring
-    mbl_battd = 4153, 'mbl-battd', TransportProtocol.tcp
+    mbl_battd = 4153, 'mbl-battd'
 
     #: - [TCP] atlinks device discovery
     #: - [UDP] atlinks device discovery
-    atlinks = 4154, 'atlinks', TransportProtocol.tcp
+    atlinks = 4154
 
     #: - [TCP] Bazaar version control system
     #: - [UDP] Bazaar version control system
-    bzr = 4155, 'bzr', TransportProtocol.tcp
+    bzr = 4155
 
     #: - [TCP] STAT Results
     #: - [UDP] STAT Results
-    stat_results = 4156, 'stat-results', TransportProtocol.tcp
+    stat_results = 4156, 'stat-results'
 
     #: - [TCP] STAT Scanner Control
     #: - [UDP] STAT Scanner Control
-    stat_scanner = 4157, 'stat-scanner', TransportProtocol.tcp
+    stat_scanner = 4157, 'stat-scanner'
 
     #: - [TCP] STAT Command Center
     #: - [UDP] STAT Command Center
-    stat_cc = 4158, 'stat-cc', TransportProtocol.tcp
+    stat_cc = 4158, 'stat-cc'
 
     #: - [TCP] Network Security Service
     #: - [UDP] Network Security Service
-    nss = 4159, 'nss', TransportProtocol.tcp
+    nss = 4159
 
     #: - [TCP] Jini Discovery
     #: - [UDP] Jini Discovery
-    jini_discovery = 4160, 'jini-discovery', TransportProtocol.tcp
+    jini_discovery = 4160, 'jini-discovery'
 
     #: - [TCP] OMS Contact
     #: - [UDP] OMS Contact
-    omscontact = 4161, 'omscontact', TransportProtocol.tcp
+    omscontact = 4161
 
     #: - [TCP] OMS Topology
     #: - [UDP] OMS Topology
-    omstopology = 4162, 'omstopology', TransportProtocol.tcp
+    omstopology = 4162
 
     #: - [TCP] Silver Peak Peer Protocol
     #: - [UDP] Silver Peak Peer Protocol
-    silverpeakpeer = 4163, 'silverpeakpeer', TransportProtocol.tcp
+    silverpeakpeer = 4163
 
     #: - [TCP] Silver Peak Communication Protocol
     #: - [UDP] Silver Peak Communication Protocol
-    silverpeakcomm = 4164, 'silverpeakcomm', TransportProtocol.tcp
+    silverpeakcomm = 4164
 
     #: - [TCP] ArcLink over Ethernet
     #: - [UDP] ArcLink over Ethernet
-    altcp = 4165, 'altcp', TransportProtocol.tcp
+    altcp = 4165
 
     #: - [TCP] Joost Peer to Peer Protocol
     #: - [UDP] Joost Peer to Peer Protocol
-    joost = 4166, 'joost', TransportProtocol.tcp
+    joost = 4166
 
     #: - [TCP] DeskDirect Global Network
     #: - [UDP] DeskDirect Global Network
-    ddgn = 4167, 'ddgn', TransportProtocol.tcp
+    ddgn = 4167
 
     #: - [TCP] PrintSoft License Server
     #: - [UDP] PrintSoft License Server
-    pslicser = 4168, 'pslicser', TransportProtocol.tcp
+    pslicser = 4168
 
     #: [TCP] Automation Drive Interface Transport
-    iadt = 4169, 'iadt', TransportProtocol.tcp
+    iadt = 4169
 
     #: [TCP] SMPTE Content Synchonization Protocol
-    d_cinema_csp = 4170, 'd-cinema-csp', TransportProtocol.tcp
+    d_cinema_csp = 4170, 'd-cinema-csp'
 
     #: [TCP] Maxlogic Supervisor Communication
-    ml_svnet = 4171, 'ml-svnet', TransportProtocol.tcp
+    ml_svnet = 4171, 'ml-svnet'
 
     #: - [TCP] PC over IP
     #: - [UDP] PC over IP
-    pcoip = 4172, 'pcoip', TransportProtocol.tcp
+    pcoip = 4172
 
     #: [TCP] Reserved
-    reserved_4173 = 4173, 'reserved', TransportProtocol.tcp
+    reserved_4173 = 4173, 'reserved'
 
     #: [TCP] StorMagic Cluster Services
-    smcluster = 4174, 'smcluster', TransportProtocol.tcp
+    smcluster = 4174
 
     #: [TCP] Brocade Cluster Communication Protocol
-    bccp = 4175, 'bccp', TransportProtocol.tcp
+    bccp = 4175
 
     #: [TCP] Translattice Cluster IPC Proxy
-    tl_ipcproxy = 4176, 'tl-ipcproxy', TransportProtocol.tcp
+    tl_ipcproxy = 4176, 'tl-ipcproxy'
 
     #: - [TCP] Wello P2P pubsub service
     #: - [UDP] Wello P2P pubsub service
-    wello = 4177, 'wello', TransportProtocol.tcp
+    wello = 4177
 
     #: - [TCP] StorMan
     #: - [UDP] StorMan
-    storman = 4178, 'storman', TransportProtocol.tcp
+    storman = 4178
 
     #: - [TCP] Maxum Services
     #: - [UDP] Maxum Services
-    maxumsp = 4179, 'maxumsp', TransportProtocol.tcp
+    maxumsp = 4179
 
     #: - [TCP] HTTPX
     #: - [UDP] HTTPX
-    httpx = 4180, 'httpx', TransportProtocol.tcp
+    httpx = 4180
 
     #: - [TCP] MacBak
     #: - [UDP] MacBak
-    macbak = 4181, 'macbak', TransportProtocol.tcp
+    macbak = 4181
 
     #: - [TCP] Production Company Pro TCP Service
     #: - [UDP] Production Company Pro TCP Service
-    pcptcpservice = 4182, 'pcptcpservice', TransportProtocol.tcp
+    pcptcpservice = 4182
 
     #: - [TCP] CyborgNet communications protocol
     #: - [UDP] CyborgNet communications protocol
-    cyborgnet = 4183, 'cyborgnet', TransportProtocol.tcp
+    cyborgnet = 4183
 
     #: - [TCP] UNIVERSE SUITE MESSAGE SERVICE IANA assigned this well-formed service
     #:   name as a replacement for "universe_suite".
@@ -16553,279 +16553,279 @@ class TCP(AppType):
     #: - [UDP] UNIVERSE SUITE MESSAGE SERVICE IANA assigned this well-formed service
     #:   name as a replacement for "universe_suite".
     #: - [UDP] UNIVERSE SUITE MESSAGE SERVICE
-    universe_suite = 4184, 'universe-suite', TransportProtocol.tcp
+    universe_suite = 4184, 'universe-suite'
 
     #: - [TCP] Woven Control Plane Protocol
     #: - [UDP] Woven Control Plane Protocol
-    wcpp = 4185, 'wcpp', TransportProtocol.tcp
+    wcpp = 4185
 
     #: [TCP] Box Backup Store Service
-    boxbackupstore = 4186, 'boxbackupstore', TransportProtocol.tcp
+    boxbackupstore = 4186
 
     #: - [TCP] Cascade Proxy IANA assigned this well-formed service name as a
     #:   replacement for "csc_proxy".
     #: - [TCP] Cascade Proxy
-    csc_proxy = 4187, 'csc-proxy', TransportProtocol.tcp
+    csc_proxy = 4187, 'csc-proxy'
 
     #: - [TCP] Vatata Peer to Peer Protocol
     #: - [UDP] Vatata Peer to Peer Protocol
-    vatata = 4188, 'vatata', TransportProtocol.tcp
+    vatata = 4188
 
     #: [TCP] Path Computation Element Communication Protocol
-    pcep = 4189, 'pcep', TransportProtocol.tcp
+    pcep = 4189
 
     #: [TCP] ManageSieve Protocol
-    sieve = 4190, 'sieve', TransportProtocol.tcp
+    sieve = 4190
 
     #: [TCP] Reserved
-    reserved_4191 = 4191, 'reserved', TransportProtocol.tcp
+    reserved_4191 = 4191, 'reserved'
 
     #: [TCP] Azeti Agent Service
-    azeti = 4192, 'azeti', TransportProtocol.tcp
+    azeti = 4192
 
     #: [TCP] PxPlus remote file srvr
-    pvxplusio = 4193, 'pvxplusio', TransportProtocol.tcp
+    pvxplusio = 4193
 
     #: [TCP] Security Protocol and Data Model
-    spdm = 4194, 'spdm', TransportProtocol.tcp
+    spdm = 4194
 
     #: - [TCP] AWS protocol for cloud remoting solution
     #: - [UDP] AWS protocol for cloud remoting solution
     #: - [SCTP] AWS protocol for cloud remoting solution
     #: - [DCCP] AWS protocol for cloud remoting solution
-    aws_wsp = 4195, 'aws-wsp', TransportProtocol.tcp
+    aws_wsp = 4195, 'aws-wsp'
 
     #: - [TCP] Harman HControl Protocol
     #: - [UDP] Harman HControl Protocol
-    hctl = 4197, 'hctl', TransportProtocol.tcp
+    hctl = 4197
 
     #: - [TCP] EIMS ADMIN
     #: - [UDP] EIMS ADMIN
-    eims_admin = 4199, 'eims-admin', TransportProtocol.tcp
+    eims_admin = 4199, 'eims-admin'
 
     #: - [TCP] Corel CCam
     #: - [UDP] Corel CCam
-    corelccam = 4300, 'corelccam', TransportProtocol.tcp
+    corelccam = 4300
 
     #: - [TCP] Diagnostic Data
     #: - [UDP] Diagnostic Data
-    d_data = 4301, 'd-data', TransportProtocol.tcp
+    d_data = 4301, 'd-data'
 
     #: - [TCP] Diagnostic Data Control
     #: - [UDP] Diagnostic Data Control
-    d_data_control = 4302, 'd-data-control', TransportProtocol.tcp
+    d_data_control = 4302, 'd-data-control'
 
     #: - [TCP] Simple Railroad Command Protocol
     #: - [UDP] Simple Railroad Command Protocol
-    srcp = 4303, 'srcp', TransportProtocol.tcp
+    srcp = 4303
 
     #: - [TCP] One-Wire Filesystem Server
     #: - [UDP] One-Wire Filesystem Server
-    owserver = 4304, 'owserver', TransportProtocol.tcp
+    owserver = 4304
 
     #: - [TCP] better approach to mobile ad-hoc networking
     #: - [UDP] better approach to mobile ad-hoc networking
-    batman = 4305, 'batman', TransportProtocol.tcp
+    batman = 4305
 
     #: - [TCP] Hellgate London
     #: - [UDP] Hellgate London
-    pinghgl = 4306, 'pinghgl', TransportProtocol.tcp
+    pinghgl = 4306
 
     #: - [TCP] TrueConf Videoconference Service
     #: - [UDP] TrueConf Videoconference Service
-    trueconf = 4307, 'trueconf', TransportProtocol.tcp
+    trueconf = 4307
 
     #: - [TCP] CompX-LockView
     #: - [UDP] CompX-LockView
-    compx_lockview = 4308, 'compx-lockview', TransportProtocol.tcp
+    compx_lockview = 4308, 'compx-lockview'
 
     #: - [TCP] Exsequi Appliance Discovery
     #: - [UDP] Exsequi Appliance Discovery
-    dserver = 4309, 'dserver', TransportProtocol.tcp
+    dserver = 4309
 
     #: - [TCP] Mir-RT exchange service
     #: - [UDP] Mir-RT exchange service
-    mirrtex = 4310, 'mirrtex', TransportProtocol.tcp
+    mirrtex = 4310
 
     #: [TCP] P6R Secure Server Management Console
-    p6ssmc = 4311, 'p6ssmc', TransportProtocol.tcp
+    p6ssmc = 4311
 
     #: [TCP] Parascale Membership Manager
-    pscl_mgt = 4312, 'pscl-mgt', TransportProtocol.tcp
+    pscl_mgt = 4312, 'pscl-mgt'
 
     #: [TCP] PERRLA User Services
-    perrla = 4313, 'perrla', TransportProtocol.tcp
+    perrla = 4313
 
     #: [TCP] ChoiceView Agent
-    choiceview_agt = 4314, 'choiceview-agt', TransportProtocol.tcp
+    choiceview_agt = 4314, 'choiceview-agt'
 
     #: [TCP] ChoiceView Client
-    choiceview_clt = 4316, 'choiceview-clt', TransportProtocol.tcp
+    choiceview_clt = 4316, 'choiceview-clt'
 
     #: [TCP] OpenTelemetry Protocol
-    opentelemetry = 4317, 'opentelemetry', TransportProtocol.tcp
+    opentelemetry = 4317
 
     #: - [TCP] Sentyron SkyTale encrypted communication
     #: - [UDP] Sentyron SkyTale encrypted communication
-    skytale = 4319, 'skytale', TransportProtocol.tcp
+    skytale = 4319
 
     #: - [TCP] FDT Remote Categorization Protocol
     #: - [UDP] FDT Remote Categorization Protocol
-    fdt_rcatp = 4320, 'fdt-rcatp', TransportProtocol.tcp
+    fdt_rcatp = 4320, 'fdt-rcatp'
 
     #: - [TCP] Remote Who Is [:rfc:`2167`]
     #: - [UDP] Remote Who Is [:rfc:`2167`]
-    rwhois = 4321, 'rwhois', TransportProtocol.tcp
+    rwhois = 4321
 
     #: - [TCP] TRIM Event Service
     #: - [UDP] TRIM Event Service
-    trim_event = 4322, 'trim-event', TransportProtocol.tcp
+    trim_event = 4322, 'trim-event'
 
     #: - [TCP] TRIM ICE Service
     #: - [UDP] TRIM ICE Service
-    trim_ice = 4323, 'trim-ice', TransportProtocol.tcp
+    trim_ice = 4323, 'trim-ice'
 
     #: [TCP] Cadcorp GeognoSIS Administrator
-    geognosisadmin = 4325, 'geognosisadmin', TransportProtocol.tcp
+    geognosisadmin = 4325
 
     #: - [TCP] Cadcorp GeognoSIS
     #: - [UDP] Cadcorp GeognoSIS
-    geognosis = 4326, 'geognosis', TransportProtocol.tcp
+    geognosis = 4326
 
     #: - [TCP] Jaxer Web Protocol
     #: - [UDP] Jaxer Web Protocol
-    jaxer_web = 4327, 'jaxer-web', TransportProtocol.tcp
+    jaxer_web = 4327, 'jaxer-web'
 
     #: - [TCP] Jaxer Manager Command Protocol
     #: - [UDP] Jaxer Manager Command Protocol
-    jaxer_manager = 4328, 'jaxer-manager', TransportProtocol.tcp
+    jaxer_manager = 4328, 'jaxer-manager'
 
     #: [TCP] PubliQare Distributed Environment Synchronisation Engine
-    publiqare_sync = 4329, 'publiqare-sync', TransportProtocol.tcp
+    publiqare_sync = 4329, 'publiqare-sync'
 
     #: [TCP] DEY Storage Administration REST API
-    dey_sapi = 4330, 'dey-sapi', TransportProtocol.tcp
+    dey_sapi = 4330, 'dey-sapi'
 
     #: [TCP] ktickets REST API for event management and ticketing systems (embedded
     #: POS devices)
-    ktickets_rest = 4331, 'ktickets-rest', TransportProtocol.tcp
+    ktickets_rest = 4331, 'ktickets-rest'
 
     #: [TCP] Getty Images FOCUS service
-    getty_focus = 4332, 'getty-focus', TransportProtocol.tcp
+    getty_focus = 4332, 'getty-focus'
 
     #: - [TCP] ArrowHead Service Protocol (AHSP)
     #: - [UDP] ArrowHead Service Protocol (AHSP)
     #: - [SCTP] ArrowHead Service Protocol (AHSP)
-    ahsp = 4333, 'ahsp', TransportProtocol.tcp
+    ahsp = 4333
 
     #: [TCP] NETCONF Call Home (SSH) [:rfc:`8071`]
-    netconf_ch_ssh = 4334, 'netconf-ch-ssh', TransportProtocol.tcp
+    netconf_ch_ssh = 4334, 'netconf-ch-ssh'
 
     #: [TCP] NETCONF Call Home (TLS) [:rfc:`8071`]
-    netconf_ch_tls = 4335, 'netconf-ch-tls', TransportProtocol.tcp
+    netconf_ch_tls = 4335, 'netconf-ch-tls'
 
     #: [TCP] RESTCONF Call Home (TLS) [:rfc:`8071`]
-    restconf_ch_tls = 4336, 'restconf-ch-tls', TransportProtocol.tcp
+    restconf_ch_tls = 4336, 'restconf-ch-tls'
 
     #: - [TCP] Gaia Connector Protocol
     #: - [UDP] Gaia Connector Protocol
-    gaia = 4340, 'gaia', TransportProtocol.tcp
+    gaia = 4340
 
     #: [TCP] Reserved
-    reserved_4341 = 4341, 'reserved', TransportProtocol.tcp
+    reserved_4341 = 4341, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4342 = 4342, 'reserved', TransportProtocol.tcp
+    reserved_4342 = 4342, 'reserved'
 
     #: - [TCP] UNICALL
     #: - [UDP] UNICALL
-    unicall = 4343, 'unicall', TransportProtocol.tcp
+    unicall = 4343
 
     #: - [TCP] VinaInstall
     #: - [UDP] VinaInstall
-    vinainstall = 4344, 'vinainstall', TransportProtocol.tcp
+    vinainstall = 4344
 
     #: - [TCP] Macro 4 Network AS
     #: - [UDP] Macro 4 Network AS
-    m4_network_as = 4345, 'm4-network-as', TransportProtocol.tcp
+    m4_network_as = 4345, 'm4-network-as'
 
     #: - [TCP] ELAN LM
     #: - [UDP] ELAN LM
-    elanlm = 4346, 'elanlm', TransportProtocol.tcp
+    elanlm = 4346
 
     #: - [TCP] LAN Surveyor
     #: - [UDP] LAN Surveyor
-    lansurveyor = 4347, 'lansurveyor', TransportProtocol.tcp
+    lansurveyor = 4347
 
     #: - [TCP] ITOSE
     #: - [UDP] ITOSE
-    itose = 4348, 'itose', TransportProtocol.tcp
+    itose = 4348
 
     #: - [TCP] File System Port Map
     #: - [UDP] File System Port Map
-    fsportmap = 4349, 'fsportmap', TransportProtocol.tcp
+    fsportmap = 4349
 
     #: - [TCP] Net Device
     #: - [UDP] Net Device
-    net_device = 4350, 'net-device', TransportProtocol.tcp
+    net_device = 4350, 'net-device'
 
     #: - [TCP] PLCY Net Services
     #: - [UDP] PLCY Net Services
-    plcy_net_svcs = 4351, 'plcy-net-svcs', TransportProtocol.tcp
+    plcy_net_svcs = 4351, 'plcy-net-svcs'
 
     #: - [TCP] Projector Link
     #: - [UDP] Projector Link
-    pjlink = 4352, 'pjlink', TransportProtocol.tcp
+    pjlink = 4352
 
     #: - [TCP] F5 iQuery
     #: - [UDP] F5 iQuery
-    f5_iquery = 4353, 'f5-iquery', TransportProtocol.tcp
+    f5_iquery = 4353, 'f5-iquery'
 
     #: - [TCP] QSNet Transmitter
     #: - [UDP] QSNet Transmitter
-    qsnet_trans = 4354, 'qsnet-trans', TransportProtocol.tcp
+    qsnet_trans = 4354, 'qsnet-trans'
 
     #: - [TCP] QSNet Workstation
     #: - [UDP] QSNet Workstation
-    qsnet_workst = 4355, 'qsnet-workst', TransportProtocol.tcp
+    qsnet_workst = 4355, 'qsnet-workst'
 
     #: - [TCP] QSNet Assistant
     #: - [UDP] QSNet Assistant
-    qsnet_assist = 4356, 'qsnet-assist', TransportProtocol.tcp
+    qsnet_assist = 4356, 'qsnet-assist'
 
     #: - [TCP] QSNet Conductor
     #: - [UDP] QSNet Conductor
-    qsnet_cond = 4357, 'qsnet-cond', TransportProtocol.tcp
+    qsnet_cond = 4357, 'qsnet-cond'
 
     #: - [TCP] QSNet Nucleus
     #: - [UDP] QSNet Nucleus
-    qsnet_nucl = 4358, 'qsnet-nucl', TransportProtocol.tcp
+    qsnet_nucl = 4358, 'qsnet-nucl'
 
     #: - [TCP] OMA BCAST Long-Term Key Messages
     #: - [UDP] OMA BCAST Long-Term Key Messages
-    omabcastltkm = 4359, 'omabcastltkm', TransportProtocol.tcp
+    omabcastltkm = 4359
 
     #: - [TCP] Matrix VNet Communication Protocol IANA assigned this well-formed
     #:   service name as a replacement for "matrix_vnet".
     #: - [TCP] Matrix VNet Communication Protocol
-    matrix_vnet = 4360, 'matrix-vnet', TransportProtocol.tcp
+    matrix_vnet = 4360, 'matrix-vnet'
 
     #: [TCP] Reserved
-    reserved_4361 = 4361, 'reserved', TransportProtocol.tcp
+    reserved_4361 = 4361, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4362 = 4362, 'reserved', TransportProtocol.tcp
+    reserved_4362 = 4362, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4366 = 4366, 'reserved', TransportProtocol.tcp
+    reserved_4366 = 4366, 'reserved'
 
     #: - [TCP] WeatherBrief Direct
     #: - [UDP] WeatherBrief Direct
-    wxbrief = 4368, 'wxbrief', TransportProtocol.tcp
+    wxbrief = 4368
 
     #: - [TCP] Erlang Port Mapper Daemon
     #: - [UDP] Erlang Port Mapper Daemon
-    epmd = 4369, 'epmd', TransportProtocol.tcp
+    epmd = 4369
 
     #: - [TCP] ELPRO V2 Protocol Tunnel IANA assigned this well-formed service name
     #:   as a replacement for "elpro_tunnel".
@@ -16833,454 +16833,454 @@ class TCP(AppType):
     #: - [UDP] ELPRO V2 Protocol Tunnel IANA assigned this well-formed service name
     #:   as a replacement for "elpro_tunnel".
     #: - [UDP] ELPRO V2 Protocol Tunnel
-    elpro_tunnel = 4370, 'elpro-tunnel', TransportProtocol.tcp
+    elpro_tunnel = 4370, 'elpro-tunnel'
 
     #: [TCP] LAN2CAN Control
-    l2c_control = 4371, 'l2c-control', TransportProtocol.tcp
+    l2c_control = 4371, 'l2c-control'
 
     #: - [TCP] LAN2CAN Data
     #: - [UDP] LAN2CAN Data
-    l2c_data = 4372, 'l2c-data', TransportProtocol.tcp
+    l2c_data = 4372, 'l2c-data'
 
     #: - [TCP] Remote Authenticated Command Service
     #: - [UDP] Remote Authenticated Command Service
-    remctl = 4373, 'remctl', TransportProtocol.tcp
+    remctl = 4373
 
     #: [TCP] PSI Push-to-Talk Protocol
-    psi_ptt = 4374, 'psi-ptt', TransportProtocol.tcp
+    psi_ptt = 4374, 'psi-ptt'
 
     #: - [TCP] Toltec EasyShare
     #: - [UDP] Toltec EasyShare
-    tolteces = 4375, 'tolteces', TransportProtocol.tcp
+    tolteces = 4375
 
     #: - [TCP] BioAPI Interworking
     #: - [UDP] BioAPI Interworking
-    bip = 4376, 'bip', TransportProtocol.tcp
+    bip = 4376
 
     #: - [TCP] Cambridge Pixel SPx Server
     #: - [UDP] Cambridge Pixel SPx Server
-    cp_spxsvr = 4377, 'cp-spxsvr', TransportProtocol.tcp
+    cp_spxsvr = 4377, 'cp-spxsvr'
 
     #: - [TCP] Cambridge Pixel SPx Display
     #: - [UDP] Cambridge Pixel SPx Display
-    cp_spxdpy = 4378, 'cp-spxdpy', TransportProtocol.tcp
+    cp_spxdpy = 4378, 'cp-spxdpy'
 
     #: - [TCP] CTDB
     #: - [UDP] CTDB
-    ctdb = 4379, 'ctdb', TransportProtocol.tcp
+    ctdb = 4379
 
     #: - [TCP] Xandros Community Management Service
     #: - [UDP] Xandros Community Management Service
-    xandros_cms = 4389, 'xandros-cms', TransportProtocol.tcp
+    xandros_cms = 4389, 'xandros-cms'
 
     #: - [TCP] Physical Access Control
     #: - [UDP] Physical Access Control
-    wiegand = 4390, 'wiegand', TransportProtocol.tcp
+    wiegand = 4390
 
     #: [TCP] American Printware IMServer Protocol
-    apwi_imserver = 4391, 'apwi-imserver', TransportProtocol.tcp
+    apwi_imserver = 4391, 'apwi-imserver'
 
     #: [TCP] American Printware RXServer Protocol
-    apwi_rxserver = 4392, 'apwi-rxserver', TransportProtocol.tcp
+    apwi_rxserver = 4392, 'apwi-rxserver'
 
     #: [TCP] American Printware RXSpooler Protocol
-    apwi_rxspooler = 4393, 'apwi-rxspooler', TransportProtocol.tcp
+    apwi_rxspooler = 4393, 'apwi-rxspooler'
 
     #: [TCP] Reserved
-    reserved_4394 = 4394, 'reserved', TransportProtocol.tcp
+    reserved_4394 = 4394, 'reserved'
 
     #: - [TCP] OmniVision communication for Virtual environments
     #: - [UDP] OmniVision communication for Virtual environments
-    omnivisionesx = 4395, 'omnivisionesx', TransportProtocol.tcp
+    omnivisionesx = 4395
 
     #: [TCP] Fly Object Space
-    fly = 4396, 'fly', TransportProtocol.tcp
+    fly = 4396
 
     #: - [TCP] ASIGRA Services
     #: - [UDP] ASIGRA Services
-    ds_srv = 4400, 'ds-srv', TransportProtocol.tcp
+    ds_srv = 4400, 'ds-srv'
 
     #: - [TCP] ASIGRA Televaulting DS-System Service
     #: - [UDP] ASIGRA Televaulting DS-System Service
-    ds_srvr = 4401, 'ds-srvr', TransportProtocol.tcp
+    ds_srvr = 4401, 'ds-srvr'
 
     #: - [TCP] ASIGRA Televaulting DS-Client Service
     #: - [UDP] ASIGRA Televaulting DS-Client Service
-    ds_clnt = 4402, 'ds-clnt', TransportProtocol.tcp
+    ds_clnt = 4402, 'ds-clnt'
 
     #: - [TCP] ASIGRA Televaulting DS-Client Monitoring/Management
     #: - [UDP] ASIGRA Televaulting DS-Client Monitoring/Management
-    ds_user = 4403, 'ds-user', TransportProtocol.tcp
+    ds_user = 4403, 'ds-user'
 
     #: - [TCP] ASIGRA Televaulting DS-System Monitoring/Management
     #: - [UDP] ASIGRA Televaulting DS-System Monitoring/Management
-    ds_admin = 4404, 'ds-admin', TransportProtocol.tcp
+    ds_admin = 4404, 'ds-admin'
 
     #: - [TCP] ASIGRA Televaulting Message Level Restore service
     #: - [UDP] ASIGRA Televaulting Message Level Restore service
-    ds_mail = 4405, 'ds-mail', TransportProtocol.tcp
+    ds_mail = 4405, 'ds-mail'
 
     #: - [TCP] ASIGRA Televaulting DS-Sleeper Service
     #: - [UDP] ASIGRA Televaulting DS-Sleeper Service
-    ds_slp = 4406, 'ds-slp', TransportProtocol.tcp
+    ds_slp = 4406, 'ds-slp'
 
     #: [TCP] Network Access Control Agent
-    nacagent = 4407, 'nacagent', TransportProtocol.tcp
+    nacagent = 4407
 
     #: [TCP] SLS Technology Control Centre
-    slscc = 4408, 'slscc', TransportProtocol.tcp
+    slscc = 4408
 
     #: [TCP] Net-Cabinet comunication
-    netcabinet_com = 4409, 'netcabinet-com', TransportProtocol.tcp
+    netcabinet_com = 4409, 'netcabinet-com'
 
     #: [TCP] RIB iTWO Application Server
-    itwo_server = 4410, 'itwo-server', TransportProtocol.tcp
+    itwo_server = 4410, 'itwo-server'
 
     #: [TCP] Found Messaging Protocol
-    found = 4411, 'found', TransportProtocol.tcp
+    found = 4411
 
     #: [TCP] Reserved
-    reserved_4412 = 4412, 'reserved', TransportProtocol.tcp
+    reserved_4412 = 4412, 'reserved'
 
     #: [TCP] FORTÉ Vision Monitoring platform
-    vision_mon = 4413, 'vision-mon', TransportProtocol.tcp
+    vision_mon = 4413, 'vision-mon'
 
     #: [TCP] Updog Monitoring and Status Framework
-    updog = 4414, 'updog', TransportProtocol.tcp
+    updog = 4414
 
     #: [TCP] Brocade Virtual Router Request
-    brcd_vr_req = 4415, 'brcd-vr-req', TransportProtocol.tcp
+    brcd_vr_req = 4415, 'brcd-vr-req'
 
     #: - [TCP] Newmood Media Player
     #: - [UDP] Newmood Media Player discovery
-    newmood_player = 4416, 'newmood-player', TransportProtocol.tcp
+    newmood_player = 4416, 'newmood-player'
 
     #: [TCP] Workflow Director Communication
-    workflowdir = 4417, 'workflowdir', TransportProtocol.tcp
+    workflowdir = 4417
 
     #: [TCP] Reserved
-    reserved_4418 = 4418, 'reserved', TransportProtocol.tcp
+    reserved_4418 = 4418, 'reserved'
 
     #: [TCP] Colnod Binary Protocol
-    cbp = 4419, 'cbp', TransportProtocol.tcp
+    cbp = 4419
 
     #: - [TCP] NVM Express over Fabrics storage access
     #: - [UDP] NVM Express over Fabrics storage access
-    nvme = 4420, 'nvme', TransportProtocol.tcp
+    nvme = 4420
 
     #: [TCP] Multi-Platform Remote Management for Cloud Infrastructure
-    scaleft = 4421, 'scaleft', TransportProtocol.tcp
+    scaleft = 4421
 
     #: [TCP] TSEP Installation Service Protocol
-    tsepisp = 4422, 'tsepisp', TransportProtocol.tcp
+    tsepisp = 4422
 
     #: [TCP] thingkit secure mesh
-    thingkit = 4423, 'thingkit', TransportProtocol.tcp
+    thingkit = 4423
 
     #: - [TCP] NetROCKEY6 SMART Plus Service
     #: - [UDP] NetROCKEY6 SMART Plus Service
-    netrockey6 = 4425, 'netrockey6', TransportProtocol.tcp
+    netrockey6 = 4425
 
     #: - [TCP] SMARTS Beacon Port
     #: - [UDP] SMARTS Beacon Port
-    beacon_port_2 = 4426, 'beacon-port-2', TransportProtocol.tcp
+    beacon_port_2 = 4426, 'beacon-port-2'
 
     #: [TCP] Drizzle database server
-    drizzle = 4427, 'drizzle', TransportProtocol.tcp
+    drizzle = 4427
 
     #: [TCP] OMV-Investigation Server-Client
-    omviserver = 4428, 'omviserver', TransportProtocol.tcp
+    omviserver = 4428
 
     #: [TCP] OMV Investigation Agent-Server
-    omviagent = 4429, 'omviagent', TransportProtocol.tcp
+    omviagent = 4429
 
     #: - [TCP] REAL SQL Server
     #: - [UDP] REAL SQL Server
-    rsqlserver = 4430, 'rsqlserver', TransportProtocol.tcp
+    rsqlserver = 4430
 
     #: [TCP] adWISE Pipe
-    wspipe = 4431, 'wspipe', TransportProtocol.tcp
+    wspipe = 4431
 
     #: - [TCP] L-ACOUSTICS management
     #: - [UDP] L-ACOUSTICS management
-    l_acoustics = 4432, 'l-acoustics', TransportProtocol.tcp
+    l_acoustics = 4432, 'l-acoustics'
 
     #: [TCP] Versile Object Protocol
-    vop = 4433, 'vop', TransportProtocol.tcp
+    vop = 4433
 
     #: [TCP] Reserved
-    reserved_4441 = 4441, 'reserved', TransportProtocol.tcp
+    reserved_4441 = 4441, 'reserved'
 
     #: - [TCP] Saris
     #: - [UDP] Saris
-    saris = 4442, 'saris', TransportProtocol.tcp
+    saris = 4442
 
     #: - [TCP] Pharos
     #: - [UDP] Pharos
-    pharos = 4443, 'pharos', TransportProtocol.tcp
+    pharos = 4443
 
     #: - [TCP] KRB524
     #: - [UDP] KRB524
-    krb524 = 4444, 'krb524', TransportProtocol.tcp
+    krb524 = 4444
 
     #: - [TCP] NV Video default
     #: - [UDP] NV Video default
-    nv_video = 4444, 'nv-video', TransportProtocol.tcp
+    nv_video = 4444, 'nv-video'
 
     #: - [TCP] UPNOTIFYP
     #: - [UDP] UPNOTIFYP
-    upnotifyp = 4445, 'upnotifyp', TransportProtocol.tcp
+    upnotifyp = 4445
 
     #: - [TCP] N1-FWP
     #: - [UDP] N1-FWP
-    n1_fwp = 4446, 'n1-fwp', TransportProtocol.tcp
+    n1_fwp = 4446, 'n1-fwp'
 
     #: - [TCP] N1-RMGMT
     #: - [UDP] N1-RMGMT
-    n1_rmgmt = 4447, 'n1-rmgmt', TransportProtocol.tcp
+    n1_rmgmt = 4447, 'n1-rmgmt'
 
     #: - [TCP] ASC Licence Manager
     #: - [UDP] ASC Licence Manager
-    asc_slmd = 4448, 'asc-slmd', TransportProtocol.tcp
+    asc_slmd = 4448, 'asc-slmd'
 
     #: - [TCP] PrivateWire
     #: - [UDP] PrivateWire
-    privatewire = 4449, 'privatewire', TransportProtocol.tcp
+    privatewire = 4449
 
     #: - [TCP] Common ASCII Messaging Protocol
     #: - [UDP] Common ASCII Messaging Protocol
-    camp = 4450, 'camp', TransportProtocol.tcp
+    camp = 4450
 
     #: - [TCP] CTI System Msg
     #: - [UDP] CTI System Msg
-    ctisystemmsg = 4451, 'ctisystemmsg', TransportProtocol.tcp
+    ctisystemmsg = 4451
 
     #: - [TCP] CTI Program Load
     #: - [UDP] CTI Program Load
-    ctiprogramload = 4452, 'ctiprogramload', TransportProtocol.tcp
+    ctiprogramload = 4452
 
     #: - [TCP] NSS Alert Manager
     #: - [UDP] NSS Alert Manager
-    nssalertmgr = 4453, 'nssalertmgr', TransportProtocol.tcp
+    nssalertmgr = 4453
 
     #: - [TCP] NSS Agent Manager
     #: - [UDP] NSS Agent Manager
-    nssagentmgr = 4454, 'nssagentmgr', TransportProtocol.tcp
+    nssagentmgr = 4454
 
     #: - [TCP] PR Chat User
     #: - [UDP] PR Chat User
-    prchat_user = 4455, 'prchat-user', TransportProtocol.tcp
+    prchat_user = 4455, 'prchat-user'
 
     #: - [TCP] PR Chat Server
     #: - [UDP] PR Chat Server
-    prchat_server = 4456, 'prchat-server', TransportProtocol.tcp
+    prchat_server = 4456, 'prchat-server'
 
     #: - [TCP] PR Register
     #: - [UDP] PR Register
-    prregister = 4457, 'prregister', TransportProtocol.tcp
+    prregister = 4457
 
     #: - [TCP] Matrix Configuration Protocol
     #: - [UDP] Matrix Configuration Protocol
-    mcp = 4458, 'mcp', TransportProtocol.tcp
+    mcp = 4458
 
     #: [TCP] Network Time Security Key Establishment [:rfc:`8915`]
-    ntske = 4460, 'ntske', TransportProtocol.tcp
+    ntske = 4460
 
     #: [TCP] Agent Transfer Protocol
-    agtp = 4480, 'agtp', TransportProtocol.tcp
+    agtp = 4480
 
     #: - [TCP] hpssmgmt service
     #: - [UDP] hpssmgmt service
-    hpssmgmt = 4484, 'hpssmgmt', TransportProtocol.tcp
+    hpssmgmt = 4484
 
     #: [TCP] Assyst Data Repository Service
-    assyst_dr = 4485, 'assyst-dr', TransportProtocol.tcp
+    assyst_dr = 4485, 'assyst-dr'
 
     #: - [TCP] Integrated Client Message Service
     #: - [UDP] Integrated Client Message Service
-    icms = 4486, 'icms', TransportProtocol.tcp
+    icms = 4486
 
     #: [TCP] Protocol for Remote Execution over TCP
-    prex_tcp = 4487, 'prex-tcp', TransportProtocol.tcp
+    prex_tcp = 4487, 'prex-tcp'
 
     #: - [TCP] Apple Wide Area Connectivity Service ICE Bootstrap
     #: - [UDP] Apple Wide Area Connectivity Service ICE Bootstrap
-    awacs_ice = 4488, 'awacs-ice', TransportProtocol.tcp
+    awacs_ice = 4488, 'awacs-ice'
 
     #: - [TCP] IPsec NAT-Traversal [:rfc:`9329`]
     #: - [UDP] IPsec NAT-Traversal [:rfc:`3948`][:rfc:`7296`]
-    ipsec_nat_t = 4500, 'ipsec-nat-t', TransportProtocol.tcp
+    ipsec_nat_t = 4500, 'ipsec-nat-t'
 
     #: [TCP] Reserved
-    reserved_4503 = 4503, 'reserved', TransportProtocol.tcp
+    reserved_4503 = 4503, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4534 = 4534, 'reserved', TransportProtocol.tcp
+    reserved_4534 = 4534, 'reserved'
 
     #: - [TCP] Event Heap Server
     #: - [UDP] Event Heap Server
-    ehs = 4535, 'ehs', TransportProtocol.tcp
+    ehs = 4535
 
     #: - [TCP] Event Heap Server SSL
     #: - [UDP] Event Heap Server SSL
-    ehs_ssl = 4536, 'ehs-ssl', TransportProtocol.tcp
+    ehs_ssl = 4536, 'ehs-ssl'
 
     #: - [TCP] WSS Security Service
     #: - [UDP] WSS Security Service
-    wssauthsvc = 4537, 'wssauthsvc', TransportProtocol.tcp
+    wssauthsvc = 4537
 
     #: - [TCP] Software Data Exchange Gateway
     #: - [UDP] Software Data Exchange Gateway
-    swx_gate = 4538, 'swx-gate', TransportProtocol.tcp
+    swx_gate = 4538, 'swx-gate'
 
     #: - [TCP] WorldScores
     #: - [UDP] WorldScores
-    worldscores = 4545, 'worldscores', TransportProtocol.tcp
+    worldscores = 4545
 
     #: - [TCP] SF License Manager (Sentinel)
     #: - [UDP] SF License Manager (Sentinel)
-    sf_lm = 4546, 'sf-lm', TransportProtocol.tcp
+    sf_lm = 4546, 'sf-lm'
 
     #: - [TCP] Lanner License Manager
     #: - [UDP] Lanner License Manager
-    lanner_lm = 4547, 'lanner-lm', TransportProtocol.tcp
+    lanner_lm = 4547, 'lanner-lm'
 
     #: - [TCP] Synchromesh
     #: - [UDP] Synchromesh
-    synchromesh = 4548, 'synchromesh', TransportProtocol.tcp
+    synchromesh = 4548
 
     #: - [TCP] Aegate PMR Service
     #: - [UDP] Aegate PMR Service
-    aegate = 4549, 'aegate', TransportProtocol.tcp
+    aegate = 4549
 
     #: - [TCP] Perman I Interbase Server
     #: - [UDP] Perman I Interbase Server
-    gds_adppiw_db = 4550, 'gds-adppiw-db', TransportProtocol.tcp
+    gds_adppiw_db = 4550, 'gds-adppiw-db'
 
     #: - [TCP] MIH Services [:rfc:`5677`]
     #: - [UDP] MIH Services [:rfc:`5677`]
-    ieee_mih = 4551, 'ieee-mih', TransportProtocol.tcp
+    ieee_mih = 4551, 'ieee-mih'
 
     #: - [TCP] Men and Mice Monitoring
     #: - [UDP] Men and Mice Monitoring
-    menandmice_mon = 4552, 'menandmice-mon', TransportProtocol.tcp
+    menandmice_mon = 4552, 'menandmice-mon'
 
     #: [TCP] ICS host services
-    icshostsvc = 4553, 'icshostsvc', TransportProtocol.tcp
+    icshostsvc = 4553
 
     #: - [TCP] MS FRS Replication
     #: - [UDP] MS FRS Replication
-    msfrs = 4554, 'msfrs', TransportProtocol.tcp
+    msfrs = 4554
 
     #: - [TCP] RSIP Port [:rfc:`3103`]
     #: - [UDP] RSIP Port [:rfc:`3103`]
-    rsip = 4555, 'rsip', TransportProtocol.tcp
+    rsip = 4555
 
     #: - [TCP] DTN Bundle TCP CL Protocol [:rfc:`9174`]
     #: - [UDP] DTN Bundle UDP CL Protocol [:rfc:`7122`]
     #: - [DCCP] DTN Bundle DCCP CL Protocol [:rfc:`7122`]
-    dtn_bundle = 4556, 'dtn-bundle', TransportProtocol.tcp
+    dtn_bundle = 4556, 'dtn-bundle'
 
     #: [TCP] Reserved
-    reserved_4557 = 4557, 'reserved', TransportProtocol.tcp
+    reserved_4557 = 4557, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4558 = 4558, 'reserved', TransportProtocol.tcp
+    reserved_4558 = 4558, 'reserved'
 
     #: - [TCP] HylaFAX
     #: - [UDP] HylaFAX
-    hylafax = 4559, 'hylafax', TransportProtocol.tcp
+    hylafax = 4559
 
     #: [TCP] Amahi Anywhere
-    amahi_anywhere = 4563, 'amahi-anywhere', TransportProtocol.tcp
+    amahi_anywhere = 4563, 'amahi-anywhere'
 
     #: - [TCP] Kids Watch Time Control Service
     #: - [UDP] Kids Watch Time Control Service
-    kwtc = 4566, 'kwtc', TransportProtocol.tcp
+    kwtc = 4566
 
     #: - [TCP] TRAM
     #: - [UDP] TRAM
-    tram = 4567, 'tram', TransportProtocol.tcp
+    tram = 4567
 
     #: - [TCP] BMC Reporting
     #: - [UDP] BMC Reporting
-    bmc_reporting = 4568, 'bmc-reporting', TransportProtocol.tcp
+    bmc_reporting = 4568, 'bmc-reporting'
 
     #: - [TCP] Inter-Asterisk eXchange [:rfc:`5456`]
     #: - [UDP] Inter-Asterisk eXchange [:rfc:`5456`]
-    iax = 4569, 'iax', TransportProtocol.tcp
+    iax = 4569
 
     #: [TCP] Service to distribute and update within a site deployment information
     #: for Oracle Communications Suite
-    deploymentmap = 4570, 'deploymentmap', TransportProtocol.tcp
+    deploymentmap = 4570
 
     #: [TCP] A port for communication between a server and client for a custom
     #: backup system
-    cardifftec_back = 4573, 'cardifftec-back', TransportProtocol.tcp
+    cardifftec_back = 4573, 'cardifftec-back'
 
     #: [TCP] RID over HTTP/TLS [:rfc:`6546`]
-    rid = 4590, 'rid', TransportProtocol.tcp
+    rid = 4590
 
     #: - [TCP] HRPD L3T (AT-AN)
     #: - [UDP] HRPD L3T (AT-AN)
-    l3t_at_an = 4591, 'l3t-at-an', TransportProtocol.tcp
+    l3t_at_an = 4591, 'l3t-at-an'
 
     #: [TCP] Reserved
-    reserved_4592 = 4592, 'reserved', TransportProtocol.tcp
+    reserved_4592 = 4592, 'reserved'
 
     #: - [TCP] IPT (ANRI-ANRI)
     #: - [UDP] IPT (ANRI-ANRI)
-    ipt_anri_anri = 4593, 'ipt-anri-anri', TransportProtocol.tcp
+    ipt_anri_anri = 4593, 'ipt-anri-anri'
 
     #: - [TCP] IAS-Session (ANRI-ANRI)
     #: - [UDP] IAS-Session (ANRI-ANRI)
-    ias_session = 4594, 'ias-session', TransportProtocol.tcp
+    ias_session = 4594, 'ias-session'
 
     #: - [TCP] IAS-Paging (ANRI-ANRI)
     #: - [UDP] IAS-Paging (ANRI-ANRI)
-    ias_paging = 4595, 'ias-paging', TransportProtocol.tcp
+    ias_paging = 4595, 'ias-paging'
 
     #: - [TCP] IAS-Neighbor (ANRI-ANRI)
     #: - [UDP] IAS-Neighbor (ANRI-ANRI)
-    ias_neighbor = 4596, 'ias-neighbor', TransportProtocol.tcp
+    ias_neighbor = 4596, 'ias-neighbor'
 
     #: - [TCP] A21 (AN-1xBS)
     #: - [UDP] A21 (AN-1xBS)
-    a21_an_1xbs = 4597, 'a21-an-1xbs', TransportProtocol.tcp
+    a21_an_1xbs = 4597, 'a21-an-1xbs'
 
     #: - [TCP] A16 (AN-AN)
     #: - [UDP] A16 (AN-AN)
-    a16_an_an = 4598, 'a16-an-an', TransportProtocol.tcp
+    a16_an_an = 4598, 'a16-an-an'
 
     #: - [TCP] A17 (AN-AN)
     #: - [UDP] A17 (AN-AN)
-    a17_an_an = 4599, 'a17-an-an', TransportProtocol.tcp
+    a17_an_an = 4599, 'a17-an-an'
 
     #: - [TCP] Piranha1
     #: - [UDP] Piranha1
-    piranha1 = 4600, 'piranha1', TransportProtocol.tcp
+    piranha1 = 4600
 
     #: - [TCP] Piranha2
     #: - [UDP] Piranha2
-    piranha2 = 4601, 'piranha2', TransportProtocol.tcp
+    piranha2 = 4601
 
     #: [TCP] EAX MTS Server
-    mtsserver = 4602, 'mtsserver', TransportProtocol.tcp
+    mtsserver = 4602
 
     #: [TCP] Men & Mice Upgrade Agent
-    menandmice_upg = 4603, 'menandmice-upg', TransportProtocol.tcp
+    menandmice_upg = 4603, 'menandmice-upg'
 
     #: [TCP] Identity Registration Protocol
-    irp = 4604, 'irp', TransportProtocol.tcp
+    irp = 4604
 
     #: [TCP] Direct End to End Secure Chat Protocol
-    sixchat = 4605, 'sixchat', TransportProtocol.tcp
+    sixchat = 4605
 
     #: [TCP] Secure ID to IP registration and lookup
-    sixid = 4606, 'sixid', TransportProtocol.tcp
+    sixid = 4606
 
     #: [TCP] Reserved
-    reserved_4621 = 4621, 'reserved', TransportProtocol.tcp
+    reserved_4621 = 4621, 'reserved'
 
     #: - [TCP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
     #:   Channel Protocol. The service name is used to construct the SRV service
@@ -17290,362 +17290,362 @@ class TCP(AppType):
     #:   Channel Protocol. The service name is used to construct the SRV service
     #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
     #:   servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]
-    dots_signal = 4646, 'dots-signal', TransportProtocol.tcp
+    dots_signal = 4646, 'dots-signal'
 
     #: - [TCP] PlayStation2 App Port
     #: - [UDP] PlayStation2 App Port
-    playsta2_app = 4658, 'playsta2-app', TransportProtocol.tcp
+    playsta2_app = 4658, 'playsta2-app'
 
     #: - [TCP] PlayStation2 Lobby Port
     #: - [UDP] PlayStation2 Lobby Port
-    playsta2_lob = 4659, 'playsta2-lob', TransportProtocol.tcp
+    playsta2_lob = 4659, 'playsta2-lob'
 
     #: - [TCP] smaclmgr
     #: - [UDP] smaclmgr
-    smaclmgr = 4660, 'smaclmgr', TransportProtocol.tcp
+    smaclmgr = 4660
 
     #: - [TCP] Kar2ouche Peer location service
     #: - [UDP] Kar2ouche Peer location service
-    kar2ouche = 4661, 'kar2ouche', TransportProtocol.tcp
+    kar2ouche = 4661
 
     #: - [TCP] OrbitNet Message Service
     #: - [UDP] OrbitNet Message Service
-    oms = 4662, 'oms', TransportProtocol.tcp
+    oms = 4662
 
     #: - [TCP] Note It! Message Service
     #: - [UDP] Note It! Message Service
-    noteit = 4663, 'noteit', TransportProtocol.tcp
+    noteit = 4663
 
     #: - [TCP] Rimage Messaging Server
     #: - [UDP] Rimage Messaging Server
-    ems = 4664, 'ems', TransportProtocol.tcp
+    ems = 4664
 
     #: - [TCP] Container Client Message Service
     #: - [UDP] Container Client Message Service
-    contclientms = 4665, 'contclientms', TransportProtocol.tcp
+    contclientms = 4665
 
     #: - [TCP] E-Port Message Service
     #: - [UDP] E-Port Message Service
-    eportcomm = 4666, 'eportcomm', TransportProtocol.tcp
+    eportcomm = 4666
 
     #: - [TCP] MMA Comm Services
     #: - [UDP] MMA Comm Services
-    mmacomm = 4667, 'mmacomm', TransportProtocol.tcp
+    mmacomm = 4667
 
     #: - [TCP] MMA EDS Service
     #: - [UDP] MMA EDS Service
-    mmaeds = 4668, 'mmaeds', TransportProtocol.tcp
+    mmaeds = 4668
 
     #: - [TCP] E-Port Data Service
     #: - [UDP] E-Port Data Service
-    eportcommdata = 4669, 'eportcommdata', TransportProtocol.tcp
+    eportcommdata = 4669
 
     #: - [TCP] Light packets transfer protocol
     #: - [UDP] Light packets transfer protocol
-    light = 4670, 'light', TransportProtocol.tcp
+    light = 4670
 
     #: - [TCP] Bull RSF action server
     #: - [UDP] Bull RSF action server
-    acter = 4671, 'acter', TransportProtocol.tcp
+    acter = 4671
 
     #: - [TCP] remote file access server
     #: - [UDP] remote file access server
-    rfa = 4672, 'rfa', TransportProtocol.tcp
+    rfa = 4672
 
     #: - [TCP] CXWS Operations
     #: - [UDP] CXWS Operations
-    cxws = 4673, 'cxws', TransportProtocol.tcp
+    cxws = 4673
 
     #: - [TCP] AppIQ Agent Management
     #: - [UDP] AppIQ Agent Management
-    appiq_mgmt = 4674, 'appiq-mgmt', TransportProtocol.tcp
+    appiq_mgmt = 4674, 'appiq-mgmt'
 
     #: - [TCP] BIAP Device Status
     #: - [UDP] BIAP Device Status
-    dhct_status = 4675, 'dhct-status', TransportProtocol.tcp
+    dhct_status = 4675, 'dhct-status'
 
     #: - [TCP] BIAP Generic Alert
     #: - [UDP] BIAP Generic Alert
-    dhct_alerts = 4676, 'dhct-alerts', TransportProtocol.tcp
+    dhct_alerts = 4676, 'dhct-alerts'
 
     #: - [TCP] Business Continuity Servi
     #: - [UDP] Business Continuity Servi
-    bcs = 4677, 'bcs', TransportProtocol.tcp
+    bcs = 4677
 
     #: - [TCP] boundary traversal
     #: - [UDP] boundary traversal
-    traversal = 4678, 'traversal', TransportProtocol.tcp
+    traversal = 4678
 
     #: - [TCP] MGE UPS Supervision
     #: - [UDP] MGE UPS Supervision
-    mgesupervision = 4679, 'mgesupervision', TransportProtocol.tcp
+    mgesupervision = 4679
 
     #: - [TCP] MGE UPS Management
     #: - [UDP] MGE UPS Management
-    mgemanagement = 4680, 'mgemanagement', TransportProtocol.tcp
+    mgemanagement = 4680
 
     #: - [TCP] Parliant Telephony System
     #: - [UDP] Parliant Telephony System
-    parliant = 4681, 'parliant', TransportProtocol.tcp
+    parliant = 4681
 
     #: - [TCP] finisar
     #: - [UDP] finisar
-    finisar = 4682, 'finisar', TransportProtocol.tcp
+    finisar = 4682
 
     #: - [TCP] Spike Clipboard Service
     #: - [UDP] Spike Clipboard Service
-    spike = 4683, 'spike', TransportProtocol.tcp
+    spike = 4683
 
     #: - [TCP] RFID Reader Protocol 1.0
     #: - [UDP] RFID Reader Protocol 1.0
-    rfid_rp1 = 4684, 'rfid-rp1', TransportProtocol.tcp
+    rfid_rp1 = 4684, 'rfid-rp1'
 
     #: - [TCP] Autopac Protocol
     #: - [UDP] Autopac Protocol
-    autopac = 4685, 'autopac', TransportProtocol.tcp
+    autopac = 4685
 
     #: - [TCP] Manina Service Protocol
     #: - [UDP] Manina Service Protocol
-    msp_os = 4686, 'msp-os', TransportProtocol.tcp
+    msp_os = 4686, 'msp-os'
 
     #: - [TCP] Network Scanner Tool FTP
     #: - [UDP] Network Scanner Tool FTP
-    nst = 4687, 'nst', TransportProtocol.tcp
+    nst = 4687
 
     #: - [TCP] Mobile P2P Service
     #: - [UDP] Mobile P2P Service
-    mobile_p2p = 4688, 'mobile-p2p', TransportProtocol.tcp
+    mobile_p2p = 4688, 'mobile-p2p'
 
     #: - [TCP] Altova DatabaseCentral
     #: - [UDP] Altova DatabaseCentral
-    altovacentral = 4689, 'altovacentral', TransportProtocol.tcp
+    altovacentral = 4689
 
     #: - [TCP] Prelude IDS message proto
     #: - [UDP] Prelude IDS message proto
-    prelude = 4690, 'prelude', TransportProtocol.tcp
+    prelude = 4690
 
     #: - [TCP] monotone Netsync Protocol
     #: - [UDP] monotone Netsync Protocol
-    mtn = 4691, 'mtn', TransportProtocol.tcp
+    mtn = 4691
 
     #: - [TCP] Conspiracy messaging
     #: - [UDP] Conspiracy messaging
-    conspiracy = 4692, 'conspiracy', TransportProtocol.tcp
+    conspiracy = 4692
 
     #: - [TCP] NetXMS Agent
     #: - [UDP] NetXMS Agent
-    netxms_agent = 4700, 'netxms-agent', TransportProtocol.tcp
+    netxms_agent = 4700, 'netxms-agent'
 
     #: - [TCP] NetXMS Management
     #: - [UDP] NetXMS Management
-    netxms_mgmt = 4701, 'netxms-mgmt', TransportProtocol.tcp
+    netxms_mgmt = 4701, 'netxms-mgmt'
 
     #: - [TCP] NetXMS Server Synchronization
     #: - [UDP] NetXMS Server Synchronization
-    netxms_sync = 4702, 'netxms-sync', TransportProtocol.tcp
+    netxms_sync = 4702, 'netxms-sync'
 
     #: [TCP] Network Performance Quality Evaluation System Test Service
-    npqes_test = 4703, 'npqes-test', TransportProtocol.tcp
+    npqes_test = 4703, 'npqes-test'
 
     #: [TCP] Assuria Insider
-    assuria_ins = 4704, 'assuria-ins', TransportProtocol.tcp
+    assuria_ins = 4704, 'assuria-ins'
 
     #: - [TCP] Trinity Trust Network Node Communication
     #: - [UDP] Trinity Trust Network Node Communication
     #: - [SCTP] Trinity Trust Network Node Communication
-    trinity_dist = 4711, 'trinity-dist', TransportProtocol.tcp
+    trinity_dist = 4711, 'trinity-dist'
 
     #: - [TCP] TruckStar Service
     #: - [UDP] TruckStar Service
-    truckstar = 4725, 'truckstar', TransportProtocol.tcp
+    truckstar = 4725
 
     #: [TCP] Reserved
-    reserved_4726 = 4726, 'reserved', TransportProtocol.tcp
+    reserved_4726 = 4726, 'reserved'
 
     #: [TCP] F-Link Client Information Service
-    fcis = 4727, 'fcis', TransportProtocol.tcp
+    fcis = 4727
 
     #: - [TCP] CA Port Multiplexer
     #: - [UDP] CA Port Multiplexer
-    capmux = 4728, 'capmux', TransportProtocol.tcp
+    capmux = 4728
 
     #: [TCP] Reserved
-    reserved_4729 = 4729, 'reserved', TransportProtocol.tcp
+    reserved_4729 = 4729, 'reserved'
 
     #: - [TCP] Gearman Job Queue System
     #: - [UDP] Gearman Job Queue System
-    gearman = 4730, 'gearman', TransportProtocol.tcp
+    gearman = 4730
 
     #: [TCP] Remote Capture Protocol
-    remcap = 4731, 'remcap', TransportProtocol.tcp
+    remcap = 4731
 
     #: [TCP] Reserved
-    reserved_4732 = 4732, 'reserved', TransportProtocol.tcp
+    reserved_4732 = 4732, 'reserved'
 
     #: [TCP] RES Orchestration Catalog Services
-    resorcs = 4733, 'resorcs', TransportProtocol.tcp
+    resorcs = 4733
 
     #: - [TCP] IPDR/SP
     #: - [UDP] IPDR/SP
-    ipdr_sp = 4737, 'ipdr-sp', TransportProtocol.tcp
+    ipdr_sp = 4737, 'ipdr-sp'
 
     #: - [TCP] SoleraTec Locator
     #: - [UDP] SoleraTec Locator
-    solera_lpn = 4738, 'solera-lpn', TransportProtocol.tcp
+    solera_lpn = 4738, 'solera-lpn'
 
     #: - [TCP] IP Flow Info Export
     #: - [UDP] IP Flow Info Export
     #: - [SCTP] IP Flow Info Export
-    ipfix = 4739, 'ipfix', TransportProtocol.tcp
+    ipfix = 4739
 
     #: - [TCP] ipfix protocol over TLS
     #: - [SCTP] ipfix protocol over DTLS
     #: - [UDP] ipfix protocol over DTLS
-    ipfixs = 4740, 'ipfixs', TransportProtocol.tcp
+    ipfixs = 4740
 
     #: - [TCP] Luminizer Manager
     #: - [UDP] Luminizer Manager
-    lumimgrd = 4741, 'lumimgrd', TransportProtocol.tcp
+    lumimgrd = 4741
 
     #: [TCP] SICCT
-    sicct = 4742, 'sicct', TransportProtocol.tcp
+    sicct = 4742
 
     #: - [TCP] openhpi HPI service
     #: - [UDP] openhpi HPI service
-    openhpid = 4743, 'openhpid', TransportProtocol.tcp
+    openhpid = 4743
 
     #: - [TCP] Internet File Synchronization Protocol
     #: - [UDP] Internet File Synchronization Protocol
-    ifsp = 4744, 'ifsp', TransportProtocol.tcp
+    ifsp = 4744
 
     #: - [TCP] Funambol Mobile Push
     #: - [UDP] Funambol Mobile Push
-    fmp = 4745, 'fmp', TransportProtocol.tcp
+    fmp = 4745
 
     #: [TCP] Reserved
-    reserved_4746 = 4746, 'reserved', TransportProtocol.tcp
+    reserved_4746 = 4746, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4747 = 4747, 'reserved', TransportProtocol.tcp
+    reserved_4747 = 4747, 'reserved'
 
     #: - [TCP] Simple Service Auto Discovery
     #: - [UDP] Simple Service Auto Discovery
-    ssad = 4750, 'ssad', TransportProtocol.tcp
+    ssad = 4750
 
     #: - [TCP] Simple Policy Control Protocol
     #: - [UDP] Simple Policy Control Protocol
-    spocp = 4751, 'spocp', TransportProtocol.tcp
+    spocp = 4751
 
     #: - [TCP] Simple Network Audio Protocol
     #: - [UDP] Simple Network Audio Protocol
-    snap = 4752, 'snap', TransportProtocol.tcp
+    snap = 4752
 
     #: [TCP] Simple Invocation of Methods Over Network (SIMON)
-    simon = 4753, 'simon', TransportProtocol.tcp
+    simon = 4753
 
     #: [TCP] Reserved
-    reserved_4754 = 4754, 'reserved', TransportProtocol.tcp
+    reserved_4754 = 4754, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4755 = 4755, 'reserved', TransportProtocol.tcp
+    reserved_4755 = 4755, 'reserved'
 
     #: [TCP] Reticle Decision Center
-    rdcenter = 4756, 'rdcenter', TransportProtocol.tcp
+    rdcenter = 4756
 
     #: [TCP] Converge RPC
-    converge = 4774, 'converge', TransportProtocol.tcp
+    converge = 4774
 
     #: - [TCP] BFD Multihop Control
     #: - [UDP] BFD Multihop Control
-    bfd_multi_ctl = 4784, 'bfd-multi-ctl', TransportProtocol.tcp
+    bfd_multi_ctl = 4784, 'bfd-multi-ctl'
 
     #: [TCP] Reserved
-    reserved_4785 = 4785, 'reserved', TransportProtocol.tcp
+    reserved_4785 = 4785, 'reserved'
 
     #: [TCP] Smart Install Service
-    smart_install = 4786, 'smart-install', TransportProtocol.tcp
+    smart_install = 4786, 'smart-install'
 
     #: [TCP] Service Insertion Architecture (SIA) Control-Plane
-    sia_ctrl_plane = 4787, 'sia-ctrl-plane', TransportProtocol.tcp
+    sia_ctrl_plane = 4787, 'sia-ctrl-plane'
 
     #: [TCP] eXtensible Messaging Client Protocol
-    xmcp = 4788, 'xmcp', TransportProtocol.tcp
+    xmcp = 4788
 
     #: [TCP] Reserved
-    reserved_4789 = 4789, 'reserved', TransportProtocol.tcp
+    reserved_4789 = 4789, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4790 = 4790, 'reserved', TransportProtocol.tcp
+    reserved_4790 = 4790, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4791 = 4791, 'reserved', TransportProtocol.tcp
+    reserved_4791 = 4791, 'reserved'
 
     #: - [TCP] IP Routable Unified Bus
     #: - [UDP] IP Routable Unified Bus
-    unified_bus = 4792, 'unified-bus', TransportProtocol.tcp
+    unified_bus = 4792, 'unified-bus'
 
     #: [TCP] Reserved
-    reserved_4793 = 4793, 'reserved', TransportProtocol.tcp
+    reserved_4793 = 4793, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4794 = 4794, 'reserved', TransportProtocol.tcp
+    reserved_4794 = 4794, 'reserved'
 
     #: - [TCP] Icona Instant Messenging System
     #: - [UDP] Icona Instant Messenging System
-    iims = 4800, 'iims', TransportProtocol.tcp
+    iims = 4800
 
     #: - [TCP] Icona Web Embedded Chat
     #: - [UDP] Icona Web Embedded Chat
-    iwec = 4801, 'iwec', TransportProtocol.tcp
+    iwec = 4801
 
     #: - [TCP] Icona License System Server
     #: - [UDP] Icona License System Server
-    ilss = 4802, 'ilss', TransportProtocol.tcp
+    ilss = 4802
 
     #: [TCP] Notateit Messaging
-    notateit = 4803, 'notateit', TransportProtocol.tcp
+    notateit = 4803
 
     #: [TCP] Reserved
-    reserved_4804 = 4804, 'reserved', TransportProtocol.tcp
+    reserved_4804 = 4804, 'reserved'
 
     #: - [TCP] HTCP
     #: - [UDP] HTCP
-    htcp = 4827, 'htcp', TransportProtocol.tcp
+    htcp = 4827
 
     #: - [TCP] Varadero-0
     #: - [UDP] Varadero-0
-    varadero_0 = 4837, 'varadero-0', TransportProtocol.tcp
+    varadero_0 = 4837, 'varadero-0'
 
     #: - [TCP] Varadero-1
     #: - [UDP] Varadero-1
-    varadero_1 = 4838, 'varadero-1', TransportProtocol.tcp
+    varadero_1 = 4838, 'varadero-1'
 
     #: - [TCP] Varadero-2
     #: - [UDP] Varadero-2
-    varadero_2 = 4839, 'varadero-2', TransportProtocol.tcp
+    varadero_2 = 4839, 'varadero-2'
 
     #: [TCP] OPC UA Connection Protocol
-    opcua_tcp = 4840, 'opcua-tcp', TransportProtocol.tcp
+    opcua_tcp = 4840, 'opcua-tcp'
 
     #: - [TCP] QUOSA Virtual Library Service
     #: - [UDP] QUOSA Virtual Library Service
-    quosa = 4841, 'quosa', TransportProtocol.tcp
+    quosa = 4841
 
     #: - [TCP] nCode ICE-flow Library AppServer
     #: - [UDP] nCode ICE-flow Library AppServer
-    gw_asv = 4842, 'gw-asv', TransportProtocol.tcp
+    gw_asv = 4842, 'gw-asv'
 
     #: - [TCP] OPC UA TCP Protocol over TLS/SSL
     #: - [UDP] OPC UA TCP Protocol over TLS/SSL
-    opcua_tls = 4843, 'opcua-tls', TransportProtocol.tcp
+    opcua_tls = 4843, 'opcua-tls'
 
     #: - [TCP] nCode ICE-flow Library LogServer
     #: - [UDP] nCode ICE-flow Library LogServer
-    gw_log = 4844, 'gw-log', TransportProtocol.tcp
+    gw_log = 4844, 'gw-log'
 
     #: - [TCP] WordCruncher Remote Library Service
     #: - [UDP] WordCruncher Remote Library Service
-    wcr_remlib = 4845, 'wcr-remlib', TransportProtocol.tcp
+    wcr_remlib = 4845, 'wcr-remlib'
 
     #: - [TCP] Contamac ICM Service IANA assigned this well-formed service name as a
     #:   replacement for "contamac_icm".
@@ -17653,562 +17653,562 @@ class TCP(AppType):
     #: - [UDP] Contamac ICM Service IANA assigned this well-formed service name as a
     #:   replacement for "contamac_icm".
     #: - [UDP] Contamac ICM Service
-    contamac_icm = 4846, 'contamac-icm', TransportProtocol.tcp
+    contamac_icm = 4846, 'contamac-icm'
 
     #: - [TCP] Web Fresh Communication
     #: - [UDP] Web Fresh Communication
-    wfc = 4847, 'wfc', TransportProtocol.tcp
+    wfc = 4847
 
     #: - [TCP] App Server - Admin HTTP
     #: - [UDP] App Server - Admin HTTP
-    appserv_http = 4848, 'appserv-http', TransportProtocol.tcp
+    appserv_http = 4848, 'appserv-http'
 
     #: - [TCP] App Server - Admin HTTPS
     #: - [UDP] App Server - Admin HTTPS
-    appserv_https = 4849, 'appserv-https', TransportProtocol.tcp
+    appserv_https = 4849, 'appserv-https'
 
     #: - [TCP] Sun App Server - NA
     #: - [UDP] Sun App Server - NA
-    sun_as_nodeagt = 4850, 'sun-as-nodeagt', TransportProtocol.tcp
+    sun_as_nodeagt = 4850, 'sun-as-nodeagt'
 
     #: - [TCP] Apache Derby Replication
     #: - [UDP] Apache Derby Replication
-    derby_repli = 4851, 'derby-repli', TransportProtocol.tcp
+    derby_repli = 4851, 'derby-repli'
 
     #: - [TCP] Unify Debugger
     #: - [UDP] Unify Debugger
-    unify_debug = 4867, 'unify-debug', TransportProtocol.tcp
+    unify_debug = 4867, 'unify-debug'
 
     #: - [TCP] Photon Relay
     #: - [UDP] Photon Relay
-    phrelay = 4868, 'phrelay', TransportProtocol.tcp
+    phrelay = 4868
 
     #: - [TCP] Photon Relay Debug
     #: - [UDP] Photon Relay Debug
-    phrelaydbg = 4869, 'phrelaydbg', TransportProtocol.tcp
+    phrelaydbg = 4869
 
     #: - [TCP] Citcom Tracking Service
     #: - [UDP] Citcom Tracking Service
-    cc_tracking = 4870, 'cc-tracking', TransportProtocol.tcp
+    cc_tracking = 4870, 'cc-tracking'
 
     #: - [TCP] Wired
     #: - [UDP] Wired
-    wired = 4871, 'wired', TransportProtocol.tcp
+    wired = 4871
 
     #: - [TCP] Tritium CAN Bus Bridge Service
     #: - [UDP] Tritium CAN Bus Bridge Service
-    tritium_can = 4876, 'tritium-can', TransportProtocol.tcp
+    tritium_can = 4876, 'tritium-can'
 
     #: - [TCP] Lighting Management Control System
     #: - [UDP] Lighting Management Control System
-    lmcs = 4877, 'lmcs', TransportProtocol.tcp
+    lmcs = 4877
 
     #: [TCP] Reserved
-    reserved_4878 = 4878, 'reserved', TransportProtocol.tcp
+    reserved_4878 = 4878, 'reserved'
 
     #: [TCP] WSDL Event Receiver
-    wsdl_event = 4879, 'wsdl-event', TransportProtocol.tcp
+    wsdl_event = 4879, 'wsdl-event'
 
     #: [TCP] IVI High-Speed LAN Instrument Protocol
-    hislip = 4880, 'hislip', TransportProtocol.tcp
+    hislip = 4880
 
     #: [TCP] Reserved
-    reserved_4881 = 4881, 'reserved', TransportProtocol.tcp
+    reserved_4881 = 4881, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4882 = 4882, 'reserved', TransportProtocol.tcp
+    reserved_4882 = 4882, 'reserved'
 
     #: [TCP] Meier-Phelps License Server
-    wmlserver = 4883, 'wmlserver', TransportProtocol.tcp
+    wmlserver = 4883
 
     #: - [TCP] HiveStor Distributed File System
     #: - [UDP] HiveStor Distributed File System
-    hivestor = 4884, 'hivestor', TransportProtocol.tcp
+    hivestor = 4884
 
     #: - [TCP] ABBS
     #: - [UDP] ABBS
-    abbs = 4885, 'abbs', TransportProtocol.tcp
+    abbs = 4885
 
     #: [TCP] xcap code analysis portal public user access
-    xcap_portal = 4888, 'xcap-portal', TransportProtocol.tcp
+    xcap_portal = 4888, 'xcap-portal'
 
     #: [TCP] xcap code analysis portal cluster control and administration
-    xcap_control = 4889, 'xcap-control', TransportProtocol.tcp
+    xcap_control = 4889, 'xcap-control'
 
     #: - [TCP] LysKOM Protocol A
     #: - [UDP] LysKOM Protocol A
-    lyskom = 4894, 'lyskom', TransportProtocol.tcp
+    lyskom = 4894
 
     #: - [TCP] RAdmin Port
     #: - [UDP] RAdmin Port
-    radmin_port = 4899, 'radmin-port', TransportProtocol.tcp
+    radmin_port = 4899, 'radmin-port'
 
     #: - [TCP] HFSQL Client/Server Database Engine
     #: - [UDP] HFSQL Client/Server Database Engine
-    hfcs = 4900, 'hfcs', TransportProtocol.tcp
+    hfcs = 4900
 
     #: - [TCP] FileLocator Remote Search Agent IANA assigned this well-formed service
     #:   name as a replacement for "flr_agent".
     #: - [TCP] FileLocator Remote Search Agent
-    flr_agent = 4901, 'flr-agent', TransportProtocol.tcp
+    flr_agent = 4901, 'flr-agent'
 
     #: [TCP] magicCONROL RF and Data Interface
-    magiccontrol = 4902, 'magiccontrol', TransportProtocol.tcp
+    magiccontrol = 4902
 
     #: [TCP] Technicolor LUT Access Protocol
-    lutap = 4912, 'lutap', TransportProtocol.tcp
+    lutap = 4912
 
     #: [TCP] LUTher Control Protocol
-    lutcp = 4913, 'lutcp', TransportProtocol.tcp
+    lutcp = 4913
 
     #: - [TCP] Bones Remote Control
     #: - [UDP] Bones Remote Control
-    bones = 4914, 'bones', TransportProtocol.tcp
+    bones = 4914
 
     #: [TCP] Fibics Remote Control Service
-    frcs = 4915, 'frcs', TransportProtocol.tcp
+    frcs = 4915
 
     #: [TCP] Host-to-host messaging
-    fmsg = 4930, 'fmsg', TransportProtocol.tcp
+    fmsg = 4930
 
     #: [TCP] Reserved
-    reserved_4936 = 4936, 'reserved', TransportProtocol.tcp
+    reserved_4936 = 4936, 'reserved'
 
     #: [TCP] Reserved
-    reserved_4937 = 4937, 'reserved', TransportProtocol.tcp
+    reserved_4937 = 4937, 'reserved'
 
     #: - [TCP] Equitrac Office
     #: - [UDP] Equitrac Office
-    eq_office_4940 = 4940, 'eq-office-4940', TransportProtocol.tcp
+    eq_office_4940 = 4940, 'eq-office-4940'
 
     #: - [TCP] Equitrac Office
     #: - [UDP] Equitrac Office
-    eq_office_4941 = 4941, 'eq-office-4941', TransportProtocol.tcp
+    eq_office_4941 = 4941, 'eq-office-4941'
 
     #: - [TCP] Equitrac Office
     #: - [UDP] Equitrac Office
-    eq_office_4942 = 4942, 'eq-office-4942', TransportProtocol.tcp
+    eq_office_4942 = 4942, 'eq-office-4942'
 
     #: - [TCP] Munin Graphing Framework
     #: - [UDP] Munin Graphing Framework
-    munin = 4949, 'munin', TransportProtocol.tcp
+    munin = 4949
 
     #: - [TCP] Sybase Server Monitor
     #: - [UDP] Sybase Server Monitor
-    sybasesrvmon = 4950, 'sybasesrvmon', TransportProtocol.tcp
+    sybasesrvmon = 4950
 
     #: - [TCP] PWG WIMS
     #: - [UDP] PWG WIMS
-    pwgwims = 4951, 'pwgwims', TransportProtocol.tcp
+    pwgwims = 4951
 
     #: - [TCP] SAG Directory Server
     #: - [UDP] SAG Directory Server
-    sagxtsds = 4952, 'sagxtsds', TransportProtocol.tcp
+    sagxtsds = 4952
 
     #: [TCP] Synchronization Arbiter
-    dbsyncarbiter = 4953, 'dbsyncarbiter', TransportProtocol.tcp
+    dbsyncarbiter = 4953
 
     #: - [TCP] CCSS QMessageMonitor
     #: - [UDP] CCSS QMessageMonitor
-    ccss_qmm = 4969, 'ccss-qmm', TransportProtocol.tcp
+    ccss_qmm = 4969, 'ccss-qmm'
 
     #: - [TCP] CCSS QSystemMonitor
     #: - [UDP] CCSS QSystemMonitor
-    ccss_qsm = 4970, 'ccss-qsm', TransportProtocol.tcp
+    ccss_qsm = 4970, 'ccss-qsm'
 
     #: [TCP] BackUp and Restore Program
-    burp = 4971, 'burp', TransportProtocol.tcp
+    burp = 4971
 
     #: [TCP] Reserved
-    reserved_4980 = 4980, 'reserved', TransportProtocol.tcp
+    reserved_4980 = 4980, 'reserved'
 
     #: [TCP] WebYast
-    webyast = 4984, 'webyast', TransportProtocol.tcp
+    webyast = 4984
 
     #: [TCP] GER HC Standard
-    gerhcs = 4985, 'gerhcs', TransportProtocol.tcp
+    gerhcs = 4985
 
     #: - [TCP] Model Railway Interface Program
     #: - [UDP] Model Railway Interface Program
-    mrip = 4986, 'mrip', TransportProtocol.tcp
+    mrip = 4986
 
     #: - [TCP] SMAR Ethernet Port 1
     #: - [UDP] SMAR Ethernet Port 1
-    smar_se_port1 = 4987, 'smar-se-port1', TransportProtocol.tcp
+    smar_se_port1 = 4987, 'smar-se-port1'
 
     #: - [TCP] SMAR Ethernet Port 2
     #: - [UDP] SMAR Ethernet Port 2
-    smar_se_port2 = 4988, 'smar-se-port2', TransportProtocol.tcp
+    smar_se_port2 = 4988, 'smar-se-port2'
 
     #: - [TCP] Parallel for GAUSS (tm)
     #: - [UDP] Parallel for GAUSS (tm)
-    parallel = 4989, 'parallel', TransportProtocol.tcp
+    parallel = 4989
 
     #: - [TCP] BusySync Calendar Synch. Protocol
     #: - [UDP] BusySync Calendar Synch. Protocol
-    busycal = 4990, 'busycal', TransportProtocol.tcp
+    busycal = 4990
 
     #: - [TCP] VITA Radio Transport
     #: - [UDP] VITA Radio Transport
-    vrt = 4991, 'vrt', TransportProtocol.tcp
+    vrt = 4991
 
     #: - [TCP] HFSQL Client/Server Database Engine Manager
     #: - [UDP] HFSQL Client/Server Database Engine Manager
-    hfcs_manager = 4999, 'hfcs-manager', TransportProtocol.tcp
+    hfcs_manager = 4999, 'hfcs-manager'
 
     #: - [TCP]
     #: - [UDP]
-    commplex_main = 5000, 'commplex-main', TransportProtocol.tcp
+    commplex_main = 5000, 'commplex-main'
 
     #: - [TCP]
     #: - [UDP]
-    commplex_link = 5001, 'commplex-link', TransportProtocol.tcp
+    commplex_link = 5001, 'commplex-link'
 
     #: - [TCP] radio free ethernet
     #: - [UDP] radio free ethernet
-    rfe = 5002, 'rfe', TransportProtocol.tcp
+    rfe = 5002
 
     #: - [TCP] FileMaker, Inc. - Proprietary transport
     #: - [UDP] FileMaker, Inc. - Proprietary name binding
-    fmpro_internal = 5003, 'fmpro-internal', TransportProtocol.tcp
+    fmpro_internal = 5003, 'fmpro-internal'
 
     #: - [TCP] RTP media data [:rfc:`3551`][:rfc:`4571`]
     #: - [UDP] RTP media data [:rfc:`3551`]
     #: - [DCCP] RTP media data [:rfc:`3551`][:rfc:`5762`]
-    avt_profile_1 = 5004, 'avt-profile-1', TransportProtocol.tcp
+    avt_profile_1 = 5004, 'avt-profile-1'
 
     #: - [TCP] RTP control protocol [:rfc:`3551`][:rfc:`4571`]
     #: - [UDP] RTP control protocol [:rfc:`3551`]
     #: - [DCCP] RTP control protocol [:rfc:`3551`][:rfc:`5762`]
-    avt_profile_2 = 5005, 'avt-profile-2', TransportProtocol.tcp
+    avt_profile_2 = 5005, 'avt-profile-2'
 
     #: - [TCP] wsm server
     #: - [UDP] wsm server
-    wsm_server = 5006, 'wsm-server', TransportProtocol.tcp
+    wsm_server = 5006, 'wsm-server'
 
     #: - [TCP] wsm server ssl
     #: - [UDP] wsm server ssl
-    wsm_server_ssl = 5007, 'wsm-server-ssl', TransportProtocol.tcp
+    wsm_server_ssl = 5007, 'wsm-server-ssl'
 
     #: - [TCP] Synapsis EDGE
     #: - [UDP] Synapsis EDGE
-    synapsis_edge = 5008, 'synapsis-edge', TransportProtocol.tcp
+    synapsis_edge = 5008, 'synapsis-edge'
 
     #: - [TCP] Microsoft Windows Filesystem
     #: - [UDP] Microsoft Windows Filesystem
-    winfs = 5009, 'winfs', TransportProtocol.tcp
+    winfs = 5009
 
     #: - [TCP] TelepathStart
     #: - [UDP] TelepathStart
-    telelpathstart = 5010, 'telelpathstart', TransportProtocol.tcp
+    telelpathstart = 5010
 
     #: - [TCP] TelepathAttack
     #: - [UDP] TelepathAttack
-    telelpathattack = 5011, 'telelpathattack', TransportProtocol.tcp
+    telelpathattack = 5011
 
     #: - [TCP] NetOnTap Service
     #: - [UDP] NetOnTap Service
-    nsp = 5012, 'nsp', TransportProtocol.tcp
+    nsp = 5012
 
     #: - [TCP] FileMaker, Inc. - Proprietary transport
     #: - [UDP] FileMaker, Inc. - Proprietary transport
-    fmpro_v6 = 5013, 'fmpro-v6', TransportProtocol.tcp
+    fmpro_v6 = 5013, 'fmpro-v6'
 
     #: [TCP] Reserved
-    reserved_5014 = 5014, 'reserved', TransportProtocol.tcp
+    reserved_5014 = 5014, 'reserved'
 
     #: [TCP] FileMaker, Inc. - Web publishing
-    fmwp = 5015, 'fmwp', TransportProtocol.tcp
+    fmwp = 5015
 
     #: - [TCP] zenginkyo-1
     #: - [UDP] zenginkyo-1
-    zenginkyo_1 = 5020, 'zenginkyo-1', TransportProtocol.tcp
+    zenginkyo_1 = 5020, 'zenginkyo-1'
 
     #: - [TCP] zenginkyo-2
     #: - [UDP] zenginkyo-2
-    zenginkyo_2 = 5021, 'zenginkyo-2', TransportProtocol.tcp
+    zenginkyo_2 = 5021, 'zenginkyo-2'
 
     #: - [TCP] mice server
     #: - [UDP] mice server
-    mice = 5022, 'mice', TransportProtocol.tcp
+    mice = 5022
 
     #: - [TCP] Htuil Server for PLD2
     #: - [UDP] Htuil Server for PLD2
-    htuilsrv = 5023, 'htuilsrv', TransportProtocol.tcp
+    htuilsrv = 5023
 
     #: - [TCP] Storix I/O daemon (data)
     #: - [UDP] Storix I/O daemon (data)
-    strexec_d = 5026, 'strexec-d', TransportProtocol.tcp
+    strexec_d = 5026, 'strexec-d'
 
     #: - [TCP] Storix I/O daemon (stat)
     #: - [UDP] Storix I/O daemon (stat)
-    strexec_s = 5027, 'strexec-s', TransportProtocol.tcp
+    strexec_s = 5027, 'strexec-s'
 
     #: [TCP] Quiqum Virtual Relais
-    qvr = 5028, 'qvr', TransportProtocol.tcp
+    qvr = 5028
 
     #: - [TCP] Infobright Database Server
     #: - [UDP] Infobright Database Server
-    infobright = 5029, 'infobright', TransportProtocol.tcp
+    infobright = 5029
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_5030 = 5030, 'reserved', TransportProtocol.tcp
+    reserved_5030 = 5030, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5031 = 5031, 'reserved', TransportProtocol.tcp
+    reserved_5031 = 5031, 'reserved'
 
     #: [TCP] SignaCert Enterprise Trust Server Agent
-    signacert_agent = 5032, 'signacert-agent', TransportProtocol.tcp
+    signacert_agent = 5032, 'signacert-agent'
 
     #: [TCP] Janstor Secure Data
-    jtnetd_server = 5033, 'jtnetd-server', TransportProtocol.tcp
+    jtnetd_server = 5033, 'jtnetd-server'
 
     #: [TCP] Janstor Status
-    jtnetd_status = 5034, 'jtnetd-status', TransportProtocol.tcp
+    jtnetd_status = 5034, 'jtnetd-status'
 
     #: - [TCP] asnaacceler8db
     #: - [UDP] asnaacceler8db
-    asnaacceler8db = 5042, 'asnaacceler8db', TransportProtocol.tcp
+    asnaacceler8db = 5042
 
     #: - [TCP] ShopWorX Administration
     #: - [UDP] ShopWorX Administration
-    swxadmin = 5043, 'swxadmin', TransportProtocol.tcp
+    swxadmin = 5043
 
     #: - [TCP] LXI Event Service
     #: - [UDP] LXI Event Service
-    lxi_evntsvc = 5044, 'lxi-evntsvc', TransportProtocol.tcp
+    lxi_evntsvc = 5044, 'lxi-evntsvc'
 
     #: [TCP] Open Settlement Protocol
-    osp = 5045, 'osp', TransportProtocol.tcp
+    osp = 5045
 
     #: [TCP] Reserved
-    reserved_5046 = 5046, 'reserved', TransportProtocol.tcp
+    reserved_5046 = 5046, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5047 = 5047, 'reserved', TransportProtocol.tcp
+    reserved_5047 = 5047, 'reserved'
 
     #: [TCP] Texai Message Service
-    texai = 5048, 'texai', TransportProtocol.tcp
+    texai = 5048
 
     #: - [TCP] iVocalize Web Conference
     #: - [UDP] iVocalize Web Conference
-    ivocalize = 5049, 'ivocalize', TransportProtocol.tcp
+    ivocalize = 5049
 
     #: - [TCP] multimedia conference control tool
     #: - [UDP] multimedia conference control tool
-    mmcc = 5050, 'mmcc', TransportProtocol.tcp
+    mmcc = 5050
 
     #: - [TCP] ITA Agent
     #: - [UDP] ITA Agent
-    ita_agent = 5051, 'ita-agent', TransportProtocol.tcp
+    ita_agent = 5051, 'ita-agent'
 
     #: - [TCP] ITA Manager
     #: - [UDP] ITA Manager
-    ita_manager = 5052, 'ita-manager', TransportProtocol.tcp
+    ita_manager = 5052, 'ita-manager'
 
     #: [TCP] RLM License Server
-    rlm = 5053, 'rlm', TransportProtocol.tcp
+    rlm = 5053
 
     #: [TCP] RLM administrative interface
-    rlm_admin = 5054, 'rlm-admin', TransportProtocol.tcp
+    rlm_admin = 5054, 'rlm-admin'
 
     #: - [TCP] UNOT
     #: - [UDP] UNOT
-    unot = 5055, 'unot', TransportProtocol.tcp
+    unot = 5055
 
     #: - [TCP] Intecom Pointspan 1
     #: - [UDP] Intecom Pointspan 1
-    intecom_ps1 = 5056, 'intecom-ps1', TransportProtocol.tcp
+    intecom_ps1 = 5056, 'intecom-ps1'
 
     #: - [TCP] Intecom Pointspan 2
     #: - [UDP] Intecom Pointspan 2
-    intecom_ps2 = 5057, 'intecom-ps2', TransportProtocol.tcp
+    intecom_ps2 = 5057, 'intecom-ps2'
 
     #: [TCP] Reserved
-    reserved_5058 = 5058, 'reserved', TransportProtocol.tcp
+    reserved_5058 = 5058, 'reserved'
 
     #: - [TCP] SIP Directory Services
     #: - [UDP] SIP Directory Services
-    sds = 5059, 'sds', TransportProtocol.tcp
+    sds = 5059
 
     #: - [TCP] SIP [:rfc:`3263`]
     #: - [UDP] SIP [:rfc:`3263`]
     #: - [SCTP] SIP [:rfc:`4168`]
-    sip = 5060, 'sip', TransportProtocol.tcp
+    sip = 5060
 
     #: - [TCP] SIP-TLS [:rfc:`3263`]
     #: - [UDP] SIP-TLS [:rfc:`3263`]
     #: - [SCTP] SIP-TLS [:rfc:`4168`]
-    sips = 5061, 'sips', TransportProtocol.tcp
+    sips = 5061
 
     #: - [TCP] Localisation access
     #: - [UDP] Localisation access
-    na_localise = 5062, 'na-localise', TransportProtocol.tcp
+    na_localise = 5062, 'na-localise'
 
     #: [TCP] centrify secure RPC
-    csrpc = 5063, 'csrpc', TransportProtocol.tcp
+    csrpc = 5063
 
     #: - [TCP] Channel Access 1
     #: - [UDP] Channel Access 1
-    ca_1 = 5064, 'ca-1', TransportProtocol.tcp
+    ca_1 = 5064, 'ca-1'
 
     #: - [TCP] Channel Access 2
     #: - [UDP] Channel Access 2
-    ca_2 = 5065, 'ca-2', TransportProtocol.tcp
+    ca_2 = 5065, 'ca-2'
 
     #: - [TCP] STANAG-5066-SUBNET-INTF
     #: - [UDP] STANAG-5066-SUBNET-INTF
-    stanag_5066 = 5066, 'stanag-5066', TransportProtocol.tcp
+    stanag_5066 = 5066, 'stanag-5066'
 
     #: - [TCP] Authentx Service
     #: - [UDP] Authentx Service
-    authentx = 5067, 'authentx', TransportProtocol.tcp
+    authentx = 5067
 
     #: [TCP] Bitforest Data Service
-    bitforestsrv = 5068, 'bitforestsrv', TransportProtocol.tcp
+    bitforestsrv = 5068
 
     #: - [TCP] I/Net 2000-NPR
     #: - [UDP] I/Net 2000-NPR
-    i_net_2000_npr = 5069, 'i-net-2000-npr', TransportProtocol.tcp
+    i_net_2000_npr = 5069, 'i-net-2000-npr'
 
     #: - [TCP] VersaTrans Server Agent Service
     #: - [UDP] VersaTrans Server Agent Service
-    vtsas = 5070, 'vtsas', TransportProtocol.tcp
+    vtsas = 5070
 
     #: - [TCP] PowerSchool
     #: - [UDP] PowerSchool
-    powerschool = 5071, 'powerschool', TransportProtocol.tcp
+    powerschool = 5071
 
     #: - [TCP] Anything In Anything
     #: - [UDP] Anything In Anything
-    ayiya = 5072, 'ayiya', TransportProtocol.tcp
+    ayiya = 5072
 
     #: - [TCP] Advantage Group Port Mgr
     #: - [UDP] Advantage Group Port Mgr
-    tag_pm = 5073, 'tag-pm', TransportProtocol.tcp
+    tag_pm = 5073, 'tag-pm'
 
     #: - [TCP] ALES Query
     #: - [UDP] ALES Query
-    alesquery = 5074, 'alesquery', TransportProtocol.tcp
+    alesquery = 5074
 
     #: [TCP] Reserved
-    reserved_5078 = 5078, 'reserved', TransportProtocol.tcp
+    reserved_5078 = 5078, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5079 = 5079, 'reserved', TransportProtocol.tcp
+    reserved_5079 = 5079, 'reserved'
 
     #: - [TCP] OnScreen Data Collection Service
     #: - [UDP] OnScreen Data Collection Service
-    onscreen = 5080, 'onscreen', TransportProtocol.tcp
+    onscreen = 5080
 
     #: - [TCP] SDL - Ent Trans Server
     #: - [UDP] SDL - Ent Trans Server
-    sdl_ets = 5081, 'sdl-ets', TransportProtocol.tcp
+    sdl_ets = 5081, 'sdl-ets'
 
     #: - [TCP] Qpur Communication Protocol
     #: - [UDP] Qpur Communication Protocol
-    qcp = 5082, 'qcp', TransportProtocol.tcp
+    qcp = 5082
 
     #: - [TCP] Qpur File Protocol
     #: - [UDP] Qpur File Protocol
-    qfp = 5083, 'qfp', TransportProtocol.tcp
+    qfp = 5083
 
     #: - [TCP] EPCglobal Low-Level Reader Protocol
     #: - [UDP] EPCglobal Low-Level Reader Protocol
-    llrp = 5084, 'llrp', TransportProtocol.tcp
+    llrp = 5084
 
     #: - [TCP] EPCglobal Encrypted LLRP
     #: - [UDP] EPCglobal Encrypted LLRP
-    encrypted_llrp = 5085, 'encrypted-llrp', TransportProtocol.tcp
+    encrypted_llrp = 5085, 'encrypted-llrp'
 
     #: [TCP] Aprigo Collection Service
-    aprigo_cs = 5086, 'aprigo-cs', TransportProtocol.tcp
+    aprigo_cs = 5086, 'aprigo-cs'
 
     #: [TCP] BIOTIC - Binary Internet of Things Interoperable Communication
-    biotic = 5087, 'biotic', TransportProtocol.tcp
+    biotic = 5087
 
     #: [TCP] Reserved
-    reserved_5092 = 5092, 'reserved', TransportProtocol.tcp
+    reserved_5092 = 5092, 'reserved'
 
     #: - [TCP] Sentinel LM
     #: - [UDP] Sentinel LM
-    sentinel_lm = 5093, 'sentinel-lm', TransportProtocol.tcp
+    sentinel_lm = 5093, 'sentinel-lm'
 
     #: - [TCP] HART-IP
     #: - [UDP] HART-IP
-    hart_ip = 5094, 'hart-ip', TransportProtocol.tcp
+    hart_ip = 5094, 'hart-ip'
 
     #: - [TCP] SentLM Srv2Srv
     #: - [UDP] SentLM Srv2Srv
-    sentlm_srv2srv = 5099, 'sentlm-srv2srv', TransportProtocol.tcp
+    sentlm_srv2srv = 5099, 'sentlm-srv2srv'
 
     #: - [TCP] Socalia service mux
     #: - [UDP] Socalia service mux
-    socalia = 5100, 'socalia', TransportProtocol.tcp
+    socalia = 5100
 
     #: [TCP] Talarian_TCP
-    talarian_tcp = 5101, 'talarian-tcp', TransportProtocol.tcp
+    talarian_tcp = 5101, 'talarian-tcp'
 
     #: - [TCP] Oracle OMS non-secure
     #: - [UDP] Oracle OMS non-secure
-    oms_nonsecure = 5102, 'oms-nonsecure', TransportProtocol.tcp
+    oms_nonsecure = 5102, 'oms-nonsecure'
 
     #: [TCP] Actifio C2C
-    actifio_c2c = 5103, 'actifio-c2c', TransportProtocol.tcp
+    actifio_c2c = 5103, 'actifio-c2c'
 
     #: [TCP] Reserved
-    reserved_5104 = 5104, 'reserved', TransportProtocol.tcp
+    reserved_5104 = 5104, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5105 = 5105, 'reserved', TransportProtocol.tcp
+    reserved_5105 = 5105, 'reserved'
 
     #: [TCP] Actifio UDS Agent
-    actifioudsagent = 5106, 'actifioudsagent', TransportProtocol.tcp
+    actifioudsagent = 5106
 
     #: [TCP] Disk to Disk replication between Actifio Clusters
-    actifioreplic = 5107, 'actifioreplic', TransportProtocol.tcp
+    actifioreplic = 5107
 
     #: - [TCP] TAEP AS service
     #: - [UDP] TAEP AS service
-    taep_as_svc = 5111, 'taep-as-svc', TransportProtocol.tcp
+    taep_as_svc = 5111, 'taep-as-svc'
 
     #: - [TCP] PeerMe Msg Cmd Service
     #: - [UDP] PeerMe Msg Cmd Service
-    pm_cmdsvr = 5112, 'pm-cmdsvr', TransportProtocol.tcp
+    pm_cmdsvr = 5112, 'pm-cmdsvr'
 
     #: [TCP] Enterprise Vault Services
-    ev_services = 5114, 'ev-services', TransportProtocol.tcp
+    ev_services = 5114, 'ev-services'
 
     #: [TCP] Symantec Autobuild Service
-    autobuild = 5115, 'autobuild', TransportProtocol.tcp
+    autobuild = 5115
 
     #: [TCP] Reserved
-    reserved_5116 = 5116, 'reserved', TransportProtocol.tcp
+    reserved_5116 = 5116, 'reserved'
 
     #: [TCP] GradeCam Image Processing
-    gradecam = 5117, 'gradecam', TransportProtocol.tcp
+    gradecam = 5117
 
     #: - [TCP] Barracuda Backup Protocol
     #: - [UDP] Barracuda Backup Protocol
-    barracuda_bbs = 5120, 'barracuda-bbs', TransportProtocol.tcp
+    barracuda_bbs = 5120, 'barracuda-bbs'
 
     #: - [TCP] Policy Commander
     #: - [UDP] Policy Commander
-    nbt_pc = 5133, 'nbt-pc', TransportProtocol.tcp
+    nbt_pc = 5133, 'nbt-pc'
 
     #: [TCP] PP ActivationServer
-    ppactivation = 5134, 'ppactivation', TransportProtocol.tcp
+    ppactivation = 5134
 
     #: [TCP] ERP-Scale
-    erp_scale = 5135, 'erp-scale', TransportProtocol.tcp
+    erp_scale = 5135, 'erp-scale'
 
     #: [TCP] Reserved
-    reserved_5136 = 5136, 'reserved', TransportProtocol.tcp
+    reserved_5136 = 5136, 'reserved'
 
     #: - [TCP] MyCTS server port
     #: - [UDP] MyCTS server port
-    ctsd = 5137, 'ctsd', TransportProtocol.tcp
+    ctsd = 5137
 
     #: - [TCP] RMONITOR SECURE IANA assigned this well-formed service name as a
     #:   replacement for "rmonitor_secure".
@@ -18216,14 +18216,14 @@ class TCP(AppType):
     #: - [UDP] RMONITOR SECURE IANA assigned this well-formed service name as a
     #:   replacement for "rmonitor_secure".
     #: - [UDP] RMONITOR SECURE
-    rmonitor_secure = 5145, 'rmonitor-secure', TransportProtocol.tcp
+    rmonitor_secure = 5145, 'rmonitor-secure'
 
     #: [TCP] Social Alarm Service
-    social_alarm = 5146, 'social-alarm', TransportProtocol.tcp
+    social_alarm = 5146, 'social-alarm'
 
     #: - [TCP] Ascend Tunnel Management Protocol
     #: - [UDP] Ascend Tunnel Management Protocol
-    atmp = 5150, 'atmp', TransportProtocol.tcp
+    atmp = 5150
 
     #: - [TCP] ESRI SDE Instance IANA assigned this well-formed service name as a
     #:   replacement for "esri_sde".
@@ -18231,41 +18231,41 @@ class TCP(AppType):
     #: - [UDP] ESRI SDE Remote Start IANA assigned this well-formed service name as a
     #:   replacement for "esri_sde".
     #: - [UDP] ESRI SDE Remote Start
-    esri_sde = 5151, 'esri-sde', TransportProtocol.tcp
+    esri_sde = 5151, 'esri-sde'
 
     #: - [TCP] ESRI SDE Instance Discovery
     #: - [UDP] ESRI SDE Instance Discovery
-    sde_discovery = 5152, 'sde-discovery', TransportProtocol.tcp
+    sde_discovery = 5152, 'sde-discovery'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_5153 = 5153, 'reserved', TransportProtocol.tcp
+    reserved_5153 = 5153, 'reserved'
 
     #: - [TCP] BZFlag game server
     #: - [UDP] BZFlag game server
-    bzflag = 5154, 'bzflag', TransportProtocol.tcp
+    bzflag = 5154
 
     #: - [TCP] Oracle asControl Agent
     #: - [UDP] Oracle asControl Agent
-    asctrl_agent = 5155, 'asctrl-agent', TransportProtocol.tcp
+    asctrl_agent = 5155, 'asctrl-agent'
 
     #: [TCP] Russian Online Game
-    rugameonline = 5156, 'rugameonline', TransportProtocol.tcp
+    rugameonline = 5156
 
     #: [TCP] Mediat Remote Object Exchange
-    mediat = 5157, 'mediat', TransportProtocol.tcp
+    mediat = 5157
 
     #: [TCP] SNMP over SSH Transport Model [:rfc:`5592`]
-    snmpssh = 5161, 'snmpssh', TransportProtocol.tcp
+    snmpssh = 5161
 
     #: [TCP] SNMP Notification over SSH Transport Model [:rfc:`5592`]
-    snmpssh_trap = 5162, 'snmpssh-trap', TransportProtocol.tcp
+    snmpssh_trap = 5162, 'snmpssh-trap'
 
     #: [TCP] Shadow Backup
-    sbackup = 5163, 'sbackup', TransportProtocol.tcp
+    sbackup = 5163
 
     #: [TCP] Virtual Protocol Adapter
-    vpa = 5164, 'vpa', TransportProtocol.tcp
+    vpa = 5164
 
     #: - [TCP] ife_1corp IANA assigned this well-formed service name as a replacement
     #:   for "ife_icorp".
@@ -18273,1512 +18273,1512 @@ class TCP(AppType):
     #: - [UDP] ife_1corp IANA assigned this well-formed service name as a replacement
     #:   for "ife_icorp".
     #: - [UDP] ife_1corp
-    ife_icorp = 5165, 'ife-icorp', TransportProtocol.tcp
+    ife_icorp = 5165, 'ife-icorp'
 
     #: - [TCP] WinPCS Service Connection
     #: - [UDP] WinPCS Service Connection
-    winpcs = 5166, 'winpcs', TransportProtocol.tcp
+    winpcs = 5166
 
     #: - [TCP] SCTE104 Connection
     #: - [UDP] SCTE104 Connection
-    scte104 = 5167, 'scte104', TransportProtocol.tcp
+    scte104 = 5167
 
     #: - [TCP] SCTE30 Connection
     #: - [UDP] SCTE30 Connection
-    scte30 = 5168, 'scte30', TransportProtocol.tcp
+    scte30 = 5168
 
     #: [TCP] PC over IP Endpoint Management
-    pcoip_mgmt = 5172, 'pcoip-mgmt', TransportProtocol.tcp
+    pcoip_mgmt = 5172, 'pcoip-mgmt'
 
     #: - [TCP] America-Online
     #: - [UDP] America-Online
-    aol = 5190, 'aol', TransportProtocol.tcp
+    aol = 5190
 
     #: - [TCP] AmericaOnline1
     #: - [UDP] AmericaOnline1
-    aol_1 = 5191, 'aol-1', TransportProtocol.tcp
+    aol_1 = 5191, 'aol-1'
 
     #: - [TCP] AmericaOnline2
     #: - [UDP] AmericaOnline2
-    aol_2 = 5192, 'aol-2', TransportProtocol.tcp
+    aol_2 = 5192, 'aol-2'
 
     #: - [TCP] AmericaOnline3
     #: - [UDP] AmericaOnline3
-    aol_3 = 5193, 'aol-3', TransportProtocol.tcp
+    aol_3 = 5193, 'aol-3'
 
     #: [TCP] CipherPoint Config Service
-    cpscomm = 5194, 'cpscomm', TransportProtocol.tcp
+    cpscomm = 5194
 
     #: [TCP] The protocol is used by a license server and client programs to
     #: control use of program licenses that float to networked machines
-    ampl_lic = 5195, 'ampl-lic', TransportProtocol.tcp
+    ampl_lic = 5195, 'ampl-lic'
 
     #: [TCP] The protocol is used by two programs that exchange "table" data used
     #: in the AMPL modeling language
-    ampl_tableproxy = 5196, 'ampl-tableproxy', TransportProtocol.tcp
+    ampl_tableproxy = 5196, 'ampl-tableproxy'
 
     #: [TCP] Tunstall Lone worker device interface
-    tunstall_lwp = 5197, 'tunstall-lwp', TransportProtocol.tcp
+    tunstall_lwp = 5197, 'tunstall-lwp'
 
     #: - [TCP] TARGUS GetData
     #: - [UDP] TARGUS GetData
-    targus_getdata = 5200, 'targus-getdata', TransportProtocol.tcp
+    targus_getdata = 5200, 'targus-getdata'
 
     #: - [TCP] TARGUS GetData 1
     #: - [UDP] TARGUS GetData 1
-    targus_getdata1 = 5201, 'targus-getdata1', TransportProtocol.tcp
+    targus_getdata1 = 5201, 'targus-getdata1'
 
     #: - [TCP] TARGUS GetData 2
     #: - [UDP] TARGUS GetData 2
-    targus_getdata2 = 5202, 'targus-getdata2', TransportProtocol.tcp
+    targus_getdata2 = 5202, 'targus-getdata2'
 
     #: - [TCP] TARGUS GetData 3
     #: - [UDP] TARGUS GetData 3
-    targus_getdata3 = 5203, 'targus-getdata3', TransportProtocol.tcp
+    targus_getdata3 = 5203, 'targus-getdata3'
 
     #: [TCP] Nomad Device Video Transfer
-    nomad = 5209, 'nomad', TransportProtocol.tcp
+    nomad = 5209
 
     #: - [TCP] NOTEZA Data Safety Service
     #: - [SCTP] NOTEZA Data Safety Service
-    noteza = 5215, 'noteza', TransportProtocol.tcp
+    noteza = 5215
 
     #: [TCP] 3eTI Extensible Management Protocol for OAMP
-    TCP_3exmp = 5221, '3exmp', TransportProtocol.tcp
+    TCP_3exmp = 5221, '3exmp'
 
     #: [TCP] XMPP Client Connection [:rfc:`6120`]
-    xmpp_client = 5222, 'xmpp-client', TransportProtocol.tcp
+    xmpp_client = 5222, 'xmpp-client'
 
     #: - [TCP] HP Virtual Machine Group Management
     #: - [UDP] HP Virtual Machine Group Management
-    hpvirtgrp = 5223, 'hpvirtgrp', TransportProtocol.tcp
+    hpvirtgrp = 5223
 
     #: - [TCP] HP Virtual Machine Console Operations
     #: - [UDP] HP Virtual Machine Console Operations
-    hpvirtctrl = 5224, 'hpvirtctrl', TransportProtocol.tcp
+    hpvirtctrl = 5224
 
     #: - [TCP] HP Server
     #: - [UDP] HP Server
-    hp_server = 5225, 'hp-server', TransportProtocol.tcp
+    hp_server = 5225, 'hp-server'
 
     #: - [TCP] HP Status
     #: - [UDP] HP Status
-    hp_status = 5226, 'hp-status', TransportProtocol.tcp
+    hp_status = 5226, 'hp-status'
 
     #: - [TCP] HP System Performance Metric Service
     #: - [UDP] HP System Performance Metric Service
-    perfd = 5227, 'perfd', TransportProtocol.tcp
+    perfd = 5227
 
     #: [TCP] HP Virtual Room Service
-    hpvroom = 5228, 'hpvroom', TransportProtocol.tcp
+    hpvroom = 5228
 
     #: [TCP] Netflow/IPFIX/sFlow Collector and Forwarder Management
-    jaxflow = 5229, 'jaxflow', TransportProtocol.tcp
+    jaxflow = 5229
 
     #: [TCP] JaxMP RealFlow application and protocol data
-    jaxflow_data = 5230, 'jaxflow-data', TransportProtocol.tcp
+    jaxflow_data = 5230, 'jaxflow-data'
 
     #: [TCP] Remote Control of Scan Software for Cruse Scanners
-    crusecontrol = 5231, 'crusecontrol', TransportProtocol.tcp
+    crusecontrol = 5231
 
     #: [TCP] Cruse Scanning System Service
-    csedaemon = 5232, 'csedaemon', TransportProtocol.tcp
+    csedaemon = 5232
 
     #: [TCP] Etinnae Network File Service
-    enfs = 5233, 'enfs', TransportProtocol.tcp
+    enfs = 5233
 
     #: - [TCP] EEnet communications
     #: - [UDP] EEnet communications
-    eenet = 5234, 'eenet', TransportProtocol.tcp
+    eenet = 5234
 
     #: - [TCP] Galaxy Network Service
     #: - [UDP] Galaxy Network Service
-    galaxy_network = 5235, 'galaxy-network', TransportProtocol.tcp
+    galaxy_network = 5235, 'galaxy-network'
 
     #: - [TCP]
     #: - [UDP]
-    padl2sim = 5236, 'padl2sim', TransportProtocol.tcp
+    padl2sim = 5236
 
     #: - [TCP] m-net discovery
     #: - [UDP] m-net discovery
-    mnet_discovery = 5237, 'mnet-discovery', TransportProtocol.tcp
+    mnet_discovery = 5237, 'mnet-discovery'
 
     #: [TCP] ATTUne API
-    attune = 5242, 'attune', TransportProtocol.tcp
+    attune = 5242
 
     #: [TCP] xyClient Status API and rendevous point
-    xycstatus = 5243, 'xycstatus', TransportProtocol.tcp
+    xycstatus = 5243
 
     #: [TCP] DownTools Control Protocol
-    downtools = 5245, 'downtools', TransportProtocol.tcp
+    downtools = 5245
 
     #: [TCP] Reserved
-    reserved_5246 = 5246, 'reserved', TransportProtocol.tcp
+    reserved_5246 = 5246, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5247 = 5247, 'reserved', TransportProtocol.tcp
+    reserved_5247 = 5247, 'reserved'
 
     #: - [TCP] CA Access Control Web Service
     #: - [UDP] CA Access Control Web Service
-    caacws = 5248, 'caacws', TransportProtocol.tcp
+    caacws = 5248
 
     #: - [TCP] CA AC Lang Service
     #: - [UDP] CA AC Lang Service
-    caaclang2 = 5249, 'caaclang2', TransportProtocol.tcp
+    caaclang2 = 5249
 
     #: - [TCP] soaGateway
     #: - [UDP] soaGateway
-    soagateway = 5250, 'soagateway', TransportProtocol.tcp
+    soagateway = 5250
 
     #: - [TCP] CA eTrust VM Service
     #: - [UDP] CA eTrust VM Service
-    caevms = 5251, 'caevms', TransportProtocol.tcp
+    caevms = 5251
 
     #: - [TCP] Movaz SSC
     #: - [UDP] Movaz SSC
-    movaz_ssc = 5252, 'movaz-ssc', TransportProtocol.tcp
+    movaz_ssc = 5252, 'movaz-ssc'
 
     #: [TCP] Kohler Power Device Protocol
-    kpdp = 5253, 'kpdp', TransportProtocol.tcp
+    kpdp = 5253
 
     #: [TCP] LogCabin storage service
-    logcabin = 5254, 'logcabin', TransportProtocol.tcp
+    logcabin = 5254
 
     #: - [TCP] 3Com Network Jack Port 1
     #: - [UDP] 3Com Network Jack Port 1
-    TCP_3com_njack_1 = 5264, '3com-njack-1', TransportProtocol.tcp
+    TCP_3com_njack_1 = 5264, '3com-njack-1'
 
     #: - [TCP] 3Com Network Jack Port 2
     #: - [UDP] 3Com Network Jack Port 2
-    TCP_3com_njack_2 = 5265, '3com-njack-2', TransportProtocol.tcp
+    TCP_3com_njack_2 = 5265, '3com-njack-2'
 
     #: [TCP] XMPP Server Connection [:rfc:`6120`]
-    xmpp_server = 5269, 'xmpp-server', TransportProtocol.tcp
+    xmpp_server = 5269, 'xmpp-server'
 
     #: - [TCP] Cartographer XMP
     #: - [UDP] Cartographer XMP
-    cartographerxmp = 5270, 'cartographerxmp', TransportProtocol.tcp
+    cartographerxmp = 5270
 
     #: [TCP] StageSoft CueLink messaging
-    cuelink = 5271, 'cuelink', TransportProtocol.tcp
+    cuelink = 5271
 
     #: - [TCP] PK
     #: - [UDP] PK
-    pk = 5272, 'pk', TransportProtocol.tcp
+    pk = 5272
 
     #: [TCP] Bidirectional-streams Over Synchronous HTTP (BOSH)
-    xmpp_bosh = 5280, 'xmpp-bosh', TransportProtocol.tcp
+    xmpp_bosh = 5280, 'xmpp-bosh'
 
     #: [TCP] Undo License Manager
-    undo_lm = 5281, 'undo-lm', TransportProtocol.tcp
+    undo_lm = 5281, 'undo-lm'
 
     #: - [TCP] Marimba Transmitter Port
     #: - [UDP] Marimba Transmitter Port
-    transmit_port = 5282, 'transmit-port', TransportProtocol.tcp
+    transmit_port = 5282, 'transmit-port'
 
     #: - [TCP] NLG Data Service
     #: - [UDP] NLG Data Service
-    nlg_data = 5299, 'nlg-data', TransportProtocol.tcp
+    nlg_data = 5299, 'nlg-data'
 
     #: - [TCP] HA cluster heartbeat
     #: - [UDP] HA cluster heartbeat
-    hacl_hb = 5300, 'hacl-hb', TransportProtocol.tcp
+    hacl_hb = 5300, 'hacl-hb'
 
     #: - [TCP] HA cluster general services
     #: - [UDP] HA cluster general services
-    hacl_gs = 5301, 'hacl-gs', TransportProtocol.tcp
+    hacl_gs = 5301, 'hacl-gs'
 
     #: - [TCP] HA cluster configuration
     #: - [UDP] HA cluster configuration
-    hacl_cfg = 5302, 'hacl-cfg', TransportProtocol.tcp
+    hacl_cfg = 5302, 'hacl-cfg'
 
     #: - [TCP] HA cluster probing
     #: - [UDP] HA cluster probing
-    hacl_probe = 5303, 'hacl-probe', TransportProtocol.tcp
+    hacl_probe = 5303, 'hacl-probe'
 
     #: - [TCP] HA Cluster Commands
     #: - [UDP] HA Cluster Commands
-    hacl_local = 5304, 'hacl-local', TransportProtocol.tcp
+    hacl_local = 5304, 'hacl-local'
 
     #: - [TCP] HA Cluster Test
     #: - [UDP] HA Cluster Test
-    hacl_test = 5305, 'hacl-test', TransportProtocol.tcp
+    hacl_test = 5305, 'hacl-test'
 
     #: - [TCP] Sun MC Group
     #: - [UDP] Sun MC Group
-    sun_mc_grp = 5306, 'sun-mc-grp', TransportProtocol.tcp
+    sun_mc_grp = 5306, 'sun-mc-grp'
 
     #: - [TCP] SCO AIP
     #: - [UDP] SCO AIP
-    sco_aip = 5307, 'sco-aip', TransportProtocol.tcp
+    sco_aip = 5307, 'sco-aip'
 
     #: - [TCP] CFengine
     #: - [UDP] CFengine
-    cfengine = 5308, 'cfengine', TransportProtocol.tcp
+    cfengine = 5308
 
     #: - [TCP] J Printer
     #: - [UDP] J Printer
-    jprinter = 5309, 'jprinter', TransportProtocol.tcp
+    jprinter = 5309
 
     #: - [TCP] Outlaws
     #: - [UDP] Outlaws
-    outlaws = 5310, 'outlaws', TransportProtocol.tcp
+    outlaws = 5310
 
     #: - [TCP] Permabit Client-Server
     #: - [UDP] Permabit Client-Server
-    permabit_cs = 5312, 'permabit-cs', TransportProtocol.tcp
+    permabit_cs = 5312, 'permabit-cs'
 
     #: - [TCP] Real-time & Reliable Data
     #: - [UDP] Real-time & Reliable Data
-    rrdp = 5313, 'rrdp', TransportProtocol.tcp
+    rrdp = 5313
 
     #: - [TCP] opalis-rbt-ipc
     #: - [UDP] opalis-rbt-ipc
-    opalis_rbt_ipc = 5314, 'opalis-rbt-ipc', TransportProtocol.tcp
+    opalis_rbt_ipc = 5314, 'opalis-rbt-ipc'
 
     #: - [TCP] HA Cluster UDP Polling
     #: - [UDP] HA Cluster UDP Polling
-    hacl_poll = 5315, 'hacl-poll', TransportProtocol.tcp
+    hacl_poll = 5315, 'hacl-poll'
 
     #: [TCP] HPBladeSystem Monitor Service
-    hpbladems = 5316, 'hpbladems', TransportProtocol.tcp
+    hpbladems = 5316
 
     #: [TCP] HP Device Monitor Service
-    hpdevms = 5317, 'hpdevms', TransportProtocol.tcp
+    hpdevms = 5317
 
     #: [TCP] PKIX Certificate Management using CMS (CMC) [:rfc:`10003`]
-    pkix_cmc = 5318, 'pkix-cmc', TransportProtocol.tcp
+    pkix_cmc = 5318, 'pkix-cmc'
 
     #: - [TCP] Roughtime time synchronization [:rfc:`10049`]
     #: - [UDP] Roughtime time synchronization [:rfc:`10049`]
-    roughtime = 5319, 'roughtime', TransportProtocol.tcp
+    roughtime = 5319
 
     #: [TCP] Webservices-based Zn interface of BSF
-    bsfserver_zn = 5320, 'bsfserver-zn', TransportProtocol.tcp
+    bsfserver_zn = 5320, 'bsfserver-zn'
 
     #: [TCP] Webservices-based Zn interface of BSF over SSL
-    bsfsvr_zn_ssl = 5321, 'bsfsvr-zn-ssl', TransportProtocol.tcp
+    bsfsvr_zn_ssl = 5321, 'bsfsvr-zn-ssl'
 
     #: - [TCP] Sculptor Database Server
     #: - [UDP] Sculptor Database Server
-    kfserver = 5343, 'kfserver', TransportProtocol.tcp
+    kfserver = 5343
 
     #: - [TCP] xkoto DRCP
     #: - [UDP] xkoto DRCP
-    xkotodrcp = 5344, 'xkotodrcp', TransportProtocol.tcp
+    xkotodrcp = 5344
 
     #: - [TCP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]
     #: - [UDP] STUN over DTLS [:rfc:`7350`]
-    stuns = 5349, 'stuns', TransportProtocol.tcp
+    stuns = 5349
 
     #: - [TCP] TURN over TLS [:rfc:`8656`]
     #: - [UDP] TURN over DTLS [:rfc:`7350`]
-    turns = 5349, 'turns', TransportProtocol.tcp
+    turns = 5349
 
     #: - [TCP] STUN Behavior Discovery over TLS [:rfc:`5780`]
     #: - [UDP] Reserved for a future enhancement of STUN-BEHAVIOR [:rfc:`5780`]
-    stun_behaviors = 5349, 'stun-behaviors', TransportProtocol.tcp
+    stun_behaviors = 5349, 'stun-behaviors'
 
     #: [TCP] Reserved
-    reserved_5350 = 5350, 'reserved', TransportProtocol.tcp
+    reserved_5350 = 5350, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5351 = 5351, 'reserved', TransportProtocol.tcp
+    reserved_5351 = 5351, 'reserved'
 
     #: - [TCP] DNS Long-Lived Queries [:rfc:`8764`]
     #: - [UDP] DNS Long-Lived Queries [:rfc:`8764`]
-    dns_llq = 5352, 'dns-llq', TransportProtocol.tcp
+    dns_llq = 5352, 'dns-llq'
 
     #: - [TCP] Multicast DNS [:rfc:`6762`]
     #: - [UDP] Multicast DNS [:rfc:`6762`]
-    mdns = 5353, 'mdns', TransportProtocol.tcp
+    mdns = 5353
 
     #: - [TCP] Multicast DNS Responder IPC
     #: - [UDP] Multicast DNS Responder IPC
-    mdnsresponder = 5354, 'mdnsresponder', TransportProtocol.tcp
+    mdnsresponder = 5354
 
     #: - [TCP] LLMNR
     #: - [UDP] LLMNR
-    llmnr = 5355, 'llmnr', TransportProtocol.tcp
+    llmnr = 5355
 
     #: - [TCP] Microsoft Small Business
     #: - [UDP] Microsoft Small Business
-    ms_smlbiz = 5356, 'ms-smlbiz', TransportProtocol.tcp
+    ms_smlbiz = 5356, 'ms-smlbiz'
 
     #: - [TCP] Web Services for Devices
     #: - [UDP] Web Services for Devices
-    wsdapi = 5357, 'wsdapi', TransportProtocol.tcp
+    wsdapi = 5357
 
     #: - [TCP] WS for Devices Secured
     #: - [UDP] WS for Devices Secured
-    wsdapi_s = 5358, 'wsdapi-s', TransportProtocol.tcp
+    wsdapi_s = 5358, 'wsdapi-s'
 
     #: - [TCP] Microsoft Alerter
     #: - [UDP] Microsoft Alerter
-    ms_alerter = 5359, 'ms-alerter', TransportProtocol.tcp
+    ms_alerter = 5359, 'ms-alerter'
 
     #: - [TCP] Protocol for Windows SideShow
     #: - [UDP] Protocol for Windows SideShow
-    ms_sideshow = 5360, 'ms-sideshow', TransportProtocol.tcp
+    ms_sideshow = 5360, 'ms-sideshow'
 
     #: - [TCP] Secure Protocol for Windows SideShow
     #: - [UDP] Secure Protocol for Windows SideShow
-    ms_s_sideshow = 5361, 'ms-s-sideshow', TransportProtocol.tcp
+    ms_s_sideshow = 5361, 'ms-s-sideshow'
 
     #: - [TCP] Microsoft Windows Server WSD2 Service
     #: - [UDP] Microsoft Windows Server WSD2 Service
-    serverwsd2 = 5362, 'serverwsd2', TransportProtocol.tcp
+    serverwsd2 = 5362
 
     #: - [TCP] Windows Network Projection
     #: - [UDP] Windows Network Projection
-    net_projection = 5363, 'net-projection', TransportProtocol.tcp
+    net_projection = 5363, 'net-projection'
 
     #: [TCP] Reserved
-    reserved_5364 = 5364, 'reserved', TransportProtocol.tcp
+    reserved_5364 = 5364, 'reserved'
 
     #: - [TCP] StressTester(tm) Injector
     #: - [UDP] StressTester(tm) Injector
-    stresstester = 5397, 'stresstester', TransportProtocol.tcp
+    stresstester = 5397
 
     #: - [TCP] Elektron Administration
     #: - [UDP] Elektron Administration
-    elektron_admin = 5398, 'elektron-admin', TransportProtocol.tcp
+    elektron_admin = 5398, 'elektron-admin'
 
     #: - [TCP] SecurityChase
     #: - [UDP] SecurityChase
-    securitychase = 5399, 'securitychase', TransportProtocol.tcp
+    securitychase = 5399
 
     #: - [TCP] Excerpt Search
     #: - [UDP] Excerpt Search
-    excerpt = 5400, 'excerpt', TransportProtocol.tcp
+    excerpt = 5400
 
     #: - [TCP] Excerpt Search Secure
     #: - [UDP] Excerpt Search Secure
-    excerpts = 5401, 'excerpts', TransportProtocol.tcp
+    excerpts = 5401
 
     #: - [TCP] mftp
     #: - [UDP] mftp
-    mftp_349 = 349, 'mftp', TransportProtocol.tcp
+    mftp_349 = 349, 'mftp'
 
     #: - [TCP] OmniCast MFTP
     #: - [UDP] OmniCast MFTP
-    mftp_5402 = 5402, 'mftp', TransportProtocol.tcp
+    mftp_5402 = 5402, 'mftp'
 
     #: - [TCP] HPOMS-CI-LSTN
     #: - [UDP] HPOMS-CI-LSTN
-    hpoms_ci_lstn = 5403, 'hpoms-ci-lstn', TransportProtocol.tcp
+    hpoms_ci_lstn = 5403, 'hpoms-ci-lstn'
 
     #: - [TCP] HPOMS-DPS-LSTN
     #: - [UDP] HPOMS-DPS-LSTN
-    hpoms_dps_lstn = 5404, 'hpoms-dps-lstn', TransportProtocol.tcp
+    hpoms_dps_lstn = 5404, 'hpoms-dps-lstn'
 
     #: - [TCP] NetSupport
     #: - [UDP] NetSupport
-    netsupport = 5405, 'netsupport', TransportProtocol.tcp
+    netsupport = 5405
 
     #: - [TCP] Systemics Sox
     #: - [UDP] Systemics Sox
-    systemics_sox = 5406, 'systemics-sox', TransportProtocol.tcp
+    systemics_sox = 5406, 'systemics-sox'
 
     #: - [TCP] Foresyte-Clear
     #: - [UDP] Foresyte-Clear
-    foresyte_clear = 5407, 'foresyte-clear', TransportProtocol.tcp
+    foresyte_clear = 5407, 'foresyte-clear'
 
     #: - [TCP] Foresyte-Sec
     #: - [UDP] Foresyte-Sec
-    foresyte_sec = 5408, 'foresyte-sec', TransportProtocol.tcp
+    foresyte_sec = 5408, 'foresyte-sec'
 
     #: - [TCP] Salient Data Server
     #: - [UDP] Salient Data Server
-    salient_dtasrv = 5409, 'salient-dtasrv', TransportProtocol.tcp
+    salient_dtasrv = 5409, 'salient-dtasrv'
 
     #: - [TCP] Salient User Manager
     #: - [UDP] Salient User Manager
-    salient_usrmgr = 5410, 'salient-usrmgr', TransportProtocol.tcp
+    salient_usrmgr = 5410, 'salient-usrmgr'
 
     #: - [TCP] ActNet
     #: - [UDP] ActNet
-    actnet = 5411, 'actnet', TransportProtocol.tcp
+    actnet = 5411
 
     #: - [TCP] Continuus
     #: - [UDP] Continuus
-    continuus = 5412, 'continuus', TransportProtocol.tcp
+    continuus = 5412
 
     #: - [TCP] WWIOTALK
     #: - [UDP] WWIOTALK
-    wwiotalk = 5413, 'wwiotalk', TransportProtocol.tcp
+    wwiotalk = 5413
 
     #: - [TCP] StatusD
     #: - [UDP] StatusD
-    statusd = 5414, 'statusd', TransportProtocol.tcp
+    statusd = 5414
 
     #: - [TCP] NS Server
     #: - [UDP] NS Server
-    ns_server = 5415, 'ns-server', TransportProtocol.tcp
+    ns_server = 5415, 'ns-server'
 
     #: - [TCP] SNS Gateway
     #: - [UDP] SNS Gateway
-    sns_gateway = 5416, 'sns-gateway', TransportProtocol.tcp
+    sns_gateway = 5416, 'sns-gateway'
 
     #: - [TCP] SNS Agent
     #: - [UDP] SNS Agent
-    sns_agent = 5417, 'sns-agent', TransportProtocol.tcp
+    sns_agent = 5417, 'sns-agent'
 
     #: - [TCP] MCNTP
     #: - [UDP] MCNTP
-    mcntp = 5418, 'mcntp', TransportProtocol.tcp
+    mcntp = 5418
 
     #: - [TCP] DJ-ICE
     #: - [UDP] DJ-ICE
-    dj_ice = 5419, 'dj-ice', TransportProtocol.tcp
+    dj_ice = 5419, 'dj-ice'
 
     #: - [TCP] Cylink-C
     #: - [UDP] Cylink-C
-    cylink_c = 5420, 'cylink-c', TransportProtocol.tcp
+    cylink_c = 5420, 'cylink-c'
 
     #: - [TCP] Net Support 2
     #: - [UDP] Net Support 2
-    netsupport2 = 5421, 'netsupport2', TransportProtocol.tcp
+    netsupport2 = 5421
 
     #: - [TCP] Salient MUX
     #: - [UDP] Salient MUX
-    salient_mux = 5422, 'salient-mux', TransportProtocol.tcp
+    salient_mux = 5422, 'salient-mux'
 
     #: - [TCP] VIRTUALUSER
     #: - [UDP] VIRTUALUSER
-    virtualuser = 5423, 'virtualuser', TransportProtocol.tcp
+    virtualuser = 5423
 
     #: - [TCP] Beyond Remote
     #: - [UDP] Beyond Remote
-    beyond_remote = 5424, 'beyond-remote', TransportProtocol.tcp
+    beyond_remote = 5424, 'beyond-remote'
 
     #: - [TCP] Beyond Remote Command Channel
     #: - [UDP] Beyond Remote Command Channel
-    br_channel = 5425, 'br-channel', TransportProtocol.tcp
+    br_channel = 5425, 'br-channel'
 
     #: - [TCP] DEVBASIC
     #: - [UDP] DEVBASIC
-    devbasic = 5426, 'devbasic', TransportProtocol.tcp
+    devbasic = 5426
 
     #: - [TCP] SCO-PEER-TTA
     #: - [UDP] SCO-PEER-TTA
-    sco_peer_tta = 5427, 'sco-peer-tta', TransportProtocol.tcp
+    sco_peer_tta = 5427, 'sco-peer-tta'
 
     #: - [TCP] TELACONSOLE
     #: - [UDP] TELACONSOLE
-    telaconsole = 5428, 'telaconsole', TransportProtocol.tcp
+    telaconsole = 5428
 
     #: - [TCP] Billing and Accounting System Exchange
     #: - [UDP] Billing and Accounting System Exchange
-    base = 5429, 'base', TransportProtocol.tcp
+    base = 5429
 
     #: - [TCP] RADEC CORP
     #: - [UDP] RADEC CORP
-    radec_corp = 5430, 'radec-corp', TransportProtocol.tcp
+    radec_corp = 5430, 'radec-corp'
 
     #: - [TCP] PARK AGENT
     #: - [UDP] PARK AGENT
-    park_agent = 5431, 'park-agent', TransportProtocol.tcp
+    park_agent = 5431, 'park-agent'
 
     #: - [TCP] PostgreSQL Database
     #: - [UDP] PostgreSQL Database
-    postgresql = 5432, 'postgresql', TransportProtocol.tcp
+    postgresql = 5432
 
     #: - [TCP] Pyrrho DBMS
     #: - [UDP] Pyrrho DBMS
-    pyrrho = 5433, 'pyrrho', TransportProtocol.tcp
+    pyrrho = 5433
 
     #: - [TCP] SGI Array Services Daemon
     #: - [UDP] SGI Array Services Daemon
-    sgi_arrayd = 5434, 'sgi-arrayd', TransportProtocol.tcp
+    sgi_arrayd = 5434, 'sgi-arrayd'
 
     #: - [TCP] SCEANICS situation and action notification
     #: - [UDP] SCEANICS situation and action notification
-    sceanics = 5435, 'sceanics', TransportProtocol.tcp
+    sceanics = 5435
 
     #: [TCP] Reserved
-    reserved_5436 = 5436, 'reserved', TransportProtocol.tcp
+    reserved_5436 = 5436, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5437 = 5437, 'reserved', TransportProtocol.tcp
+    reserved_5437 = 5437, 'reserved'
 
     #: - [TCP] Pearson HTTPS
     #: - [UDP] Pearson HTTPS
-    spss = 5443, 'spss', TransportProtocol.tcp
+    spss = 5443
 
     #: - [TCP] Server Message Block over Remote Direct Memory Access
     #: - [SCTP] Server Message Block over Remote Direct Memory Access
-    smbdirect = 5445, 'smbdirect', TransportProtocol.tcp
+    smbdirect = 5445
 
     #: [TCP] TiePie engineering data acquisition
-    tiepie = 5450, 'tiepie', TransportProtocol.tcp
+    tiepie = 5450
 
     #: - [TCP] SureBox
     #: - [UDP] SureBox
-    surebox = 5453, 'surebox', TransportProtocol.tcp
+    surebox = 5453
 
     #: - [TCP] APC 5454
     #: - [UDP] APC 5454
-    apc_5454 = 5454, 'apc-5454', TransportProtocol.tcp
+    apc_5454 = 5454, 'apc-5454'
 
     #: - [TCP] APC 5455
     #: - [UDP] APC 5455
-    apc_5455 = 5455, 'apc-5455', TransportProtocol.tcp
+    apc_5455 = 5455, 'apc-5455'
 
     #: - [TCP] APC 5456
     #: - [UDP] APC 5456
-    apc_5456 = 5456, 'apc-5456', TransportProtocol.tcp
+    apc_5456 = 5456, 'apc-5456'
 
     #: - [TCP] SILKMETER
     #: - [UDP] SILKMETER
-    silkmeter = 5461, 'silkmeter', TransportProtocol.tcp
+    silkmeter = 5461
 
     #: - [TCP] TTL Publisher
     #: - [UDP] TTL Publisher
-    ttl_publisher = 5462, 'ttl-publisher', TransportProtocol.tcp
+    ttl_publisher = 5462, 'ttl-publisher'
 
     #: - [TCP] TTL Price Proxy
     #: - [UDP] TTL Price Proxy
-    ttlpriceproxy = 5463, 'ttlpriceproxy', TransportProtocol.tcp
+    ttlpriceproxy = 5463
 
     #: - [TCP] Quail Networks Object Broker
     #: - [UDP] Quail Networks Object Broker
-    quailnet = 5464, 'quailnet', TransportProtocol.tcp
+    quailnet = 5464
 
     #: - [TCP] NETOPS-BROKER
     #: - [UDP] NETOPS-BROKER
-    netops_broker = 5465, 'netops-broker', TransportProtocol.tcp
+    netops_broker = 5465, 'netops-broker'
 
     #: [TCP] The Apsolab company's data collection protocol (native api)
-    apsolab_col = 5470, 'apsolab-col', TransportProtocol.tcp
+    apsolab_col = 5470, 'apsolab-col'
 
     #: [TCP] The Apsolab company's secure data collection protocol (native api)
-    apsolab_cols = 5471, 'apsolab-cols', TransportProtocol.tcp
+    apsolab_cols = 5471, 'apsolab-cols'
 
     #: [TCP] The Apsolab company's dynamic tag protocol
-    apsolab_tag = 5472, 'apsolab-tag', TransportProtocol.tcp
+    apsolab_tag = 5472, 'apsolab-tag'
 
     #: [TCP] The Apsolab company's secure dynamic tag protocol
-    apsolab_tags = 5473, 'apsolab-tags', TransportProtocol.tcp
+    apsolab_tags = 5473, 'apsolab-tags'
 
     #: [TCP] Reserved
-    reserved_5474 = 5474, 'reserved', TransportProtocol.tcp
+    reserved_5474 = 5474, 'reserved'
 
     #: [TCP] The Apsolab company's data retrieval protocol
-    apsolab_data = 5475, 'apsolab-data', TransportProtocol.tcp
+    apsolab_data = 5475, 'apsolab-data'
 
     #: - [TCP] fcp-addr-srvr1
     #: - [UDP] fcp-addr-srvr1
-    fcp_addr_srvr1 = 5500, 'fcp-addr-srvr1', TransportProtocol.tcp
+    fcp_addr_srvr1 = 5500, 'fcp-addr-srvr1'
 
     #: - [TCP] fcp-addr-srvr2
     #: - [UDP] fcp-addr-srvr2
-    fcp_addr_srvr2 = 5501, 'fcp-addr-srvr2', TransportProtocol.tcp
+    fcp_addr_srvr2 = 5501, 'fcp-addr-srvr2'
 
     #: - [TCP] fcp-srvr-inst1
     #: - [UDP] fcp-srvr-inst1
-    fcp_srvr_inst1 = 5502, 'fcp-srvr-inst1', TransportProtocol.tcp
+    fcp_srvr_inst1 = 5502, 'fcp-srvr-inst1'
 
     #: - [TCP] fcp-srvr-inst2
     #: - [UDP] fcp-srvr-inst2
-    fcp_srvr_inst2 = 5503, 'fcp-srvr-inst2', TransportProtocol.tcp
+    fcp_srvr_inst2 = 5503, 'fcp-srvr-inst2'
 
     #: - [TCP] fcp-cics-gw1
     #: - [UDP] fcp-cics-gw1
-    fcp_cics_gw1 = 5504, 'fcp-cics-gw1', TransportProtocol.tcp
+    fcp_cics_gw1 = 5504, 'fcp-cics-gw1'
 
     #: - [TCP] Checkout Database
     #: - [UDP] Checkout Database
-    checkoutdb = 5505, 'checkoutdb', TransportProtocol.tcp
+    checkoutdb = 5505
 
     #: - [TCP] Amcom Mobile Connect
     #: - [UDP] Amcom Mobile Connect
-    amc = 5506, 'amc', TransportProtocol.tcp
+    amc = 5506
 
     #: [TCP] PowerSysLab Electrical Management
-    psl_management = 5507, 'psl-management', TransportProtocol.tcp
+    psl_management = 5507, 'psl-management'
 
     #: - [TCP] Matter Operational Discovery and Communi
     #: - [UDP] Matter Operational Discovery and Communi
-    matter = 5540, 'matter', TransportProtocol.tcp
+    matter = 5540
 
     #: [TCP] QF-Test License Server / QF-Test MCP Server
-    qftest_lic_mcp = 5543, 'qftest-lic-mcp', TransportProtocol.tcp
+    qftest_lic_mcp = 5543, 'qftest-lic-mcp'
 
     #: [TCP] Model Railway control using the CBUS message protocol
-    cbus = 5550, 'cbus', TransportProtocol.tcp
+    cbus = 5550
 
     #: - [TCP] SGI Eventmond Port
     #: - [UDP] SGI Eventmond Port
-    sgi_eventmond = 5553, 'sgi-eventmond', TransportProtocol.tcp
+    sgi_eventmond = 5553, 'sgi-eventmond'
 
     #: - [TCP] SGI ESP HTTP
     #: - [UDP] SGI ESP HTTP
-    sgi_esphttp = 5554, 'sgi-esphttp', TransportProtocol.tcp
+    sgi_esphttp = 5554, 'sgi-esphttp'
 
     #: - [TCP] Personal Agent
     #: - [UDP] Personal Agent
-    personal_agent = 5555, 'personal-agent', TransportProtocol.tcp
+    personal_agent = 5555, 'personal-agent'
 
     #: - [TCP] Freeciv gameplay
     #: - [UDP] Freeciv gameplay
-    freeciv = 5556, 'freeciv', TransportProtocol.tcp
+    freeciv = 5556
 
     #: [TCP] Sandlab FARENET
-    farenet = 5557, 'farenet', TransportProtocol.tcp
+    farenet = 5557
 
     #: [TCP] Data Protector BURA
-    dp_bura = 5565, 'dp-bura', TransportProtocol.tcp
+    dp_bura = 5565, 'dp-bura'
 
     #: [TCP] Westec Connect
-    westec_connect = 5566, 'westec-connect', TransportProtocol.tcp
+    westec_connect = 5566, 'westec-connect'
 
     #: - [TCP] DOF Protocol Stack Multicast/Secure Transport
     #: - [UDP] DOF Protocol Stack Multicast/Secure Transport
-    dof_dps_mc_sec = 5567, 'dof-dps-mc-sec', TransportProtocol.tcp
+    dof_dps_mc_sec = 5567, 'dof-dps-mc-sec'
 
     #: - [TCP] Session Data Transport Multicast
     #: - [UDP] Session Data Transport Multicast
-    sdt = 5568, 'sdt', TransportProtocol.tcp
+    sdt = 5568
 
     #: [TCP] PLASA E1.33, Remote Device Management (RDM) controller status
     #: notifications
-    rdmnet_ctrl = 5569, 'rdmnet-ctrl', TransportProtocol.tcp
+    rdmnet_ctrl = 5569, 'rdmnet-ctrl'
 
     #: - [TCP] SAS Domain Management Messaging Protocol
     #: - [UDP] SAS Domain Management Messaging Protocol
-    sdmmp = 5573, 'sdmmp', TransportProtocol.tcp
+    sdmmp = 5573
 
     #: [TCP] SAS IO Forwarding
-    lsi_bobcat = 5574, 'lsi-bobcat', TransportProtocol.tcp
+    lsi_bobcat = 5574, 'lsi-bobcat'
 
     #: [TCP] Oracle Access Protocol
-    ora_oap = 5575, 'ora-oap', TransportProtocol.tcp
+    ora_oap = 5575, 'ora-oap'
 
     #: [TCP] FleetDisplay Tracking Service
-    fdtracks = 5579, 'fdtracks', TransportProtocol.tcp
+    fdtracks = 5579
 
     #: - [TCP] T-Mobile SMS Protocol Message 0
     #: - [UDP] T-Mobile SMS Protocol Message 0
-    tmosms0 = 5580, 'tmosms0', TransportProtocol.tcp
+    tmosms0 = 5580
 
     #: - [TCP] T-Mobile SMS Protocol Message 1
     #: - [UDP] T-Mobile SMS Protocol Message 1
-    tmosms1 = 5581, 'tmosms1', TransportProtocol.tcp
+    tmosms1 = 5581
 
     #: - [TCP] T-Mobile SMS Protocol Message 3
     #: - [UDP] T-Mobile SMS Protocol Message 3
-    fac_restore = 5582, 'fac-restore', TransportProtocol.tcp
+    fac_restore = 5582, 'fac-restore'
 
     #: - [TCP] T-Mobile SMS Protocol Message 2
     #: - [UDP] T-Mobile SMS Protocol Message 2
-    tmo_icon_sync = 5583, 'tmo-icon-sync', TransportProtocol.tcp
+    tmo_icon_sync = 5583, 'tmo-icon-sync'
 
     #: - [TCP] BeInSync-Web
     #: - [UDP] BeInSync-Web
-    bis_web = 5584, 'bis-web', TransportProtocol.tcp
+    bis_web = 5584, 'bis-web'
 
     #: - [TCP] BeInSync-sync
     #: - [UDP] BeInSync-sync
-    bis_sync = 5585, 'bis-sync', TransportProtocol.tcp
+    bis_sync = 5585, 'bis-sync'
 
     #: [TCP] Planning to send mobile terminated SMS to the specific port so that
     #: the SMS is not visible to the client
-    att_mt_sms = 5586, 'att-mt-sms', TransportProtocol.tcp
+    att_mt_sms = 5586, 'att-mt-sms'
 
     #: - [TCP] inin secure messaging
     #: - [UDP] inin secure messaging
-    ininmessaging = 5597, 'ininmessaging', TransportProtocol.tcp
+    ininmessaging = 5597
 
     #: - [TCP] MCT Market Data Feed
     #: - [UDP] MCT Market Data Feed
-    mctfeed = 5598, 'mctfeed', TransportProtocol.tcp
+    mctfeed = 5598
 
     #: - [TCP] Enterprise Security Remote Install
     #: - [UDP] Enterprise Security Remote Install
-    esinstall = 5599, 'esinstall', TransportProtocol.tcp
+    esinstall = 5599
 
     #: - [TCP] Enterprise Security Manager
     #: - [UDP] Enterprise Security Manager
-    esmmanager = 5600, 'esmmanager', TransportProtocol.tcp
+    esmmanager = 5600
 
     #: - [TCP] Enterprise Security Agent
     #: - [UDP] Enterprise Security Agent
-    esmagent = 5601, 'esmagent', TransportProtocol.tcp
+    esmagent = 5601
 
     #: - [TCP] A1-MSC
     #: - [UDP] A1-MSC
-    a1_msc = 5602, 'a1-msc', TransportProtocol.tcp
+    a1_msc = 5602, 'a1-msc'
 
     #: - [TCP] A1-BS
     #: - [UDP] A1-BS
-    a1_bs = 5603, 'a1-bs', TransportProtocol.tcp
+    a1_bs = 5603, 'a1-bs'
 
     #: - [TCP] A3-SDUNode
     #: - [UDP] A3-SDUNode
-    a3_sdunode = 5604, 'a3-sdunode', TransportProtocol.tcp
+    a3_sdunode = 5604, 'a3-sdunode'
 
     #: - [TCP] A4-SDUNode
     #: - [UDP] A4-SDUNode
-    a4_sdunode = 5605, 'a4-sdunode', TransportProtocol.tcp
+    a4_sdunode = 5605, 'a4-sdunode'
 
     #: [TCP] Fiscal Registering Protocol
-    efr = 5618, 'efr', TransportProtocol.tcp
+    efr = 5618
 
     #: - [TCP] Node Initiated Network Association Forma
     #: - [UDP] Node Initiated Network Association Forma
-    ninaf = 5627, 'ninaf', TransportProtocol.tcp
+    ninaf = 5627
 
     #: - [TCP] HTrust API
     #: - [UDP] HTrust API
-    htrust = 5628, 'htrust', TransportProtocol.tcp
+    htrust = 5628
 
     #: - [TCP] Symantec Storage Foundation for Database
     #: - [UDP] Symantec Storage Foundation for Database
-    symantec_sfdb = 5629, 'symantec-sfdb', TransportProtocol.tcp
+    symantec_sfdb = 5629, 'symantec-sfdb'
 
     #: - [TCP] PreciseCommunication
     #: - [UDP] PreciseCommunication
-    precise_comm = 5630, 'precise-comm', TransportProtocol.tcp
+    precise_comm = 5630, 'precise-comm'
 
     #: - [TCP] pcANYWHEREdata
     #: - [UDP] pcANYWHEREdata
-    pcanywheredata = 5631, 'pcanywheredata', TransportProtocol.tcp
+    pcanywheredata = 5631
 
     #: - [TCP] pcANYWHEREstat
     #: - [UDP] pcANYWHEREstat
-    pcanywherestat = 5632, 'pcanywherestat', TransportProtocol.tcp
+    pcanywherestat = 5632
 
     #: - [TCP] BE Operations Request Listener
     #: - [UDP] BE Operations Request Listener
-    beorl = 5633, 'beorl', TransportProtocol.tcp
+    beorl = 5633
 
     #: - [TCP] SF Message Service
     #: - [UDP] SF Message Service
-    xprtld = 5634, 'xprtld', TransportProtocol.tcp
+    xprtld = 5634
 
     #: [TCP] SFM Authentication Subsystem
-    sfmsso = 5635, 'sfmsso', TransportProtocol.tcp
+    sfmsso = 5635
 
     #: [TCP] SFMdb - SFM DB server
-    sfm_db_server = 5636, 'sfm-db-server', TransportProtocol.tcp
+    sfm_db_server = 5636, 'sfm-db-server'
 
     #: [TCP] Symantec CSSC
-    cssc = 5637, 'cssc', TransportProtocol.tcp
+    cssc = 5637
 
     #: [TCP] Symantec Fingerprint Lookup and Container Reference Service
-    flcrs = 5638, 'flcrs', TransportProtocol.tcp
+    flcrs = 5638
 
     #: [TCP] Symantec Integrity Checking Service
-    ics = 5639, 'ics', TransportProtocol.tcp
+    ics = 5639
 
     #: [TCP] Ventureforth Mobile
-    vfmobile = 5646, 'vfmobile', TransportProtocol.tcp
+    vfmobile = 5646
 
     #: [TCP] Nagios Remote Plugin Executor
-    nrpe = 5666, 'nrpe', TransportProtocol.tcp
+    nrpe = 5666
 
     #: [TCP] ZeroMQ file publish-subscribe protocol
-    filemq = 5670, 'filemq', TransportProtocol.tcp
+    filemq = 5670
 
     #: - [TCP] amqp protocol over TLS/SSL
     #: - [UDP] amqp protocol over TLS/SSL
-    amqps = 5671, 'amqps', TransportProtocol.tcp
+    amqps = 5671
 
     #: - [TCP] AMQP
     #: - [UDP] AMQP
     #: - [SCTP] AMQP
-    amqp = 5672, 'amqp', TransportProtocol.tcp
+    amqp = 5672
 
     #: - [TCP] JACL Message Server
     #: - [UDP] JACL Message Server
-    jms = 5673, 'jms', TransportProtocol.tcp
+    jms = 5673
 
     #: - [TCP] HyperSCSI Port
     #: - [UDP] HyperSCSI Port
-    hyperscsi_port = 5674, 'hyperscsi-port', TransportProtocol.tcp
+    hyperscsi_port = 5674, 'hyperscsi-port'
 
     #: - [TCP] V5UA application port [:rfc:`3807`]
     #: - [UDP] V5UA application port [:rfc:`3807`]
     #: - [SCTP] V5UA application port [:rfc:`3807`]
-    v5ua = 5675, 'v5ua', TransportProtocol.tcp
+    v5ua = 5675
 
     #: - [TCP] RA Administration
     #: - [UDP] RA Administration
-    raadmin = 5676, 'raadmin', TransportProtocol.tcp
+    raadmin = 5676
 
     #: - [TCP] Quest Central DB2 Launchr
     #: - [UDP] Quest Central DB2 Launchr
-    questdb2_lnchr = 5677, 'questdb2-lnchr', TransportProtocol.tcp
+    questdb2_lnchr = 5677, 'questdb2-lnchr'
 
     #: - [TCP] Remote Replication Agent Connection
     #: - [UDP] Remote Replication Agent Connection
-    rrac = 5678, 'rrac', TransportProtocol.tcp
+    rrac = 5678
 
     #: - [TCP] Direct Cable Connect Manager
     #: - [UDP] Direct Cable Connect Manager
-    dccm = 5679, 'dccm', TransportProtocol.tcp
+    dccm = 5679
 
     #: - [TCP] Auriga Router Service
     #: - [UDP] Auriga Router Service
-    auriga_router = 5680, 'auriga-router', TransportProtocol.tcp
+    auriga_router = 5680, 'auriga-router'
 
     #: - [TCP] Net-coneX Control Protocol
     #: - [UDP] Net-coneX Control Protocol
-    ncxcp = 5681, 'ncxcp', TransportProtocol.tcp
+    ncxcp = 5681
 
     #: [TCP] Reserved
-    reserved_5682 = 5682, 'reserved', TransportProtocol.tcp
+    reserved_5682 = 5682, 'reserved'
 
     #: - [TCP] Constrained Application Protocol (CoAP) [:rfc:`8323`]
     #: - [UDP] Constrained Application Protocol [:rfc:`7252`]
-    coap = 5683, 'coap', TransportProtocol.tcp
+    coap = 5683
 
     #: - [TCP] Constrained Application Protocol (CoAP) [:rfc:`7301`][:rfc:`8323`]
     #: - [UDP] DTLS-secured CoAP [:rfc:`7252`]
-    coaps = 5684, 'coaps', TransportProtocol.tcp
+    coaps = 5684
 
     #: [TCP] Reserved
-    reserved_5687 = 5687, 'reserved', TransportProtocol.tcp
+    reserved_5687 = 5687, 'reserved'
 
     #: - [TCP] GGZ Gaming Zone
     #: - [UDP] GGZ Gaming Zone
-    ggz = 5688, 'ggz', TransportProtocol.tcp
+    ggz = 5688
 
     #: - [TCP] QM video network management protocol
     #: - [UDP] QM video network management protocol
-    qmvideo = 5689, 'qmvideo', TransportProtocol.tcp
+    qmvideo = 5689
 
     #: [TCP] Robert Bosch Data Transfer
-    rbsystem = 5693, 'rbsystem', TransportProtocol.tcp
+    rbsystem = 5693
 
     #: [TCP] Key Management Interoperability Protocol
-    kmip = 5696, 'kmip', TransportProtocol.tcp
+    kmip = 5696
 
     #: [TCP] Dell SupportAssist data center management
-    supportassist = 5700, 'supportassist', TransportProtocol.tcp
+    supportassist = 5700
 
     #: [TCP] StorageOS REST API
-    storageos = 5705, 'storageos', TransportProtocol.tcp
+    storageos = 5705
 
     #: - [TCP] proshare conf audio
     #: - [UDP] proshare conf audio
-    proshareaudio = 5713, 'proshareaudio', TransportProtocol.tcp
+    proshareaudio = 5713
 
     #: - [TCP] proshare conf video
     #: - [UDP] proshare conf video
-    prosharevideo = 5714, 'prosharevideo', TransportProtocol.tcp
+    prosharevideo = 5714
 
     #: - [TCP] proshare conf data
     #: - [UDP] proshare conf data
-    prosharedata = 5715, 'prosharedata', TransportProtocol.tcp
+    prosharedata = 5715
 
     #: - [TCP] proshare conf request
     #: - [UDP] proshare conf request
-    prosharerequest = 5716, 'prosharerequest', TransportProtocol.tcp
+    prosharerequest = 5716
 
     #: - [TCP] proshare conf notify
     #: - [UDP] proshare conf notify
-    prosharenotify = 5717, 'prosharenotify', TransportProtocol.tcp
+    prosharenotify = 5717
 
     #: - [TCP] DPM Communication Server
     #: - [UDP] DPM Communication Server
-    dpm = 5718, 'dpm', TransportProtocol.tcp
+    dpm = 5718
 
     #: - [TCP] DPM Agent Coordinator
     #: - [UDP] DPM Agent Coordinator
-    dpm_agent = 5719, 'dpm-agent', TransportProtocol.tcp
+    dpm_agent = 5719, 'dpm-agent'
 
     #: - [TCP] MS-Licensing
     #: - [UDP] MS-Licensing
-    ms_licensing = 5720, 'ms-licensing', TransportProtocol.tcp
+    ms_licensing = 5720, 'ms-licensing'
 
     #: - [TCP] Desktop Passthru Service
     #: - [UDP] Desktop Passthru Service
-    dtpt = 5721, 'dtpt', TransportProtocol.tcp
+    dtpt = 5721
 
     #: - [TCP] Microsoft DFS Replication Service
     #: - [UDP] Microsoft DFS Replication Service
-    msdfsr = 5722, 'msdfsr', TransportProtocol.tcp
+    msdfsr = 5722
 
     #: - [TCP] Operations Manager - Health Service
     #: - [UDP] Operations Manager - Health Service
-    omhs = 5723, 'omhs', TransportProtocol.tcp
+    omhs = 5723
 
     #: - [TCP] Operations Manager - SDK Service
     #: - [UDP] Operations Manager - SDK Service
-    omsdk = 5724, 'omsdk', TransportProtocol.tcp
+    omsdk = 5724
 
     #: [TCP] Microsoft Identity Lifecycle Manager
-    ms_ilm = 5725, 'ms-ilm', TransportProtocol.tcp
+    ms_ilm = 5725, 'ms-ilm'
 
     #: [TCP] Microsoft Lifecycle Manager Secure Token Service
-    ms_ilm_sts = 5726, 'ms-ilm-sts', TransportProtocol.tcp
+    ms_ilm_sts = 5726, 'ms-ilm-sts'
 
     #: [TCP] ASG Event Notification Framework
-    asgenf = 5727, 'asgenf', TransportProtocol.tcp
+    asgenf = 5727
 
     #: [TCP] Dist. I/O Comm. Service Data and Control
-    io_dist_data = 5728, 'io-dist-data', TransportProtocol.tcp
+    io_dist_data = 5728, 'io-dist-data'
 
     #: - [TCP] Openmail User Agent Layer
     #: - [UDP] Openmail User Agent Layer
-    openmail = 5729, 'openmail', TransportProtocol.tcp
+    openmail = 5729
 
     #: - [TCP] Steltor's calendar access
     #: - [UDP] Steltor's calendar access
-    unieng = 5730, 'unieng', TransportProtocol.tcp
+    unieng = 5730
 
     #: - [TCP] IDA Discover Port 1
     #: - [UDP] IDA Discover Port 1
-    ida_discover1 = 5741, 'ida-discover1', TransportProtocol.tcp
+    ida_discover1 = 5741, 'ida-discover1'
 
     #: - [TCP] IDA Discover Port 2
     #: - [UDP] IDA Discover Port 2
-    ida_discover2 = 5742, 'ida-discover2', TransportProtocol.tcp
+    ida_discover2 = 5742, 'ida-discover2'
 
     #: - [TCP] Watchdoc NetPOD Protocol
     #: - [UDP] Watchdoc NetPOD Protocol
-    watchdoc_pod = 5743, 'watchdoc-pod', TransportProtocol.tcp
+    watchdoc_pod = 5743, 'watchdoc-pod'
 
     #: - [TCP] Watchdoc Server
     #: - [UDP] Watchdoc Server
-    watchdoc = 5744, 'watchdoc', TransportProtocol.tcp
+    watchdoc = 5744
 
     #: - [TCP] fcopy-server
     #: - [UDP] fcopy-server
-    fcopy_server = 5745, 'fcopy-server', TransportProtocol.tcp
+    fcopy_server = 5745, 'fcopy-server'
 
     #: - [TCP] fcopys-server
     #: - [UDP] fcopys-server
-    fcopys_server = 5746, 'fcopys-server', TransportProtocol.tcp
+    fcopys_server = 5746, 'fcopys-server'
 
     #: - [TCP] Wildbits Tunatic
     #: - [UDP] Wildbits Tunatic
-    tunatic = 5747, 'tunatic', TransportProtocol.tcp
+    tunatic = 5747
 
     #: - [TCP] Wildbits Tunalyzer
     #: - [UDP] Wildbits Tunalyzer
-    tunalyzer = 5748, 'tunalyzer', TransportProtocol.tcp
+    tunalyzer = 5748
 
     #: - [TCP] Bladelogic Agent Service
     #: - [UDP] Bladelogic Agent Service
-    rscd = 5750, 'rscd', TransportProtocol.tcp
+    rscd = 5750
 
     #: - [TCP] OpenMail Desk Gateway server
     #: - [UDP] OpenMail Desk Gateway server
-    openmailg = 5755, 'openmailg', TransportProtocol.tcp
+    openmailg = 5755
 
     #: - [TCP] OpenMail X.500 Directory Server
     #: - [UDP] OpenMail X.500 Directory Server
-    x500ms = 5757, 'x500ms', TransportProtocol.tcp
+    x500ms = 5757
 
     #: - [TCP] OpenMail NewMail Server
     #: - [UDP] OpenMail NewMail Server
-    openmailns = 5766, 'openmailns', TransportProtocol.tcp
+    openmailns = 5766
 
     #: - [TCP] OpenMail Suer Agent Layer (Secure)
     #: - [UDP] OpenMail Suer Agent Layer (Secure)
-    s_openmail = 5767, 's-openmail', TransportProtocol.tcp
+    s_openmail = 5767, 's-openmail'
 
     #: - [TCP] OpenMail CMTS Server
     #: - [UDP] OpenMail CMTS Server
-    openmailpxy = 5768, 'openmailpxy', TransportProtocol.tcp
+    openmailpxy = 5768
 
     #: - [TCP] x509solutions Internal CA
     #: - [UDP] x509solutions Internal CA
-    spramsca = 5769, 'spramsca', TransportProtocol.tcp
+    spramsca = 5769
 
     #: - [TCP] x509solutions Secure Data
     #: - [UDP] x509solutions Secure Data
-    spramsd = 5770, 'spramsd', TransportProtocol.tcp
+    spramsd = 5770
 
     #: - [TCP] NetAgent
     #: - [UDP] NetAgent
-    netagent = 5771, 'netagent', TransportProtocol.tcp
+    netagent = 5771
 
     #: - [TCP] Control commands and responses
     #: - [UDP] Control commands and responses
-    starfield_io = 5777, 'starfield-io', TransportProtocol.tcp
+    starfield_io = 5777, 'starfield-io'
 
     #: [TCP] Visual Tag System RPC
-    vts_rpc = 5780, 'vts-rpc', TransportProtocol.tcp
+    vts_rpc = 5780, 'vts-rpc'
 
     #: - [TCP] 3PAR Event Reporting Service
     #: - [UDP] 3PAR Event Reporting Service
-    TCP_3par_evts = 5781, '3par-evts', TransportProtocol.tcp
+    TCP_3par_evts = 5781, '3par-evts'
 
     #: - [TCP] 3PAR Management Service
     #: - [UDP] 3PAR Management Service
-    TCP_3par_mgmt = 5782, '3par-mgmt', TransportProtocol.tcp
+    TCP_3par_mgmt = 5782, '3par-mgmt'
 
     #: - [TCP] 3PAR Management Service with SSL
     #: - [UDP] 3PAR Management Service with SSL
-    TCP_3par_mgmt_ssl = 5783, '3par-mgmt-ssl', TransportProtocol.tcp
+    TCP_3par_mgmt_ssl = 5783, '3par-mgmt-ssl'
 
     #: [TCP] Reserved
-    reserved_5784 = 5784, 'reserved', TransportProtocol.tcp
+    reserved_5784 = 5784, 'reserved'
 
     #: - [TCP] 3PAR Inform Remote Copy
     #: - [UDP] 3PAR Inform Remote Copy
-    TCP_3par_rcopy = 5785, '3par-rcopy', TransportProtocol.tcp
+    TCP_3par_rcopy = 5785, '3par-rcopy'
 
     #: [TCP] Reserved
-    reserved_5786 = 5786, 'reserved', TransportProtocol.tcp
+    reserved_5786 = 5786, 'reserved'
 
     #: [TCP] Reserved
-    reserved_5787 = 5787, 'reserved', TransportProtocol.tcp
+    reserved_5787 = 5787, 'reserved'
 
     #: - [TCP] XtreamX Supervised Peer message
     #: - [UDP] XtreamX Supervised Peer message
-    xtreamx = 5793, 'xtreamx', TransportProtocol.tcp
+    xtreamx = 5793
 
     #: [TCP] Reserved
-    reserved_5794 = 5794, 'reserved', TransportProtocol.tcp
+    reserved_5794 = 5794, 'reserved'
 
     #: [TCP] Proprietary Website deployment service
-    enlabel_dpl = 5798, 'enlabel-dpl', TransportProtocol.tcp
+    enlabel_dpl = 5798, 'enlabel-dpl'
 
     #: - [TCP] ICMPD
     #: - [UDP] ICMPD
-    icmpd = 5813, 'icmpd', TransportProtocol.tcp
+    icmpd = 5813
 
     #: - [TCP] Support Automation
     #: - [UDP] Support Automation
-    spt_automation = 5814, 'spt-automation', TransportProtocol.tcp
+    spt_automation = 5814, 'spt-automation'
 
     #: [TCP] AutoPass licensing
-    autopassdaemon = 5820, 'autopassdaemon', TransportProtocol.tcp
+    autopassdaemon = 5820
 
     #: [TCP] Z-firm ShipRush interface for web access and bidirectional data
-    shiprush_d_ch = 5841, 'shiprush-d-ch', TransportProtocol.tcp
+    shiprush_d_ch = 5841, 'shiprush-d-ch'
 
     #: [TCP] Reversion Backup/Restore
-    reversion = 5842, 'reversion', TransportProtocol.tcp
+    reversion = 5842
 
     #: - [TCP] WHEREHOO
     #: - [UDP] WHEREHOO
-    wherehoo = 5859, 'wherehoo', TransportProtocol.tcp
+    wherehoo = 5859
 
     #: - [TCP] PlanetPress Suite Messeng
     #: - [UDP] PlanetPress Suite Messeng
-    ppsuitemsg = 5863, 'ppsuitemsg', TransportProtocol.tcp
+    ppsuitemsg = 5863
 
     #: - [TCP] Diameter over TLS/TCP [:rfc:`6733`]
     #: - [SCTP] Diameter over DTLS/SCTP [:rfc:`6733`]
-    diameters = 5868, 'diameters', TransportProtocol.tcp
+    diameters = 5868
 
     #: [TCP] Javascript Unit Test Environment
-    jute = 5883, 'jute', TransportProtocol.tcp
+    jute = 5883
 
     #: - [TCP] Remote Framebuffer [:rfc:`6143`]
     #: - [UDP] Remote Framebuffer [:rfc:`6143`]
-    rfb = 5900, 'rfb', TransportProtocol.tcp
+    rfb = 5900
 
     #: - [TCP] Flight & Flow Info for Collaborative Env
     #: - [UDP] Flight & Flow Info for Collaborative Env
     #: - [SCTP] Flight & Flow Info for Collaborative Env
-    ff_ice = 5903, 'ff-ice', TransportProtocol.tcp
+    ff_ice = 5903, 'ff-ice'
 
     #: - [TCP] Air-Ground SWIM
     #: - [UDP] Air-Ground SWIM
     #: - [SCTP] Air-Ground SWIM
-    ag_swim = 5904, 'ag-swim', TransportProtocol.tcp
+    ag_swim = 5904, 'ag-swim'
 
     #: - [TCP] Adv Surface Mvmnt and Guidance Cont Sys
     #: - [UDP] Adv Surface Mvmnt and Guidance Cont Sys
     #: - [SCTP] Adv Surface Mvmnt and Guidance Cont Sys
-    asmgcs = 5905, 'asmgcs', TransportProtocol.tcp
+    asmgcs = 5905
 
     #: - [TCP] Remotely Piloted Vehicle C&C
     #: - [UDP] Remotely Piloted Vehicle C&C
     #: - [SCTP] Remotely Piloted Vehicle C&C
-    rpas_c2 = 5906, 'rpas-c2', TransportProtocol.tcp
+    rpas_c2 = 5906, 'rpas-c2'
 
     #: - [TCP] Distress and Safety Data App
     #: - [UDP] Distress and Safety Data App
     #: - [SCTP] Distress and Safety Data App
-    dsd = 5907, 'dsd', TransportProtocol.tcp
+    dsd = 5907
 
     #: - [TCP] IPS Management Application
     #: - [UDP] IPS Management Application
     #: - [SCTP] IPS Management Application
-    ipsma = 5908, 'ipsma', TransportProtocol.tcp
+    ipsma = 5908
 
     #: - [TCP] Air-ground media advisory
     #: - [UDP] Air-ground media advisory
     #: - [SCTP] Air-ground media advisory
-    agma = 5909, 'agma', TransportProtocol.tcp
+    agma = 5909
 
     #: - [TCP] Air Traffic Services applications using ATN
     #: - [UDP] Air Traffic Services applications using ATN
-    ats_atn = 5910, 'ats-atn', TransportProtocol.tcp
+    ats_atn = 5910, 'ats-atn'
 
     #: - [TCP] Air Traffic Services applications using ACARS
     #: - [UDP] Air Traffic Services applications using ACARS
-    ats_acars = 5911, 'ats-acars', TransportProtocol.tcp
+    ats_acars = 5911, 'ats-acars'
 
     #: - [TCP] Aeronautical Information Service/Meteorological applications using
     #:   ACARS
     #: - [UDP] Aeronautical Information Service/Meteorological applications using
     #:   ACARS
-    ais_met = 5912, 'ais-met', TransportProtocol.tcp
+    ais_met = 5912, 'ais-met'
 
     #: - [TCP] Airline operational communications applications using ACARS
     #: - [UDP] Airline operational communications applications using ACARS
-    aoc_acars = 5913, 'aoc-acars', TransportProtocol.tcp
+    aoc_acars = 5913, 'aoc-acars'
 
     #: - [TCP] Security for Internet Protocol Suite
     #: - [UDP] Security for Internet Protocol Suite
     #: - [SCTP] Security for Internet Protocol Suite
-    ipsdtls = 5914, 'ipsdtls', TransportProtocol.tcp
+    ipsdtls = 5914
 
     #: - [TCP] Indy Application Server
     #: - [UDP] Indy Application Server
-    indy = 5963, 'indy', TransportProtocol.tcp
+    indy = 5963
 
     #: - [TCP] mppolicy-v5
     #: - [UDP] mppolicy-v5
-    mppolicy_v5 = 5968, 'mppolicy-v5', TransportProtocol.tcp
+    mppolicy_v5 = 5968, 'mppolicy-v5'
 
     #: - [TCP] mppolicy-mgr
     #: - [UDP] mppolicy-mgr
-    mppolicy_mgr = 5969, 'mppolicy-mgr', TransportProtocol.tcp
+    mppolicy_mgr = 5969, 'mppolicy-mgr'
 
     #: - [TCP] CouchDB
     #: - [UDP] CouchDB
-    couchdb = 5984, 'couchdb', TransportProtocol.tcp
+    couchdb = 5984
 
     #: - [TCP] WBEM WS-Management HTTP
     #: - [UDP] WBEM WS-Management HTTP
-    wsman = 5985, 'wsman', TransportProtocol.tcp
+    wsman = 5985
 
     #: - [TCP] WBEM WS-Management HTTP over TLS/SSL
     #: - [UDP] WBEM WS-Management HTTP over TLS/SSL
-    wsmans = 5986, 'wsmans', TransportProtocol.tcp
+    wsmans = 5986
 
     #: - [TCP] WBEM RMI
     #: - [UDP] WBEM RMI
-    wbem_rmi = 5987, 'wbem-rmi', TransportProtocol.tcp
+    wbem_rmi = 5987, 'wbem-rmi'
 
     #: - [TCP] WBEM CIM-XML (HTTP)
     #: - [UDP] WBEM CIM-XML (HTTP)
-    wbem_http = 5988, 'wbem-http', TransportProtocol.tcp
+    wbem_http = 5988, 'wbem-http'
 
     #: - [TCP] WBEM CIM-XML (HTTPS)
     #: - [UDP] WBEM CIM-XML (HTTPS)
-    wbem_https = 5989, 'wbem-https', TransportProtocol.tcp
+    wbem_https = 5989, 'wbem-https'
 
     #: - [TCP] WBEM Export HTTPS
     #: - [UDP] WBEM Export HTTPS
-    wbem_exp_https = 5990, 'wbem-exp-https', TransportProtocol.tcp
+    wbem_exp_https = 5990, 'wbem-exp-https'
 
     #: - [TCP] NUXSL
     #: - [UDP] NUXSL
-    nuxsl = 5991, 'nuxsl', TransportProtocol.tcp
+    nuxsl = 5991
 
     #: - [TCP] Consul InSight Security
     #: - [UDP] Consul InSight Security
-    consul_insight = 5992, 'consul-insight', TransportProtocol.tcp
+    consul_insight = 5992, 'consul-insight'
 
     #: [TCP] DMTF WBEM CIM REST
-    cim_rs = 5993, 'cim-rs', TransportProtocol.tcp
+    cim_rs = 5993, 'cim-rs'
 
     #: [TCP] RMS Agent Listening Service
-    rms_agent = 5994, 'rms-agent', TransportProtocol.tcp
+    rms_agent = 5994, 'rms-agent'
 
     #: - [TCP] CVSup
     #: - [UDP] CVSup
-    cvsup = 5999, 'cvsup', TransportProtocol.tcp
+    cvsup = 5999
 
     #: - [TCP] NDL-AHP-SVC
     #: - [UDP] NDL-AHP-SVC
-    ndl_ahp_svc = 6064, 'ndl-ahp-svc', TransportProtocol.tcp
+    ndl_ahp_svc = 6064, 'ndl-ahp-svc'
 
     #: - [TCP] WinPharaoh
     #: - [UDP] WinPharaoh
-    winpharaoh = 6065, 'winpharaoh', TransportProtocol.tcp
+    winpharaoh = 6065
 
     #: - [TCP] EWCTSP
     #: - [UDP] EWCTSP
-    ewctsp = 6066, 'ewctsp', TransportProtocol.tcp
+    ewctsp = 6066
 
     #: [TCP] GSMP/ANCP [:rfc:`6320`]
-    gsmp_ancp = 6068, 'gsmp-ancp', TransportProtocol.tcp
+    gsmp_ancp = 6068, 'gsmp-ancp'
 
     #: - [TCP] TRIP
     #: - [UDP] TRIP
-    trip = 6069, 'trip', TransportProtocol.tcp
+    trip = 6069
 
     #: - [TCP] Messageasap
     #: - [UDP] Messageasap
-    messageasap = 6070, 'messageasap', TransportProtocol.tcp
+    messageasap = 6070
 
     #: - [TCP] SSDTP
     #: - [UDP] SSDTP
-    ssdtp = 6071, 'ssdtp', TransportProtocol.tcp
+    ssdtp = 6071
 
     #: - [TCP] DIAGNOSE-PROC
     #: - [UDP] DIAGNOSE-PROC
-    diagnose_proc = 6072, 'diagnose-proc', TransportProtocol.tcp
+    diagnose_proc = 6072, 'diagnose-proc'
 
     #: - [TCP] DirectPlay8
     #: - [UDP] DirectPlay8
-    directplay8 = 6073, 'directplay8', TransportProtocol.tcp
+    directplay8 = 6073
 
     #: - [TCP] Microsoft Max
     #: - [UDP] Microsoft Max
-    max = 6074, 'max', TransportProtocol.tcp
+    max = 6074
 
     #: [TCP] Microsoft DPM Access Control Manager
-    dpm_acm = 6075, 'dpm-acm', TransportProtocol.tcp
+    dpm_acm = 6075, 'dpm-acm'
 
     #: [TCP] Microsoft DPM WCF Certificates
-    msft_dpm_cert = 6076, 'msft-dpm-cert', TransportProtocol.tcp
+    msft_dpm_cert = 6076, 'msft-dpm-cert'
 
     #: [TCP] iConstruct Server
-    iconstructsrv = 6077, 'iconstructsrv', TransportProtocol.tcp
+    iconstructsrv = 6077
 
     #: [TCP] Reserved
-    reserved_6080 = 6080, 'reserved', TransportProtocol.tcp
+    reserved_6080 = 6080, 'reserved'
 
     #: [TCP] Reserved
-    reserved_6081 = 6081, 'reserved', TransportProtocol.tcp
+    reserved_6081 = 6081, 'reserved'
 
     #: [TCP] Reserved
-    reserved_6082 = 6082, 'reserved', TransportProtocol.tcp
+    reserved_6082 = 6082, 'reserved'
 
     #: [TCP] Reserved
-    reserved_6083 = 6083, 'reserved', TransportProtocol.tcp
+    reserved_6083 = 6083, 'reserved'
 
     #: [TCP] Peer to Peer Infrastructure Configuration [:rfc:`6940`]
-    reload_config = 6084, 'reload-config', TransportProtocol.tcp
+    reload_config = 6084, 'reload-config'
 
     #: - [TCP] konspire2b p2p network
     #: - [UDP] konspire2b p2p network
-    konspire2b = 6085, 'konspire2b', TransportProtocol.tcp
+    konspire2b = 6085
 
     #: - [TCP] PDTP P2P
     #: - [UDP] PDTP P2P
-    pdtp = 6086, 'pdtp', TransportProtocol.tcp
+    pdtp = 6086
 
     #: - [TCP] Local Download Sharing Service
     #: - [UDP] Local Download Sharing Service
-    ldss = 6087, 'ldss', TransportProtocol.tcp
+    ldss = 6087
 
     #: [TCP] SuperDog License Manager
-    doglms = 6088, 'doglms', TransportProtocol.tcp
+    doglms = 6088
 
     #: [TCP] RAXA Management
-    raxa_mgmt = 6099, 'raxa-mgmt', TransportProtocol.tcp
+    raxa_mgmt = 6099, 'raxa-mgmt'
 
     #: - [TCP] SynchroNet-db
     #: - [UDP] SynchroNet-db
-    synchronet_db = 6100, 'synchronet-db', TransportProtocol.tcp
+    synchronet_db = 6100, 'synchronet-db'
 
     #: - [TCP] SynchroNet-rtc
     #: - [UDP] SynchroNet-rtc
-    synchronet_rtc = 6101, 'synchronet-rtc', TransportProtocol.tcp
+    synchronet_rtc = 6101, 'synchronet-rtc'
 
     #: - [TCP] SynchroNet-upd
     #: - [UDP] SynchroNet-upd
-    synchronet_upd = 6102, 'synchronet-upd', TransportProtocol.tcp
+    synchronet_upd = 6102, 'synchronet-upd'
 
     #: - [TCP] RETS
     #: - [UDP] RETS
-    rets = 6103, 'rets', TransportProtocol.tcp
+    rets = 6103
 
     #: - [TCP] DBDB
     #: - [UDP] DBDB
-    dbdb = 6104, 'dbdb', TransportProtocol.tcp
+    dbdb = 6104
 
     #: - [TCP] Prima Server
     #: - [UDP] Prima Server
-    primaserver = 6105, 'primaserver', TransportProtocol.tcp
+    primaserver = 6105
 
     #: - [TCP] MPS Server
     #: - [UDP] MPS Server
-    mpsserver = 6106, 'mpsserver', TransportProtocol.tcp
+    mpsserver = 6106
 
     #: - [TCP] ETC Control
     #: - [UDP] ETC Control
-    etc_control = 6107, 'etc-control', TransportProtocol.tcp
+    etc_control = 6107, 'etc-control'
 
     #: - [TCP] Sercomm-SCAdmin
     #: - [UDP] Sercomm-SCAdmin
-    sercomm_scadmin = 6108, 'sercomm-scadmin', TransportProtocol.tcp
+    sercomm_scadmin = 6108, 'sercomm-scadmin'
 
     #: - [TCP] GLOBECAST-ID
     #: - [UDP] GLOBECAST-ID
-    globecast_id = 6109, 'globecast-id', TransportProtocol.tcp
+    globecast_id = 6109, 'globecast-id'
 
     #: - [TCP] HP SoftBench CM
     #: - [UDP] HP SoftBench CM
-    softcm = 6110, 'softcm', TransportProtocol.tcp
+    softcm = 6110
 
     #: - [TCP] HP SoftBench Sub-Process Control
     #: - [UDP] HP SoftBench Sub-Process Control
-    spc = 6111, 'spc', TransportProtocol.tcp
+    spc = 6111
 
     #: - [TCP] Desk-Top Sub-Process Control Daemon
     #: - [UDP] Desk-Top Sub-Process Control Daemon
-    dtspcd = 6112, 'dtspcd', TransportProtocol.tcp
+    dtspcd = 6112
 
     #: [TCP] Daylite Server
-    dayliteserver = 6113, 'dayliteserver', TransportProtocol.tcp
+    dayliteserver = 6113
 
     #: [TCP] WRspice IPC Service
-    wrspice = 6114, 'wrspice', TransportProtocol.tcp
+    wrspice = 6114
 
     #: [TCP] Xic IPC Service
-    xic = 6115, 'xic', TransportProtocol.tcp
+    xic = 6115
 
     #: [TCP] XicTools License Manager Service
-    xtlserv = 6116, 'xtlserv', TransportProtocol.tcp
+    xtlserv = 6116
 
     #: [TCP] Daylite Touch Sync
-    daylitetouch = 6117, 'daylitetouch', TransportProtocol.tcp
+    daylitetouch = 6117
 
     #: [TCP] Reserved
-    reserved_6118 = 6118, 'reserved', TransportProtocol.tcp
+    reserved_6118 = 6118, 'reserved'
 
     #: [TCP] SPDY for a faster web
-    spdy = 6121, 'spdy', TransportProtocol.tcp
+    spdy = 6121
 
     #: - [TCP] Backup Express Web Server
     #: - [UDP] Backup Express Web Server
-    bex_webadmin = 6122, 'bex-webadmin', TransportProtocol.tcp
+    bex_webadmin = 6122, 'bex-webadmin'
 
     #: - [TCP] Backup Express
     #: - [UDP] Backup Express
-    backup_express = 6123, 'backup-express', TransportProtocol.tcp
+    backup_express = 6123, 'backup-express'
 
     #: - [TCP] Phlexible Network Backup Service
     #: - [UDP] Phlexible Network Backup Service
-    pnbs = 6124, 'pnbs', TransportProtocol.tcp
+    pnbs = 6124
 
     #: [TCP] The DameWare Mobile Gateway Service
-    damewaremobgtwy = 6130, 'damewaremobgtwy', TransportProtocol.tcp
+    damewaremobgtwy = 6130
 
     #: - [TCP] New Boundary Tech WOL
     #: - [UDP] New Boundary Tech WOL
-    nbt_wol = 6133, 'nbt-wol', TransportProtocol.tcp
+    nbt_wol = 6133, 'nbt-wol'
 
     #: - [TCP] Pulsonix Network License Service
     #: - [UDP] Pulsonix Network License Service
-    pulsonixnls = 6140, 'pulsonixnls', TransportProtocol.tcp
+    pulsonixnls = 6140
 
     #: - [TCP] Meta Corporation License Manager
     #: - [UDP] Meta Corporation License Manager
-    meta_corp = 6141, 'meta-corp', TransportProtocol.tcp
+    meta_corp = 6141, 'meta-corp'
 
     #: - [TCP] Aspen Technology License Manager
     #: - [UDP] Aspen Technology License Manager
-    aspentec_lm = 6142, 'aspentec-lm', TransportProtocol.tcp
+    aspentec_lm = 6142, 'aspentec-lm'
 
     #: - [TCP] Watershed License Manager
     #: - [UDP] Watershed License Manager
-    watershed_lm = 6143, 'watershed-lm', TransportProtocol.tcp
+    watershed_lm = 6143, 'watershed-lm'
 
     #: - [TCP] StatSci License Manager - 1
     #: - [UDP] StatSci License Manager - 1
-    statsci1_lm = 6144, 'statsci1-lm', TransportProtocol.tcp
+    statsci1_lm = 6144, 'statsci1-lm'
 
     #: - [TCP] StatSci License Manager - 2
     #: - [UDP] StatSci License Manager - 2
-    statsci2_lm = 6145, 'statsci2-lm', TransportProtocol.tcp
+    statsci2_lm = 6145, 'statsci2-lm'
 
     #: - [TCP] Lone Wolf Systems License Manager
     #: - [UDP] Lone Wolf Systems License Manager
-    lonewolf_lm = 6146, 'lonewolf-lm', TransportProtocol.tcp
+    lonewolf_lm = 6146, 'lonewolf-lm'
 
     #: - [TCP] Montage License Manager
     #: - [UDP] Montage License Manager
-    montage_lm = 6147, 'montage-lm', TransportProtocol.tcp
+    montage_lm = 6147, 'montage-lm'
 
     #: - [TCP] Ricardo North America License Manager
     #: - [UDP] Ricardo North America License Manager
-    ricardo_lm_1522 = 1522, 'ricardo-lm', TransportProtocol.tcp
+    ricardo_lm_1522 = 1522, 'ricardo-lm'
 
     #: - [TCP] Ricardo North America License Manager
     #: - [UDP] Ricardo North America License Manager
-    ricardo_lm_6148 = 6148, 'ricardo-lm', TransportProtocol.tcp
+    ricardo_lm_6148 = 6148, 'ricardo-lm'
 
     #: - [TCP] tal-pod
     #: - [UDP] tal-pod
-    tal_pod = 6149, 'tal-pod', TransportProtocol.tcp
+    tal_pod = 6149, 'tal-pod'
 
     #: [TCP] EFB Application Control Interface
-    efb_aci = 6159, 'efb-aci', TransportProtocol.tcp
+    efb_aci = 6159, 'efb-aci'
 
     #: [TCP] Emerson Extensible Control and Management Protocol
-    ecmp = 6160, 'ecmp', TransportProtocol.tcp
+    ecmp = 6160
 
     #: - [TCP] PATROL Internet Srv Mgr
     #: - [UDP] PATROL Internet Srv Mgr
-    patrol_ism = 6161, 'patrol-ism', TransportProtocol.tcp
+    patrol_ism = 6161, 'patrol-ism'
 
     #: - [TCP] PATROL Collector
     #: - [UDP] PATROL Collector
-    patrol_coll = 6162, 'patrol-coll', TransportProtocol.tcp
+    patrol_coll = 6162, 'patrol-coll'
 
     #: - [TCP] Precision Scribe Cnx Port
     #: - [UDP] Precision Scribe Cnx Port
-    pscribe = 6163, 'pscribe', TransportProtocol.tcp
+    pscribe = 6163
 
     #: - [TCP] LM-X License Manager by X-Formation
     #: - [UDP] LM-X License Manager by X-Formation
-    lm_x = 6200, 'lm-x', TransportProtocol.tcp
+    lm_x = 6200, 'lm-x'
 
     #: [TCP] Reserved
-    reserved_6201 = 6201, 'reserved', TransportProtocol.tcp
+    reserved_6201 = 6201, 'reserved'
 
     #: - [TCP] QMTP over TLS
     #: - [UDP] QMTP over TLS
-    qmtps = 6209, 'qmtps', TransportProtocol.tcp
+    qmtps = 6209
 
     #: - [TCP] Radmind Access Protocol
     #: - [UDP] Radmind Access Protocol
-    radmind = 6222, 'radmind', TransportProtocol.tcp
+    radmind = 6222
 
     #: [TCP] JEOL Network Services Data Transport Protocol 1
-    jeol_nsdtp_1 = 6241, 'jeol-nsdtp-1', TransportProtocol.tcp
+    jeol_nsdtp_1 = 6241, 'jeol-nsdtp-1'
 
     #: [TCP] JEOL Network Services Data Transport Protocol 2
-    jeol_nsdtp_2 = 6242, 'jeol-nsdtp-2', TransportProtocol.tcp
+    jeol_nsdtp_2 = 6242, 'jeol-nsdtp-2'
 
     #: [TCP] JEOL Network Services Data Transport Protocol 3
-    jeol_nsdtp_3 = 6243, 'jeol-nsdtp-3', TransportProtocol.tcp
+    jeol_nsdtp_3 = 6243, 'jeol-nsdtp-3'
 
     #: [TCP] JEOL Network Services Data Transport Protocol 4
-    jeol_nsdtp_4 = 6244, 'jeol-nsdtp-4', TransportProtocol.tcp
+    jeol_nsdtp_4 = 6244, 'jeol-nsdtp-4'
 
     #: - [TCP] TL1 Raw Over SSL/TLS
     #: - [UDP] TL1 Raw Over SSL/TLS
-    tl1_raw_ssl = 6251, 'tl1-raw-ssl', TransportProtocol.tcp
+    tl1_raw_ssl = 6251, 'tl1-raw-ssl'
 
     #: - [TCP] TL1 over SSH
     #: - [UDP] TL1 over SSH
-    tl1_ssh = 6252, 'tl1-ssh', TransportProtocol.tcp
+    tl1_ssh = 6252, 'tl1-ssh'
 
     #: - [TCP] CRIP
     #: - [UDP] CRIP
-    crip = 6253, 'crip', TransportProtocol.tcp
+    crip = 6253
 
     #: [TCP] GridLAB-D User Interface
-    gld = 6267, 'gld', TransportProtocol.tcp
+    gld = 6267
 
     #: - [TCP] Grid Authentication
     #: - [UDP] Grid Authentication
-    grid = 6268, 'grid', TransportProtocol.tcp
+    grid = 6268
 
     #: - [TCP] Grid Authentication Alt
     #: - [UDP] Grid Authentication Alt
-    grid_alt = 6269, 'grid-alt', TransportProtocol.tcp
+    grid_alt = 6269, 'grid-alt'
 
     #: - [TCP] BMC GRX
     #: - [UDP] BMC GRX
-    bmc_grx = 6300, 'bmc-grx', TransportProtocol.tcp
+    bmc_grx = 6300, 'bmc-grx'
 
     #: - [TCP] BMC CONTROL-D LDAP SERVER IANA assigned this well-formed service name
     #:   as a replacement for "bmc_ctd_ldap".
@@ -19786,125 +19786,125 @@ class TCP(AppType):
     #: - [UDP] BMC CONTROL-D LDAP SERVER IANA assigned this well-formed service name
     #:   as a replacement for "bmc_ctd_ldap".
     #: - [UDP] BMC CONTROL-D LDAP SERVER
-    bmc_ctd_ldap = 6301, 'bmc-ctd-ldap', TransportProtocol.tcp
+    bmc_ctd_ldap = 6301, 'bmc-ctd-ldap'
 
     #: - [TCP] Unified Fabric Management Protocol
     #: - [UDP] Unified Fabric Management Protocol
-    ufmp = 6306, 'ufmp', TransportProtocol.tcp
+    ufmp = 6306
 
     #: [TCP] Sensor Control Unit Protocol
-    scup = 6315, 'scup', TransportProtocol.tcp
+    scup = 6315
 
     #: - [TCP] Ethernet Sensor Communications Protocol
     #: - [UDP] Ethernet Sensor Communications Protocol
-    abb_escp = 6316, 'abb-escp', TransportProtocol.tcp
+    abb_escp = 6316, 'abb-escp'
 
     #: [TCP] Navtech Radar Sensor Data Command
-    nav_data_cmd = 6317, 'nav-data-cmd', TransportProtocol.tcp
+    nav_data_cmd = 6317, 'nav-data-cmd'
 
     #: [TCP] IONA Measurement and control data
-    iona_data = 6318, 'iona-data', TransportProtocol.tcp
+    iona_data = 6318, 'iona-data'
 
     #: - [TCP] Double-Take Replication Service
     #: - [UDP] Double-Take Replication Service
-    repsvc = 6320, 'repsvc', TransportProtocol.tcp
+    repsvc = 6320
 
     #: - [TCP] Empress Software Connectivity Server 1
     #: - [UDP] Empress Software Connectivity Server 1
-    emp_server1 = 6321, 'emp-server1', TransportProtocol.tcp
+    emp_server1 = 6321, 'emp-server1'
 
     #: - [TCP] Empress Software Connectivity Server 2
     #: - [UDP] Empress Software Connectivity Server 2
-    emp_server2 = 6322, 'emp-server2', TransportProtocol.tcp
+    emp_server2 = 6322, 'emp-server2'
 
     #: [TCP] HR Device Network Configuration Service
-    hrd_ncs = 6324, 'hrd-ncs', TransportProtocol.tcp
+    hrd_ncs = 6324, 'hrd-ncs'
 
     #: [TCP] Double-Take Management Service
-    dt_mgmtsvc = 6325, 'dt-mgmtsvc', TransportProtocol.tcp
+    dt_mgmtsvc = 6325, 'dt-mgmtsvc'
 
     #: [TCP] Double-Take Virtual Recovery Assistant
-    dt_vra = 6326, 'dt-vra', TransportProtocol.tcp
+    dt_vra = 6326, 'dt-vra'
 
     #: - [TCP] sFlow traffic monitoring
     #: - [UDP] sFlow traffic monitoring
-    sflow = 6343, 'sflow', TransportProtocol.tcp
+    sflow = 6343
 
     #: [TCP] Argus-Spectr security and fire-prevention systems service
-    streletz = 6344, 'streletz', TransportProtocol.tcp
+    streletz = 6344
 
     #: - [TCP] gnutella-svc
     #: - [UDP] gnutella-svc
-    gnutella_svc = 6346, 'gnutella-svc', TransportProtocol.tcp
+    gnutella_svc = 6346, 'gnutella-svc'
 
     #: - [TCP] gnutella-rtr
     #: - [UDP] gnutella-rtr
-    gnutella_rtr = 6347, 'gnutella-rtr', TransportProtocol.tcp
+    gnutella_rtr = 6347, 'gnutella-rtr'
 
     #: - [TCP] App Discovery and Access Protocol
     #: - [UDP] App Discovery and Access Protocol
-    adap = 6350, 'adap', TransportProtocol.tcp
+    adap = 6350
 
     #: - [TCP] PMCS applications
     #: - [UDP] PMCS applications
-    pmcs = 6355, 'pmcs', TransportProtocol.tcp
+    pmcs = 6355
 
     #: - [TCP] MetaEdit+ Multi-User
     #: - [UDP] MetaEdit+ Multi-User
-    metaedit_mu = 6360, 'metaedit-mu', TransportProtocol.tcp
+    metaedit_mu = 6360, 'metaedit-mu'
 
     #: [TCP] Reserved
-    reserved_6363 = 6363, 'reserved', TransportProtocol.tcp
+    reserved_6363 = 6363, 'reserved'
 
     #: - [TCP] MetaEdit+ Server Administration
     #: - [UDP] MetaEdit+ Server Administration
-    metaedit_se = 6370, 'metaedit-se', TransportProtocol.tcp
+    metaedit_se = 6370, 'metaedit-se'
 
     #: [TCP] An advanced key-value cache and store
-    redis = 6379, 'redis', TransportProtocol.tcp
+    redis = 6379
 
     #: - [TCP] Metatude Dialogue Server
     #: - [UDP] Metatude Dialogue Server
-    metatude_mds = 6382, 'metatude-mds', TransportProtocol.tcp
+    metatude_mds = 6382, 'metatude-mds'
 
     #: - [TCP] clariion-evr01
     #: - [UDP] clariion-evr01
-    clariion_evr01 = 6389, 'clariion-evr01', TransportProtocol.tcp
+    clariion_evr01 = 6389, 'clariion-evr01'
 
     #: - [TCP] MetaEdit+ WebService API
     #: - [UDP] MetaEdit+ WebService API
-    metaedit_ws = 6390, 'metaedit-ws', TransportProtocol.tcp
+    metaedit_ws = 6390, 'metaedit-ws'
 
     #: - [TCP] Faxcom Message Service
     #: - [UDP] Faxcom Message Service
-    faxcomservice = 6417, 'faxcomservice', TransportProtocol.tcp
+    faxcomservice = 6417
 
     #: [TCP] SYserver remote commands
-    syserverremote = 6418, 'syserverremote', TransportProtocol.tcp
+    syserverremote = 6418
 
     #: [TCP] Simple VDR Protocol
-    svdrp = 6419, 'svdrp', TransportProtocol.tcp
+    svdrp = 6419
 
     #: - [TCP] NIM_VDRShell
     #: - [UDP] NIM_VDRShell
-    nim_vdrshell = 6420, 'nim-vdrshell', TransportProtocol.tcp
+    nim_vdrshell = 6420, 'nim-vdrshell'
 
     #: - [TCP] NIM_WAN
     #: - [UDP] NIM_WAN
-    nim_wan = 6421, 'nim-wan', TransportProtocol.tcp
+    nim_wan = 6421, 'nim-wan'
 
     #: [TCP] PgBouncer
-    pgbouncer = 6432, 'pgbouncer', TransportProtocol.tcp
+    pgbouncer = 6432
 
     #: [TCP] heliosd daemon
-    heliosd = 6440, 'heliosd', TransportProtocol.tcp
+    heliosd = 6440
 
     #: [TCP] Transitory Application Request Protocol
-    tarp = 6442, 'tarp', TransportProtocol.tcp
+    tarp = 6442
 
     #: - [TCP] Service Registry Default HTTPS Domain
     #: - [UDP] Service Registry Default HTTPS Domain
-    sun_sr_https = 6443, 'sun-sr-https', TransportProtocol.tcp
+    sun_sr_https = 6443, 'sun-sr-https'
 
     #: - [TCP] Grid Engine Execution Service IANA assigned this well-formed service
     #:   name as a replacement for "sge_execd".
@@ -19912,73 +19912,73 @@ class TCP(AppType):
     #: - [UDP] Grid Engine Execution Service IANA assigned this well-formed service
     #:   name as a replacement for "sge_execd".
     #: - [UDP] Grid Engine Execution Service
-    sge_execd = 6445, 'sge-execd', TransportProtocol.tcp
+    sge_execd = 6445, 'sge-execd'
 
     #: - [TCP] MySQL Proxy
     #: - [UDP] MySQL Proxy
-    mysql_proxy = 6446, 'mysql-proxy', TransportProtocol.tcp
+    mysql_proxy = 6446, 'mysql-proxy'
 
     #: - [TCP] SKIP Certificate Receive
     #: - [UDP] SKIP Certificate Receive
-    skip_cert_recv = 6455, 'skip-cert-recv', TransportProtocol.tcp
+    skip_cert_recv = 6455, 'skip-cert-recv'
 
     #: - [TCP] SKIP Certificate Send
     #: - [UDP] SKIP Certificate Send
-    skip_cert_send = 6456, 'skip-cert-send', TransportProtocol.tcp
+    skip_cert_send = 6456, 'skip-cert-send'
 
     #: - [TCP] Port assignment for medical device communication in accordance to IEEE
     #:   11073-20701
     #: - [UDP] Port assignment for medical device communication in accordance to IEEE
     #:   11073-20701
-    ieee11073_20701 = 6464, 'ieee11073-20701', TransportProtocol.tcp
+    ieee11073_20701 = 6464, 'ieee11073-20701'
 
     #: - [TCP] LVision License Manager
     #: - [UDP] LVision License Manager
-    lvision_lm = 6471, 'lvision-lm', TransportProtocol.tcp
+    lvision_lm = 6471, 'lvision-lm'
 
     #: - [TCP] Service Registry Default HTTP Domain
     #: - [UDP] Service Registry Default HTTP Domain
-    sun_sr_http = 6480, 'sun-sr-http', TransportProtocol.tcp
+    sun_sr_http = 6480, 'sun-sr-http'
 
     #: - [TCP] Service Tags
     #: - [UDP] Service Tags
-    servicetags = 6481, 'servicetags', TransportProtocol.tcp
+    servicetags = 6481
 
     #: - [TCP] Logical Domains Management Interface
     #: - [UDP] Logical Domains Management Interface
-    ldoms_mgmt = 6482, 'ldoms-mgmt', TransportProtocol.tcp
+    ldoms_mgmt = 6482, 'ldoms-mgmt'
 
     #: - [TCP] SunVTS RMI
     #: - [UDP] SunVTS RMI
-    sunvts_rmi = 6483, 'sunvts-rmi', TransportProtocol.tcp
+    sunvts_rmi = 6483, 'sunvts-rmi'
 
     #: - [TCP] Service Registry Default JMS Domain
     #: - [UDP] Service Registry Default JMS Domain
-    sun_sr_jms = 6484, 'sun-sr-jms', TransportProtocol.tcp
+    sun_sr_jms = 6484, 'sun-sr-jms'
 
     #: - [TCP] Service Registry Default IIOP Domain
     #: - [UDP] Service Registry Default IIOP Domain
-    sun_sr_iiop = 6485, 'sun-sr-iiop', TransportProtocol.tcp
+    sun_sr_iiop = 6485, 'sun-sr-iiop'
 
     #: - [TCP] Service Registry Default IIOPS Domain
     #: - [UDP] Service Registry Default IIOPS Domain
-    sun_sr_iiops = 6486, 'sun-sr-iiops', TransportProtocol.tcp
+    sun_sr_iiops = 6486, 'sun-sr-iiops'
 
     #: - [TCP] Service Registry Default IIOPAuth Domain
     #: - [UDP] Service Registry Default IIOPAuth Domain
-    sun_sr_iiop_aut = 6487, 'sun-sr-iiop-aut', TransportProtocol.tcp
+    sun_sr_iiop_aut = 6487, 'sun-sr-iiop-aut'
 
     #: - [TCP] Service Registry Default JMX Domain
     #: - [UDP] Service Registry Default JMX Domain
-    sun_sr_jmx = 6488, 'sun-sr-jmx', TransportProtocol.tcp
+    sun_sr_jmx = 6488, 'sun-sr-jmx'
 
     #: - [TCP] Service Registry Default Admin Domain
     #: - [UDP] Service Registry Default Admin Domain
-    sun_sr_admin = 6489, 'sun-sr-admin', TransportProtocol.tcp
+    sun_sr_admin = 6489, 'sun-sr-admin'
 
     #: - [TCP] BoKS Master
     #: - [UDP] BoKS Master
-    boks = 6500, 'boks', TransportProtocol.tcp
+    boks = 6500
 
     #: - [TCP] BoKS Servc IANA assigned this well-formed service name as a
     #:   replacement for "boks_servc".
@@ -19986,7 +19986,7 @@ class TCP(AppType):
     #: - [UDP] BoKS Servc IANA assigned this well-formed service name as a
     #:   replacement for "boks_servc".
     #: - [UDP] BoKS Servc
-    boks_servc = 6501, 'boks-servc', TransportProtocol.tcp
+    boks_servc = 6501, 'boks-servc'
 
     #: - [TCP] BoKS Servm IANA assigned this well-formed service name as a
     #:   replacement for "boks_servm".
@@ -19994,7 +19994,7 @@ class TCP(AppType):
     #: - [UDP] BoKS Servm IANA assigned this well-formed service name as a
     #:   replacement for "boks_servm".
     #: - [UDP] BoKS Servm
-    boks_servm = 6502, 'boks-servm', TransportProtocol.tcp
+    boks_servm = 6502, 'boks-servm'
 
     #: - [TCP] BoKS Clntd IANA assigned this well-formed service name as a
     #:   replacement for "boks_clntd".
@@ -20002,7 +20002,7 @@ class TCP(AppType):
     #: - [UDP] BoKS Clntd IANA assigned this well-formed service name as a
     #:   replacement for "boks_clntd".
     #: - [UDP] BoKS Clntd
-    boks_clntd = 6503, 'boks-clntd', TransportProtocol.tcp
+    boks_clntd = 6503, 'boks-clntd'
 
     #: - [TCP] BoKS Admin Private Port IANA assigned this well-formed service name as
     #:   a replacement for "badm_priv".
@@ -20010,7 +20010,7 @@ class TCP(AppType):
     #: - [UDP] BoKS Admin Private Port IANA assigned this well-formed service name as
     #:   a replacement for "badm_priv".
     #: - [UDP] BoKS Admin Private Port
-    badm_priv = 6505, 'badm-priv', TransportProtocol.tcp
+    badm_priv = 6505, 'badm-priv'
 
     #: - [TCP] BoKS Admin Public Port IANA assigned this well-formed service name as
     #:   a replacement for "badm_pub".
@@ -20018,7 +20018,7 @@ class TCP(AppType):
     #: - [UDP] BoKS Admin Public Port IANA assigned this well-formed service name as
     #:   a replacement for "badm_pub".
     #: - [UDP] BoKS Admin Public Port
-    badm_pub = 6506, 'badm-pub', TransportProtocol.tcp
+    badm_pub = 6506, 'badm-pub'
 
     #: - [TCP] BoKS Dir Server, Private Port IANA assigned this well-formed service
     #:   name as a replacement for "bdir_priv".
@@ -20026,7 +20026,7 @@ class TCP(AppType):
     #: - [UDP] BoKS Dir Server, Private Port IANA assigned this well-formed service
     #:   name as a replacement for "bdir_priv".
     #: - [UDP] BoKS Dir Server, Private Port
-    bdir_priv = 6507, 'bdir-priv', TransportProtocol.tcp
+    bdir_priv = 6507, 'bdir-priv'
 
     #: - [TCP] BoKS Dir Server, Public Port IANA assigned this well-formed service
     #:   name as a replacement for "bdir_pub".
@@ -20034,190 +20034,190 @@ class TCP(AppType):
     #: - [UDP] BoKS Dir Server, Public Port IANA assigned this well-formed service
     #:   name as a replacement for "bdir_pub".
     #: - [UDP] BoKS Dir Server, Public Port
-    bdir_pub = 6508, 'bdir-pub', TransportProtocol.tcp
+    bdir_pub = 6508, 'bdir-pub'
 
     #: - [TCP] MGCS-MFP Port
     #: - [UDP] MGCS-MFP Port
-    mgcs_mfp_port = 6509, 'mgcs-mfp-port', TransportProtocol.tcp
+    mgcs_mfp_port = 6509, 'mgcs-mfp-port'
 
     #: - [TCP] MCER Port
     #: - [UDP] MCER Port
-    mcer_port = 6510, 'mcer-port', TransportProtocol.tcp
+    mcer_port = 6510, 'mcer-port'
 
     #: [TCP] Reserved
-    reserved_6511 = 6511, 'reserved', TransportProtocol.tcp
+    reserved_6511 = 6511, 'reserved'
 
     #: [TCP] NETCONF over TLS [:rfc:`7589`][:rfc:`9918`]
-    netconf_tls = 6513, 'netconf-tls', TransportProtocol.tcp
+    netconf_tls = 6513, 'netconf-tls'
 
     #: - [TCP] Syslog over TLS [:rfc:`5425`]
     #: - [UDP] syslog over DTLS [:rfc:`6012`]
     #: - [DCCP] syslog over DTLS [:rfc:`6012`]
-    syslog_tls = 6514, 'syslog-tls', TransportProtocol.tcp
+    syslog_tls = 6514, 'syslog-tls'
 
     #: - [TCP] Elipse RPC Protocol
     #: - [UDP] Elipse RPC Protocol
-    elipse_rec = 6515, 'elipse-rec', TransportProtocol.tcp
+    elipse_rec = 6515, 'elipse-rec'
 
     #: - [TCP] lds_distrib
     #: - [UDP] lds_distrib
-    lds_distrib = 6543, 'lds-distrib', TransportProtocol.tcp
+    lds_distrib = 6543, 'lds-distrib'
 
     #: - [TCP] LDS Dump Service
     #: - [UDP] LDS Dump Service
-    lds_dump = 6544, 'lds-dump', TransportProtocol.tcp
+    lds_dump = 6544, 'lds-dump'
 
     #: - [TCP] APC 6547
     #: - [UDP] APC 6547
-    apc_6547 = 6547, 'apc-6547', TransportProtocol.tcp
+    apc_6547 = 6547, 'apc-6547'
 
     #: - [TCP] APC 6548
     #: - [UDP] APC 6548
-    apc_6548 = 6548, 'apc-6548', TransportProtocol.tcp
+    apc_6548 = 6548, 'apc-6548'
 
     #: - [TCP] APC 6549
     #: - [UDP] APC 6549
-    apc_6549 = 6549, 'apc-6549', TransportProtocol.tcp
+    apc_6549 = 6549, 'apc-6549'
 
     #: - [TCP] fg-sysupdate
     #: - [UDP] fg-sysupdate
-    fg_sysupdate = 6550, 'fg-sysupdate', TransportProtocol.tcp
+    fg_sysupdate = 6550, 'fg-sysupdate'
 
     #: - [TCP] Software Update Manager
     #: - [UDP] Software Update Manager
-    sum = 6551, 'sum', TransportProtocol.tcp
+    sum = 6551
 
     #: [TCP] Checkmk Monitoring Agent
-    checkmk_agent = 6556, 'checkmk-agent', TransportProtocol.tcp
+    checkmk_agent = 6556, 'checkmk-agent'
 
     #: - [TCP]
     #: - [UDP]
-    xdsxdm = 6558, 'xdsxdm', TransportProtocol.tcp
+    xdsxdm = 6558
 
     #: - [TCP] SANE Control Port
     #: - [UDP] SANE Control Port
-    sane_port = 6566, 'sane-port', TransportProtocol.tcp
+    sane_port = 6566, 'sane-port'
 
     #: - [TCP] CanIt Storage Manager IANA assigned this well-formed service name as a
     #:   replacement for "canit_store".
     #: - [TCP] CanIt Storage Manager
-    canit_store = 6568, 'canit-store', TransportProtocol.tcp
+    canit_store = 6568, 'canit-store'
 
     #: - [TCP] Affiliate
     #: - [UDP] Affiliate
-    affiliate = 6579, 'affiliate', TransportProtocol.tcp
+    affiliate = 6579
 
     #: - [TCP] Parsec Masterserver
     #: - [UDP] Parsec Masterserver
-    parsec_master = 6580, 'parsec-master', TransportProtocol.tcp
+    parsec_master = 6580, 'parsec-master'
 
     #: - [TCP] Parsec Peer-to-Peer
     #: - [UDP] Parsec Peer-to-Peer
-    parsec_peer = 6581, 'parsec-peer', TransportProtocol.tcp
+    parsec_peer = 6581, 'parsec-peer'
 
     #: - [TCP] Parsec Gameserver
     #: - [UDP] Parsec Gameserver
-    parsec_game = 6582, 'parsec-game', TransportProtocol.tcp
+    parsec_game = 6582, 'parsec-game'
 
     #: - [TCP] JOA Jewel Suite
     #: - [UDP] JOA Jewel Suite
-    joajewelsuite = 6583, 'joajewelsuite', TransportProtocol.tcp
+    joajewelsuite = 6583
 
     #: [TCP] Microsoft Hyper-V Live Migration
-    mshvlm = 6600, 'mshvlm', TransportProtocol.tcp
+    mshvlm = 6600
 
     #: [TCP] Microsoft Threat Management Gateway SSTP
-    mstmg_sstp = 6601, 'mstmg-sstp', TransportProtocol.tcp
+    mstmg_sstp = 6601, 'mstmg-sstp'
 
     #: [TCP] Windows WSS Communication Framework
-    wsscomfrmwk = 6602, 'wsscomfrmwk', TransportProtocol.tcp
+    wsscomfrmwk = 6602
 
     #: - [TCP] Bencher API
     #: - [UDP] Bencher API
-    bencher = 6610, 'bencher', TransportProtocol.tcp
+    bencher = 6610
 
     #: - [TCP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]
     #: - [UDP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]
-    odette_ftps = 6619, 'odette-ftps', TransportProtocol.tcp
+    odette_ftps = 6619, 'odette-ftps'
 
     #: - [TCP] Kerberos V5 FTP Data
     #: - [UDP] Kerberos V5 FTP Data
-    kftp_data = 6620, 'kftp-data', TransportProtocol.tcp
+    kftp_data = 6620, 'kftp-data'
 
     #: - [TCP] Kerberos V5 FTP Control
     #: - [UDP] Kerberos V5 FTP Control
-    kftp = 6621, 'kftp', TransportProtocol.tcp
+    kftp = 6621
 
     #: - [TCP] Multicast FTP
     #: - [UDP] Multicast FTP
-    mcftp = 6622, 'mcftp', TransportProtocol.tcp
+    mcftp = 6622
 
     #: - [TCP] Kerberos V5 Telnet
     #: - [UDP] Kerberos V5 Telnet
-    ktelnet = 6623, 'ktelnet', TransportProtocol.tcp
+    ktelnet = 6623
 
     #: [TCP] DataScaler database
-    datascaler_db = 6624, 'datascaler-db', TransportProtocol.tcp
+    datascaler_db = 6624, 'datascaler-db'
 
     #: [TCP] DataScaler control
-    datascaler_ctl = 6625, 'datascaler-ctl', TransportProtocol.tcp
+    datascaler_ctl = 6625, 'datascaler-ctl'
 
     #: - [TCP] WAGO Service and Update
     #: - [UDP] WAGO Service and Update
-    wago_service = 6626, 'wago-service', TransportProtocol.tcp
+    wago_service = 6626, 'wago-service'
 
     #: - [TCP] Allied Electronics NeXGen
     #: - [UDP] Allied Electronics NeXGen
-    nexgen = 6627, 'nexgen', TransportProtocol.tcp
+    nexgen = 6627
 
     #: - [TCP] AFE Stock Channel M/C
     #: - [UDP] AFE Stock Channel M/C
-    afesc_mc = 6628, 'afesc-mc', TransportProtocol.tcp
+    afesc_mc = 6628, 'afesc-mc'
 
     #: - [TCP] Secondary, (non ANDI) multi-protocol multi-function interface to the
     #:   Allied ANDI-based family of forecourt controllers
     #: - [UDP] Secondary, (non ANDI) multi-protocol multi-function interface to the
     #:   Allied ANDI-based family of forecourt controllers
-    nexgen_aux = 6629, 'nexgen-aux', TransportProtocol.tcp
+    nexgen_aux = 6629, 'nexgen-aux'
 
     #: [TCP] eGenix mxODBC Connect
-    mxodbc_connect = 6632, 'mxodbc-connect', TransportProtocol.tcp
+    mxodbc_connect = 6632, 'mxodbc-connect'
 
     #: [TCP] Reserved
-    reserved_6633 = 6633, 'reserved', TransportProtocol.tcp
+    reserved_6633 = 6633, 'reserved'
 
     #: [TCP] Reserved
-    reserved_6634 = 6634, 'reserved', TransportProtocol.tcp
+    reserved_6634 = 6634, 'reserved'
 
     #: [TCP] Reserved
-    reserved_6635 = 6635, 'reserved', TransportProtocol.tcp
+    reserved_6635 = 6635, 'reserved'
 
     #: [TCP] Reserved
-    reserved_6636 = 6636, 'reserved', TransportProtocol.tcp
+    reserved_6636 = 6636, 'reserved'
 
     #: [TCP] Open vSwitch Database protocol [:rfc:`7047`]
-    ovsdb = 6640, 'ovsdb', TransportProtocol.tcp
+    ovsdb = 6640
 
     #: - [TCP] OpenFlow
     #: - [UDP] OpenFlow
-    openflow = 6653, 'openflow', TransportProtocol.tcp
+    openflow = 6653
 
     #: [TCP] PC SOFT - Software factory UI/manager
-    pcs_sf_ui_man = 6655, 'pcs-sf-ui-man', TransportProtocol.tcp
+    pcs_sf_ui_man = 6655, 'pcs-sf-ui-man'
 
     #: [TCP] Emergency Message Control Service
-    emgmsg = 6656, 'emgmsg', TransportProtocol.tcp
+    emgmsg = 6656
 
     #: [TCP] Reserved
-    reserved_6657 = 6657, 'reserved', TransportProtocol.tcp
+    reserved_6657 = 6657, 'reserved'
 
     #: - [TCP] Vocaltec Global Online Directory
     #: - [UDP] Vocaltec Global Online Directory
-    vocaltec_gold = 6670, 'vocaltec-gold', TransportProtocol.tcp
+    vocaltec_gold = 6670, 'vocaltec-gold'
 
     #: - [TCP] P4P Portal Service
     #: - [UDP] P4P Portal Service
-    p4p_portal = 6671, 'p4p-portal', TransportProtocol.tcp
+    p4p_portal = 6671, 'p4p-portal'
 
     #: - [TCP] vision_server IANA assigned this well-formed service name as a
     #:   replacement for "vision_server".
@@ -20225,7 +20225,7 @@ class TCP(AppType):
     #: - [UDP] vision_server IANA assigned this well-formed service name as a
     #:   replacement for "vision_server".
     #: - [UDP] vision_server
-    vision_server = 6672, 'vision-server', TransportProtocol.tcp
+    vision_server = 6672, 'vision-server'
 
     #: - [TCP] vision_elmd IANA assigned this well-formed service name as a
     #:   replacement for "vision_elmd".
@@ -20233,469 +20233,469 @@ class TCP(AppType):
     #: - [UDP] vision_elmd IANA assigned this well-formed service name as a
     #:   replacement for "vision_elmd".
     #: - [UDP] vision_elmd
-    vision_elmd = 6673, 'vision-elmd', TransportProtocol.tcp
+    vision_elmd = 6673, 'vision-elmd'
 
     #: [TCP] Viscount Freedom Bridge Protocol
-    vfbp = 6678, 'vfbp', TransportProtocol.tcp
+    vfbp = 6678
 
     #: - [TCP] Osorno Automation
     #: - [UDP] Osorno Automation
-    osaut = 6679, 'osaut', TransportProtocol.tcp
+    osaut = 6679
 
     #: [TCP] CleverView for cTrace Message Service
-    clever_ctrace = 6687, 'clever-ctrace', TransportProtocol.tcp
+    clever_ctrace = 6687, 'clever-ctrace'
 
     #: [TCP] CleverView for TCP/IP Message Service
-    clever_tcpip = 6688, 'clever-tcpip', TransportProtocol.tcp
+    clever_tcpip = 6688, 'clever-tcpip'
 
     #: - [TCP] Tofino Security Appliance
     #: - [UDP] Tofino Security Appliance
-    tsa = 6689, 'tsa', TransportProtocol.tcp
+    tsa = 6689
 
     #: [TCP] CLEVERDetect Message Service
-    cleverdetect = 6690, 'cleverdetect', TransportProtocol.tcp
+    cleverdetect = 6690
 
     #: [TCP] Reserved
-    reserved_6696 = 6696, 'reserved', TransportProtocol.tcp
+    reserved_6696 = 6696, 'reserved'
 
     #: [TCP] Internet Relay Chat via TLS/SSL [:rfc:`7194`]
-    ircs_u = 6697, 'ircs-u', TransportProtocol.tcp
+    ircs_u = 6697, 'ircs-u'
 
     #: [TCP] Reserved
-    reserved_6699 = 6699, 'reserved', TransportProtocol.tcp
+    reserved_6699 = 6699, 'reserved'
 
     #: - [TCP] KTI/ICAD Nameserver
     #: - [UDP] KTI/ICAD Nameserver
-    kti_icad_srvr = 6701, 'kti-icad-srvr', TransportProtocol.tcp
+    kti_icad_srvr = 6701, 'kti-icad-srvr'
 
     #: - [TCP] e-Design network
     #: - [UDP] e-Design network
-    e_design_net = 6702, 'e-design-net', TransportProtocol.tcp
+    e_design_net = 6702, 'e-design-net'
 
     #: - [TCP] e-Design web
     #: - [UDP] e-Design web
-    e_design_web = 6703, 'e-design-web', TransportProtocol.tcp
+    e_design_web = 6703, 'e-design-web'
 
     #: - [UDP] Reserved
     #: - [TCP] Reserved
-    reserved_6704 = 6704, 'reserved', TransportProtocol.tcp
+    reserved_6704 = 6704, 'reserved'
 
     #: - [UDP] Reserved
     #: - [TCP] Reserved
-    reserved_6705 = 6705, 'reserved', TransportProtocol.tcp
+    reserved_6705 = 6705, 'reserved'
 
     #: - [UDP] Reserved
     #: - [TCP] Reserved
-    reserved_6706 = 6706, 'reserved', TransportProtocol.tcp
+    reserved_6706 = 6706, 'reserved'
 
     #: - [TCP] Internet Backplane Protocol
     #: - [UDP] Internet Backplane Protocol
-    ibprotocol = 6714, 'ibprotocol', TransportProtocol.tcp
+    ibprotocol = 6714
 
     #: - [TCP] Fibotrader Communications
     #: - [UDP] Fibotrader Communications
-    fibotrader_com = 6715, 'fibotrader-com', TransportProtocol.tcp
+    fibotrader_com = 6715, 'fibotrader-com'
 
     #: [TCP] Princity Agent
-    princity_agent = 6716, 'princity-agent', TransportProtocol.tcp
+    princity_agent = 6716, 'princity-agent'
 
     #: - [TCP] BMC PERFORM AGENT
     #: - [UDP] BMC PERFORM AGENT
-    bmc_perf_agent = 6767, 'bmc-perf-agent', TransportProtocol.tcp
+    bmc_perf_agent = 6767, 'bmc-perf-agent'
 
     #: - [TCP] BMC PERFORM MGRD
     #: - [UDP] BMC PERFORM MGRD
-    bmc_perf_mgrd = 6768, 'bmc-perf-mgrd', TransportProtocol.tcp
+    bmc_perf_mgrd = 6768, 'bmc-perf-mgrd'
 
     #: - [TCP] ADInstruments GxP Server
     #: - [UDP] ADInstruments GxP Server
-    adi_gxp_srvprt = 6769, 'adi-gxp-srvprt', TransportProtocol.tcp
+    adi_gxp_srvprt = 6769, 'adi-gxp-srvprt'
 
     #: - [TCP] PolyServe http
     #: - [UDP] PolyServe http
-    plysrv_http = 6770, 'plysrv-http', TransportProtocol.tcp
+    plysrv_http = 6770, 'plysrv-http'
 
     #: - [TCP] PolyServe https
     #: - [UDP] PolyServe https
-    plysrv_https = 6771, 'plysrv-https', TransportProtocol.tcp
+    plysrv_https = 6771, 'plysrv-https'
 
     #: [TCP] netTsunami Tracker
-    ntz_tracker = 6777, 'ntz-tracker', TransportProtocol.tcp
+    ntz_tracker = 6777, 'ntz-tracker'
 
     #: [TCP] netTsunami p2p storage system
-    ntz_p2p_storage = 6778, 'ntz-p2p-storage', TransportProtocol.tcp
+    ntz_p2p_storage = 6778, 'ntz-p2p-storage'
 
     #: [TCP] Reserved
-    reserved_6784 = 6784, 'reserved', TransportProtocol.tcp
+    reserved_6784 = 6784, 'reserved'
 
     #: - [TCP] DGPF Individual Exchange
     #: - [UDP] DGPF Individual Exchange
-    dgpf_exchg = 6785, 'dgpf-exchg', TransportProtocol.tcp
+    dgpf_exchg = 6785, 'dgpf-exchg'
 
     #: - [TCP] Sun Java Web Console JMX
     #: - [UDP] Sun Java Web Console JMX
-    smc_jmx = 6786, 'smc-jmx', TransportProtocol.tcp
+    smc_jmx = 6786, 'smc-jmx'
 
     #: - [TCP] Sun Web Console Admin
     #: - [UDP] Sun Web Console Admin
-    smc_admin = 6787, 'smc-admin', TransportProtocol.tcp
+    smc_admin = 6787, 'smc-admin'
 
     #: - [TCP] SMC-HTTP
     #: - [UDP] SMC-HTTP
-    smc_http = 6788, 'smc-http', TransportProtocol.tcp
+    smc_http = 6788, 'smc-http'
 
     #: [TCP] GSS-API for the Oracle Remote Administration Daemon
-    radg = 6789, 'radg', TransportProtocol.tcp
+    radg = 6789
 
     #: - [TCP] HNMP
     #: - [UDP] HNMP
-    hnmp = 6790, 'hnmp', TransportProtocol.tcp
+    hnmp = 6790
 
     #: - [TCP] Halcyon Network Manager
     #: - [UDP] Halcyon Network Manager
-    hnm = 6791, 'hnm', TransportProtocol.tcp
+    hnm = 6791
 
     #: - [TCP] ACNET Control System Protocol
     #: - [UDP] ACNET Control System Protocol
-    acnet = 6801, 'acnet', TransportProtocol.tcp
+    acnet = 6801
 
     #: [TCP] PenTBox Secure IM Protocol
-    pentbox_sim = 6817, 'pentbox-sim', TransportProtocol.tcp
+    pentbox_sim = 6817, 'pentbox-sim'
 
     #: - [TCP] ambit-lm
     #: - [UDP] ambit-lm
-    ambit_lm = 6831, 'ambit-lm', TransportProtocol.tcp
+    ambit_lm = 6831, 'ambit-lm'
 
     #: - [TCP] Netmo Default
     #: - [UDP] Netmo Default
-    netmo_default = 6841, 'netmo-default', TransportProtocol.tcp
+    netmo_default = 6841, 'netmo-default'
 
     #: - [TCP] Netmo HTTP
     #: - [UDP] Netmo HTTP
-    netmo_http = 6842, 'netmo-http', TransportProtocol.tcp
+    netmo_http = 6842, 'netmo-http'
 
     #: - [TCP] ICCRUSHMORE
     #: - [UDP] ICCRUSHMORE
-    iccrushmore = 6850, 'iccrushmore', TransportProtocol.tcp
+    iccrushmore = 6850
 
     #: [TCP] Acctopus Command Channel
-    acctopus_cc = 6868, 'acctopus-cc', TransportProtocol.tcp
+    acctopus_cc = 6868, 'acctopus-cc'
 
     #: - [TCP] MUSE
     #: - [UDP] MUSE
-    muse = 6888, 'muse', TransportProtocol.tcp
+    muse = 6888
 
     #: [TCP] R*TIME Viewer Data Interface
-    rtimeviewer = 6900, 'rtimeviewer', TransportProtocol.tcp
+    rtimeviewer = 6900
 
     #: [TCP] Novell Jetstream messaging protocol
-    jetstream = 6901, 'jetstream', TransportProtocol.tcp
+    jetstream = 6901
 
     #: - [TCP] Ping with RX/TX latency/loss split
     #: - [UDP] Ping with RX/TX latency/loss split
-    split_ping = 6924, 'split-ping', TransportProtocol.tcp
+    split_ping = 6924, 'split-ping'
 
     #: - [TCP] EthoScan Service
     #: - [UDP] EthoScan Service
-    ethoscan = 6935, 'ethoscan', TransportProtocol.tcp
+    ethoscan = 6935
 
     #: - [TCP] XenSource Management Service
     #: - [UDP] XenSource Management Service
-    xsmsvc = 6936, 'xsmsvc', TransportProtocol.tcp
+    xsmsvc = 6936
 
     #: - [TCP] Biometrics Server
     #: - [UDP] Biometrics Server
-    bioserver = 6946, 'bioserver', TransportProtocol.tcp
+    bioserver = 6946
 
     #: - [TCP] OTLP
     #: - [UDP] OTLP
-    otlp = 6951, 'otlp', TransportProtocol.tcp
+    otlp = 6951
 
     #: - [TCP] JMACT3
     #: - [UDP] JMACT3
-    jmact3 = 6961, 'jmact3', TransportProtocol.tcp
+    jmact3 = 6961
 
     #: - [TCP] jmevt2
     #: - [UDP] jmevt2
-    jmevt2 = 6962, 'jmevt2', TransportProtocol.tcp
+    jmevt2 = 6962
 
     #: - [TCP] swismgr1
     #: - [UDP] swismgr1
-    swismgr1 = 6963, 'swismgr1', TransportProtocol.tcp
+    swismgr1 = 6963
 
     #: - [TCP] swismgr2
     #: - [UDP] swismgr2
-    swismgr2 = 6964, 'swismgr2', TransportProtocol.tcp
+    swismgr2 = 6964
 
     #: - [TCP] swistrap
     #: - [UDP] swistrap
-    swistrap = 6965, 'swistrap', TransportProtocol.tcp
+    swistrap = 6965
 
     #: - [TCP] swispol
     #: - [UDP] swispol
-    swispol = 6966, 'swispol', TransportProtocol.tcp
+    swispol = 6966
 
     #: - [TCP] acmsoda
     #: - [UDP] acmsoda
-    acmsoda = 6969, 'acmsoda', TransportProtocol.tcp
+    acmsoda = 6969
 
     #: [TCP] Conductor test coordination protocol
-    conductor = 6970, 'conductor', TransportProtocol.tcp
+    conductor = 6970
 
     #: [TCP] Reserved
-    reserved_6980 = 6980, 'reserved', TransportProtocol.tcp
+    reserved_6980 = 6980, 'reserved'
 
     #: - [TCP] Mobility XE Protocol
     #: - [UDP] Mobility XE Protocol
-    mobilitysrv = 6997, 'mobilitysrv', TransportProtocol.tcp
+    mobilitysrv = 6997
 
     #: - [TCP] IATP-highPri
     #: - [UDP] IATP-highPri
-    iatp_highpri = 6998, 'iatp-highpri', TransportProtocol.tcp
+    iatp_highpri = 6998, 'iatp-highpri'
 
     #: - [TCP] IATP-normalPri
     #: - [UDP] IATP-normalPri
-    iatp_normalpri = 6999, 'iatp-normalpri', TransportProtocol.tcp
+    iatp_normalpri = 6999, 'iatp-normalpri'
 
     #: - [TCP] file server itself
     #: - [UDP] file server itself
-    afs3_fileserver = 7000, 'afs3-fileserver', TransportProtocol.tcp
+    afs3_fileserver = 7000, 'afs3-fileserver'
 
     #: - [TCP] callbacks to cache managers
     #: - [UDP] callbacks to cache managers
-    afs3_callback = 7001, 'afs3-callback', TransportProtocol.tcp
+    afs3_callback = 7001, 'afs3-callback'
 
     #: - [TCP] users & groups database
     #: - [UDP] users & groups database
-    afs3_prserver = 7002, 'afs3-prserver', TransportProtocol.tcp
+    afs3_prserver = 7002, 'afs3-prserver'
 
     #: - [TCP] volume location database
     #: - [UDP] volume location database
-    afs3_vlserver = 7003, 'afs3-vlserver', TransportProtocol.tcp
+    afs3_vlserver = 7003, 'afs3-vlserver'
 
     #: - [TCP] AFS/Kerberos authentication service
     #: - [UDP] AFS/Kerberos authentication service
-    afs3_kaserver = 7004, 'afs3-kaserver', TransportProtocol.tcp
+    afs3_kaserver = 7004, 'afs3-kaserver'
 
     #: - [TCP] volume managment server
     #: - [UDP] volume managment server
-    afs3_volser = 7005, 'afs3-volser', TransportProtocol.tcp
+    afs3_volser = 7005, 'afs3-volser'
 
     #: - [TCP] error interpretation service
     #: - [UDP] error interpretation service
-    afs3_errors = 7006, 'afs3-errors', TransportProtocol.tcp
+    afs3_errors = 7006, 'afs3-errors'
 
     #: - [TCP] basic overseer process
     #: - [UDP] basic overseer process
-    afs3_bos = 7007, 'afs3-bos', TransportProtocol.tcp
+    afs3_bos = 7007, 'afs3-bos'
 
     #: - [TCP] server-to-server updater
     #: - [UDP] server-to-server updater
-    afs3_update = 7008, 'afs3-update', TransportProtocol.tcp
+    afs3_update = 7008, 'afs3-update'
 
     #: - [TCP] remote cache manager service
     #: - [UDP] remote cache manager service
-    afs3_rmtsys = 7009, 'afs3-rmtsys', TransportProtocol.tcp
+    afs3_rmtsys = 7009, 'afs3-rmtsys'
 
     #: - [TCP] onlinet uninterruptable power supplies
     #: - [UDP] onlinet uninterruptable power supplies
-    ups_onlinet = 7010, 'ups-onlinet', TransportProtocol.tcp
+    ups_onlinet = 7010, 'ups-onlinet'
 
     #: - [TCP] Talon Discovery Port
     #: - [UDP] Talon Discovery Port
-    talon_disc = 7011, 'talon-disc', TransportProtocol.tcp
+    talon_disc = 7011, 'talon-disc'
 
     #: - [TCP] Talon Engine
     #: - [UDP] Talon Engine
-    talon_engine = 7012, 'talon-engine', TransportProtocol.tcp
+    talon_engine = 7012, 'talon-engine'
 
     #: - [TCP] Microtalon Discovery
     #: - [UDP] Microtalon Discovery
-    microtalon_dis = 7013, 'microtalon-dis', TransportProtocol.tcp
+    microtalon_dis = 7013, 'microtalon-dis'
 
     #: - [TCP] Microtalon Communications
     #: - [UDP] Microtalon Communications
-    microtalon_com = 7014, 'microtalon-com', TransportProtocol.tcp
+    microtalon_com = 7014, 'microtalon-com'
 
     #: - [TCP] Talon Webserver
     #: - [UDP] Talon Webserver
-    talon_webserver = 7015, 'talon-webserver', TransportProtocol.tcp
+    talon_webserver = 7015, 'talon-webserver'
 
     #: - [TCP] SPG Controls Carrier
     #: - [UDP] SPG Controls Carrier
-    spg = 7016, 'spg', TransportProtocol.tcp
+    spg = 7016
 
     #: - [TCP] GeneRic Autonomic Signaling Protocol [:rfc:`8990`]
     #: - [UDP] GeneRic Autonomic Signaling Protocol [:rfc:`8990`]
-    grasp = 7017, 'grasp', TransportProtocol.tcp
+    grasp = 7017
 
     #: [TCP] FISA Service
-    fisa_svc = 7018, 'fisa-svc', TransportProtocol.tcp
+    fisa_svc = 7018, 'fisa-svc'
 
     #: [TCP] doceri drawing service control
-    doceri_ctl = 7019, 'doceri-ctl', TransportProtocol.tcp
+    doceri_ctl = 7019, 'doceri-ctl'
 
     #: - [TCP] DP Serve
     #: - [UDP] DP Serve
-    dpserve = 7020, 'dpserve', TransportProtocol.tcp
+    dpserve = 7020
 
     #: - [TCP] DP Serve Admin
     #: - [UDP] DP Serve Admin
-    dpserveadmin = 7021, 'dpserveadmin', TransportProtocol.tcp
+    dpserveadmin = 7021
 
     #: - [TCP] CT Discovery Protocol
     #: - [UDP] CT Discovery Protocol
-    ctdp = 7022, 'ctdp', TransportProtocol.tcp
+    ctdp = 7022
 
     #: - [TCP] Comtech T2 NMCS
     #: - [UDP] Comtech T2 NMCS
-    ct2nmcs = 7023, 'ct2nmcs', TransportProtocol.tcp
+    ct2nmcs = 7023
 
     #: - [TCP] Vormetric service
     #: - [UDP] Vormetric service
-    vmsvc = 7024, 'vmsvc', TransportProtocol.tcp
+    vmsvc = 7024
 
     #: - [TCP] Vormetric Service II
     #: - [UDP] Vormetric Service II
-    vmsvc_2 = 7025, 'vmsvc-2', TransportProtocol.tcp
+    vmsvc_2 = 7025, 'vmsvc-2'
 
     #: [TCP] Loreji Webhosting Panel
-    loreji_panel = 7026, 'loreji-panel', TransportProtocol.tcp
+    loreji_panel = 7026, 'loreji-panel'
 
     #: - [TCP] ObjectPlanet probe
     #: - [UDP] ObjectPlanet probe
-    op_probe = 7030, 'op-probe', TransportProtocol.tcp
+    op_probe = 7030, 'op-probe'
 
     #: [TCP] IPOSPLANET retailing multi devices protocol
-    iposplanet = 7031, 'iposplanet', TransportProtocol.tcp
+    iposplanet = 7031
 
     #: [TCP] Reserved
-    reserved_7040 = 7040, 'reserved', TransportProtocol.tcp
+    reserved_7040 = 7040, 'reserved'
 
     #: - [TCP] ARCP
     #: - [UDP] ARCP
-    arcp = 7070, 'arcp', TransportProtocol.tcp
+    arcp = 7070
 
     #: - [TCP] IWGADTS Aircraft Housekeeping Message
     #: - [UDP] IWGADTS Aircraft Housekeeping Message
-    iwg1 = 7071, 'iwg1', TransportProtocol.tcp
+    iwg1 = 7071
 
     #: [TCP] iba Device Configuration Protocol
-    iba_cfg = 7072, 'iba-cfg', TransportProtocol.tcp
+    iba_cfg = 7072, 'iba-cfg'
 
     #: [TCP] MarTalk protocol
-    martalk = 7073, 'martalk', TransportProtocol.tcp
+    martalk = 7073
 
     #: - [TCP] EmpowerID Communication
     #: - [UDP] EmpowerID Communication
-    empowerid = 7080, 'empowerid', TransportProtocol.tcp
+    empowerid = 7080
 
     #: [TCP] Reserved
-    reserved_7088 = 7088, 'reserved', TransportProtocol.tcp
+    reserved_7088 = 7088, 'reserved'
 
     #: [TCP] Reserved
-    reserved_7095 = 7095, 'reserved', TransportProtocol.tcp
+    reserved_7095 = 7095, 'reserved'
 
     #: - [TCP] lazy-ptop
     #: - [UDP] lazy-ptop
-    lazy_ptop = 7099, 'lazy-ptop', TransportProtocol.tcp
+    lazy_ptop = 7099, 'lazy-ptop'
 
     #: - [TCP] X Font Service
     #: - [UDP] X Font Service
-    font_service = 7100, 'font-service', TransportProtocol.tcp
+    font_service = 7100, 'font-service'
 
     #: - [TCP] Embedded Light Control Network
     #: - [UDP] Embedded Light Control Network
-    elcn = 7101, 'elcn', TransportProtocol.tcp
+    elcn = 7101
 
     #: [TCP] Reserved
-    reserved_7107 = 7107, 'reserved', TransportProtocol.tcp
+    reserved_7107 = 7107, 'reserved'
 
     #: [TCP] Encrypted chat and file transfer service
-    rothaga = 7117, 'rothaga', TransportProtocol.tcp
+    rothaga = 7117
 
     #: - [TCP] Virtual Prototypes License Manager
     #: - [UDP] Virtual Prototypes License Manager
-    virprot_lm = 7121, 'virprot-lm', TransportProtocol.tcp
+    virprot_lm = 7121, 'virprot-lm'
 
     #: - [TCP] SNIF End-to-End TLS Relay Control Connection [draft-zubov-snif-05,
     #:   Section 4.3]
     #: - [UDP] SNIF End-to-End TLS Relay over QUIC [draft-zubov-snif-05, Section 4.4]
-    snif = 7123, 'snif', TransportProtocol.tcp
+    snif = 7123
 
     #: - [TCP] intelligent data manager
     #: - [UDP] intelligent data manager
-    scenidm = 7128, 'scenidm', TransportProtocol.tcp
+    scenidm = 7128
 
     #: - [TCP] Catalog Content Search
     #: - [UDP] Catalog Content Search
-    scenccs = 7129, 'scenccs', TransportProtocol.tcp
+    scenccs = 7129
 
     #: [TCP] AmbesaSQL Database Server
-    ambesasql = 7151, 'ambesasql', TransportProtocol.tcp
+    ambesasql = 7151
 
     #: - [TCP] CA BSM Comm
     #: - [UDP] CA BSM Comm
-    cabsm_comm = 7161, 'cabsm-comm', TransportProtocol.tcp
+    cabsm_comm = 7161, 'cabsm-comm'
 
     #: - [TCP] CA Storage Manager
     #: - [UDP] CA Storage Manager
-    caistoragemgr = 7162, 'caistoragemgr', TransportProtocol.tcp
+    caistoragemgr = 7162
 
     #: - [TCP] CA Connection Broker
     #: - [UDP] CA Connection Broker
-    cacsambroker = 7163, 'cacsambroker', TransportProtocol.tcp
+    cacsambroker = 7163
 
     #: - [TCP] File System Repository Agent
     #: - [UDP] File System Repository Agent
-    fsr = 7164, 'fsr', TransportProtocol.tcp
+    fsr = 7164
 
     #: - [TCP] Document WCF Server
     #: - [UDP] Document WCF Server
-    doc_server = 7165, 'doc-server', TransportProtocol.tcp
+    doc_server = 7165, 'doc-server'
 
     #: - [TCP] Aruba eDiscovery Server
     #: - [UDP] Aruba eDiscovery Server
-    aruba_server = 7166, 'aruba-server', TransportProtocol.tcp
+    aruba_server = 7166, 'aruba-server'
 
     #: [TCP] CA SRM Agent
-    casrmagent = 7167, 'casrmagent', TransportProtocol.tcp
+    casrmagent = 7167
 
     #: [TCP] cncKadServer DB & Inventory Services
-    cnckadserver = 7168, 'cnckadserver', TransportProtocol.tcp
+    cnckadserver = 7168
 
     #: - [TCP] Consequor Consulting Process Integration Bridge
     #: - [UDP] Consequor Consulting Process Integration Bridge
-    ccag_pib = 7169, 'ccag-pib', TransportProtocol.tcp
+    ccag_pib = 7169, 'ccag-pib'
 
     #: - [TCP] Adaptive Name/Service Resolution
     #: - [UDP] Adaptive Name/Service Resolution
-    nsrp = 7170, 'nsrp', TransportProtocol.tcp
+    nsrp = 7170
 
     #: - [TCP] Discovery and Retention Mgt Production
     #: - [UDP] Discovery and Retention Mgt Production
-    drm_production = 7171, 'drm-production', TransportProtocol.tcp
+    drm_production = 7171, 'drm-production'
 
     #: [TCP] Port used for MetalBend programmable interface
-    metalbend = 7172, 'metalbend', TransportProtocol.tcp
+    metalbend = 7172
 
     #: [TCP] zSecure Server
-    zsecure = 7173, 'zsecure', TransportProtocol.tcp
+    zsecure = 7173
 
     #: - [TCP] Clutild
     #: - [UDP] Clutild
-    clutild = 7174, 'clutild', TransportProtocol.tcp
+    clutild = 7174
 
     #: [TCP] Reserved
-    reserved_7181 = 7181, 'reserved', TransportProtocol.tcp
+    reserved_7181 = 7181, 'reserved'
 
     #: - [TCP] FODMS FLIP
     #: - [UDP] FODMS FLIP
-    fodms = 7200, 'fodms', TransportProtocol.tcp
+    fodms = 7200
 
     #: - [TCP] DLIP
     #: - [UDP] DLIP
-    dlip = 7201, 'dlip', TransportProtocol.tcp
+    dlip = 7201
 
     #: [TCP] Inter-Channel Termination Protocol (ICTP) for multi-wavelength PON
     #: (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
@@ -20705,2146 +20705,2146 @@ class TCP(AppType):
     #: (NG-PON2) system to exchange channel profile configuration and status
     #: information and to coordinate the operation of tunable optical network units
     #: (ONUs) in a multi-wavelength channel environment.]
-    pon_ictp = 7202, 'pon-ictp', TransportProtocol.tcp
+    pon_ictp = 7202, 'pon-ictp'
 
     #: [TCP] Communication ports for PaperStream Server services
-    ps_server = 7215, 'ps-server', TransportProtocol.tcp
+    ps_server = 7215, 'ps-server'
 
     #: [TCP] PaperStream Capture Professional
-    ps_capture_pro = 7216, 'ps-capture-pro', TransportProtocol.tcp
+    ps_capture_pro = 7216, 'ps-capture-pro'
 
     #: - [TCP] Registry A & M Protocol
     #: - [UDP] Registry A & M Protocol
-    ramp = 7227, 'ramp', TransportProtocol.tcp
+    ramp = 7227
 
     #: [TCP] Citrix Universal Printing Port
-    citrixupp = 7228, 'citrixupp', TransportProtocol.tcp
+    citrixupp = 7228
 
     #: [TCP] Citrix UPP Gateway
-    citrixuppg = 7229, 'citrixuppg', TransportProtocol.tcp
+    citrixuppg = 7229
 
     #: [TCP] Traffic forwarding for Okta cloud infra
-    asa_gateways = 7234, 'asa-gateways', TransportProtocol.tcp
+    asa_gateways = 7234, 'asa-gateways'
 
     #: [TCP] Reserved
-    reserved_7235 = 7235, 'reserved', TransportProtocol.tcp
+    reserved_7235 = 7235, 'reserved'
 
     #: [TCP] Wi-Fi Alliance Wi-Fi Display Protocol
-    display = 7236, 'display', TransportProtocol.tcp
+    display = 7236
 
     #: [TCP] PADS (Public Area Display System) Server
-    pads = 7237, 'pads', TransportProtocol.tcp
+    pads = 7237
 
     #: [TCP] FrontRow Calypso Human Interface Control Protocol
-    frc_hicp = 7244, 'frc-hicp', TransportProtocol.tcp
+    frc_hicp = 7244, 'frc-hicp'
 
     #: - [TCP] Calypso Network Access Protocol
     #: - [UDP] Calypso Network Access Protocol
-    cnap = 7262, 'cnap', TransportProtocol.tcp
+    cnap = 7262
 
     #: - [TCP] WatchMe Monitoring 7272
     #: - [UDP] WatchMe Monitoring 7272
-    watchme_7272 = 7272, 'watchme-7272', TransportProtocol.tcp
+    watchme_7272 = 7272, 'watchme-7272'
 
     #: - [TCP] OMA Roaming Location
     #: - [UDP] OMA Roaming Location
-    oma_rlp = 7273, 'oma-rlp', TransportProtocol.tcp
+    oma_rlp = 7273, 'oma-rlp'
 
     #: - [TCP] OMA Roaming Location SEC
     #: - [UDP] OMA Roaming Location SEC
-    oma_rlp_s = 7274, 'oma-rlp-s', TransportProtocol.tcp
+    oma_rlp_s = 7274, 'oma-rlp-s'
 
     #: - [TCP] OMA UserPlane Location
     #: - [UDP] OMA UserPlane Location
-    oma_ulp = 7275, 'oma-ulp', TransportProtocol.tcp
+    oma_ulp = 7275, 'oma-ulp'
 
     #: - [TCP] OMA Internal Location Protocol
     #: - [UDP] OMA Internal Location Protocol
-    oma_ilp = 7276, 'oma-ilp', TransportProtocol.tcp
+    oma_ilp = 7276, 'oma-ilp'
 
     #: - [TCP] OMA Internal Location Secure Protocol
     #: - [UDP] OMA Internal Location Secure Protocol
-    oma_ilp_s = 7277, 'oma-ilp-s', TransportProtocol.tcp
+    oma_ilp_s = 7277, 'oma-ilp-s'
 
     #: - [TCP] OMA Dynamic Content Delivery over CBS
     #: - [UDP] OMA Dynamic Content Delivery over CBS
-    oma_dcdocbs = 7278, 'oma-dcdocbs', TransportProtocol.tcp
+    oma_dcdocbs = 7278, 'oma-dcdocbs'
 
     #: - [TCP] Citrix Licensing
     #: - [UDP] Citrix Licensing
-    ctxlic = 7279, 'ctxlic', TransportProtocol.tcp
+    ctxlic = 7279
 
     #: - [TCP] ITACTIONSERVER 1
     #: - [UDP] ITACTIONSERVER 1
-    itactionserver1 = 7280, 'itactionserver1', TransportProtocol.tcp
+    itactionserver1 = 7280
 
     #: - [TCP] ITACTIONSERVER 2
     #: - [UDP] ITACTIONSERVER 2
-    itactionserver2 = 7281, 'itactionserver2', TransportProtocol.tcp
+    itactionserver2 = 7281
 
     #: [TCP] eventACTION/ussACTION (MZCA) server
-    mzca_action = 7282, 'mzca-action', TransportProtocol.tcp
+    mzca_action = 7282, 'mzca-action'
 
     #: [TCP] General Statistics Rendezvous Protocol
-    genstat = 7283, 'genstat', TransportProtocol.tcp
+    genstat = 7283
 
     #: - [TCP] LifeKeeper Communications
     #: - [UDP] LifeKeeper Communications
-    lcm_server = 7365, 'lcm-server', TransportProtocol.tcp
+    lcm_server = 7365, 'lcm-server'
 
     #: - [TCP] mind-file system server
     #: - [UDP] mind-file system server
-    mindfilesys = 7391, 'mindfilesys', TransportProtocol.tcp
+    mindfilesys = 7391
 
     #: - [TCP] mrss-rendezvous server
     #: - [UDP] mrss-rendezvous server
-    mrssrendezvous = 7392, 'mrssrendezvous', TransportProtocol.tcp
+    mrssrendezvous = 7392
 
     #: - [TCP] nFoldMan Remote Publish
     #: - [UDP] nFoldMan Remote Publish
-    nfoldman = 7393, 'nfoldman', TransportProtocol.tcp
+    nfoldman = 7393
 
     #: - [TCP] File system export of backup images
     #: - [UDP] File system export of backup images
-    fse = 7394, 'fse', TransportProtocol.tcp
+    fse = 7394
 
     #: - [TCP] winqedit
     #: - [UDP] winqedit
-    winqedit = 7395, 'winqedit', TransportProtocol.tcp
+    winqedit = 7395
 
     #: - [TCP] Hexarc Command Language
     #: - [UDP] Hexarc Command Language
-    hexarc = 7397, 'hexarc', TransportProtocol.tcp
+    hexarc = 7397
 
     #: - [TCP] RTPS Discovery
     #: - [UDP] RTPS Discovery
-    rtps_discovery = 7400, 'rtps-discovery', TransportProtocol.tcp
+    rtps_discovery = 7400, 'rtps-discovery'
 
     #: - [TCP] RTPS Data-Distribution User-Traffic
     #: - [UDP] RTPS Data-Distribution User-Traffic
-    rtps_dd_ut = 7401, 'rtps-dd-ut', TransportProtocol.tcp
+    rtps_dd_ut = 7401, 'rtps-dd-ut'
 
     #: - [TCP] RTPS Data-Distribution Meta-Traffic
     #: - [UDP] RTPS Data-Distribution Meta-Traffic
-    rtps_dd_mt = 7402, 'rtps-dd-mt', TransportProtocol.tcp
+    rtps_dd_mt = 7402, 'rtps-dd-mt'
 
     #: - [TCP] Ionix Network Monitor
     #: - [UDP] Ionix Network Monitor
-    ionixnetmon = 7410, 'ionixnetmon', TransportProtocol.tcp
+    ionixnetmon = 7410
 
     #: - [TCP] Streaming of measurement data
     #: - [UDP] Streaming of measurement data
-    daqstream = 7411, 'daqstream', TransportProtocol.tcp
+    daqstream = 7411
 
     #: [TCP] Reserved
-    reserved_7420 = 7420, 'reserved', TransportProtocol.tcp
+    reserved_7420 = 7420, 'reserved'
 
     #: - [TCP] Matisse Port Monitor
     #: - [UDP] Matisse Port Monitor
-    mtportmon = 7421, 'mtportmon', TransportProtocol.tcp
+    mtportmon = 7421
 
     #: - [TCP] OpenView DM Postmaster Manager
     #: - [UDP] OpenView DM Postmaster Manager
-    pmdmgr = 7426, 'pmdmgr', TransportProtocol.tcp
+    pmdmgr = 7426
 
     #: - [TCP] OpenView DM Event Agent Manager
     #: - [UDP] OpenView DM Event Agent Manager
-    oveadmgr = 7427, 'oveadmgr', TransportProtocol.tcp
+    oveadmgr = 7427
 
     #: - [TCP] OpenView DM Log Agent Manager
     #: - [UDP] OpenView DM Log Agent Manager
-    ovladmgr = 7428, 'ovladmgr', TransportProtocol.tcp
+    ovladmgr = 7428
 
     #: - [TCP] OpenView DM rqt communication
     #: - [UDP] OpenView DM rqt communication
-    opi_sock = 7429, 'opi-sock', TransportProtocol.tcp
+    opi_sock = 7429, 'opi-sock'
 
     #: - [TCP] OpenView DM xmpv7 api pipe
     #: - [UDP] OpenView DM xmpv7 api pipe
-    xmpv7 = 7430, 'xmpv7', TransportProtocol.tcp
+    xmpv7 = 7430
 
     #: - [TCP] OpenView DM ovc/xmpv3 api pipe
     #: - [UDP] OpenView DM ovc/xmpv3 api pipe
-    pmd = 7431, 'pmd', TransportProtocol.tcp
+    pmd = 7431
 
     #: - [TCP] Faximum
     #: - [UDP] Faximum
-    faximum = 7437, 'faximum', TransportProtocol.tcp
+    faximum = 7437
 
     #: - [TCP] Oracle Application Server HTTPS
     #: - [UDP] Oracle Application Server HTTPS
-    oracleas_https = 7443, 'oracleas-https', TransportProtocol.tcp
+    oracleas_https = 7443, 'oracleas-https'
 
     #: [TCP] Stateless Transport Tunneling Protocol
-    sttunnel = 7471, 'sttunnel', TransportProtocol.tcp
+    sttunnel = 7471
 
     #: - [TCP] Rise: The Vieneo Province
     #: - [UDP] Rise: The Vieneo Province
-    rise = 7473, 'rise', TransportProtocol.tcp
+    rise = 7473
 
     #: [TCP] Neo4j Graph Database
-    neo4j = 7474, 'neo4j', TransportProtocol.tcp
+    neo4j = 7474
 
     #: [TCP] IT Asset Management
-    openit = 7478, 'openit', TransportProtocol.tcp
+    openit = 7478
 
     #: - [TCP] telops-lmd
     #: - [UDP] telops-lmd
-    telops_lmd = 7491, 'telops-lmd', TransportProtocol.tcp
+    telops_lmd = 7491, 'telops-lmd'
 
     #: - [TCP] Silhouette User
     #: - [UDP] Silhouette User
-    silhouette = 7500, 'silhouette', TransportProtocol.tcp
+    silhouette = 7500
 
     #: - [TCP] HP OpenView Bus Daemon
     #: - [UDP] HP OpenView Bus Daemon
-    ovbus = 7501, 'ovbus', TransportProtocol.tcp
+    ovbus = 7501
 
     #: [TCP] Automation Device Configuration Protocol
-    adcp = 7508, 'adcp', TransportProtocol.tcp
+    adcp = 7508
 
     #: [TCP] ACPLT - process automation service
-    acplt = 7509, 'acplt', TransportProtocol.tcp
+    acplt = 7509
 
     #: - [TCP] HP OpenView Application Server
     #: - [UDP] HP OpenView Application Server
-    ovhpas = 7510, 'ovhpas', TransportProtocol.tcp
+    ovhpas = 7510
 
     #: - [TCP] pafec-lm
     #: - [UDP] pafec-lm
-    pafec_lm = 7511, 'pafec-lm', TransportProtocol.tcp
+    pafec_lm = 7511, 'pafec-lm'
 
     #: - [TCP] Saratoga Transfer Protocol
     #: - [UDP] Saratoga Transfer Protocol
-    saratoga = 7542, 'saratoga', TransportProtocol.tcp
+    saratoga = 7542
 
     #: - [TCP] atul server
     #: - [UDP] atul server
-    atul = 7543, 'atul', TransportProtocol.tcp
+    atul = 7543
 
     #: - [TCP] FlowAnalyzer DisplayServer
     #: - [UDP] FlowAnalyzer DisplayServer
-    nta_ds = 7544, 'nta-ds', TransportProtocol.tcp
+    nta_ds = 7544, 'nta-ds'
 
     #: - [TCP] FlowAnalyzer UtilityServer
     #: - [UDP] FlowAnalyzer UtilityServer
-    nta_us = 7545, 'nta-us', TransportProtocol.tcp
+    nta_us = 7545, 'nta-us'
 
     #: - [TCP] Cisco Fabric service
     #: - [UDP] Cisco Fabric service
-    cfs = 7546, 'cfs', TransportProtocol.tcp
+    cfs = 7546
 
     #: - [TCP] Broadband Forum CWMP
     #: - [UDP] Broadband Forum CWMP
-    cwmp = 7547, 'cwmp', TransportProtocol.tcp
+    cwmp = 7547
 
     #: - [TCP] Threat Information Distribution Protocol
     #: - [UDP] Threat Information Distribution Protocol
-    tidp = 7548, 'tidp', TransportProtocol.tcp
+    tidp = 7548
 
     #: - [TCP] Network Layer Signaling Transport Layer
     #: - [UDP] Network Layer Signaling Transport Layer
-    nls_tl = 7549, 'nls-tl', TransportProtocol.tcp
+    nls_tl = 7549, 'nls-tl'
 
     #: [TCP] Reserved
-    reserved_7550 = 7550, 'reserved', TransportProtocol.tcp
+    reserved_7550 = 7550, 'reserved'
 
     #: [TCP] ControlONE Console signaling
-    controlone_con = 7551, 'controlone-con', TransportProtocol.tcp
+    controlone_con = 7551, 'controlone-con'
 
     #: - [TCP] Sniffer Command Protocol
     #: - [UDP] Sniffer Command Protocol
-    sncp = 7560, 'sncp', TransportProtocol.tcp
+    sncp = 7560
 
     #: [TCP] Control Framework [:rfc:`6230`]
-    cfw = 7563, 'cfw', TransportProtocol.tcp
+    cfw = 7563
 
     #: - [TCP] VSI Omega
     #: - [UDP] VSI Omega
-    vsi_omega = 7566, 'vsi-omega', TransportProtocol.tcp
+    vsi_omega = 7566, 'vsi-omega'
 
     #: [TCP] Dell EqualLogic Host Group Management
-    dell_eql_asm = 7569, 'dell-eql-asm', TransportProtocol.tcp
+    dell_eql_asm = 7569, 'dell-eql-asm'
 
     #: - [TCP] Aries Kfinder
     #: - [UDP] Aries Kfinder
-    aries_kfinder = 7570, 'aries-kfinder', TransportProtocol.tcp
+    aries_kfinder = 7570, 'aries-kfinder'
 
     #: [TCP] Oracle Coherence Cluster Service
-    coherence = 7574, 'coherence', TransportProtocol.tcp
+    coherence = 7574
 
     #: [TCP] Main access port for WTMI Panel
-    wtmi_panel = 7575, 'wtmi-panel', TransportProtocol.tcp
+    wtmi_panel = 7575, 'wtmi-panel'
 
     #: - [TCP] Sun License Manager
     #: - [UDP] Sun License Manager
-    sun_lm = 7588, 'sun-lm', TransportProtocol.tcp
+    sun_lm = 7588, 'sun-lm'
 
     #: - [TCP] MIPI Alliance Debug
     #: - [UDP] MIPI Alliance Debug
-    mipi_debug = 7606, 'mipi-debug', TransportProtocol.tcp
+    mipi_debug = 7606, 'mipi-debug'
 
     #: - [TCP] Instrument Neutral Distributed Interface
     #: - [UDP] Instrument Neutral Distributed Interface
-    indi = 7624, 'indi', TransportProtocol.tcp
+    indi = 7624
 
     #: - [TCP] SImple Middlebox COnfiguration (SIMCO) Server [:rfc:`4540`]
     #: - [SCTP] SImple Middlebox COnfiguration (SIMCO)
-    simco = 7626, 'simco', TransportProtocol.tcp
+    simco = 7626
 
     #: - [TCP] SOAP Service Port
     #: - [UDP] SOAP Service Port
-    soap_http = 7627, 'soap-http', TransportProtocol.tcp
+    soap_http = 7627, 'soap-http'
 
     #: - [TCP] Primary Agent Work Notification
     #: - [UDP] Primary Agent Work Notification
-    zen_pawn = 7628, 'zen-pawn', TransportProtocol.tcp
+    zen_pawn = 7628, 'zen-pawn'
 
     #: - [TCP] OpenXDAS Wire Protocol
     #: - [UDP] OpenXDAS Wire Protocol
-    xdas = 7629, 'xdas', TransportProtocol.tcp
+    xdas = 7629
 
     #: [TCP] HA Web Konsole
-    hawk = 7630, 'hawk', TransportProtocol.tcp
+    hawk = 7630
 
     #: [TCP] TESLA System Messaging
-    tesla_sys_msg = 7631, 'tesla-sys-msg', TransportProtocol.tcp
+    tesla_sys_msg = 7631, 'tesla-sys-msg'
 
     #: - [TCP] PMDF Management
     #: - [UDP] PMDF Management
-    pmdfmgt = 7633, 'pmdfmgt', TransportProtocol.tcp
+    pmdfmgt = 7633
 
     #: - [TCP] bonjour-cuseeme
     #: - [UDP] bonjour-cuseeme
-    cuseeme = 7648, 'cuseeme', TransportProtocol.tcp
+    cuseeme = 7648
 
     #: - [TCP] Proprietary immutable distributed data storage
     #: - [UDP] Proprietary immutable distributed data storage
-    rome = 7663, 'rome', TransportProtocol.tcp
+    rome = 7663
 
     #: [TCP] AuthorityGate Secure API communication for Orchestrated task
     #: sequencing
-    authoritygate = 7668, 'authoritygate', TransportProtocol.tcp
+    authoritygate = 7668
 
     #: [TCP] iMQ STOMP Server
-    imqstomp = 7672, 'imqstomp', TransportProtocol.tcp
+    imqstomp = 7672
 
     #: [TCP] iMQ STOMP Server over SSL
-    imqstomps = 7673, 'imqstomps', TransportProtocol.tcp
+    imqstomps = 7673
 
     #: - [TCP] iMQ SSL tunnel
     #: - [UDP] iMQ SSL tunnel
-    imqtunnels = 7674, 'imqtunnels', TransportProtocol.tcp
+    imqtunnels = 7674
 
     #: - [TCP] iMQ Tunnel
     #: - [UDP] iMQ Tunnel
-    imqtunnel = 7675, 'imqtunnel', TransportProtocol.tcp
+    imqtunnel = 7675
 
     #: - [TCP] iMQ Broker Rendezvous
     #: - [UDP] iMQ Broker Rendezvous
-    imqbrokerd = 7676, 'imqbrokerd', TransportProtocol.tcp
+    imqbrokerd = 7676
 
     #: - [TCP] Sun App Server - HTTPS
     #: - [UDP] Sun App Server - HTTPS
-    sun_user_https = 7677, 'sun-user-https', TransportProtocol.tcp
+    sun_user_https = 7677, 'sun-user-https'
 
     #: - [TCP] Microsoft Delivery Optimization Peer-to-Peer
     #: - [UDP] Microsoft Delivery Optimization Peer-to-Peer
-    ms_do = 7680, 'ms-do', TransportProtocol.tcp
+    ms_do = 7680, 'ms-do'
 
     #: [TCP] Cleondris DMT
-    dmt = 7683, 'dmt', TransportProtocol.tcp
+    dmt = 7683
 
     #: [TCP] Bolt database connection
-    bolt = 7687, 'bolt', TransportProtocol.tcp
+    bolt = 7687
 
     #: - [TCP] Collaber Network Service
     #: - [UDP] Collaber Network Service
-    collaber = 7689, 'collaber', TransportProtocol.tcp
+    collaber = 7689
 
     #: [TCP] Service-Oriented Vehicle Diagnostics
-    sovd = 7690, 'sovd', TransportProtocol.tcp
+    sovd = 7690
 
     #: - [TCP] KLIO communications
     #: - [UDP] KLIO communications
-    klio = 7697, 'klio', TransportProtocol.tcp
+    klio = 7697
 
     #: [TCP] EM7 Secure Communications
-    em7_secom = 7700, 'em7-secom', TransportProtocol.tcp
+    em7_secom = 7700, 'em7-secom'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_7701 = 7701, 'reserved', TransportProtocol.tcp
+    reserved_7701 = 7701, 'reserved'
 
     #: - [TCP] EM7 Dynamic Updates
     #: - [UDP] EM7 Dynamic Updates
-    sync_em7 = 7707, 'sync-em7', TransportProtocol.tcp
+    sync_em7 = 7707, 'sync-em7'
 
     #: - [TCP] scientia.net
     #: - [UDP] scientia.net
-    scinet = 7708, 'scinet', TransportProtocol.tcp
+    scinet = 7708
 
     #: - [TCP] MedImage Portal
     #: - [UDP] MedImage Portal
-    medimageportal = 7720, 'medimageportal', TransportProtocol.tcp
+    medimageportal = 7720
 
     #: - [TCP] Novell Snap-in Deep Freeze Control
     #: - [UDP] Novell Snap-in Deep Freeze Control
-    nsdeepfreezectl = 7724, 'nsdeepfreezectl', TransportProtocol.tcp
+    nsdeepfreezectl = 7724
 
     #: - [TCP] Nitrogen Service
     #: - [UDP] Nitrogen Service
-    nitrogen = 7725, 'nitrogen', TransportProtocol.tcp
+    nitrogen = 7725
 
     #: - [TCP] FreezeX Console Service
     #: - [UDP] FreezeX Console Service
-    freezexservice = 7726, 'freezexservice', TransportProtocol.tcp
+    freezexservice = 7726
 
     #: - [TCP] Trident Systems Data
     #: - [UDP] Trident Systems Data
-    trident_data = 7727, 'trident-data', TransportProtocol.tcp
+    trident_data = 7727, 'trident-data'
 
     #: - [TCP] Open-Source Virtual Reality
     #: - [UDP] Open-Source Virtual Reality
     #: - [SCTP] Open-Source Virtual Reality
-    osvr = 7728, 'osvr', TransportProtocol.tcp
+    osvr = 7728
 
     #: - [TCP] Smith Protocol over IP
     #: - [UDP] Smith Protocol over IP
-    smip = 7734, 'smip', TransportProtocol.tcp
+    smip = 7734
 
     #: - [TCP] HP Enterprise Discovery Agent
     #: - [UDP] HP Enterprise Discovery Agent
-    aiagent = 7738, 'aiagent', TransportProtocol.tcp
+    aiagent = 7738
 
     #: - [TCP] ScriptView Network
     #: - [UDP] ScriptView Network
-    scriptview = 7741, 'scriptview', TransportProtocol.tcp
+    scriptview = 7741
 
     #: [TCP] Mugginsoft Script Server Service
-    msss = 7742, 'msss', TransportProtocol.tcp
+    msss = 7742
 
     #: - [TCP] Sakura Script Transfer Protocol
     #: - [UDP] Sakura Script Transfer Protocol
-    sstp_1 = 7743, 'sstp-1', TransportProtocol.tcp
+    sstp_1 = 7743, 'sstp-1'
 
     #: - [TCP] RAQMON PDU [:rfc:`4712`]
     #: - [UDP] RAQMON PDU [:rfc:`4712`]
-    raqmon_pdu = 7744, 'raqmon-pdu', TransportProtocol.tcp
+    raqmon_pdu = 7744, 'raqmon-pdu'
 
     #: - [TCP] Put/Run/Get Protocol
     #: - [UDP] Put/Run/Get Protocol
-    prgp = 7747, 'prgp', TransportProtocol.tcp
+    prgp = 7747
 
     #: [TCP] A File System using TLS over a wide area network
-    inetfs = 7775, 'inetfs', TransportProtocol.tcp
+    inetfs = 7775
 
     #: - [TCP] cbt
     #: - [UDP] cbt
-    cbt = 7777, 'cbt', TransportProtocol.tcp
+    cbt = 7777
 
     #: - [TCP] Interwise
     #: - [UDP] Interwise
-    interwise = 7778, 'interwise', TransportProtocol.tcp
+    interwise = 7778
 
     #: - [TCP] VSTAT
     #: - [UDP] VSTAT
-    vstat = 7779, 'vstat', TransportProtocol.tcp
+    vstat = 7779
 
     #: - [TCP] accu-lmgr
     #: - [UDP] accu-lmgr
-    accu_lmgr = 7781, 'accu-lmgr', TransportProtocol.tcp
+    accu_lmgr = 7781, 'accu-lmgr'
 
     #: [TCP] Reserved
-    reserved_7784 = 7784, 'reserved', TransportProtocol.tcp
+    reserved_7784 = 7784, 'reserved'
 
     #: - [TCP] MINIVEND
     #: - [UDP] MINIVEND
-    minivend = 7786, 'minivend', TransportProtocol.tcp
+    minivend = 7786
 
     #: - [TCP] Popup Reminders Receive
     #: - [UDP] Popup Reminders Receive
-    popup_reminders = 7787, 'popup-reminders', TransportProtocol.tcp
+    popup_reminders = 7787, 'popup-reminders'
 
     #: - [TCP] Office Tools Pro Receive
     #: - [UDP] Office Tools Pro Receive
-    office_tools = 7789, 'office-tools', TransportProtocol.tcp
+    office_tools = 7789, 'office-tools'
 
     #: - [TCP] Q3ADE Cluster Service
     #: - [UDP] Q3ADE Cluster Service
-    q3ade = 7794, 'q3ade', TransportProtocol.tcp
+    q3ade = 7794
 
     #: - [TCP] Propel Connector port
     #: - [UDP] Propel Connector port
-    pnet_conn = 7797, 'pnet-conn', TransportProtocol.tcp
+    pnet_conn = 7797, 'pnet-conn'
 
     #: - [TCP] Propel Encoder port
     #: - [UDP] Propel Encoder port
-    pnet_enc = 7798, 'pnet-enc', TransportProtocol.tcp
+    pnet_enc = 7798, 'pnet-enc'
 
     #: - [TCP] Alternate BSDP Service
     #: - [UDP] Alternate BSDP Service
-    altbsdp = 7799, 'altbsdp', TransportProtocol.tcp
+    altbsdp = 7799
 
     #: - [TCP] Apple Software Restore
     #: - [UDP] Apple Software Restore
-    asr = 7800, 'asr', TransportProtocol.tcp
+    asr = 7800
 
     #: - [TCP] Secure Server Protocol - client
     #: - [UDP] Secure Server Protocol - client
-    ssp_client = 7801, 'ssp-client', TransportProtocol.tcp
+    ssp_client = 7801, 'ssp-client'
 
     #: [TCP] Reserved
-    reserved_7802 = 7802, 'reserved', TransportProtocol.tcp
+    reserved_7802 = 7802, 'reserved'
 
     #: - [TCP] Riverbed WAN Optimization Protocol
     #: - [UDP] Riverbed WAN Optimization Protocol
-    rbt_wanopt = 7810, 'rbt-wanopt', TransportProtocol.tcp
+    rbt_wanopt = 7810, 'rbt-wanopt'
 
     #: - [TCP] APC 7845
     #: - [UDP] APC 7845
-    apc_7845 = 7845, 'apc-7845', TransportProtocol.tcp
+    apc_7845 = 7845, 'apc-7845'
 
     #: - [TCP] APC 7846
     #: - [UDP] APC 7846
-    apc_7846 = 7846, 'apc-7846', TransportProtocol.tcp
+    apc_7846 = 7846, 'apc-7846'
 
     #: [TCP] A product key authentication protocol made by CSO
-    csoauth = 7847, 'csoauth', TransportProtocol.tcp
+    csoauth = 7847
 
     #: [TCP] MobileAnalyzer& MobileMonitor
-    mobileanalyzer = 7869, 'mobileanalyzer', TransportProtocol.tcp
+    mobileanalyzer = 7869
 
     #: [TCP] Riverbed Steelhead Mobile Service
-    rbt_smc = 7870, 'rbt-smc', TransportProtocol.tcp
+    rbt_smc = 7870, 'rbt-smc'
 
     #: [TCP] Mobile Device Management
-    mdm = 7871, 'mdm', TransportProtocol.tcp
+    mdm = 7871
 
     #: [TCP] Reserved
-    reserved_7872 = 7872, 'reserved', TransportProtocol.tcp
+    reserved_7872 = 7872, 'reserved'
 
     #: [TCP] Opswise Message Service
-    owms = 7878, 'owms', TransportProtocol.tcp
+    owms = 7878
 
     #: - [TCP] Pearson
     #: - [UDP] Pearson
-    pss = 7880, 'pss', TransportProtocol.tcp
+    pss = 7880
 
     #: - [TCP] Universal Broker
     #: - [UDP] Universal Broker
-    ubroker = 7887, 'ubroker', TransportProtocol.tcp
+    ubroker = 7887
 
     #: - [TCP] Multicast Event
     #: - [UDP] Multicast Event
-    mevent = 7900, 'mevent', TransportProtocol.tcp
+    mevent = 7900
 
     #: - [TCP] TNOS Service Protocol
     #: - [UDP] TNOS Service Protocol
-    tnos_sp = 7901, 'tnos-sp', TransportProtocol.tcp
+    tnos_sp = 7901, 'tnos-sp'
 
     #: - [TCP] TNOS shell Protocol
     #: - [UDP] TNOS shell Protocol
-    tnos_dp = 7902, 'tnos-dp', TransportProtocol.tcp
+    tnos_dp = 7902, 'tnos-dp'
 
     #: - [TCP] TNOS Secure DiaguardProtocol
     #: - [UDP] TNOS Secure DiaguardProtocol
-    tnos_dps = 7903, 'tnos-dps', TransportProtocol.tcp
+    tnos_dps = 7903, 'tnos-dps'
 
     #: - [TCP] QuickObjects secure port
     #: - [UDP] QuickObjects secure port
-    qo_secure = 7913, 'qo-secure', TransportProtocol.tcp
+    qo_secure = 7913, 'qo-secure'
 
     #: - [TCP] Tier 2 Data Resource Manager
     #: - [UDP] Tier 2 Data Resource Manager
-    t2_drm = 7932, 't2-drm', TransportProtocol.tcp
+    t2_drm = 7932, 't2-drm'
 
     #: - [TCP] Tier 2 Business Rules Manager
     #: - [UDP] Tier 2 Business Rules Manager
-    t2_brm = 7933, 't2-brm', TransportProtocol.tcp
+    t2_brm = 7933, 't2-brm'
 
     #: - [TCP] Encrypted, extendable, general-purpose synchronization protocol
     #: - [UDP] Encrypted, extendable, general-purpose synchronization protocol
-    generalsync = 7962, 'generalsync', TransportProtocol.tcp
+    generalsync = 7962
 
     #: - [TCP] Supercell
     #: - [UDP] Supercell
-    supercell = 7967, 'supercell', TransportProtocol.tcp
+    supercell = 7967
 
     #: - [TCP] Micromuse-ncps
     #: - [UDP] Micromuse-ncps
-    micromuse_ncps = 7979, 'micromuse-ncps', TransportProtocol.tcp
+    micromuse_ncps = 7979, 'micromuse-ncps'
 
     #: - [TCP] Quest Vista
     #: - [UDP] Quest Vista
-    quest_vista = 7980, 'quest-vista', TransportProtocol.tcp
+    quest_vista = 7980, 'quest-vista'
 
     #: [TCP] Spotlight on SQL Server Desktop Collect
-    sossd_collect = 7981, 'sossd-collect', TransportProtocol.tcp
+    sossd_collect = 7981, 'sossd-collect'
 
     #: [TCP] Spotlight on SQL Server Desktop Agent
-    sossd_agent = 7982, 'sossd-agent', TransportProtocol.tcp
+    sossd_agent = 7982, 'sossd-agent'
 
     #: [TCP] PUSH Notification Service
-    pushns = 7997, 'pushns', TransportProtocol.tcp
+    pushns = 7997
 
     #: [TCP] Reserved
-    reserved_7998 = 7998, 'reserved', TransportProtocol.tcp
+    reserved_7998 = 7998, 'reserved'
 
     #: - [TCP] iRDMI2
     #: - [UDP] iRDMI2
-    irdmi2 = 7999, 'irdmi2', TransportProtocol.tcp
+    irdmi2 = 7999
 
     #: - [TCP] iRDMI
     #: - [UDP] iRDMI
-    irdmi = 8000, 'irdmi', TransportProtocol.tcp
+    irdmi = 8000
 
     #: - [TCP] VCOM Tunnel
     #: - [UDP] VCOM Tunnel
-    vcom_tunnel = 8001, 'vcom-tunnel', TransportProtocol.tcp
+    vcom_tunnel = 8001, 'vcom-tunnel'
 
     #: - [TCP] Teradata ORDBMS
     #: - [UDP] Teradata ORDBMS
-    teradataordbms = 8002, 'teradataordbms', TransportProtocol.tcp
+    teradataordbms = 8002
 
     #: - [TCP] Mulberry Connect Reporting Service
     #: - [UDP] Mulberry Connect Reporting Service
-    mcreport = 8003, 'mcreport', TransportProtocol.tcp
+    mcreport = 8003
 
     #: [TCP] Opensource Evolv Enterprise Platform P2P Network Node Connection
     #: Protocol
-    p2pevolvenet = 8004, 'p2pevolvenet', TransportProtocol.tcp
+    p2pevolvenet = 8004
 
     #: - [TCP] MXI Generation II for z/OS
     #: - [UDP] MXI Generation II for z/OS
-    mxi = 8005, 'mxi', TransportProtocol.tcp
+    mxi = 8005
 
     #: [TCP] World Programming analytics
-    wpl_analytics = 8006, 'wpl-analytics', TransportProtocol.tcp
+    wpl_analytics = 8006, 'wpl-analytics'
 
     #: - [TCP] I/O oriented cluster computing software
     #: - [UDP] I/O oriented cluster computing software
-    warppipe = 8007, 'warppipe', TransportProtocol.tcp
+    warppipe = 8007
 
     #: - [TCP] FileMaker, Inc. - HTTP Alternate (see Port 80)
     #: - [UDP] FileMaker, Inc. - HTTP Alternate (see Port 80)
-    http_alt_591 = 591, 'http-alt', TransportProtocol.tcp
+    http_alt_591 = 591, 'http-alt'
 
     #: - [TCP] HTTP Alternate
     #: - [UDP] HTTP Alternate
-    http_alt_8008 = 8008, 'http-alt', TransportProtocol.tcp
+    http_alt_8008 = 8008, 'http-alt'
 
     #: [TCP] NVMe over Fabrics Discovery Service
-    nvme_disc = 8009, 'nvme-disc', TransportProtocol.tcp
+    nvme_disc = 8009, 'nvme-disc'
 
     #: [TCP] Reserved
-    reserved_8011 = 8011, 'reserved', TransportProtocol.tcp
+    reserved_8011 = 8011, 'reserved'
 
     #: [TCP] Configuration Cloud Service
-    cfg_cloud = 8015, 'cfg-cloud', TransportProtocol.tcp
+    cfg_cloud = 8015, 'cfg-cloud'
 
     #: [TCP] Beckhoff Automation Device Specification
-    ads_s = 8016, 'ads-s', TransportProtocol.tcp
+    ads_s = 8016, 'ads-s'
 
     #: [TCP] Reserved
-    reserved_8017 = 8017, 'reserved', TransportProtocol.tcp
+    reserved_8017 = 8017, 'reserved'
 
     #: - [TCP] QB DB Dynamic Port
     #: - [UDP] QB DB Dynamic Port
-    qbdb = 8019, 'qbdb', TransportProtocol.tcp
+    qbdb = 8019
 
     #: - [TCP] Intuit Entitlement Service and Discovery
     #: - [UDP] Intuit Entitlement Service and Discovery
-    intu_ec_svcdisc = 8020, 'intu-ec-svcdisc', TransportProtocol.tcp
+    intu_ec_svcdisc = 8020, 'intu-ec-svcdisc'
 
     #: - [TCP] Intuit Entitlement Client
     #: - [UDP] Intuit Entitlement Client
-    intu_ec_client = 8021, 'intu-ec-client', TransportProtocol.tcp
+    intu_ec_client = 8021, 'intu-ec-client'
 
     #: - [TCP] oa-system
     #: - [UDP] oa-system
-    oa_system = 8022, 'oa-system', TransportProtocol.tcp
+    oa_system = 8022, 'oa-system'
 
     #: - [TCP] ARCATrust vault API
     #: - [UDP] ARCATrust vault API
-    arca_api = 8023, 'arca-api', TransportProtocol.tcp
+    arca_api = 8023, 'arca-api'
 
     #: [TCP] Reserved
-    reserved_8024 = 8024, 'reserved', TransportProtocol.tcp
+    reserved_8024 = 8024, 'reserved'
 
     #: - [TCP] CA Audit Distribution Agent
     #: - [UDP] CA Audit Distribution Agent
-    ca_audit_da = 8025, 'ca-audit-da', TransportProtocol.tcp
+    ca_audit_da = 8025, 'ca-audit-da'
 
     #: - [TCP] CA Audit Distribution Server
     #: - [UDP] CA Audit Distribution Server
-    ca_audit_ds = 8026, 'ca-audit-ds', TransportProtocol.tcp
+    ca_audit_ds = 8026, 'ca-audit-ds'
 
     #: - [TCP] peer tracker and data relay service
     #: - [UDP] peer tracker and data relay service
-    papachi_p2p_srv = 8027, 'papachi-p2p-srv', TransportProtocol.tcp
+    papachi_p2p_srv = 8027, 'papachi-p2p-srv'
 
     #: - [TCP] ProEd
     #: - [UDP] ProEd
-    pro_ed = 8032, 'pro-ed', TransportProtocol.tcp
+    pro_ed = 8032, 'pro-ed'
 
     #: - [TCP] MindPrint
     #: - [UDP] MindPrint
-    mindprint = 8033, 'mindprint', TransportProtocol.tcp
+    mindprint = 8033
 
     #: - [TCP] .vantronix Management
     #: - [UDP] .vantronix Management
-    vantronix_mgmt = 8034, 'vantronix-mgmt', TransportProtocol.tcp
+    vantronix_mgmt = 8034, 'vantronix-mgmt'
 
     #: - [TCP] Ampify Messaging Protocol
     #: - [UDP] Ampify Messaging Protocol
-    ampify = 8040, 'ampify', TransportProtocol.tcp
+    ampify = 8040
 
     #: - [TCP] Xcorpeon ASIC Carrier Ethernet Transport
     #: - [UDP] Xcorpeon ASIC Carrier Ethernet Transport
-    enguity_xccetp = 8041, 'enguity-xccetp', TransportProtocol.tcp
+    enguity_xccetp = 8041, 'enguity-xccetp'
 
     #: [TCP] FireScope Agent
-    fs_agent = 8042, 'fs-agent', TransportProtocol.tcp
+    fs_agent = 8042, 'fs-agent'
 
     #: [TCP] FireScope Server
-    fs_server = 8043, 'fs-server', TransportProtocol.tcp
+    fs_server = 8043, 'fs-server'
 
     #: [TCP] FireScope Management Interface
-    fs_mgmt = 8044, 'fs-mgmt', TransportProtocol.tcp
+    fs_mgmt = 8044, 'fs-mgmt'
 
     #: [TCP] Rocrail Client Service
-    rocrail = 8051, 'rocrail', TransportProtocol.tcp
+    rocrail = 8051
 
     #: - [TCP] Senomix Timesheets Server
     #: - [UDP] Senomix Timesheets Server
-    senomix01 = 8052, 'senomix01', TransportProtocol.tcp
+    senomix01 = 8052
 
     #: - [TCP] Senomix Timesheets Client [1 year assignment]
     #: - [UDP] Senomix Timesheets Client [1 year assignment]
-    senomix02 = 8053, 'senomix02', TransportProtocol.tcp
+    senomix02 = 8053
 
     #: - [TCP] Senomix Timesheets Server [1 year assignment]
     #: - [UDP] Senomix Timesheets Server [1 year assignment]
-    senomix03 = 8054, 'senomix03', TransportProtocol.tcp
+    senomix03 = 8054
 
     #: - [TCP] Senomix Timesheets Server [1 year assignment]
     #: - [UDP] Senomix Timesheets Server [1 year assignment]
-    senomix04 = 8055, 'senomix04', TransportProtocol.tcp
+    senomix04 = 8055
 
     #: - [TCP] Senomix Timesheets Server [1 year assignment]
     #: - [UDP] Senomix Timesheets Server [1 year assignment]
-    senomix05 = 8056, 'senomix05', TransportProtocol.tcp
+    senomix05 = 8056
 
     #: - [TCP] Senomix Timesheets Client [1 year assignment]
     #: - [UDP] Senomix Timesheets Client [1 year assignment]
-    senomix06 = 8057, 'senomix06', TransportProtocol.tcp
+    senomix06 = 8057
 
     #: - [TCP] Senomix Timesheets Client [1 year assignment]
     #: - [UDP] Senomix Timesheets Client [1 year assignment]
-    senomix07 = 8058, 'senomix07', TransportProtocol.tcp
+    senomix07 = 8058
 
     #: - [TCP] Senomix Timesheets Client [1 year assignment]
     #: - [UDP] Senomix Timesheets Client [1 year assignment]
-    senomix08 = 8059, 'senomix08', TransportProtocol.tcp
+    senomix08 = 8059
 
     #: [TCP] Reserved
-    reserved_8060 = 8060, 'reserved', TransportProtocol.tcp
+    reserved_8060 = 8060, 'reserved'
 
     #: [TCP] Nikatron Device Protocol
-    nikatron_dev = 8061, 'nikatron-dev', TransportProtocol.tcp
+    nikatron_dev = 8061, 'nikatron-dev'
 
     #: [TCP] Toad BI Application Server
-    toad_bi_appsrvr = 8066, 'toad-bi-appsrvr', TransportProtocol.tcp
+    toad_bi_appsrvr = 8066, 'toad-bi-appsrvr'
 
     #: [TCP] Infinidat async replication
-    infi_async = 8067, 'infi-async', TransportProtocol.tcp
+    infi_async = 8067, 'infi-async'
 
     #: [TCP] Oracle Unified Communication Suite's Indexed Search Converter
-    ucs_isc = 8070, 'ucs-isc', TransportProtocol.tcp
+    ucs_isc = 8070, 'ucs-isc'
 
     #: - [TCP] Gadu-Gadu
     #: - [UDP] Gadu-Gadu
-    gadugadu = 8074, 'gadugadu', TransportProtocol.tcp
+    gadugadu = 8074
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_8077 = 8077, 'reserved', TransportProtocol.tcp
+    reserved_8077 = 8077, 'reserved'
 
     #: - [TCP] HTTP Alternate (see port 80)
     #: - [UDP] HTTP Alternate (see port 80)
-    http_alt = 8080, 'http-alt', TransportProtocol.tcp
+    http_alt = 8080, 'http-alt'
 
     #: - [TCP] Sun Proxy Admin Service
     #: - [UDP] Sun Proxy Admin Service
-    sunproxyadmin = 8081, 'sunproxyadmin', TransportProtocol.tcp
+    sunproxyadmin = 8081
 
     #: - [TCP] Utilistor (Client)
     #: - [UDP] Utilistor (Client)
-    us_cli = 8082, 'us-cli', TransportProtocol.tcp
+    us_cli = 8082, 'us-cli'
 
     #: - [TCP] Utilistor (Server)
     #: - [UDP] Utilistor (Server)
-    us_srv = 8083, 'us-srv', TransportProtocol.tcp
+    us_srv = 8083, 'us-srv'
 
     #: [TCP] Snarl Network Protocol over HTTP
-    websnp = 8084, 'websnp', TransportProtocol.tcp
+    websnp = 8084
 
     #: - [TCP] Distributed SCADA Networking Rendezvous Port
     #: - [UDP] Distributed SCADA Networking Rendezvous Port
-    d_s_n = 8086, 'd-s-n', TransportProtocol.tcp
+    d_s_n = 8086, 'd-s-n'
 
     #: - [TCP] Simplify Media SPP Protocol
     #: - [UDP] Simplify Media SPP Protocol
-    simplifymedia = 8087, 'simplifymedia', TransportProtocol.tcp
+    simplifymedia = 8087
 
     #: - [TCP] Radan HTTP
     #: - [UDP] Radan HTTP
-    radan_http = 8088, 'radan-http', TransportProtocol.tcp
+    radan_http = 8088, 'radan-http'
 
     #: [TCP] Vehicle to station messaging
-    opsmessaging = 8090, 'opsmessaging', TransportProtocol.tcp
+    opsmessaging = 8090
 
     #: [TCP] Jam Link Framework
-    jamlink = 8091, 'jamlink', TransportProtocol.tcp
+    jamlink = 8091
 
     #: - [TCP] SAC Port Id
     #: - [UDP] SAC Port Id
-    sac = 8097, 'sac', TransportProtocol.tcp
+    sac = 8097
 
     #: - [TCP] Xprint Server
     #: - [UDP] Xprint Server
-    xprint_server = 8100, 'xprint-server', TransportProtocol.tcp
+    xprint_server = 8100, 'xprint-server'
 
     #: [TCP] Logical Domains Migration
-    ldoms_migr = 8101, 'ldoms-migr', TransportProtocol.tcp
+    ldoms_migr = 8101, 'ldoms-migr'
 
     #: [TCP] Oracle Kernel zones migration server
-    kz_migr = 8102, 'kz-migr', TransportProtocol.tcp
+    kz_migr = 8102, 'kz-migr'
 
     #: [TCP] Reserved
-    reserved_8111 = 8111, 'reserved', TransportProtocol.tcp
+    reserved_8111 = 8111, 'reserved'
 
     #: - [TCP] MTL8000 Matrix
     #: - [UDP] MTL8000 Matrix
-    mtl8000_matrix = 8115, 'mtl8000-matrix', TransportProtocol.tcp
+    mtl8000_matrix = 8115, 'mtl8000-matrix'
 
     #: - [TCP] Check Point Clustering
     #: - [UDP] Check Point Clustering
-    cp_cluster = 8116, 'cp-cluster', TransportProtocol.tcp
+    cp_cluster = 8116, 'cp-cluster'
 
     #: [TCP] Purity replication clustering and remote management
-    purityrpc = 8117, 'purityrpc', TransportProtocol.tcp
+    purityrpc = 8117
 
     #: - [TCP] Privoxy HTTP proxy
     #: - [UDP] Privoxy HTTP proxy
-    privoxy = 8118, 'privoxy', TransportProtocol.tcp
+    privoxy = 8118
 
     #: - [TCP] Apollo Data Port
     #: - [UDP] Apollo Data Port
-    apollo_data = 8121, 'apollo-data', TransportProtocol.tcp
+    apollo_data = 8121, 'apollo-data'
 
     #: - [TCP] Apollo Admin Port
     #: - [UDP] Apollo Admin Port
-    apollo_admin = 8122, 'apollo-admin', TransportProtocol.tcp
+    apollo_admin = 8122, 'apollo-admin'
 
     #: - [TCP] PayCash Online Protocol
     #: - [UDP] PayCash Online Protocol
-    paycash_online = 8128, 'paycash-online', TransportProtocol.tcp
+    paycash_online = 8128, 'paycash-online'
 
     #: - [TCP] PayCash Wallet-Browser
     #: - [UDP] PayCash Wallet-Browser
-    paycash_wbp = 8129, 'paycash-wbp', TransportProtocol.tcp
+    paycash_wbp = 8129, 'paycash-wbp'
 
     #: - [TCP] INDIGO-VRMI
     #: - [UDP] INDIGO-VRMI
-    indigo_vrmi = 8130, 'indigo-vrmi', TransportProtocol.tcp
+    indigo_vrmi = 8130, 'indigo-vrmi'
 
     #: - [TCP] INDIGO-VBCP
     #: - [UDP] INDIGO-VBCP
-    indigo_vbcp = 8131, 'indigo-vbcp', TransportProtocol.tcp
+    indigo_vbcp = 8131, 'indigo-vbcp'
 
     #: - [TCP] dbabble
     #: - [UDP] dbabble
-    dbabble = 8132, 'dbabble', TransportProtocol.tcp
+    dbabble = 8132
 
     #: [TCP] The Puppet master service
-    puppet = 8140, 'puppet', TransportProtocol.tcp
+    puppet = 8140
 
     #: - [TCP] i-SDD file transfer
     #: - [UDP] i-SDD file transfer
-    isdd = 8148, 'isdd', TransportProtocol.tcp
+    isdd = 8148
 
     #: [TCP] Reserved
-    reserved_8149 = 8149, 'reserved', TransportProtocol.tcp
+    reserved_8149 = 8149, 'reserved'
 
     #: [TCP] QuantaStor Management Interface
-    quantastor = 8153, 'quantastor', TransportProtocol.tcp
+    quantastor = 8153
 
     #: - [TCP] Patrol
     #: - [UDP] Patrol
-    patrol = 8160, 'patrol', TransportProtocol.tcp
+    patrol = 8160
 
     #: - [TCP] Patrol SNMP
     #: - [UDP] Patrol SNMP
-    patrol_snmp = 8161, 'patrol-snmp', TransportProtocol.tcp
+    patrol_snmp = 8161, 'patrol-snmp'
 
     #: [TCP] LPAR2RRD client server communication
-    lpar2rrd = 8162, 'lpar2rrd', TransportProtocol.tcp
+    lpar2rrd = 8162
 
     #: [TCP] Intermapper network management system
-    intermapper = 8181, 'intermapper', TransportProtocol.tcp
+    intermapper = 8181
 
     #: - [TCP] VMware Fault Domain Manager
     #: - [UDP] VMware Fault Domain Manager
-    vmware_fdm = 8182, 'vmware-fdm', TransportProtocol.tcp
+    vmware_fdm = 8182, 'vmware-fdm'
 
     #: [TCP] ProRemote
-    proremote = 8183, 'proremote', TransportProtocol.tcp
+    proremote = 8183
 
     #: - [TCP] Remote iTach Connection
     #: - [UDP] Remote iTach Connection
-    itach = 8184, 'itach', TransportProtocol.tcp
+    itach = 8184
 
     #: [TCP] Generic control plane for RPHY
-    gcp_rphy = 8190, 'gcp-rphy', TransportProtocol.tcp
+    gcp_rphy = 8190, 'gcp-rphy'
 
     #: [TCP] Limner Pressure
-    limnerpressure = 8191, 'limnerpressure', TransportProtocol.tcp
+    limnerpressure = 8191
 
     #: - [TCP] SpyTech Phone Service
     #: - [UDP] SpyTech Phone Service
-    spytechphone = 8192, 'spytechphone', TransportProtocol.tcp
+    spytechphone = 8192
 
     #: - [TCP] Bloomberg data API
     #: - [UDP] Bloomberg data API
-    blp1 = 8194, 'blp1', TransportProtocol.tcp
+    blp1 = 8194
 
     #: - [TCP] Bloomberg feed
     #: - [UDP] Bloomberg feed
-    blp2 = 8195, 'blp2', TransportProtocol.tcp
+    blp2 = 8195
 
     #: - [TCP] VVR DATA
     #: - [UDP] VVR DATA
-    vvr_data = 8199, 'vvr-data', TransportProtocol.tcp
+    vvr_data = 8199, 'vvr-data'
 
     #: - [TCP] TRIVNET
     #: - [UDP] TRIVNET
-    trivnet1 = 8200, 'trivnet1', TransportProtocol.tcp
+    trivnet1 = 8200
 
     #: - [TCP] TRIVNET
     #: - [UDP] TRIVNET
-    trivnet2 = 8201, 'trivnet2', TransportProtocol.tcp
+    trivnet2 = 8201
 
     #: [TCP] Reserved
-    reserved_8202 = 8202, 'reserved', TransportProtocol.tcp
+    reserved_8202 = 8202, 'reserved'
 
     #: - [TCP] LM Perfworks
     #: - [UDP] LM Perfworks
-    lm_perfworks = 8204, 'lm-perfworks', TransportProtocol.tcp
+    lm_perfworks = 8204, 'lm-perfworks'
 
     #: - [TCP] LM Instmgr
     #: - [UDP] LM Instmgr
-    lm_instmgr = 8205, 'lm-instmgr', TransportProtocol.tcp
+    lm_instmgr = 8205, 'lm-instmgr'
 
     #: - [TCP] LM Dta
     #: - [UDP] LM Dta
-    lm_dta = 8206, 'lm-dta', TransportProtocol.tcp
+    lm_dta = 8206, 'lm-dta'
 
     #: - [TCP] LM SServer
     #: - [UDP] LM SServer
-    lm_sserver = 8207, 'lm-sserver', TransportProtocol.tcp
+    lm_sserver = 8207, 'lm-sserver'
 
     #: - [TCP] LM Webwatcher
     #: - [UDP] LM Webwatcher
-    lm_webwatcher = 8208, 'lm-webwatcher', TransportProtocol.tcp
+    lm_webwatcher = 8208, 'lm-webwatcher'
 
     #: [TCP] Reserved
-    reserved_8211 = 8211, 'reserved', TransportProtocol.tcp
+    reserved_8211 = 8211, 'reserved'
 
     #: - [TCP] RexecJ Server
     #: - [UDP] RexecJ Server
-    rexecj = 8230, 'rexecj', TransportProtocol.tcp
+    rexecj = 8230
 
     #: [TCP] Reserved
-    reserved_8231 = 8231, 'reserved', TransportProtocol.tcp
+    reserved_8231 = 8231, 'reserved'
 
     #: [TCP] Reserved
-    reserved_8232 = 8232, 'reserved', TransportProtocol.tcp
+    reserved_8232 = 8232, 'reserved'
 
     #: - [TCP] Synapse Non Blocking HTTPS
     #: - [UDP] Synapse Non Blocking HTTPS
-    synapse_nhttps = 8243, 'synapse-nhttps', TransportProtocol.tcp
+    synapse_nhttps = 8243, 'synapse-nhttps'
 
     #: [TCP] Reserved
-    reserved_8266 = 8266, 'reserved', TransportProtocol.tcp
+    reserved_8266 = 8266, 'reserved'
 
     #: [TCP] Robot Framework Remote Library Interface
-    robot_remote = 8270, 'robot-remote', TransportProtocol.tcp
+    robot_remote = 8270, 'robot-remote'
 
     #: - [TCP] Microsoft Connected Cache
     #: - [UDP] Microsoft Connected Cache
-    ms_mcc = 8276, 'ms-mcc', TransportProtocol.tcp
+    ms_mcc = 8276, 'ms-mcc'
 
     #: - [TCP] Synapse Non Blocking HTTP
     #: - [UDP] Synapse Non Blocking HTTP
-    synapse_nhttp = 8280, 'synapse-nhttp', TransportProtocol.tcp
+    synapse_nhttp = 8280, 'synapse-nhttp'
 
     #: [TCP] Libelle EnterpriseBus
-    libelle = 8282, 'libelle', TransportProtocol.tcp
+    libelle = 8282
 
     #: - [TCP] Bloomberg professional
     #: - [UDP] Bloomberg professional
-    blp3 = 8292, 'blp3', TransportProtocol.tcp
+    blp3 = 8292
 
     #: [TCP] Hiperscan Identification Service
-    hiperscan_id = 8293, 'hiperscan-id', TransportProtocol.tcp
+    hiperscan_id = 8293, 'hiperscan-id'
 
     #: - [TCP] Bloomberg intelligent client
     #: - [UDP] Bloomberg intelligent client
-    blp4 = 8294, 'blp4', TransportProtocol.tcp
+    blp4 = 8294
 
     #: - [TCP] Transport Management Interface
     #: - [UDP] Transport Management Interface
-    tmi = 8300, 'tmi', TransportProtocol.tcp
+    tmi = 8300
 
     #: - [TCP] Amberon PPC/PPS
     #: - [UDP] Amberon PPC/PPS
-    amberon = 8301, 'amberon', TransportProtocol.tcp
+    amberon = 8301
 
     #: [TCP] Hub Open Network
-    hub_open_net = 8313, 'hub-open-net', TransportProtocol.tcp
+    hub_open_net = 8313, 'hub-open-net'
 
     #: - [TCP] Thin(ium) Network Protocol
     #: - [UDP] Thin(ium) Network Protocol
-    tnp_discover = 8320, 'tnp-discover', TransportProtocol.tcp
+    tnp_discover = 8320, 'tnp-discover'
 
     #: - [TCP] Thin(ium) Network Protocol
     #: - [UDP] Thin(ium) Network Protocol
-    tnp = 8321, 'tnp', TransportProtocol.tcp
+    tnp = 8321
 
     #: - [TCP] Garmin Marine
     #: - [UDP] Garmin Marine
-    garmin_marine = 8322, 'garmin-marine', TransportProtocol.tcp
+    garmin_marine = 8322, 'garmin-marine'
 
     #: - [TCP] Server Find
     #: - [UDP] Server Find
-    server_find = 8351, 'server-find', TransportProtocol.tcp
+    server_find = 8351, 'server-find'
 
     #: - [TCP] Cruise ENUM
     #: - [UDP] Cruise ENUM
-    cruise_enum = 8376, 'cruise-enum', TransportProtocol.tcp
+    cruise_enum = 8376, 'cruise-enum'
 
     #: - [TCP] Cruise SWROUTE
     #: - [UDP] Cruise SWROUTE
-    cruise_swroute = 8377, 'cruise-swroute', TransportProtocol.tcp
+    cruise_swroute = 8377, 'cruise-swroute'
 
     #: - [TCP] Cruise CONFIG
     #: - [UDP] Cruise CONFIG
-    cruise_config = 8378, 'cruise-config', TransportProtocol.tcp
+    cruise_config = 8378, 'cruise-config'
 
     #: - [TCP] Cruise DIAGS
     #: - [UDP] Cruise DIAGS
-    cruise_diags = 8379, 'cruise-diags', TransportProtocol.tcp
+    cruise_diags = 8379, 'cruise-diags'
 
     #: - [TCP] Cruise UPDATE
     #: - [UDP] Cruise UPDATE
-    cruise_update = 8380, 'cruise-update', TransportProtocol.tcp
+    cruise_update = 8380, 'cruise-update'
 
     #: - [TCP] M2m Services
     #: - [UDP] M2m Services
-    m2mservices = 8383, 'm2mservices', TransportProtocol.tcp
+    m2mservices = 8383
 
     #: [TCP] Reserved
-    reserved_8384 = 8384, 'reserved', TransportProtocol.tcp
+    reserved_8384 = 8384, 'reserved'
 
     #: - [TCP] cvd
     #: - [UDP] cvd
-    cvd = 8400, 'cvd', TransportProtocol.tcp
+    cvd = 8400
 
     #: - [TCP] sabarsd
     #: - [UDP] sabarsd
-    sabarsd = 8401, 'sabarsd', TransportProtocol.tcp
+    sabarsd = 8401
 
     #: - [TCP] abarsd
     #: - [UDP] abarsd
-    abarsd = 8402, 'abarsd', TransportProtocol.tcp
+    abarsd = 8402
 
     #: - [TCP] admind
     #: - [UDP] admind
-    admind_3279 = 3279, 'admind', TransportProtocol.tcp
+    admind_3279 = 3279, 'admind'
 
     #: - [TCP] admind
     #: - [UDP] admind
-    admind_8403 = 8403, 'admind', TransportProtocol.tcp
+    admind_8403 = 8403, 'admind'
 
     #: [TCP] SuperVault Cloud
-    svcloud = 8404, 'svcloud', TransportProtocol.tcp
+    svcloud = 8404
 
     #: [TCP] SuperVault Backup
-    svbackup = 8405, 'svbackup', TransportProtocol.tcp
+    svbackup = 8405
 
     #: - [TCP] eSpeech Session Protocol
     #: - [UDP] eSpeech Session Protocol
-    espeech = 8416, 'espeech', TransportProtocol.tcp
+    espeech = 8416
 
     #: - [TCP] eSpeech RTP Protocol
     #: - [UDP] eSpeech RTP Protocol
-    espeech_rtp = 8417, 'espeech-rtp', TransportProtocol.tcp
+    espeech_rtp = 8417, 'espeech-rtp'
 
     #: [TCP] Aristech text-to-speech server
-    aritts = 8423, 'aritts', TransportProtocol.tcp
+    aritts = 8423
 
     #: [TCP] PostgreSQL Backup
-    pgbackrest = 8432, 'pgbackrest', TransportProtocol.tcp
+    pgbackrest = 8432
 
     #: [TCP] Reserved
-    reserved_8433 = 8433, 'reserved', TransportProtocol.tcp
+    reserved_8433 = 8433, 'reserved'
 
     #: - [TCP] CyBro A-bus Protocol
     #: - [UDP] CyBro A-bus Protocol
-    cybro_a_bus = 8442, 'cybro-a-bus', TransportProtocol.tcp
+    cybro_a_bus = 8442, 'cybro-a-bus'
 
     #: - [TCP] PCsync HTTPS
     #: - [UDP] PCsync HTTPS
-    pcsync_https = 8443, 'pcsync-https', TransportProtocol.tcp
+    pcsync_https = 8443, 'pcsync-https'
 
     #: - [TCP] PCsync HTTP
     #: - [UDP] PCsync HTTP
-    pcsync_http = 8444, 'pcsync-http', TransportProtocol.tcp
+    pcsync_http = 8444, 'pcsync-http'
 
     #: [TCP] Port for copy peer sync feature
-    copy = 8445, 'copy', TransportProtocol.tcp
+    copy = 8445
 
     #: [TCP] Matrix Federation Protocol
-    matrix_fed = 8448, 'matrix-fed', TransportProtocol.tcp
+    matrix_fed = 8448, 'matrix-fed'
 
     #: - [TCP] npmp
     #: - [UDP] npmp
-    npmp = 8450, 'npmp', TransportProtocol.tcp
+    npmp = 8450
 
     #: [TCP] Nexenta Management GUI
-    nexentamv = 8457, 'nexentamv', TransportProtocol.tcp
+    nexentamv = 8457
 
     #: [TCP] Cisco Address Validation Protocol
-    cisco_avp = 8470, 'cisco-avp', TransportProtocol.tcp
+    cisco_avp = 8470, 'cisco-avp'
 
     #: - [TCP] PIM over Reliable Transport [:rfc:`6559`]
     #: - [SCTP] PIM over Reliable Transport [:rfc:`6559`]
-    pim_port = 8471, 'pim-port', TransportProtocol.tcp
+    pim_port = 8471, 'pim-port'
 
     #: - [TCP] Overlay Transport Virtualization (OTV)
     #: - [UDP] Overlay Transport Virtualization (OTV)
-    otv = 8472, 'otv', TransportProtocol.tcp
+    otv = 8472
 
     #: - [TCP] Virtual Point to Point
     #: - [UDP] Virtual Point to Point
-    vp2p = 8473, 'vp2p', TransportProtocol.tcp
+    vp2p = 8473
 
     #: - [TCP] AquaMinds NoteShare
     #: - [UDP] AquaMinds NoteShare
-    noteshare = 8474, 'noteshare', TransportProtocol.tcp
+    noteshare = 8474
 
     #: - [TCP] Flight Message Transfer Protocol
     #: - [UDP] Flight Message Transfer Protocol
-    fmtp = 8500, 'fmtp', TransportProtocol.tcp
+    fmtp = 8500
 
     #: [TCP] CYTEL Message Transfer Management
-    cmtp_mgt = 8501, 'cmtp-mgt', TransportProtocol.tcp
+    cmtp_mgt = 8501, 'cmtp-mgt'
 
     #: [TCP] FTN Message Transfer Protocol
-    ftnmtp = 8502, 'ftnmtp', TransportProtocol.tcp
+    ftnmtp = 8502
 
     #: [TCP] Reserved
-    reserved_8503 = 8503, 'reserved', TransportProtocol.tcp
+    reserved_8503 = 8503, 'reserved'
 
     #: - [TCP] RTSP Alternate (see port 554)
     #: - [UDP] RTSP Alternate (see port 554)
-    rtsp_alt = 8554, 'rtsp-alt', TransportProtocol.tcp
+    rtsp_alt = 8554, 'rtsp-alt'
 
     #: - [TCP] SYMAX D-FENCE
     #: - [UDP] SYMAX D-FENCE
-    d_fence = 8555, 'd-fence', TransportProtocol.tcp
+    d_fence = 8555, 'd-fence'
 
     #: - [TCP] DOF Tunneling Protocol
     #: - [UDP] DOF Tunneling Protocol
-    dof_tunnel = 8567, 'dof-tunnel', TransportProtocol.tcp
+    dof_tunnel = 8567, 'dof-tunnel'
 
     #: - [TCP] Surveillance Data
     #: - [UDP] Surveillance Data
-    asterix = 8600, 'asterix', TransportProtocol.tcp
+    asterix = 8600
 
     #: [TCP] Reserved
-    reserved_8609 = 8609, 'reserved', TransportProtocol.tcp
+    reserved_8609 = 8609, 'reserved'
 
     #: - [TCP] Canon MFNP Service
     #: - [UDP] Canon MFNP Service
-    canon_mfnp = 8610, 'canon-mfnp', TransportProtocol.tcp
+    canon_mfnp = 8610, 'canon-mfnp'
 
     #: - [TCP] Canon BJNP Port 1
     #: - [UDP] Canon BJNP Port 1
-    canon_bjnp1 = 8611, 'canon-bjnp1', TransportProtocol.tcp
+    canon_bjnp1 = 8611, 'canon-bjnp1'
 
     #: - [TCP] Canon BJNP Port 2
     #: - [UDP] Canon BJNP Port 2
-    canon_bjnp2 = 8612, 'canon-bjnp2', TransportProtocol.tcp
+    canon_bjnp2 = 8612, 'canon-bjnp2'
 
     #: - [TCP] Canon BJNP Port 3
     #: - [UDP] Canon BJNP Port 3
-    canon_bjnp3 = 8613, 'canon-bjnp3', TransportProtocol.tcp
+    canon_bjnp3 = 8613, 'canon-bjnp3'
 
     #: - [TCP] Canon BJNP Port 4
     #: - [UDP] Canon BJNP Port 4
-    canon_bjnp4 = 8614, 'canon-bjnp4', TransportProtocol.tcp
+    canon_bjnp4 = 8614, 'canon-bjnp4'
 
     #: [TCP] Imink Service Control
-    imink = 8615, 'imink', TransportProtocol.tcp
+    imink = 8615
 
     #: [TCP] Monetra
-    monetra = 8665, 'monetra', TransportProtocol.tcp
+    monetra = 8665
 
     #: [TCP] Monetra Administrative Access
-    monetra_admin = 8666, 'monetra-admin', TransportProtocol.tcp
+    monetra_admin = 8666, 'monetra-admin'
 
     #: [TCP] Spartan management
-    spartan = 8668, 'spartan', TransportProtocol.tcp
+    spartan = 8668
 
     #: [TCP] Motorola Solutions Customer Programming Software for Radio Management
-    msi_cps_rm = 8675, 'msi-cps-rm', TransportProtocol.tcp
+    msi_cps_rm = 8675, 'msi-cps-rm'
 
     #: - [TCP] Sun App Server - JMX/RMI
     #: - [UDP] Sun App Server - JMX/RMI
-    sun_as_jmxrmi = 8686, 'sun-as-jmxrmi', TransportProtocol.tcp
+    sun_as_jmxrmi = 8686, 'sun-as-jmxrmi'
 
     #: [TCP] OpenRemote Controller HTTP/REST
-    openremote_ctrl = 8688, 'openremote-ctrl', TransportProtocol.tcp
+    openremote_ctrl = 8688, 'openremote-ctrl'
 
     #: [TCP] VNYX Primary Port
-    vnyx = 8699, 'vnyx', TransportProtocol.tcp
+    vnyx = 8699
 
     #: [TCP] gRPC for SEMI Standards implementations
-    semi_grpc = 8710, 'semi-grpc', TransportProtocol.tcp
+    semi_grpc = 8710, 'semi-grpc'
 
     #: [TCP] Nuance Voice Control
-    nvc = 8711, 'nvc', TransportProtocol.tcp
+    nvc = 8711
 
     #: [TCP] Reserved
-    reserved_8732 = 8732, 'reserved', TransportProtocol.tcp
+    reserved_8732 = 8732, 'reserved'
 
     #: - [TCP] iBus
     #: - [UDP] iBus
-    ibus = 8733, 'ibus', TransportProtocol.tcp
+    ibus = 8733
 
     #: [TCP] DEY Storage Key Negotiation
-    dey_keyneg = 8750, 'dey-keyneg', TransportProtocol.tcp
+    dey_keyneg = 8750, 'dey-keyneg'
 
     #: - [TCP] MC-APPSERVER
     #: - [UDP] MC-APPSERVER
-    mc_appserver = 8763, 'mc-appserver', TransportProtocol.tcp
+    mc_appserver = 8763, 'mc-appserver'
 
     #: - [TCP] OPENQUEUE
     #: - [UDP] OPENQUEUE
-    openqueue = 8764, 'openqueue', TransportProtocol.tcp
+    openqueue = 8764
 
     #: - [TCP] Ultraseek HTTP
     #: - [UDP] Ultraseek HTTP
-    ultraseek_http = 8765, 'ultraseek-http', TransportProtocol.tcp
+    ultraseek_http = 8765, 'ultraseek-http'
 
     #: - [TCP] Agilent Connectivity Service
     #: - [UDP] Agilent Connectivity Service
-    amcs = 8766, 'amcs', TransportProtocol.tcp
+    amcs = 8766
 
     #: [TCP] Online mobile multiplayer game
-    core_of_source = 8767, 'core-of-source', TransportProtocol.tcp
+    core_of_source = 8767, 'core-of-source'
 
     #: [TCP] Sandpolis Server
-    sandpolis = 8768, 'sandpolis', TransportProtocol.tcp
+    sandpolis = 8768
 
     #: [TCP] Okta MultiPlatform Access Mgmt for Cloud Svcs
-    oktaauthenticat = 8769, 'oktaauthenticat', TransportProtocol.tcp
+    oktaauthenticat = 8769
 
     #: - [TCP] Digital Photo Access Protocol (iPhoto)
     #: - [UDP] Digital Photo Access Protocol (iPhoto)
-    dpap = 8770, 'dpap', TransportProtocol.tcp
+    dpap = 8770
 
     #: [TCP] Stonebranch Universal Enterprise Controller
-    uec = 8778, 'uec', TransportProtocol.tcp
+    uec = 8778
 
     #: - [TCP] Message Client
     #: - [UDP] Message Client
-    msgclnt = 8786, 'msgclnt', TransportProtocol.tcp
+    msgclnt = 8786
 
     #: - [TCP] Message Server
     #: - [UDP] Message Server
-    msgsrvr = 8787, 'msgsrvr', TransportProtocol.tcp
+    msgsrvr = 8787
 
     #: - [TCP] Accedian Performance Measurement
     #: - [UDP] Accedian Performance Measurement
-    acd_pm = 8793, 'acd-pm', TransportProtocol.tcp
+    acd_pm = 8793, 'acd-pm'
 
     #: - [TCP] Sun Web Server Admin Service
     #: - [UDP] Sun Web Server Admin Service
-    sunwebadmin = 8800, 'sunwebadmin', TransportProtocol.tcp
+    sunwebadmin = 8800
 
     #: - [TCP] truecm
     #: - [UDP] truecm
-    truecm = 8804, 'truecm', TransportProtocol.tcp
+    truecm = 8804
 
     #: [TCP] Reserved
-    reserved_8805 = 8805, 'reserved', TransportProtocol.tcp
+    reserved_8805 = 8805, 'reserved'
 
     #: [TCP] Reserved
-    reserved_8807 = 8807, 'reserved', TransportProtocol.tcp
+    reserved_8807 = 8807, 'reserved'
 
     #: [TCP] Reserved
-    reserved_8808 = 8808, 'reserved', TransportProtocol.tcp
+    reserved_8808 = 8808, 'reserved'
 
     #: [TCP] Reserved
-    reserved_8809 = 8809, 'reserved', TransportProtocol.tcp
+    reserved_8809 = 8809, 'reserved'
 
     #: - [TCP] dxspider linking protocol
     #: - [UDP] dxspider linking protocol
-    dxspider = 8873, 'dxspider', TransportProtocol.tcp
+    dxspider = 8873
 
     #: - [TCP] CDDBP
     #: - [UDP] CDDBP
-    cddbp_alt = 8880, 'cddbp-alt', TransportProtocol.tcp
+    cddbp_alt = 8880, 'cddbp-alt'
 
     #: [TCP] Galaxy4D Online Game Engine
-    galaxy4d = 8881, 'galaxy4d', TransportProtocol.tcp
+    galaxy4d = 8881
 
     #: - [TCP] Secure MQTT
     #: - [UDP] Secure MQTT
-    secure_mqtt = 8883, 'secure-mqtt', TransportProtocol.tcp
+    secure_mqtt = 8883, 'secure-mqtt'
 
     #: [TCP] NewsEDGE server TCP (TCP 1)
-    ddi_tcp_1 = 8888, 'ddi-tcp-1', TransportProtocol.tcp
+    ddi_tcp_1 = 8888, 'ddi-tcp-1'
 
     #: [TCP] Desktop Data TCP 1
-    ddi_tcp_2 = 8889, 'ddi-tcp-2', TransportProtocol.tcp
+    ddi_tcp_2 = 8889, 'ddi-tcp-2'
 
     #: [TCP] Desktop Data TCP 2
-    ddi_tcp_3 = 8890, 'ddi-tcp-3', TransportProtocol.tcp
+    ddi_tcp_3 = 8890, 'ddi-tcp-3'
 
     #: [TCP] Desktop Data TCP 3: NESS application
-    ddi_tcp_4 = 8891, 'ddi-tcp-4', TransportProtocol.tcp
+    ddi_tcp_4 = 8891, 'ddi-tcp-4'
 
     #: [TCP] Desktop Data TCP 4: FARM product
-    ddi_tcp_5 = 8892, 'ddi-tcp-5', TransportProtocol.tcp
+    ddi_tcp_5 = 8892, 'ddi-tcp-5'
 
     #: [TCP] Desktop Data TCP 5: NewsEDGE/Web application
-    ddi_tcp_6 = 8893, 'ddi-tcp-6', TransportProtocol.tcp
+    ddi_tcp_6 = 8893, 'ddi-tcp-6'
 
     #: [TCP] Desktop Data TCP 6: COAL application
-    ddi_tcp_7 = 8894, 'ddi-tcp-7', TransportProtocol.tcp
+    ddi_tcp_7 = 8894, 'ddi-tcp-7'
 
     #: - [TCP] ospf-lite
     #: - [UDP] ospf-lite
-    ospf_lite = 8899, 'ospf-lite', TransportProtocol.tcp
+    ospf_lite = 8899, 'ospf-lite'
 
     #: - [TCP] JMB-CDS 1
     #: - [UDP] JMB-CDS 1
-    jmb_cds1 = 8900, 'jmb-cds1', TransportProtocol.tcp
+    jmb_cds1 = 8900, 'jmb-cds1'
 
     #: - [TCP] JMB-CDS 2
     #: - [UDP] JMB-CDS 2
-    jmb_cds2 = 8901, 'jmb-cds2', TransportProtocol.tcp
+    jmb_cds2 = 8901, 'jmb-cds2'
 
     #: [TCP] WFA Device Provisioning Protocol
-    dpp = 8908, 'dpp', TransportProtocol.tcp
+    dpp = 8908
 
     #: - [TCP] manyone-http
     #: - [UDP] manyone-http
-    manyone_http = 8910, 'manyone-http', TransportProtocol.tcp
+    manyone_http = 8910, 'manyone-http'
 
     #: - [TCP] manyone-xml
     #: - [UDP] manyone-xml
-    manyone_xml = 8911, 'manyone-xml', TransportProtocol.tcp
+    manyone_xml = 8911, 'manyone-xml'
 
     #: - [TCP] Windows Client Backup
     #: - [UDP] Windows Client Backup
-    wcbackup = 8912, 'wcbackup', TransportProtocol.tcp
+    wcbackup = 8912
 
     #: - [TCP] Dragonfly System Service
     #: - [UDP] Dragonfly System Service
-    dragonfly = 8913, 'dragonfly', TransportProtocol.tcp
+    dragonfly = 8913
 
     #: [TCP] Transaction Warehouse Data Service
-    twds = 8937, 'twds', TransportProtocol.tcp
+    twds = 8937
 
     #: [TCP] unbound dns nameserver control
-    ub_dns_control = 8953, 'ub-dns-control', TransportProtocol.tcp
+    ub_dns_control = 8953, 'ub-dns-control'
 
     #: - [TCP] Cumulus Admin Port
     #: - [UDP] Cumulus Admin Port
-    cumulus_admin = 8954, 'cumulus-admin', TransportProtocol.tcp
+    cumulus_admin = 8954, 'cumulus-admin'
 
     #: - [TCP] Network of Devices Provider
     #: - [UDP] Network of Devices Provider
-    nod_provider = 8980, 'nod-provider', TransportProtocol.tcp
+    nod_provider = 8980, 'nod-provider'
 
     #: [TCP] Reserved
-    reserved_8981 = 8981, 'reserved', TransportProtocol.tcp
+    reserved_8981 = 8981, 'reserved'
 
     #: - [TCP] Sun Web Server SSL Admin Service
     #: - [UDP] Sun Web Server SSL Admin Service
-    sunwebadmins = 8989, 'sunwebadmins', TransportProtocol.tcp
+    sunwebadmins = 8989
 
     #: - [TCP] webmail HTTP service
     #: - [UDP] webmail HTTP service
-    http_wmap = 8990, 'http-wmap', TransportProtocol.tcp
+    http_wmap = 8990, 'http-wmap'
 
     #: - [TCP] webmail HTTPS service
     #: - [UDP] webmail HTTPS service
-    https_wmap = 8991, 'https-wmap', TransportProtocol.tcp
+    https_wmap = 8991, 'https-wmap'
 
     #: [TCP] Oracle Messaging Server Event Notification Service
-    oracle_ms_ens = 8997, 'oracle-ms-ens', TransportProtocol.tcp
+    oracle_ms_ens = 8997, 'oracle-ms-ens'
 
     #: [TCP] Canto RoboFlow Control
-    canto_roboflow = 8998, 'canto-roboflow', TransportProtocol.tcp
+    canto_roboflow = 8998, 'canto-roboflow'
 
     #: - [TCP] Brodos Crypto Trade Protocol
     #: - [UDP] Brodos Crypto Trade Protocol
-    bctp = 8999, 'bctp', TransportProtocol.tcp
+    bctp = 8999
 
     #: - [TCP] CSlistener
     #: - [UDP] CSlistener
-    cslistener = 9000, 'cslistener', TransportProtocol.tcp
+    cslistener = 9000
 
     #: - [TCP] ETL Service Manager
     #: - [UDP] ETL Service Manager
-    etlservicemgr = 9001, 'etlservicemgr', TransportProtocol.tcp
+    etlservicemgr = 9001
 
     #: - [TCP] DynamID authentication
     #: - [UDP] DynamID authentication
-    dynamid = 9002, 'dynamid', TransportProtocol.tcp
+    dynamid = 9002
 
     #: [TCP] Golem Inter-System RPC
-    golem = 9005, 'golem', TransportProtocol.tcp
+    golem = 9005
 
     #: [TCP] Reserved
-    reserved_9007 = 9007, 'reserved', TransportProtocol.tcp
+    reserved_9007 = 9007, 'reserved'
 
     #: [TCP] Open Grid Services Server
-    ogs_server = 9008, 'ogs-server', TransportProtocol.tcp
+    ogs_server = 9008, 'ogs-server'
 
     #: - [TCP] Pichat Server
     #: - [UDP] Pichat Server
-    pichat = 9009, 'pichat', TransportProtocol.tcp
+    pichat = 9009
 
     #: [TCP] Secure Data Replicator Protocol
-    sdr = 9010, 'sdr', TransportProtocol.tcp
+    sdr = 9010
 
     #: [TCP] Reserved
-    reserved_9011 = 9011, 'reserved', TransportProtocol.tcp
+    reserved_9011 = 9011, 'reserved'
 
     #: - [TCP] TAMBORA
     #: - [UDP] TAMBORA
-    tambora = 9020, 'tambora', TransportProtocol.tcp
+    tambora = 9020
 
     #: - [TCP] Pangolin Identification
     #: - [UDP] Pangolin Identification
-    panagolin_ident = 9021, 'panagolin-ident', TransportProtocol.tcp
+    panagolin_ident = 9021, 'panagolin-ident'
 
     #: - [TCP] PrivateArk Remote Agent
     #: - [UDP] PrivateArk Remote Agent
-    paragent = 9022, 'paragent', TransportProtocol.tcp
+    paragent = 9022
 
     #: - [TCP] Secure Web Access - 1
     #: - [UDP] Secure Web Access - 1
-    swa_1 = 9023, 'swa-1', TransportProtocol.tcp
+    swa_1 = 9023, 'swa-1'
 
     #: - [TCP] Secure Web Access - 2
     #: - [UDP] Secure Web Access - 2
-    swa_2 = 9024, 'swa-2', TransportProtocol.tcp
+    swa_2 = 9024, 'swa-2'
 
     #: - [TCP] Secure Web Access - 3
     #: - [UDP] Secure Web Access - 3
-    swa_3 = 9025, 'swa-3', TransportProtocol.tcp
+    swa_3 = 9025, 'swa-3'
 
     #: - [TCP] Secure Web Access - 4
     #: - [UDP] Secure Web Access - 4
-    swa_4 = 9026, 'swa-4', TransportProtocol.tcp
+    swa_4 = 9026, 'swa-4'
 
     #: [TCP] Versiera Agent Listener
-    versiera = 9050, 'versiera', TransportProtocol.tcp
+    versiera = 9050
 
     #: [TCP] Fusion-io Central Manager Service
-    fio_cmgmt = 9051, 'fio-cmgmt', TransportProtocol.tcp
+    fio_cmgmt = 9051, 'fio-cmgmt'
 
     #: [TCP] CardWeb request-response I/O exchange
-    cardweb_io = 9060, 'cardweb-io', TransportProtocol.tcp
+    cardweb_io = 9060, 'cardweb-io'
 
     #: - [TCP] Groove GLRPC
     #: - [UDP] Groove GLRPC
-    glrpc = 9080, 'glrpc', TransportProtocol.tcp
+    glrpc = 9080
 
     #: [TCP] Reserved
-    reserved_9081 = 9081, 'reserved', TransportProtocol.tcp
+    reserved_9081 = 9081, 'reserved'
 
     #: [TCP] EMC PowerPath Mgmt Service
-    emc_pp_mgmtsvc = 9083, 'emc-pp-mgmtsvc', TransportProtocol.tcp
+    emc_pp_mgmtsvc = 9083, 'emc-pp-mgmtsvc'
 
     #: - [TCP] IBM AURORA Performance Visualizer
     #: - [UDP] IBM AURORA Performance Visualizer
     #: - [SCTP] IBM AURORA Performance Visualizer
-    aurora = 9084, 'aurora', TransportProtocol.tcp
+    aurora = 9084
 
     #: - [TCP] IBM Remote System Console
     #: - [UDP] IBM Remote System Console
-    ibm_rsyscon = 9085, 'ibm-rsyscon', TransportProtocol.tcp
+    ibm_rsyscon = 9085, 'ibm-rsyscon'
 
     #: - [TCP] Vesa Net2Display
     #: - [UDP] Vesa Net2Display
-    net2display = 9086, 'net2display', TransportProtocol.tcp
+    net2display = 9086
 
     #: - [TCP] Classic Data Server
     #: - [UDP] Classic Data Server
-    classic = 9087, 'classic', TransportProtocol.tcp
+    classic = 9087
 
     #: - [TCP] IBM Informix SQL Interface
     #: - [UDP] IBM Informix SQL Interface
-    sqlexec = 9088, 'sqlexec', TransportProtocol.tcp
+    sqlexec = 9088
 
     #: - [TCP] IBM Informix SQL Interface - Encrypted
     #: - [UDP] IBM Informix SQL Interface - Encrypted
-    sqlexec_ssl = 9089, 'sqlexec-ssl', TransportProtocol.tcp
+    sqlexec_ssl = 9089, 'sqlexec-ssl'
 
     #: - [TCP] WebSM
     #: - [UDP] WebSM
-    websm = 9090, 'websm', TransportProtocol.tcp
+    websm = 9090
 
     #: - [TCP] xmltec-xmlmail
     #: - [UDP] xmltec-xmlmail
-    xmltec_xmlmail = 9091, 'xmltec-xmlmail', TransportProtocol.tcp
+    xmltec_xmlmail = 9091, 'xmltec-xmlmail'
 
     #: - [TCP] Xml-Ipc Server Reg
     #: - [UDP] Xml-Ipc Server Reg
-    xmlipcregsvc = 9092, 'xmlipcregsvc', TransportProtocol.tcp
+    xmlipcregsvc = 9092
 
     #: [TCP] Copycat database replication service
-    copycat = 9093, 'copycat', TransportProtocol.tcp
+    copycat = 9093
 
     #: - [TCP] PDL Data Streaming Port
     #: - [UDP] PDL Data Streaming Port
-    hp_pdl_datastr = 9100, 'hp-pdl-datastr', TransportProtocol.tcp
+    hp_pdl_datastr = 9100, 'hp-pdl-datastr'
 
     #: - [TCP] Printer PDL Data Stream
     #: - [UDP] Printer PDL Data Stream
-    pdl_datastream = 9100, 'pdl-datastream', TransportProtocol.tcp
+    pdl_datastream = 9100, 'pdl-datastream'
 
     #: - [TCP] Bacula Director
     #: - [UDP] Bacula Director
-    bacula_dir = 9101, 'bacula-dir', TransportProtocol.tcp
+    bacula_dir = 9101, 'bacula-dir'
 
     #: - [TCP] Bacula File Daemon
     #: - [UDP] Bacula File Daemon
-    bacula_fd = 9102, 'bacula-fd', TransportProtocol.tcp
+    bacula_fd = 9102, 'bacula-fd'
 
     #: - [TCP] Bacula Storage Daemon
     #: - [UDP] Bacula Storage Daemon
-    bacula_sd = 9103, 'bacula-sd', TransportProtocol.tcp
+    bacula_sd = 9103, 'bacula-sd'
 
     #: - [TCP] PeerWire
     #: - [UDP] PeerWire
-    peerwire = 9104, 'peerwire', TransportProtocol.tcp
+    peerwire = 9104
 
     #: - [TCP] Xadmin Control Service [Ari√´n Huisken <xadmin&huisken-systems.nl> 15
     #:   June 2009]
     #: - [UDP] Xadmin Control Service [Ari√´n Huisken <xadmin&huisken-systems.nl> 15
     #:   June 2009]
-    xadmin = 9105, 'xadmin', TransportProtocol.tcp
+    xadmin = 9105
 
     #: [TCP] Astergate Control Service
-    astergate = 9106, 'astergate', TransportProtocol.tcp
+    astergate = 9106
 
     #: [TCP] AstergateFax Control Service
-    astergatefax = 9107, 'astergatefax', TransportProtocol.tcp
+    astergatefax = 9107
 
     #: - [TCP] Multiple Purpose, Distributed Message Bus
     #: - [UDP] Multiple Purpose, Distributed Message Bus
-    hexxorecore = 9111, 'hexxorecore', TransportProtocol.tcp
+    hexxorecore = 9111
 
     #: - [TCP] MXit Instant Messaging
     #: - [UDP] MXit Instant Messaging
-    mxit = 9119, 'mxit', TransportProtocol.tcp
+    mxit = 9119
 
     #: [TCP] Global Relay compliant mobile instant messaging protocol
-    grcmp = 9122, 'grcmp', TransportProtocol.tcp
+    grcmp = 9122
 
     #: [TCP] Global Relay compliant instant messaging protocol
-    grcp = 9123, 'grcp', TransportProtocol.tcp
+    grcp = 9123
 
     #: - [TCP] Dynamic Device Discovery
     #: - [UDP] Dynamic Device Discovery
-    dddp = 9131, 'dddp', TransportProtocol.tcp
+    dddp = 9131
 
     #: - [TCP] apani1
     #: - [UDP] apani1
-    apani1 = 9160, 'apani1', TransportProtocol.tcp
+    apani1 = 9160
 
     #: - [TCP] apani2
     #: - [UDP] apani2
-    apani2 = 9161, 'apani2', TransportProtocol.tcp
+    apani2 = 9161
 
     #: - [TCP] apani3
     #: - [UDP] apani3
-    apani3 = 9162, 'apani3', TransportProtocol.tcp
+    apani3 = 9162
 
     #: - [TCP] apani4
     #: - [UDP] apani4
-    apani4 = 9163, 'apani4', TransportProtocol.tcp
+    apani4 = 9163
 
     #: - [TCP] apani5
     #: - [UDP] apani5
-    apani5 = 9164, 'apani5', TransportProtocol.tcp
+    apani5 = 9164
 
     #: - [TCP] Sirius Configuration Agent
     #: - [UDP] Sirius Configuration Agent
-    sirius_agent = 9183, 'sirius-agent', TransportProtocol.tcp
+    sirius_agent = 9183, 'sirius-agent'
 
     #: - [TCP] Sun AppSvr JPDA
     #: - [UDP] Sun AppSvr JPDA
-    sun_as_jpda = 9191, 'sun-as-jpda', TransportProtocol.tcp
+    sun_as_jpda = 9191, 'sun-as-jpda'
 
     #: - [TCP] WAP connectionless session service
     #: - [UDP] WAP connectionless session service
-    wap_wsp = 9200, 'wap-wsp', TransportProtocol.tcp
+    wap_wsp = 9200, 'wap-wsp'
 
     #: - [TCP] WAP session service
     #: - [UDP] WAP session service
-    wap_wsp_wtp = 9201, 'wap-wsp-wtp', TransportProtocol.tcp
+    wap_wsp_wtp = 9201, 'wap-wsp-wtp'
 
     #: - [TCP] WAP secure connectionless session service
     #: - [UDP] WAP secure connectionless session service
-    wap_wsp_s = 9202, 'wap-wsp-s', TransportProtocol.tcp
+    wap_wsp_s = 9202, 'wap-wsp-s'
 
     #: - [TCP] WAP secure session service
     #: - [UDP] WAP secure session service
-    wap_wsp_wtp_s = 9203, 'wap-wsp-wtp-s', TransportProtocol.tcp
+    wap_wsp_wtp_s = 9203, 'wap-wsp-wtp-s'
 
     #: - [TCP] WAP vCard
     #: - [UDP] WAP vCard
-    wap_vcard = 9204, 'wap-vcard', TransportProtocol.tcp
+    wap_vcard = 9204, 'wap-vcard'
 
     #: - [TCP] WAP vCal
     #: - [UDP] WAP vCal
-    wap_vcal = 9205, 'wap-vcal', TransportProtocol.tcp
+    wap_vcal = 9205, 'wap-vcal'
 
     #: - [TCP] WAP vCard Secure
     #: - [UDP] WAP vCard Secure
-    wap_vcard_s = 9206, 'wap-vcard-s', TransportProtocol.tcp
+    wap_vcard_s = 9206, 'wap-vcard-s'
 
     #: - [TCP] WAP vCal Secure
     #: - [UDP] WAP vCal Secure
-    wap_vcal_s = 9207, 'wap-vcal-s', TransportProtocol.tcp
+    wap_vcal_s = 9207, 'wap-vcal-s'
 
     #: - [TCP] rjcdb vCard
     #: - [UDP] rjcdb vCard
-    rjcdb_vcards = 9208, 'rjcdb-vcards', TransportProtocol.tcp
+    rjcdb_vcards = 9208, 'rjcdb-vcards'
 
     #: - [TCP] ALMobile System Service
     #: - [UDP] ALMobile System Service
-    almobile_system = 9209, 'almobile-system', TransportProtocol.tcp
+    almobile_system = 9209, 'almobile-system'
 
     #: - [TCP] OMA Mobile Location Protocol
     #: - [UDP] OMA Mobile Location Protocol
-    oma_mlp = 9210, 'oma-mlp', TransportProtocol.tcp
+    oma_mlp = 9210, 'oma-mlp'
 
     #: - [TCP] OMA Mobile Location Protocol Secure
     #: - [UDP] OMA Mobile Location Protocol Secure
-    oma_mlp_s = 9211, 'oma-mlp-s', TransportProtocol.tcp
+    oma_mlp_s = 9211, 'oma-mlp-s'
 
     #: - [TCP] Server View dbms access
     #: - [UDP] Server View dbms access
-    serverviewdbms = 9212, 'serverviewdbms', TransportProtocol.tcp
+    serverviewdbms = 9212
 
     #: - [TCP] ServerStart RemoteControl
     #: - [UDP] ServerStart RemoteControl
-    serverstart = 9213, 'serverstart', TransportProtocol.tcp
+    serverstart = 9213
 
     #: - [TCP] IPDC ESG BootstrapService
     #: - [UDP] IPDC ESG BootstrapService
-    ipdcesgbs = 9214, 'ipdcesgbs', TransportProtocol.tcp
+    ipdcesgbs = 9214
 
     #: - [TCP] Integrated Setup and Install Service
     #: - [UDP] Integrated Setup and Install Service
-    insis = 9215, 'insis', TransportProtocol.tcp
+    insis = 9215
 
     #: - [TCP] Aionex Communication Management Engine
     #: - [UDP] Aionex Communication Management Engine
-    acme = 9216, 'acme', TransportProtocol.tcp
+    acme = 9216
 
     #: - [TCP] FSC Communication Port
     #: - [UDP] FSC Communication Port
-    fsc_port = 9217, 'fsc-port', TransportProtocol.tcp
+    fsc_port = 9217, 'fsc-port'
 
     #: - [TCP] QSC Team Coherence
     #: - [UDP] QSC Team Coherence
-    teamcoherence = 9222, 'teamcoherence', TransportProtocol.tcp
+    teamcoherence = 9222
 
     #: - [TCP] MON
     #: - [UDP] MON
-    mon_2583 = 2583, 'mon', TransportProtocol.tcp
+    mon_2583 = 2583, 'mon'
 
     #: - [TCP] Manager On Network
     #: - [UDP] Manager On Network
-    mon_9255 = 9255, 'mon', TransportProtocol.tcp
+    mon_9255 = 9255, 'mon'
 
     #: [TCP] Reserved
-    reserved_9277 = 9277, 'reserved', TransportProtocol.tcp
+    reserved_9277 = 9277, 'reserved'
 
     #: - [TCP] Pegasus GPS Platform
     #: - [UDP] Pegasus GPS Platform
-    pegasus = 9278, 'pegasus', TransportProtocol.tcp
+    pegasus = 9278
 
     #: - [TCP] Pegaus GPS System Control Interface
     #: - [UDP] Pegaus GPS System Control Interface
-    pegasus_ctl = 9279, 'pegasus-ctl', TransportProtocol.tcp
+    pegasus_ctl = 9279, 'pegasus-ctl'
 
     #: - [TCP] Predicted GPS
     #: - [UDP] Predicted GPS
-    pgps = 9280, 'pgps', TransportProtocol.tcp
+    pgps = 9280
 
     #: - [TCP] SofaWare transport port 1
     #: - [UDP] SofaWare transport port 1
-    swtp_port1 = 9281, 'swtp-port1', TransportProtocol.tcp
+    swtp_port1 = 9281, 'swtp-port1'
 
     #: - [TCP] SofaWare transport port 2
     #: - [UDP] SofaWare transport port 2
-    swtp_port2 = 9282, 'swtp-port2', TransportProtocol.tcp
+    swtp_port2 = 9282, 'swtp-port2'
 
     #: - [TCP] CallWaveIAM
     #: - [UDP] CallWaveIAM
-    callwaveiam = 9283, 'callwaveiam', TransportProtocol.tcp
+    callwaveiam = 9283
 
     #: - [TCP] VERITAS Information Serve
     #: - [UDP] VERITAS Information Serve
-    visd = 9284, 'visd', TransportProtocol.tcp
+    visd = 9284
 
     #: - [TCP] N2H2 Filter Service Port
     #: - [UDP] N2H2 Filter Service Port
-    n2h2server = 9285, 'n2h2server', TransportProtocol.tcp
+    n2h2server = 9285
 
     #: [TCP] Reserved
-    reserved_9286 = 9286, 'reserved', TransportProtocol.tcp
+    reserved_9286 = 9286, 'reserved'
 
     #: - [TCP] Cumulus
     #: - [UDP] Cumulus
-    cumulus = 9287, 'cumulus', TransportProtocol.tcp
+    cumulus = 9287
 
     #: - [TCP] ArmTech Daemon
     #: - [UDP] ArmTech Daemon
-    armtechdaemon = 9292, 'armtechdaemon', TransportProtocol.tcp
+    armtechdaemon = 9292
 
     #: - [TCP] StorView Client
     #: - [UDP] StorView Client
-    storview = 9293, 'storview', TransportProtocol.tcp
+    storview = 9293
 
     #: - [TCP] ARMCenter http Service
     #: - [UDP] ARMCenter http Service
-    armcenterhttp = 9294, 'armcenterhttp', TransportProtocol.tcp
+    armcenterhttp = 9294
 
     #: - [TCP] ARMCenter https Service
     #: - [UDP] ARMCenter https Service
-    armcenterhttps = 9295, 'armcenterhttps', TransportProtocol.tcp
+    armcenterhttps = 9295
 
     #: - [TCP] Virtual Racing Service
     #: - [UDP] Virtual Racing Service
-    vrace = 9300, 'vrace', TransportProtocol.tcp
+    vrace = 9300
 
     #: [TCP] Sphinx search server (MySQL listener)
-    sphinxql = 9306, 'sphinxql', TransportProtocol.tcp
+    sphinxql = 9306
 
     #: [TCP] SAP Message Server
-    sapms = 9310, 'sapms', TransportProtocol.tcp
+    sapms = 9310
 
     #: [TCP] Sphinx search server
-    sphinxapi = 9312, 'sphinxapi', TransportProtocol.tcp
+    sphinxapi = 9312
 
     #: - [TCP] PKIX TimeStamp over TLS
     #: - [UDP] PKIX TimeStamp over TLS
-    secure_ts = 9318, 'secure-ts', TransportProtocol.tcp
+    secure_ts = 9318, 'secure-ts'
 
     #: - [TCP] guibase
     #: - [UDP] guibase
-    guibase = 9321, 'guibase', TransportProtocol.tcp
+    guibase = 9321
 
     #: [TCP] gRPC Network Mgmt/Operations Interface
-    gnmi_gnoi = 9339, 'gnmi-gnoi', TransportProtocol.tcp
+    gnmi_gnoi = 9339, 'gnmi-gnoi'
 
     #: [TCP] gRPC Routing Information Base Interface
-    gribi = 9340, 'gribi', TransportProtocol.tcp
+    gribi = 9340
 
     #: - [TCP] MpIdcMgr
     #: - [UDP] MpIdcMgr
-    mpidcmgr = 9343, 'mpidcmgr', TransportProtocol.tcp
+    mpidcmgr = 9343
 
     #: - [TCP] Mphlpdmc
     #: - [UDP] Mphlpdmc
-    mphlpdmc = 9344, 'mphlpdmc', TransportProtocol.tcp
+    mphlpdmc = 9344
 
     #: [TCP] Rancher Agent
-    rancher = 9345, 'rancher', TransportProtocol.tcp
+    rancher = 9345
 
     #: - [TCP] C Tech Licensing
     #: - [UDP] C Tech Licensing
-    ctechlicensing = 9346, 'ctechlicensing', TransportProtocol.tcp
+    ctechlicensing = 9346
 
     #: - [TCP] fjdmimgr
     #: - [UDP] fjdmimgr
-    fjdmimgr = 9374, 'fjdmimgr', TransportProtocol.tcp
+    fjdmimgr = 9374
 
     #: - [TCP] Brivs! Open Extensible Protocol
     #: - [UDP] Brivs! Open Extensible Protocol
-    boxp = 9380, 'boxp', TransportProtocol.tcp
+    boxp = 9380
 
     #: [TCP] D2D Configuration Service
-    d2dconfig = 9387, 'd2dconfig', TransportProtocol.tcp
+    d2dconfig = 9387
 
     #: [TCP] D2D Data Transfer Service
-    d2ddatatrans = 9388, 'd2ddatatrans', TransportProtocol.tcp
+    d2ddatatrans = 9388
 
     #: [TCP] Active Directory Web Services
-    adws = 9389, 'adws', TransportProtocol.tcp
+    adws = 9389
 
     #: [TCP] OpenVAS Transfer Protocol
-    otp = 9390, 'otp', TransportProtocol.tcp
+    otp = 9390
 
     #: - [TCP] fjinvmgr
     #: - [UDP] fjinvmgr
-    fjinvmgr = 9396, 'fjinvmgr', TransportProtocol.tcp
+    fjinvmgr = 9396
 
     #: - [TCP] MpIdcAgt
     #: - [UDP] MpIdcAgt
-    mpidcagt = 9397, 'mpidcagt', TransportProtocol.tcp
+    mpidcagt = 9397
 
     #: - [TCP] Samsung Twain for Network Server
     #: - [UDP] Samsung Twain for Network Server
-    sec_t4net_srv = 9400, 'sec-t4net-srv', TransportProtocol.tcp
+    sec_t4net_srv = 9400, 'sec-t4net-srv'
 
     #: - [TCP] Samsung Twain for Network Client
     #: - [UDP] Samsung Twain for Network Client
-    sec_t4net_clt = 9401, 'sec-t4net-clt', TransportProtocol.tcp
+    sec_t4net_clt = 9401, 'sec-t4net-clt'
 
     #: - [TCP] Samsung PC2FAX for Network Server
     #: - [UDP] Samsung PC2FAX for Network Server
-    sec_pc2fax_srv = 9402, 'sec-pc2fax-srv', TransportProtocol.tcp
+    sec_pc2fax_srv = 9402, 'sec-pc2fax-srv'
 
     #: - [TCP] git pack transfer service
     #: - [UDP] git pack transfer service
-    git = 9418, 'git', TransportProtocol.tcp
+    git = 9418
 
     #: - [TCP] WSO2 Tungsten HTTPS
     #: - [UDP] WSO2 Tungsten HTTPS
-    tungsten_https = 9443, 'tungsten-https', TransportProtocol.tcp
+    tungsten_https = 9443, 'tungsten-https'
 
     #: - [TCP] WSO2 ESB Administration Console HTTPS
     #: - [UDP] WSO2 ESB Administration Console HTTPS
-    wso2esb_console = 9444, 'wso2esb-console', TransportProtocol.tcp
+    wso2esb_console = 9444, 'wso2esb-console'
 
     #: [TCP] MindArray Systems Console Agent
-    mindarray_ca = 9445, 'mindarray-ca', TransportProtocol.tcp
+    mindarray_ca = 9445, 'mindarray-ca'
 
     #: - [TCP] Sentinel Keys Server
     #: - [UDP] Sentinel Keys Server
-    sntlkeyssrvr = 9450, 'sntlkeyssrvr', TransportProtocol.tcp
+    sntlkeyssrvr = 9450
 
     #: - [TCP] ismserver
     #: - [UDP] ismserver
-    ismserver = 9500, 'ismserver', TransportProtocol.tcp
+    ismserver = 9500
 
     #: [TCP] Reserved
-    reserved_9522 = 9522, 'reserved', TransportProtocol.tcp
+    reserved_9522 = 9522, 'reserved'
 
     #: - [TCP] Management Suite Remote Control
     #: - [UDP] Management Suite Remote Control
-    mngsuite = 9535, 'mngsuite', TransportProtocol.tcp
+    mngsuite = 9535
 
     #: - [TCP] Surveillance buffering function
     #: - [UDP] Surveillance buffering function
-    laes_bf = 9536, 'laes-bf', TransportProtocol.tcp
+    laes_bf = 9536, 'laes-bf'
 
     #: - [TCP] Trispen Secure Remote Access
     #: - [UDP] Trispen Secure Remote Access
-    trispen_sra = 9555, 'trispen-sra', TransportProtocol.tcp
+    trispen_sra = 9555, 'trispen-sra'
 
     #: [TCP] P4Runtime gRPC Service
-    p4runtime = 9559, 'p4runtime', TransportProtocol.tcp
+    p4runtime = 9559
 
     #: - [TCP] LANDesk Gateway
     #: - [UDP] LANDesk Gateway
-    ldgateway = 9592, 'ldgateway', TransportProtocol.tcp
+    ldgateway = 9592
 
     #: - [TCP] LANDesk Management Agent (cba8)
     #: - [UDP] LANDesk Management Agent (cba8)
-    cba8 = 9593, 'cba8', TransportProtocol.tcp
+    cba8 = 9593
 
     #: - [TCP] Message System
     #: - [UDP] Message System
-    msgsys = 9594, 'msgsys', TransportProtocol.tcp
+    msgsys = 9594
 
     #: - [TCP] Ping Discovery Service
     #: - [UDP] Ping Discovery Service
-    pds = 9595, 'pds', TransportProtocol.tcp
+    pds = 9595
 
     #: - [TCP] Mercury Discovery
     #: - [UDP] Mercury Discovery
-    mercury_disc = 9596, 'mercury-disc', TransportProtocol.tcp
+    mercury_disc = 9596, 'mercury-disc'
 
     #: - [TCP] PD Administration
     #: - [UDP] PD Administration
-    pd_admin = 9597, 'pd-admin', TransportProtocol.tcp
+    pd_admin = 9597, 'pd-admin'
 
     #: - [TCP] Very Simple Ctrl Protocol
     #: - [UDP] Very Simple Ctrl Protocol
-    vscp = 9598, 'vscp', TransportProtocol.tcp
+    vscp = 9598
 
     #: - [TCP] Robix
     #: - [UDP] Robix
-    robix = 9599, 'robix', TransportProtocol.tcp
+    robix = 9599
 
     #: - [TCP] MICROMUSE-NCPW
     #: - [UDP] MICROMUSE-NCPW
-    micromuse_ncpw = 9600, 'micromuse-ncpw', TransportProtocol.tcp
+    micromuse_ncpw = 9600, 'micromuse-ncpw'
 
     #: - [TCP] StreamComm User Directory
     #: - [UDP] StreamComm User Directory
-    streamcomm_ds = 9612, 'streamcomm-ds', TransportProtocol.tcp
+    streamcomm_ds = 9612, 'streamcomm-ds'
 
     #: [TCP] iADT Protocol over TLS
-    iadt_tls = 9614, 'iadt-tls', TransportProtocol.tcp
+    iadt_tls = 9614, 'iadt-tls'
 
     #: - [TCP] eRunbook Agent IANA assigned this well-formed service name as a
     #:   replacement for "erunbook_agent".
     #: - [TCP] eRunbook Agent
-    erunbook_agent = 9616, 'erunbook-agent', TransportProtocol.tcp
+    erunbook_agent = 9616, 'erunbook-agent'
 
     #: - [TCP] eRunbook Server IANA assigned this well-formed service name as a
     #:   replacement for "erunbook_server".
     #: - [TCP] eRunbook Server
-    erunbook_server = 9617, 'erunbook-server', TransportProtocol.tcp
+    erunbook_server = 9617, 'erunbook-server'
 
     #: - [TCP] Condor Collector Service
     #: - [UDP] Condor Collector Service
-    condor = 9618, 'condor', TransportProtocol.tcp
+    condor = 9618
 
     #: - [TCP] ODBC Pathway Service
     #: - [UDP] ODBC Pathway Service
-    odbcpathway = 9628, 'odbcpathway', TransportProtocol.tcp
+    odbcpathway = 9628
 
     #: - [TCP] UniPort SSO Controller
     #: - [UDP] UniPort SSO Controller
-    uniport = 9629, 'uniport', TransportProtocol.tcp
+    uniport = 9629
 
     #: [TCP] Peovica Controller
-    peoctlr = 9630, 'peoctlr', TransportProtocol.tcp
+    peoctlr = 9630
 
     #: [TCP] Peovica Collector
-    peocoll = 9631, 'peocoll', TransportProtocol.tcp
+    peocoll = 9631
 
     #: [TCP] Reserved
-    reserved_9632 = 9632, 'reserved', TransportProtocol.tcp
+    reserved_9632 = 9632, 'reserved'
 
     #: [TCP] ProQueSys Flows Service
-    pqsflows = 9640, 'pqsflows', TransportProtocol.tcp
+    pqsflows = 9640
 
     #: [TCP] Zoom Control Panel Game Server Management
-    zoomcp = 9666, 'zoomcp', TransportProtocol.tcp
+    zoomcp = 9666
 
     #: - [TCP] Cross-platform Music Multiplexing System
     #: - [UDP] Cross-platform Music Multiplexing System
-    xmms2 = 9667, 'xmms2', TransportProtocol.tcp
+    xmms2 = 9667
 
     #: - [TCP] tec5 Spectral Device Control Protocol
     #: - [UDP] tec5 Spectral Device Control Protocol
-    tec5_sdctp = 9668, 'tec5-sdctp', TransportProtocol.tcp
+    tec5_sdctp = 9668, 'tec5-sdctp'
 
     #: - [TCP] T-Mobile Client Wakeup Message
     #: - [UDP] T-Mobile Client Wakeup Message
-    client_wakeup = 9694, 'client-wakeup', TransportProtocol.tcp
+    client_wakeup = 9694, 'client-wakeup'
 
     #: - [TCP] Content Centric Networking
     #: - [UDP] Content Centric Networking
-    ccnx = 9695, 'ccnx', TransportProtocol.tcp
+    ccnx = 9695
 
     #: - [TCP] Board M.I.T. Service
     #: - [UDP] Board M.I.T. Service
-    board_roar = 9700, 'board-roar', TransportProtocol.tcp
+    board_roar = 9700, 'board-roar'
 
     #: - [TCP] L5NAS Parallel Channel
     #: - [UDP] L5NAS Parallel Channel
-    l5nas_parchan = 9747, 'l5nas-parchan', TransportProtocol.tcp
+    l5nas_parchan = 9747, 'l5nas-parchan'
 
     #: - [TCP] Board M.I.T. Synchronous Collaboration
     #: - [UDP] Board M.I.T. Synchronous Collaboration
-    board_voip = 9750, 'board-voip', TransportProtocol.tcp
+    board_voip = 9750, 'board-voip'
 
     #: - [TCP] rasadv
     #: - [UDP] rasadv
-    rasadv = 9753, 'rasadv', TransportProtocol.tcp
+    rasadv = 9753
 
     #: - [TCP] WSO2 Tungsten HTTP
     #: - [UDP] WSO2 Tungsten HTTP
-    tungsten_http = 9762, 'tungsten-http', TransportProtocol.tcp
+    tungsten_http = 9762, 'tungsten-http'
 
     #: - [TCP] WebDav Source Port
     #: - [UDP] WebDav Source Port
-    davsrc = 9800, 'davsrc', TransportProtocol.tcp
+    davsrc = 9800
 
     #: - [TCP] Sakura Script Transfer Protocol-2
     #: - [UDP] Sakura Script Transfer Protocol-2
-    sstp_2 = 9801, 'sstp-2', TransportProtocol.tcp
+    sstp_2 = 9801, 'sstp-2'
 
     #: - [TCP] WebDAV Source TLS/SSL
     #: - [UDP] WebDAV Source TLS/SSL
-    davsrcs = 9802, 'davsrcs', TransportProtocol.tcp
+    davsrcs = 9802
 
     #: - [TCP] Session Announcement v1 [:rfc:`2974`]
     #: - [UDP] Session Announcement v1 [:rfc:`2974`]
-    sapv1 = 9875, 'sapv1', TransportProtocol.tcp
+    sapv1 = 9875
 
     #: [TCP] Session Director
-    sd = 9876, 'sd', TransportProtocol.tcp
+    sd = 9876
 
     #: [TCP] Reserved
-    reserved_9878 = 9878, 'reserved', TransportProtocol.tcp
+    reserved_9878 = 9878, 'reserved'
 
     #: - [TCP] CYBORG Systems
     #: - [UDP] CYBORG Systems
-    cyborg_systems = 9888, 'cyborg-systems', TransportProtocol.tcp
+    cyborg_systems = 9888, 'cyborg-systems'
 
     #: - [TCP] Port for Cable network related data proxy or repeater
     #: - [UDP] Port for Cable network related data proxy or repeater
-    gt_proxy = 9889, 'gt-proxy', TransportProtocol.tcp
+    gt_proxy = 9889, 'gt-proxy'
 
     #: - [TCP] MonkeyCom
     #: - [UDP] MonkeyCom
-    monkeycom = 9898, 'monkeycom', TransportProtocol.tcp
+    monkeycom = 9898
 
     #: [TCP] Reserved
-    reserved_9899 = 9899, 'reserved', TransportProtocol.tcp
+    reserved_9899 = 9899, 'reserved'
 
     #: - [TCP] IUA
     #: - [UDP] IUA
     #: - [SCTP] IUA
-    iua = 9900, 'iua', TransportProtocol.tcp
+    iua = 9900
 
     #: [TCP] Reserved
-    reserved_9903 = 9903, 'reserved', TransportProtocol.tcp
+    reserved_9903 = 9903, 'reserved'
 
     #: - [TCP] domaintime
     #: - [UDP] domaintime
-    domaintime = 9909, 'domaintime', TransportProtocol.tcp
+    domaintime = 9909
 
     #: - [TCP] SYPECom Transport Protocol
     #: - [UDP] SYPECom Transport Protocol
-    sype_transport = 9911, 'sype-transport', TransportProtocol.tcp
+    sype_transport = 9911, 'sype-transport'
 
     #: [TCP] XYBRID Cloud
-    xybrid_cloud = 9925, 'xybrid-cloud', TransportProtocol.tcp
+    xybrid_cloud = 9925, 'xybrid-cloud'
 
     #: - [TCP] APC 9950
     #: - [UDP] APC 9950
-    apc_9950 = 9950, 'apc-9950', TransportProtocol.tcp
+    apc_9950 = 9950, 'apc-9950'
 
     #: - [TCP] APC 9951
     #: - [UDP] APC 9951
-    apc_9951 = 9951, 'apc-9951', TransportProtocol.tcp
+    apc_9951 = 9951, 'apc-9951'
 
     #: - [TCP] APC 9952
     #: - [UDP] APC 9952
-    apc_9952 = 9952, 'apc-9952', TransportProtocol.tcp
+    apc_9952 = 9952, 'apc-9952'
 
     #: - [TCP] 9953
     #: - [UDP] 9953
-    acis = 9953, 'acis', TransportProtocol.tcp
+    acis = 9953
 
     #: [TCP] HaloteC Instrument Network Protocol
-    hinp = 9954, 'hinp', TransportProtocol.tcp
+    hinp = 9954
 
     #: [TCP] Contact Port for AllJoyn standard messaging
-    alljoyn_stm = 9955, 'alljoyn-stm', TransportProtocol.tcp
+    alljoyn_stm = 9955, 'alljoyn-stm'
 
     #: [TCP] Reserved
-    reserved_9956 = 9956, 'reserved', TransportProtocol.tcp
+    reserved_9956 = 9956, 'reserved'
 
     #: - [TCP] OKI Data Network Setting Protocol
     #: - [UDP] OKI Data Network Setting Protocol
-    odnsp = 9966, 'odnsp', TransportProtocol.tcp
+    odnsp = 9966
 
     #: [TCP] XYBRID RT Server
-    xybrid_rt = 9978, 'xybrid-rt', TransportProtocol.tcp
+    xybrid_rt = 9978, 'xybrid-rt'
 
     #: [TCP] Valley Information Systems Weather station data
-    visweather = 9979, 'visweather', TransportProtocol.tcp
+    visweather = 9979
 
     #: [TCP] Event sourcing database engine with a built-in programming language
-    pumpkindb = 9981, 'pumpkindb', TransportProtocol.tcp
+    pumpkindb = 9981
 
     #: [TCP] KAOS secure message transport protocol for safety-critical
     #: environments
-    kaostransport = 9986, 'kaostransport', TransportProtocol.tcp
+    kaostransport = 9986
 
     #: - [TCP] DSM/SCM Target Interface
     #: - [UDP] DSM/SCM Target Interface
-    dsm_scm_target = 9987, 'dsm-scm-target', TransportProtocol.tcp
+    dsm_scm_target = 9987, 'dsm-scm-target'
 
     #: [TCP] Software Essentials Secure HTTP server
-    nsesrvr = 9988, 'nsesrvr', TransportProtocol.tcp
+    nsesrvr = 9988
 
     #: - [TCP] OSM Applet Server
     #: - [UDP] OSM Applet Server
-    osm_appsrvr = 9990, 'osm-appsrvr', TransportProtocol.tcp
+    osm_appsrvr = 9990, 'osm-appsrvr'
 
     #: - [TCP] OSM Event Server
     #: - [UDP] OSM Event Server
-    osm_oev = 9991, 'osm-oev', TransportProtocol.tcp
+    osm_oev = 9991, 'osm-oev'
 
     #: - [TCP] OnLive-1
     #: - [UDP] OnLive-1
-    palace_1 = 9992, 'palace-1', TransportProtocol.tcp
+    palace_1 = 9992, 'palace-1'
 
     #: - [TCP] OnLive-2
     #: - [UDP] OnLive-2
-    palace_2 = 9993, 'palace-2', TransportProtocol.tcp
+    palace_2 = 9993, 'palace-2'
 
     #: - [TCP] OnLive-3
     #: - [UDP] OnLive-3
-    palace_3 = 9994, 'palace-3', TransportProtocol.tcp
+    palace_3 = 9994, 'palace-3'
 
     #: - [TCP] Palace-4
     #: - [UDP] Palace-4
-    palace_4 = 9995, 'palace-4', TransportProtocol.tcp
+    palace_4 = 9995, 'palace-4'
 
     #: - [TCP] Palace-5
     #: - [UDP] Palace-5
-    palace_5 = 9996, 'palace-5', TransportProtocol.tcp
+    palace_5 = 9996, 'palace-5'
 
     #: - [TCP] Palace-6
     #: - [UDP] Palace-6
-    palace_6 = 9997, 'palace-6', TransportProtocol.tcp
+    palace_6 = 9997, 'palace-6'
 
     #: - [TCP] Distinct32
     #: - [UDP] Distinct32
-    distinct32 = 9998, 'distinct32', TransportProtocol.tcp
+    distinct32 = 9998
 
     #: - [TCP] distinct
     #: - [UDP] distinct
-    distinct = 9999, 'distinct', TransportProtocol.tcp
+    distinct = 9999
 
     #: - [TCP] Network Data Management Protocol
     #: - [UDP] Network Data Management Protocol
-    ndmp = 10000, 'ndmp', TransportProtocol.tcp
+    ndmp = 10000
 
     #: - [TCP] SCP Configuration
     #: - [UDP] SCP Configuration
-    scp_config = 10001, 'scp-config', TransportProtocol.tcp
+    scp_config = 10001, 'scp-config'
 
     #: - [TCP] EMC-Documentum Content Server Product
     #: - [UDP] EMC-Documentum Content Server Product
-    documentum = 10002, 'documentum', TransportProtocol.tcp
+    documentum = 10002
 
     #: - [TCP] EMC-Documentum Content Server Product IANA assigned this well-formed
     #:   service name as a replacement for "documentum_s".
@@ -22852,1035 +22852,1035 @@ class TCP(AppType):
     #: - [UDP] EMC-Documentum Content Server Product IANA assigned this well-formed
     #:   service name as a replacement for "documentum_s".
     #: - [UDP] EMC-Documentum Content Server Product
-    documentum_s = 10003, 'documentum-s', TransportProtocol.tcp
+    documentum_s = 10003, 'documentum-s'
 
     #: [TCP] EMC Replication Manager Client
-    emcrmirccd = 10004, 'emcrmirccd', TransportProtocol.tcp
+    emcrmirccd = 10004
 
     #: [TCP] EMC Replication Manager Server
-    emcrmird = 10005, 'emcrmird', TransportProtocol.tcp
+    emcrmird = 10005
 
     #: [TCP] Sync replication protocol among different NetApp platforms
-    netapp_sync = 10006, 'netapp-sync', TransportProtocol.tcp
+    netapp_sync = 10006, 'netapp-sync'
 
     #: - [TCP] MVS Capacity
     #: - [UDP] MVS Capacity
-    mvs_capacity = 10007, 'mvs-capacity', TransportProtocol.tcp
+    mvs_capacity = 10007, 'mvs-capacity'
 
     #: - [TCP] Octopus Multiplexer
     #: - [UDP] Octopus Multiplexer
-    octopus = 10008, 'octopus', TransportProtocol.tcp
+    octopus = 10008
 
     #: - [TCP] Systemwalker Desktop Patrol
     #: - [UDP] Systemwalker Desktop Patrol
-    swdtp_sv = 10009, 'swdtp-sv', TransportProtocol.tcp
+    swdtp_sv = 10009, 'swdtp-sv'
 
     #: [TCP] ooRexx rxapi services
-    rxapi = 10010, 'rxapi', TransportProtocol.tcp
+    rxapi = 10010
 
     #: [TCP] Hardware configuration and maintenance
-    abb_hw = 10020, 'abb-hw', TransportProtocol.tcp
+    abb_hw = 10020, 'abb-hw'
 
     #: [TCP] Reserved
-    reserved_10023 = 10023, 'reserved', TransportProtocol.tcp
+    reserved_10023 = 10023, 'reserved'
 
     #: - [TCP] Zabbix Agent
     #: - [UDP] Zabbix Agent
-    zabbix_agent = 10050, 'zabbix-agent', TransportProtocol.tcp
+    zabbix_agent = 10050, 'zabbix-agent'
 
     #: - [TCP] Zabbix Trapper
     #: - [UDP] Zabbix Trapper
-    zabbix_trapper = 10051, 'zabbix-trapper', TransportProtocol.tcp
+    zabbix_trapper = 10051, 'zabbix-trapper'
 
     #: [TCP] Quantapoint FLEXlm Licensing Service
-    qptlmd = 10055, 'qptlmd', TransportProtocol.tcp
+    qptlmd = 10055
 
     #: - [TCP] Amanda
     #: - [UDP] Amanda
-    amanda = 10080, 'amanda', TransportProtocol.tcp
+    amanda = 10080
 
     #: - [TCP] FAM Archive Server
     #: - [UDP] FAM Archive Server
-    famdc = 10081, 'famdc', TransportProtocol.tcp
+    famdc = 10081
 
     #: - [TCP] VERITAS ITAP DDTP
     #: - [UDP] VERITAS ITAP DDTP
-    itap_ddtp = 10100, 'itap-ddtp', TransportProtocol.tcp
+    itap_ddtp = 10100, 'itap-ddtp'
 
     #: - [TCP] eZmeeting
     #: - [UDP] eZmeeting
-    ezmeeting_2 = 10101, 'ezmeeting-2', TransportProtocol.tcp
+    ezmeeting_2 = 10101, 'ezmeeting-2'
 
     #: - [TCP] eZproxy
     #: - [UDP] eZproxy
-    ezproxy_2 = 10102, 'ezproxy-2', TransportProtocol.tcp
+    ezproxy_2 = 10102, 'ezproxy-2'
 
     #: - [TCP] eZrelay
     #: - [UDP] eZrelay
-    ezrelay = 10103, 'ezrelay', TransportProtocol.tcp
+    ezrelay = 10103
 
     #: - [TCP] Systemwalker Desktop Patrol
     #: - [UDP] Systemwalker Desktop Patrol
-    swdtp = 10104, 'swdtp', TransportProtocol.tcp
+    swdtp = 10104
 
     #: - [TCP] VERITAS BCTP, server
     #: - [UDP] VERITAS BCTP, server
-    bctp_server = 10107, 'bctp-server', TransportProtocol.tcp
+    bctp_server = 10107, 'bctp-server'
 
     #: - [TCP] NMEA-0183 Navigational Data
     #: - [UDP] NMEA-0183 Navigational Data
-    nmea_0183 = 10110, 'nmea-0183', TransportProtocol.tcp
+    nmea_0183 = 10110, 'nmea-0183'
 
     #: [TCP] Reserved
-    reserved_10111 = 10111, 'reserved', TransportProtocol.tcp
+    reserved_10111 = 10111, 'reserved'
 
     #: - [TCP] NetIQ Endpoint
     #: - [UDP] NetIQ Endpoint
-    netiq_endpoint = 10113, 'netiq-endpoint', TransportProtocol.tcp
+    netiq_endpoint = 10113, 'netiq-endpoint'
 
     #: - [TCP] NetIQ Qcheck
     #: - [UDP] NetIQ Qcheck
-    netiq_qcheck = 10114, 'netiq-qcheck', TransportProtocol.tcp
+    netiq_qcheck = 10114, 'netiq-qcheck'
 
     #: - [TCP] NetIQ Endpoint
     #: - [UDP] NetIQ Endpoint
-    netiq_endpt = 10115, 'netiq-endpt', TransportProtocol.tcp
+    netiq_endpt = 10115, 'netiq-endpt'
 
     #: - [TCP] NetIQ VoIP Assessor
     #: - [UDP] NetIQ VoIP Assessor
-    netiq_voipa = 10116, 'netiq-voipa', TransportProtocol.tcp
+    netiq_voipa = 10116, 'netiq-voipa'
 
     #: - [TCP] NetIQ IQCResource Managament Svc
     #: - [UDP] NetIQ IQCResource Managament Svc
-    iqrm = 10117, 'iqrm', TransportProtocol.tcp
+    iqrm = 10117
 
     #: [TCP] HotLink CIMple REST API
-    cimple = 10125, 'cimple', TransportProtocol.tcp
+    cimple = 10125
 
     #: - [TCP] BMC-PERFORM-SERVICE DAEMON
     #: - [UDP] BMC-PERFORM-SERVICE DAEMON
-    bmc_perf_sd = 10128, 'bmc-perf-sd', TransportProtocol.tcp
+    bmc_perf_sd = 10128, 'bmc-perf-sd'
 
     #: [TCP] BMC General Manager Server
-    bmc_gms = 10129, 'bmc-gms', TransportProtocol.tcp
+    bmc_gms = 10129, 'bmc-gms'
 
     #: - [TCP] QB Database Server
     #: - [UDP] QB Database Server
-    qb_db_server = 10160, 'qb-db-server', TransportProtocol.tcp
+    qb_db_server = 10160, 'qb-db-server'
 
     #: [TCP] SNMP-TLS [:rfc:`6353`]
-    snmptls = 10161, 'snmptls', TransportProtocol.tcp
+    snmptls = 10161
 
     #: [TCP] SNMP-Trap-TLS [:rfc:`6353`]
-    snmptls_trap = 10162, 'snmptls-trap', TransportProtocol.tcp
+    snmptls_trap = 10162, 'snmptls-trap'
 
     #: - [TCP] Trigence AE Soap Service
     #: - [UDP] Trigence AE Soap Service
-    trisoap = 10200, 'trisoap', TransportProtocol.tcp
+    trisoap = 10200
 
     #: [TCP] Remote Server Management Service
-    rsms = 10201, 'rsms', TransportProtocol.tcp
+    rsms = 10201
 
     #: - [TCP] Apollo Relay Port
     #: - [UDP] Apollo Relay Port
-    apollo_relay = 10252, 'apollo-relay', TransportProtocol.tcp
+    apollo_relay = 10252, 'apollo-relay'
 
     #: [TCP] Reserved
-    reserved_10253 = 10253, 'reserved', TransportProtocol.tcp
+    reserved_10253 = 10253, 'reserved'
 
     #: - [TCP] Axis WIMP Port
     #: - [UDP] Axis WIMP Port
-    axis_wimp_port = 10260, 'axis-wimp-port', TransportProtocol.tcp
+    axis_wimp_port = 10260, 'axis-wimp-port'
 
     #: [TCP] Tile remote machine learning
-    tile_ml = 10261, 'tile-ml', TransportProtocol.tcp
+    tile_ml = 10261, 'tile-ml'
 
     #: - [TCP] Blocks
     #: - [UDP] Blocks
-    blocks = 10288, 'blocks', TransportProtocol.tcp
+    blocks = 10288
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_10321 = 10321, 'reserved', TransportProtocol.tcp
+    reserved_10321 = 10321, 'reserved'
 
     #: [TCP] Reserved
-    reserved_10439 = 10439, 'reserved', TransportProtocol.tcp
+    reserved_10439 = 10439, 'reserved'
 
     #: [TCP] CirrosSP Workstation Communication
-    cirrossp = 10443, 'cirrossp', TransportProtocol.tcp
+    cirrossp = 10443
 
     #: [TCP] Reserved
-    reserved_10500 = 10500, 'reserved', TransportProtocol.tcp
+    reserved_10500 = 10500, 'reserved'
 
     #: - [TCP] MOS Media Object Metadata Port
     #: - [UDP] MOS Media Object Metadata Port
-    mos_lower = 10540, 'mos-lower', TransportProtocol.tcp
+    mos_lower = 10540, 'mos-lower'
 
     #: - [TCP] MOS Running Order Port
     #: - [UDP] MOS Running Order Port
-    mos_upper = 10541, 'mos-upper', TransportProtocol.tcp
+    mos_upper = 10541, 'mos-upper'
 
     #: - [TCP] MOS Low Priority Port
     #: - [UDP] MOS Low Priority Port
-    mos_aux = 10542, 'mos-aux', TransportProtocol.tcp
+    mos_aux = 10542, 'mos-aux'
 
     #: - [TCP] MOS SOAP Default Port
     #: - [UDP] MOS SOAP Default Port
-    mos_soap = 10543, 'mos-soap', TransportProtocol.tcp
+    mos_soap = 10543, 'mos-soap'
 
     #: - [TCP] MOS SOAP Optional Port
     #: - [UDP] MOS SOAP Optional Port
-    mos_soap_opt = 10544, 'mos-soap-opt', TransportProtocol.tcp
+    mos_soap_opt = 10544, 'mos-soap-opt'
 
     #: [TCP] Apple Document Sharing Service
-    serverdocs = 10548, 'serverdocs', TransportProtocol.tcp
+    serverdocs = 10548
 
     #: - [TCP] Gestor de Acaparamiento para Pocket PCs
     #: - [UDP] Gestor de Acaparamiento para Pocket PCs
-    gap = 10800, 'gap', TransportProtocol.tcp
+    gap = 10800
 
     #: - [TCP] LUCIA Pareja Data Group
     #: - [UDP] LUCIA Pareja Data Group
-    lpdg = 10805, 'lpdg', TransportProtocol.tcp
+    lpdg = 10805
 
     #: [TCP] Network Block Device
     #: [https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md]
-    nbd = 10809, 'nbd', TransportProtocol.tcp
+    nbd = 10809
 
     #: [TCP] Reserved
-    reserved_10810 = 10810, 'reserved', TransportProtocol.tcp
+    reserved_10810 = 10810, 'reserved'
 
     #: - [TCP] Helix Client/Server
     #: - [UDP] Helix Client/Server
-    helix = 10860, 'helix', TransportProtocol.tcp
+    helix = 10860
 
     #: - [TCP] BVEssentials HTTP API
     #: - [UDP] BVEssentials HTTP API
-    bveapi = 10880, 'bveapi', TransportProtocol.tcp
+    bveapi = 10880
 
     #: [TCP] Listen port used by the Octopus Deploy Tentacle deployment agent
-    octopustentacle = 10933, 'octopustentacle', TransportProtocol.tcp
+    octopustentacle = 10933
 
     #: - [TCP] Auxiliary RMI Port
     #: - [UDP] Auxiliary RMI Port
-    rmiaux = 10990, 'rmiaux', TransportProtocol.tcp
+    rmiaux = 10990
 
     #: - [TCP] IRISA
     #: - [UDP] IRISA
-    irisa = 11000, 'irisa', TransportProtocol.tcp
+    irisa = 11000
 
     #: - [TCP] Metasys
     #: - [UDP] Metasys
-    metasys = 11001, 'metasys', TransportProtocol.tcp
+    metasys = 11001
 
     #: - [TCP] Nest device-to-device and device-to-service application protocol
     #: - [UDP] Nest device-to-device and device-to-service application protocol
-    weave = 11095, 'weave', TransportProtocol.tcp
+    weave = 11095
 
     #: [TCP] OrigoDB Server Sync Interface
-    origo_sync = 11103, 'origo-sync', TransportProtocol.tcp
+    origo_sync = 11103, 'origo-sync'
 
     #: [TCP] NetApp Intercluster Management
-    netapp_icmgmt = 11104, 'netapp-icmgmt', TransportProtocol.tcp
+    netapp_icmgmt = 11104, 'netapp-icmgmt'
 
     #: [TCP] NetApp Intercluster Data
-    netapp_icdata = 11105, 'netapp-icdata', TransportProtocol.tcp
+    netapp_icdata = 11105, 'netapp-icdata'
 
     #: - [TCP] SGI LK Licensing service
     #: - [UDP] SGI LK Licensing service
-    sgi_lk = 11106, 'sgi-lk', TransportProtocol.tcp
+    sgi_lk = 11106, 'sgi-lk'
 
     #: [TCP] Reserved
-    reserved_11108 = 11108, 'reserved', TransportProtocol.tcp
+    reserved_11108 = 11108, 'reserved'
 
     #: [TCP] Data migration facility Manager (DMF) is a browser based interface to
     #: DMF
-    sgi_dmfmgr = 11109, 'sgi-dmfmgr', TransportProtocol.tcp
+    sgi_dmfmgr = 11109, 'sgi-dmfmgr'
 
     #: [TCP] Data migration facility (DMF) SOAP is a web server protocol to support
     #: remote access to DMF
-    sgi_soap = 11110, 'sgi-soap', TransportProtocol.tcp
+    sgi_soap = 11110, 'sgi-soap'
 
     #: - [TCP] Viral Computing Environment (VCE)
     #: - [UDP] Viral Computing Environment (VCE)
-    vce = 11111, 'vce', TransportProtocol.tcp
+    vce = 11111
 
     #: - [TCP] DICOM
     #: - [UDP] DICOM
-    dicom = 11112, 'dicom', TransportProtocol.tcp
+    dicom = 11112
 
     #: - [TCP] sun cacao snmp access point
     #: - [UDP] sun cacao snmp access point
-    suncacao_snmp = 11161, 'suncacao-snmp', TransportProtocol.tcp
+    suncacao_snmp = 11161, 'suncacao-snmp'
 
     #: - [TCP] sun cacao JMX-remoting access point
     #: - [UDP] sun cacao JMX-remoting access point
-    suncacao_jmxmp = 11162, 'suncacao-jmxmp', TransportProtocol.tcp
+    suncacao_jmxmp = 11162, 'suncacao-jmxmp'
 
     #: - [TCP] sun cacao rmi registry access point
     #: - [UDP] sun cacao rmi registry access point
-    suncacao_rmi = 11163, 'suncacao-rmi', TransportProtocol.tcp
+    suncacao_rmi = 11163, 'suncacao-rmi'
 
     #: - [TCP] sun cacao command-streaming access point
     #: - [UDP] sun cacao command-streaming access point
-    suncacao_csa = 11164, 'suncacao-csa', TransportProtocol.tcp
+    suncacao_csa = 11164, 'suncacao-csa'
 
     #: - [TCP] sun cacao web service access point
     #: - [UDP] sun cacao web service access point
-    suncacao_websvc = 11165, 'suncacao-websvc', TransportProtocol.tcp
+    suncacao_websvc = 11165, 'suncacao-websvc'
 
     #: [TCP] Reserved
-    reserved_11171 = 11171, 'reserved', TransportProtocol.tcp
+    reserved_11171 = 11171, 'reserved'
 
     #: [TCP] OEM cacao JMX-remoting access point
-    oemcacao_jmxmp = 11172, 'oemcacao-jmxmp', TransportProtocol.tcp
+    oemcacao_jmxmp = 11172, 'oemcacao-jmxmp'
 
     #: [TCP] Straton Runtime Programing
-    t5_straton = 11173, 't5-straton', TransportProtocol.tcp
+    t5_straton = 11173, 't5-straton'
 
     #: [TCP] OEM cacao rmi registry access point
-    oemcacao_rmi = 11174, 'oemcacao-rmi', TransportProtocol.tcp
+    oemcacao_rmi = 11174, 'oemcacao-rmi'
 
     #: [TCP] OEM cacao web service access point
-    oemcacao_websvc = 11175, 'oemcacao-websvc', TransportProtocol.tcp
+    oemcacao_websvc = 11175, 'oemcacao-websvc'
 
     #: - [TCP] smsqp
     #: - [UDP] smsqp
-    smsqp = 11201, 'smsqp', TransportProtocol.tcp
+    smsqp = 11201
 
     #: [TCP] DCSL Network Backup Services
-    dcsl_backup = 11202, 'dcsl-backup', TransportProtocol.tcp
+    dcsl_backup = 11202, 'dcsl-backup'
 
     #: - [TCP] WiFree Service
     #: - [UDP] WiFree Service
-    wifree = 11208, 'wifree', TransportProtocol.tcp
+    wifree = 11208
 
     #: - [TCP] Memory cache service
     #: - [UDP] Memory cache service
-    memcache = 11211, 'memcache', TransportProtocol.tcp
+    memcache = 11211
 
     #: - [TCP] numerical systems messaging
     #: - [SCTP] numerical systems messaging
-    xcompute = 11235, 'xcompute', TransportProtocol.tcp
+    xcompute = 11235
 
     #: - [TCP] IMIP
     #: - [UDP] IMIP
-    imip = 11319, 'imip', TransportProtocol.tcp
+    imip = 11319
 
     #: - [TCP] IMIP Channels Port
     #: - [UDP] IMIP Channels Port
-    imip_channels = 11320, 'imip-channels', TransportProtocol.tcp
+    imip_channels = 11320, 'imip-channels'
 
     #: - [TCP] Arena Server Listen
     #: - [UDP] Arena Server Listen
-    arena_server = 11321, 'arena-server', TransportProtocol.tcp
+    arena_server = 11321, 'arena-server'
 
     #: - [TCP] ATM UHAS
     #: - [UDP] ATM UHAS
-    atm_uhas = 11367, 'atm-uhas', TransportProtocol.tcp
+    atm_uhas = 11367, 'atm-uhas'
 
     #: - [TCP] OpenPGP HTTP Keyserver
     #: - [UDP] OpenPGP HTTP Keyserver
-    hkp = 11371, 'hkp', TransportProtocol.tcp
+    hkp = 11371
 
     #: [TCP] Reserved
-    reserved_11430 = 11430, 'reserved', TransportProtocol.tcp
+    reserved_11430 = 11430, 'reserved'
 
     #: [TCP] Ollama
-    ollama = 11434, 'ollama', TransportProtocol.tcp
+    ollama = 11434
 
     #: [TCP] ASG Cypress Secure Only
-    asgcypresstcps = 11489, 'asgcypresstcps', TransportProtocol.tcp
+    asgcypresstcps = 11489
 
     #: - [TCP] Tempest Protocol Port
     #: - [UDP] Tempest Protocol Port
-    tempest_port = 11600, 'tempest-port', TransportProtocol.tcp
+    tempest_port = 11600, 'tempest-port'
 
     #: [TCP] EMC XtremSW distributed config
-    emc_xsw_dconfig = 11623, 'emc-xsw-dconfig', TransportProtocol.tcp
+    emc_xsw_dconfig = 11623, 'emc-xsw-dconfig'
 
     #: - [TCP] H.323 Call Control Signalling Alternate
     #: - [UDP] H.323 Call Control Signalling Alternate
-    h323callsigalt = 11720, 'h323callsigalt', TransportProtocol.tcp
+    h323callsigalt = 11720
 
     #: - [TCP] EMC XtremSW distributed cache
     #: - [UDP] EMC XtremSW distributed cache
-    emc_xsw_dcache = 11723, 'emc-xsw-dcache', TransportProtocol.tcp
+    emc_xsw_dcache = 11723, 'emc-xsw-dcache'
 
     #: - [TCP] Intrepid SSL
     #: - [UDP] Intrepid SSL
-    intrepid_ssl = 11751, 'intrepid-ssl', TransportProtocol.tcp
+    intrepid_ssl = 11751, 'intrepid-ssl'
 
     #: [TCP] LanSchool
-    lanschool = 11796, 'lanschool', TransportProtocol.tcp
+    lanschool = 11796
 
     #: - [TCP] X2E Xoraya Multichannel protocol
     #: - [UDP] X2E Xoraya Multichannel protocol
-    xoraya = 11876, 'xoraya', TransportProtocol.tcp
+    xoraya = 11876
 
     #: [TCP] Reserved
-    reserved_11877 = 11877, 'reserved', TransportProtocol.tcp
+    reserved_11877 = 11877, 'reserved'
 
     #: - [TCP] SysInfo Service Protocol
     #: - [UDP] SysInfo Service Protocol
-    sysinfo_sp = 11967, 'sysinfo-sp', TransportProtocol.tcp
+    sysinfo_sp = 11967, 'sysinfo-sp'
 
     #: [TCP] TiBS Service
-    tibsd = 11971, 'tibsd', TransportProtocol.tcp
+    tibsd = 11971
 
     #: - [TCP] IBM Enterprise Extender SNA XID Exchange
     #: - [UDP] IBM Enterprise Extender SNA XID Exchange
-    entextxid = 12000, 'entextxid', TransportProtocol.tcp
+    entextxid = 12000
 
     #: - [TCP] IBM Enterprise Extender SNA COS Network Priority
     #: - [UDP] IBM Enterprise Extender SNA COS Network Priority
-    entextnetwk = 12001, 'entextnetwk', TransportProtocol.tcp
+    entextnetwk = 12001
 
     #: - [TCP] IBM Enterprise Extender SNA COS High Priority
     #: - [UDP] IBM Enterprise Extender SNA COS High Priority
-    entexthigh = 12002, 'entexthigh', TransportProtocol.tcp
+    entexthigh = 12002
 
     #: - [TCP] IBM Enterprise Extender SNA COS Medium Priority
     #: - [UDP] IBM Enterprise Extender SNA COS Medium Priority
-    entextmed = 12003, 'entextmed', TransportProtocol.tcp
+    entextmed = 12003
 
     #: - [TCP] IBM Enterprise Extender SNA COS Low Priority
     #: - [UDP] IBM Enterprise Extender SNA COS Low Priority
-    entextlow = 12004, 'entextlow', TransportProtocol.tcp
+    entextlow = 12004
 
     #: - [TCP] DBISAM Database Server - Regular
     #: - [UDP] DBISAM Database Server - Regular
-    dbisamserver1 = 12005, 'dbisamserver1', TransportProtocol.tcp
+    dbisamserver1 = 12005
 
     #: - [TCP] DBISAM Database Server - Admin
     #: - [UDP] DBISAM Database Server - Admin
-    dbisamserver2 = 12006, 'dbisamserver2', TransportProtocol.tcp
+    dbisamserver2 = 12006
 
     #: - [TCP] Accuracer Database System Server
     #: - [UDP] Accuracer Database System Server
-    accuracer = 12007, 'accuracer', TransportProtocol.tcp
+    accuracer = 12007
 
     #: - [TCP] Accuracer Database System Admin
     #: - [UDP] Accuracer Database System Admin
-    accuracer_dbms = 12008, 'accuracer-dbms', TransportProtocol.tcp
+    accuracer_dbms = 12008, 'accuracer-dbms'
 
     #: [TCP] Reserved
-    reserved_12009 = 12009, 'reserved', TransportProtocol.tcp
+    reserved_12009 = 12009, 'reserved'
 
     #: [TCP] ElevateDB Server
-    edbsrvr = 12010, 'edbsrvr', TransportProtocol.tcp
+    edbsrvr = 12010
 
     #: - [TCP] Vipera Messaging Service
     #: - [UDP] Vipera Messaging Service
-    vipera = 12012, 'vipera', TransportProtocol.tcp
+    vipera = 12012
 
     #: - [TCP] Vipera Messaging Service over SSL Communication
     #: - [UDP] Vipera Messaging Service over SSL Communication
-    vipera_ssl = 12013, 'vipera-ssl', TransportProtocol.tcp
+    vipera_ssl = 12013, 'vipera-ssl'
 
     #: - [TCP] RETS over SSL
     #: - [UDP] RETS over SSL
-    rets_ssl = 12109, 'rets-ssl', TransportProtocol.tcp
+    rets_ssl = 12109, 'rets-ssl'
 
     #: - [TCP] NuPaper Session Service
     #: - [UDP] NuPaper Session Service
-    nupaper_ss = 12121, 'nupaper-ss', TransportProtocol.tcp
+    nupaper_ss = 12121, 'nupaper-ss'
 
     #: - [TCP] CA Web Access Service
     #: - [UDP] CA Web Access Service
-    cawas = 12168, 'cawas', TransportProtocol.tcp
+    cawas = 12168
 
     #: - [TCP] HiveP
     #: - [UDP] HiveP
-    hivep = 12172, 'hivep', TransportProtocol.tcp
+    hivep = 12172
 
     #: - [TCP] LinoGrid Engine
     #: - [UDP] LinoGrid Engine
-    linogridengine = 12300, 'linogridengine', TransportProtocol.tcp
+    linogridengine = 12300
 
     #: [TCP] Remote Administration Daemon (RAD) is a system service that offers
     #: secure, remote, programmatic access to Solaris system configuration and
     #: run-time state
-    rads = 12302, 'rads', TransportProtocol.tcp
+    rads = 12302
 
     #: - [TCP] Warehouse Monitoring Syst SSS
     #: - [UDP] Warehouse Monitoring Syst SSS
-    warehouse_sss = 12321, 'warehouse-sss', TransportProtocol.tcp
+    warehouse_sss = 12321, 'warehouse-sss'
 
     #: - [TCP] Warehouse Monitoring Syst
     #: - [UDP] Warehouse Monitoring Syst
-    warehouse = 12322, 'warehouse', TransportProtocol.tcp
+    warehouse = 12322
 
     #: - [TCP] Italk Chat System
     #: - [UDP] Italk Chat System
-    italk = 12345, 'italk', TransportProtocol.tcp
+    italk = 12345
 
     #: [TCP] Carbonite Server Replication Control
-    carb_repl_ctrl = 12546, 'carb-repl-ctrl', TransportProtocol.tcp
+    carb_repl_ctrl = 12546, 'carb-repl-ctrl'
 
     #: - [TCP] tsaf port
     #: - [UDP] tsaf port
-    tsaf = 12753, 'tsaf', TransportProtocol.tcp
+    tsaf = 12753
 
     #: [TCP] control port for the netperf benchmark
-    netperf = 12865, 'netperf', TransportProtocol.tcp
+    netperf = 12865
 
     #: - [TCP] I-ZIPQD
     #: - [UDP] I-ZIPQD
-    i_zipqd = 13160, 'i-zipqd', TransportProtocol.tcp
+    i_zipqd = 13160, 'i-zipqd'
 
     #: - [TCP] Black Crow Software application logging
     #: - [UDP] Black Crow Software application logging
-    bcslogc = 13216, 'bcslogc', TransportProtocol.tcp
+    bcslogc = 13216
 
     #: - [TCP] R&S Proxy Installation Assistant Service
     #: - [UDP] R&S Proxy Installation Assistant Service
-    rs_pias = 13217, 'rs-pias', TransportProtocol.tcp
+    rs_pias = 13217, 'rs-pias'
 
     #: [TCP] EMC Virtual CAS Service
-    emc_vcas_tcp = 13218, 'emc-vcas-tcp', TransportProtocol.tcp
+    emc_vcas_tcp = 13218, 'emc-vcas-tcp'
 
     #: - [TCP] PowWow Client
     #: - [UDP] PowWow Client
-    powwow_client = 13223, 'powwow-client', TransportProtocol.tcp
+    powwow_client = 13223, 'powwow-client'
 
     #: - [TCP] PowWow Server
     #: - [UDP] PowWow Server
-    powwow_server = 13224, 'powwow-server', TransportProtocol.tcp
+    powwow_server = 13224, 'powwow-server'
 
     #: [TCP] DoIP Data
-    doip_data = 13400, 'doip-data', TransportProtocol.tcp
+    doip_data = 13400, 'doip-data'
 
     #: - [TCP] BPRD Protocol (VERITAS NetBackup)
     #: - [UDP] BPRD Protocol (VERITAS NetBackup)
-    bprd = 13720, 'bprd', TransportProtocol.tcp
+    bprd = 13720
 
     #: - [TCP] BPDBM Protocol (VERITAS NetBackup)
     #: - [UDP] BPDBM Protocol (VERITAS NetBackup)
-    bpdbm = 13721, 'bpdbm', TransportProtocol.tcp
+    bpdbm = 13721
 
     #: - [TCP] BP Java MSVC Protocol
     #: - [UDP] BP Java MSVC Protocol
-    bpjava_msvc = 13722, 'bpjava-msvc', TransportProtocol.tcp
+    bpjava_msvc = 13722, 'bpjava-msvc'
 
     #: - [TCP] Veritas Network Utility
     #: - [UDP] Veritas Network Utility
-    vnetd = 13724, 'vnetd', TransportProtocol.tcp
+    vnetd = 13724
 
     #: - [TCP] VERITAS NetBackup
     #: - [UDP] VERITAS NetBackup
-    bpcd = 13782, 'bpcd', TransportProtocol.tcp
+    bpcd = 13782
 
     #: - [TCP] VOPIED Protocol
     #: - [UDP] VOPIED Protocol
-    vopied = 13783, 'vopied', TransportProtocol.tcp
+    vopied = 13783
 
     #: - [TCP] NetBackup Database
     #: - [UDP] NetBackup Database
-    nbdb = 13785, 'nbdb', TransportProtocol.tcp
+    nbdb = 13785
 
     #: - [TCP] Veritas-nomdb
     #: - [UDP] Veritas-nomdb
-    nomdb = 13786, 'nomdb', TransportProtocol.tcp
+    nomdb = 13786
 
     #: - [TCP] DSMCC Config [ISO/IEC 13818-6 MPEG-2 DSM-CC]
     #: - [UDP] DSMCC Config [ISO/IEC 13818-6 MPEG-2 DSM-CC]
-    dsmcc_config = 13818, 'dsmcc-config', TransportProtocol.tcp
+    dsmcc_config = 13818, 'dsmcc-config'
 
     #: - [TCP] DSMCC Session Messages [ISO/IEC 13818-6 MPEG-2 DSM-CC]
     #: - [UDP] DSMCC Session Messages [ISO/IEC 13818-6 MPEG-2 DSM-CC]
-    dsmcc_session = 13819, 'dsmcc-session', TransportProtocol.tcp
+    dsmcc_session = 13819, 'dsmcc-session'
 
     #: - [TCP] DSMCC Pass-Thru Messages [ISO/IEC 13818-6 MPEG-2 DSM-CC]
     #: - [UDP] DSMCC Pass-Thru Messages [ISO/IEC 13818-6 MPEG-2 DSM-CC]
-    dsmcc_passthru = 13820, 'dsmcc-passthru', TransportProtocol.tcp
+    dsmcc_passthru = 13820, 'dsmcc-passthru'
 
     #: - [TCP] DSMCC Download Protocol [ISO/IEC 13818-6 MPEG-2 DSM-CC]
     #: - [UDP] DSMCC Download Protocol [ISO/IEC 13818-6 MPEG-2 DSM-CC]
-    dsmcc_download = 13821, 'dsmcc-download', TransportProtocol.tcp
+    dsmcc_download = 13821, 'dsmcc-download'
 
     #: - [TCP] DSMCC Channel Change Protocol [ISO/IEC 13818-6 MPEG-2 DSM-CC]
     #: - [UDP] DSMCC Channel Change Protocol [ISO/IEC 13818-6 MPEG-2 DSM-CC]
-    dsmcc_ccp = 13822, 'dsmcc-ccp', TransportProtocol.tcp
+    dsmcc_ccp = 13822, 'dsmcc-ccp'
 
     #: [TCP] Blackmagic Design Streaming Server
-    bmdss = 13823, 'bmdss', TransportProtocol.tcp
+    bmdss = 13823
 
     #: [TCP] Certificate Management and Issuing
-    a_trust_rpc = 13832, 'a-trust-rpc', TransportProtocol.tcp
+    a_trust_rpc = 13832, 'a-trust-rpc'
 
     #: - [TCP] Ultimate Control communication protocol
     #: - [UDP] Ultimate Control communication protocol
-    ucontrol = 13894, 'ucontrol', TransportProtocol.tcp
+    ucontrol = 13894
 
     #: - [TCP] D-TA SYSTEMS
     #: - [UDP] D-TA SYSTEMS
-    dta_systems = 13929, 'dta-systems', TransportProtocol.tcp
+    dta_systems = 13929, 'dta-systems'
 
     #: [TCP] MedEvolve Port Requester
-    medevolve = 13930, 'medevolve', TransportProtocol.tcp
+    medevolve = 13930
 
     #: - [TCP] SCOTTY High-Speed Filetransfer
     #: - [UDP] SCOTTY High-Speed Filetransfer
-    scotty_ft = 14000, 'scotty-ft', TransportProtocol.tcp
+    scotty_ft = 14000, 'scotty-ft'
 
     #: - [TCP] SUA
     #: - [UDP] De-Registered
     #: - [SCTP] SUA
-    sua = 14001, 'sua', TransportProtocol.tcp
+    sua = 14001
 
     #: [TCP] Reserved
-    reserved_14002 = 14002, 'reserved', TransportProtocol.tcp
+    reserved_14002 = 14002, 'reserved'
 
     #: - [TCP] sage Best! Config Server 1
     #: - [UDP] sage Best! Config Server 1
-    sage_best_com1 = 14033, 'sage-best-com1', TransportProtocol.tcp
+    sage_best_com1 = 14033, 'sage-best-com1'
 
     #: - [TCP] sage Best! Config Server 2
     #: - [UDP] sage Best! Config Server 2
-    sage_best_com2 = 14034, 'sage-best-com2', TransportProtocol.tcp
+    sage_best_com2 = 14034, 'sage-best-com2'
 
     #: - [TCP] VCS Application
     #: - [UDP] VCS Application
-    vcs_app = 14141, 'vcs-app', TransportProtocol.tcp
+    vcs_app = 14141, 'vcs-app'
 
     #: - [TCP] IceWall Cert Protocol
     #: - [UDP] IceWall Cert Protocol
-    icpp = 14142, 'icpp', TransportProtocol.tcp
+    icpp = 14142
 
     #: [TCP] IceWall Cert Protocol over TLS
-    icpps = 14143, 'icpps', TransportProtocol.tcp
+    icpps = 14143
 
     #: - [TCP] GCM Application
     #: - [UDP] GCM Application
-    gcm_app = 14145, 'gcm-app', TransportProtocol.tcp
+    gcm_app = 14145, 'gcm-app'
 
     #: - [TCP] Veritas Traffic Director
     #: - [UDP] Veritas Traffic Director
-    vrts_tdd = 14149, 'vrts-tdd', TransportProtocol.tcp
+    vrts_tdd = 14149, 'vrts-tdd'
 
     #: [TCP] Veritas Cluster Server Command Server
-    vcscmd = 14150, 'vcscmd', TransportProtocol.tcp
+    vcscmd = 14150
 
     #: - [TCP] Veritas Application Director
     #: - [UDP] Veritas Application Director
-    vad = 14154, 'vad', TransportProtocol.tcp
+    vad = 14154
 
     #: - [TCP] Fencing Server
     #: - [UDP] Fencing Server
-    cps = 14250, 'cps', TransportProtocol.tcp
+    cps = 14250
 
     #: - [TCP] CA eTrust Web Update Service
     #: - [UDP] CA eTrust Web Update Service
-    ca_web_update = 14414, 'ca-web-update', TransportProtocol.tcp
+    ca_web_update = 14414, 'ca-web-update'
 
     #: [TCP] xpra network protocol
-    xpra = 14500, 'xpra', TransportProtocol.tcp
+    xpra = 14500
 
     #: - [TCP] hde-lcesrvr-1
     #: - [UDP] hde-lcesrvr-1
-    hde_lcesrvr_1 = 14936, 'hde-lcesrvr-1', TransportProtocol.tcp
+    hde_lcesrvr_1 = 14936, 'hde-lcesrvr-1'
 
     #: - [TCP] hde-lcesrvr-2
     #: - [UDP] hde-lcesrvr-2
-    hde_lcesrvr_2 = 14937, 'hde-lcesrvr-2', TransportProtocol.tcp
+    hde_lcesrvr_2 = 14937, 'hde-lcesrvr-2'
 
     #: - [TCP] Hypack Data Aquisition
     #: - [UDP] Hypack Data Aquisition
-    hydap = 15000, 'hydap', TransportProtocol.tcp
+    hydap = 15000
 
     #: [TCP] Open Network Environment TLS
-    onep_tls = 15002, 'onep-tls', TransportProtocol.tcp
+    onep_tls = 15002, 'onep-tls'
 
     #: [TCP] Reserved
-    reserved_15118 = 15118, 'reserved', TransportProtocol.tcp
+    reserved_15118 = 15118, 'reserved'
 
     #: - [TCP] XPilot Contact Port
     #: - [UDP] XPilot Contact Port
-    xpilot = 15345, 'xpilot', TransportProtocol.tcp
+    xpilot = 15345
 
     #: - [TCP] 3Link Negotiation
     #: - [UDP] 3Link Negotiation
-    TCP_3link = 15363, '3link', TransportProtocol.tcp
+    TCP_3link = 15363, '3link'
 
     #: - [TCP] Cisco Stateful NAT
     #: - [UDP] Cisco Stateful NAT
-    cisco_snat = 15555, 'cisco-snat', TransportProtocol.tcp
+    cisco_snat = 15555, 'cisco-snat'
 
     #: - [TCP] Backup Express Restore Server
     #: - [UDP] Backup Express Restore Server
-    bex_xr = 15660, 'bex-xr', TransportProtocol.tcp
+    bex_xr = 15660, 'bex-xr'
 
     #: - [TCP] Picture Transfer Protocol
     #: - [UDP] Picture Transfer Protocol
-    ptp = 15740, 'ptp', TransportProtocol.tcp
+    ptp = 15740
 
     #: [TCP] Reserved
-    reserved_15998 = 15998, 'reserved', TransportProtocol.tcp
+    reserved_15998 = 15998, 'reserved'
 
     #: [TCP] ProGrammar Enterprise
-    programmar = 15999, 'programmar', TransportProtocol.tcp
+    programmar = 15999
 
     #: [TCP] Administration Server Access
-    fmsas = 16000, 'fmsas', TransportProtocol.tcp
+    fmsas = 16000
 
     #: [TCP] Administration Server Connector
-    fmsascon = 16001, 'fmsascon', TransportProtocol.tcp
+    fmsascon = 16001
 
     #: [TCP] GoodSync Mediation Service
-    gsms = 16002, 'gsms', TransportProtocol.tcp
+    gsms = 16002
 
     #: [TCP] Reserved
-    reserved_16003 = 16003, 'reserved', TransportProtocol.tcp
+    reserved_16003 = 16003, 'reserved'
 
     #: [TCP] Filemaker Java Web Publishing Core
-    jwpc = 16020, 'jwpc', TransportProtocol.tcp
+    jwpc = 16020
 
     #: [TCP] Filemaker Java Web Publishing Core Binary
-    jwpc_bin = 16021, 'jwpc-bin', TransportProtocol.tcp
+    jwpc_bin = 16021, 'jwpc-bin'
 
     #: - [TCP] Solaris SEA Port
     #: - [UDP] Solaris SEA Port
-    sun_sea_port = 16161, 'sun-sea-port', TransportProtocol.tcp
+    sun_sea_port = 16161, 'sun-sea-port'
 
     #: [TCP] Solaris Audit - secure remote audit log
-    solaris_audit = 16162, 'solaris-audit', TransportProtocol.tcp
+    solaris_audit = 16162, 'solaris-audit'
 
     #: - [TCP] etb4j
     #: - [UDP] etb4j
-    etb4j = 16309, 'etb4j', TransportProtocol.tcp
+    etb4j = 16309
 
     #: - [TCP] Policy Distribute, Update Notification
     #: - [UDP] Policy Distribute, Update Notification
-    pduncs = 16310, 'pduncs', TransportProtocol.tcp
+    pduncs = 16310
 
     #: - [TCP] Policy definition and update management
     #: - [UDP] Policy definition and update management
-    pdefmns = 16311, 'pdefmns', TransportProtocol.tcp
+    pdefmns = 16311
 
     #: - [TCP] Network Serial Extension Ports One
     #: - [UDP] Network Serial Extension Ports One
-    netserialext1 = 16360, 'netserialext1', TransportProtocol.tcp
+    netserialext1 = 16360
 
     #: - [TCP] Network Serial Extension Ports Two
     #: - [UDP] Network Serial Extension Ports Two
-    netserialext2 = 16361, 'netserialext2', TransportProtocol.tcp
+    netserialext2 = 16361
 
     #: - [TCP] Network Serial Extension Ports Three
     #: - [UDP] Network Serial Extension Ports Three
-    netserialext3 = 16367, 'netserialext3', TransportProtocol.tcp
+    netserialext3 = 16367
 
     #: - [TCP] Network Serial Extension Ports Four
     #: - [UDP] Network Serial Extension Ports Four
-    netserialext4 = 16368, 'netserialext4', TransportProtocol.tcp
+    netserialext4 = 16368
 
     #: - [TCP] Connected Corp
     #: - [UDP] Connected Corp
-    connected = 16384, 'connected', TransportProtocol.tcp
+    connected = 16384
 
     #: [TCP] Reliable Datagram Sockets
-    rdgs = 16385, 'rdgs', TransportProtocol.tcp
+    rdgs = 16385
 
     #: [TCP] X509 Objects Management Service
-    xoms = 16619, 'xoms', TransportProtocol.tcp
+    xoms = 16619
 
     #: [TCP] Reliable multipath data transport for high latencies
-    axon_tunnel = 16665, 'axon-tunnel', TransportProtocol.tcp
+    axon_tunnel = 16665, 'axon-tunnel'
 
     #: [TCP] Reserved
-    reserved_16666 = 16666, 'reserved', TransportProtocol.tcp
+    reserved_16666 = 16666, 'reserved'
 
     #: [TCP] This server provides callable services to mainframe External Security
     #: Managers from any TCP/IP platform
-    cadsisvr = 16789, 'cadsisvr', TransportProtocol.tcp
+    cadsisvr = 16789
 
     #: - [TCP] Newbay Mobile Client Update Service
     #: - [UDP] Newbay Mobile Client Update Service
-    newbay_snc_mc = 16900, 'newbay-snc-mc', TransportProtocol.tcp
+    newbay_snc_mc = 16900, 'newbay-snc-mc'
 
     #: - [TCP] Simple Generic Client Interface Protocol
     #: - [UDP] Simple Generic Client Interface Protocol
-    sgcip = 16950, 'sgcip', TransportProtocol.tcp
+    sgcip = 16950
 
     #: - [TCP] INTEL-RCI-MP
     #: - [UDP] INTEL-RCI-MP
-    intel_rci_mp = 16991, 'intel-rci-mp', TransportProtocol.tcp
+    intel_rci_mp = 16991, 'intel-rci-mp'
 
     #: - [TCP] Intel(R) AMT SOAP/HTTP
     #: - [UDP] Intel(R) AMT SOAP/HTTP
-    amt_soap_http = 16992, 'amt-soap-http', TransportProtocol.tcp
+    amt_soap_http = 16992, 'amt-soap-http'
 
     #: - [TCP] Intel(R) AMT SOAP/HTTPS
     #: - [UDP] Intel(R) AMT SOAP/HTTPS
-    amt_soap_https = 16993, 'amt-soap-https', TransportProtocol.tcp
+    amt_soap_https = 16993, 'amt-soap-https'
 
     #: - [TCP] Intel(R) AMT Redirection/TCP
     #: - [UDP] Intel(R) AMT Redirection/TCP
-    amt_redir_tcp = 16994, 'amt-redir-tcp', TransportProtocol.tcp
+    amt_redir_tcp = 16994, 'amt-redir-tcp'
 
     #: - [TCP] Intel(R) AMT Redirection/TLS
     #: - [UDP] Intel(R) AMT Redirection/TLS
-    amt_redir_tls = 16995, 'amt-redir-tls', TransportProtocol.tcp
+    amt_redir_tls = 16995, 'amt-redir-tls'
 
     #: - [TCP]
     #: - [UDP]
-    isode_dua = 17007, 'isode-dua', TransportProtocol.tcp
+    isode_dua = 17007, 'isode-dua'
 
     #: [TCP] Plan 9 cpu port
-    ncpu = 17010, 'ncpu', TransportProtocol.tcp
+    ncpu = 17010
 
     #: [TCP] Vestas Data Layer Protocol
-    vestasdlp = 17184, 'vestasdlp', TransportProtocol.tcp
+    vestasdlp = 17184
 
     #: - [TCP] Sounds Virtual
     #: - [UDP] Sounds Virtual
-    soundsvirtual = 17185, 'soundsvirtual', TransportProtocol.tcp
+    soundsvirtual = 17185
 
     #: - [TCP] Chipper
     #: - [UDP] Chipper
-    chipper = 17219, 'chipper', TransportProtocol.tcp
+    chipper = 17219
 
     #: - [TCP] IEEE 1722 Transport Protocol for Time Sensitive Applications
     #: - [UDP] IEEE 1722 Transport Protocol for Time Sensitive Applications
-    avtp = 17220, 'avtp', TransportProtocol.tcp
+    avtp = 17220
 
     #: - [TCP] IEEE 1722.1 AVB Discovery, Enumeration, Connection management, and
     #:   Control
     #: - [UDP] IEEE 1722.1 AVB Discovery, Enumeration, Connection management, and
     #:   Control
-    avdecc = 17221, 'avdecc', TransportProtocol.tcp
+    avdecc = 17221
 
     #: [TCP] Reserved
-    reserved_17222 = 17222, 'reserved', TransportProtocol.tcp
+    reserved_17222 = 17222, 'reserved'
 
     #: [TCP] ISA100 GCI is a service utilizing a common interface between an ISA100
     #: Wireless gateway and a client application
-    isa100_gci = 17223, 'isa100-gci', TransportProtocol.tcp
+    isa100_gci = 17223, 'isa100-gci'
 
     #: [TCP] Reserved
-    reserved_17224 = 17224, 'reserved', TransportProtocol.tcp
+    reserved_17224 = 17224, 'reserved'
 
     #: - [TCP] Train Realtime Data Protocol (TRDP) Message Data
     #: - [UDP] Train Realtime Data Protocol (TRDP) Message Data
-    trdp_md = 17225, 'trdp-md', TransportProtocol.tcp
+    trdp_md = 17225, 'trdp-md'
 
     #: - [TCP] Integrius Secure Tunnel Protocol
     #: - [UDP] Integrius Secure Tunnel Protocol
-    integrius_stp = 17234, 'integrius-stp', TransportProtocol.tcp
+    integrius_stp = 17234, 'integrius-stp'
 
     #: - [TCP] SSH Tectia Manager
     #: - [UDP] SSH Tectia Manager
-    ssh_mgmt = 17235, 'ssh-mgmt', TransportProtocol.tcp
+    ssh_mgmt = 17235, 'ssh-mgmt'
 
     #: [TCP] Dropbox LanSync Protocol
-    db_lsp = 17500, 'db-lsp', TransportProtocol.tcp
+    db_lsp = 17500, 'db-lsp'
 
     #: [TCP] Ailith management of routers
-    ailith = 17555, 'ailith', TransportProtocol.tcp
+    ailith = 17555
 
     #: - [TCP] Eclipse Aviation
     #: - [UDP] Eclipse Aviation
-    ea = 17729, 'ea', TransportProtocol.tcp
+    ea = 17729
 
     #: - [TCP] Encap. ZigBee Packets
     #: - [UDP] Encap. ZigBee Packets
-    zep = 17754, 'zep', TransportProtocol.tcp
+    zep = 17754
 
     #: - [TCP] ZigBee IP Transport Service
     #: - [UDP] ZigBee IP Transport Service
-    zigbee_ip = 17755, 'zigbee-ip', TransportProtocol.tcp
+    zigbee_ip = 17755, 'zigbee-ip'
 
     #: - [TCP] ZigBee IP Transport Secure Service
     #: - [UDP] ZigBee IP Transport Secure Service
-    zigbee_ips = 17756, 'zigbee-ips', TransportProtocol.tcp
+    zigbee_ips = 17756, 'zigbee-ips'
 
     #: [TCP] SolarWinds Orion
-    sw_orion = 17777, 'sw-orion', TransportProtocol.tcp
+    sw_orion = 17777, 'sw-orion'
 
     #: - [TCP] Beckman Instruments, Inc.
     #: - [UDP] Beckman Instruments, Inc.
-    biimenu = 18000, 'biimenu', TransportProtocol.tcp
+    biimenu = 18000
 
     #: [TCP] RAD PDF Service
-    radpdf = 18104, 'radpdf', TransportProtocol.tcp
+    radpdf = 18104
 
     #: [TCP] z/OS Resource Access Control Facility
-    racf = 18136, 'racf', TransportProtocol.tcp
+    racf = 18136
 
     #: - [TCP] OPSEC CVP
     #: - [UDP] OPSEC CVP
-    opsec_cvp = 18181, 'opsec-cvp', TransportProtocol.tcp
+    opsec_cvp = 18181, 'opsec-cvp'
 
     #: - [TCP] OPSEC UFP
     #: - [UDP] OPSEC UFP
-    opsec_ufp = 18182, 'opsec-ufp', TransportProtocol.tcp
+    opsec_ufp = 18182, 'opsec-ufp'
 
     #: - [TCP] OPSEC SAM
     #: - [UDP] OPSEC SAM
-    opsec_sam = 18183, 'opsec-sam', TransportProtocol.tcp
+    opsec_sam = 18183, 'opsec-sam'
 
     #: - [TCP] OPSEC LEA
     #: - [UDP] OPSEC LEA
-    opsec_lea = 18184, 'opsec-lea', TransportProtocol.tcp
+    opsec_lea = 18184, 'opsec-lea'
 
     #: - [TCP] OPSEC OMI
     #: - [UDP] OPSEC OMI
-    opsec_omi = 18185, 'opsec-omi', TransportProtocol.tcp
+    opsec_omi = 18185, 'opsec-omi'
 
     #: - [TCP] Occupational Health SC
     #: - [UDP] Occupational Health Sc
-    ohsc = 18186, 'ohsc', TransportProtocol.tcp
+    ohsc = 18186
 
     #: - [TCP] OPSEC ELA
     #: - [UDP] OPSEC ELA
-    opsec_ela = 18187, 'opsec-ela', TransportProtocol.tcp
+    opsec_ela = 18187, 'opsec-ela'
 
     #: - [TCP] Check Point RTM
     #: - [UDP] Check Point RTM
-    checkpoint_rtm = 18241, 'checkpoint-rtm', TransportProtocol.tcp
+    checkpoint_rtm = 18241, 'checkpoint-rtm'
 
     #: [TCP] Checkpoint router monitoring
-    iclid = 18242, 'iclid', TransportProtocol.tcp
+    iclid = 18242
 
     #: [TCP] Checkpoint router state backup
-    clusterxl = 18243, 'clusterxl', TransportProtocol.tcp
+    clusterxl = 18243
 
     #: - [TCP] GV NetConfig Service
     #: - [UDP] GV NetConfig Service
-    gv_pf = 18262, 'gv-pf', TransportProtocol.tcp
+    gv_pf = 18262, 'gv-pf'
 
     #: - [TCP] AC Cluster
     #: - [UDP] AC Cluster
-    ac_cluster = 18463, 'ac-cluster', TransportProtocol.tcp
+    ac_cluster = 18463, 'ac-cluster'
 
     #: [TCP] Reserved
-    reserved_18516 = 18516, 'reserved', TransportProtocol.tcp
+    reserved_18516 = 18516, 'reserved'
 
     #: - [TCP] Reliable Datagram Service
     #: - [UDP] Reliable Datagram Service
-    rds_ib = 18634, 'rds-ib', TransportProtocol.tcp
+    rds_ib = 18634, 'rds-ib'
 
     #: - [TCP] Reliable Datagram Service over IP
     #: - [UDP] Reliable Datagram Service over IP
-    rds_ip = 18635, 'rds-ip', TransportProtocol.tcp
+    rds_ip = 18635, 'rds-ip'
 
     #: [TCP] Manufacturing Execution Systems Mesh Communication
-    vdmmesh = 18668, 'vdmmesh', TransportProtocol.tcp
+    vdmmesh = 18668
 
     #: - [TCP] IQue Protocol
     #: - [UDP] IQue Protocol
-    ique = 18769, 'ique', TransportProtocol.tcp
+    ique = 18769
 
     #: - [TCP] Infotos
     #: - [UDP] Infotos
-    infotos = 18881, 'infotos', TransportProtocol.tcp
+    infotos = 18881
 
     #: - [TCP] APCNECMP
     #: - [UDP] APCNECMP
-    apc_necmp = 18888, 'apc-necmp', TransportProtocol.tcp
+    apc_necmp = 18888, 'apc-necmp'
 
     #: - [TCP] iGrid Server
     #: - [UDP] iGrid Server
-    igrid = 19000, 'igrid', TransportProtocol.tcp
+    igrid = 19000
 
     #: - [TCP] Scintilla protocol for device services
     #: - [UDP] Scintilla protocol for device services
-    scintilla = 19007, 'scintilla', TransportProtocol.tcp
+    scintilla = 19007
 
     #: [TCP] J-Link TCP/IP Protocol
-    j_link = 19020, 'j-link', TransportProtocol.tcp
+    j_link = 19020, 'j-link'
 
     #: - [TCP] OPSEC UAA
     #: - [UDP] OPSEC UAA
-    opsec_uaa = 19191, 'opsec-uaa', TransportProtocol.tcp
+    opsec_uaa = 19191, 'opsec-uaa'
 
     #: - [TCP] UserAuthority SecureAgent
     #: - [UDP] UserAuthority SecureAgent
-    ua_secureagent = 19194, 'ua-secureagent', TransportProtocol.tcp
+    ua_secureagent = 19194, 'ua-secureagent'
 
     #: [TCP] Client Connection Management and Data Exchange Service
-    cora = 19220, 'cora', TransportProtocol.tcp
+    cora = 19220
 
     #: - [TCP] Key Server for SASSAFRAS
     #: - [UDP] Key Server for SASSAFRAS
-    keysrvr = 19283, 'keysrvr', TransportProtocol.tcp
+    keysrvr = 19283
 
     #: - [TCP] Key Shadow for SASSAFRAS
     #: - [UDP] Key Shadow for SASSAFRAS
-    keyshadow = 19315, 'keyshadow', TransportProtocol.tcp
+    keyshadow = 19315
 
     #: - [TCP] mtrgtrans
     #: - [UDP] mtrgtrans
-    mtrgtrans = 19398, 'mtrgtrans', TransportProtocol.tcp
+    mtrgtrans = 19398
 
     #: - [TCP] hp-sco
     #: - [UDP] hp-sco
-    hp_sco = 19410, 'hp-sco', TransportProtocol.tcp
+    hp_sco = 19410, 'hp-sco'
 
     #: - [TCP] hp-sca
     #: - [UDP] hp-sca
-    hp_sca = 19411, 'hp-sca', TransportProtocol.tcp
+    hp_sca = 19411, 'hp-sca'
 
     #: - [TCP] HP-SESSMON
     #: - [UDP] HP-SESSMON
-    hp_sessmon = 19412, 'hp-sessmon', TransportProtocol.tcp
+    hp_sessmon = 19412, 'hp-sessmon'
 
     #: - [TCP] FXUPTP
     #: - [UDP] FXUPTP
-    fxuptp = 19539, 'fxuptp', TransportProtocol.tcp
+    fxuptp = 19539
 
     #: - [TCP] SXUPTP
     #: - [UDP] SXUPTP
-    sxuptp = 19540, 'sxuptp', TransportProtocol.tcp
+    sxuptp = 19540
 
     #: - [TCP] JCP Client
     #: - [UDP] JCP Client
-    jcp = 19541, 'jcp', TransportProtocol.tcp
+    jcp = 19541
 
     #: [TCP] Reserved
-    reserved_19788 = 19788, 'reserved', TransportProtocol.tcp
+    reserved_19788 = 19788, 'reserved'
 
     #: [TCP] FairCom Database
-    faircom_db = 19790, 'faircom-db', TransportProtocol.tcp
+    faircom_db = 19790, 'faircom-db'
 
     #: [TCP] IEC 60870-5-104 process control - secure
-    iec_104_sec = 19998, 'iec-104-sec', TransportProtocol.tcp
+    iec_104_sec = 19998, 'iec-104-sec'
 
     #: - [TCP] Distributed Network Protocol - Secure
     #: - [UDP] Distributed Network Protocol - Secure
     #: - [SCTP] Distributed Network Protocol - secured
-    dnp_sec = 19999, 'dnp-sec', TransportProtocol.tcp
+    dnp_sec = 19999, 'dnp-sec'
 
     #: - [TCP] DNP
     #: - [UDP] DNP
     #: - [SCTP] Distributed Network Protocol
-    dnp = 20000, 'dnp', TransportProtocol.tcp
+    dnp = 20000
 
     #: - [TCP] MicroSAN
     #: - [UDP] MicroSAN
-    microsan = 20001, 'microsan', TransportProtocol.tcp
+    microsan = 20001
 
     #: - [TCP] Commtact HTTP
     #: - [UDP] Commtact HTTP
-    commtact_http = 20002, 'commtact-http', TransportProtocol.tcp
+    commtact_http = 20002, 'commtact-http'
 
     #: - [TCP] Commtact HTTPS
     #: - [UDP] Commtact HTTPS
-    commtact_https = 20003, 'commtact-https', TransportProtocol.tcp
+    commtact_https = 20003, 'commtact-https'
 
     #: - [TCP] OpenWebNet protocol for electric network
     #: - [UDP] OpenWebNet protocol for electric network
-    openwebnet = 20005, 'openwebnet', TransportProtocol.tcp
+    openwebnet = 20005
 
     #: [TCP] Reserved
-    reserved_20012 = 20012, 'reserved', TransportProtocol.tcp
+    reserved_20012 = 20012, 'reserved'
 
     #: [TCP] Samsung Interdevice Interaction
-    ss_idi = 20013, 'ss-idi', TransportProtocol.tcp
+    ss_idi = 20013, 'ss-idi'
 
     #: - [TCP] OpenDeploy Listener
     #: - [UDP] OpenDeploy Listener
-    opendeploy = 20014, 'opendeploy', TransportProtocol.tcp
+    opendeploy = 20014
 
     #: - [TCP] NetBurner ID Port IANA assigned this well-formed service name as a
     #:   replacement for "nburn_id".
@@ -23888,292 +23888,292 @@ class TCP(AppType):
     #: - [UDP] NetBurner ID Port IANA assigned this well-formed service name as a
     #:   replacement for "nburn_id".
     #: - [UDP] NetBurner ID Port
-    nburn_id = 20034, 'nburn-id', TransportProtocol.tcp
+    nburn_id = 20034, 'nburn-id'
 
     #: - [TCP] TMOP HL7 Message Transfer Service
     #: - [UDP] TMOP HL7 Message Transfer Service
-    tmophl7mts = 20046, 'tmophl7mts', TransportProtocol.tcp
+    tmophl7mts = 20046
 
     #: - [TCP] NFS mount protocol
     #: - [UDP] NFS mount protocol
-    mountd = 20048, 'mountd', TransportProtocol.tcp
+    mountd = 20048
 
     #: - [TCP] Network File System (NFS) over RDMA [:rfc:`8267`]
     #: - [UDP] Network File System (NFS) over RDMA [:rfc:`8267`]
     #: - [SCTP] Network File System (NFS) over RDMA [:rfc:`8267`]
-    nfsrdma = 20049, 'nfsrdma', TransportProtocol.tcp
+    nfsrdma = 20049
 
     #: [TCP] AvesTerra Hypergraph Transfer Protocol (HGTP)
-    avesterra = 20057, 'avesterra', TransportProtocol.tcp
+    avesterra = 20057
 
     #: - [TCP] TOLfab Data Change
     #: - [UDP] TOLfab Data Change
-    tolfab = 20167, 'tolfab', TransportProtocol.tcp
+    tolfab = 20167
 
     #: - [TCP] IPD Tunneling Port
     #: - [UDP] IPD Tunneling Port
-    ipdtp_port = 20202, 'ipdtp-port', TransportProtocol.tcp
+    ipdtp_port = 20202, 'ipdtp-port'
 
     #: - [TCP] iPulse-ICS
     #: - [UDP] iPulse-ICS
-    ipulse_ics = 20222, 'ipulse-ics', TransportProtocol.tcp
+    ipulse_ics = 20222, 'ipulse-ics'
 
     #: - [TCP] emWave Message Service
     #: - [UDP] emWave Message Service
-    emwavemsg = 20480, 'emwavemsg', TransportProtocol.tcp
+    emwavemsg = 20480
 
     #: - [TCP] Track
     #: - [UDP] Track
-    track = 20670, 'track', TransportProtocol.tcp
+    track = 20670
 
     #: [TCP] CRTech NLM
-    crtech_nlm = 20810, 'crtech-nlm', TransportProtocol.tcp
+    crtech_nlm = 20810, 'crtech-nlm'
 
     #: - [TCP] At Hand MMP
     #: - [UDP] AT Hand MMP
-    athand_mmp = 20999, 'athand-mmp', TransportProtocol.tcp
+    athand_mmp = 20999, 'athand-mmp'
 
     #: - [TCP] IRTrans Control
     #: - [UDP] IRTrans Control
-    irtrans = 21000, 'irtrans', TransportProtocol.tcp
+    irtrans = 21000
 
     #: [TCP] Notezilla.Lan Server
-    notezilla_lan = 21010, 'notezilla-lan', TransportProtocol.tcp
+    notezilla_lan = 21010, 'notezilla-lan'
 
     #: [TCP] Distributed artificial intelligence
-    trinket_agent = 21212, 'trinket-agent', TransportProtocol.tcp
+    trinket_agent = 21212, 'trinket-agent'
 
     #: [TCP] Cohesity backup agents
-    cohesity_agent = 21213, 'cohesity-agent', TransportProtocol.tcp
+    cohesity_agent = 21213, 'cohesity-agent'
 
     #: [TCP] Services for Air Server
-    aigairserver = 21221, 'aigairserver', TransportProtocol.tcp
+    aigairserver = 21221
 
     #: [TCP] Xahau P2P network protocol [https://xahau.network]
-    xahaud = 21337, 'xahaud', TransportProtocol.tcp
+    xahaud = 21337
 
     #: [TCP] Raima RDM TFS
-    rdm_tfs = 21553, 'rdm-tfs', TransportProtocol.tcp
+    rdm_tfs = 21553, 'rdm-tfs'
 
     #: - [TCP] MineScape Design File Server
     #: - [UDP] MineScape Design File Server
-    dfserver = 21554, 'dfserver', TransportProtocol.tcp
+    dfserver = 21554
 
     #: - [TCP] VoFR Gateway
     #: - [UDP] VoFR Gateway
-    vofr_gateway = 21590, 'vofr-gateway', TransportProtocol.tcp
+    vofr_gateway = 21590, 'vofr-gateway'
 
     #: - [TCP] TVNC Pro Multiplexing
     #: - [UDP] TVNC Pro Multiplexing
-    tvpm = 21800, 'tvpm', TransportProtocol.tcp
+    tvpm = 21800
 
     #: [TCP] Safe AutoLogon
-    sal = 21801, 'sal', TransportProtocol.tcp
+    sal = 21801
 
     #: - [TCP] webphone
     #: - [UDP] webphone
-    webphone = 21845, 'webphone', TransportProtocol.tcp
+    webphone = 21845
 
     #: - [TCP] NetSpeak Corp. Directory Services
     #: - [UDP] NetSpeak Corp. Directory Services
-    netspeak_is = 21846, 'netspeak-is', TransportProtocol.tcp
+    netspeak_is = 21846, 'netspeak-is'
 
     #: - [TCP] NetSpeak Corp. Connection Services
     #: - [UDP] NetSpeak Corp. Connection Services
-    netspeak_cs = 21847, 'netspeak-cs', TransportProtocol.tcp
+    netspeak_cs = 21847, 'netspeak-cs'
 
     #: - [TCP] NetSpeak Corp. Automatic Call Distribution
     #: - [UDP] NetSpeak Corp. Automatic Call Distribution
-    netspeak_acd = 21848, 'netspeak-acd', TransportProtocol.tcp
+    netspeak_acd = 21848, 'netspeak-acd'
 
     #: - [TCP] NetSpeak Corp. Credit Processing System
     #: - [UDP] NetSpeak Corp. Credit Processing System
-    netspeak_cps = 21849, 'netspeak-cps', TransportProtocol.tcp
+    netspeak_cps = 21849, 'netspeak-cps'
 
     #: - [TCP] SNAPenetIO
     #: - [UDP] SNAPenetIO
-    snapenetio = 22000, 'snapenetio', TransportProtocol.tcp
+    snapenetio = 22000
 
     #: - [TCP] OptoControl
     #: - [UDP] OptoControl
-    optocontrol = 22001, 'optocontrol', TransportProtocol.tcp
+    optocontrol = 22001
 
     #: - [TCP] Opto Host Port 2
     #: - [UDP] Opto Host Port 2
-    optohost002 = 22002, 'optohost002', TransportProtocol.tcp
+    optohost002 = 22002
 
     #: - [TCP] Opto Host Port 3
     #: - [UDP] Opto Host Port 3
-    optohost003 = 22003, 'optohost003', TransportProtocol.tcp
+    optohost003 = 22003
 
     #: - [TCP] Opto Host Port 4
     #: - [UDP] Opto Host Port 4
-    optohost004_22004 = 22004, 'optohost004', TransportProtocol.tcp
+    optohost004_22004 = 22004, 'optohost004'
 
     #: - [TCP] Opto Host Port 5
     #: - [UDP] Opto Host Port 5
-    optohost004_22005 = 22005, 'optohost004', TransportProtocol.tcp
+    optohost004_22005 = 22005, 'optohost004'
 
     #: [TCP] dCache Access Protocol
-    dcap = 22125, 'dcap', TransportProtocol.tcp
+    dcap = 22125
 
     #: [TCP] GSI dCache Access Protocol
-    gsidcap = 22128, 'gsidcap', TransportProtocol.tcp
+    gsidcap = 22128
 
     #: [TCP] EasyEngine is CLI tool to manage WordPress Sites on Nginx server
-    easyengine = 22222, 'easyengine', TransportProtocol.tcp
+    easyengine = 22222
 
     #: - [TCP] wnn6
     #: - [UDP] wnn6
-    wnn6 = 22273, 'wnn6', TransportProtocol.tcp
+    wnn6 = 22273
 
     #: - [TCP] CompactIS Tunnel
     #: - [UDP] CompactIS Tunnel
-    cis = 22305, 'cis', TransportProtocol.tcp
+    cis = 22305
 
     #: - [TCP] ShowCockpit Networking
     #: - [UDP] ShowCockpit Networking
-    showcockpit_net = 22333, 'showcockpit-net', TransportProtocol.tcp
+    showcockpit_net = 22333, 'showcockpit-net'
 
     #: [TCP] Initium Labs Security and Automation Control
-    shrewd_control = 22335, 'shrewd-control', TransportProtocol.tcp
+    shrewd_control = 22335, 'shrewd-control'
 
     #: - [TCP] CompactIS Secure Tunnel
     #: - [UDP] CompactIS Secure Tunnel
-    cis_secure = 22343, 'cis-secure', TransportProtocol.tcp
+    cis_secure = 22343, 'cis-secure'
 
     #: - [TCP] WibuKey Standard WkLan
     #: - [UDP] WibuKey Standard WkLan
-    wibukey = 22347, 'wibukey', TransportProtocol.tcp
+    wibukey = 22347
 
     #: - [TCP] CodeMeter Standard
     #: - [UDP] CodeMeter Standard
-    codemeter = 22350, 'codemeter', TransportProtocol.tcp
+    codemeter = 22350
 
     #: [TCP] TPC/IP requests of copy protection software to a server
-    codemeter_cmwan = 22351, 'codemeter-cmwan', TransportProtocol.tcp
+    codemeter_cmwan = 22351, 'codemeter-cmwan'
 
     #: [TCP] CaldSoft Backup server file transfer
-    caldsoft_backup = 22537, 'caldsoft-backup', TransportProtocol.tcp
+    caldsoft_backup = 22537, 'caldsoft-backup'
 
     #: [TCP] Vocaltec Web Conference
-    vocaltec_wconf = 22555, 'vocaltec-wconf', TransportProtocol.tcp
+    vocaltec_wconf = 22555, 'vocaltec-wconf'
 
     #: - [TCP] Talika Main Server
     #: - [UDP] Talika Main Server
-    talikaserver = 22763, 'talikaserver', TransportProtocol.tcp
+    talikaserver = 22763
 
     #: - [TCP] Telerate Information Platform LAN
     #: - [UDP] Telerate Information Platform LAN
-    aws_brf = 22800, 'aws-brf', TransportProtocol.tcp
+    aws_brf = 22800, 'aws-brf'
 
     #: - [TCP] Telerate Information Platform WAN
     #: - [UDP] Telerate Information Platform WAN
-    brf_gw = 22951, 'brf-gw', TransportProtocol.tcp
+    brf_gw = 22951, 'brf-gw'
 
     #: - [TCP] Inova LightLink Server Type 1
     #: - [UDP] Inova LightLink Server Type 1
-    inovaport1 = 23000, 'inovaport1', TransportProtocol.tcp
+    inovaport1 = 23000
 
     #: - [TCP] Inova LightLink Server Type 2
     #: - [UDP] Inova LightLink Server Type 2
-    inovaport2 = 23001, 'inovaport2', TransportProtocol.tcp
+    inovaport2 = 23001
 
     #: - [TCP] Inova LightLink Server Type 3
     #: - [UDP] Inova LightLink Server Type 3
-    inovaport3 = 23002, 'inovaport3', TransportProtocol.tcp
+    inovaport3 = 23002
 
     #: - [TCP] Inova LightLink Server Type 4
     #: - [UDP] Inova LightLink Server Type 4
-    inovaport4 = 23003, 'inovaport4', TransportProtocol.tcp
+    inovaport4 = 23003
 
     #: - [TCP] Inova LightLink Server Type 5
     #: - [UDP] Inova LightLink Server Type 5
-    inovaport5 = 23004, 'inovaport5', TransportProtocol.tcp
+    inovaport5 = 23004
 
     #: - [TCP] Inova LightLink Server Type 6
     #: - [UDP] Inova LightLink Server Type 6
-    inovaport6 = 23005, 'inovaport6', TransportProtocol.tcp
+    inovaport6 = 23005
 
     #: [TCP] Generic Notification Transport Protocol
-    gntp = 23053, 'gntp', TransportProtocol.tcp
+    gntp = 23053
 
     #: [TCP] Reserved
-    reserved_23272 = 23272, 'reserved', TransportProtocol.tcp
+    reserved_23272 = 23272, 'reserved'
 
     #: [TCP] 5AFE SDN Directory
-    TCP_5afe_dir = 23294, '5afe-dir', TransportProtocol.tcp
+    TCP_5afe_dir = 23294, '5afe-dir'
 
     #: - [TCP] Emulex HBAnyware Remote Management
     #: - [UDP] Emulex HBAnyware Remote Management
-    elxmgmt = 23333, 'elxmgmt', TransportProtocol.tcp
+    elxmgmt = 23333
 
     #: - [TCP] Novar Data
     #: - [UDP] Novar Data
-    novar_dbase = 23400, 'novar-dbase', TransportProtocol.tcp
+    novar_dbase = 23400, 'novar-dbase'
 
     #: - [TCP] Novar Alarm
     #: - [UDP] Novar Alarm
-    novar_alarm = 23401, 'novar-alarm', TransportProtocol.tcp
+    novar_alarm = 23401, 'novar-alarm'
 
     #: - [TCP] Novar Global
     #: - [UDP] Novar Global
-    novar_global = 23402, 'novar-global', TransportProtocol.tcp
+    novar_global = 23402, 'novar-global'
 
     #: [TCP] Aequus Service
-    aequus = 23456, 'aequus', TransportProtocol.tcp
+    aequus = 23456
 
     #: [TCP] Aequus Service Mgmt
-    aequus_alt = 23457, 'aequus-alt', TransportProtocol.tcp
+    aequus_alt = 23457, 'aequus-alt'
 
     #: [TCP] AreaGuard Neo - WebServer
-    areaguard_neo = 23546, 'areaguard-neo', TransportProtocol.tcp
+    areaguard_neo = 23546, 'areaguard-neo'
 
     #: - [TCP] med-ltp
     #: - [UDP] med-ltp
-    med_ltp = 24000, 'med-ltp', TransportProtocol.tcp
+    med_ltp = 24000, 'med-ltp'
 
     #: - [TCP] med-fsp-rx
     #: - [UDP] med-fsp-rx
-    med_fsp_rx = 24001, 'med-fsp-rx', TransportProtocol.tcp
+    med_fsp_rx = 24001, 'med-fsp-rx'
 
     #: - [TCP] med-fsp-tx
     #: - [UDP] med-fsp-tx
-    med_fsp_tx = 24002, 'med-fsp-tx', TransportProtocol.tcp
+    med_fsp_tx = 24002, 'med-fsp-tx'
 
     #: - [TCP] med-supp
     #: - [UDP] med-supp
-    med_supp = 24003, 'med-supp', TransportProtocol.tcp
+    med_supp = 24003, 'med-supp'
 
     #: - [TCP] med-ovw
     #: - [UDP] med-ovw
-    med_ovw = 24004, 'med-ovw', TransportProtocol.tcp
+    med_ovw = 24004, 'med-ovw'
 
     #: - [TCP] med-ci
     #: - [UDP] med-ci
-    med_ci = 24005, 'med-ci', TransportProtocol.tcp
+    med_ci = 24005, 'med-ci'
 
     #: - [TCP] med-net-svc
     #: - [UDP] med-net-svc
-    med_net_svc = 24006, 'med-net-svc', TransportProtocol.tcp
+    med_net_svc = 24006, 'med-net-svc'
 
     #: - [TCP] fileSphere
     #: - [UDP] fileSphere
-    filesphere = 24242, 'filesphere', TransportProtocol.tcp
+    filesphere = 24242
 
     #: - [TCP] Vista 4GL
     #: - [UDP] Vista 4GL
-    vista_4gl = 24249, 'vista-4gl', TransportProtocol.tcp
+    vista_4gl = 24249, 'vista-4gl'
 
     #: - [TCP] Isolv Local Directory
     #: - [UDP] Isolv Local Directory
-    ild = 24321, 'ild', TransportProtocol.tcp
+    ild = 24321
 
     #: [TCP] Reserved
-    reserved_24322 = 24322, 'reserved', TransportProtocol.tcp
+    reserved_24322 = 24322, 'reserved'
 
     #: [TCP] Verimag mobile class protocol over TCP
-    vrmg_ip = 24323, 'vrmg-ip', TransportProtocol.tcp
+    vrmg_ip = 24323, 'vrmg-ip'
 
     #: - [TCP] Intel RCI IANA assigned this well-formed service name as a replacement
     #:   for "intel_rci".
@@ -24181,323 +24181,323 @@ class TCP(AppType):
     #: - [UDP] Intel RCI IANA assigned this well-formed service name as a replacement
     #:   for "intel_rci".
     #: - [UDP] Intel RCI
-    intel_rci = 24386, 'intel-rci', TransportProtocol.tcp
+    intel_rci = 24386, 'intel-rci'
 
     #: - [TCP] Tonido Domain Server
     #: - [UDP] Tonido Domain Server
-    tonidods = 24465, 'tonidods', TransportProtocol.tcp
+    tonidods = 24465
 
     #: - [TCP] BINKP
     #: - [UDP] BINKP
-    binkp = 24554, 'binkp', TransportProtocol.tcp
+    binkp = 24554
 
     #: [TCP] bilobit Service
-    bilobit = 24577, 'bilobit', TransportProtocol.tcp
+    bilobit = 24577
 
     #: [TCP] Reserved
-    reserved_24601 = 24601, 'reserved', TransportProtocol.tcp
+    reserved_24601 = 24601, 'reserved'
 
     #: [TCP] Service used by SmarDTV to communicate between a CAM and a second
     #: screen application
-    sdtvwcam = 24666, 'sdtvwcam', TransportProtocol.tcp
+    sdtvwcam = 24666
 
     #: - [TCP] Canditv Message Service
     #: - [UDP] Canditv Message Service
-    canditv = 24676, 'canditv', TransportProtocol.tcp
+    canditv = 24676
 
     #: - [TCP] FlashFiler
     #: - [UDP] FlashFiler
-    flashfiler = 24677, 'flashfiler', TransportProtocol.tcp
+    flashfiler = 24677
 
     #: - [TCP] Turbopower Proactivate
     #: - [UDP] Turbopower Proactivate
-    proactivate = 24678, 'proactivate', TransportProtocol.tcp
+    proactivate = 24678
 
     #: - [TCP] TCC User HTTP Service
     #: - [UDP] TCC User HTTP Service
-    tcc_http = 24680, 'tcc-http', TransportProtocol.tcp
+    tcc_http = 24680, 'tcc-http'
 
     #: [TCP] Citrix StorageLink Gateway
-    cslg = 24754, 'cslg', TransportProtocol.tcp
+    cslg = 24754
 
     #: [TCP] Reserved
-    reserved_24850 = 24850, 'reserved', TransportProtocol.tcp
+    reserved_24850 = 24850, 'reserved'
 
     #: - [TCP] Find Identification of Network Devices
     #: - [UDP] Find Identification of Network Devices
-    find = 24922, 'find', TransportProtocol.tcp
+    find = 24922
 
     #: - [TCP] icl-twobase1
     #: - [UDP] icl-twobase1
-    icl_twobase1 = 25000, 'icl-twobase1', TransportProtocol.tcp
+    icl_twobase1 = 25000, 'icl-twobase1'
 
     #: - [TCP] icl-twobase2
     #: - [UDP] icl-twobase2
-    icl_twobase2 = 25001, 'icl-twobase2', TransportProtocol.tcp
+    icl_twobase2 = 25001, 'icl-twobase2'
 
     #: - [TCP] icl-twobase3
     #: - [UDP] icl-twobase3
-    icl_twobase3 = 25002, 'icl-twobase3', TransportProtocol.tcp
+    icl_twobase3 = 25002, 'icl-twobase3'
 
     #: - [TCP] icl-twobase4
     #: - [UDP] icl-twobase4
-    icl_twobase4 = 25003, 'icl-twobase4', TransportProtocol.tcp
+    icl_twobase4 = 25003, 'icl-twobase4'
 
     #: - [TCP] icl-twobase5
     #: - [UDP] icl-twobase5
-    icl_twobase5 = 25004, 'icl-twobase5', TransportProtocol.tcp
+    icl_twobase5 = 25004, 'icl-twobase5'
 
     #: - [TCP] icl-twobase6
     #: - [UDP] icl-twobase6
-    icl_twobase6 = 25005, 'icl-twobase6', TransportProtocol.tcp
+    icl_twobase6 = 25005, 'icl-twobase6'
 
     #: - [TCP] icl-twobase7
     #: - [UDP] icl-twobase7
-    icl_twobase7 = 25006, 'icl-twobase7', TransportProtocol.tcp
+    icl_twobase7 = 25006, 'icl-twobase7'
 
     #: - [TCP] icl-twobase8
     #: - [UDP] icl-twobase8
-    icl_twobase8 = 25007, 'icl-twobase8', TransportProtocol.tcp
+    icl_twobase8 = 25007, 'icl-twobase8'
 
     #: - [TCP] icl-twobase9
     #: - [UDP] icl-twobase9
-    icl_twobase9 = 25008, 'icl-twobase9', TransportProtocol.tcp
+    icl_twobase9 = 25008, 'icl-twobase9'
 
     #: - [TCP] icl-twobase10
     #: - [UDP] icl-twobase10
-    icl_twobase10 = 25009, 'icl-twobase10', TransportProtocol.tcp
+    icl_twobase10 = 25009, 'icl-twobase10'
 
     #: [TCP] IBM Db2 Client Interface - Encrypted
-    db2c_tls = 25100, 'db2c-tls', TransportProtocol.tcp
+    db2c_tls = 25100, 'db2c-tls'
 
     #: [TCP] Sauter Dongle
-    sauterdongle = 25576, 'sauterdongle', TransportProtocol.tcp
+    sauterdongle = 25576
 
     #: [TCP] Identifier Tracing Protocol
-    idtp = 25604, 'idtp', TransportProtocol.tcp
+    idtp = 25604
 
     #: - [TCP] Vocaltec Address Server
     #: - [UDP] Vocaltec Address Server
-    vocaltec_hos = 25793, 'vocaltec-hos', TransportProtocol.tcp
+    vocaltec_hos = 25793, 'vocaltec-hos'
 
     #: - [TCP] TASP Network Comm
     #: - [UDP] TASP Network Comm
-    tasp_net = 25900, 'tasp-net', TransportProtocol.tcp
+    tasp_net = 25900, 'tasp-net'
 
     #: - [TCP] NIObserver
     #: - [UDP] NIObserver
-    niobserver = 25901, 'niobserver', TransportProtocol.tcp
+    niobserver = 25901
 
     #: - [TCP] NILinkAnalyst
     #: - [UDP] NILinkAnalyst
-    nilinkanalyst = 25902, 'nilinkanalyst', TransportProtocol.tcp
+    nilinkanalyst = 25902
 
     #: - [TCP] NIProbe
     #: - [UDP] NIProbe
-    niprobe = 25903, 'niprobe', TransportProtocol.tcp
+    niprobe = 25903
 
     #: [TCP] Reserved
-    reserved_25954 = 25954, 'reserved', TransportProtocol.tcp
+    reserved_25954 = 25954, 'reserved'
 
     #: [TCP] Reserved
-    reserved_25955 = 25955, 'reserved', TransportProtocol.tcp
+    reserved_25955 = 25955, 'reserved'
 
     #: - [TCP] quake
     #: - [UDP] quake
-    quake = 26000, 'quake', TransportProtocol.tcp
+    quake = 26000
 
     #: - [TCP] Symbolic Computation Software Composability Protocol
     #: - [UDP] Symbolic Computation Software Composability Protocol
-    scscp = 26133, 'scscp', TransportProtocol.tcp
+    scscp = 26133
 
     #: - [TCP] wnn6-ds
     #: - [UDP] wnn6-ds
-    wnn6_ds = 26208, 'wnn6-ds', TransportProtocol.tcp
+    wnn6_ds = 26208, 'wnn6-ds'
 
     #: [TCP] CockroachDB
-    cockroach = 26257, 'cockroach', TransportProtocol.tcp
+    cockroach = 26257
 
     #: - [TCP] eZproxy
     #: - [UDP] eZproxy
-    ezproxy = 26260, 'ezproxy', TransportProtocol.tcp
+    ezproxy = 26260
 
     #: - [TCP] eZmeeting
     #: - [UDP] eZmeeting
-    ezmeeting = 26261, 'ezmeeting', TransportProtocol.tcp
+    ezmeeting = 26261
 
     #: - [TCP] K3 Software-Server
     #: - [UDP] K3 Software-Server
-    k3software_svr = 26262, 'k3software-svr', TransportProtocol.tcp
+    k3software_svr = 26262, 'k3software-svr'
 
     #: - [TCP] K3 Software-Client
     #: - [UDP] K3 Software-Client
-    k3software_cli = 26263, 'k3software-cli', TransportProtocol.tcp
+    k3software_cli = 26263, 'k3software-cli'
 
     #: [TCP] EXOline-TCP
-    exoline_tcp = 26486, 'exoline-tcp', TransportProtocol.tcp
+    exoline_tcp = 26486, 'exoline-tcp'
 
     #: - [TCP] EXOconfig
     #: - [UDP] EXOconfig
-    exoconfig = 26487, 'exoconfig', TransportProtocol.tcp
+    exoconfig = 26487
 
     #: - [TCP] EXOnet
     #: - [UDP] EXOnet
-    exonet = 26489, 'exonet', TransportProtocol.tcp
+    exonet = 26489
 
     #: [TCP] A protocol for managing license services
-    flex_lmadmin = 27010, 'flex-lmadmin', TransportProtocol.tcp
+    flex_lmadmin = 27010, 'flex-lmadmin'
 
     #: [TCP] Cloud hosting environment network
-    chlenix = 27016, 'chlenix', TransportProtocol.tcp
+    chlenix = 27016
 
     #: [TCP] Mongo database system
-    mongodb = 27017, 'mongodb', TransportProtocol.tcp
+    mongodb = 27017
 
     #: - [TCP] ImagePump
     #: - [UDP] ImagePump
-    imagepump = 27345, 'imagepump', TransportProtocol.tcp
+    imagepump = 27345
 
     #: - [TCP] Job controller service
     #: - [UDP] Job controller service
-    jesmsjc = 27442, 'jesmsjc', TransportProtocol.tcp
+    jesmsjc = 27442
 
     #: - [TCP] Kopek HTTP Head Port
     #: - [UDP] Kopek HTTP Head Port
-    kopek_httphead = 27504, 'kopek-httphead', TransportProtocol.tcp
+    kopek_httphead = 27504, 'kopek-httphead'
 
     #: - [TCP] ARS VISTA Application
     #: - [UDP] ARS VISTA Application
-    ars_vista = 27782, 'ars-vista', TransportProtocol.tcp
+    ars_vista = 27782, 'ars-vista'
 
     #: [TCP] Astrolink Protocol
-    astrolink = 27876, 'astrolink', TransportProtocol.tcp
+    astrolink = 27876
 
     #: - [TCP] TW Authentication/Key Distribution and
     #: - [UDP] Attribute Certificate Services
-    tw_auth_key = 27999, 'tw-auth-key', TransportProtocol.tcp
+    tw_auth_key = 27999, 'tw-auth-key'
 
     #: - [TCP] NX License Manager
     #: - [UDP] NX License Manager
-    nxlmd = 28000, 'nxlmd', TransportProtocol.tcp
+    nxlmd = 28000
 
     #: [TCP] PQ Service
-    pqsp = 28001, 'pqsp', TransportProtocol.tcp
+    pqsp = 28001
 
     #: [TCP] Gruber cash registry protocol
-    gruber_cashreg = 28010, 'gruber-cashreg', TransportProtocol.tcp
+    gruber_cashreg = 28010, 'gruber-cashreg'
 
     #: [TCP] thor/server - ML engine
-    thor_engine = 28080, 'thor-engine', TransportProtocol.tcp
+    thor_engine = 28080, 'thor-engine'
 
     #: [TCP] Reserved
-    reserved_28119 = 28119, 'reserved', TransportProtocol.tcp
+    reserved_28119 = 28119, 'reserved'
 
     #: - [TCP] VoxelStorm game server
     #: - [UDP] VoxelStorm game server
-    voxelstorm = 28200, 'voxelstorm', TransportProtocol.tcp
+    voxelstorm = 28200
 
     #: - [TCP] Siemens GSM
     #: - [UDP] Siemens GSM
-    siemensgsm = 28240, 'siemensgsm', TransportProtocol.tcp
+    siemensgsm = 28240
 
     #: [TCP] Building operating system services wide area verified exchange
-    bosswave = 28589, 'bosswave', TransportProtocol.tcp
+    bosswave = 28589
 
     #: [TCP] Siemens Licensing Server
-    saltd_licensing = 29000, 'saltd-licensing', TransportProtocol.tcp
+    saltd_licensing = 29000, 'saltd-licensing'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_29118 = 29118, 'reserved', TransportProtocol.tcp
+    reserved_29118 = 29118, 'reserved'
 
     #: - [TCP] ObTools Message Protocol
     #: - [UDP] ObTools Message Protocol
-    otmp = 29167, 'otmp', TransportProtocol.tcp
+    otmp = 29167
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_29168 = 29168, 'reserved', TransportProtocol.tcp
+    reserved_29168 = 29168, 'reserved'
 
     #: [TCP] data exchange protocol for IEC61850 in wind power plants
-    bingbang = 29999, 'bingbang', TransportProtocol.tcp
+    bingbang = 29999
 
     #: [TCP] Secure Network Data Management Protocol
-    ndmps = 30000, 'ndmps', TransportProtocol.tcp
+    ndmps = 30000
 
     #: - [TCP] Pago Services 1
     #: - [UDP] Pago Services 1
-    pago_services1 = 30001, 'pago-services1', TransportProtocol.tcp
+    pago_services1 = 30001, 'pago-services1'
 
     #: - [TCP] Pago Services 2
     #: - [UDP] Pago Services 2
-    pago_services2 = 30002, 'pago-services2', TransportProtocol.tcp
+    pago_services2 = 30002, 'pago-services2'
 
     #: - [TCP] Amicon FPSU-IP Remote Administration
     #: - [UDP] Amicon FPSU-IP Remote Administration
-    amicon_fpsu_ra = 30003, 'amicon-fpsu-ra', TransportProtocol.tcp
+    amicon_fpsu_ra = 30003, 'amicon-fpsu-ra'
 
     #: [TCP] Reserved
-    reserved_30004 = 30004, 'reserved', TransportProtocol.tcp
+    reserved_30004 = 30004, 'reserved'
 
     #: - [TCP] Remote Window Protocol
     #: - [SCTP] Remote Window Protocol
-    rwp = 30100, 'rwp', TransportProtocol.tcp
+    rwp = 30100
 
     #: - [TCP] Kingdoms Online (CraigAvenue)
     #: - [UDP] Kingdoms Online (CraigAvenue)
-    kingdomsonline = 30260, 'kingdomsonline', TransportProtocol.tcp
+    kingdomsonline = 30260
 
     #: [TCP] GroundStar RealTime System
-    gs_realtime = 30400, 'gs-realtime', TransportProtocol.tcp
+    gs_realtime = 30400, 'gs-realtime'
 
     #: [TCP] Reserved
-    reserved_30832 = 30832, 'reserved', TransportProtocol.tcp
+    reserved_30832 = 30832, 'reserved'
 
     #: - [TCP] Persistent peer-to-peer connections for block propagation, transaction
     #:   relay, and BFT consensus message exchange.
     #: - [UDP] Kademlia DHT peer discovery and routing table maintenance.
-    dilithium3 = 30939, 'dilithium3', TransportProtocol.tcp
+    dilithium3 = 30939
 
     #: - [TCP] OpenView Service Desk Client
     #: - [UDP] OpenView Service Desk Client
-    ovobs = 30999, 'ovobs', TransportProtocol.tcp
+    ovobs = 30999
 
     #: [TCP] Kollective Agent Secure Distributed Delivery Protocol
-    ka_sddp = 31016, 'ka-sddp', TransportProtocol.tcp
+    ka_sddp = 31016, 'ka-sddp'
 
     #: [TCP] Autotrac ACP 245
-    autotrac_acp = 31020, 'autotrac-acp', TransportProtocol.tcp
+    autotrac_acp = 31020, 'autotrac-acp'
 
     #: [TCP] Reserved
-    reserved_31029 = 31029, 'reserved', TransportProtocol.tcp
+    reserved_31029 = 31029, 'reserved'
 
     #: - [TCP] eldim is a secure file upload proxy
     #: - [UDP] eldim is a secure file upload proxy
-    eldim = 31337, 'eldim', TransportProtocol.tcp
+    eldim = 31337
 
     #: [TCP] PACE license server
-    pace_licensed = 31400, 'pace-licensed', TransportProtocol.tcp
+    pace_licensed = 31400, 'pace-licensed'
 
     #: - [TCP] XQoS network monitor
     #: - [UDP] XQoS network monitor
-    xqosd = 31416, 'xqosd', TransportProtocol.tcp
+    xqosd = 31416
 
     #: - [TCP] TetriNET Protocol
     #: - [UDP] TetriNET Protocol
-    tetrinet = 31457, 'tetrinet', TransportProtocol.tcp
+    tetrinet = 31457
 
     #: - [TCP] lm mon
     #: - [UDP] lm mon
-    lm_mon = 31620, 'lm-mon', TransportProtocol.tcp
+    lm_mon = 31620, 'lm-mon'
 
     #: - [TCP] DS Expert Monitor IANA assigned this well-formed service name as a
     #:   replacement for "dsx_monitor".
     #: - [TCP] DS Expert Monitor
-    dsx_monitor = 31685, 'dsx-monitor', TransportProtocol.tcp
+    dsx_monitor = 31685, 'dsx-monitor'
 
     #: - [TCP] GameSmith Port
     #: - [UDP] GameSmith Port
-    gamesmith_port = 31765, 'gamesmith-port', TransportProtocol.tcp
+    gamesmith_port = 31765, 'gamesmith-port'
 
     #: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this
     #:   well-formed service name as a replacement for "iceedcp_tx".
@@ -24505,7 +24505,7 @@ class TCP(AppType):
     #: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this
     #:   well-formed service name as a replacement for "iceedcp_tx".
     #: - [UDP] Embedded Device Configuration Protocol TX
-    iceedcp_tx = 31948, 'iceedcp-tx', TransportProtocol.tcp
+    iceedcp_tx = 31948, 'iceedcp-tx'
 
     #: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this
     #:   well-formed service name as a replacement for "iceedcp_rx".
@@ -24513,430 +24513,430 @@ class TCP(AppType):
     #: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this
     #:   well-formed service name as a replacement for "iceedcp_rx".
     #: - [UDP] Embedded Device Configuration Protocol RX
-    iceedcp_rx = 31949, 'iceedcp-rx', TransportProtocol.tcp
+    iceedcp_rx = 31949, 'iceedcp-rx'
 
     #: - [TCP] iRacing helper service
     #: - [UDP] iRacing helper service
-    iracinghelper = 32034, 'iracinghelper', TransportProtocol.tcp
+    iracinghelper = 32034
 
     #: - [TCP] T1 Distributed Processor
     #: - [UDP] T1 Distributed Processor
-    t1distproc60 = 32249, 't1distproc60', TransportProtocol.tcp
+    t1distproc60 = 32249
 
     #: [TCP] Plex multimedia
-    plex = 32400, 'plex', TransportProtocol.tcp
+    plex = 32400
 
     #: - [TCP] Access Point Manager Link
     #: - [UDP] Access Point Manager Link
-    apm_link = 32483, 'apm-link', TransportProtocol.tcp
+    apm_link = 32483, 'apm-link'
 
     #: - [TCP] SecureNotebook-CLNT
     #: - [UDP] SecureNotebook-CLNT
-    sec_ntb_clnt = 32635, 'sec-ntb-clnt', TransportProtocol.tcp
+    sec_ntb_clnt = 32635, 'sec-ntb-clnt'
 
     #: - [TCP] DMExpress
     #: - [UDP] DMExpress
-    dmexpress = 32636, 'dmexpress', TransportProtocol.tcp
+    dmexpress = 32636
 
     #: - [TCP] FileNet BPM WS-ReliableMessaging Client
     #: - [UDP] FileNet BPM WS-ReliableMessaging Client
-    filenet_powsrm = 32767, 'filenet-powsrm', TransportProtocol.tcp
+    filenet_powsrm = 32767, 'filenet-powsrm'
 
     #: - [TCP] Filenet TMS
     #: - [UDP] Filenet TMS
-    filenet_tms = 32768, 'filenet-tms', TransportProtocol.tcp
+    filenet_tms = 32768, 'filenet-tms'
 
     #: - [TCP] Filenet RPC
     #: - [UDP] Filenet RPC
-    filenet_rpc = 32769, 'filenet-rpc', TransportProtocol.tcp
+    filenet_rpc = 32769, 'filenet-rpc'
 
     #: - [TCP] Filenet NCH
     #: - [UDP] Filenet NCH
-    filenet_nch = 32770, 'filenet-nch', TransportProtocol.tcp
+    filenet_nch = 32770, 'filenet-nch'
 
     #: - [TCP] FileNET RMI
     #: - [UDP] FileNet RMI
-    filenet_rmi = 32771, 'filenet-rmi', TransportProtocol.tcp
+    filenet_rmi = 32771, 'filenet-rmi'
 
     #: - [TCP] FileNET Process Analyzer
     #: - [UDP] FileNET Process Analyzer
-    filenet_pa = 32772, 'filenet-pa', TransportProtocol.tcp
+    filenet_pa = 32772, 'filenet-pa'
 
     #: - [TCP] FileNET Component Manager
     #: - [UDP] FileNET Component Manager
-    filenet_cm = 32773, 'filenet-cm', TransportProtocol.tcp
+    filenet_cm = 32773, 'filenet-cm'
 
     #: - [TCP] FileNET Rules Engine
     #: - [UDP] FileNET Rules Engine
-    filenet_re = 32774, 'filenet-re', TransportProtocol.tcp
+    filenet_re = 32774, 'filenet-re'
 
     #: - [TCP] Performance Clearinghouse
     #: - [UDP] Performance Clearinghouse
-    filenet_pch = 32775, 'filenet-pch', TransportProtocol.tcp
+    filenet_pch = 32775, 'filenet-pch'
 
     #: - [TCP] FileNET BPM IOR
     #: - [UDP] FileNET BPM IOR
-    filenet_peior = 32776, 'filenet-peior', TransportProtocol.tcp
+    filenet_peior = 32776, 'filenet-peior'
 
     #: - [TCP] FileNet BPM CORBA
     #: - [UDP] FileNet BPM CORBA
-    filenet_obrok = 32777, 'filenet-obrok', TransportProtocol.tcp
+    filenet_obrok = 32777, 'filenet-obrok'
 
     #: - [TCP] Multiple Listing Service Network
     #: - [UDP] Multiple Listing Service Network
-    mlsn = 32801, 'mlsn', TransportProtocol.tcp
+    mlsn = 32801
 
     #: [TCP] Real Estate Transport Protocol
-    retp = 32811, 'retp', TransportProtocol.tcp
+    retp = 32811
 
     #: - [TCP] Attachmate ID Manager
     #: - [UDP] Attachmate ID Manager
-    idmgratm = 32896, 'idmgratm', TransportProtocol.tcp
+    idmgratm = 32896
 
     #: [TCP] WatchGuard Endpoint Communications
-    wg_endpt_comms = 33000, 'wg-endpt-comms', TransportProtocol.tcp
+    wg_endpt_comms = 33000, 'wg-endpt-comms'
 
     #: [TCP] MySQL Database Extended Interface
-    mysqlx = 33060, 'mysqlx', TransportProtocol.tcp
+    mysqlx = 33060
 
     #: - [TCP] Aurora (Balaena Ltd)
     #: - [UDP] Aurora (Balaena Ltd)
-    aurora_balaena = 33123, 'aurora-balaena', TransportProtocol.tcp
+    aurora_balaena = 33123, 'aurora-balaena'
 
     #: - [TCP] DiamondCentral Interface
     #: - [UDP] DiamondCentral Interface
-    diamondport = 33331, 'diamondport', TransportProtocol.tcp
+    diamondport = 33331
 
     #: [TCP] Digital Gaslight Service
-    dgi_serv = 33333, 'dgi-serv', TransportProtocol.tcp
+    dgi_serv = 33333, 'dgi-serv'
 
     #: [TCP] SpeedTrace TraceAgent
-    speedtrace = 33334, 'speedtrace', TransportProtocol.tcp
+    speedtrace = 33334
 
     #: - [TCP] traceroute use
     #: - [UDP] traceroute use
-    traceroute = 33434, 'traceroute', TransportProtocol.tcp
+    traceroute = 33434
 
     #: [TCP] Reserved
-    reserved_33435 = 33435, 'reserved', TransportProtocol.tcp
+    reserved_33435 = 33435, 'reserved'
 
     #: - [TCP] SNIP Slave
     #: - [UDP] SNIP Slave
-    snip_slave = 33656, 'snip-slave', TransportProtocol.tcp
+    snip_slave = 33656, 'snip-slave'
 
     #: [TCP] Adept IP protocol
-    digilent_adept = 33890, 'digilent-adept', TransportProtocol.tcp
+    digilent_adept = 33890, 'digilent-adept'
 
     #: - [TCP] TurboNote Relay Server Default Port
     #: - [UDP] TurboNote Relay Server Default Port
-    turbonote_2 = 34249, 'turbonote-2', TransportProtocol.tcp
+    turbonote_2 = 34249, 'turbonote-2'
 
     #: - [TCP] P-Net on IP local
     #: - [UDP] P-Net on IP local
-    p_net_local = 34378, 'p-net-local', TransportProtocol.tcp
+    p_net_local = 34378, 'p-net-local'
 
     #: - [TCP] P-Net on IP remote
     #: - [UDP] P-Net on IP remote
-    p_net_remote = 34379, 'p-net-remote', TransportProtocol.tcp
+    p_net_remote = 34379, 'p-net-remote'
 
     #: [TCP] dhanalakshmi.org EDI Service
-    dhanalakshmi = 34567, 'dhanalakshmi', TransportProtocol.tcp
+    dhanalakshmi = 34567
 
     #: - [TCP] PROFInet RT Unicast
     #: - [UDP] PROFInet RT Unicast
-    profinet_rt = 34962, 'profinet-rt', TransportProtocol.tcp
+    profinet_rt = 34962, 'profinet-rt'
 
     #: - [TCP] PROFInet RT Multicast
     #: - [UDP] PROFInet RT Multicast
-    profinet_rtm = 34963, 'profinet-rtm', TransportProtocol.tcp
+    profinet_rtm = 34963, 'profinet-rtm'
 
     #: - [TCP] PROFInet Context Manager
     #: - [UDP] PROFInet Context Manager
-    profinet_cm = 34964, 'profinet-cm', TransportProtocol.tcp
+    profinet_cm = 34964, 'profinet-cm'
 
     #: - [TCP] PROFINET secure connection management and key provisioning
     #: - [UDP] PROFINET secure connection management and key provisioning
-    profinet_cm_sec = 34965, 'profinet-cm-sec', TransportProtocol.tcp
+    profinet_cm_sec = 34965, 'profinet-cm-sec'
 
     #: [TCP] Reserved
-    reserved_34966 = 34966, 'reserved', TransportProtocol.tcp
+    reserved_34966 = 34966, 'reserved'
 
     #: - [TCP] EtherCAT Port
     #: - [UDP] EtherCAT Port
-    ethercat = 34980, 'ethercat', TransportProtocol.tcp
+    ethercat = 34980
 
     #: [TCP] HeathView
-    heathview = 35000, 'heathview', TransportProtocol.tcp
+    heathview = 35000
 
     #: - [TCP] ReadyTech Viewer
     #: - [UDP] ReadyTech Viewer
-    rt_viewer = 35001, 'rt-viewer', TransportProtocol.tcp
+    rt_viewer = 35001, 'rt-viewer'
 
     #: [TCP] ReadyTech Sound Server
-    rt_sound = 35002, 'rt-sound', TransportProtocol.tcp
+    rt_sound = 35002, 'rt-sound'
 
     #: [TCP] ReadyTech DeviceMapper Server
-    rt_devicemapper = 35003, 'rt-devicemapper', TransportProtocol.tcp
+    rt_devicemapper = 35003, 'rt-devicemapper'
 
     #: - [TCP] ReadyTech ClassManager
     #: - [UDP] ReadyTech ClassManager
-    rt_classmanager = 35004, 'rt-classmanager', TransportProtocol.tcp
+    rt_classmanager = 35004, 'rt-classmanager'
 
     #: [TCP] ReadyTech LabTracker
-    rt_labtracker = 35005, 'rt-labtracker', TransportProtocol.tcp
+    rt_labtracker = 35005, 'rt-labtracker'
 
     #: [TCP] ReadyTech Helper Service
-    rt_helper = 35006, 'rt-helper', TransportProtocol.tcp
+    rt_helper = 35006, 'rt-helper'
 
     #: - [TCP] Axiomatic discovery protocol
     #: - [UDP] Axiomatic discovery protocol
-    axio_disc = 35100, 'axio-disc', TransportProtocol.tcp
+    axio_disc = 35100, 'axio-disc'
 
     #: [TCP] KIT Messenger
-    kitim = 35354, 'kitim', TransportProtocol.tcp
+    kitim = 35354
 
     #: [TCP] Altova License Management
-    altova_lm = 35355, 'altova-lm', TransportProtocol.tcp
+    altova_lm = 35355, 'altova-lm'
 
     #: [TCP] Gutters Note Exchange
-    guttersnex = 35356, 'guttersnex', TransportProtocol.tcp
+    guttersnex = 35356
 
     #: [TCP] OpenStack ID Service
-    openstack_id = 35357, 'openstack-id', TransportProtocol.tcp
+    openstack_id = 35357, 'openstack-id'
 
     #: - [TCP] AllPeers Network
     #: - [UDP] AllPeers Network
-    allpeers = 36001, 'allpeers', TransportProtocol.tcp
+    allpeers = 36001
 
     #: [TCP] Reserved
-    reserved_36411 = 36411, 'reserved', TransportProtocol.tcp
+    reserved_36411 = 36411, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_36412 = 36412, 'reserved', TransportProtocol.tcp
+    reserved_36412 = 36412, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_36422 = 36422, 'reserved', TransportProtocol.tcp
+    reserved_36422 = 36422, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_36462 = 36462, 'reserved', TransportProtocol.tcp
+    reserved_36462 = 36462, 'reserved'
 
     #: [TCP] Febooti Automation Workshop
-    febooti_aw = 36524, 'febooti-aw', TransportProtocol.tcp
+    febooti_aw = 36524, 'febooti-aw'
 
     #: [TCP] Observium statistics collection agent
-    observium_agent = 36602, 'observium-agent', TransportProtocol.tcp
+    observium_agent = 36602, 'observium-agent'
 
     #: [TCP] MapX communication
-    mapx = 36700, 'mapx', TransportProtocol.tcp
+    mapx = 36700
 
     #: - [TCP] KastenX Pipe
     #: - [UDP] KastenX Pipe
-    kastenxpipe = 36865, 'kastenxpipe', TransportProtocol.tcp
+    kastenxpipe = 36865
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_37472 = 37472, 'reserved', TransportProtocol.tcp
+    reserved_37472 = 37472, 'reserved'
 
     #: - [TCP] science + computing's Venus Administration Port
     #: - [UDP] science + computing's Venus Administration Port
-    neckar = 37475, 'neckar', TransportProtocol.tcp
+    neckar = 37475
 
     #: [TCP] Google Drive Sync
-    gdrive_sync = 37483, 'gdrive-sync', TransportProtocol.tcp
+    gdrive_sync = 37483, 'gdrive-sync'
 
     #: [TCP] Epipole File Transfer Protocol
-    eftp = 37601, 'eftp', TransportProtocol.tcp
+    eftp = 37601
 
     #: - [TCP] Unisys ClearPath ePortal
     #: - [UDP] Unisys ClearPath ePortal
-    unisys_eportal = 37654, 'unisys-eportal', TransportProtocol.tcp
+    unisys_eportal = 37654, 'unisys-eportal'
 
     #: [TCP] InfoVista Server Database
-    ivs_database = 38000, 'ivs-database', TransportProtocol.tcp
+    ivs_database = 38000, 'ivs-database'
 
     #: [TCP] InfoVista Server Insertion
-    ivs_insertion = 38001, 'ivs-insertion', TransportProtocol.tcp
+    ivs_insertion = 38001, 'ivs-insertion'
 
     #: [TCP] Cresco Controller
-    cresco_control = 38002, 'cresco-control', TransportProtocol.tcp
+    cresco_control = 38002, 'cresco-control'
 
     #: - [TCP] Galaxy7 Data Tunnel
     #: - [UDP] Galaxy7 Data Tunnel
-    galaxy7_data = 38201, 'galaxy7-data', TransportProtocol.tcp
+    galaxy7_data = 38201, 'galaxy7-data'
 
     #: - [TCP] Fairview Message Service
     #: - [UDP] Fairview Message Service
-    fairview = 38202, 'fairview', TransportProtocol.tcp
+    fairview = 38202
 
     #: - [TCP] AppGate Policy Server
     #: - [UDP] AppGate Policy Server
-    agpolicy = 38203, 'agpolicy', TransportProtocol.tcp
+    agpolicy = 38203
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_38412 = 38412, 'reserved', TransportProtocol.tcp
+    reserved_38412 = 38412, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_38422 = 38422, 'reserved', TransportProtocol.tcp
+    reserved_38422 = 38422, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_38462 = 38462, 'reserved', TransportProtocol.tcp
+    reserved_38462 = 38462, 'reserved'
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
-    reserved_38472 = 38472, 'reserved', TransportProtocol.tcp
+    reserved_38472 = 38472, 'reserved'
 
     #: [TCP] Premier SQL Middleware Server
-    psqlmws = 38638, 'psqlmws', TransportProtocol.tcp
+    psqlmws = 38638
 
     #: [TCP] Sruth is a service for the distribution of routinely- generated but
     #: arbitrary files based on a publish/subscribe distribution model and
     #: implemented using a peer-to-peer transport mechanism
-    sruth = 38800, 'sruth', TransportProtocol.tcp
+    sruth = 38800
 
     #: [TCP] Security approval process for use of the secRMM SafeCopy program
-    secrmmsafecopya = 38865, 'secrmmsafecopya', TransportProtocol.tcp
+    secrmmsafecopya = 38865
 
     #: [TCP] Children's hearing test/Telemedicine
-    vroa = 39063, 'vroa', TransportProtocol.tcp
+    vroa = 39063
 
     #: - [TCP] TurboNote Default Port
     #: - [UDP] TurboNote Default Port
-    turbonote_1 = 39681, 'turbonote-1', TransportProtocol.tcp
+    turbonote_1 = 39681, 'turbonote-1'
 
     #: - [TCP] SafetyNET p
     #: - [UDP] SafetyNET p
-    safetynetp = 40000, 'safetynetp', TransportProtocol.tcp
+    safetynetp = 40000
 
     #: [TCP] Reserved
-    reserved_40023 = 40023, 'reserved', TransportProtocol.tcp
+    reserved_40023 = 40023, 'reserved'
 
     #: [TCP] Simplify Printing TX
-    sptx = 40404, 'sptx', TransportProtocol.tcp
+    sptx = 40404
 
     #: - [TCP] CSCP
     #: - [UDP] CSCP
-    cscp = 40841, 'cscp', TransportProtocol.tcp
+    cscp = 40841
 
     #: - [TCP] CSCCREDIR
     #: - [UDP] CSCCREDIR
-    csccredir = 40842, 'csccredir', TransportProtocol.tcp
+    csccredir = 40842
 
     #: - [TCP] CSCCFIREWALL
     #: - [UDP] CSCCFIREWALL
-    csccfirewall = 40843, 'csccfirewall', TransportProtocol.tcp
+    csccfirewall = 40843
 
     #: [TCP] Reserved
-    reserved_40853 = 40853, 'reserved', TransportProtocol.tcp
+    reserved_40853 = 40853, 'reserved'
 
     #: - [TCP] Foursticks QoS Protocol
     #: - [UDP] Foursticks QoS Protocol
-    fs_qos = 41111, 'fs-qos', TransportProtocol.tcp
+    fs_qos = 41111, 'fs-qos'
 
     #: [TCP] Tentacle Server
-    tentacle = 41121, 'tentacle', TransportProtocol.tcp
+    tentacle = 41121
 
     #: - [TCP] Z-Wave Protocol over SSL/TLS
     #: - [UDP] Z-Wave Protocol over DTLS
-    z_wave_s = 41230, 'z-wave-s', TransportProtocol.tcp
+    z_wave_s = 41230, 'z-wave-s'
 
     #: - [TCP] Crestron Control Port
     #: - [UDP] Crestron Control Port
-    crestron_cip = 41794, 'crestron-cip', TransportProtocol.tcp
+    crestron_cip = 41794, 'crestron-cip'
 
     #: - [TCP] Crestron Terminal Port
     #: - [UDP] Crestron Terminal Port
-    crestron_ctp = 41795, 'crestron-ctp', TransportProtocol.tcp
+    crestron_ctp = 41795, 'crestron-ctp'
 
     #: [TCP] Crestron Secure Control Port
-    crestron_cips = 41796, 'crestron-cips', TransportProtocol.tcp
+    crestron_cips = 41796, 'crestron-cips'
 
     #: [TCP] Crestron Secure Terminal Port
-    crestron_ctps = 41797, 'crestron-ctps', TransportProtocol.tcp
+    crestron_ctps = 41797, 'crestron-ctps'
 
     #: - [TCP] Computer Associates network discovery protocol
     #: - [UDP] Computer Associates network discovery protocol
-    candp = 42508, 'candp', TransportProtocol.tcp
+    candp = 42508
 
     #: - [TCP] CA discovery response
     #: - [UDP] CA discovery response
-    candrp = 42509, 'candrp', TransportProtocol.tcp
+    candrp = 42509
 
     #: - [TCP] CA eTrust RPC
     #: - [UDP] CA eTrust RPC
-    caerpc = 42510, 'caerpc', TransportProtocol.tcp
+    caerpc = 42510
 
     #: [TCP] API endpoint for search application
-    curiosity = 42999, 'curiosity', TransportProtocol.tcp
+    curiosity = 42999
 
     #: [TCP] Receiver Remote Control
-    recvr_rc = 43000, 'recvr-rc', TransportProtocol.tcp
+    recvr_rc = 43000, 'recvr-rc'
 
     #: - [TCP] REACHOUT
     #: - [UDP] REACHOUT
-    reachout = 43188, 'reachout', TransportProtocol.tcp
+    reachout = 43188
 
     #: - [TCP] NDM-AGENT-PORT
     #: - [UDP] NDM-AGENT-PORT
-    ndm_agent_port = 43189, 'ndm-agent-port', TransportProtocol.tcp
+    ndm_agent_port = 43189, 'ndm-agent-port'
 
     #: - [TCP] IP-PROVISION
     #: - [UDP] IP-PROVISION
-    ip_provision = 43190, 'ip-provision', TransportProtocol.tcp
+    ip_provision = 43190, 'ip-provision'
 
     #: [TCP] Reconnoiter Agent Data Transport
-    noit_transport = 43191, 'noit-transport', TransportProtocol.tcp
+    noit_transport = 43191, 'noit-transport'
 
     #: [TCP] Shaper Automation Server Management
-    shaperai = 43210, 'shaperai', TransportProtocol.tcp
+    shaperai = 43210
 
     #: [TCP] Reserved
-    reserved_43438 = 43438, 'reserved', TransportProtocol.tcp
+    reserved_43438 = 43438, 'reserved'
 
     #: [TCP] EQ3 firmware update
-    eq3_update = 43439, 'eq3-update', TransportProtocol.tcp
+    eq3_update = 43439, 'eq3-update'
 
     #: [TCP] Cisco EnergyWise Management
-    ew_mgmt = 43440, 'ew-mgmt', TransportProtocol.tcp
+    ew_mgmt = 43440, 'ew-mgmt'
 
     #: - [TCP] Cisco NetMgmt DB Ports
     #: - [UDP] Cisco NetMgmt DB Ports
-    ciscocsdb = 43441, 'ciscocsdb', TransportProtocol.tcp
+    ciscocsdb = 43441
 
     #: [TCP] Z-Wave Secure Tunnel
-    z_wave_tunnel = 44123, 'z-wave-tunnel', TransportProtocol.tcp
+    z_wave_tunnel = 44123, 'z-wave-tunnel'
 
     #: - [TCP] PCP server (pmcd)
     #: - [UDP] PCP server (pmcd)
-    pmcd = 44321, 'pmcd', TransportProtocol.tcp
+    pmcd = 44321
 
     #: - [TCP] PCP proxy (pmproxy)
     #: - [UDP] PCP proxy (pmproxy)
-    pmproxy = 44322, 'pmproxy', TransportProtocol.tcp
+    pmproxy = 44322
 
     #: [TCP] HTTP binding for Performance Co-Pilot client API
-    pmwebapi = 44323, 'pmwebapi', TransportProtocol.tcp
+    pmwebapi = 44323
 
     #: [TCP] Cognex DataMan Management Protocol
-    cognex_dataman = 44444, 'cognex-dataman', TransportProtocol.tcp
+    cognex_dataman = 44444, 'cognex-dataman'
 
     #: [TCP] Acronis Backup Gateway service port
-    acronis_backup = 44445, 'acronis-backup', TransportProtocol.tcp
+    acronis_backup = 44445, 'acronis-backup'
 
     #: [TCP] Reserved
-    reserved_44544 = 44544, 'reserved', TransportProtocol.tcp
+    reserved_44544 = 44544, 'reserved'
 
     #: - [TCP] REALbasic Remote Debug
     #: - [UDP] REALbasic Remote Debug
-    rbr_debug = 44553, 'rbr-debug', TransportProtocol.tcp
+    rbr_debug = 44553, 'rbr-debug'
 
     #: [TCP] Reserved
-    reserved_44600 = 44600, 'reserved', TransportProtocol.tcp
+    reserved_44600 = 44600, 'reserved'
 
     #: - [TCP] EtherNet/IP messaging IANA assigned this well-formed service name as a
     #:   replacement for "EtherNet/IP-2".
@@ -24944,190 +24944,190 @@ class TCP(AppType):
     #: - [UDP] EtherNet/IP messaging IANA assigned this well-formed service name as a
     #:   replacement for "EtherNet/IP-2".
     #: - [UDP] EtherNet/IP messaging
-    ethernet_ip_2 = 44818, 'ethernet-ip-2', TransportProtocol.tcp
+    ethernet_ip_2 = 44818, 'ethernet-ip-2'
 
     #: [TCP] M3DA is used for efficient machine-to-machine communications
-    m3da = 44900, 'm3da', TransportProtocol.tcp
+    m3da = 44900
 
     #: [TCP] Nuance AutoStore Status Monitoring Protocol (data transfer)
-    asmp = 45000, 'asmp', TransportProtocol.tcp
+    asmp = 45000
 
     #: [TCP] Nuance AutoStore Status Monitoring Protocol (secure data transfer)
-    asmps = 45001, 'asmps', TransportProtocol.tcp
+    asmps = 45001
 
     #: [TCP] Redspeed Status Monitor
-    rs_status = 45002, 'rs-status', TransportProtocol.tcp
+    rs_status = 45002, 'rs-status'
 
     #: [TCP] Remote application control protocol
-    synctest = 45045, 'synctest', TransportProtocol.tcp
+    synctest = 45045
 
     #: - [TCP] InVision AG
     #: - [UDP] InVision AG
-    invision_ag = 45054, 'invision-ag', TransportProtocol.tcp
+    invision_ag = 45054, 'invision-ag'
 
     #: - [TCP] Wire and Wireless transfer on synchroniz
     #: - [UDP] Wire and Wireless transfer on synchroniz
-    witsnet = 45185, 'witsnet', TransportProtocol.tcp
+    witsnet = 45185
 
     #: [TCP] ASSIA CloudCheck WiFi Management System
-    cloudcheck = 45514, 'cloudcheck', TransportProtocol.tcp
+    cloudcheck = 45514
 
     #: - [TCP] EBA PRISE
     #: - [UDP] EBA PRISE
-    eba = 45678, 'eba', TransportProtocol.tcp
+    eba = 45678
 
     #: [TCP] Server for the DAI family of client-server products
-    dai_shell = 45824, 'dai-shell', TransportProtocol.tcp
+    dai_shell = 45824, 'dai-shell'
 
     #: - [TCP] Qpuncture Data Access Service
     #: - [UDP] Qpuncture Data Access Service
-    qdb2service = 45825, 'qdb2service', TransportProtocol.tcp
+    qdb2service = 45825
 
     #: - [TCP] SSRServerMgr
     #: - [UDP] SSRServerMgr
-    ssr_servermgr = 45966, 'ssr-servermgr', TransportProtocol.tcp
+    ssr_servermgr = 45966, 'ssr-servermgr'
 
     #: [TCP] Listen port used for Inedo agent communication
-    inedo = 46336, 'inedo', TransportProtocol.tcp
+    inedo = 46336
 
     #: [TCP] Connection between a desktop computer or server and a signature tablet
     #: to capture handwritten signatures
-    spremotetablet = 46998, 'spremotetablet', TransportProtocol.tcp
+    spremotetablet = 46998
 
     #: - [TCP] MediaBox Server
     #: - [UDP] MediaBox Server
-    mediabox = 46999, 'mediabox', TransportProtocol.tcp
+    mediabox = 46999
 
     #: - [TCP] Message Bus
     #: - [UDP] Message Bus
-    mbus = 47000, 'mbus', TransportProtocol.tcp
+    mbus = 47000
 
     #: [TCP] Windows Remote Management Service
-    winrm = 47001, 'winrm', TransportProtocol.tcp
+    winrm = 47001
 
     #: [TCP] Reserved
-    reserved_47100 = 47100, 'reserved', TransportProtocol.tcp
+    reserved_47100 = 47100, 'reserved'
 
     #: - [TCP] Databeam Corporation
     #: - [UDP] Databeam Corporation
-    dbbrowse = 47557, 'dbbrowse', TransportProtocol.tcp
+    dbbrowse = 47557
 
     #: - [TCP] Direct Play Server
     #: - [UDP] Direct Play Server
-    directplaysrvr = 47624, 'directplaysrvr', TransportProtocol.tcp
+    directplaysrvr = 47624
 
     #: - [TCP] ALC Protocol
     #: - [UDP] ALC Protocol
-    ap = 47806, 'ap', TransportProtocol.tcp
+    ap = 47806
 
     #: - [TCP] Building Automation and Control Networks
     #: - [UDP] Building Automation and Control Networks
-    bacnet = 47808, 'bacnet', TransportProtocol.tcp
+    bacnet = 47808
 
     #: [TCP] Reserved
-    reserved_47809 = 47809, 'reserved', TransportProtocol.tcp
+    reserved_47809 = 47809, 'reserved'
 
     #: - [TCP] Nimbus Controller
     #: - [UDP] Nimbus Controller
-    nimcontroller = 48000, 'nimcontroller', TransportProtocol.tcp
+    nimcontroller = 48000
 
     #: - [TCP] Nimbus Spooler
     #: - [UDP] Nimbus Spooler
-    nimspooler = 48001, 'nimspooler', TransportProtocol.tcp
+    nimspooler = 48001
 
     #: - [TCP] Nimbus Hub
     #: - [UDP] Nimbus Hub
-    nimhub = 48002, 'nimhub', TransportProtocol.tcp
+    nimhub = 48002
 
     #: - [TCP] Nimbus Gateway
     #: - [UDP] Nimbus Gateway
-    nimgtw = 48003, 'nimgtw', TransportProtocol.tcp
+    nimgtw = 48003
 
     #: [TCP] NimbusDB Connector
-    nimbusdb = 48004, 'nimbusdb', TransportProtocol.tcp
+    nimbusdb = 48004
 
     #: [TCP] NimbusDB Control
-    nimbusdbctrl = 48005, 'nimbusdbctrl', TransportProtocol.tcp
+    nimbusdbctrl = 48005
 
     #: [TCP] Juliar Programming Language Protocol
-    juka = 48048, 'juka', TransportProtocol.tcp
+    juka = 48048
 
     #: [TCP] 3GPP Cell Broadcast Service Protocol
-    TCP_3gpp_cbsp = 48049, '3gpp-cbsp', TransportProtocol.tcp
+    TCP_3gpp_cbsp = 48049, '3gpp-cbsp'
 
     #: [TCP] WeFi Access Network Discovery and Selection Function
-    weandsf = 48050, 'weandsf', TransportProtocol.tcp
+    weandsf = 48050
 
     #: - [TCP] Image Systems Network Services
     #: - [UDP] Image Systems Network Services
-    isnetserv = 48128, 'isnetserv', TransportProtocol.tcp
+    isnetserv = 48128
 
     #: - [TCP] Bloomberg locator
     #: - [UDP] Bloomberg locator
-    blp5 = 48129, 'blp5', TransportProtocol.tcp
+    blp5 = 48129
 
     #: - [TCP] com-bardac-dw
     #: - [UDP] com-bardac-dw
-    com_bardac_dw = 48556, 'com-bardac-dw', TransportProtocol.tcp
+    com_bardac_dw = 48556, 'com-bardac-dw'
 
     #: - [TCP] iqobject
     #: - [UDP] iqobject
-    iqobject = 48619, 'iqobject', TransportProtocol.tcp
+    iqobject = 48619
 
     #: - [TCP] Robot Raconteur transport
     #: - [UDP] Robot Raconteur transport
-    robotraconteur = 48653, 'robotraconteur', TransportProtocol.tcp
+    robotraconteur = 48653
 
     #: [TCP] Matahari Broker
-    matahari = 49000, 'matahari', TransportProtocol.tcp
+    matahari = 49000
 
     #: [TCP] Nuance Unity Service Request Protocol
-    nusrp = 49001, 'nusrp', TransportProtocol.tcp
+    nusrp = 49001
 
     #: [TCP] InSpider System
-    inspider = 49150, 'inspider', TransportProtocol.tcp
+    inspider = 49150
 
     #: [TCP] Delphix Session Protocol
-    dlpx_sp_8415 = 8415, 'dlpx-sp', TransportProtocol.tcp
+    dlpx_sp_8415 = 8415, 'dlpx-sp'
 
     #: - [TCP] http protocol over TLS/SSL [:rfc:`9110`]
     #: - [UDP] http protocol over TLS/SSL [:rfc:`9110`]
     #: - [SCTP] HTTPS [:rfc:`9260`]
-    https_443 = 443, 'https', TransportProtocol.tcp
+    https_443 = 443, 'https'
 
     #: - [TCP] LonWorks
     #: - [UDP] LonWorks
-    lonworks_2540 = 2540, 'lonworks', TransportProtocol.tcp
+    lonworks_2540 = 2540, 'lonworks'
 
     #: - [TCP] Message Queuing Telemetry Transport Protocol
     #: - [UDP] Message Queuing Telemetry Transport Protocol
-    mqtt_1883 = 1883, 'mqtt', TransportProtocol.tcp
+    mqtt_1883 = 1883, 'mqtt'
 
     #: - [TCP] XMPP Link-Local Messaging
     #: - [UDP] XMPP Link-Local Messaging
-    presence_5298 = 5298, 'presence', TransportProtocol.tcp
+    presence_5298 = 5298, 'presence'
 
     #: [TCP] Printopia Serve
-    printopia_10631 = 10631, 'printopia', TransportProtocol.tcp
+    printopia_10631 = 10631, 'printopia'
 
     #: - [TCP] Profile for Mac
     #: - [UDP] Profile for Mac
-    profilemac_4749 = 4749, 'profilemac', TransportProtocol.tcp
+    profilemac_4749 = 4749, 'profilemac'
 
     #: [TCP] Experimental Physics and Industrial Control System
-    pvaccess_5075 = 5075, 'pvaccess', TransportProtocol.tcp
+    pvaccess_5075 = 5075, 'pvaccess'
 
     #: - [TCP] Retrospect backup and restore service
     #: - [UDP] Retrospect backup and restore service
-    retrospect_497 = 497, 'retrospect', TransportProtocol.tcp
+    retrospect_497 = 497, 'retrospect'
 
     #: - [TCP] SCPI-RAW
     #: - [UDP] SCPI-RAW
-    scpi_raw_5025 = 5025, 'scpi-raw', TransportProtocol.tcp
+    scpi_raw_5025 = 5025, 'scpi-raw'
 
     #: - [TCP] SCPI-TELNET
     #: - [UDP] SCPI-TELNET
-    scpi_telnet_5024 = 5024, 'scpi-telnet', TransportProtocol.tcp
+    scpi_telnet_5024 = 5024, 'scpi-telnet'
 
     #: - [TCP] Grid Engine Qmaster Service IANA assigned this well-formed service
     #:   name as a replacement for "sge_qmaster".
@@ -25135,20 +25135,20 @@ class TCP(AppType):
     #: - [UDP] Grid Engine Qmaster Service IANA assigned this well-formed service
     #:   name as a replacement for "sge_qmaster".
     #: - [UDP] Grid Engine Qmaster Service
-    sge_qmaster_6444 = 6444, 'sge-qmaster', TransportProtocol.tcp
+    sge_qmaster_6444 = 6444, 'sge-qmaster'
 
     #: - [TCP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
     #: - [UDP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
     #: - [SCTP] SSH [:rfc:`9260`]
-    ssh_22 = 22, 'ssh', TransportProtocol.tcp
+    ssh_22 = 22, 'ssh'
 
     #: - [TCP] Subversion
     #: - [UDP] Subversion
-    svn_3690 = 3690, 'svn', TransportProtocol.tcp
+    svn_3690 = 3690, 'svn'
 
     #: [TCP] The X.510 wrapper protocol [ITU-T X.510 / ISO/IEC 9584-11]
-    x510_9877 = 9877, 'x510', TransportProtocol.tcp
+    x510_9877 = 9877, 'x510'
 
     #: - [TCP] Z-Wave Protocol
     #: - [UDP] Z-Wave Protocol
-    z_wave_4123 = 4123, 'z-wave', TransportProtocol.tcp
+    z_wave_4123 = 4123, 'z-wave'
