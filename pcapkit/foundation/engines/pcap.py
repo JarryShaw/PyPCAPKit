@@ -135,7 +135,7 @@ class PCAP(EngineBase[Frame]):
         # pylint: disable=attribute-defined-outside-init,protected-access
         ext = self._extractor
         self._setup_reassembly(parse=True)
-        self._setup_traceflow()
+        self._setup_traceflow(parse=True)
 
         self._gbhdr = Header(ext._ifile)
         self._vinfo = self._gbhdr.version

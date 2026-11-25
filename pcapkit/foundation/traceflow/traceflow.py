@@ -503,6 +503,12 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         #: read; otherwise no payload is buffered and ``packet`` is
         #: :data:`None`.
         self._analyze = analyze
+        #: dict[str, Any]: Keyword arguments a reassembled payload's parse takes
+        #: under ``analyze``: the stops and context the engine parses its frames
+        #: with, as :meth:`EngineBase._setup_traceflow
+        #: <pcapkit.foundation.engines.engine.EngineBase._setup_traceflow>` hands
+        #: them over (:issue:`2946`).
+        self._parse_keywords = {}  # type: dict[str, Any]
 
         # dump I/O object
         fio, ext = self.make_fout(fout, format=format)

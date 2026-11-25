@@ -1169,7 +1169,8 @@ class Extractor(Generic[_P]):
                 the channel is honoured by the :term:`default engine`, whose PCAP
                 and PCAP-NG readers parse with :mod:`pcapkit`'s own protocol
                 implementations, in its frames and in the payloads IP and TCP
-                reassembly rebuild from them; the third party engines ignore it.
+                reassembly, and TCP flow tracing's ``analyze``, rebuild from them;
+                the third party engines ignore it.
             reassembly: reassembly settings, or the names of the reassemblers to
                 enable with their defaults, each as registered in
                 :attr:`__reassembly__`; :data:`None`, or no names, reassembles
