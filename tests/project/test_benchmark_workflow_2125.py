@@ -427,18 +427,23 @@ class TestTheMeasureStep(_Scratch):
 class TestTheReportStep(_Scratch):
     """``Write the report``: the ratio table for the post, and both tables for the summary."""
 
-    def test_the_report_names_the_runner_and_fences_the_tables(self) -> None:
+    def test_the_report_names_the_runner_and_folds_the_rst(self) -> None:
+        """Each table as Markdown, its reStructuredText folded beneath (#3054)."""
         out = self.tmp / 'out'
         out.mkdir()
-        (out / 'table.rst').write_text('RATIOS\n', encoding='utf-8')
-        (out / 'table-versions.rst').write_text('ABSOLUTES\n', encoding='utf-8')
+        for name, text in (('table.md', 'RATIOS'), ('table.rst', 'RATIOS RST'),
+                           ('table-versions.md', 'ABSOLUTES'), ('table-versions.rst', 'ABSOLUTES RST')):
+            (out / name).write_text(f'{text}\n', encoding='utf-8')
         self.assertEqual(self.run_step('benchmark', 'Write the report', RUNNER_LABEL='macos-latest').returncode, 0)
         report = (out / 'report.md').read_text(encoding='utf-8')
+        fold = ('{}\n\n<details>\n<summary>reStructuredText for docs/source/engines.rst</summary>\n\n'
+                '```rst\n{} RST\n```\n\n</details>\n')
         self.assertTrue(report.startswith('## Engine benchmark on macos-latest\n'))
         self.assertIn('Linux X64, image ubuntu26 20261020.1', report)
-        self.assertTrue(report.endswith('```rst\nRATIOS\n```\n'))
+        self.assertTrue(report.endswith('by hand.\n\n' + fold.format('RATIOS', 'RATIOS')))
         self.assertNotIn('ABSOLUTES', report)
-        self.assertEqual(self.summary.read_text(encoding='utf-8'), f'{report}\n```rst\nABSOLUTES\n```\n')
+        self.assertEqual(self.summary.read_text(encoding='utf-8'),
+                         f'{report}\n' + fold.format('ABSOLUTES', 'ABSOLUTES'))
         self.assertEqual(step('benchmark', 'Write the report')['if'],
                          "${{ always() && hashFiles('out/table.rst') != '' }}")
 

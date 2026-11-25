@@ -642,7 +642,10 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertEqual(workflow_commands(result.stdout)[-1],
                          f'::warning title=Scapy failed on Python {ktlo_py} (KTLO%2C non-blocking)::{ktlo_py} is '
                          'end-of-life and KTLO per #1633; this does not fail the job.')
-        self.assertEqual(page.read_text(encoding='utf-8'), f'| {ktlo_py} | Scapy | | FAILED (KTLO, non-blocking) |\n')
+        # #3054: the step writes its table's header, as GitHub renders its page alone.
+        self.assertEqual(page.read_text(encoding='utf-8'),
+                         '\n### Engine cells: Scapy (KTLO, non-blocking)\n\n| Python | Engine | Expect | Result |\n'
+                         f'| --- | --- | --- | --- |\n| {ktlo_py} | Scapy | | FAILED (KTLO, non-blocking) |\n')
 
 
 class TestASupportedLegStillFails(unittest.TestCase):

@@ -1380,9 +1380,14 @@ def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 
 # --------------------------------------------------------------------- output
 
 
+def _cell(text: 'str') -> 'str':
+    """A name the API or a JUnit report gave, as one table cell: a ``|`` in it would end the cell (#3054)."""
+    return text.replace('|', '\\|')
+
+
 def _job_cell(row: 'dict[str, Any]', key: 'str') -> 'str':
     """A table row's job name, marked when :func:`no_longer_run` names it."""
-    return row[key] + ('' if row.get('still_run', True) else ' *(no longer run)*')
+    return _cell(row[key]) + ('' if row.get('still_run', True) else ' *(no longer run)*')
 
 
 def summary(report: 'dict[str, Any]', findings: 'list[dict[str, str]]') -> 'str':
@@ -1431,14 +1436,14 @@ def summary(report: 'dict[str, Any]', findings: 'list[dict[str, str]]') -> 'str'
     out += ['', f'### Steps, by p90 (top {TABLE_ROWS})', '',
             '| Job | Step | n | Median | p90 | Step cap | Days to cap |', '|---|---|--:|--:|--:|--:|--:|']
     for row in steps:
-        out.append(f'| {_job_cell(row, "job")} | {row["name"]} | {row["n"]} | {_fmt(row["median"])} | '
+        out.append(f'| {_job_cell(row, "job")} | {_cell(row["name"])} | {row["n"]} | {_fmt(row["median"])} | '
                    f'{_fmt(row["p90"])} | {row["cap"] or "-"} | {_fmt(row.get("days_to_cap"))} |')
 
     out += ['', '### Critical path to `Required checks passed`', '',
             '| Event | Runs | Last to finish | Share | Median slack to runner-up |', '|---|--:|---|--:|--:|']
     for event, row in report['critical_path'].items():
         share = row['shares'].get(row['leader'], 0) if row['leader'] else 0
-        out.append(f'| {event} | {row["runs"]} | {row["leader"] or "-"} | {share:.0%} | '
+        out.append(f'| {event} | {row["runs"]} | {_cell(row["leader"] or "-")} | {share:.0%} | '
                    f'{_fmt(row["slack_median"])} min |')
 
     derived = report['derived']
@@ -1455,9 +1460,9 @@ def summary(report: 'dict[str, Any]', findings: 'list[dict[str, str]]') -> 'str'
     for leg, row in report['tests'].items():
         out += ['', f'### Tests on {leg}, median of {row["runs"]} push run(s)', '',
                 '| Module | Seconds |', '|---|--:|']
-        out += [f'| `{name}` | {seconds:.1f} |' for name, seconds in row['top_modules'][:10]]
+        out += [f'| `{_cell(name)}` | {seconds:.1f} |' for name, seconds in row['top_modules'][:10]]
         out += ['', '| Class | Seconds |', '|---|--:|']
-        out += [f'| `{name}` | {seconds:.1f} |' for name, seconds in row['top_classes'][:10]]
+        out += [f'| `{_cell(name)}` | {seconds:.1f} |' for name, seconds in row['top_classes'][:10]]
 
     if report.get('concurrency'):
         pool = report['concurrency']

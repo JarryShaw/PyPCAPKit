@@ -218,29 +218,40 @@ jobs:
           esac
 
       # The report names the runner, as the tables' Image row does, since a
-      # native run has no image digest to name.
+      # native run has no image digest to name. Each table is report.py's
+      # Markdown, which GitHub renders, with its reStructuredText for the docs
+      # folded in a <details> block; the fence inside renders only after the
+      # blank line that follows <summary> (#3054).
       - name: Write the report
         if: ${{ always() && hashFiles('out/table.rst') != '' }}
         env:
           RUNNER_LABEL: ${{ matrix.os }}
         run: |
           set -eu
+          table() {
+            cat "out/$1.md"
+            echo
+            echo '<details>'
+            echo '<summary>reStructuredText for docs/source/engines.rst</summary>'
+            echo
+            echo '```rst'
+            cat "out/$1.rst"
+            echo '```'
+            echo
+            echo '</details>'
+          }
           {
             echo "## Engine benchmark on $RUNNER_LABEL"
             echo
             echo "Measured natively on $RUNNER_OS $RUNNER_ARCH, image ${ImageOS:-unknown} ${ImageVersion:-unknown},"
             echo "so the absolute times compare only within this run. The docs' tables are updated by hand."
             echo
-            echo '```rst'
-            cat out/table.rst
-            echo '```'
+            table table
           } > out/report.md
           {
             cat out/report.md
             echo
-            echo '```rst'
-            cat out/table-versions.rst
-            echo '```'
+            table table-versions
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload the results

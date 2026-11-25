@@ -962,12 +962,6 @@ jobs:
           fi
           echo "| $PY | $ENGINE | $EXPECT | passed |" | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
           CELL
-          {
-            echo "### Engine cells: $ENGINE"
-            echo
-            echo "| Python | Engine | Expect | Result |"
-            echo "| --- | --- | --- | --- |"
-          } | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
@@ -977,13 +971,21 @@ jobs:
 
       # Every cell runs even after one fails, so one red run reports all of
       # them; the step fails at the end if any did. ANNOTATION_LEVEL is the
-      # level of the cell script's annotations (#1672).
+      # level of the cell script's annotations (#1672). GitHub renders each
+      # step's summary on its own, so a step writing a table's rows writes its
+      # header first (#3054).
       - name: Run the supported cells
         shell: bash
         env:
           PYTHONS: ${{ needs.python-versions.outputs.engine-supported }}
           ANNOTATION_LEVEL: error
         run: |
+          {
+            echo "### Engine cells: $ENGINE"
+            echo
+            echo "| Python | Engine | Expect | Result |"
+            echo "| --- | --- | --- | --- |"
+          } | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
           failed=()
           for py in $PYTHONS; do
             echo "::group::Python $py ($ENGINE)"
@@ -998,7 +1000,8 @@ jobs:
             exit 1
           fi
 
-      # KTLO, non-blocking (#1633); with no KTLO cell it loops over nothing.
+      # KTLO, non-blocking (#1633); with no KTLO cell it loops over nothing and
+      # writes no table, its header included (#3054).
       # #1672: this step is the KTLO cells' report, as `KTLO summary` is a KTLO
       # leg's in the matrix jobs, and an interpreter the setup step above could
       # not install fails here.
@@ -1009,6 +1012,15 @@ jobs:
           PYTHONS: ${{ needs.python-versions.outputs.engine-ktlo }}
           ANNOTATION_LEVEL: warning
         run: |
+          if [ -n "${PYTHONS//[[:space:]]/}" ]; then
+            {
+              echo
+              echo "### Engine cells: $ENGINE (KTLO, non-blocking)"
+              echo
+              echo "| Python | Engine | Expect | Result |"
+              echo "| --- | --- | --- | --- |"
+            } | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
           failed=()
           for py in $PYTHONS; do
             echo "::group::Python $py ($ENGINE)"
