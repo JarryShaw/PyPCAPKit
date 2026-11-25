@@ -17,9 +17,8 @@ nothing a lookup needs: member construction reads the positional tuple, not
 ``__annotations__``. Dropping it saves 7 or 8 bytes per member, by whether its
 class name is 3 or 4 letters long (#769).
 
-GitHub issue #768: the ``proto`` argument on every one of those members, and
-every ``cls.__transport__ is ...`` test in a range-row ``_missing_`` branch,
-uses attribute access rather than
+GitHub issue #768: every ``cls.__transport__ is ...`` test in a range-row
+``_missing_`` branch uses attribute access rather than
 :meth:`~pcapkit.const.reg.apptype.apptype.TransportProtocol.get` (524 ns, an
 ``isinstance`` check, two ``.lower()`` calls, a membership test and a
 ``__getitem__``) to reach a member plain attribute access returns in 24 ns,
@@ -157,11 +156,10 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
     def test_no_transport_protocol_get_calls_survive_in_generated_output(self) -> None:
         """GitHub issue #768, swept over the generated source text itself.
 
-        Every *generator-emitted* site -- one per member's ``proto``
-        argument plus one per ``cls.__transport__ is ...`` range-row test and
-        its own ``extend_enum(...)`` call -- uses attribute access, so the
-        generated registries have none. The base module keeps one legitimate
-        call, ``_dispatch``'s ``TransportProtocol.get(proto.lower())``,
+        Every *generator-emitted* site -- one per ``cls.__transport__ is ...``
+        range-row test and its own ``extend_enum(...)`` call -- uses attribute
+        access, so the generated registries have none. The base module keeps
+        one legitimate call, ``_dispatch``'s ``TransportProtocol.get(proto.lower())``,
         which resolves a *caller*-supplied string at run time and so cannot
         be a fixed attribute access -- exactly the "other callers" #768 says
         :meth:`~pcapkit.const.reg.apptype.apptype.TransportProtocol.get`

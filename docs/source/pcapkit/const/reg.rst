@@ -105,6 +105,16 @@ transport protocol sharing a memberless base.
    raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`, still a
    :exc:`ValueError`, rather than a builtin one (:issue:`2545`).
 
+.. versionchanged:: 1.8.0
+
+   A per-transport member no longer repeats its transport, which
+   :meth:`AppType.__new__ <pcapkit.const.reg.apptype.apptype.AppType.__new__>`
+   takes from the registry's ``__transport__``, and gives its service name only
+   where it differs from the member name: ``exp2 = 1022``, but
+   ``ltp_deepspace = 1113, 'ltp-deepspace'`` (:issue:`3055`). ``__new__``'s
+   ``name`` lost its ``'<null>'`` default. No member's value, ``svc``, ``port``
+   or ``proto`` changed.
+
 .. autoclass:: pcapkit.const.reg.apptype.apptype.AppType
    :members:
    :undoc-members:

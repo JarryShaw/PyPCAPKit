@@ -311,20 +311,29 @@ class {NAME}(EnumRegistry, StrEnum):
     #: registry has no members and so no collisions.
     __canonical__: 'dict[int, str]' = {{}}
 
-    def __new__(cls, value: 'int', name: 'str' = '<null>',
+    def __new__(cls, value: 'int', name: 'str',
                 proto: 'TransportProtocol' = TransportProtocol.undefined) -> 'Type[{NAME}]':
         """Create a member from a registry row and add it to :attr:`__registry__`.
+
+        A member declares its port alone where its service name is its own name,
+        as ``exp2 = 1022`` does, and adds the name only where the two differ, as
+        in ``ltp_deepspace = 1113, 'ltp-deepspace'``; ``_generate_next_value_``
+        supplies the name a bare port leaves out.
 
         Args:
             value: Port number.
             name: Service name.
-            proto: Transport protocol carrying the service.
+            proto: Transport protocol carrying the service;
+                :attr:`TransportProtocol.undefined`, the default, takes the
+                registry's :attr:`__transport__`.
 
         Raises:
             ValueError: If called on the base registry, which holds no members
                 of its own, rather than on a per-transport subclass.
 
         """
+        if proto is TransportProtocol.undefined:
+            proto = cls.__transport__
         temp = f'{{name}} [{{value}} - {{proto.name}}]'
 
         obj = str.__new__(cls, temp)
@@ -342,6 +351,29 @@ class {NAME}(EnumRegistry, StrEnum):
         cls.__registry__.add(value, obj)
 
         return obj
+
+    @staticmethod
+    def _generate_next_value_(name: 'str', start: 'int', count: 'int', last_values: 'list[Any]',
+                              *args: 'Any', **kwds: 'Any') -> 'tuple[Any, ...]':
+        """Take the member's name as the service name of a member declaring its port alone.
+
+        |aenum|_ calls this for a member declaring fewer values than
+        :meth:`__new__` requires, passing the values it does declare as ``args``,
+        and only when the signature takes ``*args`` and ``**kwds``.
+
+        Args:
+            name: Member name.
+            start: Unused.
+            count: Unused.
+            last_values: Unused.
+            *args: Values the member declares, i.e. its port.
+            **kwds: Unused.
+
+        Returns:
+            The port and the member name, as :meth:`__new__` takes them.
+
+        """
+        return (*args, name)
 
     @property
     def aliases(self) -> 'tuple[{NAME}, ...]':
@@ -1212,9 +1244,11 @@ class AppType(Vendor):
             if keyword.iskeyword(key):
                 key = '%s_' % key
 
-            # NOTE: ``proto`` is this registry's transport alone (#806); ``record.protos`` would give
-            # ``TCP.http`` UDP and SCTP too, a drifting multi-bit copy every entry point refuses (#860).
-            pres = f"{key} = {record.port}, {record.svc!r}, {self.flag([self.TRANSPORT])}"
+            # NOTE: ``__new__`` takes ``proto`` from ``__transport__`` and a missing name from the member's
+            # own (#3055), so a member repeats neither and gives the name only where it differs.
+            pres = f'{key} = {record.port}'
+            if record.svc != key:
+                pres = f'{pres}, {record.svc!r}'
             if len(record.parts) > 1:
                 # NOTE: a merged entry gets one bullet per registry row; the bullet supplies the hanging
                 # indent the single-row form re-indents its continuations for.
