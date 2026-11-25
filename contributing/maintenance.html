@@ -883,7 +883,10 @@ are the loops’ moves.</p>
     W --&gt; [*] : covering pull request merged, issue closed
     </pre><p>A merged pull request closes only the issue its own <code class="docutils literal notranslate"><span class="pre">Closes</span></code> keyword names, one
 keyword per issue, so every <code class="docutils literal notranslate"><span class="pre">wip</span></code> issue is checked against its pull request’s state
-and closed by hand where the keyword did not.</p>
+and closed by hand where the keyword did not. <strong>A merge into</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>closes
+nothing</strong>, since GitHub acts on the keyword only on the default branch: the coordinator
+closes each target by hand as completed, with a comment naming the merge commit and the
+release it ships in (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3062">#3062</a>).</p>
 <p><code class="docutils literal notranslate"><span class="pre">review:</span> <span class="pre">good-to-go</span></code> goes on when the verdict lands; the CI gate belongs to
 reporting the pull request as ready.</p>
 <pre  class="mermaid">
@@ -1029,13 +1032,14 @@ change that implements it.</p></li>
 <ol class="arabic simple">
 <li><p><strong>Labels</strong>: strip the merged pull request’s labels and settle its issues’ – close
 any its keyword did not, unblock any whose condition was this merge.</p></li>
-<li><p><strong>Superseded runs on</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>: cancel the queued and running push runs of Unit
-Tests, Python Compatibility, CodeQL and Experimental Tests on every <code class="docutils literal notranslate"><span class="pre">main</span></code> sha
-older than the head, whose results the head makes moot. The head is read afresh
-inside the cancelling script, since a stale local <code class="docutils literal notranslate"><span class="pre">origin/main</span></code> would cancel the
-real head’s runs, and when the head is docs-only, the newest code-changing
-commit keeps its runs. <strong>Never cancelled</strong>: Create Release, Project Status,
-Milestone, CI Reports, any scheduled run, and the head’s own runs.</p></li>
+<li><p><strong>Superseded runs on</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3062">#3062</a>): cancel the
+queued and running push runs of Unit Tests, Python Compatibility, CodeQL and
+Experimental Tests on every sha of either branch older than its head, whose results
+the head makes moot. The head is read afresh from the API inside the cancelling
+script, since a stale local <code class="docutils literal notranslate"><span class="pre">origin/main</span></code> or <code class="docutils literal notranslate"><span class="pre">origin/develop</span></code> would cancel the
+real head’s runs, and when the head is docs-only, the newest code-changing commit
+keeps its runs. <strong>Never cancelled</strong>: Create Release, Project Status, Milestone, CI
+Reports, any scheduled run, and the head’s own runs.</p></li>
 <li><p><strong>The latest-tier sweeps, locally</strong>: the project modules that only CI’s
 <code class="docutils literal notranslate"><span class="pre">latest</span></code> leg runs (Test Tiers on <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>) are run on a scratch tree of
 the new <code class="docutils literal notranslate"><span class="pre">main</span></code>, because a merge wave supersedes <code class="docutils literal notranslate"><span class="pre">main</span></code>’s runs before they
@@ -1069,6 +1073,9 @@ which it skips or stops rather than cancels (<a class="reference internal" href=
 job already failed. A non-blocking leg’s red check is a defect as well: such a leg may
 only warn and end green, so a step that can lose its runner is contained – capped,
 bounded, timed out – rather than excused.</p>
+<p><strong>The scheduled workflows run on</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code> <strong>alone, with no</strong> <code class="docutils literal notranslate"><span class="pre">develop</span></code> <strong>leg</strong>, as
+ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/3062">#3062</a>: they catch upstream drift, which both branches share, and
+<code class="docutils literal notranslate"><span class="pre">develop</span></code>’s own push and pull-request CI covers its changes.</p>
 <p><strong>What may go straight to</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>. A change that only touches docs – pages,
 docstrings and comments, under <code class="file docutils literal notranslate"><span class="pre">pcapkit/</span></code> as anywhere else, conventions and
 process pages included – or only tests needs no issue and no pull request, and is
