@@ -172,7 +172,8 @@ export BENCH_IMAGE="${IMAGE}"
 
 # A previous run's output is not inherited, for run.sh's reasons.
 mkdir -p "${OUT_DIR}/missing" "${WORK_DIR}"
-rm -f "${OUT_DIR}/missing/"*.txt "${OUT_DIR}"/*.json "${OUT_DIR}"/*.rst "${OUT_DIR}"/*.txt
+rm -f "${OUT_DIR}/missing/"*.txt "${OUT_DIR}"/*.json "${OUT_DIR}"/*.rst "${OUT_DIR}"/*.txt \
+    "${OUT_DIR}/table.md" "${OUT_DIR}/table-versions.md"
 
 GAPS=0
 record_missing() {
@@ -289,12 +290,15 @@ done
 status=0
 "${REPORTER}" "${SCRIPT_DIR}/report.py" "${DOCUMENTS[@]}" \
     --rst-out "${OUT_DIR}/table.rst" --versions-rst-out "${OUT_DIR}/table-versions.rst" \
+    --md-out "${OUT_DIR}/table.md" --versions-md-out "${OUT_DIR}/table-versions.md" \
     ${REPORT_ARGS[@]+"${REPORT_ARGS[@]}"} || status=$?
 
-if [ ! -f "${OUT_DIR}/table.rst" ] || [ ! -f "${OUT_DIR}/table-versions.rst" ]; then
-    echo "native.sh: no table was produced; ${OUT_DIR} holds whatever the run got to." >&2
-    exit 1
-fi
+for table in table.rst table-versions.rst table.md table-versions.md; do
+    if [ ! -f "${OUT_DIR}/${table}" ]; then
+        echo "native.sh: no ${table} was produced; ${OUT_DIR} holds whatever the run got to." >&2
+        exit 1
+    fi
+done
 if [ "${status}" -ne 0 ]; then
     exit 1
 fi
