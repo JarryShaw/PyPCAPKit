@@ -131,9 +131,11 @@ AUDIT = ('tests.project.test_python_versions_1660', 'tests.project.test_python_m
          'tests.project.test_ktlo_legs_stay_green_1672')
 #: Tiers :func:`python_versions.load` refuses, so a version in one is reported, not written.
 HELD = ('pre-release',)
-#: The job whose blocking legs ruleset 23497679 requires by name, besides the aggregate.
+#: The job whose blocking legs :data:`RULESETS` require by name, besides the aggregate.
 REQUIRED_JOB = ('python-compatibility.yml', 'compatibility')
 REQUIRED_AGGREGATE = 'Required checks passed'
+#: The rulesets requiring those contexts, by id, with the branch each protects (#3093).
+RULESETS = (('23497679', 'main'), ('28079111', 'develop'))
 #: What GitHub answers a push that changes a workflow file without the permission.
 WORKFLOWS_REFUSAL = 'without `workflows` permission'
 
@@ -524,7 +526,7 @@ def with_ktlo_twins(names: 'dict[tuple[str, str], dict[tuple, str]]') -> 'dict[t
 
 
 def required_contexts(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 'list[str]':
-    """Ruleset 23497679's required contexts for ``values``: the aggregate, and :data:`REQUIRED_JOB`'s blocking legs.
+    """:data:`RULESETS`' required contexts for ``values``: the aggregate, and :data:`REQUIRED_JOB`'s blocking legs.
 
     A KTLO leg never blocks, nor an experimental one (#1660), so neither is ever proposed as required.
 
@@ -1280,12 +1282,13 @@ def describe_plan(plan: 'dict[str, Any]', audit: 'tuple[str, list[str]]', run_ur
         out += [f'- {text}' for text in plan['retire']]
         out.append('')
     required = plan['required']
+    rulesets = ' and '.join(f'{number} (`{branch}`)' for number, branch in RULESETS)
     if required['remove'] or required['add']:
-        out.append('**Before merging, edit ruleset 23497679 (`main`)** -- the workflow never edits it:')
+        out.append(f'**Before merging, edit rulesets {rulesets}** -- the workflow never edits them:')
         out += [f'- remove `{name}`' for name in required['remove']]
         out += [f'- add `{name}`' for name in required['add']]
     else:
-        out.append('Ruleset 23497679 needs no edit: its required contexts are unchanged.')
+        out.append(f'Rulesets {rulesets} need no edit: their required contexts are unchanged.')
     out.append('')
     if plan['renamed']:
         out.append('Renamed check runs: ' + ', '.join(f'`{a}` -> `{b}`' for a, b in plan['renamed']) + '.')
@@ -1464,9 +1467,10 @@ def command_update(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> '
         print(f'latest: {plan["latest"][0]} -> {plan["latest"][1]}')
     for old, new in plan['renamed']:
         print(f'renamed: {old} -> {new}')
+    rulesets = ' and '.join(number for number, _ in RULESETS)
     for kind in ('add', 'remove'):
         for name in plan['required'][kind]:
-            print(f'ruleset 23497679: {kind} {name}')
+            print(f'rulesets {rulesets}: {kind} {name}')
     annotate(plan['notes'])
     changed = bool(plan['changed_files'])
     publish, status = changed, 0
