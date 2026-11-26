@@ -1,0 +1,27 @@
+/* The version switch under the sidebar brand (#3077), in furo's own variables. */
+.sidebar-versions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25em 0.75em;
+  padding: 0 var(--sidebar-item-spacing-horizontal) var(--sidebar-item-spacing-vertical);
+  font-size: var(--sidebar-item-font-size);
+}
+.sidebar-versions-label {
+  color: var(--color-foreground-muted);
+}
+.sidebar-versions ul {
+  display: flex;
+  gap: 0.75em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sidebar-versions a {
+  color: var(--color-sidebar-link-text);
+  text-decoration: none;
+}
+.sidebar-versions a.current {
+  color: var(--color-brand-primary);
+  font-weight: bold;
+}

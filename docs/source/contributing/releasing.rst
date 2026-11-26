@@ -576,6 +576,15 @@ nothing published. Without its ``needs: github``, ``tag``, which has no
 reviewer of its own, could push a commit to ``main`` and cut a ``conda-*`` tag
 *ahead of* the approval it is supposed to wait for.
 
+The Release's Documentation
+---------------------------
+
+No release job publishes the documentation (:ref:`documentation-hosting`). GitHub
+Pages republishes ``main``'s build at its root, which ``/latest/`` aliases, once the
+release's push passes Unit Tests, and ``develop``'s build under ``/dev/`` on each push
+to ``develop``. Read the Docs builds ``latest`` from ``main``, ``develop``, and the
+release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its tree.
+
 Precautions
 -----------
 
