@@ -1065,8 +1065,15 @@ Deterministic Construction Arguments
 ------------------------------------
 
 **Done** in 1.6.0 (:issue:`2594`): a ``make()`` call's argument list is
-deterministic. Further proposals for the construction workflow go under this
-heading.
+deterministic.
+
+**Done** in 1.8.0 (:issue:`2840`): a protocol parses with
+:meth:`~pcapkit.protocols.protocol.Protocol.from_file` and builds with
+:meth:`~pcapkit.protocols.protocol.Protocol.from_fields`, each taking a closed
+keyword set (:ref:`public-signatures`), and calling the class does either
+(:issue:`3081`).
+
+Further proposals for the construction workflow go under this heading.
 
 Inferring a namespace from the caller's frame, for a conventional
 four-argument group -- ``X``, ``X_default``, ``X_namespace`` and

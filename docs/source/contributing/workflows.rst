@@ -1049,10 +1049,10 @@ classifier and the ``required-checks`` step.
 Required Status Checks
 ----------------------
 
-Ruleset ``23497679`` on ``main`` requires the contexts below, with
-``strict_required_status_checks_policy: true`` (a branch must be up to date
-with ``main`` before it can merge, not merely green). Each was found by
-grepping every workflow file for its name:
+Rulesets ``23497679`` on ``main`` and ``28079111`` on ``develop`` both require the
+contexts below, each with ``strict_required_status_checks_policy: true`` (a branch
+must be up to date with the one it targets before it can merge, not merely green).
+Each was found by grepping every workflow file for its name:
 
 .. list-table::
    :header-rows: 1
@@ -1082,7 +1082,7 @@ grepping every workflow file for its name:
      - job ``compatibility``, matrix leg ``3.15``
      - ``python-compatibility.yml``, key ``"3.15"`` of ``.github/python-versions.toml``
 
-Moving a version between the tiers below means editing the ruleset in the same
+Moving a version between the tiers below means editing both rulesets in the same
 change, as :issue:`1633` did for 3.15 and 3.10.
 
 ``Required checks passed`` is defined by exactly one, the ``name:`` of the
@@ -1094,15 +1094,15 @@ are its supported tier (keys ``"3.11"`` to ``"3.15"``), and its KTLO legs
 context matches one. The comment above ``required-checks`` mentions the string
 without defining it.
 
-``Required checks passed`` is an aggregate, not a single check run. The ruleset
+``Required checks passed`` is an aggregate, not a single check run. Each ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, with ``Lint``, and
 nothing else. It ``needs:`` the gating jobs of ``unit-tests.yml`` --
 ``test``, ``test-latest-tier``, ``coverage``, ``integration``, ``engine-tests``
 and ``pypcap-parity``, plus ``project-tests``, the one run of the project pins,
 and ``changes`` for the docs-only path -- and checks each result explicitly, in its "Check every
 required job succeeded" step. Rulesets match check names literally, with no
-wildcard, so requiring the matrix cells one by one would mean editing the
-ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
+wildcard, so requiring the matrix cells one by one would mean editing both
+rulesets whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
 ``project-tests`` runs every test that reads ``docs/`` or Markdown as well, and
 ``engine-tests`` and ``pypcap-parity`` only on a test-only one (see `Light Pull
@@ -1196,7 +1196,7 @@ versions after CPython's, and ``test-ktlo`` and ``integration-ktlo`` its KTLO on
 each leg running the ``ALL`` test tier (:issue:`1958`,
 see `Test Tiers`_). A
 supported PyPy leg blocks through ``Required checks passed``, which needs its job,
-so it adds no context to the ruleset. No ``Compat``, ``engine-tests`` or
+so it adds no context to either ruleset. No ``Compat``, ``engine-tests`` or
 ``pypcap-parity`` leg runs PyPy. On PyPy 8.0, which setup-python's ``pypy3.11``
 is, PyPI has no Linux wheel of |cryptography|_, so the install step builds it
 with the image's Rust and ``libssl-dev``, and none of ``lxml``, so the ``test``
@@ -2167,8 +2167,8 @@ actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
 other steps, this one blocks, by the owner's ruling on :issue:`1967`: a finding fails
 the job. It runs last and
 on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
-Python setup does not skip it. ``Lint`` is a required check of ruleset 23497679
-(:issue:`1967`), so a red Lint
+Python setup does not skip it. ``Lint`` is a required check of both rulesets
+(`Required Status Checks`_, :issue:`1967`), so a red Lint
 holds a merge. The image's shellcheck is not pinned, so a runner
 image that adds a check can turn Lint red on unchanged code; the fix is to the
 script it flags. The step's run summary counts the findings by actionlint rule and
@@ -2235,8 +2235,8 @@ job in ``unit-tests.yml`` and ``python-compatibility.yml``, ``version_check`` in
 ``create-release.yml`` and ``conda-update`` in ``cron-conda.yml`` hand theirs on
 through ``fromJSON``, and each single-interpreter job reads ``latest``.
 
-**A tier change is a one-line edit to that file, plus the matching edit to ruleset
-23497679's** ``Compat`` **contexts.** The file's ``exemptions`` list each pin kept
+**A tier change is a one-line edit to that file, plus the matching edit to both
+rulesets'** ``Compat`` **contexts.** The file's ``exemptions`` list each pin kept
 off ``latest``, with its reason in the comment above it, such as the conda
 jobs' ``!= '3.15'``. ``tests/project/test_python_versions_1660.py`` fails on a
 pin the file does not list, on an exemption with no comment, and on a
@@ -2258,8 +2258,8 @@ run, in ``release-app``, an environment with no reviewer. It mints a release App
 token (:doc:`releasing`, "The Release App") with contents and pull
 requests write, force-pushes ``bot/python-versions`` and opens or updates its
 one pull request, whose body lists each move and why, the ``Compat`` contexts to
-change in the ruleset by hand, and every renamed check run. It never pushes
-``main``, edits the ruleset or writes a workflow file, which that token cannot
+change in ruleset 23497679 by hand, and every renamed check run. It never pushes
+``main``, edits a ruleset or writes a workflow file, which that token cannot
 push, so workflow comments name the tiers rather than restate them. While the
 branch's pull request is open, it does not re-push tiers a commit on the branch
 already proposes, hand edits or merges of ``main`` on top or not, nor overwrite

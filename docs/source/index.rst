@@ -118,11 +118,12 @@ Install the current version from PyPI:
 
    pip install pypcapkit
 
-Or the latest version from the repository:
+Or the development version from the repository's ``develop`` branch (a plain
+clone is the released ``main``):
 
 .. code-block:: shell
 
-   git clone https://github.com/JarryShaw/PyPCAPKit.git
+   git clone -b develop https://github.com/JarryShaw/PyPCAPKit.git
    cd PyPCAPKit
    pip install -e .
    # and to update at any time

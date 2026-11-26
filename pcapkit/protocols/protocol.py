@@ -1569,9 +1569,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             member ``version`` names.
 
         Raises:
-            UnexpectedKeyword: If a keyword is none this protocol declares, the
-                parse keywords ``file`` and ``length``, the stops and
-                ``__context__`` included.
+            UnexpectedKeyword: If a keyword is none this protocol declares;
+                ``file``, ``length``, ``layer`` and ``protocol`` count only where a
+                ``make`` field has that name, and ``__context__`` never does.
             ProtocolError: Through a versioned family's base, if ``version`` is
                 missing or names no member; on a member, if it names another.
 
