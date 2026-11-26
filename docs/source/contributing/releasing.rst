@@ -586,9 +586,9 @@ Pages republishes ``main``'s build once the release's push passes Unit Tests. Th
 build runs alongside Create Release, so its ``versions.json`` may predate the release's
 tag, which the next publish lists -- the next push to ``main`` or the Saturday
 schedule. Read the Docs builds ``stable`` from the ``stable`` branch, which Stable
-Branch moves to ``main``'s head on each push there, ``latest`` and ``dev`` from
-``develop``, and the release's tag as a version of its own, from the
-:file:`.readthedocs.yaml` in its tree.
+Branch moves to ``main``'s head on each push there, ``latest`` from ``develop``, and
+the release's tag as a version of its own, from the :file:`.readthedocs.yaml` in its
+tree.
 
 Precautions
 -----------

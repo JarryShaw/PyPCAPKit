@@ -2429,7 +2429,7 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
      - Holds
    * - ``versions.json``
      - each version's path segment, mapped to its Read the Docs URL: ``latest``,
-       ``stable``, ``dev``, then every ``v*`` release tag ``origin`` lists, pre- and
+       ``stable``, then every ``v*`` release tag ``origin`` lists, pre- and
        post-releases included, in version order. A ``conda-*`` tag is none.
    * - ``404.html``
      - the page GitHub Pages serves for a missing path. Under a segment
@@ -2439,13 +2439,14 @@ its root, so ``clean`` keeps them, and fails rather than overwrite a page:
 
 **Read the Docs** builds the ``pypcapkit`` project outside GitHub Actions, at
 https://pypcapkit.jarryshaw.me/: ``stable``, at ``/en/stable/``, from the ``stable``
-branch, `Stable Branch (#3077)`_'s mirror of ``main``; ``latest`` and ``dev``, at
-``/en/latest/`` and ``/en/dev/``, from ``develop``; and each release tag at
-``/en/<tag>/`` from the first that carries :file:`.readthedocs.yaml`, since a version
-builds from that file in its own tree. It installs as the Pages build does. Every other
-build's sidebar links to it under the brand; there its own flyout menu switches
-versions, so :file:`docs/source/conf.py` leaves the link out and takes the canonical URL
-from ``READTHEDOCS_CANONICAL_URL``.
+branch, `Stable Branch (#3077)`_'s mirror of ``main``; ``latest``, at ``/en/latest/``,
+from ``develop``; and each release tag at ``/en/<tag>/`` from the first that carries
+:file:`.readthedocs.yaml`, since a version builds from that file in its own tree. It
+installs as the Pages build does. Every other build's sidebar links to it under the
+brand; there its own flyout menu switches versions, so :file:`docs/source/conf.py`
+leaves the link out and takes the canonical URL from ``READTHEDOCS_CANONICAL_URL``. No
+``dev`` version duplicates ``latest``, as the owner ruled in session, recorded on
+:issue:`3077`, so a Pages path under ``/dev/`` is not found.
 
 :file:`tests/project/test_pages_versions_3077.py` and
 :file:`tests/project/test_readthedocs_config_3077.py` pin both.
