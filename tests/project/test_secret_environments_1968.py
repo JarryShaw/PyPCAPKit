@@ -84,7 +84,7 @@ class TestSecretsReachTheirJobs(unittest.TestCase):
                 self.assertEqual(environment(load(name)['jobs'][job_id]), next(iter(needed)))
 
     def test_the_scan_finds_the_known_readers(self) -> None:
-        """Not vacuous: the scheduled jobs #1968 is about, and the release jobs."""
+        """Not vacuous: the scheduled jobs #1968 is about, the release jobs, and Sync Develop's push (#3102)."""
         self.assertLessEqual({
             ('cron-conda.yml', 'conda-update'): {'conda-tag'},
             ('cron-conda.yml', 'conda-tag'): {'conda-tag'},
@@ -92,6 +92,7 @@ class TestSecretsReachTheirJobs(unittest.TestCase):
             ('cron-vendor.yml', 'vendor-update'): {'conda-tag'},
             ('create-release.yml', 'tag'): {'conda-tag'},
             ('create-release.yml', 'conda'): {'anaconda'},
+            ('sync-develop.yml', 'merge'): {'conda-tag'},
         }.items(), readers().items())
 
     def test_a_commented_reference_does_not_count(self) -> None:

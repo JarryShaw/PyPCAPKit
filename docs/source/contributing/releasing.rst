@@ -24,9 +24,10 @@ milestone, its scope issue and its *Release X.Y* view on the project board, set 
 :ref:`a new line opens <process-release-scope>`.
 
 ``main`` **is the released line, and** ``develop`` **carries the next minor's work**
-(:issue:`2942`). A patch fix merges to ``main``, which then merges back into
-``develop`` through the pull request Sync Develop opens (:doc:`workflows`), with a
-merge commit rather than a squash.
+(:issue:`2942`). A patch fix merges to ``main``, and Sync Develop then merges
+``main`` into ``develop`` with a merge commit and pushes it, with no pull request
+(:issue:`3102`, :doc:`workflows`). Only a merge that conflicts opens one, which a
+person resolves and merges with a merge commit rather than a squash.
 
 **A major release,** ``X.0.0``, **isolates one change to the core model** and carries
 nothing else. The roadmap work that can or should be done ships first, a batch per

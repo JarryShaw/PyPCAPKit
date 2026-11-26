@@ -36,7 +36,7 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
 carries only the version being released.
 
-* **1.8.0** (unreleased) -- Protocol parsing split from construction, with
+* **1.8.0** (2026-11-26) -- Protocol parsing split from construction, with
   ``from_file`` and ``from_fields`` as the explicit pair and closed parse and
   build signatures, ``analyze`` dispatching as a frame does, and versioned
   documentation on Read the Docs. :doc:`Full changelog <changelog/1.8.0>`.
