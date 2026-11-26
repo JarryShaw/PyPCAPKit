@@ -368,7 +368,8 @@ One-time setup:
    the Python Versions and Issue and PR Kinds workflows' ``pr`` jobs open their
    pull requests with a token of this App, with contents and pull requests write
    only (:issue:`1660`, :issue:`2561`, :doc:`workflows`), and Sync Develop's with
-   contents read and pull requests write (:issue:`2942`).
+   workflows write as well, to move its mirror of ``main`` (:issue:`2942`,
+   :pr:`3075`).
 2. Add repository variables ``RELEASE_APP_CLIENT_ID``, the App's Client ID, and
    ``RELEASE_APP_BOT_ID``, its bot's user id (``gh api
    "/users/<app-slug>[bot]" --jq .id``, as the action's README reads it).
