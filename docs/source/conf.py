@@ -340,13 +340,6 @@ html_theme = 'furo'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-#: The folder GitHub Pages serves this build from (#3077): ``''``, the site root,
-#: for ``main``'s build, and ``dev`` for ``develop``'s, which deploy-pages.yml sets
-#: in ``PAGES_FOLDER``. ``_templates/sidebar/versions.html`` reads it as
-#: ``pages_folder``.
-PAGES_FOLDER = os.environ.get('PAGES_FOLDER', '')
-if PAGES_FOLDER not in ('', 'dev'):
-    raise ValueError(f"PAGES_FOLDER is '' for the site root or 'dev', not {PAGES_FOLDER!r}")
 #: Whether Read the Docs is building this, which sets ``READTHEDOCS`` and gives the
 #: version's URL in ``READTHEDOCS_CANONICAL_URL`` (#3077).
 READTHEDOCS = bool(os.environ.get('READTHEDOCS'))
@@ -370,7 +363,7 @@ html_theme_options = {
     "top_of_page_button": "edit",  # None
 
     "source_repository": "https://github.com/JarryShaw/PyPCAPKit/",
-    "source_branch": "develop" if PAGES_FOLDER == 'dev' else "main",
+    "source_branch": "main",
     "source_directory": "docs/source/",
 
     "light_css_variables": {
@@ -383,9 +376,9 @@ html_theme_options = {
     },
 }
 html_title = "PyPCAPKit"
-html_context = {'pages_folder': PAGES_FOLDER}
-# furo's own sidebar list, from its ``theme.conf``, with the version switch under
-# the brand on GitHub Pages (#3077). Read the Docs' flyout menu switches there.
+# furo's own sidebar list, from its ``theme.conf``, with a link to the versions on
+# Read the Docs under the brand (#3077). A Read the Docs build leaves it out, as
+# its flyout menu switches versions there.
 html_sidebars = {
     '**': [
         'sidebar/brand.html',
@@ -400,12 +393,12 @@ html_sidebars = {
 }
 
 # Where this build is served, which each page's canonical link and Open Graph URL
-# name (#3077): the version's own URL on Read the Docs, and on GitHub Pages the
-# site root for ``main``'s build or ``dev/`` for ``develop``'s.
+# name (#3077): the version's own URL on Read the Docs, and otherwise the GitHub
+# Pages site root, which serves ``main``'s build.
 if READTHEDOCS:
     ogp_site_url = os.environ['READTHEDOCS_CANONICAL_URL']
 else:
-    ogp_site_url = 'https://jarryshaw.github.io/PyPCAPKit/' + (f'{PAGES_FOLDER}/' if PAGES_FOLDER else '')
+    ogp_site_url = 'https://jarryshaw.github.io/PyPCAPKit/'
 html_baseurl = ogp_site_url
 
 # Mermaid diagrams render at their natural size and shrink only to fit the page

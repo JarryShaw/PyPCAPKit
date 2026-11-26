@@ -3,7 +3,7 @@
 
 It installs as the GitHub Pages build does, and on a CPython the repository
 supports. Which versions the project builds, and its webhook, are settings of the
-Read the Docs project that no test here can read. :mod:`tests.project.test_pages_dev_latest_3077`
+Read the Docs project that no test here can read. :mod:`tests.project.test_pages_versions_3077`
 pins what :file:`docs/source/conf.py` does on a Read the Docs build.
 
 """
