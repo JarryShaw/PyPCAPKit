@@ -60,7 +60,7 @@ class TestMHCGAParamDict(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, 'unknown CGA parameter format'):
-            MH()._make_opt_cga_param(Option.CGA_Parameters, parameters=[_fields()])
+            MH.from_fields()._make_opt_cga_param(Option.CGA_Parameters, parameters=[_fields()])
 
     def test_data_model_of_the_same_fields_round_trips(self) -> None:
         from pcapkit.const.mh.option import Option
@@ -68,7 +68,7 @@ class TestMHCGAParamDict(unittest.TestCase):
         from pcapkit.protocols.internet.mh.data import CGAParameter
         from pcapkit.protocols.internet.mh.protocol import MH
 
-        built = MH(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00', data={
+        built = MH.from_fields(type=Packet.Binding_Refresh_Request, next=59, checksum=b'\x00\x00', data={
             'options': [(Option.CGA_Parameters, {'parameters': [CGAParameter(**_fields())]})],
         })
         parsed = MH(built.data)

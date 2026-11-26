@@ -35,9 +35,9 @@ class TestPCAPNGAddressType(PCAPNGTestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        return PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
-                      block={'linktype': LinkType.ETHERNET, 'snaplen': 65535,
-                             'options': [(OptionType[option], {'interface': interface})]})
+        return PCAPNG.from_fields(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
+                                  block={'linktype': LinkType.ETHERNET, 'snaplen': 65535,
+                                         'options': [(OptionType[option], {'interface': interface})]})
 
     OPTIONS = ('if_MACaddr', 'if_EUIaddr')
 

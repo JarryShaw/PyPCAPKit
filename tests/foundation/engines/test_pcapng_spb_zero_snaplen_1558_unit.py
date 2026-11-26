@@ -2,12 +2,12 @@
 """GitHub issue #1558: a Simple Packet Block keeps its padding when the snaplen is 0.
 
 An SPB's packet data is ``min(original_len, snaplen)`` octets, with interface
-0's snaplen, and a snaplen of 0 means no limit. Guards against the default
-engine handing interface 0's snaplen to the parser as ``__packet__['snaplen']``
-as it stands, which reads a 0 as a limit of no octets and the block's padding as
-packet data: 57 data octets come out as 60. The engine hands over no limit for
-a zero snaplen, and :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` reads a zero
-snaplen handed in as no limit too.
+0's snaplen, and a snaplen of 0 means no limit. Guards against a 0 read as a
+limit of no octets, which takes the block's padding as packet data: 57 data
+octets come out as 60. :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` reads
+interface 0's snaplen off the section context only where it is not 0, and reads a
+zero snaplen handed in as ``__packet__['snaplen']`` as no limit too. The default
+engine hands in none (#2840).
 
 Each case builds its capture here. Everything from :mod:`pcapkit` is imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -72,10 +72,25 @@ class TestSPBZeroSnaplen(unittest.TestCase):
                 self.assertEqual(info.captured_len, len(DATA))
                 self.assertEqual(bytes(info.packet), DATA)
 
-    def test_engine_hands_over_no_limit_for_a_zero_snaplen(self) -> None:
-        engine = self._extract(0)._exeng
+    def test_engine_hands_over_no_snaplen(self) -> None:
+        """The parser takes interface 0's from the section context the engine hands it."""
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+
+        seen = []
+        original = PCAPNG.unpack
+
+        def unpack(self, length=None, **kwargs):  # type: ignore[no-untyped-def]
+            seen.append(kwargs.get('__packet__'))
+            return original(self, length, **kwargs)
+
+        PCAPNG.unpack = unpack  # type: ignore[method-assign]
+        try:
+            engine = self._extract(0)._exeng
+        finally:
+            PCAPNG.unpack = original  # type: ignore[method-assign]
         self.assertEqual(engine._ctx.interfaces[0].snaplen, 0)
-        self.assertEqual(engine._get_snaplen(), 0xFFFF_FFFF_FFFF_FFFF)
+        self.assertTrue(seen)
+        self.assertEqual([packet for packet in seen if packet is not None], [])
 
     def test_engine_frame_rebuilds_byte_exactly(self) -> None:
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
@@ -95,15 +110,16 @@ class TestSPBZeroSnaplen(unittest.TestCase):
         octets = _spb()
         for snaplen in (0, 65535):
             with self.subTest(interface_snaplen=snaplen):
-                section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+                section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
                 context = Context(section.info)
-                interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                                   block={'linktype': 1, 'snaplen': snaplen})
+                interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                               block={'linktype': 1, 'snaplen': snaplen})
                 context.interfaces.append(interface.info)
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    parsed = PCAPNG(octets, len(octets), num=2, sct=1, ctx=context,
-                                    __packet__={'snaplen': 0})
+                    # NOTE: Handed in as state, the one route left for it (#2840).
+                    parsed = PCAPNG._from_parent(octets, len(octets), {'num': 2, 'sct': 1, 'ctx': context},
+                                                 __packet__={'snaplen': 0})
                 self.assertEqual(parsed.info.captured_len, len(DATA))
                 self.assertEqual(bytes(parsed.info.packet), DATA)
                 rebuilt = PCAPNG.from_data(parsed.info, num=2, sct=1, ctx=context)

@@ -135,7 +135,7 @@ class CaptureTests(unittest.TestCase):
         for index, ((from_client, payload), (chain, records)) in enumerate(zip(WOLFSSL, TSHARK), 1):
             with self.subTest(datagram=index):
                 datagram = _udp(payload, from_client)
-                proto = UDP(datagram, len(datagram), __context__=registry)
+                proto = UDP(datagram, len(datagram), context=registry)
                 self.assertEqual(str(proto.protochain), chain)
                 self.assertEqual(_cid_layers(proto.payload), records)
         context = registry.match(['DTLS'], DTLSContext)
@@ -145,7 +145,7 @@ class CaptureTests(unittest.TestCase):
         from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         wire = WOLFSSL[6][1]  # first octet 0x3e: C, S and L set, epoch bits 2
-        parsed = DTLS(wire, len(wire), __context__=DTLSContext(CLIENT_CID, SERVER_CID))
+        parsed = DTLS(wire, len(wire), context=DTLSContext(CLIENT_CID, SERVER_CID))
         self.assertEqual(parsed.alias, 'DTLS 1.3')
         self.assertEqual(parsed.length, 1 + len(SERVER_CID) + 2 + 2)
         self.assertEqual((parsed.info.cid, parsed.info.epoch, parsed.info.sequence_number,
@@ -176,7 +176,7 @@ class CaptureTests(unittest.TestCase):
             with self.subTest(datagram=index + 1):
                 context = DTLSContext(cid_length=len(records[0][0]))
                 datagram = _udp(payload, from_client)
-                proto = UDP(datagram, len(datagram), __context__=context)
+                proto = UDP(datagram, len(datagram), context=context)
                 self.assertEqual(str(proto.protochain), chain)
                 self.assertEqual(_cid_layers(proto.payload), records)
 
@@ -189,8 +189,8 @@ class CaptureTests(unittest.TestCase):
             (from_client, payload), (_, records) = WOLFSSL[index], TSHARK[index]
             with self.subTest(datagram=index + 1):
                 datagram = _udp(payload, from_client)
-                by_length = UDP(datagram, len(datagram), __context__=DTLSContext(cid_length=len(CLIENT_CID)))
-                by_ids = UDP(datagram, len(datagram), __context__=DTLSContext(CLIENT_CID, SERVER_CID))
+                by_length = UDP(datagram, len(datagram), context=DTLSContext(cid_length=len(CLIENT_CID)))
+                by_ids = UDP(datagram, len(datagram), context=DTLSContext(CLIENT_CID, SERVER_CID))
                 self.assertEqual(str(by_length.protochain), 'UDP:Raw' if from_client else 'UDP:DTLS 1.3')
                 self.assertEqual(str(by_ids.protochain), 'UDP:DTLS 1.3')
                 self.assertEqual(_cid_layers(by_ids.payload), records)
@@ -327,7 +327,7 @@ class LayoutTests(unittest.TestCase):
             for length_present in (True, False):
                 with self.subTest(sequence_long=len(sequence) == 2, length_present=length_present):
                     wire = _unified(cid, sequence=sequence, length_present=length_present, epoch=3)
-                    parsed = DTLS(wire, len(wire), __context__=DTLSContext(cid))
+                    parsed = DTLS(wire, len(wire), context=DTLSContext(cid))
                     self.assertEqual(parsed.alias, 'DTLS 1.3')
                     self.assertEqual(parsed.length, 1 + len(cid) + len(sequence) + 2 * length_present)
                     self.assertEqual((parsed.info.cid, parsed.info.epoch, parsed.info.sequence_number,
@@ -353,7 +353,7 @@ class LayoutTests(unittest.TestCase):
                            ('no sequence number', b'\x3c\xc1\xc2\xc3\xc4')):
             with self.subTest(case=name), warnings.catch_warnings(), self.assertRaises(ProtocolError):
                 warnings.simplefilter('ignore')  # the schema's short read
-                DTLS(wire, len(wire), __context__=DTLSContext(cid_length=4))
+                DTLS(wire, len(wire), context=DTLSContext(cid_length=4))
 
 
 class ResolutionTests(unittest.TestCase):
@@ -373,7 +373,7 @@ class ResolutionTests(unittest.TestCase):
                  DTLSContext(b'\xab\xcd', cid_length=1), (b'\xab\xcd', 7, None)),
         ):
             with self.subTest(case=name):
-                parsed = DTLS(wire, len(wire), __context__=context)
+                parsed = DTLS(wire, len(wire), context=context)
                 self.assertEqual((parsed.info.cid, parsed.info.sequence_number, parsed.info.length), header)
 
     def test_a_shorter_id_is_not_read_as_a_longer_one(self) -> None:
@@ -387,7 +387,7 @@ class ResolutionTests(unittest.TestCase):
         ):
             with self.subTest(case=name):
                 wire = _unified(b'\xab', fragment, sequence=b'\xcd\x00', length_present=length_present)
-                parsed = DTLS(wire, len(wire), __context__=DTLSContext(b'\xab', b'\xab\xcd'))
+                parsed = DTLS(wire, len(wire), context=DTLSContext(b'\xab', b'\xab\xcd'))
                 self.assertEqual((parsed.info.cid, parsed.info.sequence_number, parsed.info.content),
                                  (b'\xab', 0xCD00, fragment))
 
@@ -419,7 +419,7 @@ class ResolutionTests(unittest.TestCase):
         ):
             with self.subTest(case=name):
                 wire = _unified(cid, fragment, sequence=b'\xcd')
-                parsed = DTLS(wire, len(wire), __context__=DTLSContext(*ids))
+                parsed = DTLS(wire, len(wire), context=DTLSContext(*ids))
                 self.assertEqual((parsed.info.cid, parsed.info.content), (cid, fragment))
                 self.assertEqual(parsed.length, 1 + len(cid) + 1 + 2)
 
@@ -427,7 +427,7 @@ class ResolutionTests(unittest.TestCase):
         from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         wire = _unified(b'\xab\xcd', length_present=False)
-        parsed = DTLS(wire, len(wire), __context__=DTLSContext(b'\xab', b'\xab\xcd'))
+        parsed = DTLS(wire, len(wire), context=DTLSContext(b'\xab', b'\xab\xcd'))
         self.assertEqual((parsed.info.cid, parsed.info.length, parsed.info.content), (b'\xab\xcd', None, FRAGMENT))
 
     def test_match_takes_the_unified_layout(self) -> None:
@@ -457,10 +457,10 @@ class ChainTests(unittest.TestCase):
                                   ('two of them', record + record, 'DTLS 1.3:DTLS 1.3'),
                                   ('one without a length, last', CCS + record + last, 'DTLS 1.2:DTLS 1.3:DTLS 1.3')):
             with self.subTest(case=name):
-                parsed = DTLS(wire, len(wire), __context__=DTLSContext(CLIENT_CID))
+                parsed = DTLS(wire, len(wire), context=DTLSContext(CLIENT_CID))
                 self.assertEqual(str(parsed.protochain), chain)
                 self.assertEqual(bytes(DTLS.from_data(parsed.info)).hex(), wire.hex())
-        parsed = DTLS(CCS + last, len(CCS + last), __context__=DTLSContext(CLIENT_CID))
+        parsed = DTLS(CCS + last, len(CCS + last), context=DTLSContext(CLIENT_CID))
         self.assertEqual(_cid_layers(parsed), ((CLIENT_CID, 1, 7, None),))
         self.assertEqual(parsed.payload.info.content, FRAGMENT + CCS)
 
@@ -470,8 +470,8 @@ class ChainTests(unittest.TestCase):
 
         record = _unified(CLIENT_CID)
         for name, tail, kwargs in (('no context', record, {}),
-                                   ('another id', record, {'__context__': DTLSContext(SERVER_CID)}),
-                                   ('a header cut short', record[:5], {'__context__': DTLSContext(CLIENT_CID)})):
+                                   ('another id', record, {'context': DTLSContext(SERVER_CID)}),
+                                   ('a header cut short', record[:5], {'context': DTLSContext(CLIENT_CID)})):
             with self.subTest(case=name):
                 parsed = DTLS(CCS + tail, len(CCS + tail), **kwargs)
                 self.assertEqual(str(parsed.protochain), 'DTLS 1.2:Raw')
@@ -495,12 +495,12 @@ class RoundTripTests(unittest.TestCase):
         for index, (from_client, payload) in enumerate(WOLFSSL, 1):
             with self.subTest(datagram=index):
                 datagram = _udp(payload, from_client)
-                udp = UDP(datagram, len(datagram), __context__=registry)
+                udp = UDP(datagram, len(datagram), context=registry)
                 rebuilt = DTLS.from_data(udp.payload.info)
                 self.assertEqual(bytes(rebuilt).hex(), payload.hex())
                 self.assertEqual(str(rebuilt.protochain), str(udp.payload.protochain))
 
-                again = UDP.from_data(udp.info, __context__=registry)
+                again = UDP.from_data(udp.info, context=registry)
                 self.assertEqual(bytes(again).hex(), datagram.hex())
                 self.assertEqual(str(again.protochain), str(udp.protochain))
                 with warnings.catch_warnings():
@@ -514,18 +514,18 @@ class RoundTripTests(unittest.TestCase):
         for index in range(FIRST_CID_RECORD, len(WOLFSSL)):
             wire = WOLFSSL[index][1]
             with self.subTest(datagram=index + 1):
-                parsed = DTLS(wire, len(wire), __context__=DTLSContext(CLIENT_CID, SERVER_CID))
+                parsed = DTLS(wire, len(wire), context=DTLSContext(CLIENT_CID, SERVER_CID))
                 info = parsed.info
                 made = bytes(maker.make(ciphertext=True, epoch=info.epoch, cid=info.cid,
                                         sequence_number=info.sequence_number, sequence_long=info.sequence_long,
                                         length_present=info.length is not None, content=info.content))
                 self.assertEqual(made.hex(), wire.hex())
 
-                again = DTLS(made, len(made), __context__=DTLSContext(CLIENT_CID, SERVER_CID))
+                again = DTLS(made, len(made), context=DTLSContext(CLIENT_CID, SERVER_CID))
                 self.assertEqual(_cid_layers(again), _cid_layers(parsed))
 
-        made = DTLS(ciphertext=True, epoch=2, sequence_number=0x1234, sequence_long=True, cid=b'\x0a\x0b',
-                    content=FRAGMENT)
+        made = DTLS.from_fields(ciphertext=True, epoch=2, sequence_number=0x1234, sequence_long=True, cid=b'\x0a\x0b',
+                                content=FRAGMENT)
         self.assertEqual(bytes(made).hex(), _unified(b'\x0a\x0b', sequence=b'\x12\x34', epoch=2).hex())
         self.assertEqual((made.alias, made.length, made.info.cid, made.info.length), ('DTLS 1.3', 7, b'\x0a\x0b', 16))
 
@@ -535,12 +535,12 @@ class RoundTripTests(unittest.TestCase):
         from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         def build(**kwargs: 'Any') -> 'Any':
-            inner = DTLS(ciphertext=True, epoch=3, sequence_number=9, cid=SERVER_CID, content=FRAGMENT)
-            return DTLS(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
-                        content=b'\x01', payload=inner, **kwargs)
+            inner = DTLS.from_fields(ciphertext=True, epoch=3, sequence_number=9, cid=SERVER_CID, content=FRAGMENT)
+            return DTLS.from_fields(content_type=ContentType.change_cipher_spec, epoch=0, sequence_number=3,
+                                    content=b'\x01', payload=inner, **kwargs)
 
         context = DTLSContext()
-        outer = build(__context__=context)
+        outer = build(context=context)
         self.assertEqual(str(outer.protochain), 'DTLS 1.2:DTLS 1.3')
         self.assertEqual(_cid_layers(outer), ((SERVER_CID, 3, 9, 16),))
         self.assertEqual(context.connection_ids, (SERVER_CID,))

@@ -140,7 +140,7 @@ class PCAPNGEngineTests(unittest.TestCase):
             with self.assertRaises(FormatError):
                 bad_engine.run()
 
-    def test_write_file_and_snaplen_helpers_cover_modes(self) -> None:
+    def test_write_file_helper_covers_modes(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.foundation.engines.pcapng import Context, PCAPNG
 
@@ -151,10 +151,6 @@ class PCAPNGEngineTests(unittest.TestCase):
         engine._write_file(FakeBlock(block_info), name='Block')
         self.assertEqual(sink.paths[-1], 'out/Block.json')
         self.assertEqual(extractor._offmt, 'unit')
-        self.assertEqual(engine._get_snaplen(), 0xFFFF_FFFF_FFFF_FFFF)
-
-        engine._ctx.interfaces.append(FakeInfo(snaplen=1234))
-        self.assertEqual(engine._get_snaplen(), 1234)
 
         quiet, quiet_sink = make_extractor(_flag_q=True)
         quiet_engine = PCAPNG(quiet)

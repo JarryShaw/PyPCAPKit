@@ -51,7 +51,7 @@ def _ppp_control_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _ppp_control_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.link.ppp.protocol import PPP
-    return PPP(protocol=code, control_packet=dict(kwargs))
+    return PPP.from_fields(protocol=code, control_packet=dict(kwargs))
 
 
 def _ppp_parse(octets: 'bytes') -> 'Any':
@@ -67,7 +67,7 @@ def _ppp_control_rebuild(collection: 'Any') -> 'Any':
     from pcapkit.protocols.link.ppp.protocol import PPP
 
     protocol, packet = collection
-    return PPP(protocol=protocol, control_packet=packet)
+    return PPP.from_fields(protocol=protocol, control_packet=packet)
 
 
 #: The families this module adds.

@@ -237,7 +237,7 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         )
         return self._decode_next_layer(sslv2, -1, length - header_len - record_length)
 
-    def make(self,
+    def make(self, *,
              msg_type: 'Enum_HandshakeType | int' = Enum_HandshakeType.CLIENT_HELLO,
              two_byte_header: 'bool' = True,
              is_escape: 'bool' = False,
@@ -540,4 +540,4 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         file_ = self._get_payload()
         return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx)
+                                      protocol=self._exproto, context=self._exctx)

@@ -691,7 +691,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
             return hip
 
         # NOTE: ``_decode_next_layer`` builds the chain from :attr:`self.alias <HIP.alias>`, which
@@ -699,7 +699,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         self._info = hip
         return self._decode_next_layer(hip, schema.next, length - hip.length)
 
-    def make(self,
+    def make(self, *,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              packet: 'Enum_Packet | int' = Enum_Packet.HIP_DATA,
              packet_fixed: 'int' = 0,

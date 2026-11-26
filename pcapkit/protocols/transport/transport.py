@@ -25,11 +25,12 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, DefaultDict, Optional, Type
+    from typing import IO, Any, DefaultDict, Iterable, Mapping, Optional, Type
 
     from typing_extensions import Literal, Self
 
     from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
 
 __all__ = ['Transport']
 
@@ -123,7 +124,11 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         cls.__proto__[code] = entry
 
     @classmethod
-    def analyze(cls, ports: 'tuple[Enum_AppType, Enum_AppType]', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':  # type: ignore[override] # pylint: disable=arguments-renamed
+    def analyze(cls, ports: 'tuple[Enum_AppType, Enum_AppType]', payload: 'bytes', /, *,  # type: ignore[override] # pylint: disable=arguments-renamed
+                layer: 'Optional[str]' = None,
+                protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                ) -> 'ProtocolBase':
         """Analyse packet payload.
 
         Args:
@@ -133,22 +138,27 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 :attr:`TCP.dst <pcapkit.protocols.transport.tcp.protocol.TCP.dst>` read
                 off a parsed header, resolved the same way.
             payload: Packet payload.
-            **kwargs: Keyword arguments for the payload's constructor, such as
-                the stops and context a frame's next layer is parsed with.
+            layer: As :meth:`Protocol.analyze
+                <pcapkit.protocols.protocol.Protocol.analyze>`.
+            protocol: As :meth:`Protocol.analyze
+                <pcapkit.protocols.protocol.Protocol.analyze>`.
+            context: As :meth:`Protocol.analyze
+                <pcapkit.protocols.protocol.Protocol.analyze>`.
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
-            instance. A payload that fails to parse is kept as
+            instance, looked up by the port :meth:`_decode_next_layer` looks a
+            frame's next layer up by: the lower one, unless only the higher one is
+            registered. A payload that fails to parse is kept as
             :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
-            keeps one, its ``protocol`` the port looked up, as an :obj:`int`, as
-            a frame's fallback records the port :meth:`_decode_next_layer`
-            looked up. An empty payload is
+            keeps one, its ``protocol`` that port, as an :obj:`int`, as a frame's
+            fallback records it. An empty payload is
             :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, as in a
             frame, and one past a stop this class meets is ``Raw``.
 
         Important:
-            The annotation names the **base** registry because every transport
-            protocol shares this method while resolving its ports in a registry
+            The annotation names the **base** registry because each port-keyed
+            transport shares this method while resolving its ports in a registry
             of its own, such as :class:`~pcapkit.const.reg.apptype.tcp.TCP`. A
             caller that knows its transport gets the narrower type from
             whatever handed it the pair, e.g. :meth:`TCP._make_ports
@@ -162,14 +172,19 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             is tested against :attr:`__proto__` as it arrived, and the chosen
             one is unwrapped through :meth:`AppType.__int__
             <pcapkit.const.reg.apptype.apptype.AppType.__int__>` only when it
-            is a member; unwrapping anything else would make :obj:`None` raise
-            rather than fall back to
-            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and ``'80'``
-            dispatch as a port.
+            is a member. A port that is neither, such as :obj:`None` or
+            ``'80'``, is passed over for the other; where both are, the
+            destination is kept as it arrived. So a missing port falls back to
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` rather than
+            raising, and ``'80'`` does not dispatch as a port.
 
             A miss writes nothing back, so an unregistered port does not grow
             the process-wide registry -- see :meth:`Protocol._lookup_registry
             <pcapkit.protocols.protocol.Protocol._lookup_registry>`.
+
+        Raises:
+            FormatError: If ``layer`` names no layer.
+            RegistryError: If ``protocol`` is no protocol name, class or instance.
 
         .. versionchanged:: 1.5.0
 
@@ -191,20 +206,29 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
            A payload past a stop is ``Raw``, and the parse gets the port as
            ``alias``, as a frame's next layer does (:issue:`2933`).
 
-        """
-        if TYPE_CHECKING:
-            protocol: 'Type[ProtocolBase]'
+        .. versionchanged:: 1.8.0
 
-        port = ports[0] if ports[0] in cls.__proto__ else ports[1]
-        code = int(port) if isinstance(port, Enum_AppType) else port
-        if cls._stops_next_layer(kwargs):
-            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+           The port is the one a frame's next layer is looked up by, where it
+           was the source port unless that was unregistered (:issue:`2945`).
+           ``ports`` and ``payload`` are positional-only, and the keywords are
+           ``layer``, ``protocol`` and ``context``, as for
+           :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+           (:issue:`2840`).
+
+        """
+        # NOTE: Chosen among the ports that are numbers, so a missing one falls back to ``Raw``.
+        numbers = tuple(port for port in ports if isinstance(port, (int, Enum_AppType)))
+        if len(numbers) == 2:
+            port = cls._next_layer_port(numbers)
         else:
-            protocol = cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, code), payload, len(payload))
-        return cls._analyze_next_layer(protocol, payload, code, **kwargs)
+            port = numbers[0] if numbers else ports[1]
+        code = int(port) if isinstance(port, Enum_AppType) else port
+        klass = (cls._analyze_stop(layer, protocol)
+                 or cls._dispatch_family(cls._lookup_next_layer(cls.__proto__, code), payload, len(payload)))
+        return cls._analyze_next_layer(klass, payload, code, layer=layer, protocol=protocol, context=context)
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -275,15 +299,22 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         return klass
 
     @staticmethod
-    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int',
-                          **kwargs: 'Any') -> 'ProtocolBase':
+    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int', /, *,
+                          layer: 'Optional[str]' = None,
+                          protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                          context: 'Optional[ContextRegistry]' = None,
+                          **state: 'Any') -> 'ProtocolBase':
         r"""Parse the next layer, resolving a family base to its member first.
 
         Arguments:
             klass: next layer protocol class
             file\_: payload of the current layer
             length: valid (*non-padding*) length
-            **kwargs: keyword arguments for the next layer's constructor
+            layer: parse the next layer until such layer
+            protocol: parse the next layer until such protocol
+            context: caller supplied parsing context
+            **state: next-layer state, as for :meth:`Protocol._parse_next_layer
+                <pcapkit.protocols.protocol.Protocol._parse_next_layer>`
 
         Returns:
             As :meth:`Protocol._parse_next_layer
@@ -292,7 +323,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         """
         return ProtocolBase._parse_next_layer(Transport._dispatch_family(klass, file_, length),
-                                              file_, length, **kwargs)
+                                              file_, length, layer=layer, protocol=protocol,
+                                              context=context, **state)
 
     @classmethod
     def _make_port(cls, port: 'Enum_AppType | int',
@@ -371,9 +403,22 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             behave the same way for an unregistered PPID and transport type.
 
         """
-        sort_port = sorted(ports)
-        if sort_port[0] not in self.__proto__ and sort_port[1] in self.__proto__:
-            proto = sort_port[1]
-        else:
-            proto = sort_port[0]
-        return super()._decode_next_layer(dict_, proto, length, packet=packet)
+        return super()._decode_next_layer(dict_, self._next_layer_port(ports), length, packet=packet)
+
+    @classmethod
+    def _next_layer_port(cls, ports: 'tuple[int, int]') -> 'int':
+        """The port a next layer is looked up by.
+
+        Arguments:
+            ports: source & destination ports, as port numbers or as
+                :class:`~pcapkit.const.reg.apptype.apptype.AppType` members
+
+        Returns:
+            The lower port, unless only the higher one is in :attr:`__proto__`,
+            for a frame's next layer and :meth:`analyze` alike (:issue:`2945`).
+
+        """
+        low, high = sorted(ports)
+        if low not in cls.__proto__ and high in cls.__proto__:
+            return high
+        return low

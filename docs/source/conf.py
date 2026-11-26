@@ -1162,9 +1162,7 @@ def constructor_for_types(cls: type) -> str:
     before 3.14 read it.
 
     An overloaded ``__init__`` keeps the library's choice. Reading it would add an
-    ``Overloads`` field to each class, which no release showed for these classes,
-    and the protocol classes, whose shared ``__init__`` is overloaded, list no
-    constructor parameters for types to go on.
+    ``Overloads`` field to the class, which no release showed for these classes.
 
     Args:
         cls: The class being documented.

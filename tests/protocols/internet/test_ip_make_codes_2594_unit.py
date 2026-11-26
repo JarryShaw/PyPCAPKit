@@ -44,7 +44,7 @@ SEC, RTRALT, QS = 130, 148, 25
 def _ipv4(**kwargs: 'object') -> 'bytes':
     from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-    return IPv4(**kwargs).data
+    return IPv4.from_fields(**kwargs).data
 
 
 def _ipv4_option(code: 'int', field: 'str') -> 'object':
@@ -58,39 +58,39 @@ def _ipv4_option(code: 'int', field: 'str') -> 'object':
 def _ipx(value: 'object') -> 'bytes':
     from pcapkit.protocols.internet.ipx.protocol import IPX
 
-    return IPX(type=value).data
+    return IPX.from_fields(type=value).data
 
 
 def _icmpv4(value: 'object') -> 'bytes':
     from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
-    return ICMPv4(type=value).data
+    return ICMPv4.from_fields(type=value).data
 
 
 def _icmpv6(value: 'object') -> 'bytes':
     from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
-    return ICMPv6(type=value).data
+    return ICMPv6.from_fields(type=value).data
 
 
 def _igmpv2(value: 'object') -> 'bytes':
     # IGMPv2 makes with the family base's IGMP.make.
     from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
-    return IGMPv2(type=value).data
+    return IGMPv2.from_fields(type=value).data
 
 
 def _igmpv3(value: 'object') -> 'bytes':
     from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
-    return IGMPv3(type=value).data
+    return IGMPv3.from_fields(type=value).data
 
 
 def _igmpv3_record(value: 'object') -> 'bytes':
     from pcapkit.const.igmp.type import Type
     from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
-    return IGMPv3(type=Type.IGMPv3_Membership_Report, records=[{'record_type': value}]).data
+    return IGMPv3.from_fields(type=Type.IGMPv3_Membership_Report, records=[{'record_type': value}]).data
 
 
 #: ``(label, build, enumeration, member, bits, read)``: ``build(value)`` makes

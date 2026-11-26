@@ -122,7 +122,7 @@ class ICMPv6RoundTripTests(unittest.TestCase):
         """``ICMPv6()`` builds a default Echo Request rather than raising."""
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
-        proto = ICMPv6()
+        proto = ICMPv6.from_fields()
         self.assertEqual(bytes(proto), bytes.fromhex('8000000000000000'))
 
     def test_icmpv6_over_ipv4_dispatches_without_crashing(self) -> None:

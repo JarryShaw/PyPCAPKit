@@ -35,16 +35,17 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.internet.igmp.data import IGMP as Data_IGMP
 from pcapkit.protocols.internet.igmp.schema import IGMP as Schema_IGMP
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.protocol import _PT, _ST
+from pcapkit.protocols.protocol import _PT, _ST, _nothing_to_parse
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
-    from typing import IO, Any, Literal, Optional, Type
+    from typing import IO, Any, Iterable, Literal, Mapping, Optional, Type
 
     from typing_extensions import Self
 
+    from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.protocols.misc.raw.protocol import Raw
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
@@ -82,6 +83,10 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     one it is not given.
 
     """
+
+    #: ``version``, which names the member and which :meth:`make` does not
+    #: take, as a construction keyword (:issue:`2840`).
+    __keywords__ = frozenset({'version'})
 
     ##########################################################################
     # Properties.
@@ -168,7 +173,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         # as ``Raw``.
         return self._decode_next_layer(igmp, None, length - self.length)
 
-    def make(self,
+    def make(self, *,
              type: 'Enum_Type | int' = Enum_Type.IGMP_Membership_Query,
              max_resp_time: 'int' = 0,
              checksum: 'Optional[bytes]' = None,
@@ -221,7 +226,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         return schema  # type: ignore[return-value]
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -267,47 +272,49 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         """Return an estimated length for the object."""
         return 8
 
-    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
-                 length: 'Optional[int]' = None, *,
-                 version: 'Optional[Literal[1, 2, 3]]' = None, **kwargs: 'Any') -> 'None':
-        """Initialisation.
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,  # pylint: disable=super-init-not-called
+                 version: 'Optional[Literal[1, 2, 3]]' = None,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            version: Version of IGMP, ``1``, ``2`` or ``3``: the class
-                :meth:`__new__` picks. Building from fields, it must be this
-                class's :attr:`version`. Parsing, it is handed on unread, as the
-                enclosing IP layer passes its own version under this name to the
-                layer it carries.
-            **kwargs: As :meth:`Protocol.__init__
+            version: Version of IGMP, ``1``, ``2`` or ``3``: the class :meth:`__new__` picks, which must be this
+                class's own.
+            layer: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            protocol: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+            context: As :meth:`Protocol.__init__
                 <pcapkit.protocols.protocol.Protocol.__init__>`.
 
         Raises:
-            ProtocolError: If, building from fields, ``version`` names no version
-                class, or is not this class's own :attr:`version`, which every
-                IGMP class states, a subclass outside the members included.
+            ProtocolError: If ``version`` names no version class, or is not this
+                class's own :attr:`version`, which every IGMP class states, a
+                subclass outside the members included.
+
+        .. versionchanged:: 1.8.0
+
+           Parses only, and ``version`` is checked against the class, as
+           :meth:`from_fields` checks it, rather than handed on (:issue:`2840`).
 
         """
-        if file is not None:
-            if version is not None:
-                kwargs['version'] = version
-        elif version is not None:
-            self._member_of_version(version)
-            if version != self.version:
-                raise ProtocolError(f'{type(self).__name__}: version={version!r} '
-                                    'names another member')
-        super().__init__(file, length, **kwargs)  # type: ignore[arg-type]
+        if version is not None:
+            type(self)._construction_member({'version': version})
+        # NOTE: ``_parse``, as the base's ``__init__`` takes no ``version`` (#2840).
+        self._parse(file, length, layer=layer, protocol=protocol, context=context)
 
     def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
                 length: 'Optional[int]' = None, **kwargs: 'Any') -> 'IGMP':
-        """Create the version class a construction of this class describes.
+        """Create the version class a parse of this class describes.
 
-        The ``version`` keyword names the class, on either path. Without it,
-        parsing octets gives the class :meth:`_dispatch` picks, and building from
-        fields is refused, since no field picks a class. That class's
-        ``__init__`` then runs with the same arguments. A subclass of this class
-        is created as itself.
+        The ``version`` keyword names the class. Without it, the octets give the
+        class :meth:`_dispatch` picks. That class's ``__init__`` then runs with
+        the same arguments. A subclass of this class is created as itself.
 
         Args:
             file: Source packet stream, read here without being consumed.
@@ -318,18 +325,18 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             An uninitialised instance of the version class.
 
         Raises:
+            TypeError: If ``file`` is :obj:`None`, on this class.
             ProtocolError: If ``version`` names no version class; or, without it,
-                if building from fields, or if the octets are no version's
-                message.
+                if the octets are no version's message.
 
         """
         if cls is not IGMP:
             return super().__new__(cls, file, length, **kwargs)
+        if file is None:
+            raise _nothing_to_parse(IGMP)
         version = kwargs.get('version')
         if version is not None:
             member = cls._member_of_version(version)
-        elif file is None:
-            raise ProtocolError('IGMP: no version to build with; pass version=1, 2 or 3')
         else:
             if isinstance(file, bytes):
                 data = file[:length]
@@ -489,3 +496,39 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
                 if version == number:
                     return member.klass
         raise ProtocolError(f'IGMP: invalid version: {version!r}')
+
+    @classmethod
+    def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':
+        """The version class :meth:`from_fields` and :meth:`from_data` construct.
+
+        Picked and checked as constructing this class directly does: on this
+        class, the version class ``version`` names; on another, the class
+        itself, whose :attr:`version` ``version`` must be. ``version`` is taken
+        out of ``fields``, as :meth:`make` does not read it.
+
+        Args:
+            fields: Construction keywords.
+
+        Returns:
+            The version class, or the class itself.
+
+        Raises:
+            ProtocolError: If, on this class, ``version`` is missing; if it names
+                no version class; or if it is not the class's own
+                :attr:`version`.
+
+        .. versionadded:: 1.8.0
+
+        """
+        version = fields.pop('version', None)
+        if cls is IGMP:
+            if version is None:
+                raise ProtocolError('IGMP: no version to build with; pass version=1, 2 or 3')
+            return cast('Type[Self]', cls._member_of_version(version))
+        if version is not None:
+            cls._member_of_version(version)
+            # NOTE: ``version`` is a property, read as ``__init__`` reads it, off a bare instance.
+            if version != cls.__new__(cls).version:
+                raise ProtocolError(f'{cls.__name__}: version={version!r} '
+                                    'names another member')
+        return cls

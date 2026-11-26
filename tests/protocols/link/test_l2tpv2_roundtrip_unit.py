@@ -71,12 +71,12 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        self.assertEqual(L2TPv2(type=0, reserved=0x0400).data[:2], bytes.fromhex('0402'))
-        self.assertEqual(L2TPv2(type=0).data[:2], bytes.fromhex('0002'))
+        self.assertEqual(L2TPv2.from_fields(type=0, reserved=0x0400).data[:2], bytes.fromhex('0402'))
+        self.assertEqual(L2TPv2.from_fields(type=0).data[:2], bytes.fromhex('0002'))
         for bad in (0x0001, 0x0800, 0x8000):
             with self.subTest(reserved=hex(bad)):
                 with self.assertRaises(ProtocolError):
-                    L2TPv2(type=0, reserved=bad)
+                    L2TPv2.from_fields(type=0, reserved=bad)
 
     def test_issue_1208_lone_ns_or_nr_is_refused(self) -> None:
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
@@ -85,12 +85,12 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
         for kwargs in ({'ns': 7}, {'nr': 7}, {'ns': 0}, {'nr': 0}):
             with self.subTest(**kwargs):
                 with self.assertRaises(ProtocolError):
-                    L2TPv2(**kwargs)
+                    L2TPv2.from_fields(**kwargs)
 
     def test_ns_and_nr_together_round_trip(self) -> None:
         from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
-        made = L2TPv2(type=0, ns=7, nr=0)
+        made = L2TPv2.from_fields(type=0, ns=7, nr=0)
         self.assertEqual(made.data, bytes.fromhex('08020000000000070000'))
         self.assertEqual((made.info.ns, made.info.nr), (7, 0))
         self.assertEqual(L2TPv2.from_data(made.info).data, made.data)

@@ -152,8 +152,8 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         # ``extension=True`` keeps ``HIP.alias`` off ``self._info``, which
         # ``__post_init__`` assigns only once ``read`` has returned (#1184).
         base['version'] = HIP_VERSION.get(int(code), 2)  # type: ignore[call-overload]
-        return HIP(parameters=[(code, value)], extension=True,
-                   **base).data
+        return HIP.from_fields(parameters=[(code, value)], extension=True,
+                               **base).data
 
     def test_a_member_name_in_a_list_is_refused(self) -> None:
         """#2594: a name in a list raises ``ProtocolError``, for every maker.

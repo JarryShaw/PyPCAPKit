@@ -38,7 +38,7 @@ def pseudo() -> 'object':
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
-    return IP_Pseudo(src='2001:db8::1', dst='2001:db8::2', protocol=TransType.IPv6_ICMP, upper_length=0)
+    return IP_Pseudo.from_fields(src='2001:db8::1', dst='2001:db8::2', protocol=TransType.IPv6_ICMP, upper_length=0)
 
 
 class ICMPBaseDispatchTests(unittest.TestCase):
@@ -94,13 +94,13 @@ class ICMPBaseDispatchTests(unittest.TestCase):
         }
         for label, (fields, version) in cases.items():
             with self.subTest(fields=label):
-                layer = ICMP(version=version, **fields)
+                layer = ICMP.from_fields(version=version, **fields)
                 self.assertIs(type(layer), self.member(version))
-                self.assertEqual(layer.data, self.member(version)(**fields).data)
+                self.assertEqual(layer.data, self.member(version).from_fields(**fields).data)
                 parsed = ICMP(layer.data, version=version)
                 self.assertEqual(parsed.data, layer.data)
                 self.assertEqual(ICMP.from_data(parsed.info).data, layer.data)
-        self.assertEqual(ICMP(version=4, type=8, body=ECHO[4][4:], checksum=b'\x00\x00').data, ECHO[4])
+        self.assertEqual(ICMP.from_fields(version=4, type=8, body=ECHO[4][4:], checksum=b'\x00\x00').data, ECHO[4])
 
     def test_fields_without_version_raise(self) -> None:
         """Even ``pseudo``, the field only ICMPv6 takes, picks nothing."""
@@ -111,7 +111,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
                               ('pseudo', {'type': 128, 'pseudo': pseudo()})):
             with self.subTest(fields=label):
                 with self.assertRaisesRegex(ProtocolError, NO_VERSION_FIELDS):
-                    ICMP(**fields)
+                    ICMP.from_fields(**fields)
 
     def test_version_is_the_only_check(self) -> None:
         """A bad ``version`` raises; a field the member lacks fails the member's check."""
@@ -121,23 +121,27 @@ class ICMPBaseDispatchTests(unittest.TestCase):
         for version in (1, True, '6', 4.0, 6.0):
             with self.subTest(version=version):
                 with self.assertRaisesRegex(ProtocolError, f'^ICMP: invalid version: {version!r}$'):
-                    ICMP(version=version)
+                    ICMP.from_fields(version=version)
         with self.assertRaisesRegex(UnsupportedCall, "^ICMPv4: unexpected keyword\\(s\\): 'pseudo'"):
-            ICMP(version=4, pseudo=pseudo())
+            ICMP.from_fields(version=4, pseudo=pseudo())
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
-        """Building, ``version`` must name the member; parsing, it is handed on unread."""
+        """Building or parsing, ``version`` must name the member (#2840)."""
         from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
         from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
-        self.assertEqual(ICMPv4(version=4).data, ICMPv4().data)
-        self.assertEqual(ICMPv6(version=6).data, ICMPv6().data)
+        self.assertEqual(ICMPv4.from_fields(version=4).data, ICMPv4.from_fields().data)
+        self.assertEqual(ICMPv6.from_fields(version=6).data, ICMPv6.from_fields().data)
         with self.assertRaisesRegex(ProtocolError, '^ICMPv4: version=6 names another member$'):
-            ICMPv4(version=6)
+            ICMPv4.from_fields(version=6)
         with self.assertRaisesRegex(ProtocolError, '^ICMPv6: version=4 names another member$'):
-            ICMPv6(version=4)
-        self.assertEqual(ICMPv6(ECHO[6], version=4).data, ECHO[6])
+            ICMPv6.from_fields(version=4)
+        with self.assertRaisesRegex(ProtocolError, '^ICMPv6: version=4 names another member$'):
+            ICMPv6(ECHO[6], version=4)
+        self.assertEqual(ICMPv6(ECHO[6], version=6).data, ECHO[6])
+        # NOTE: The enclosing IP layer's own version takes the private channel.
+        self.assertEqual(ICMPv6._from_parent(ECHO[6], len(ECHO[6]), version=4).data, ECHO[6])  # pylint: disable=protected-access
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
@@ -159,7 +163,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
                 raise NotImplementedError
 
         with self.assertRaisesRegex(ProtocolError, '^Outside: no version of its own to match version=6$'):
-            Outside(version=6)
+            Outside.from_fields(version=6)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         from pcapkit.protocols.internet.icmp.protocol import ICMP
@@ -191,9 +195,9 @@ class ICMPBaseDispatchTests(unittest.TestCase):
             """A concrete subclass of the base, through a member."""
 
         octets = ECHO[4]
-        self.assertIs(type(ICMP(type=8, version=4)), ICMPv4)
+        self.assertIs(type(ICMP.from_fields(type=8, version=4)), ICMPv4)
         self.assertIs(type(Custom(octets)), Custom)
-        self.assertIs(type(Custom(type=8, version=4)), Custom)
+        self.assertIs(type(Custom.from_fields(type=8, version=4)), Custom)
         self.assertIs(type(Custom.from_data(Custom(octets).info)), Custom)
         with self.assertRaisesRegex(TypeError, 'abstract'):
             Abstract(octets)

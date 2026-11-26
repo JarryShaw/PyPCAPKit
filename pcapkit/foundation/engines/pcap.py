@@ -135,7 +135,7 @@ class PCAP(EngineBase[Frame]):
         # pylint: disable=attribute-defined-outside-init,protected-access
         ext = self._extractor
         self._setup_reassembly(parse=True)
-        self._setup_traceflow()
+        self._setup_traceflow(parse=True)
 
         self._gbhdr = Header(ext._ifile)
         self._vinfo = self._gbhdr.version
@@ -181,8 +181,7 @@ class PCAP(EngineBase[Frame]):
         # read frame header
         self._bound_read_ahead()
         frame = Frame(ext._ifile, num=ext._frnum+1, header=self._gbhdr.info,
-                      layer=ext._exlyr, protocol=ext._exptl, nanosecond=self._nnsec,
-                      __context__=ext._exctx)
+                      layer=ext._exlyr, protocol=ext._exptl, context=ext._exctx)
         ext._frnum += 1
 
         # verbose output

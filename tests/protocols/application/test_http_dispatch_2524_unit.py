@@ -237,9 +237,9 @@ class HTTPDispatchTests(unittest.TestCase):
 
         HTTPv1, HTTPv2 = self.member('HTTPv1'), self.member('HTTPv2')
         made = {
-            'HTTPv1': HTTPv1(method='GET', uri='/', http_version='1.1'),
-            'HTTPv2': HTTPv2(type=Frame.DATA, sid=1, frame={'data': b'x'}),
-            'HTTPv2 preface': HTTPv2(type=Frame.SETTINGS, sid=0, frame={}, preface=True),
+            'HTTPv1': HTTPv1.from_fields(method='GET', uri='/', http_version='1.1'),
+            'HTTPv2': HTTPv2.from_fields(type=Frame.DATA, sid=1, frame={'data': b'x'}),
+            'HTTPv2 preface': HTTPv2.from_fields(type=Frame.SETTINGS, sid=0, frame={}, preface=True),
         }
         for label, layer in made.items():
             klass = type(layer)

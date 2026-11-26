@@ -107,7 +107,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
         }
         for name, (options, wire, codes) in cases.items():
             with self.subTest(case=name):
-                data = IPv4(options=options, protocol=253).data
+                data = IPv4.from_fields(options=options, protocol=253).data
                 self.assertEqual(data[20:].hex(), wire)
                 parsed = self.parse(data)
                 self.assertEqual([code for code, _ in parsed.info.options.items(multi=True)], codes)
@@ -115,7 +115,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
     def test_make_builds_an_unassigned_option(self) -> None:
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        data = IPv4(options=[(0x9e, {'data': b'\xab\xcd'})], protocol=253).data
+        data = IPv4.from_fields(options=[(0x9e, {'data': b'\xab\xcd'})], protocol=253).data
         self.assertEqual(data[20:].hex(), '9e04abcd')
         self.assertEqual(self.parse(data).info.options[0x9e].data, b'\xab\xcd')
 
@@ -124,8 +124,8 @@ class TestIPv4RoundTrip(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.data import UnassignedOption
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
-        data = IPv4(options=[(OptionNumber.QS, {'func': 15, 'ttl': 1, 'nonce': 2})],
-                    protocol=253).data
+        data = IPv4.from_fields(options=[(OptionNumber.QS, {'func': 15, 'ttl': 1, 'nonce': 2})],
+                                protocol=253).data
         self.assertEqual(data[20:].hex(), '1908f00100000008')
         option = self.parse(data).info.options[OptionNumber.QS]
         self.assertIsInstance(option, UnassignedOption)
@@ -141,9 +141,9 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
         # A fresh option writes the pending hops after the recorded ones, and
         # zero-fills the slots left over up to ``counts``.
-        data = IPv4(options=[(OptionNumber.LSR, {'counts': 3, 'route': ['10.0.0.1'],
-                                                 'remaining': ['10.0.0.2']})],
-                    protocol=253).data
+        data = IPv4.from_fields(options=[(OptionNumber.LSR, {'counts': 3, 'route': ['10.0.0.1'],
+                                                             'remaining': ['10.0.0.2']})],
+                                protocol=253).data
         self.assertEqual(data[20:].hex(), '830f08' '0a000001' '0a000002' '00000000' '00')
 
     def test_sec_termination_indicator_follows_rfc_1108(self) -> None:
@@ -175,7 +175,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         self.assertEqual(self.parse(HEADERS['1326 reserved flag bit']).info.flags.reserved, 1)
-        self.assertEqual(IPv4(reserved=1, protocol=253).data[6:8].hex(), '8000')
+        self.assertEqual(IPv4.from_fields(reserved=1, protocol=253).data[6:8].hex(), '8000')
 
         request = self.parse(HEADERS['1326 QS request, reserved bits']).info.options[OptionNumber.QS]
         self.assertEqual(request.reserved, 3)
@@ -217,7 +217,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         # A fresh list drops its EOOL and pads once, so the octets go nowhere.
-        data = IPv4(options=[(OptionNumber.RR, {'counts': 1})], padding=b'\xff', protocol=253).data
+        data = IPv4.from_fields(options=[(OptionNumber.RR, {'counts': 1})], padding=b'\xff', protocol=253).data
         self.assertEqual(data[20:].hex(), '07070400000000' '00')
 
 

@@ -85,7 +85,7 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
 
         return raw
 
-    def make(self,
+    def make(self, *,
              packet: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_Raw':
         """Make raw packet data.
@@ -155,7 +155,7 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
             alias = self.alias
 
         #: pcapkit.protocols.misc.no_payload.protocol.NoPayload: Next layer (no payload).
-        self._next = NoPayload()
+        self._next = NoPayload.from_fields()
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
         self._protos = ProtoChain(self.__class__, alias)
 

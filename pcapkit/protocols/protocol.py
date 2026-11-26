@@ -24,6 +24,7 @@ import abc
 import collections
 import collections.abc
 import contextlib
+import contextvars
 import copy
 import difflib
 import enum
@@ -58,9 +59,10 @@ from pcapkit.utilities import config
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.contextvars import beholding, frame_depth, rebuilding
-from pcapkit.utilities.exceptions import (BaseError, CaughtByCaller, ProtocolError,
+from pcapkit.utilities.exceptions import (BaseError, CaughtByCaller, FormatError, ProtocolError,
                                           ProtocolNotFound, ProtocolNotImplemented, RegistryError,
-                                          StructError, UnsupportedCall, stacklevel)
+                                          StructError, UnexpectedKeyword, UnsupportedCall,
+                                          stacklevel)
 from pcapkit.utilities.inspect import isabstract
 from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 from pcapkit.utilities.warnings import (ProtocolWarning, RegistryWarning, UnknownFieldWarning,
@@ -69,7 +71,7 @@ from pcapkit.utilities.warnings import (ProtocolWarning, RegistryWarning, Unknow
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from types import FrameType
-    from typing import IO, Any, Callable, DefaultDict, Iterable, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
@@ -193,24 +195,38 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
                    for name in made.__fields__ if name in parsed.__fields__)
     return False
 
-#: Construction keywords that name no field.
-#: :meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>` or the
-#: schema layer consumes them, not :meth:`make <pcapkit.protocols.protocol.Protocol.make>`.
-#: No signature declares them, so :func:`_declared_keywords` takes them from here.
+#: The layers a parse may stop at, as ``layer`` names them, case-insensitively
+#: (:issue:`2840`).
+_LAYERS = ('link', 'internet', 'transport', 'application')
+
+#: The state a layer hands the layer it carries, through
+#: :meth:`ProtocolBase._from_parent <pcapkit.protocols.protocol.ProtocolBase._from_parent>`
+#: rather than the public constructor (:issue:`2840`). It reaches
+#: :meth:`Protocol.__post_init__ <pcapkit.protocols.protocol.Protocol.__post_init__>`, and
+#: the hooks after it, as keywords:
 #:
-#: ``packet`` is injected by the library: :meth:`Protocol.__init__
-#: <pcapkit.protocols.protocol.Protocol.__init__>` puts
-#: ``packet=self.packet.payload`` into every parsed ``_info``, which the default
-#: :meth:`Protocol._make_data <pcapkit.protocols.protocol.Protocol._make_data>`
-#: (``data.to_dict()``) carries into the keywords :meth:`Protocol.from_data
-#: <pcapkit.protocols.protocol.Protocol.from_data>` rebuilds from. Refusing it
-#: would break ``from_data`` for every protocol whose ``make`` lacks it, starting
-#: with :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`. Where it
-#: is a real field, as the packet *type* of :meth:`HIP.make
-#: <pcapkit.protocols.internet.hip.protocol.HIP.make>`, listing it here only
-#: stops it being refused.
-OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
-                                  '__packet__', 'packet'})
+#: * ``alias``, the code the layer was dispatched on, and ``error``, the failure a
+#:   layer kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` records;
+#: * ``packet``, the enclosing layer's packet data, and ``__packet__``, the copy of it
+#:   a re-dispatch of the same octets shares, as TLS's SSLv2 trial does;
+#: * ``version``, the enclosing IP version, ``extension``, whether the layer is an IPv6
+#:   extension header, and ``_exthdr_depth``, its place in a chain of them;
+#: * ``framed``, whether a DNS message carries the two-octet TCP length, and
+#:   ``chained``, whether a TLS record follows another in its segment.
+_NEXT_LAYER_KEYWORDS = frozenset({'alias', 'error', 'packet', '__packet__', 'version',
+                                  'extension', '_exthdr_depth', 'framed', 'chained'})
+
+#: contextvars.ContextVar[dict[str, Any] | None]: The next-layer state
+#: :meth:`ProtocolBase._analyze_from_parent
+#: <pcapkit.protocols.protocol.ProtocolBase._analyze_from_parent>` hands the
+#: :meth:`~pcapkit.protocols.protocol.ProtocolBase.analyze` it calls, whose
+#: :meth:`~pcapkit.protocols.protocol.ProtocolBase._analyze_next_layer` takes it for
+#: that payload alone, as :meth:`~pcapkit.protocols.protocol.ProtocolBase._from_parent`
+#: hands :meth:`~pcapkit.protocols.protocol.ProtocolBase.__init__` its state on
+#: :attr:`~pcapkit.protocols.protocol.ProtocolBase.__next_layer__` (:issue:`2840`).
+_analyze_state = contextvars.ContextVar(
+    'pcapkit.protocols.protocol._analyze_state', default=None,
+)  # type: contextvars.ContextVar[Optional[dict[str, Any]]]
 
 
 #: Cache for :func:`_declared_keywords`, keyed by protocol class. Signatures do
@@ -224,7 +240,12 @@ _DECLARED_KEYWORDS = {}  # type: dict[type, Optional[frozenset[str]]]
 #: passes the same ``**kwargs`` to :meth:`pack <pcapkit.protocols.protocol.Protocol.pack>`
 #: (and so ``make``) *and* :meth:`unpack <pcapkit.protocols.protocol.Protocol.unpack>`
 #: (and so ``read``).
-_KEYWORD_CONSUMERS = ('make', 'read', 'pack', 'unpack', '__post_init__', '__init__')
+#:
+#: .. versionchanged:: 1.8.0
+#:
+#:    ``__init__`` is not among them, so its parameters are no construction keywords
+#:    (:issue:`2840`).
+_KEYWORD_CONSUMERS = ('make', 'read', 'pack', 'unpack', '__post_init__')
 
 
 def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
@@ -235,13 +256,12 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
 
     Returns:
         Names of every keyword-acceptable parameter declared by any of
-        :data:`_KEYWORD_CONSUMERS` anywhere in the MRO of ``cls``, plus every
-        entry of :attr:`Protocol.__keywords__
-        <pcapkit.protocols.protocol.Protocol.__keywords__>` found there,
-        plus :data:`OUT_OF_BAND_KEYWORDS`. :obj:`None` if ``cls`` *itself* sets
-        ``__keywords__`` to :obj:`None`, meaning its keywords cannot be enumerated
-        and are not to be checked -- inherited :obj:`None` does not count, as
-        :attr:`Protocol.__keywords__
+        :data:`_KEYWORD_CONSUMERS` anywhere in the MRO of ``cls``, but ``file``
+        and ``length``, plus every entry of :attr:`Protocol.__keywords__
+        <pcapkit.protocols.protocol.Protocol.__keywords__>` found there.
+        :obj:`None` if ``cls`` *itself* sets ``__keywords__`` to :obj:`None`,
+        meaning its keywords cannot be enumerated and are not to be checked --
+        inherited :obj:`None` does not count, as :attr:`Protocol.__keywords__
         <pcapkit.protocols.protocol.Protocol.__keywords__>` explains.
 
     The union is wider than the signature of ``cls.make``:
@@ -257,6 +277,11 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
     <pcapkit.protocols.protocol.Protocol.__own_make_keywords__>`: its ``make``
     counts only while no subclass overrides it (:issue:`2286`).
 
+    .. versionchanged:: 1.8.0
+
+       ``file`` and ``length`` are left out, being what a parse is given, and
+       ``OUT_OF_BAND_KEYWORDS`` is not added (:issue:`2840`).
+
     """
     try:
         return _DECLARED_KEYWORDS[cls]
@@ -264,7 +289,7 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
         pass
 
     unchecked = False
-    names = set(OUT_OF_BAND_KEYWORDS)
+    names = set()  # type: set[str]
     # NOTE: The class whose ``make`` is the one ``cls`` resolves to; any other
     # ``make`` in the MRO has been overridden.
     make_owner = next((klass for klass in cls.__mro__ if 'make' in klass.__dict__), None)
@@ -306,25 +331,26 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
                                   inspect.Parameter.KEYWORD_ONLY):
                     names.add(name)
 
+    # NOTE: What a parse is given, which ``__post_init__`` and ``read`` declare.
+    names.difference_update(('file', 'length'))
     declared = None if unchecked else frozenset(names)
     _DECLARED_KEYWORDS[cls] = declared
     return declared
 
 
-def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
+def _check_construction_keywords(cls: 'type', kwargs: 'Mapping[str, Any]', /, *,
                                  strict: 'bool' = True) -> 'None':
     """Reject construction keywords that the protocol ``cls`` declares nowhere.
 
     Args:
         cls: Protocol class being constructed.
-        kwargs: Construction keywords to check, the out-of-band ones left out.
-            :meth:`Protocol.__init__
-            <pcapkit.protocols.protocol.Protocol.__init__>` passes those
-            remaining after it has consumed them; :meth:`Protocol.from_data
-            <pcapkit.protocols.protocol.Protocol.from_data>` passes its
-            caller's own, less ``_layer``, ``_protocol`` and ``__context__``,
-            before :meth:`Protocol._make_data
-            <pcapkit.protocols.protocol.Protocol._make_data>` adds to them.
+        kwargs: Construction keywords to check: the fields
+            :meth:`Protocol.from_fields
+            <pcapkit.protocols.protocol.Protocol.from_fields>` is given, or the
+            caller's own keywords of :meth:`Protocol.from_data
+            <pcapkit.protocols.protocol.Protocol.from_data>` and then those with
+            :meth:`Protocol._make_data
+            <pcapkit.protocols.protocol.Protocol._make_data>`'s added.
         strict: Whether an unexpected keyword is an error. :data:`True` for a
             caller's own construction; :data:`False` when the keywords were
             generated by :meth:`Protocol._make_data
@@ -333,11 +359,18 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
             <pcapkit.protocols.protocol.Protocol.from_data>`.
 
     Raises:
-        UnsupportedCall: If ``strict`` and any keyword is not among those
+        UnexpectedKeyword: If ``strict`` and any keyword is not among those
             :func:`_declared_keywords` collects for ``cls``.
 
     Warns:
         UnknownFieldWarning: The same finding when not ``strict``.
+
+    .. versionchanged:: 1.8.0
+
+       ``cls`` and ``kwargs`` are positional-only and ``strict`` keyword-only,
+       and the error is :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`,
+       an :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` that is a
+       :exc:`TypeError` too (:issue:`2840`).
 
     """
     declared = _declared_keywords(cls)
@@ -348,22 +381,41 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     if not unexpected:
         return
 
-    # NOTE: The check catches misspellings, so suggest the closest declared
-    # name, e.g. ``seq_no`` for ``seq``.
+    # NOTE: The check catches misspellings, so suggest the closest accepted name, e.g. ``seq_no``
+    # for ``seq``; ``from_fields`` and ``from_data`` take ``context`` too.
+    candidates = declared | {'context'}
     report = []  # type: list[str]
     for key in unexpected:
-        suggestions = difflib.get_close_matches(key, declared, n=1)
+        suggestions = difflib.get_close_matches(key, candidates, n=1)
         report.append(f'{key!r} (did you mean {suggestions[0]!r}?)' if suggestions else repr(key))
     listed = ', '.join(report)
 
     if strict:
-        raise UnsupportedCall(f'{cls.__name__}: unexpected keyword(s): {listed}')
+        raise UnexpectedKeyword(f'{cls.__name__}: unexpected keyword(s): {listed}')
 
     # NOTE: A warning, not an error: the caller cannot fix keys ``_make_data`` generated, and
     # raising would break ``from_data``; the default ``stacklevel`` blames that call.
     warn(f'{cls.__name__}._make_data returned keyword(s) that no signature of '
          f'{cls.__name__} declares, so they are discarded: {listed}',
          UnknownFieldWarning)
+
+
+def _nothing_to_parse(cls: 'type') -> 'TypeError':
+    """The error a parse given no octets raises.
+
+    Args:
+        cls: Protocol class being parsed.
+
+    Returns:
+        A :exc:`TypeError` naming ``cls`` and :meth:`Protocol.from_fields
+        <pcapkit.protocols.protocol.Protocol.from_fields>`, which builds one
+        instead (:issue:`2840`).
+
+    .. versionadded:: 1.8.0
+
+    """
+    name = cls.__name__
+    return TypeError(f'{name}: nothing to parse; build one with {name}.from_fields()')
 
 
 def _short_of_hint(klass: 'Type[ProtocolBase]', captured: 'int') -> 'bool':
@@ -489,6 +541,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         _protos: 'ProtoChain'
         #: If a header set before :meth:`unpack` may hold raw items.
         _make_raw: 'bool'
+        #: File pointer.
+        _seekset: 'int'
+        #: Parse packet until such layer.
+        _exlayer: 'Optional[str]'
+        #: Parse packet until such protocol.
+        _exproto: 'Optional[str | ProtocolBase | Type[ProtocolBase]]'
+        #: Whether to stop parsing the next layer of protocol.
+        _sigterm: 'bool'
 
         # Internal data storage for cached properties.
         __cached__: 'dict[str, Any]'
@@ -620,9 +680,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: rather than declaring as a parameter, as :meth:`IPv6_Ext.read
     #: <pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read>` does with
     #: ``alias``. :func:`_declared_keywords` reads signatures, which miss such a
-    #: name, so the construction check of :meth:`__init__` accepts only those
+    #: name, so the construction check of :meth:`from_fields` accepts only those
     #: listed here, unioned over the MRO. Prefer a declared parameter, which also
-    #: documents the keyword (:issue:`617`).
+    #: documents the keyword (:issue:`617`). This class lists ``__packet__``,
+    #: which :meth:`pack` reads for every protocol.
     #:
     #: :obj:`None` skips the check, for a *dispatcher* whose real signature is
     #: chosen at call time: :meth:`HTTP.make
@@ -633,7 +694,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: A protocol that skips the check discards an unknown keyword silently.
     #: Unlike a set, :obj:`None` is **not** inherited, so ``HTTPv1`` and
     #: ``HTTPv2``, which declare their keywords in full, stay checked.
-    __keywords__: 'Optional[frozenset[str]]' = frozenset()
+    #:
+    #: .. versionchanged:: 1.8.0
+    #:
+    #:    This class lists ``__packet__`` (:issue:`2840`).
+    __keywords__: 'Optional[frozenset[str]]' = frozenset({'__packet__'})
 
     #: Whether the parameters of this class's own :meth:`make` are accepted only
     #: while that ``make`` is the one in use. By default
@@ -645,19 +710,20 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: :attr:`__keywords__` and the other construction methods are unaffected.
     __own_make_keywords__: 'bool' = False
 
-    #: Whether :meth:`from_data` is rebuilding this instance from a parsed data
-    #: model, rather than from keywords somebody wrote. It decides only whether
-    #: the construction keyword check of :meth:`__init__` raises or warns, and
-    #: is set for that call alone; every other code path sees :data:`False`.
-    __reconstructing__: 'bool' = False
-
     #: The ``__short_read__`` record of the data model :meth:`from_data`
     #: rebuilds this instance from. :meth:`pack` cuts the header it makes back
     #: to the octets captured, and :meth:`__post_init__` has :meth:`unpack`
     #: parse them at the width ``__short_width__`` records, so the rebuild is
     #: parsed as its capture was (:issue:`2703`, :issue:`2761`). Set for that
-    #: call alone, like :attr:`__reconstructing__`; otherwise :data:`None`.
+    #: call alone; otherwise :data:`None`.
     __short_read__: 'Optional[tuple[str, int]]' = None
+
+    #: The next-layer state :meth:`_from_parent` hands this layer, keyed as
+    #: :data:`~pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS`. :meth:`__init__`
+    #: and :meth:`_parse` take it over the keywords they are given, so a default
+    #: an override passes on cannot mask it. Set for that call alone, like
+    #: :attr:`__short_read__`; otherwise :data:`None`.
+    __next_layer__: 'Optional[dict[str, Any]]' = None
 
     #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
     #: :meth:`self.__init__ <Protocol.__init__>` sets a
@@ -835,20 +901,23 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             parse as well as the construction, so an implementation need not
             declare every keyword it is called with. A caller's keyword that no
             signature declares still raises
-            :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` from
-            :meth:`Protocol.__init__
-            <pcapkit.protocols.protocol.Protocol.__init__>` (:issue:`617`).
+            :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword` from
+            :meth:`from_fields` (:issue:`617`).
 
         Warning:
             **Calling this method directly is not checked**, and discards an
-            undeclared keyword silently. The check lives in
-            :meth:`Protocol.__init__
-            <pcapkit.protocols.protocol.Protocol.__init__>`, the one place the
-            keywords converge, so it covers ``SomeProtocol(...)`` and its
-            :meth:`pack`, but not ``object.__new__(cls).make(**kwargs)``, as
-            :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>`
-            calls its versioned implementation. Construct through the
-            constructor to get the check.
+            undeclared keyword silently. The check lives in :meth:`from_fields`
+            and :meth:`from_data`, which hand the keywords on, so it covers
+            ``SomeProtocol.from_fields(...)`` and its :meth:`pack`, but not
+            ``object.__new__(cls).make(**kwargs)``, as :meth:`HTTP.make
+            <pcapkit.protocols.application.http.protocol.HTTP.make>` calls its
+            versioned implementation. Construct through :meth:`from_fields` to
+            get the check.
+
+        .. versionchanged:: 1.8.0
+
+           Every implementation takes its fields as keywords only
+           (:issue:`2840`).
 
         """
 
@@ -1066,7 +1135,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            >>> from pcapkit.protocols.link.ethernet.protocol import Ethernet
            >>> code = Ethernet.resolve_index('Address_Resolution_Protocol',
            ...                               namespace=EtherType)
-           >>> Ethernet(type=code).info.type
+           >>> Ethernet.from_fields(type=code).info.type
            <EtherType.Address_Resolution_Protocol: 2054>
 
         Args:
@@ -1140,14 +1209,20 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return comp
 
     @classmethod
-    def analyze(cls, proto: 'int', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':
+    def analyze(cls, proto: 'int', payload: 'bytes', /, *,
+                layer: 'Optional[str]' = None,
+                protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                ) -> 'ProtocolBase':
         """Analyse packet payload.
 
         Args:
             proto: Protocol registry number.
             payload: Packet payload.
-            **kwargs: Keyword arguments for the payload's constructor, such as
-                the stops and context a frame's next layer is parsed with.
+            layer: Parse the payload until such layer, as for :meth:`__init__`.
+            protocol: Parse the payload until such protocol, as for
+                :meth:`__init__`.
+            context: Caller supplied parsing context, as for :meth:`__init__`.
 
         Returns:
             Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
@@ -1163,6 +1238,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             frame. A payload past a stop this class meets is ``Raw``, as a frame
             keeps the next layer of the layer it stops at.
 
+        Raises:
+            FormatError: If ``layer`` names no layer.
+            RegistryError: If ``protocol`` is no protocol name, class or instance.
+
+        Note:
+            Called by :meth:`_analyze_from_parent`, it hands the payload the
+            next-layer state that method was given, as a frame's layer hands its
+            own (:issue:`2945`).
+
         .. versionchanged:: 1.7.0
 
            The fallback holds the whole payload and the failure's message,
@@ -1174,15 +1258,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            the parse gets ``proto`` as ``alias``, as a frame's next layer does
            (:issue:`2933`).
 
-        """
-        if TYPE_CHECKING:
-            protocol: 'Type[ProtocolBase]'
+        .. versionchanged:: 1.8.0
 
-        if cls._stops_next_layer(kwargs):
-            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        else:
-            protocol = cls._lookup_next_layer(cls.__proto__, proto)
-        return cls._analyze_next_layer(protocol, payload, proto, **kwargs)
+           ``proto`` and ``payload`` are positional-only, and the keywords are
+           those of :meth:`__init__`, ``layer``, ``protocol`` and ``context``,
+           so any other is refused (:issue:`2840`).
+
+        """
+        klass = cls._analyze_stop(layer, protocol) or cls._lookup_next_layer(cls.__proto__, proto)
+        return cls._analyze_next_layer(klass, payload, proto, layer=layer, protocol=protocol, context=context)
 
     @classmethod
     def register(cls, code: 'int', protocol: 'ModuleDescriptor | Type[ProtocolBase]') -> 'None':
@@ -1347,7 +1431,50 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return self
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_fields(cls, *,
+                    context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                    **fields: 'Any') -> 'Self':
+        """Construct a protocol instance from its fields.
+
+        The fields are the keywords of :meth:`make`, and any other a hook of
+        this protocol declares, as
+        :func:`~pcapkit.protocols.protocol._declared_keywords` collects them.
+        Through a versioned family's base, ``version`` names the member built
+        (:ref:`protocol-family-dispatch`).
+
+        Args:
+            context: Caller supplied context (see
+                :mod:`pcapkit.corekit.context`), as for a parse, such as the
+                Security Associations :class:`~pcapkit.protocols.internet.esp.protocol.ESP`
+                encrypts with.
+            **fields: Fields of the protocol.
+
+        Returns:
+            Protocol instance; through a versioned family's base, one of the
+            member ``version`` names.
+
+        Raises:
+            UnexpectedKeyword: If a keyword is none this protocol declares, the
+                parse keywords ``file`` and ``length``, the stops and
+                ``__context__`` included.
+            ProtocolError: Through a versioned family's base, if ``version`` is
+                missing or names no member; on a member, if it names another.
+
+        .. versionadded:: 1.8.0
+
+        """
+        klass = cls._construction_member(fields)
+        _check_construction_keywords(klass, fields)
+        self = klass.__new__(klass)
+        self._initialise(context=context)
+        self.__post_init__(**fields)
+        self._info.__update__(packet=self.packet.payload)
+        return self
+
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', /, *,
+                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                  **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         ``data`` may be the :obj:`dict` that :meth:`Info.to_dict
@@ -1371,6 +1498,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Args:
             data: Protocol data.
+            context: Caller supplied context, as for :meth:`from_fields`.
             **kwargs: Construction keywords that ``data`` does not carry, such as
                 the ``num`` and ``header`` of
                 :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, or the
@@ -1382,37 +1510,40 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Protocol instance.
 
         Raises:
-            UnsupportedCall: If any of ``kwargs`` matches no parameter of the
-                protocol, as for a direct construction.
+            UnexpectedKeyword: If any of ``kwargs`` matches no parameter of the
+                protocol, as for :meth:`from_fields`.
+
+        Warns:
+            UnknownFieldWarning: If a keyword :meth:`_make_data` returns matches
+                none, which the caller cannot correct.
+
+        .. versionchanged:: 1.8.0
+
+           ``data`` is positional-only, the context is ``context`` rather than
+           ``__context__``, and the stops ``_layer`` and ``_protocol`` are
+           refused (:issue:`2840`).
 
         """
         if not isinstance(data, Data):
             data = cast('_PT', cls.__data__.from_dict(data))
 
-        # NOTE: The caller's own keywords are checked strictly, as for a direct
-        # construction, less the out-of-band ones ``__init__`` consumes.
-        _check_construction_keywords(cls, {
-            key: val for key, val in kwargs.items()
-            if key not in ('_layer', '_protocol', '__context__')
-        })
+        # NOTE: The caller's own keywords are checked strictly, as for ``from_fields``;
+        # the rest came from ``_make_data``, so they warn, not raise.
+        _check_construction_keywords(cls, kwargs)
+        keywords = {**cls._make_data(data), **kwargs}
+        klass = cls._construction_member(keywords)
+        _check_construction_keywords(klass, keywords, strict=False)
 
-        self = cls.__new__(cls)
-        kwargs = {**self._make_data(data), **kwargs}
-
-        # NOTE: The rest came from ``_make_data``, so ``__init__`` warns, not raises.
-        # Both flags last the call alone; ``pack`` cuts back by ``__short_read__`` (#2703).
-        self.__reconstructing__ = True
+        self = klass.__new__(klass)
+        # NOTE: For the call alone; ``pack`` cuts back by it (#2703). A cut header is read at
+        # the width its parse read it at, so the rebuild holds what its parse did (#2717, #2761).
         self.__short_read__ = cast('Optional[tuple[str, int]]', data.get('__short_read__'))
-        # NOTE: A cut header is read at the width its parse read it at, as recorded, so
-        # the rebuild holds the values and the next layer its parse did (#2717, #2761).
-        width = data.get('__short_width__')
-        if self.__short_read__ is not None and width is not None:
-            kwargs.setdefault('length', width)
+        width = None if self.__short_read__ is None else data.get('__short_width__')
         try:
-            # initialize protocol instance
-            self.__init__(**kwargs)  # type: ignore[misc]
+            self._initialise(context=context)
+            self.__post_init__(None, width, **keywords)  # type: ignore[call-overload]
+            self._info.__update__(packet=self.packet.payload)
         finally:
-            del self.__reconstructing__
             del self.__short_read__
 
         return self
@@ -1434,126 +1565,64 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         return self
 
-    @overload  # pragma: no cover
-    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
-    @overload  # pragma: no cover
-    def __init__(self, **kwargs: 'Any') -> 'None': ...
-
-    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
-        """Initialisation.
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = None, /, *,
+                 layer: 'Optional[str]' = None,
+                 protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                 context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                 ) -> 'None':
+        """Parse a protocol instance from its octets.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            _layer (str): Parse packet until ``_layer``
-                (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
-                While parsing, the un-prefixed ``layer`` is accepted as well --
-                see the note below.
-            _protocol: Parse packet until ``_protocol``
+            layer: Parse packet until such layer
+                (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`):
+                ``'link'``, ``'internet'``, ``'transport'`` or ``'application'``,
+                in any case; :obj:`None` sets no stop.
+            protocol: Parse packet until such protocol
                 (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`),
                 given as a protocol name (:obj:`str`), a protocol class or a
-                protocol instance.
-                While parsing, the un-prefixed ``protocol`` is accepted as well --
-                see the note below.
-            packet: Packet context of the enclosing layer, a :obj:`dict` as
-                handed over by
-                :meth:`self._import_next_layer
-                <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-                While parsing, it is republished as ``__packet__`` so that
-                :meth:`self.unpack <Protocol.unpack>` -- and through it the
-                schema -- can see it; see the note below.
-            __context__: Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`;
-                see :mod:`pcapkit.corekit.context`): a
+                protocol instance; :obj:`None` sets no stop.
+            context: Caller supplied parsing context (:attr:`self._exctx
+                <pcapkit.protocols.protocol.Protocol._exctx>`; see
+                :mod:`pcapkit.corekit.context`): a
                 :class:`~pcapkit.corekit.context.ContextRegistry`, a
                 :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping of
                 names to :class:`~pcapkit.corekit.context.ProtocolContext`, or an
                 iterable of :class:`~pcapkit.corekit.context.ProtocolContext`.
-                It is consumed here rather
-                than being forwarded to :meth:`self.read <Protocol.read>`, and is
-                propagated to nested layers by
+                It is propagated to nested layers by
                 :meth:`self._import_next_layer
                 <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-            **kwargs: Arbitrary keyword arguments.
 
         Raises:
-            UnsupportedCall: When constructing (``file`` is :obj:`None`), if a
-                keyword names no parameter of this protocol's :meth:`make`,
-                :meth:`read`, :meth:`pack`, :meth:`unpack`,
-                :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO
-                -- except a ``make`` whose class sets
-                :attr:`__own_make_keywords__`, which counts only while it is
-                the ``make`` of the protocol being constructed -- and is not
-                listed in :attr:`__keywords__`. Parsing (``file`` is given) is
-                unaffected.
+            TypeError: If ``file`` is :obj:`None`: build a protocol with
+                :meth:`from_fields`.
+            FormatError: If ``layer`` names no layer.
+            RegistryError: If ``protocol`` is no protocol name, class or instance.
 
         Note:
-            The ``_layer``, ``_protocol`` and ``__context__`` keywords are
-            *out-of-band*: they configure the parse rather than describe the
-            packet, and are consumed here, the one point every producer passes
-            through, so a spelling normalised here is normalised for the
-            engines, every :meth:`_import_next_layer
-            <pcapkit.protocols.protocol.Protocol._import_next_layer>` and any
-            third-party protocol alike.
+            A protocol whose parse takes a keyword of its own, such as the
+            ``version`` of a versioned family's base, overrides this method with
+            that keyword first, then ``layer``, ``protocol`` and ``context``, and
+            calls :meth:`_parse`.
 
-            ``packet`` is read but not consumed: it stays in the keywords
-            forwarded to :meth:`__post_init__`, and while parsing a copy is
-            republished beside it as ``__packet__``.
+            The state the enclosing layer hands on through :meth:`_from_parent`,
+            on :attr:`__next_layer__`, reaches :meth:`__post_init__` and the
+            hooks after it as keywords (:issue:`2840`).
+
+        .. versionchanged:: 1.8.0
+
+           Parses only: ``file`` and ``length`` are positional-only, and
+           ``layer``, ``protocol`` and ``context`` keyword-only. Any other
+           keyword, ``_layer``, ``_protocol``, ``__context__``, ``packet`` and
+           ``__packet__`` included, is refused, and a protocol is built with
+           :meth:`from_fields`. ``'none'`` and ``'null'`` no longer mean no stop
+           (:issue:`2840`).
 
         """
-        #logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
-
-        # Parsing rather than constructing, as in ``__post_init__``. ``layer``,
-        # ``protocol`` and ``packet`` are out-of-band only then; else ``make()`` fields.
-        parsing = file is not None
-
-        #: int: File pointer.
-        self._seekset = io.SEEK_SET  # type: int
-        #: Parse packet until such layer.
-        self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
-        #: Parse packet until such protocol.
-        self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | ProtocolBase | Type[ProtocolBase]]
-
-        # NOTE: The engines, every ``_import_next_layer`` and ``pcapkit.extract`` spell the
-        # limits ``layer``/``protocol``, so both are accepted; the prefixed one wins (GH-356).
-        if parsing:
-            layer = kwargs.pop('layer', None)
-            protocol = kwargs.pop('protocol', None)
-            if self._exlayer is None:
-                self._exlayer = layer
-            if self._exproto is None:
-                self._exproto = protocol
-
-        # NOTE: ``Extractor.__init__`` passes ``'none'``/``'null'`` for an omitted
-        # ``layer``/``protocol`` (``extract`` too, for ``layer``), meaning no limit.
-        if isinstance(self._exlayer, str) and self._exlayer.lower() == 'none':
-            self._exlayer = None
-        if isinstance(self._exproto, str) and self._exproto.lower() == 'null':
-            self._exproto = None
-
-        #: pcapkit.corekit.context.ContextRegistry: Caller supplied parsing context.
-        # NOTE: A registry is adopted as-is rather than copied by ``make()``: the
-        # contexts are shared across layers regardless.
-        __context__ = kwargs.pop('__context__', None)
-        self._exctx = (__context__ if isinstance(__context__, ContextRegistry)
-                       else ContextRegistry.make(__context__))  # type: ContextRegistry
-        #: bool: Whether to stop parsing the next layer of protocol.
-        self._sigterm = self._check_term_threshold()
-
-        # NOTE: ``packet=`` from ``_import_next_layer`` reaches the schema as ``__packet__`` (GH-382),
-        # copied since ``Schema.unpack`` writes into it and IPv6 extension headers share one dict.
-        if parsing and '__packet__' not in kwargs and isinstance(kwargs.get('packet'), dict):
-            kwargs['__packet__'] = dict(kwargs['packet'])
-
-        # NOTE: Construction only: every ``make`` ends in ``**kwargs``, so a misspelt field would
-        # keep its default silently (#617). Parse keywords go unchecked: dropping one changes no octet.
-        if not parsing:
-            _check_construction_keywords(
-                type(self), kwargs, strict=not self.__reconstructing__)
-
-        # post-init customisations
-        self.__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
-
-        # inject packet payload into the data model
+        # NOTE: ``_parse``, inline, so a parse adds no frame per layer (#1610).
+        keywords = self._start_parse(file, layer, protocol, context, {})
+        self.__post_init__(file, length, **keywords)
         self._info.__update__(packet=self.packet.payload)
 
     @overload  # pragma: no cover
@@ -1897,10 +1966,21 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             data: protocol data
 
         Returns:
-            Key-value pairs for protocol construction.
+            Key-value pairs for protocol construction: those of ``data``, but
+            the ``packet`` :meth:`__init__` puts into every parsed ``_info``,
+            unless this protocol declares a ``packet`` keyword.
+
+        .. versionchanged:: 1.8.0
+
+           ``packet`` is left out unless declared, since :meth:`from_fields`
+           refuses it then (:issue:`2840`).
 
         """
-        return data.to_dict()
+        keywords = data.to_dict()
+        declared = _declared_keywords(cls)
+        if declared is not None and 'packet' not in declared:
+            keywords.pop('packet', None)
+        return keywords
 
     def _packing_target(self) -> 'Self':
         """Return the instance that :meth:`pack` makes its header on.
@@ -1926,6 +2006,136 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if '_info' not in vars(self):
             return self
         return copy.copy(self)
+
+    @classmethod
+    def _construction_member(cls, fields: 'dict[str, Any]') -> 'Type[Self]':  # pylint: disable=unused-argument
+        """The class :meth:`from_fields` and :meth:`from_data` construct.
+
+        A versioned family's base overrides it to pick its member, taking out of
+        ``fields`` a ``version`` that only names the member, as building the
+        class directly does (:ref:`protocol-family-dispatch`).
+
+        Args:
+            fields: Construction keywords.
+
+        Returns:
+            This class.
+
+        .. versionadded:: 1.8.0
+
+        """
+        return cls
+
+    def _initialise(self, layer: 'Optional[str]' = None,
+                    protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                    context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                    ) -> 'None':
+        """Set the stops, the context and the termination flag of this instance.
+
+        :meth:`_start_parse`, :meth:`from_fields` and :meth:`from_data` each call
+        it, and :meth:`__post_init__` is called after it rather than from it, so
+        it adds no frame to a parse, which dissects its next layer from inside
+        its own (:issue:`1610`).
+
+        Args:
+            layer: Parse packet until such layer.
+            protocol: Parse packet until such protocol.
+            context: Caller supplied parsing context.
+
+        .. versionadded:: 1.8.0
+
+        """
+        self._seekset = io.SEEK_SET
+        self._exlayer = layer
+        self._exproto = protocol
+        # NOTE: A registry is adopted as-is rather than copied by ``make()``: the
+        # contexts are shared across layers regardless.
+        self._exctx = (context if isinstance(context, ContextRegistry)
+                       else ContextRegistry.make(context))
+        self._sigterm = self._check_term_threshold()
+
+    def _start_parse(self, file: 'Optional[IO[bytes] | bytes]', layer: 'Optional[str]',
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]',
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]',  # pylint: disable=line-too-long
+                     keywords: 'dict[str, Any]') -> 'dict[str, Any]':
+        """Check what a parse is given and set its stops and context.
+
+        :meth:`__init__`, :meth:`_parse` and the overrides that run its steps
+        inline call it and then :meth:`__post_init__` themselves, as
+        :meth:`_initialise` explains.
+
+        Args:
+            file: Source packet stream.
+            layer: Parse packet until such layer.
+            protocol: Parse packet until such protocol.
+            context: Caller supplied parsing context.
+            keywords: The parse keywords of the class's own :meth:`__init__`.
+
+        Returns:
+            The keywords for :meth:`__post_init__`: ``keywords``, with the
+            :attr:`__next_layer__` state over them, and a copy of its ``packet``
+            as ``__packet__``.
+
+        Raises:
+            TypeError: If ``file`` is :obj:`None`.
+            FormatError: If ``layer`` names no layer.
+            RegistryError: If ``protocol`` is no protocol name, class or instance.
+
+        .. versionadded:: 1.8.0
+
+        """
+        if file is None:
+            raise _nothing_to_parse(type(self))
+        self._check_stops(layer, protocol)
+
+        # NOTE: The enclosing layer's state wins, so a default an override passes on cannot mask it.
+        state = self.__dict__.pop('__next_layer__', None)
+        if state:
+            keywords.update(state)
+        self._initialise(layer, protocol, context)
+
+        # NOTE: ``packet`` from ``_import_next_layer`` reaches the schema as ``__packet__`` (GH-382),
+        # copied since ``Schema.unpack`` writes into it and IPv6 extension headers share one dict.
+        if '__packet__' not in keywords and isinstance(keywords.get('packet'), dict):
+            keywords['__packet__'] = dict(keywords['packet'])
+        return keywords
+
+    def _parse(self, file: 'IO[bytes] | bytes', length: 'Optional[int]', /, *,
+               layer: 'Optional[str]' = None,
+               protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+               context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+               **keywords: 'Any') -> 'None':
+        """Parse this instance as :meth:`__init__` does, with parse keywords of its class's own.
+
+        An :meth:`__init__` override taking such a keyword calls this, as
+        :meth:`IP.__init__ <pcapkit.protocols.internet.ip.protocol.IP.__init__>`
+        does for ``version``, since the base's keywords are closed (:doc:`/ext`).
+        Calling it adds a frame to a layer's parse, so :meth:`__init__` runs its
+        steps inline, and so do the library's overrides, but for the versioned bases
+        that call it, as :meth:`IPv6_Ext.__init__
+        <pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.__init__>` does
+        (:issue:`1610`).
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            layer: Parse packet until such layer.
+            protocol: Parse packet until such protocol.
+            context: Caller supplied parsing context.
+            **keywords: The override's own parse keywords, for
+                :meth:`__post_init__` and the hooks after it.
+
+        Raises:
+            TypeError: If ``file`` is :obj:`None`.
+            FormatError: If ``layer`` names no layer.
+            RegistryError: If ``protocol`` is no protocol name, class or instance.
+
+        .. versionadded:: 1.8.0
+
+        """
+        keywords = self._start_parse(file, layer, protocol, context, keywords)
+        self.__post_init__(file, length, **keywords)
+        self._info.__update__(packet=self.packet.payload)
 
     @classmethod
     def _next_layer_entry(cls, code: 'Any', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'
@@ -2737,7 +2947,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 or name is None or name not in data):
             from pcapkit.protocols.misc.no_payload.protocol import \
                 NoPayload  # pylint: disable=import-outside-toplevel
-            return NoPayload()
+            return NoPayload.from_fields()
 
         token, rebuilt = frame_depth.set(frame_depth.get() + 1), rebuilding.set(True)
         try:
@@ -2890,7 +3100,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         return self._parse_next_layer(protocol, file_, length, alias=proto, packet=packet,
                                       layer=self._exlayer, protocol=self._exproto,
-                                      __context__=self._exctx)
+                                      context=self._exctx)
 
     def _empty_next_layer(self, file_: 'bytes', length: 'int') -> 'Optional[Type[ProtocolBase]]':
         r"""The class a next layer with nothing to parse is kept as.
@@ -2929,15 +3139,23 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return NoPayload
 
     @staticmethod
-    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int',
-                          **kwargs: 'Any') -> 'ProtocolBase':
+    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int', /, *,
+                          layer: 'Optional[str]' = None,
+                          protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                          context: 'Optional[ContextRegistry]' = None,
+                          **state: 'Any') -> 'ProtocolBase':
         r"""Parse the next layer, or keep it as raw octets if its header was not captured.
 
         Arguments:
             klass: next layer protocol class
             file\_: payload of the current layer
             length: valid (*non-padding*) length
-            **kwargs: keyword arguments for the next layer's constructor
+            layer: parse the next layer until such layer
+            protocol: parse the next layer until such protocol
+            context: caller supplied parsing context
+            **state: next-layer state, keyed as
+                :data:`~pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS`, which
+                :meth:`_from_parent` hands on
 
         Returns:
             Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
@@ -2994,7 +3212,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Warns:
             ProtocolWarning: If the next layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 
+        .. versionchanged:: 1.8.0
+
+           The stops and the context are keyword-only, the context spelt
+           ``context`` rather than ``__context__``, and every other keyword is
+           next-layer state, refused unless it is one of
+           :data:`~pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS` (:issue:`2840`).
+
         """
+        stops = {'layer': layer, 'protocol': protocol, 'context': context}  # type: dict[str, Any]
         depth = frame_depth.get() + 1
         limit = config.FRAME_LAYER_LIMIT
         if limit != -1 and depth > limit:
@@ -3009,7 +3235,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 # for warns of the same octets once its own parse gets here.
                 if not rebuilding.get():
                     warn(message, ProtocolWarning, stacklevel=stacklevel())
-                raw = Raw(file_, length, **{**kwargs, 'error': message})
+                # pylint: disable-next=protected-access
+                raw = Raw._from_parent(file_, length, **stops, **{**state, 'error': message})
                 raw._past_layer_limit = True  # pylint: disable=protected-access
                 return raw
 
@@ -3020,7 +3247,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             # so its warnings are held however much was captured (#2516).
             with hold_warnings(beholding.get() or _short_of_hint(klass, captured)) as held:
                 try:
-                    next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
+                    next_ = klass._from_parent(file_, length, **stops, **state)  # pylint: disable=protected-access
                 except Exception:
                     # NOTE: Under ``beholder`` the layer is replaced and its warnings
                     # go with it; outside it, they leave with the error (#2308).
@@ -3034,21 +3261,81 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             frame_depth.reset(token)
         if held.discard:
             from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
-            next_ = Raw(file_, length, **kwargs)
+            next_ = Raw._from_parent(file_, length, **stops, **state)  # pylint: disable=protected-access
         return next_
 
+    @classmethod
+    def _analyze_from_parent(cls, proto: 'int', payload: 'bytes', /, *,
+                             layer: 'Optional[str]' = None,
+                             protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                             context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                             **state: 'Any') -> 'ProtocolBase':
+        """Analyse a payload with the state the layer carrying it would hand on.
+
+        :meth:`analyze` runs as calling it runs, given the stops and the
+        context set, and ``state`` travels on
+        :data:`~pcapkit.protocols.protocol._analyze_state` to the
+        :meth:`_analyze_next_layer` it reaches, so an override of :meth:`analyze`,
+        as :meth:`Transport.analyze
+        <pcapkit.protocols.transport.transport.Transport.analyze>`, hands it on as
+        the base's does. A reassembled IP datagram's payload takes the datagram's
+        addresses and IP version this way, as a frame's IP layer hands them to
+        its next layer through :meth:`_from_parent` (:issue:`2945`).
+
+        Arguments:
+            proto: Protocol registry number.
+            payload: Packet payload.
+            layer: Parse the payload until such layer.
+            protocol: Parse the payload until such protocol.
+            context: Caller supplied parsing context.
+            **state: Next-layer state, keyed as
+                :data:`~pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS`.
+
+        Returns:
+            Parsed payload, as :meth:`analyze` returns it.
+
+        Raises:
+            UnsupportedCall: If a key of ``state`` is not next-layer state, as
+                for :meth:`_from_parent`.
+
+        .. versionadded:: 1.8.0
+
+        """
+        if not _NEXT_LAYER_KEYWORDS.issuperset(state):
+            unknown = sorted(set(state) - _NEXT_LAYER_KEYWORDS)
+            raise UnsupportedCall(f'{cls.__name__}: unknown next-layer state: '
+                                  f'{", ".join(map(repr, unknown))}')
+
+        # NOTE: Only the stops set, so ``analyze`` is called as a caller giving none would call it.
+        stops = {name: value for name, value in (('layer', layer), ('protocol', protocol), ('context', context))
+                 if value is not None}  # type: dict[str, Any]
+        token = _analyze_state.set(state)
+        try:
+            return cls.analyze(proto, payload, **stops)
+        finally:
+            _analyze_state.reset(token)
+
     @staticmethod
-    def _analyze_next_layer(klass: 'Type[ProtocolBase]', payload: 'bytes', code: 'Any', /,
-                            **kwargs: 'Any') -> 'ProtocolBase':
+    def _analyze_next_layer(klass: 'Type[ProtocolBase]', payload: 'bytes', code: 'Any', /, *,
+                            layer: 'Optional[str]' = None,
+                            protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                            context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                            **state: 'Any') -> 'ProtocolBase':
         """Parse a payload :meth:`analyze` dispatched, or keep it as raw octets if it fails.
 
         Arguments:
             klass: protocol class the payload was dispatched to
             payload: payload to parse
             code: code the payload was dispatched on, the ``alias`` of the parse
-                and its fallback unless ``kwargs`` gives one, as a frame's next
+                and its fallback unless ``state`` gives one, as a frame's next
                 layer takes it
-            **kwargs: keyword arguments for ``klass``'s constructor
+            layer: parse the payload until such layer
+            protocol: parse the payload until such protocol
+            context: caller supplied parsing context
+            **state: next-layer state, keyed as
+                :data:`~pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS`, which
+                that :meth:`_analyze_from_parent` hands on through
+                :data:`~pcapkit.protocols.protocol._analyze_state` joins
 
         Returns:
             Instance of ``klass``. A payload that fails to parse is kept as
@@ -3078,14 +3365,25 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             a header cut before its first octet, made of nothing but zeros
             (:issue:`2880`).
 
+            The trial and a layer kept instead are built by :meth:`_from_parent`,
+            from the stops, the context and ``state`` (:issue:`2840`), so an
+            enclosing IP version never picks a family base's member
+            (:issue:`2945`).
+
         """
+        # NOTE: ``_analyze_from_parent``'s state joins, for this payload alone: none is left for a
+        # parse inside it, and ``_analyze_from_parent`` restores the variable after (#2945).
+        state = {**(_analyze_state.get() or {}), **state}
+        _analyze_state.set(None)
         # NOTE: The parse takes ``alias`` as a frame's next layer does, its fallback too (#2933).
-        kwargs.setdefault('alias', code)
+        state.setdefault('alias', code)
+        stops = {'layer': layer, 'protocol': protocol, 'context': context}  # type: dict[str, Any]
+
         payload_io = io.BytesIO(payload)
         # NOTE: No octets are no layer, as a frame's ``_empty_next_layer`` keeps them (#2880).
         if not payload:
             from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
-            return NoPayload(payload_io, 0, **kwargs)
+            return NoPayload._from_parent(payload_io, 0, **stops, **state)  # pylint: disable=protected-access
         eof, error = False, ''
         # NOTE: ``beholding`` as well, so a trial block inside the parse, as TLS's, drops its
         # warnings on a raise rather than reporting them past this one (#2308).
@@ -3094,7 +3392,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             with hold_warnings() as held:
                 try:
                     with CaughtByCaller(ProtocolError):
-                        return klass(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
+                        return klass._from_parent(payload_io, len(payload), **stops, **state)  # pylint: disable=protected-access
                 except Exception:
                     held.discard = True
                     raise
@@ -3111,16 +3409,92 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         finally:
             beholding.reset(token)
 
+        if TYPE_CHECKING:
+            fallback: 'Type[ProtocolBase]'
         if eof:
-            from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload as fallback  # pylint: disable=import-outside-toplevel # isort: skip
         else:
-            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # type: ignore[assignment] # pylint: disable=import-outside-toplevel # isort: skip
+            from pcapkit.protocols.misc.raw.protocol import Raw as fallback  # pylint: disable=import-outside-toplevel # isort: skip
 
         # NOTE: Rewound, as the failed parse read the stream; ``error`` as ``beholder``
         # gives a frame's fallback (#2842, #2862).
         payload_io.seek(0)
-        kwargs['error'] = error
-        return protocol(payload_io, len(payload), **kwargs)
+        state['error'] = error
+        return fallback._from_parent(payload_io, len(payload), **stops, **state)  # pylint: disable=protected-access
+
+    @classmethod
+    def _from_parent(cls, file: 'IO[bytes] | bytes', length: 'Optional[int]',
+                     extra: 'Optional[Mapping[str, Any]]' = None, /, *,
+                     layer: 'Optional[str]' = None,
+                     protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]' = None,
+                     context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None,  # pylint: disable=line-too-long
+                     **state: 'Any') -> 'Self':
+        """Parse a layer with the state the layer carrying it hands on.
+
+        :meth:`__new__` and then :meth:`__init__` run as calling the class runs
+        them, given the stops, the context and ``extra`` alone. ``state`` travels on
+        :attr:`__next_layer__` and reaches only the hooks from
+        :meth:`__post_init__` on, so the enclosing IP version it may carry
+        never picks a family base's member (:issue:`2840`).
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            extra: Other keywords for :meth:`__init__`, those a class's own
+                parse takes, such as the ``num``, ``sct`` and ``ctx`` of
+                :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`.
+            layer: Parse packet until such layer.
+            protocol: Parse packet until such protocol.
+            context: Caller supplied parsing context.
+            **state: Next-layer state, keyed as
+                :data:`~pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS`.
+
+        Returns:
+            The parsed layer; for a family base, the member it picks.
+
+        Raises:
+            UnsupportedCall: If a key of ``state`` is not next-layer state, a
+                defect of the caller rather than of the octets.
+
+        .. versionadded:: 1.8.0
+
+        """
+        if not _NEXT_LAYER_KEYWORDS.issuperset(state):
+            unknown = sorted(set(state) - _NEXT_LAYER_KEYWORDS)
+            raise UnsupportedCall(f'{cls.__name__}: unknown next-layer state: '
+                                  f'{", ".join(map(repr, unknown))}')
+
+        keywords = {**(extra or {}), 'layer': layer, 'protocol': protocol, 'context': context}
+        made = cast('object', cls.__new__(cls, file, length, **keywords))
+        if not isinstance(made, cls):
+            return cast('Self', made)
+        made.__next_layer__ = state
+        try:
+            made.__init__(file, length, **keywords)  # type: ignore[misc]
+        finally:
+            # NOTE: Left behind by an ``__init__`` override that never reaches the base's.
+            made.__dict__.pop('__next_layer__', None)
+        return made
+
+    @staticmethod
+    def _next_layer_state(keywords: 'Mapping[str, Any]') -> 'dict[str, Any]':
+        """The next-layer state among the keywords a layer is parsed with.
+
+        A layer that re-dispatches its own octets to another class, as TLS's
+        SSLv2 trial and an HTTP subclass's versioned parse do, hands it on
+        through :meth:`_from_parent`. No hook of those classes reads the other
+        keywords.
+
+        Args:
+            keywords: Keywords of the layer's parse.
+
+        Returns:
+            Those keyed as :data:`~pcapkit.protocols.protocol._NEXT_LAYER_KEYWORDS`.
+
+        .. versionadded:: 1.8.0
+
+        """
+        return {key: value for key, value in keywords.items() if key in _NEXT_LAYER_KEYWORDS}
 
     def _check_term_threshold(self) -> bool:
         """Check if reached termination threshold."""
@@ -3164,9 +3538,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Whether a parse given ``kwargs`` stops at this class, as ``_sigterm`` stops a layer.
 
         Arguments:
-            kwargs: keyword arguments of the parse, whose stops are read as
-                :meth:`__init__` reads them while parsing: the prefixed spelling
-                wins, and ``'none'`` and ``'null'`` are no stop
+            kwargs: the stops of the parse, its ``layer`` and ``protocol``
 
         Returns:
             Whether :meth:`analyze` keeps the payload as
@@ -3175,18 +3547,67 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         .. versionadded:: 1.7.0
 
+        .. versionchanged:: 1.8.0
+
+           Reads ``layer`` and ``protocol`` alone, and :obj:`None` is the only no
+           stop, as for :meth:`__init__` (:issue:`2840`).
+
         """
-        layer = kwargs.get('_layer')
-        if layer is None:
-            layer = kwargs.get('layer')
-        protocol = kwargs.get('_protocol')
-        if protocol is None:
-            protocol = kwargs.get('protocol')
-        if isinstance(layer, str) and layer.lower() == 'none':
-            layer = None
-        if isinstance(protocol, str) and protocol.lower() == 'null':
-            protocol = None
-        return cls._meets_term_threshold(layer, protocol)
+        return cls._meets_term_threshold(kwargs.get('layer'), kwargs.get('protocol'))
+
+    @classmethod
+    def _analyze_stop(cls, layer: 'Optional[str]',
+                      protocol: 'Optional[str | ProtocolBase | Type[ProtocolBase]]') -> 'Optional[Type[ProtocolBase]]':
+        """Check the stops an ``analyze`` is given, and whether its payload is past one.
+
+        Arguments:
+            layer: layer to parse until
+            protocol: protocol to parse until
+
+        Returns:
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` where a stop meets this
+            class, as :meth:`_stops_next_layer` tells, which keeps the payload raw;
+            otherwise :obj:`None`.
+
+        Raises:
+            FormatError: If ``layer`` names no layer.
+            RegistryError: If ``protocol`` is no protocol name, class or instance.
+
+        .. versionadded:: 1.8.0
+
+        """
+        cls._check_stops(layer, protocol)
+        if not cls._stops_next_layer({'layer': layer, 'protocol': protocol}):
+            return None
+        from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+        return Raw
+
+    @staticmethod
+    def _check_stops(layer: 'Any', protocol: 'Any') -> 'None':
+        """Check the stops a parse is given.
+
+        Arguments:
+            layer: layer to parse until: :obj:`None`, or ``'link'``,
+                ``'internet'``, ``'transport'`` or ``'application'`` in any case
+            protocol: protocol to parse until: :obj:`None`, or a protocol name,
+                class or instance; a name is not looked up, since a stop may
+                match an ``id()`` name no registry key spells, such as
+                ``'HTTP/2'``
+
+        Raises:
+            FormatError: If ``layer`` is anything else.
+            RegistryError: If ``protocol`` is anything else.
+
+        .. versionadded:: 1.8.0
+
+        """
+        if layer is not None and not (isinstance(layer, str) and layer.lower() in _LAYERS):
+            raise FormatError(f'unknown layer: {layer!r}; expected one of {", ".join(map(repr, _LAYERS))}')
+        if protocol is not None and not (
+                isinstance(protocol, (str, ProtocolBase))
+                or (isinstance(protocol, type) and issubclass(protocol, ProtocolBase))):
+            raise RegistryError(f'unknown protocol: {protocol!r}; expected a protocol name, '
+                                'class or instance')
 
     def _read_qs_rate(self, code: 'int') -> 'int':
         """Read a Quick-Start rate code as a rate in kbps.

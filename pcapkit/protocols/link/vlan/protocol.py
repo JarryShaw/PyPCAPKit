@@ -179,7 +179,7 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
         )
         return self._decode_next_layer(vlan, schema.type, length - self.length)
 
-    def make(self,
+    def make(self, *,
              tci: 'Optional[Schema_TCI | TCIType]' = None,
              pcp: 'Enum_PriorityLevel | int' = Enum_PriorityLevel.BE,
              dei: 'bool' = False,

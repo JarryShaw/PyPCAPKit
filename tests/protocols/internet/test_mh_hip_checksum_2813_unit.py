@@ -181,11 +181,11 @@ class MHChecksumTests(ChecksumTestCase):
     def test_ipv4_gives_no_pseudo_header(self) -> None:
         # RFC 6275 defines the checksum over IPv6 header fields alone.
         self.assertEqual(self.status(ipv4(MH_BRR, proto=135), 135, self.IPv4), (self.Status.NO_PSEUDO_HEADER, []))
-        made = self.IPv4(src=V4_SRC, dst=V4_DST, protocol=self.TransType.Mobility_Header,
-                         payload=self.MH(next=59)).data
+        made = self.IPv4.from_fields(src=V4_SRC, dst=V4_DST, protocol=self.TransType.Mobility_Header,
+                                     payload=self.MH.from_fields(next=59)).data
         self.assertEqual(made[20:], with_checksum(MH_BRR, b'\x00\x00'))
-        pseudo = self.IP_Pseudo(src=V4_SRC, dst=V4_DST, protocol=135, upper_length=0)
-        self.assertEqual(self.MH(next=59, pseudo=pseudo).data[4:6], b'\x00\x00')
+        pseudo = self.IP_Pseudo.from_fields(src=V4_SRC, dst=V4_DST, protocol=135, upper_length=0)
+        self.assertEqual(self.MH.from_fields(next=59, pseudo=pseudo).data[4:6], b'\x00\x00')
 
     def test_parse_rebuild_is_exact(self) -> None:
         self.assertRebuilds([
@@ -198,8 +198,8 @@ class MHChecksumTests(ChecksumTestCase):
 
     def make(self, **kwargs: object) -> bytes:
         """The octets of an IPv6 packet carrying a Binding Refresh Request made with ``kwargs``."""
-        mh = self.MH(next=59, type=self.MHPacket.Binding_Refresh_Request, **kwargs)
-        return self.IPv6(src=V6_SRC, dst=V6_DST, next=self.TransType.Mobility_Header, payload=mh).data
+        mh = self.MH.from_fields(next=59, type=self.MHPacket.Binding_Refresh_Request, **kwargs)
+        return self.IPv6.from_fields(src=V6_SRC, dst=V6_DST, next=self.TransType.Mobility_Header, payload=mh).data
 
     def test_the_ipv6_layer_computes_it(self) -> None:
         made = self.make()
@@ -210,10 +210,10 @@ class MHChecksumTests(ChecksumTestCase):
         self.assertEqual(self.IPv6.from_data(ip.info).data, made)
 
     def test_make_takes_the_pseudo_header(self) -> None:
-        pseudo = self.IP_Pseudo(src=V6_SRC, dst=V6_DST, protocol=135, upper_length=0)
-        self.assertEqual(self.MH(next=59, pseudo=pseudo).data, MH_BRR)
+        pseudo = self.IP_Pseudo.from_fields(src=V6_SRC, dst=V6_DST, protocol=135, upper_length=0)
+        self.assertEqual(self.MH.from_fields(next=59, pseudo=pseudo).data, MH_BRR)
         # Alone, with no pseudo-header to compute it over, it is left zero.
-        self.assertEqual(self.MH(next=59).data, with_checksum(MH_BRR, b'\x00\x00'))
+        self.assertEqual(self.MH.from_fields(next=59).data, with_checksum(MH_BRR, b'\x00\x00'))
 
     def test_off_or_given_is_written_as_is(self) -> None:
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
@@ -222,7 +222,7 @@ class MHChecksumTests(ChecksumTestCase):
 
     def test_make_takes_checksum_as_hip_does(self) -> None:
         with self.assertRaisesRegex(self.UnsupportedCall, "'chksum' \\(did you mean 'checksum'\\?\\)"):
-            self.MH(next=59, chksum=b'\x00\x00')
+            self.MH.from_fields(next=59, chksum=b'\x00\x00')
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_make_agrees_with_scapy(self) -> None:
@@ -280,14 +280,14 @@ class HIPChecksumTests(ChecksumTestCase):
     def i1(self, **kwargs: object) -> object:
         """The I1 packet of RFC 7401 Appendix C, made with ``kwargs``."""
         groups = [self.Group.get(3), self.Group.get(4), self.Group.get(8)]
-        return self.HIP(next=59, packet=self.HIPPacket.I1, shit=int(ipaddress.ip_address('2001:20::1')),
-                        rhit=int(ipaddress.ip_address('2001:20::2')),
-                        parameters=[(self.Parameter.DH_GROUP_LIST, {'groups': groups})], **kwargs)
+        return self.HIP.from_fields(next=59, packet=self.HIPPacket.I1, shit=int(ipaddress.ip_address('2001:20::1')),
+                                    rhit=int(ipaddress.ip_address('2001:20::2')),
+                                    parameters=[(self.Parameter.DH_GROUP_LIST, {'groups': groups})], **kwargs)
 
     def test_the_ip_layer_computes_the_rfc_checksums(self) -> None:
         made = {
-            'IPv6': self.IPv6(src=V6_SRC, dst=V6_DST, next=self.TransType.HIP, payload=self.i1()).data,
-            'IPv4': self.IPv4(src=V4_SRC, dst=V4_DST, protocol=self.TransType.HIP, payload=self.i1()).data,
+            'IPv6': self.IPv6.from_fields(src=V6_SRC, dst=V6_DST, next=self.TransType.HIP, payload=self.i1()).data,
+            'IPv4': self.IPv4.from_fields(src=V4_SRC, dst=V4_DST, protocol=self.TransType.HIP, payload=self.i1()).data,
         }
         self.assertEqual(made['IPv6'], self.packets()['IPv6'][1])
         self.assertEqual(made['IPv4'][20:], self.packets()['IPv4'][1][20:])
@@ -302,18 +302,18 @@ class HIPChecksumTests(ChecksumTestCase):
     def test_make_takes_the_pseudo_header(self) -> None:
         for src, dst, field in ((V6_SRC, V6_DST, HIP_V6_CHECKSUM), (V4_SRC, V4_DST, HIP_V4_CHECKSUM)):
             with self.subTest(version=src.version):
-                pseudo = self.IP_Pseudo(src=src, dst=dst, protocol=139, upper_length=0)
+                pseudo = self.IP_Pseudo.from_fields(src=src, dst=dst, protocol=139, upper_length=0)
                 self.assertEqual(self.i1(pseudo=pseudo).data, with_checksum(HIP_I1, field))
         self.assertEqual(self.i1().data, HIP_I1)
 
     def test_what_follows_it_is_not_covered(self) -> None:
-        pseudo = self.IP_Pseudo(src=V6_SRC, dst=V6_DST, protocol=139, upper_length=0)
-        made = self.HIP(next=17, packet=self.HIPPacket.I1, pseudo=pseudo, payload=wire.udp(b'abc')).data
+        pseudo = self.IP_Pseudo.from_fields(src=V6_SRC, dst=V6_DST, protocol=139, upper_length=0)
+        made = self.HIP.from_fields(next=17, packet=self.HIPPacket.I1, pseudo=pseudo, payload=wire.udp(b'abc')).data
         self.assertEqual(made[4:6], expected(pseudo6(V6_SRC, 40, 139), made[:40]))
         self.assertEqual(self.status(ipv6(made, nxt=139), 139), (self.Status.VALID, []))
 
     def test_off_or_given_is_written_as_is(self) -> None:
-        pseudo = self.IP_Pseudo(src=V6_SRC, dst=V6_DST, protocol=139, upper_length=0)
+        pseudo = self.IP_Pseudo.from_fields(src=V6_SRC, dst=V6_DST, protocol=139, upper_length=0)
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
             self.assertEqual(self.i1(pseudo=pseudo).data[4:6], b'\x00\x00')
         self.assertEqual(self.i1(pseudo=pseudo, checksum=b'\xbe\xef').data[4:6], b'\xbe\xef')

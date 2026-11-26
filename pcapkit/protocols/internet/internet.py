@@ -239,7 +239,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         cls.__proto__[code] = entry
 
     @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+    def from_data(cls, data: '_PT | dict[str, Any]', /, **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
         An IPv6 extension header parsed alone always holds a next layer in its
@@ -563,4 +563,4 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         protocol, extra = self._next_layer_class(proto, file_, length, extension)
         return self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx, **extra)
+                                      protocol=self._exproto, context=self._exctx, **extra)

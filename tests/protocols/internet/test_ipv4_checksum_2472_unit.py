@@ -110,8 +110,8 @@ class IPv4ChecksumTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
 
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', compute):
-            return self.IPv4(src='192.0.2.1', dst='198.51.100.2', ttl=64, id=0x1234,
-                             protocol=TransType.UDP, **kwargs).data
+            return self.IPv4.from_fields(src='192.0.2.1', dst='198.51.100.2', ttl=64, id=0x1234,
+                                         protocol=TransType.UDP, **kwargs).data
 
     def test_make_computes_the_checksum(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber

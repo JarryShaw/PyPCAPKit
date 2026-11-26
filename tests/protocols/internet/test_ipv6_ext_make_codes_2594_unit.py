@@ -132,16 +132,16 @@ class _Row:
 
         cls = _class(self.cls)
         if self.argument == 'options':
-            return cls(next=59, options=[(value, {})]).data
+            return cls.from_fields(next=59, options=[(value, {})]).data
         if self.option is not None:
             args = {**self.extra, self.argument: value}
-            return cls(next=59, options=[(Option[self.option], args)]).data
+            return cls.from_fields(next=59, options=[(Option[self.option], args)]).data
         if self.cls == 'ESP':
-            return cls(spi=1, seq=1, next=value, encrypt=True, payload=b'abcd',
-                       __context__=_esp_context()).data
+            return cls.from_fields(spi=1, seq=1, next=value, encrypt=True, payload=b'abcd',
+                                   context=_esp_context()).data
         if self.cls == 'IPv6_Ext':
-            return cls(next=value, len=0, data=bytes(6)).data
-        return cls(**{self.argument: value}).data
+            return cls.from_fields(next=value, len=0, data=bytes(6)).data
+        return cls.from_fields(**{self.argument: value}).data
 
     def read(self, octets: 'bytes') -> 'object':
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
@@ -151,9 +151,10 @@ class _Row:
         if self.cls == 'IPv6':
             return cls(octets, len(octets)).info.next
         if self.cls == 'ESP':
-            return cls(octets, len(octets), __context__=_esp_context()).info.next
+            return cls(octets, len(octets), context=_esp_context()).info.next
         if self.cls == 'IPv6_Ext':
-            return cls(octets, len(octets), extension=True, alias=ExtensionHeader.Shim6).info.next
+            # NOTE: The dispatch code is state the enclosing layer hands on (#2840).
+            return cls._from_parent(octets, len(octets), extension=True, alias=ExtensionHeader.Shim6).info.next  # pylint: disable=protected-access
         info = cls(octets, len(octets), extension=True).info
         if self.argument == 'options':
             return list(info.options.keys())[0]

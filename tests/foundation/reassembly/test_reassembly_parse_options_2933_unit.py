@@ -208,8 +208,8 @@ class AnalyzeTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         octets = _ipv4(DNS, 17, df=True)[14:]
-        for stop in ({'layer': 'Internet'}, {'_layer': 'internet'}, {'protocol': IPv4},
-                     {'layer': 'Transport'}, {'layer': 'none', 'protocol': 'null'}, {}):
+        for stop in ({'layer': 'Internet'}, {'layer': 'internet'}, {'protocol': IPv4},
+                     {'layer': 'Transport'}, {'layer': None, 'protocol': None}, {}):
             with self.subTest(stop=stop):
                 whole = IPv4(octets, **stop).payload
                 packet = IPv4.analyze(TransType.UDP, DNS, **stop)

@@ -57,8 +57,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
                      ExtensionHeader.HIP):
             with self.subTest(code=code):
                 raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14  # (1+1)*8 == 16
-                inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
-                                alias=int(code))
+                inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True,
+                                             alias=int(code))  # pylint: disable=protected-access
                 self.assertEqual(inst.next, TransType.UDP)
                 self.assertEqual(inst.length, 16)
                 self.assertEqual(inst.protocol, code)
@@ -70,8 +70,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         raw = bytes([int(TransType.TCP), 2]) + b'\x00' * 14  # (2+2)*4 == 16
-        inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
-                        alias=int(ExtensionHeader.AH))
+        inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True,
+                                     alias=int(ExtensionHeader.AH))  # pylint: disable=protected-access
         self.assertEqual(inst.next, TransType.TCP)
         self.assertEqual(inst.length, 16)
         self.assertEqual(inst.protocol, ExtensionHeader.AH)
@@ -85,8 +85,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         raw = bytes([int(TransType.UDP), 200]) + b'\x00' * 14  # 200 must be ignored
-        inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
-                        alias=int(ExtensionHeader.IPv6_Frag))
+        inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True,
+                                     alias=int(ExtensionHeader.IPv6_Frag))  # pylint: disable=protected-access
         self.assertEqual(inst.next, TransType.UDP)
         self.assertEqual(inst.length, 8)
         self.assertEqual(inst.protocol, ExtensionHeader.IPv6_Frag)
@@ -106,8 +106,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         raw = bytes([int(TransType.UDP), 250]) + b'\x00' * 6
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
-                            alias=int(ExtensionHeader.HOPOPT))
+            inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True,
+                                         alias=int(ExtensionHeader.HOPOPT))  # pylint: disable=protected-access
 
         self.assertIsNone(inst.next)
         self.assertEqual(inst.length, len(raw))  # absorbed everything, nothing skipped past
@@ -139,8 +139,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
-        inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
-                        alias=int(ExtensionHeader.HOPOPT))
+        inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True,
+                                     alias=int(ExtensionHeader.HOPOPT))  # pylint: disable=protected-access
 
         with self.assertRaises(UnsupportedCall):
             _ = inst.payload
@@ -167,8 +167,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         ):
             with self.subTest(code=code):
                 raw = bytes([int(TransType.UDP), len_octet]) + b'\x00' * (total - 2)
-                inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
-                                alias=int(code))
+                inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True,
+                                             alias=int(code))  # pylint: disable=protected-access
                 values = IPv6_Ext._make_data(inst.info)
                 self.assertEqual(values['next'], TransType.UDP)
                 self.assertEqual(values['len'], len_octet)
@@ -181,7 +181,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.mh.protocol import MH, FastBindingAcknowledgmentStatus
 
-        mh_raw = bytearray(bytes(MH(
+        mh_raw = bytearray(bytes(MH.from_fields(
             next=TransType.UDP, checksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
             data={'status': FastBindingAcknowledgmentStatus.Insufficient_resources,
                   'key_mngt': True, 'seq': 0x1234, 'lifetime': 40, 'options': []})))
@@ -398,8 +398,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
-        inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
-                        alias=int(ExtensionHeader.HOPOPT))
+        inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True,
+                                     alias=int(ExtensionHeader.HOPOPT))  # pylint: disable=protected-access
         self.assertEqual(inst.alias, 'IPv6-Ext')
         # this is exactly the computation ``IPv6._decode_next_layer`` performs
         # to key its packet dict -- ``str.lstrip`` strips a character *set*,
@@ -489,7 +489,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
                 self.assertFalse(ext == 'IPv6_Ext')
 
         generic = bytes([int(TransType.UDP), 0]) + bytes(6)
-        fallback = IPv6_Ext(io.BytesIO(generic), len(generic), extension=True, alias=0)
+        fallback = IPv6_Ext._from_parent(io.BytesIO(generic), len(generic), extension=True, alias=0)
         self.assertFalse(fallback == 'IPv6_Ext')
         self.assertTrue(fallback == IPv6_Ext)
 
@@ -544,8 +544,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
         with self.assertRaises(ProtocolError):
-            IPv6_Ext(io.BytesIO(raw), len(raw), version=4, extension=True,
-                     alias=int(ExtensionHeader.HOPOPT))
+            IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), version=4, extension=True,
+                                  alias=int(ExtensionHeader.HOPOPT))  # pylint: disable=protected-access
 
     def test_version_gate_message_is_in_the_house_form(self) -> None:
         """GitHub issue #2302: the gate said ``only valid for IPv6, got
@@ -563,13 +563,13 @@ class IPv6ExtUnitTests(unittest.TestCase):
         expected = 'IPv6_Ext: invalid version: must be 6, not 4'
 
         with self.assertRaises(ProtocolError) as context:
-            IPv6_Ext(b'\x06\x00\x00\x00\x00\x00\x00\x00', version=4)
+            IPv6_Ext._from_parent(b'\x06\x00\x00\x00\x00\x00\x00\x00', None, version=4)
         self.assertEqual(str(context.exception), expected)
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
         with self.assertRaises(ProtocolError) as context:
-            IPv6_Ext(io.BytesIO(raw), len(raw), version=4, extension=True,
-                     alias=int(ExtensionHeader.HOPOPT))
+            IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), version=4, extension=True,
+                                  alias=int(ExtensionHeader.HOPOPT))  # pylint: disable=protected-access
         self.assertEqual(str(context.exception), expected)
 
     def test_shim6_registration_does_not_leak_into_ipv4_parsing(self) -> None:
@@ -917,7 +917,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         wire = struct.pack('>II', 0x66, 1) + b'\x00' * 16
-        inst = ESP(io.BytesIO(wire), len(wire), version=6, extension=True)
+        inst = ESP._from_parent(io.BytesIO(wire), len(wire), version=6, extension=True)
         for attr in ('payload', 'protocol', 'protochain'):
             with self.subTest(attr=attr, extension=True):
                 with self.assertRaises(UnsupportedCall):
@@ -925,7 +925,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
 
         # ... and with ``extension=False`` the same three stay open, so the
         # guards read ``_extf`` rather than refusing unconditionally.
-        plain = ESP(io.BytesIO(wire), len(wire), version=6)
+        plain = ESP._from_parent(io.BytesIO(wire), len(wire), version=6)  # pylint: disable=protected-access
         self.assertEqual(str(plain.protochain).split(':')[0], 'ESP')
         self.assertEqual(plain.alias, 'ESP')
         self.assertIs(ESP.__index__(), TransType.ESP)
@@ -960,7 +960,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         ]
         for klass, wire in cases:
             with self.subTest(klass=klass.__qualname__):
-                inst = klass(io.BytesIO(wire), len(wire), version=6)
+                inst = klass._from_parent(io.BytesIO(wire), len(wire), version=6)  # pylint: disable=protected-access
                 protocol = inst.protocol
                 # the ``ProtocolBase`` meaning -- a chain entry name, i.e. a
                 # ``str`` -- never the fallback's ``ExtensionHeader`` identity.
@@ -978,7 +978,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         from pcapkit.protocols.transport.udp.protocol import UDP
 
         raw = bytes([int(TransType.UDP), 0]) + b'\x00' * 6 + _udp_bytes(b'hi')
-        inst = IPv6_Ext(io.BytesIO(raw), len(raw), alias=int(ExtensionHeader.HOPOPT))
+        inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), alias=int(ExtensionHeader.HOPOPT))
 
         self.assertIsInstance(inst.payload, UDP)
         self.assertEqual(str(inst.protochain), 'IPv6-Ext:UDP:Raw')
@@ -994,12 +994,12 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
-        built = IPv6_Ext(next=TransType.TCP, len=0, payload=b'\x00' * 6, version=6)
+        built = IPv6_Ext.from_fields(next=TransType.TCP, len=0, payload=b'\x00' * 6, version=6)
         self.assertEqual(bytes(built)[:2], bytes([int(TransType.TCP), 0]))
         self.assertEqual(len(bytes(built)), 8)
 
         # the defaults, when the caller supplies nothing at all
-        default = IPv6_Ext(version=6)
+        default = IPv6_Ext.from_fields(version=6)
         self.assertEqual(bytes(default)[:2], bytes([int(TransType.UDP), 0]))
 
     def test_an_absent_or_unregistered_alias_uses_the_generic_rule(self) -> None:
@@ -1015,7 +1015,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14  # (1+1)*8 == 16
         for label, kwargs in (('absent', {}), ('unregistered', {'alias': 200})):
             with self.subTest(alias=label):
-                inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True, **kwargs)
+                inst = IPv6_Ext._from_parent(io.BytesIO(raw), len(raw), extension=True, **kwargs)
                 self.assertIsNone(inst.protocol)
                 self.assertEqual(inst.length, 16)
                 self.assertEqual(inst.next, TransType.UDP)
@@ -1037,8 +1037,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertTrue({'next', 'len', 'data'} <= _declared_keywords(IPv6_Ext))
-        self.assertEqual(bytes(IPv6_Ext(next=TransType.TCP, len=0, data=b'\x00' * 6,
-                                        version=6))[:2], bytes([int(TransType.TCP), 0]))
+        self.assertEqual(bytes(IPv6_Ext.from_fields(next=TransType.TCP, len=0, data=b'\x00' * 6,
+                                                    version=6))[:2], bytes([int(TransType.TCP), 0]))
 
         for klass in self._family():
             own = inspect.signature(klass.make).parameters
@@ -1048,9 +1048,9 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                         self.assertIn(name, _declared_keywords(klass))
                         continue
                     with self.assertRaisesRegex(UnsupportedCall, f"unexpected keyword\\(s\\): '{name}'"):
-                        klass(**{name: value})
+                        klass.from_fields(**{name: value})
             with self.subTest(klass=klass.__name__, keyword='next'):
-                self.assertIsInstance(bytes(klass(next=TransType.TCP)), bytes)
+                self.assertIsInstance(bytes(klass.from_fields(next=TransType.TCP)), bytes)
 
     def test_length_hint_is_the_eight_octet_rfc_6564_minimum(self) -> None:
         """Eight: :rfc:`6564#section-4`'s Hdr Ext Len excludes the first 8
@@ -1074,13 +1074,13 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
 
         hopopt_wire = bytes([int(TransType.UDP), 0]) + b'\x01\x04\x00\x00\x00\x00'
         self.assertEqual(
-            HOPOPT(io.BytesIO(hopopt_wire), len(hopopt_wire), version=6,
-                   extension=True).next, TransType.UDP)
+            HOPOPT._from_parent(io.BytesIO(hopopt_wire), len(hopopt_wire), version=6,
+                                extension=True).next, TransType.UDP)  # pylint: disable=protected-access
 
         frag_wire = bytes([int(TransType.UDP), 0]) + struct.pack('>HI', 0, 0)
         self.assertEqual(
-            IPv6_Frag(io.BytesIO(frag_wire), len(frag_wire), version=6,
-                      extension=True).next, TransType.UDP)
+            IPv6_Frag._from_parent(io.BytesIO(frag_wire), len(frag_wire), version=6,
+                                   extension=True).next, TransType.UDP)  # pylint: disable=protected-access
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

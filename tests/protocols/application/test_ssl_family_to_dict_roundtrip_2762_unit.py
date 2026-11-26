@@ -168,7 +168,7 @@ class TestToDictRebuild(unittest.TestCase):
     def test_the_parse_matches_the_specification(self) -> None:
         for label, parser, octets, chain, fields, cids in CASES:
             with self.subTest(case=label):
-                kwargs = {'__context__': self._context(cids)} if cids else {}
+                kwargs = {'context': self._context(cids)} if cids else {}
                 parsed = self._parser(parser)(octets, len(octets), **kwargs)
                 self.assertEqual(self._chain(parsed, chain.count(':') + 1), chain)
                 for name, value in fields.items():
@@ -177,7 +177,7 @@ class TestToDictRebuild(unittest.TestCase):
     def test_the_record_rebuilds_from_its_info_and_its_dict(self) -> None:
         for label, parser, octets, chain, _, cids in CASES:
             cls = self._parser(parser)
-            kwargs = {'__context__': self._context(cids)} if cids else {}
+            kwargs = {'context': self._context(cids)} if cids else {}
             info = cls(octets, len(octets), **kwargs).info
             for source, data in (('info', info), ('to_dict()', info.to_dict())):
                 with self.subTest(case=label, source=source):
@@ -189,7 +189,7 @@ class TestToDictRebuild(unittest.TestCase):
         for label, parser, octets, _, _, cids in CASES:
             with self.subTest(case=label):
                 cls = self._parser(parser)
-                kwargs = {'__context__': self._context(cids)} if cids else {}
+                kwargs = {'context': self._context(cids)} if cids else {}
                 info = cls(octets, len(octets), **kwargs).info
                 self.assertIs(type(cls.from_data(info.to_dict())), type(cls.from_data(info)))
 
@@ -201,13 +201,13 @@ class TestToDictRebuild(unittest.TestCase):
             if parser not in ('TLS', 'DTLS'):
                 continue
             cls, wire = (UDP, _udp(octets)) if parser == 'DTLS' else (TCP, _tcp(octets))
-            kwargs = {'__context__': self._context(cids)} if cids else {}
+            kwargs = {'context': self._context(cids)} if cids else {}
             transport = cls(wire, len(wire), **kwargs)
             self.assertEqual(self._chain(transport.payload, chain.count(':') + 1), chain, label)
             for source, data in (('info', transport.info), ('to_dict()', transport.info.to_dict())):
                 with self.subTest(case=label, source=source):
                     # NOTE: the rebuilt layer parses its payload again, which a connection ID needs a context for.
-                    rebuilt = cls.from_data(data, **kwargs)
+                    rebuilt = cls.from_data(data, context=kwargs.get('context'))
                     self.assertEqual(bytes(rebuilt).hex(), wire.hex())
                     self.assertEqual(self._chain(rebuilt.payload, chain.count(':') + 1), chain)
 

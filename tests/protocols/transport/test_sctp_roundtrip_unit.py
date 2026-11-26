@@ -84,7 +84,7 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.protocols.transport.sctp.protocol import SCTP
 
-        data = SCTP(srcport=1, dstport=2, chunks=[(Chunk.Initiation, {})]).data
+        data = SCTP.from_fields(srcport=1, dstport=2, chunks=[(Chunk.Initiation, {})]).data
         self.assertEqual(data[13], 0)
 
     def test_chunk_length_excludes_final_padding(self) -> None:
@@ -112,7 +112,7 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
         from pcapkit.const.sctp.parameter import Parameter
         from pcapkit.protocols.transport.sctp.protocol import SCTP
 
-        data = SCTP(srcport=1, dstport=2, chunks=[
+        data = SCTP.from_fields(srcport=1, dstport=2, chunks=[
             (Chunk.Heartbeat_Request, {'parameters': [(Parameter.Heartbeat_Info, {'info': b'abc'})]}),
         ]).data
         self.assertEqual(data[12:].hex(), '0400000b' + '00010007' + '61626300')

@@ -303,10 +303,10 @@ class Extractor(Generic[_P]):
         #: has no adapter for at startup.
         _trace: 'TraceFlowManager'
 
-        #: Extract til protocol.
-        _exptl: 'Protocols'
-        #: Extract til layer.
-        _exlyr: 'Layers'
+        #: Extract til protocol; :obj:`None` sets no stop.
+        _exptl: 'Optional[Protocols]'
+        #: Extract til layer; :obj:`None` sets no stop.
+        _exlyr: 'Optional[Layers]'
         #: Caller supplied parsing context, cf. :mod:`pcapkit.corekit.context`.
         _exctx: 'ContextRegistry'
         #: Extraction engine name.
@@ -1169,7 +1169,8 @@ class Extractor(Generic[_P]):
                 the channel is honoured by the :term:`default engine`, whose PCAP
                 and PCAP-NG readers parse with :mod:`pcapkit`'s own protocol
                 implementations, in its frames and in the payloads IP and TCP
-                reassembly rebuild from them; the third party engines ignore it.
+                reassembly, and TCP flow tracing's ``analyze``, rebuild from them;
+                the third party engines ignore it.
             reassembly: reassembly settings, or the names of the reassemblers to
                 enable with their defaults, each as registered in
                 :attr:`__reassembly__`; :data:`None`, or no names, reassembles
@@ -1322,8 +1323,8 @@ class Extractor(Generic[_P]):
         self._frnum = 0   # frame number
         self._frame = []  # frame record
 
-        self._exptl = protocol or 'null'                      # extract til protocol
-        self._exlyr = cast('Layers', layer_name)              # extract til layer
+        self._exptl = protocol or None                        # extract til protocol
+        self._exlyr = None if layer_name == 'none' else cast('Layers', layer_name)  # extract til layer
         self._exctx = ContextRegistry.make(context)           # caller supplied context
 
         reasm_objs = {}  # type: dict[str, ReassemblyBase]

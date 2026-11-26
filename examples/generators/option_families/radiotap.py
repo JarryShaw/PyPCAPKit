@@ -85,9 +85,9 @@ def _radiotap_field_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
     if code < Enum_FieldType.TLV_fields_in_radiotap:
-        return Radiotap(present=(1 << code,), fields=[(code, dict(kwargs))])
+        return Radiotap.from_fields(present=(1 << code,), fields=[(code, dict(kwargs))])
     tlv = Enum_FieldType.TLV_fields_in_radiotap
-    return Radiotap(present=(1 << tlv,), fields=[(tlv, {'tlvs': [{'type': code, 'data': dict(kwargs)}]})])
+    return Radiotap.from_fields(present=(1 << tlv,), fields=[(tlv, {'tlvs': [{'type': code, 'data': dict(kwargs)}]})])
 
 
 def _radiotap_parse(octets: 'bytes') -> 'Any':
@@ -103,7 +103,7 @@ def _radiotap_field_rebuild(collection: 'Any') -> 'Any':
     from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
     present, decoded = collection
-    return Radiotap(present=present, fields=decoded)
+    return Radiotap.from_fields(present=present, fields=decoded)
 
 
 #: The families this module adds.

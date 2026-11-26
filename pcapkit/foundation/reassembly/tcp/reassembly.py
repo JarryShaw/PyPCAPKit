@@ -827,10 +827,10 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             with -- measured, for a registered port and an unassigned one alike.
             :meth:`Transport.analyze
             <pcapkit.protocols.transport.transport.Transport.analyze>` keeps the
-            base in its own signature, since it is the one method
-            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` and
-            :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` share, and each of
-            them would name a different registry.
+            base in its own signature, since the port-keyed transports share it
+            and each would name a different registry;
+            :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` overrides it
+            to look up by PPID.
 
         Important:
             Every port a 16-bit header field can hold resolves to a member, so

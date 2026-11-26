@@ -59,8 +59,8 @@ class TestPCAPNGShortSHBIDB(unittest.TestCase):
 
         if octets[:4] == b'\x0a\x0d\x0d\x0a':
             return {'num': 0, 'sct': 1, 'ctx': None}
-        section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
-                         block={'byteorder': 'little' if endian == '<' else 'big'})
+        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
+                                     block={'byteorder': 'little' if endian == '<' else 'big'})
         return {'num': 1, 'sct': 1, 'ctx': Context(section.info)}
 
     def _parse(self, octets: 'bytes', kwargs: 'dict[str, Any]') -> 'tuple[Any, list[str]]':

@@ -45,10 +45,10 @@ class PCAPNGTestCase(unittest.TestCase):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
+        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
-        interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                           block={'linktype': LinkType.ETHERNET, 'snaplen': snaplen})
+        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                       block={'linktype': LinkType.ETHERNET, 'snaplen': snaplen})
         context.interfaces.append(interface.info)
         return context
 
@@ -116,8 +116,8 @@ class TestPCAPNGLengths(PCAPNGTestCase):
                                 (BlockType.Packet_Block, 40),
                                 (BlockType.Simple_Packet_Block, 24)):
                 with self.subTest(type=type_):
-                    block = PCAPNG(num=2, sct=1, ctx=context, type=type_,
-                                   block={'packet_data': b'A' * 16, 'timestamp': 0})
+                    block = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=type_,
+                                               block={'packet_data': b'A' * 16, 'timestamp': 0})
                     self.assertEqual(len(block.data), size)
                     self.assertEqual(block.info.original_len, 16)
                     self.assertEqual(block.info.captured_len, 8)
@@ -128,8 +128,8 @@ class TestPCAPNGLengths(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        block = PCAPNG(num=2, sct=1, ctx=self._context(snaplen=0), type=BlockType.Enhanced_Packet_Block,
-                       block={'packet_data': b'A' * 16, 'timestamp': 0})
+        block = PCAPNG.from_fields(num=2, sct=1, ctx=self._context(snaplen=0), type=BlockType.Enhanced_Packet_Block,
+                                   block={'packet_data': b'A' * 16, 'timestamp': 0})
         self.assertEqual(block.info.captured_len, 16)
 
     def test_pcap_frame_clips_to_snaplen(self) -> None:
@@ -137,7 +137,7 @@ class TestPCAPNGLengths(PCAPNGTestCase):
         from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.protocols.misc.pcap.header.protocol import Header
 
-        frame = Frame(num=1, header=Header(snaplen=8).info, packet=b'A' * 16)
+        frame = Frame.from_fields(num=1, header=Header.from_fields(snaplen=8).info, packet=b'A' * 16)
         self.assertEqual(len(frame.data), 24)
         self.assertEqual(frame.info.cap_len, 8)
         self.assertEqual(frame.info.len, 16)
@@ -186,8 +186,8 @@ class TestPCAPNGModelling(PCAPNGTestCase):
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = Context(PCAPNG(SHB_BE, len(SHB_BE), num=0, sct=1, ctx=None).info)  # type: Any
-        interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
-                           block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        interface = PCAPNG.from_fields(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                                       block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
         context.interfaces.append(interface.info)
         return context
 
@@ -198,8 +198,8 @@ class TestPCAPNGModelling(PCAPNGTestCase):
 
         self.assertEqual(self._parse(SHB_BE).info.byteorder, 'big')
         self.assertRebuilds(SHB_BE)
-        built = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
-                       block={'byteorder': 'big'})
+        built = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
+                                   block={'byteorder': 'big'})
         self.assertEqual(built.data, SHB_BE)
 
     def test_flags_are_numbered_from_the_least_significant_bit(self) -> None:
@@ -212,9 +212,9 @@ class TestPCAPNGModelling(PCAPNGTestCase):
         for kwargs, word in (({'direction': PacketDirection.INBOUND}, '01000000'),
                              ({'fcs_len': 4}, '80000000')):
             with self.subTest(**kwargs):
-                block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
-                               block={'packet_data': b'abcd', 'timestamp': 0,
-                                      'options': [(OptionType.epb_flags, kwargs)]})
+                block = PCAPNG.from_fields(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
+                                           block={'packet_data': b'abcd', 'timestamp': 0,
+                                                  'options': [(OptionType.epb_flags, kwargs)]})
                 self.assertIn(H('0200 0400' + word), block.data)
 
         flags = self._parse(_epb_with_options(H('0200 0400 01000000'))).info.options[OptionType.epb_flags]

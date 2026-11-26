@@ -340,7 +340,8 @@ add a build per version and no isolation. `native.sh` builds the virtualenvs the
 The workflow measures the engines' interpreters from `.github/python-versions.toml`, all
 in one job, since the per-version table's absolute times compare only within one
 machine, and posts the ratio table to the `benchmark: weekly engine benchmark report`
-thread in the `CI reports` Discussions category.
+thread in the `CI reports` Discussions category. The post and the job summary show each
+table as Markdown, with its reST folded beneath for pasting into the docs.
 
 What a native run does not pin, against the containers:
 
@@ -381,6 +382,7 @@ untracked):
 | --- | --- |
 | `table-versions.rst` | absolute ms/packet per engine and Python version -- the docs' **Test Results** section, verbatim |
 | `table.rst` | `Test Environment` plus the machine-independent ratio table |
+| `table-versions.md`, `table.md` | `native.sh` only: both tables as GitHub Flavored Markdown, which the workflow's job summary and post render, where reST shows as source (#3054) |
 | `<version>-<provider>.json` | the raw per-environment measurements, every pass, e.g. `3.11-pypcap.json` |
 | `<version>-<provider>.txt` | `pip freeze` of that virtualenv as built |
 | `missing/<version>.txt` | why a version produced no measurements, when one did not |

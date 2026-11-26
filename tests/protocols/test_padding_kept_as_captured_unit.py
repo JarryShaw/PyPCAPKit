@@ -121,14 +121,14 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
                               (b'\xaa\xbb\xcc\xdd\xee', '0202000000000003aabbcc7878'),
                               (None, '02020000000000030000007878')):
             with self.subTest(l2tpv2=padding):
-                self.assertEqual(L2TPv2(offset=3, padding=padding, payload=b'xx').data.hex(), wire)
+                self.assertEqual(L2TPv2.from_fields(offset=3, padding=padding, payload=b'xx').data.hex(), wire)
 
         for padding, wire in ((b'\xaa', '0000050008000000010378aa0000'),
                               (b'\xaa\xbb\xcc\xdd', '0000050008000000010378aabbcc'),
                               (b'', '0000050008000000010378000000')):
             with self.subTest(http2=padding):
                 frame = {'pad_len': 3, 'data': b'x', 'padding': padding}
-                self.assertEqual(HTTPv2(type=Frame.DATA, sid=1, frame=frame).data.hex(), wire)
+                self.assertEqual(HTTPv2.from_fields(type=Frame.DATA, sid=1, frame=frame).data.hex(), wire)
 
     def test_makers_tolerate_a_data_model_without_the_new_fields(self) -> None:
         """A stand-in lacking the padding attributes rebuilds with zero padding."""
@@ -188,8 +188,8 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
         self.assertEqual(bytes(proto._make_opt_pad(Option.PadN, length=4)).hex(), '010400000000')
         self.assertEqual(bytes(proto._make_opt_pad(Option.PadN, length=4, pad=b'\xaa' * 4)).hex(),
                          '0104aaaaaaaa')
-        self.assertEqual(IPv6_Frag(next=59, id=1, extension=True).data.hex(), '3b00000000000001')
-        self.assertEqual(IPv6_Frag(next=59, id=1, reserved_octet=b'\xaa', extension=True).data.hex(),
+        self.assertEqual(IPv6_Frag.from_fields(next=59, id=1, extension=True).data.hex(), '3b00000000000001')
+        self.assertEqual(IPv6_Frag.from_fields(next=59, id=1, reserved_octet=b'\xaa', extension=True).data.hex(),
                          '3baa000000000001')
 
     def test_make_takes_the_hip_reserved_octets(self) -> None:
@@ -199,9 +199,9 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
         base = {'next': 59, 'packet': 1, 'version': 2, 'checksum': b'\x00\x00',
                 'controls_anonymous': False, 'shit': 0, 'rhit': 0, 'payload': b''}
         params = [(Parameter.NOTIFICATION, {})]
-        self.assertEqual(HIP(parameters=params, extension=True, **base).data[44:46], b'\x00\x00')
+        self.assertEqual(HIP.from_fields(parameters=params, extension=True, **base).data[44:46], b'\x00\x00')
         params = [(Parameter.NOTIFICATION, {'reserved': b'\xff\xff'})]
-        self.assertEqual(HIP(parameters=params, extension=True, **base).data[44:46], b'\xff\xff')
+        self.assertEqual(HIP.from_fields(parameters=params, extension=True, **base).data[44:46], b'\xff\xff')
 
 
 if __name__ == '__main__':

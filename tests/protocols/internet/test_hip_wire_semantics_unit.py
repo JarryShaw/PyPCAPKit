@@ -70,8 +70,8 @@ class HIPWireSemanticsTests(unittest.TestCase):
         """Build a whole HIP packet carrying the one parameter ``code``."""
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        return HIP(parameters=[(code, value)], extension=True,
-                   version=version, **HIP_BASE).data  # type: ignore[arg-type]
+        return HIP.from_fields(parameters=[(code, value)], extension=True,
+                               version=version, **HIP_BASE).data  # type: ignore[arg-type]
 
     def _params(self, code: 'object', value: 'object', version: 'int' = 2) -> 'bytes':
         """Just the parameter octets of such a packet."""
@@ -81,8 +81,8 @@ class HIPWireSemanticsTests(unittest.TestCase):
         """Build a whole HIP packet whose parameter octets are ``raw``."""
         from pcapkit.protocols.internet.hip.protocol import HIP
 
-        return HIP(parameters=[raw], extension=True,
-                   version=version, **HIP_BASE).data
+        return HIP.from_fields(parameters=[raw], extension=True,
+                               version=version, **HIP_BASE).data
 
     def _parse(self, code: 'object', raw: 'bytes', version: 'int' = 2) -> 'object':
         """Parse the parameter octets ``raw`` and return the parsed data."""

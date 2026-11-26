@@ -392,14 +392,14 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         if extension:
             # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
-            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            self._next = NoPayload.from_fields()  # pylint: disable=attribute-defined-outside-init
             return hopopt
         return self._decode_next_layer(hopopt, schema.next, length - hopopt.length)
 
-    def make(self,
+    def make(self, *,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              options: 'Optional[list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
-             payload: 'bytes | ProtocolBase | Schema' = b'', *,
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              len: 'Optional[int]' = None,  # pylint: disable=redefined-builtin
              **kwargs: 'Any') -> 'Schema_HOPOPT':
         """Make (construct) packet data.

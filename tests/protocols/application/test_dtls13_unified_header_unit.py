@@ -262,7 +262,7 @@ class UnifiedHeaderMakeTests(unittest.TestCase):
                     expected += len(_FRAGMENT).to_bytes(2, 'big')
                 expected += _FRAGMENT
 
-                made = bytes(DTLS(ciphertext=True, content=_FRAGMENT, **options))
+                made = bytes(DTLS.from_fields(ciphertext=True, content=_FRAGMENT, **options))
                 self.assertEqual(made, expected)
 
     def test_make_then_parse_round_trips(self) -> None:
@@ -271,9 +271,9 @@ class UnifiedHeaderMakeTests(unittest.TestCase):
         for sequence_long in (False, True):
             for length_present in (False, True):
                 with self.subTest(sequence_long=sequence_long, length_present=length_present):
-                    made = DTLS(ciphertext=True, epoch=2, sequence_number=0x5A,
-                                sequence_long=sequence_long, length_present=length_present,
-                                content=_FRAGMENT)
+                    made = DTLS.from_fields(ciphertext=True, epoch=2, sequence_number=0x5A,
+                                            sequence_long=sequence_long, length_present=length_present,
+                                            content=_FRAGMENT)
                     parsed = DTLS(bytes(made), len(bytes(made)))
                     self.assertEqual(parsed.alias, 'DTLS 1.3')
                     self.assertEqual(parsed.info.epoch, 2)
@@ -287,7 +287,7 @@ class UnifiedHeaderMakeTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import FieldValueError
 
         with self.assertRaises(FieldValueError):
-            DTLS(ciphertext=True, epoch=4, content=_FRAGMENT)
+            DTLS.from_fields(ciphertext=True, epoch=4, content=_FRAGMENT)
 
 
 if __name__ == '__main__':

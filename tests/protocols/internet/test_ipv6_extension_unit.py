@@ -1812,8 +1812,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         first = ip_address('2001:db8::1')
         second = ip_address('2001:db8::2')
 
-        built = IPv6_Route(type=Routing.RPL_Source_Route_Header,
-                           data={'ip': [first, second]}, seg_left=2, payload=b'')
+        built = IPv6_Route.from_fields(type=Routing.RPL_Source_Route_Header,
+                                       data={'ip': [first, second]}, seg_left=2, payload=b'')
         self.assertEqual([str(item) for item in built.info.ip],
                          ['2001:db8::1', '2001:db8::2'])
         self.assertEqual(built.info.length, 40)
@@ -1822,7 +1822,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # byte-for-byte -- the cycle the round-trip table drives.
         raw = built.data
         parsed = IPv6_Route(io.BytesIO(raw), len(raw), extension=True).info
-        again = bytes(IPv6_Route(type=parsed.type, data=parsed, next=parsed.next,
+        again = bytes(IPv6_Route.from_fields(type=parsed.type, data=parsed, next=parsed.next,
                                 seg_left=parsed.seg_left, payload=b''))
         self.assertEqual(raw, again)
 
@@ -2314,7 +2314,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         for name, options, size, expected in cases:
             with self.subTest(case=name):
-                built = protocol_cls(next=TransType.IPv6_NoNxt, options=list(options))
+                built = protocol_cls.from_fields(next=TransType.IPv6_NoNxt, options=list(options))
                 raw = bytes(built)
 
                 self.assertEqual(len(raw), size)

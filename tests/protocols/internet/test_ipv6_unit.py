@@ -163,6 +163,7 @@ class IPv6UnitTests(unittest.TestCase):
         })
         fragment = object.__new__(IPv6_Frag)
         fragment._info = DummyDict(next=TransType.UDP, offset=0)
+        fragment._sigterm = False  # no stop met at the header (#3067)
 
         with mock.patch.object(proto, '_import_next_layer', return_value=fragment) as import_next:
             with mock.patch.object(Internet, '_decode_next_layer', return_value='decoded') as decode:
@@ -271,6 +272,7 @@ class IPv6UnitTests(unittest.TestCase):
         proto.__header__ = SimpleNamespace(get_payload=lambda: b'hopopt-rest')
         hopopt = object.__new__(HOPOPT)
         hopopt._info = DummyDict(next=TransType.UDP, length=2)
+        hopopt._sigterm = False  # no stop met at the header (#3067)
         ipv6 = Data_IPv6.from_dict({
             'version': 6,
             'class': 0,

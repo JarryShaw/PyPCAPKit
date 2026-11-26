@@ -228,7 +228,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         self._verify_checksum(igmp, body.checksum, length)
         return self._decode_next_layer(igmp, None, len(trailing))
 
-    def make(self,
+    def make(self, *,
              type: 'Enum_Type | int' = Enum_Type.IGMP_Membership_Query,  # pylint: disable=redefined-builtin
              max_resp_code: 'Optional[int]' = None,
              max_resp_time: 'int' = 0,

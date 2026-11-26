@@ -62,51 +62,51 @@ class DCCP(AppType):
     #: - [UDP] Discard
     #: - [SCTP] Discard [:rfc:`9260`]
     #: - [DCCP] Discard [:rfc:`4340`]
-    discard = 9, 'discard', TransportProtocol.dccp
+    discard = 9
 
     #: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    exp1 = 1021, 'exp1', TransportProtocol.dccp
+    exp1 = 1021
 
     #: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    exp2 = 1022, 'exp2', TransportProtocol.dccp
+    exp2 = 1022
 
     #: - [TCP] Licklider Transmission Protocol [:rfc:`5326`]
     #: - [UDP] Licklider Transmission Protocol [:rfc:`5326`][:rfc:`7122`]
     #: - [DCCP] Licklider Transmission Protocol [:rfc:`7122`]
-    ltp_deepspace = 1113, 'ltp-deepspace', TransportProtocol.dccp
+    ltp_deepspace = 1113, 'ltp-deepspace'
 
     #: - [TCP] AWS protocol for cloud remoting solution
     #: - [UDP] AWS protocol for cloud remoting solution
     #: - [SCTP] AWS protocol for cloud remoting solution
     #: - [DCCP] AWS protocol for cloud remoting solution
-    aws_wsp = 4195, 'aws-wsp', TransportProtocol.dccp
+    aws_wsp = 4195, 'aws-wsp'
 
     #: - [TCP] DTN Bundle TCP CL Protocol [:rfc:`9174`]
     #: - [UDP] DTN Bundle UDP CL Protocol [:rfc:`7122`]
     #: - [DCCP] DTN Bundle DCCP CL Protocol [:rfc:`7122`]
-    dtn_bundle = 4556, 'dtn-bundle', TransportProtocol.dccp
+    dtn_bundle = 4556, 'dtn-bundle'
 
     #: - [TCP] RTP media data [:rfc:`3551`][:rfc:`4571`]
     #: - [UDP] RTP media data [:rfc:`3551`]
     #: - [DCCP] RTP media data [:rfc:`3551`][:rfc:`5762`]
-    avt_profile_1 = 5004, 'avt-profile-1', TransportProtocol.dccp
+    avt_profile_1 = 5004, 'avt-profile-1'
 
     #: - [TCP] RTP control protocol [:rfc:`3551`][:rfc:`4571`]
     #: - [UDP] RTP control protocol [:rfc:`3551`]
     #: - [DCCP] RTP control protocol [:rfc:`3551`][:rfc:`5762`]
-    avt_profile_2 = 5005, 'avt-profile-2', TransportProtocol.dccp
+    avt_profile_2 = 5005, 'avt-profile-2'
 
     #: - [TCP] Syslog over TLS [:rfc:`5425`]
     #: - [UDP] syslog over DTLS [:rfc:`6012`]
     #: - [DCCP] syslog over DTLS [:rfc:`6012`]
-    syslog_tls = 6514, 'syslog-tls', TransportProtocol.dccp
+    syslog_tls = 6514, 'syslog-tls'
 
     #: - [SCTP] Reserved
     #: - [DCCP] Reserved
-    reserved_8282 = 8282, 'reserved', TransportProtocol.dccp
+    reserved_8282 = 8282, 'reserved'

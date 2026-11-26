@@ -1947,9 +1947,10 @@ marker. How often depends on the script's ``--mode``:
 report``, and ``benchmark.yml`` to ``benchmark: weekly engine benchmark report``:
 the ratio table :file:`examples/benchmark/native.sh` writes, with its
 absolute-time footnote and the runner it ran on, reporting ``warning`` where a
-Python version was not measured in full (:issue:`2125`). ``cron-vendor.yml``
-posts to ``cron-vendor: vendor constant update report``, as ``push`` on its
-``workflow_run`` and ``scheduled`` otherwise, and
+Python version was not measured in full (:issue:`2125`). The table is Markdown,
+with its reStructuredText folded beneath it for the docs (:issue:`3054`).
+``cron-vendor.yml`` posts to ``cron-vendor: vendor constant update report``, as
+``push`` on its ``workflow_run`` and ``scheduled`` otherwise, and
 reports ``warning`` where ``vendor-update`` passed over a failed target or test
 gate. A failed or cancelled ``head`` skips ``vendor-update``, so its
 ``discussion`` job runs on ``always()`` and then posts a line of its own with
@@ -2056,10 +2057,15 @@ suite's order. GitHub serves no job summary through its API, so every step that
 writes one copies it to the job's ``job-summary.md``: the scripts through
 :file:`util/_actions.py`, where the step sets ``JOB_SUMMARY_COPY``, and the shell
 with ``tee``. No step that runs the tests sets it, since a test writing the
-summary through the helper would write into the copy. The job then ends in ``Name
-the job summary``, which writes the job's name beside it, and ``Upload the job
-summary``, which uploads both as the ``job-summary-<job>-<index>`` artifact (7
-days) for the report to download; both run on ``always()`` and are
+summary through the helper would write into the copy. GitHub renders each step's
+summary on its own, where the copy joins them, so a step that writes a table's
+rows writes its header too, as ``engine-tests``' ``Run the supported cells`` and
+``Run the KTLO cells (non-blocking)`` each do; and a ``|`` in a name a cell holds
+is escaped, as :file:`util/ci_timing.py` does (:issue:`3054`). The job then
+ends in ``Name the job summary``, which writes the job's name beside it, and
+``Upload the job summary``, which uploads both as the
+``job-summary-<job>-<index>`` artifact (7 days) for the report to download;
+both run on ``always()`` and are
 ``continue-on-error``. The summaries share the room a comment leaves, smallest first,
 and one cut to fit links the run. ``Run unit tests`` in ``experimental.yml`` sets
 no ``JOB_SUMMARY_COPY`` either: the line :file:`util/superseded.py` writes there

@@ -58,6 +58,7 @@ is kept as ``loopback.byteorder``.
    .. rubric:: Data Models
 
    .. automethod:: __index__
+   .. automethod:: __init__
 
    .. rubric:: Utilities
 

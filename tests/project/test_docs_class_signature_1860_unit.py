@@ -14,7 +14,8 @@ their class docstrings lose the types of the parameters they list.
 ``restore_class_signature`` in :file:`docs/source/conf.py` gives such a class its
 ``__init__``'s parameters, and ``constructor_for_types`` has the library read the
 parameter types from that ``__init__``. The expected signatures are the ones the
-build showed before 3.15, where it had one.
+build showed before 3.15, where it had one; a protocol class's is the closed parse
+signature of #2840.
 
 The tests call the hooks directly and replay the signature event through Sphinx's
 own :class:`~sphinx.events.EventManager`. They need Sphinx and
@@ -27,7 +28,7 @@ from __future__ import annotations
 import inspect
 import types
 import unittest
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 from unittest import mock
 
 from tests.project.test_docs_ambiguous_xrefs_1775_unit import (HAS_SPHINX, SPHINX_SKIP_REASON, connections,
@@ -85,7 +86,7 @@ def resolve(name: 'str') -> 'Any':
 
 #: Each class, and the signature restored for it.
 RESTORED = {
-    'pcapkit.protocols.application.ftp.protocol.FTP': '(file=None, length=None, **kwargs)',
+    'pcapkit.protocols.application.ftp.protocol.FTP': '(file, length=None, /, *, layer=None, protocol=None, context=None)',
     'pcapkit.dumpkit.pcap.PCAPIO': '(fname, *, protocol, byteorder=sys.byteorder, nanosecond=False, **kwargs)',
     'pcapkit.foundation.reassembly.ipv4.reassembly.IPv4': '(*, strict=True, store=True, timeout=None)',
     'pcapkit.foundation.traceflow.tcp.traceflow.TCP': ("(*, fout='./tmp', format='pcap', byteorder=sys.byteorder, "
@@ -120,6 +121,21 @@ class Built(Forwarding):
 
     def __new__(cls, value: 'str', raw: 'bytes') -> 'Built':  # pylint: disable=unused-argument
         return super().__new__(cls)
+
+
+class Overloaded:
+    """A class whose pass-through ``__new__`` hides an overloaded ``__init__``."""
+
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Overloaded':  # pylint: disable=unused-argument
+        return super().__new__(cls)
+
+    @overload
+    def __init__(self, value: 'int') -> 'None': ...
+    @overload
+    def __init__(self, value: 'str') -> 'None': ...
+
+    def __init__(self, value: 'Any') -> 'None':
+        self.value = value
 
 
 @unittest.skipUnless(HAS_SPHINX, SPHINX_SKIP_REASON)
@@ -218,16 +234,18 @@ class ConstructorTypesTests(unittest.TestCase):
         """Each class docstring lists the ``__init__`` parameters, which otherwise lose their types."""
         for name in ('pcapkit.foundation.reassembly.ipv4.reassembly.IPv4',
                      'pcapkit.foundation.traceflow.tcp.traceflow.TCP',
-                     'pcapkit.corekit.infoclass.Info', 'pcapkit.corekit.infoclass.MultiInfo'):
+                     'pcapkit.corekit.infoclass.Info', 'pcapkit.corekit.infoclass.MultiInfo',
+                     'pcapkit.protocols.application.ftp.protocol.FTP'):
             cls = resolve(name)
             with self.subTest(name=name):
                 self.assertEqual(self.conf.typehints_constructor_name(cls), '__new__')
                 self.assertEqual(self.conf.constructor_for_types(cls), '__init__')
 
     def test_overloaded_init_keeps_the_library_choice(self) -> 'None':
-        """Reading it would add an ``Overloads`` field to every protocol class."""
-        cls = resolve('pcapkit.protocols.application.ftp.protocol.FTP')
-        self.assertEqual(self.conf.constructor_for_types(cls), self.conf.typehints_constructor_name(cls))
+        """Reading it would add an ``Overloads`` field to the class."""
+        self.assertIsNotNone(self.conf.hidden_init(Overloaded))
+        self.assertEqual(self.conf.typehints_constructor_name(Overloaded), '__new__')
+        self.assertEqual(self.conf.constructor_for_types(Overloaded), '__new__')
 
     def test_other_classes_keep_the_library_choice(self) -> 'None':
         """A class with no pass-through ``__new__`` in the way is left as the library reads it."""

@@ -75,7 +75,7 @@ class PCAPHeaderMagicProtosUnitTests(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.misc.pcap.header.protocol import Header
 
-        raw = Header(bigendian=True, network=LinkType.ETHERNET).data
+        raw = Header.from_fields(bigendian=True, network=LinkType.ETHERNET).data
         self.assertEqual(raw[:4], b'\xa1\xb2\xc3\xd4')
         header = Header(io.BytesIO(raw))
         self.assertEqual(header.byteorder, 'big')

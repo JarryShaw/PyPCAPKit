@@ -275,7 +275,7 @@ class MLDRoundTripTests(unittest.TestCase):
             with self.subTest(message=name), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 parsed = ICMPv6(io.BytesIO(packet), len(packet))
-                made = ICMPv6(type=parsed.info.type, code=0, checksum=b'\xab\xcd', body=parsed.info)
+                made = ICMPv6.from_fields(type=parsed.info.type, code=0, checksum=b'\xab\xcd', body=parsed.info)
                 self.assertEqual(bytes(made), packet)
 
 

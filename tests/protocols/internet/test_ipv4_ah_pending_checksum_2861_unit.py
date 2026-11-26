@@ -85,19 +85,19 @@ class PendingChecksumTestCase(unittest.TestCase):
 
     def upper(self, klass: type, **kwargs: object) -> object:
         """An instance of ``klass`` as the tests construct it."""
-        return klass(**ARGS.get(klass.__name__, {}), **kwargs)
+        return klass.from_fields(**ARGS.get(klass.__name__, {}), **kwargs)
 
     def behind(self, code: int, upper: object, depth: int) -> object:
         """``upper`` behind ``depth`` Authentication Headers, the innermost naming ``code``."""
         layer = upper
         for level in range(depth):
-            layer = self.AH(next=code if level == 0 else AH_PROTO, spi=0x1234 + level, seq=1,
-                            icv=bytes(AH_LEN - 12), payload=layer)
+            layer = self.AH.from_fields(next=code if level == 0 else AH_PROTO, spi=0x1234 + level, seq=1,
+                                        icv=bytes(AH_LEN - 12), payload=layer)
         return layer
 
     def ipv4(self, protocol: int, payload: object, **kwargs: object) -> bytes:
         """The octets of an IPv4 packet from SRC to DST carrying ``payload``."""
-        return self.IPv4(src=SRC, dst=DST, protocol=protocol, payload=payload, **kwargs).data
+        return self.IPv4.from_fields(src=SRC, dst=DST, protocol=protocol, payload=payload, **kwargs).data
 
     def parse(self, octets: bytes) -> 'tuple[object, list[tuple[type, str]]]':
         """``octets`` parsed as IPv4, verified, and its ProtocolWarnings as ``(category, message)``."""
@@ -208,12 +208,12 @@ class LeftPendingTests(PendingChecksumTestCase):
         tcp = self.upper(self.uppers[6])
         cases = {
             # The AH names UDP, so the segment behind it is read as UDP.
-            'next header': (AH_PROTO, self.AH(next=17, icv=bytes(12), payload=tcp)),
+            'next header': (AH_PROTO, self.AH.from_fields(next=17, icv=bytes(12), payload=tcp)),
             # IPv4 walks no IPv6 extension header (RFC 8200 section 4).
-            'hop-by-hop options': (0, HOPOPT(next=6, payload=tcp)),
+            'hop-by-hop options': (0, HOPOPT.from_fields(next=6, payload=tcp)),
             # The upper layer of ESP is encrypted (RFC 4303).
-            'ESP': (50, ESP(spi=1, seq=1, payload=tcp)),
-            'AH behind ESP': (50, ESP(spi=1, seq=1, payload=self.behind(6, tcp, 1))),
+            'ESP': (50, ESP.from_fields(spi=1, seq=1, payload=tcp)),
+            'AH behind ESP': (50, ESP.from_fields(spi=1, seq=1, payload=self.behind(6, tcp, 1))),
         }
         for name, (protocol, payload) in cases.items():
             with self.subTest(name):

@@ -76,8 +76,8 @@ class TestLayers(_KeepsState):
         for module, name, kwargs in self.CASES:
             with self.subTest(protocol=name):
                 cls = getattr(importlib.import_module(module), name)
-                proto = cls(**kwargs)
-                self.assertEqual(self.assertPackKeepsState(proto), cls().data)
+                proto = cls.from_fields(**kwargs)
+                self.assertEqual(self.assertPackKeepsState(proto), cls.from_fields().data)
                 # NOTE: the schema still describes the octets the instance holds.
                 self.assertEqual(bytes(proto.schema), proto.data)
 
@@ -85,23 +85,23 @@ class TestLayers(_KeepsState):
         for module, name, kwargs in self.CASES:
             with self.subTest(protocol=name):
                 cls = getattr(importlib.import_module(module), name)
-                proto = cls()
-                self.assertEqual(self.assertPackKeepsState(proto, **kwargs), cls(**kwargs).data)
-                self.assertEqual(bytes(proto.schema), cls().data)
+                proto = cls.from_fields()
+                self.assertEqual(self.assertPackKeepsState(proto, **kwargs), cls.from_fields(**kwargs).data)
+                self.assertEqual(bytes(proto.schema), cls.from_fields().data)
 
     def test_parsed_instance_keeps_state(self) -> 'None':
         for module, name, kwargs in self.CASES:
             with self.subTest(protocol=name):
                 cls = getattr(importlib.import_module(module), name)
-                octets = cls(**kwargs).data
+                octets = cls.from_fields(**kwargs).data
                 proto = cls(octets, len(octets))
-                self.assertEqual(self.assertPackKeepsState(proto), cls().data)
+                self.assertEqual(self.assertPackKeepsState(proto), cls.from_fields().data)
                 self.assertEqual(bytes(proto.schema), octets)
 
     def test_issue_example(self) -> 'None':
         from pcapkit.protocols.transport.udp.protocol import UDP
 
-        udp = UDP(srcport=1234, dstport=53)
+        udp = UDP.from_fields(srcport=1234, dstport=53)
         self.assertEqual(udp.data, bytes.fromhex('04d2003500080000'))
         self.assertEqual(self.assertPackKeepsState(udp), bytes.fromhex('0000000000080000'))
         self.assertEqual(udp.schema.srcport, 1234)
@@ -111,7 +111,7 @@ class TestLayers(_KeepsState):
         from pcapkit.const.tcp.flags import Flags
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
-        tcp = TCP(srcport=80, dstport=443, syn=True, ack=True)
+        tcp = TCP.from_fields(srcport=80, dstport=443, syn=True, ack=True)
         self.assertEqual(tcp.connection, Flags.SYN | Flags.ACK)
         self.assertPackKeepsState(tcp)
         self.assertEqual(tcp.connection, Flags.SYN | Flags.ACK)
@@ -125,10 +125,10 @@ class TestOverrides(_KeepsState):
         from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.protocols.misc.pcap.header.protocol import Header
 
-        header = Header().info
-        frame = Frame(num=1, header=header, ts_sec=1, ts_usec=2, packet=b'abcd')
+        header = Header.from_fields().info
+        frame = Frame.from_fields(num=1, header=header, ts_sec=1, ts_usec=2, packet=b'abcd')
         packed = self.assertPackKeepsState(frame, num=1, header=header, ts_sec=3, ts_usec=4, packet=b'xy')
-        self.assertEqual(packed, Frame(num=1, header=header, ts_sec=3, ts_usec=4, packet=b'xy').data)
+        self.assertEqual(packed, Frame.from_fields(num=1, header=header, ts_sec=3, ts_usec=4, packet=b'xy').data)
         self.assertEqual(frame.schema.ts_sec, 1)
 
     def test_pcapng(self) -> 'None':
@@ -138,7 +138,7 @@ class TestOverrides(_KeepsState):
         from pcapkit.foundation.engines.pcapng import Context
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={'byteorder': 'big'})
+        section = PCAPNG.from_fields(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={'byteorder': 'big'})
         self.assertEqual(section.byteorder, 'big')
         self.assertPackKeepsState(section, num=0, sct=1, ctx=None,
                                   type=BlockType.Section_Header_Block, block={'byteorder': 'little'})
@@ -148,7 +148,7 @@ class TestOverrides(_KeepsState):
         kwargs = {'num': 1, 'sct': 1, 'ctx': context, 'type': BlockType.Interface_Description_Block,
                   'block': {'linktype': LinkType.ETHERNET, 'snaplen': 0x40000,
                             'options': [(OptionType.if_name, {'name': 'eth0'})]}}
-        interface = PCAPNG(**kwargs)
+        interface = PCAPNG.from_fields(**kwargs)
         counts = dict(interface._opt)  # pylint: disable=protected-access
         self.assertEqual(self.assertPackKeepsState(interface, **kwargs), interface.data)
         self.assertEqual(dict(interface._opt), counts)  # pylint: disable=protected-access
@@ -161,7 +161,7 @@ class TestOverrides(_KeepsState):
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         kwargs = {'type': 0x00, 'sid': 1, 'frame': {'data': b'abc'}}
-        frame = HTTPv2(**kwargs)
+        frame = HTTPv2.from_fields(**kwargs)
         self.assertIsNotNone(frame.__header__)
         self.assertEqual(self.assertPackKeepsState(frame, **kwargs), frame.data)
 

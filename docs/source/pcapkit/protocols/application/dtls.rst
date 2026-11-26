@@ -87,14 +87,14 @@ The connection IDs a
 instance: a new one starts with none, and a reused one keeps what it learned.
 An extraction given none keeps its own in its own registry, so what its
 handshakes negotiate lasts for its capture only. A registry passed as
-``__context__`` to several parses carries its instance across them.
+``context`` to several parses carries its instance across them.
 
 Matching by value relies on IDs being self-delineating
 (:rfc:`9146#section-4`): with ``c1c2c3c4`` registered, a record whose ID is
 ``c1c2c3c400010203`` reads as carrying ``c1c2c3c4``.
 
 A rebuild parses each layer's octets again, so ``from_data`` takes the same
-``__context__``. Without it the octets still rebuild exactly, and
+``context``. Without it the octets still rebuild exactly, and
 ``DTLS.from_data`` keeps its chain, but a record with a connection ID under a
 rebuilt UDP layer reads as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 

@@ -263,7 +263,7 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
            return IPv4Data(...)
 
-       def make(self, ..., **kwargs: 'Any') -> 'IPv4Schema':
+       def make(self, *, ..., **kwargs: 'Any') -> 'IPv4Schema':
            ...
 
            return IPv4Schema(...)
@@ -274,13 +274,15 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
 .. important::
 
-   **Declare every construction keyword your protocol accepts.** Constructing a
-   protocol with a keyword no signature declares raises
-   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, so a misspelling fails
-   instead of building a wrong field. The accepted set, read by
+   **Declare every construction keyword your protocol accepts.**
+   :meth:`Protocol.from_fields <pcapkit.protocols.protocol.Protocol.from_fields>`
+   builds a protocol from its fields, and a keyword no signature declares raises
+   :exc:`~pcapkit.utilities.exceptions.UnexpectedKeyword`, a :exc:`TypeError`, so a
+   misspelling fails instead of building a wrong field. ``make`` takes its fields
+   as keywords only, ending in ``**kwargs``. The accepted set, read by
    :func:`inspect.signature`, is the union of the keyword-taking parameters of
-   ``make``, ``read``, ``pack``, ``unpack``, ``__post_init__`` and ``__init__``
-   across the MRO: :meth:`Protocol.__post_init__
+   ``make``, ``read``, ``pack``, ``unpack`` and ``__post_init__`` across the MRO,
+   ``file`` and ``length`` aside: :meth:`Protocol.__post_init__
    <pcapkit.protocols.protocol.Protocol.__post_init__>` hands one ``**kwargs``
    to both construction and parse, so a keyword only ``read`` declares still
    travels through ``make``.
@@ -308,19 +310,28 @@ implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
    dispatcher's subclasses stay checked. Prefer a declared parameter to either,
    since it also documents the keyword.
 
-   Parsing is unaffected. :meth:`Protocol.from_data
-   <pcapkit.protocols.protocol.Protocol.from_data>` checks its caller's keywords
-   as strictly, but only warns with
+   :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
+   checks its caller's keywords as strictly, ``context`` aside, but only warns with
    :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a key from your
    ``_make_data``, a disagreement between two of your own mappings rather than a
    caller's typo.
 
+   Parsing takes no field: calling the class is ``Proto(file, length, /, *, layer,
+   protocol, context)``, and Python refuses any other keyword. A parse that needs
+   an input of its own declares it on an ``__init__`` override, keyword-only and
+   before the stops, as :meth:`DNS.__init__
+   <pcapkit.protocols.application.dns.protocol.DNS.__init__>` declares ``framed``,
+   and calls :meth:`Protocol._parse <pcapkit.protocols.protocol.Protocol._parse>`.
+   What the layer carrying yours hands on, such as ``alias`` and ``packet``,
+   reaches your hooks as keywords, never the signature (:issue:`2840`).
+
    .. warning::
 
-      The check lives in :meth:`Protocol.__init__
-      <pcapkit.protocols.protocol.Protocol.__init__>`, where every producer's
-      keywords converge, so it covers ``SomeProtocol(...)`` and the ``pack`` it
-      leads to, but **not** ``make`` called on a bare instance, such as
+      The check lives in :meth:`Protocol.from_fields
+      <pcapkit.protocols.protocol.Protocol.from_fields>` and
+      :meth:`~pcapkit.protocols.protocol.Protocol.from_data`, which hand the keywords
+      on, so it covers ``SomeProtocol.from_fields(...)`` and the ``pack`` it leads
+      to, but **not** ``make`` called on a bare instance, such as
       ``object.__new__(cls).make(...)``, which drops an undeclared keyword
       silently. This package's tests and :meth:`HTTP.make
       <pcapkit.protocols.application.http.protocol.HTTP.make>` call ``make`` that
@@ -674,14 +685,14 @@ whose full implementation is :mod:`pcapkit.dumpkit.pcap`:
 
        # NOTE: Called on initialisation, to write the file header.
        def _dump_header(self, *, ...) -> 'None':
-           packet = Header(...)  # create PCAP header instance based on the given arguments
+           packet = Header.from_fields(...)  # create PCAP header instance based on the given arguments
 
            with open(self._file, 'wb') as file:
                file.write(packet.data)  # write the header to the output file
 
        # NOTE: Write one packet, here as a PCAP frame.
        def _append_value(self, value: 'Frame', file: 'IO[bytes]', name: 'str') -> 'None':
-           packet = Frame(...)  # create PCAP frame instance based on the given arguments
+           packet = Frame.from_fields(...)  # create PCAP frame instance based on the given arguments
 
            file.write(packet.data)  # write the frame to the output file
            self._fnum += 1  # increment frame number counter

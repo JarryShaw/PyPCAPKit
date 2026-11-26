@@ -39,13 +39,13 @@ class AHCutPayloadLengthTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, raw: bytes, **kwargs: object) -> 'object':
-        """``raw`` parsed on its own as AH, given its length."""
+        """``raw`` parsed on its own as AH, given its length, and ``kwargs`` as the IP layer's state."""
         from pcapkit.protocols.internet.ah.protocol import AH
         from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 
         with warnings.catch_warnings(), CaughtByCaller(ProtocolError):
             warnings.simplefilter('ignore')
-            return AH(raw, len(raw), **kwargs)
+            return AH._from_parent(raw, len(raw), **kwargs)  # pylint: disable=protected-access
 
     def assertRebuilds(self, layer: 'object', raw: bytes) -> None:  # pylint: disable=invalid-name
         """``layer`` rebuilt from its data model and its dict gives ``raw`` and its info."""
@@ -91,7 +91,7 @@ class AHCutPayloadLengthTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ProtocolError, r'^AH: invalid payload length: must describe the '
                                                    r'0-octet ICV exactly, not 0$'):
-            AH(icv=b'', payload_length=0)
+            AH.from_fields(icv=b'', payload_length=0)
 
 
 if __name__ == '__main__':

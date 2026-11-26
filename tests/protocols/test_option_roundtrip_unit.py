@@ -492,7 +492,7 @@ class OptionRoundTripTests(unittest.TestCase):
 
         for copies in (1, 2):
             with self.subTest(copies=copies):
-                built = bytes(HIP(parameters=one * copies, extension=True, **base))
+                built = bytes(HIP.from_fields(parameters=one * copies, extension=True, **base))
 
                 # 40 octets of fixed header, then one 8-octet SEQ per copy --
                 # the RFC total for Length = 4, and what the header's own
@@ -504,8 +504,8 @@ class OptionRoundTripTests(unittest.TestCase):
                 self.assertEqual(
                     len(reparsed.info.parameters.getlist(Parameter.SEQ)), copies)
 
-                again = bytes(HIP(parameters=reparsed.info.parameters,
-                                  extension=True, **base))
+                again = bytes(HIP.from_fields(parameters=reparsed.info.parameters,
+                                              extension=True, **base))
                 self.assertEqual(built, again)
 
     def test_recorded_gaps_are_a_minority(self) -> None:

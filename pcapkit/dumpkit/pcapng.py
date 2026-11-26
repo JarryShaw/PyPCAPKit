@@ -168,8 +168,8 @@ class PCAPNGIO(DumperBase):
         from pcapkit.foundation.engines.pcapng import \
             Context  # pylint: disable=import-outside-toplevel
 
-        header = P_PCAPNG(num=0, sct=1, ctx=None, type=Enum_BlockType.Section_Header_Block,
-                          block={'byteorder': byteorder})
+        header = P_PCAPNG.from_fields(num=0, sct=1, ctx=None, type=Enum_BlockType.Section_Header_Block,
+                                      block={'byteorder': byteorder})
         with open(self._file, 'wb') as file:
             file.write(header.data)
         self._ctx = Context(cast('Data_SectionHeaderBlock', header.info))
@@ -306,8 +306,8 @@ class PCAPNGIO(DumperBase):
                 'options': options,
             }
 
-        idb = P_PCAPNG(num=0, sct=1, ctx=self._ctx, type=Enum_BlockType.Interface_Description_Block,
-                       block=block)
+        idb = P_PCAPNG.from_fields(num=0, sct=1, ctx=self._ctx,
+                                   type=Enum_BlockType.Interface_Description_Block, block=block)
         index = self._index.get(idb.data)
         if index is None:
             index = self._index[idb.data] = len(self._ctx.interfaces)

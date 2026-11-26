@@ -413,6 +413,11 @@ class DecoratorTests(unittest.TestCase):
                 self.error = error
                 self.alias = alias
 
+            # NOTE: ``beholder`` hands its fallback the state through ``_from_parent`` (#2840).
+            @classmethod
+            def _from_parent(cls, file_, length, /, *, error=None, alias=None):
+                return cls(file_, length, error=error, alias=alias)
+
         class Raw(NoPayload):
             pass
 

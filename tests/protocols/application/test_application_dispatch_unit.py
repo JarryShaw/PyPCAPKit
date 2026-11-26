@@ -67,7 +67,7 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
     def test_sentinel_dispatches_remainder_to_raw(self) -> None:
         from pcapkit.protocols.misc.raw.protocol import Raw
 
-        proto = self._protocol_class(-1)(packet=b'abtrailer')
+        proto = self._protocol_class(-1).from_fields(packet=b'abtrailer')
 
         self.assertEqual(proto.layer, 'Application')
         self.assertIsInstance(proto.payload, Raw)
@@ -80,14 +80,14 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
     def test_sentinel_with_nothing_left_is_no_payload(self) -> None:
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
-        proto = self._protocol_class(-1)(packet=b'ab')
+        proto = self._protocol_class(-1).from_fields(packet=b'ab')
 
         self.assertIsInstance(proto.payload, NoPayload)
 
     def test_undispatched_application_still_has_no_payload(self) -> None:
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
-        proto = self._protocol_class(None)(packet=b'abtrailer')
+        proto = self._protocol_class(None).from_fields(packet=b'abtrailer')
 
         self.assertIsInstance(proto.payload, NoPayload)
         self.assertEqual(str(proto.protochain), 'DummyApplication')
@@ -98,7 +98,7 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
         for number in (0, 6, 17, 0x0800):
             with self.subTest(proto=number):
                 with self.assertRaises(UnsupportedCall):
-                    self._protocol_class(number)(packet=b'abtrailer')
+                    self._protocol_class(number).from_fields(packet=b'abtrailer')
 
     def test_import_next_layer_accepts_only_the_sentinel(self) -> None:
         from pcapkit.protocols.misc.raw.protocol import Raw

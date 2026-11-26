@@ -85,14 +85,14 @@ class UDP(AppType):
     """
 
     #: [UDP] Reserved [:rfc:`6335`]
-    reserved_4415 = 4415, 'reserved', TransportProtocol.udp
+    reserved_4415 = 4415, 'reserved'
 
     #: [UDP] PJJ Media Player discovery
-    pjj_player_disc = 4416, 'pjj-player-disc', TransportProtocol.udp
+    pjj_player_disc = 4416, 'pjj-player-disc'
 
     #: - [TCP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
     #: - [UDP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
-    roughtime = 5319, 'roughtime', TransportProtocol.udp
+    roughtime = 5319
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'UDP':
@@ -124,8 +124,7 @@ EDITS = [
      [('which is automatically generated from', 'generated from'),
       ('Lookup function used when value is not found.', 'Look up a value not found.')], False),
     ('an attribute docstring added under a member',
-     [("roughtime = 5319, 'roughtime', TransportProtocol.udp",
-       "roughtime = 5319, 'roughtime', TransportProtocol.udp\n    '''Roughtime.'''")], False),
+     [('roughtime = 5319\n', "roughtime = 5319\n    '''Roughtime.'''\n")], False),
     ('b8: a member renamed',
      [('pjj_player_disc = 4416', 'newmood_player = 4416')], True),
     ('a member value changed',
@@ -138,7 +137,7 @@ EDITS = [
      [("        return cls._unregistered_member(value, 'Unassigned')\n",
        "        cls._unregistered_member(value, 'Unassigned')\n        return cls(value)\n")], True),
     ('a member removed',
-     [("    #: [UDP] Reserved [:rfc:`6335`]\n    reserved_4415 = 4415, 'reserved', TransportProtocol.udp\n\n",
+     [("    #: [UDP] Reserved [:rfc:`6335`]\n    reserved_4415 = 4415, 'reserved'\n\n",
        '')], True),
     ('an import changed',
      [('import AppType, TransportProtocol', 'import AppType, TransportProtocol, TransType')], True),

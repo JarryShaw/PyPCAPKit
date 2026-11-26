@@ -66,19 +66,19 @@ class TestCALIPSOPad(unittest.TestCase):
 
         for cls in self._protocols():
             with self.subTest(protocol=cls.__name__, cmpt_len=0):
-                made = cls(next=59, options=[(Option.CALIPSO, {
+                made = cls.from_fields(next=59, options=[(Option.CALIPSO, {
                     'domain': 1, 'level': 5, 'pad': b'\xaa\xbb\xcc\xdd',
                 })])
                 self.assertEqual(made.data, bytes.fromhex(HEADERS['cmpt_len 0, non-zero pad'][0]))
             with self.subTest(protocol=cls.__name__, cmpt_len=2):
-                made = cls(next=59, options=[(Option.CALIPSO, {
+                made = cls.from_fields(next=59, options=[(Option.CALIPSO, {
                     'domain': 1, 'level': 5, 'bitmap': bytes.fromhex('1122334455667788'),
                     'pad': b'\x00' * 4,
                 })])
                 self.assertEqual(made.data, bytes.fromhex(HEADERS['cmpt_len 2, zero pad'][0]))
             with self.subTest(protocol=cls.__name__, pad=None):
                 # without a pad the option is the fixed header alone
-                made = cls(next=59, options=[(Option.CALIPSO, {'domain': 1, 'level': 5})])
+                made = cls.from_fields(next=59, options=[(Option.CALIPSO, {'domain': 1, 'level': 5})])
                 self.assertEqual(made.data, bytes.fromhex(HEADERS['cmpt_len 0, no pad'][0]))
 
 

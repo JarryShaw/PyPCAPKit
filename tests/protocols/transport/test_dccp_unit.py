@@ -182,9 +182,9 @@ class DCCPPacketTypeTests(DCCPTestCase):
         for type_ in range(11):
             for x in (True, False):
                 with self.subTest(type=type_, x=x):
-                    made = self.DCCP(srcport=SRC, dstport=DST, type=type_, x=x, seq=5, ack=4,
-                                     service_code=3, reset_code=2, reset_data=b'\x01\x02\x03',
-                                     checksum=b'\x00\x00', payload=b'data')
+                    made = self.DCCP.from_fields(srcport=SRC, dstport=DST, type=type_, x=x, seq=5, ack=4,
+                                                 service_code=3, reset_code=2, reset_data=b'\x01\x02\x03',
+                                                 checksum=b'\x00\x00', payload=b'data')
                     self.assertRoundTrip(made.data)
                     self.assertEqual(self.DCCP(made.data).info.type, self.Type(type_))
 
@@ -218,7 +218,7 @@ class DCCPPacketTypeTests(DCCPTestCase):
     def test_an_oversized_header_is_refused(self) -> None:
         cookie = (self.Option.Init_Cookie, {'cookie': bytes(253)})
         with self.assertRaisesRegex(self.ProtocolError, 'exceeds 1020 octets'):
-            self.DCCP(type=0, options=[cookie] * 4, checksum=b'\x00\x00')
+            self.DCCP.from_fields(type=0, options=[cookie] * 4, checksum=b'\x00\x00')
 
 
 class DCCPOptionTests(DCCPTestCase):
@@ -250,12 +250,12 @@ class DCCPOptionTests(DCCPTestCase):
         options = self.options(bytes([32, 2, 35, 2]))
         self.assertEqual([(option.feature, option.value) for _, option in options.items(multi=True)],
                          [(None, b''), (None, b'')])
-        made = self.DCCP(type=3, ack=1, checksum=b'\x00\x00',
-                         options=[(self.Option.Confirm_R, {'feature': None})])
+        made = self.DCCP.from_fields(type=3, ack=1, checksum=b'\x00\x00',
+                                     options=[(self.Option.Confirm_R, {'feature': None})])
         self.assertEqual(made.data[24:], bytes([35, 2, 0, 0]))
         for code in (self.Option.Change_L, self.Option.Confirm_L):
             with self.subTest(code=code), self.assertRaises(self.ProtocolError):
-                self.DCCP(type=3, checksum=b'\x00\x00', options=[(code, {'feature': None, 'value': b'\x01'})])
+                self.DCCP.from_fields(type=3, checksum=b'\x00\x00', options=[(code, {'feature': None, 'value': b'\x01'})])
 
     def test_a_feature_option_shorter_than_its_header_is_refused(self) -> None:
         # RFC 4340 section 5.8: a length under 2 is nonsensical, as in every option
@@ -320,15 +320,15 @@ class DCCPOptionTests(DCCPTestCase):
             self.DCCP(packet(3, ack(1), bytes([2, 2, 41, 6]), data=b'\x00\x00\x00\x01'))
 
     def test_make_pads_to_32_bits(self) -> None:
-        made = self.DCCP(type=3, ack=1, checksum=b'\x00\x00',
-                         options=[(self.Option.Timestamp, {'timestamp': 1}),
-                                  (self.Option.Ack_Vector_Nonce_0, {'vector': [(3, 2)]})])
+        made = self.DCCP.from_fields(type=3, ack=1, checksum=b'\x00\x00',
+                                     options=[(self.Option.Timestamp, {'timestamp': 1}),
+                                              (self.Option.Ack_Vector_Nonce_0, {'vector': [(3, 2)]})])
         self.assertEqual(made.data[24:], bytes([41, 6, 0, 0, 0, 1, 38, 3, 0xC2, 0, 0, 0]))
         self.assertEqual(made.info.hdr_len, 36)
         self.assertRoundTrip(made.data)
 
     def test_make_sizes_the_variable_fields(self) -> None:
-        made = self.DCCP(type=3, ack=1, checksum=b'\x00\x00', options=[
+        made = self.DCCP.from_fields(type=3, ack=1, checksum=b'\x00\x00', options=[
             (self.Option.NDP_Count, {'count': 0x010000}),
             (self.Option.Elapsed_Time, {'elapsed': 0x10000}),
             (self.Option.Timestamp_Echo, {'timestamp': 1, 'elapsed': 2}),
@@ -341,7 +341,7 @@ class DCCPOptionTests(DCCPTestCase):
         self.assertRoundTrip(made.data)
 
     def test_make_writes_the_fixed_layouts(self) -> None:
-        made = self.DCCP(type=3, ack=1, checksum=b'\x00\x00', options=[
+        made = self.DCCP.from_fields(type=3, ack=1, checksum=b'\x00\x00', options=[
             (self.Option.Confirm_L, {'feature': self.Feature.Sequence_Window, 'value': b'\x00\x64'}),
             (self.Option.Timestamp_Echo, {'timestamp': 2, 'elapsed': 0x10000}),
             (self.Option.Data_Checksum, {'checksum': b'\xde\xad\xbe\xef'}),
@@ -353,11 +353,11 @@ class DCCPOptionTests(DCCPTestCase):
 
     def test_make_takes_schemas_octets_and_parsed_options(self) -> None:
         parsed = self.options(bytes([1, 41, 6, 0, 0, 0, 7, 0]))
-        rebuilt = self.DCCP(type=3, ack=1, checksum=b'\x00\x00', options=parsed)
+        rebuilt = self.DCCP.from_fields(type=3, ack=1, checksum=b'\x00\x00', options=parsed)
         self.assertEqual(rebuilt.data[24:], bytes([1, 41, 6, 0, 0, 0, 7, 0]))
         layer = self.DCCP(rebuilt.data)
-        given = self.DCCP(type=3, ack=1, checksum=b'\x00\x00',
-                          options=[b'\x02', layer.__header__.options[1]])
+        given = self.DCCP.from_fields(type=3, ack=1, checksum=b'\x00\x00',
+                                      options=[b'\x02', layer.__header__.options[1]])
         self.assertEqual(given.data[24:], bytes([2, 41, 6, 0, 0, 0, 7, 0]))
 
     def test_make_refuses_what_an_option_cannot_hold(self) -> None:
@@ -371,7 +371,7 @@ class DCCPOptionTests(DCCPTestCase):
                        (self.Option.Init_Cookie, {'cookie': bytes(254)})):
             with self.subTest(option=option):
                 with self.assertRaises(self.ProtocolError):
-                    self.DCCP(type=3, checksum=b'\x00\x00', options=[option])
+                    self.DCCP.from_fields(type=3, checksum=b'\x00\x00', options=[option])
 
     def test_register_option_and_its_wrapper(self) -> None:
         from pcapkit.foundation.registry.protocols import register_dccp_option
@@ -504,45 +504,45 @@ class DCCPChecksumTests(DCCPTestCase):
                          (None, []))
 
     def test_the_ip_layer_computes_it(self) -> None:
-        dccp = self.DCCP(srcport=SRC, dstport=DST, type=0, seq=1, service_code=0x12345678,
-                         options=[(self.Option.Change_L, {'feature': 1, 'value': b'\x02'})], payload=b'hello')
-        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, payload=dccp).data
+        dccp = self.DCCP.from_fields(srcport=SRC, dstport=DST, type=0, seq=1, service_code=0x12345678,
+                                     options=[(self.Option.Change_L, {'feature': 1, 'value': b'\x02'})], payload=b'hello')
+        octets = self.IPv4.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, payload=dccp).data
         self.assertEqual(octets, CHECKSUMMED[0])
-        dccp = self.DCCP(srcport=SRC, dstport=DST, type=7, seq=9, ack=8, reset_code=5,
-                         reset_data=b'\x20\x01\x02', payload=b'odd')
-        octets = self.IPv6(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.DCCP, payload=dccp).data
+        dccp = self.DCCP.from_fields(srcport=SRC, dstport=DST, type=7, seq=9, ack=8, reset_code=5,
+                                     reset_data=b'\x20\x01\x02', payload=b'odd')
+        octets = self.IPv6.from_fields(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.DCCP, payload=dccp).data
         self.assertEqual(octets, CHECKSUMMED[2])
 
     def test_make_takes_the_pseudo_header(self) -> None:
-        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, upper_length=0)
-        made = self.DCCP(srcport=SRC, dstport=DST, type=4, x=False, seq=7, ack=6, cscov=2,
-                         options=[(self.Option.Timestamp, {'timestamp': 5})],
-                         payload=b'0123456789abcdef', pseudo=pseudo).data
+        pseudo = self.IP_Pseudo.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, upper_length=0)
+        made = self.DCCP.from_fields(srcport=SRC, dstport=DST, type=4, x=False, seq=7, ack=6, cscov=2,
+                                     options=[(self.Option.Timestamp, {'timestamp': 5})],
+                                     payload=b'0123456789abcdef', pseudo=pseudo).data
         self.assertEqual(made, CHECKSUMMED[1][20:])
 
     def test_a_coverage_reaching_the_end_is_written_as_zero(self) -> None:
         # As Linux's dccp_csum_outgoing: CsCov 0 wherever the coverage reaches the end.
-        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, upper_length=0)
+        pseudo = self.IP_Pseudo.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, upper_length=0)
         for cscov, payload in ((15, b'abc'), (2, b'abcd')):
             with self.subTest(cscov=cscov, payload=payload):
-                made = self.DCCP(type=2, x=False, ccval=5, cscov=cscov, payload=payload, pseudo=pseudo).data
+                made = self.DCCP.from_fields(type=2, x=False, ccval=5, cscov=cscov, payload=payload, pseudo=pseudo).data
                 self.assertEqual(made[5], 0x50)
                 self.assertEqual(made[6:8], expected(pseudo4(len(made)), made, len(made)))
-                dccp = self.DCCP(type=2, x=False, ccval=5, cscov=cscov, payload=payload)
-                octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, payload=dccp).data
+                dccp = self.DCCP.from_fields(type=2, x=False, ccval=5, cscov=cscov, payload=payload)
+                octets = self.IPv4.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, payload=dccp).data
                 self.assertEqual(octets[20:], made)
                 self.assertEqual(self.status(octets), (self.Status.VALID, []))
         # One short of the end, and one written as given, keep their value.
-        self.assertEqual(self.DCCP(type=2, x=False, cscov=2, payload=b'abcde', pseudo=pseudo).data[5], 2)
-        self.assertEqual(self.DCCP(type=2, x=False, cscov=15, checksum=b'\x00\x00', pseudo=pseudo).data[5], 15)
+        self.assertEqual(self.DCCP.from_fields(type=2, x=False, cscov=2, payload=b'abcde', pseudo=pseudo).data[5], 2)
+        self.assertEqual(self.DCCP.from_fields(type=2, x=False, cscov=15, checksum=b'\x00\x00', pseudo=pseudo).data[5], 15)
 
     def test_off_or_given_is_written_as_is(self) -> None:
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-            octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP,
-                               payload=self.DCCP(type=2, x=False)).data
+            octets = self.IPv4.from_fields(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP,
+                                           payload=self.DCCP.from_fields(type=2, x=False)).data
         self.assertEqual(octets[26:28], b'\x00\x00')
-        self.assertEqual(self.DCCP(type=2, checksum=b'\xbe\xef').data[6:8], b'\xbe\xef')
-        self.assertEqual(self.DCCP(type=2).data[6:8], b'\x00\x00')
+        self.assertEqual(self.DCCP.from_fields(type=2, checksum=b'\xbe\xef').data[6:8], b'\xbe\xef')
+        self.assertEqual(self.DCCP.from_fields(type=2).data[6:8], b'\x00\x00')
 
 
 if __name__ == '__main__':
