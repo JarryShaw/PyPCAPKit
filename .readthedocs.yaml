@@ -1,0 +1,24 @@
+# Read the Docs build of the v0.13.1 documentation (#3077). This file
+# is the only change from the tag, and matches its own docs toolchain.
+version: 2
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.8"
+  jobs:
+    install:
+      - python -m pip install --no-cache-dir "Sphinx==7.1.2" "myst-parser==3.0.1"
+    build:
+      html:
+        - mkdir -p $READTHEDOCS_VIRTUALENV_PATH/conf
+        - echo myst_heading_anchors = 6 > $READTHEDOCS_VIRTUALENV_PATH/conf/conf.py
+        - >-
+          python -m sphinx -T -b html -c $READTHEDOCS_VIRTUALENV_PATH/conf
+          -D project=PyPCAPKit
+          -D release=0.13.1
+          -D extensions=myst_parser -D root_doc=README
+          -D "include_patterns=README.md,doc/**"
+          . $READTHEDOCS_OUTPUT/html
+        # RTD serves a version from its index.html
+        - cp $READTHEDOCS_OUTPUT/html/README.html $READTHEDOCS_OUTPUT/html/index.html
