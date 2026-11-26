@@ -2,11 +2,11 @@
 """Write ``versions.json`` and ``404.html`` into the GitHub Pages build (#3077).
 
 GitHub Pages serves ``main``'s build alone, and Read the Docs serves every version.
-:data:`VERSIONS` maps each version's path segment -- ``latest``, ``dev`` and every
-release tag -- to its URL there. GitHub Pages serves :data:`NOT_FOUND` for any path
-it lacks: under one of those segments it sends the reader to the same page on Read
-the Docs, the query and fragment kept, and anywhere else it says the page is not
-found.
+:data:`VERSIONS` maps each version's path segment -- ``latest``, ``stable``, ``dev``
+and every release tag -- to its URL there. GitHub Pages serves :data:`NOT_FOUND` for
+any path it lacks: under one of those segments it sends the reader to the same page
+on Read the Docs, the query and fragment kept, and anywhere else it says the page is
+not found.
 
 deploy-pages.yml's ``Write the version redirects`` runs it on the built site, as
 ``python util/pages_versions.py docs/build/html``, and reads the release tags from
@@ -36,8 +36,9 @@ if TYPE_CHECKING:
 SITE = 'https://jarryshaw.github.io/PyPCAPKit/'
 #: Where Read the Docs serves each version, under its slug.
 READ_THE_DOCS = 'https://pypcapkit.jarryshaw.me/en/'
-#: The versions built from a branch: ``main`` as ``latest``, and ``develop``.
-BRANCHES = ('latest', 'dev')
+#: The versions built from a branch: ``develop`` as ``latest`` and ``dev``, and the
+#: ``stable`` branch, Stable Branch's mirror of ``main``, as ``stable``.
+BRANCHES = ('latest', 'stable', 'dev')
 #: A release tag, whose Read the Docs slug is its name. A ``conda-*`` tag is none.
 RELEASE = re.compile(r'v(?P<release>\d+(?:\.\d+)*)(?:(?P<pre>a|b|rc)(?P<pre_n>\d+))?'
                      r'(?:\.post(?P<post>\d+))?(?:\.dev(?P<dev>\d+))?')
