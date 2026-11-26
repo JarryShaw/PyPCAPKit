@@ -146,6 +146,13 @@ class ConversionRuleTests(ChangelogTreeMixin, unittest.TestCase):
         # The underline must be consumed, not merely followed by a heading.
         self.assertNotRegex(markdown, r'(?m)^=+$')
 
+    def test_rule_1_a_mod_role_in_a_module_title_renders_as_a_code_span(self) -> None:
+        title = ':mod:`pcapkit.const`'
+        markdown = self.convert(f'\n{title}\n{"-" * len(title)}\n\nProse.\n')
+
+        self.assertIn('### `pcapkit.const`\n', markdown)
+        self.assertEqual([], changelog_md.residual(markdown))
+
     def test_rule_2_rfc_role_becomes_a_datatracker_link(self) -> None:
         markdown = self.convert()
 

@@ -10,8 +10,8 @@ and the documentation is versioned on Read the Docs. Its breaking changes, each
 marked **a breaking change to** and ending with how to migrate, are to the
 protocol signatures.
 
-pcapkit.const
--------------
+:mod:`pcapkit.const`
+--------------------
 
 Changed
 ~~~~~~~
@@ -26,8 +26,8 @@ Changed
   :meth:`AppType.__new__ <pcapkit.const.reg.apptype.apptype.AppType.__new__>`'s
   ``name`` loses its ``'<null>'`` default.
 
-pcapkit.foundation
-------------------
+:mod:`pcapkit.foundation`
+-------------------------
 
 Added
 ~~~~~
@@ -49,8 +49,8 @@ Fixed
   engines each flow's reassembler takes them, as TCP reassembly does; the
   third-party engines hand none, as for reassembly (:issue:`2946`, :pr:`3058`).
 
-pcapkit.protocols
------------------
+:mod:`pcapkit.protocols`
+------------------------
 
 Changed
 ~~~~~~~
